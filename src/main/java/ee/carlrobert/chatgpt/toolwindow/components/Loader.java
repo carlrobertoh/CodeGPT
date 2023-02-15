@@ -1,4 +1,4 @@
-package ee.carlrobert.chatgpt.toolwindow;
+package ee.carlrobert.chatgpt.toolwindow.components;
 
 import com.intellij.util.ui.JBUI;
 import java.awt.Font;

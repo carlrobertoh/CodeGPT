@@ -5,7 +5,7 @@ import com.intellij.openapi.wm.ToolWindow;
 public class FindBugsAction extends BaseAction {
 
   protected String getPrompt(String selectedText) {
-    return "Find bugs in the code:\n" + selectedText;
+    return "Find bugs in the following code:\n" + selectedText;
   }
 
   protected void initToolWindow(ToolWindow toolWindow) {

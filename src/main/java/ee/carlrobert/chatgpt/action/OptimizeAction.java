@@ -5,7 +5,7 @@ import com.intellij.openapi.wm.ToolWindow;
 public class OptimizeAction extends BaseAction {
 
   protected String getPrompt(String selectedText) {
-    return "Optimize code:\n" + selectedText;
+    return "Optimize the following code:\n" + selectedText;
   }
 
   protected void initToolWindow(ToolWindow toolWindow) {

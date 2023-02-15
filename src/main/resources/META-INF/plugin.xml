@@ -1,6 +1,5 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
-<idea-plugin>
-    <!-- Unique identifier of the plugin. It should be FQN. It cannot be changed between the plugin versions. -->
+<idea-plugin require-restart="true">
     <id>ee.carlrobert.chatgpt</id>
 
     <!-- Public plugin name should be written in Title Case.
@@ -14,10 +13,10 @@
          Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
     <description><![CDATA[
-    <b>ChatGPT as your copilot to level up your developer experience</b>
+    <p><b>ChatGPT as your copilot to level up your developer experience.</b></p>
+    <p>This is the perfect assistant for any programmer who wants to improve their coding skills and make more efficient use of the time.</p>
     <br />
-    <br />
-    <p>Available commands</p>
+    <span>Available commands</span>
     <ul>
         <li><b>Find bugs:</b> Analyze and find bugs in your code. Right click on a selected block of code, run command.</li>
         <li><b>Add tests:</b> Write tests for you. Right click on a selected block of code, run command.</li>
@@ -26,30 +25,29 @@
         <li><b>Explain:</b> Explain the selected code. Right click on a selected block of code, run command.</li>
     </ul>
     <br />
-    <b>Before using the plugin, you need to set up the API key in Settings -> Tools -> ChatGPT</b>
+    <p><b>Before using the plugin, it is necessary to configure the API key in the Settings → Tools → ChatGPT</b></p>
   ]]></description>
 
     <change-notes>
         <![CDATA[
       <ul>
+        <li><b>1.0.2</b> Visual changes</li>
         <li><b>1.0.1</b> Design updates and simple missing key notification</li>
         <li><b>1.0.0</b> First release</li>
       </ul>
     ]]>
     </change-notes>
 
-    <!-- Product and plugin compatibility requirements.
-         Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <postStartupActivity implementation="ee.carlrobert.chatgpt.ShowNotificationActivity"/>
 
-        <applicationConfigurable parentId="tools" instance="ee.carlrobert.chatgpt.SettingsConfigurable"
+        <applicationConfigurable parentId="tools" instance="ee.carlrobert.chatgpt.settings.SettingsConfigurable"
             id="org.intellij.sdk.settings.AppSettingsConfigurable"
             displayName="ChatGPT"/>
-        <applicationService serviceImplementation="ee.carlrobert.chatgpt.SettingsState"/>
-        <applicationService serviceImplementation="ee.carlrobert.chatgpt.service.ToolWindowService"/>
+        <applicationService serviceImplementation="ee.carlrobert.chatgpt.settings.SettingsState"/>
+        <applicationService serviceImplementation="ee.carlrobert.chatgpt.toolwindow.ToolWindowService"/>
         <toolWindow id="ChatGPT" secondary="true" icon="AllIcons.General.Modified" anchor="right"
             factoryClass="ee.carlrobert.chatgpt.toolwindow.ChatGptToolWindowFactory"/>
 

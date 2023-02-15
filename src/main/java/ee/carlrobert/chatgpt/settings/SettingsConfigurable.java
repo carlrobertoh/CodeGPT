@@ -1,5 +1,4 @@
-package ee.carlrobert.chatgpt;
-
+package ee.carlrobert.chatgpt.settings;
 
 import com.intellij.openapi.options.Configurable;
 import javax.swing.JComponent;

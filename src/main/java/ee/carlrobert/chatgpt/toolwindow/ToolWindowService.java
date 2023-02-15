@@ -1,16 +1,16 @@
-package ee.carlrobert.chatgpt.service;
+package ee.carlrobert.chatgpt.toolwindow;
 
 import static ee.carlrobert.chatgpt.toolwindow.ToolWindowUtil.createIconLabel;
 import static ee.carlrobert.chatgpt.toolwindow.ToolWindowUtil.createTextArea;
 import static ee.carlrobert.chatgpt.toolwindow.ToolWindowUtil.justifyLeft;
 
+import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
 import ee.carlrobert.chatgpt.client.ApiClient;
-import ee.carlrobert.chatgpt.toolwindow.Loader;
-import ee.carlrobert.chatgpt.toolwindow.ScrollablePanel;
+import ee.carlrobert.chatgpt.EmptyCallback;
+import ee.carlrobert.chatgpt.toolwindow.components.Loader;
 import java.util.Objects;
 import javax.annotation.Nullable;
 import javax.swing.Box;
-import javax.swing.JScrollPane;
 
 public class ToolWindowService {
 
@@ -28,10 +28,12 @@ public class ToolWindowService {
     sendMessage(userMessage, prompt, null);
   }
 
-  public void sendMessage(String userMessage, String prompt, @Nullable SuccessCallback onSuccess) {
-    scrollablePanel.add(createTextArea(userMessage, true, false));
+  public void sendMessage(String userMessage, String prompt, @Nullable EmptyCallback onSuccess) {
+    scrollablePanel.add(justifyLeft(createIconLabel(Objects.requireNonNull(getClass().getResource("/icons/user-icon.png")), "User")));
+    scrollablePanel.add(Box.createVerticalStrut(8));
+    scrollablePanel.add(createTextArea(userMessage, true, true));
     scrollablePanel.add(Box.createVerticalStrut(16));
-    scrollablePanel.add(justifyLeft(createIconLabel(Objects.requireNonNull(getClass().getResource("/icons/chatgpt-icon.png")))));
+    scrollablePanel.add(justifyLeft(createIconLabel(Objects.requireNonNull(getClass().getResource("/icons/chatgpt-icon.png")), "ChatGPT")));
 
     var loader = new Loader();
     scrollablePanel.add(justifyLeft(loader.getComponent()));

@@ -5,7 +5,7 @@ import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
-import ee.carlrobert.chatgpt.SettingsState;
+import ee.carlrobert.chatgpt.settings.SettingsState;
 import icons.SdkIcons;
 
 public class ActionGroup extends DefaultActionGroup {

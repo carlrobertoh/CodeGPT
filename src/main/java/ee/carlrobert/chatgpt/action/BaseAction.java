@@ -7,7 +7,7 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import ee.carlrobert.chatgpt.client.ApiClient;
-import ee.carlrobert.chatgpt.service.ToolWindowService;
+import ee.carlrobert.chatgpt.toolwindow.ToolWindowService;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class BaseAction extends AnAction {

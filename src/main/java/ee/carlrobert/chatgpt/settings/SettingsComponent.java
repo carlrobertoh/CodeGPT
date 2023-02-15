@@ -1,4 +1,4 @@
-package ee.carlrobert.chatgpt;
+package ee.carlrobert.chatgpt.settings;
 
 import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;

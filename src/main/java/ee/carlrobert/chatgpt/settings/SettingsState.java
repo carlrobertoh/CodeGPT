@@ -1,4 +1,4 @@
-package ee.carlrobert.chatgpt;
+package ee.carlrobert.chatgpt.settings;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @State(
-    name = "com.example.chatgpt.SettingsState",
+    name = "ee.carlrobert.chatgpt.settings.SettingsState",
     storages = @Storage("SdkSettingsPlugin.xml")
 )
 public class SettingsState implements PersistentStateComponent<SettingsState> {

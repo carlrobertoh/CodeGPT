@@ -25,11 +25,11 @@ public class ToolWindowUtil {
     return textArea;
   }
 
-  public static JLabel createIconLabel(URL iconLocation) {
+  public static JLabel createIconLabel(URL iconLocation, String text) {
     var iconLabel = new JLabel(new ImageIcon(iconLocation));
-    iconLabel.setText("ChatGPT");
+    iconLabel.setText(text);
     iconLabel.setFont(iconLabel.getFont().deriveFont(iconLabel.getFont().getStyle() | Font.BOLD));
-    iconLabel.setIconTextGap(10);
+    iconLabel.setIconTextGap(8);
     return iconLabel;
   }
 

@@ -2,7 +2,7 @@ package ee.carlrobert.chatgpt.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ee.carlrobert.chatgpt.SettingsState;
+import ee.carlrobert.chatgpt.settings.SettingsState;
 import ee.carlrobert.chatgpt.client.response.ApiError;
 import ee.carlrobert.chatgpt.client.response.ApiResponse;
 import java.io.IOException;
@@ -17,7 +17,8 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 public final class ApiClient {
-  private static List<Map.Entry<String, String>> queries = new ArrayList<>();
+
+  private static final List<Map.Entry<String, String>> queries = new ArrayList<>(); // TODO
   private static ApiClient instance;
   private final ObjectMapper objectMapper = new ObjectMapper();
   private final HttpClient client = HttpClient.newBuilder().version(HttpClient.Version.HTTP_2).build();

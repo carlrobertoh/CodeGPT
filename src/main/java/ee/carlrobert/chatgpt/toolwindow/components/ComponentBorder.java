@@ -1,4 +1,4 @@
-package ee.carlrobert.chatgpt;
+package ee.carlrobert.chatgpt.toolwindow.components;
 
 import java.awt.*;
 import javax.swing.*;

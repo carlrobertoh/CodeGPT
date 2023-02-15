@@ -9,6 +9,8 @@ import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.StartupActivity;
+import ee.carlrobert.chatgpt.settings.SettingsConfigurable;
+import ee.carlrobert.chatgpt.settings.SettingsState;
 import org.jetbrains.annotations.NotNull;
 
 public class ShowNotificationActivity implements StartupActivity {
