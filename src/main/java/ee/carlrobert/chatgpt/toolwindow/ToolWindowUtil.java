@@ -11,16 +11,14 @@ import javax.swing.JTextArea;
 
 public class ToolWindowUtil {
 
-  public static JTextArea createTextArea(String selectedText, boolean isItalicFont, boolean transparentBackground) {
+  public static JTextArea createTextArea(String selectedText, boolean isItalicFont) {
     var textArea = new JTextArea();
     textArea.append(selectedText);
     textArea.setLineWrap(true);
     textArea.setEditable(false);
-    textArea.setFont(createFont(isItalicFont, textArea.getFont().getSize()));
+    textArea.setFont(new Font("Tahoma", isItalicFont ? Font.ITALIC : Font.PLAIN, textArea.getFont().getSize()));
     textArea.setWrapStyleWord(true);
-    if (transparentBackground) {
-      textArea.setBackground(JBColor.background());
-    }
+    textArea.setBackground(JBColor.PanelBackground);
     // textArea.setBorder(new MatteBorder(0, 2, 0, 0, JBColor.RED));
     return textArea;
   }

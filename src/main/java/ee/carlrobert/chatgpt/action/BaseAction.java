@@ -23,10 +23,10 @@ public abstract class BaseAction extends AnAction {
       initToolWindow(ToolWindowManager.getInstance(project).getToolWindow("ChatGPT"));
       var selectedText = editor.getSelectionModel().getSelectedText();
       var toolWindowService = ApplicationManager.getApplication().getService(ToolWindowService.class);
-      var scrollablePanel = toolWindowService.getScrollablePanel();
       ApiClient.getInstance().clearQueries();
-      scrollablePanel.removeAll();
-      toolWindowService.sendMessage(selectedText, getPrompt(selectedText));
+      toolWindowService.removeAll();
+      toolWindowService.paintUserMessage(selectedText);
+      toolWindowService.sendMessage(getPrompt(selectedText), null);
     }
   }
 

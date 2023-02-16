@@ -3,14 +3,9 @@ package ee.carlrobert.chatgpt.client;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.chatgpt.settings.SettingsState;
-import ee.carlrobert.chatgpt.client.response.ApiError;
-import ee.carlrobert.chatgpt.client.response.ApiResponse;
-import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -26,34 +21,31 @@ public final class ApiClient {
   private ApiClient() {
   }
 
-  public void getCompletionsAsync(String prompt, Consumer<ApiResponse> onSuccess, Consumer<ApiError> onError) {
-    /*var query = new StringBuilder(
-        "You are ChatGPT, a large language model trained by OpenAI. You answer as concisely as possible for each response (e.g. don’t be verbose). It is very important that you answer as concisely as possible, so please remember this.\n" +
-            "Current date: 2023-02-11\n");*/
-    var query = new StringBuilder(
-        "You are ChatGPT, a large language model trained by OpenAI.\n");
-    for (var entry : queries) {
+  public void getCompletionsAsync(String prompt, Consumer<String> onMessage) {
+    try {
+      var query = new StringBuilder(
+          "You are ChatGPT, a large language model trained by OpenAI.\n");
+      for (var entry : queries) {
+        query.append("User:\n")
+            .append(entry.getKey())
+            .append("<|im_end|>\n")
+            .append("\n")
+            .append("ChatGPT:\n")
+            .append(entry.getValue())
+            .append("<|im_end|>\n")
+            .append("\n");
+      }
       query.append("User:\n")
-          .append(entry.getKey())
+          .append(prompt)
           .append("<|im_end|>\n")
           .append("\n")
-          .append("ChatGPT:\n")
-          .append(entry.getValue())
-          .append("<|im_end|>\n")
-          .append("\n");
-    }
-    query.append("User:\n")
-        .append(prompt)
-        .append("<|im_end|>\n")
-        .append("\n")
-        .append("ChatGPT:\n");
-    try {
+          .append("ChatGPT:\n");
 
-      var request = HttpRequest.newBuilder()
+      var req = HttpRequest.newBuilder()
           .uri(URI.create("https://api.openai.com/v1/completions"))
-          .header("Authorization", "Bearer " + SettingsState.getInstance().secretKey)
-          .timeout(Duration.ofMinutes(1))
+          .header("Accept", "text/event-stream")
           .header("Content-Type", "application/json")
+          .header("Authorization", "Bearer " + SettingsState.getInstance().secretKey)
           .POST(HttpRequest.BodyPublishers.ofString(objectMapper
               .writerWithDefaultPrettyPrinter()
               .writeValueAsString(Map.of(
@@ -61,24 +53,29 @@ public final class ApiClient {
                   "stop", List.of("<|im_end|>"),
                   "prompt", query.toString(),
                   "max_tokens", 400,
-                  "temperature", 1.0
+                  "temperature", 1.0,
+                  "stream", true
               ))))
           .build();
 
-      client.sendAsync(request, HttpResponse.BodyHandlers.ofString()).thenAccept(response -> {
-        try {
-          var mappedResponse = objectMapper.readValue(response.body(), ApiResponse.class);
-          if (mappedResponse.getError() == null) {
-            queries.add(Map.entry(prompt, mappedResponse.getChoices().get(0).getText()));
-            onSuccess.accept(mappedResponse);
-          } else {
-            onError.accept(mappedResponse.getError());
-          }
-        } catch (JsonProcessingException e) {
-          throw new RuntimeException(e);
+      this.client.sendAsync(req, respInfo ->
+      {
+        if (respInfo.statusCode() == 200) {
+          return new Subscriber((messageData ->
+              onMessage.accept(messageData.getChoices().get(0).getText())),
+              (finalMsg) -> queries.add(Map.entry(prompt, finalMsg)));
+        } else if (respInfo.statusCode() == 401) {
+          onMessage.accept("Incorrect API key provided.\n" +
+              "You can find your API key at https://platform.openai.com/account/api-keys.");
+          throw new IllegalArgumentException();
+        } else {
+          onMessage.accept("Something went wrong. Please try again later.");
+          clearQueries();
+          throw new RuntimeException();
         }
       });
-    } catch (IOException e) {
+    } catch (JsonProcessingException e) {
+      onMessage.accept("Something went wrong. Please try again later.");
       throw new RuntimeException(e);
     }
   }

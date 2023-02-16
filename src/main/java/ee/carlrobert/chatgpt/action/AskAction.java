@@ -24,9 +24,11 @@ public class AskAction extends AnAction {
       var toolWindow = ToolWindowManager.getInstance(project).getToolWindow("ChatGPT");
       if (toolWindow != null) {
         toolWindow.show();
+        toolWindow.setTitle("");
         var toolWindowService = ApplicationManager.getApplication().getService(ToolWindowService.class);
         ApiClient.getInstance().clearQueries();
-        toolWindowService.getScrollablePanel().removeAll();
+        toolWindowService.removeAll();
+        toolWindowService.paintLandingView();
       }
     }
   }

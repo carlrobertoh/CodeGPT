@@ -31,6 +31,7 @@
     <change-notes>
         <![CDATA[
       <ul>
+        <li><b>1.0.3</b> Server-Sent Events</li>
         <li><b>1.0.2</b> Visual changes</li>
         <li><b>1.0.1</b> Design updates and simple missing key notification</li>
         <li><b>1.0.0</b> First release</li>

@@ -26,7 +26,8 @@ public class ChatGptToolWindow {
   public void handleSubmit() {
     var toolWindowService = ApplicationManager.getApplication().getService(ToolWindowService.class);
     var searchText = textField.getText();
-    toolWindowService.sendMessage(searchText, searchText, this::scrollToBottom);
+    toolWindowService.paintUserMessage(searchText);
+    toolWindowService.sendMessage(searchText, this::scrollToBottom);
     textField.setText("");
     scrollToBottom();
   }
@@ -60,5 +61,6 @@ public class ChatGptToolWindow {
 
     var toolWindowService = ApplicationManager.getApplication().getService(ToolWindowService.class);
     toolWindowService.setScrollablePanel(scrollablePanel);
+    toolWindowService.paintLandingView();
   }
 }
