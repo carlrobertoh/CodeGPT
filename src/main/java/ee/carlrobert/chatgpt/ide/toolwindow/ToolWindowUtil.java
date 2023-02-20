@@ -1,4 +1,4 @@
-package ee.carlrobert.chatgpt.toolwindow;
+package ee.carlrobert.chatgpt.ide.toolwindow;
 
 import com.intellij.ui.JBColor;
 import java.awt.Component;
@@ -29,10 +29,6 @@ public class ToolWindowUtil {
     iconLabel.setFont(iconLabel.getFont().deriveFont(iconLabel.getFont().getStyle() | Font.BOLD));
     iconLabel.setIconTextGap(8);
     return iconLabel;
-  }
-
-  public static Font createFont(boolean isItalic, int fontSize) {
-    return new Font("Tahoma", isItalic ? Font.ITALIC : Font.PLAIN, fontSize);
   }
 
   public static Box justifyLeft(Component component) {

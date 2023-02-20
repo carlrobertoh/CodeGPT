@@ -2,7 +2,7 @@ package ee.carlrobert.chatgpt.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ee.carlrobert.chatgpt.settings.SettingsState;
+import ee.carlrobert.chatgpt.ide.settings.SettingsState;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;

@@ -1,11 +1,11 @@
-package ee.carlrobert.chatgpt.action;
+package ee.carlrobert.chatgpt.ide.action;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
-import ee.carlrobert.chatgpt.settings.SettingsState;
+import ee.carlrobert.chatgpt.ide.settings.SettingsState;
 import icons.SdkIcons;
 
 public class ActionGroup extends DefaultActionGroup {

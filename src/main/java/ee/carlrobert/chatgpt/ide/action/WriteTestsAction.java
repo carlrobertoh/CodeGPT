@@ -1,4 +1,4 @@
-package ee.carlrobert.chatgpt.action;
+package ee.carlrobert.chatgpt.ide.action;
 
 import com.intellij.openapi.wm.ToolWindow;
 

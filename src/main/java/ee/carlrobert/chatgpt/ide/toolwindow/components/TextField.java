@@ -1,4 +1,4 @@
-package ee.carlrobert.chatgpt.toolwindow.components;
+package ee.carlrobert.chatgpt.ide.toolwindow.components;
 
 import com.intellij.ui.JBColor;
 import ee.carlrobert.chatgpt.EmptyCallback;

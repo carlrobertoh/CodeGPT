@@ -1,20 +1,18 @@
-package ee.carlrobert.chatgpt.action;
+package ee.carlrobert.chatgpt.ide.action;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.wm.ToolWindowManager;
-import ee.carlrobert.chatgpt.settings.SettingsState;
 import ee.carlrobert.chatgpt.client.ApiClient;
-import ee.carlrobert.chatgpt.toolwindow.ToolWindowService;
+import ee.carlrobert.chatgpt.ide.toolwindow.ToolWindowService;
 import org.jetbrains.annotations.NotNull;
 
 public class AskAction extends AnAction {
 
   @Override
   public void update(@NotNull AnActionEvent event) {
-    var secretKey = SettingsState.getInstance().secretKey;
-    event.getPresentation().setEnabled(event.getProject() != null && secretKey != null && !secretKey.isEmpty());
+    event.getPresentation().setEnabled(event.getProject() != null);
   }
 
   @Override

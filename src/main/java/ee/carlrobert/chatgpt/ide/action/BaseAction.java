@@ -1,13 +1,12 @@
-package ee.carlrobert.chatgpt.action;
+package ee.carlrobert.chatgpt.ide.action;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.wm.ToolWindow;
-import com.intellij.openapi.wm.ToolWindowManager;
 import ee.carlrobert.chatgpt.client.ApiClient;
-import ee.carlrobert.chatgpt.toolwindow.ToolWindowService;
+import ee.carlrobert.chatgpt.ide.toolwindow.ToolWindowService;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class BaseAction extends AnAction {
@@ -20,13 +19,13 @@ public abstract class BaseAction extends AnAction {
     var project = event.getProject();
     var editor = event.getData(PlatformDataKeys.EDITOR);
     if (editor != null && project != null) {
-      initToolWindow(ToolWindowManager.getInstance(project).getToolWindow("ChatGPT"));
-      var selectedText = editor.getSelectionModel().getSelectedText();
       var toolWindowService = ApplicationManager.getApplication().getService(ToolWindowService.class);
+      var selectedText = editor.getSelectionModel().getSelectedText();
       ApiClient.getInstance().clearQueries();
+      initToolWindow(toolWindowService.getToolWindow());
       toolWindowService.removeAll();
       toolWindowService.paintUserMessage(selectedText);
-      toolWindowService.sendMessage(getPrompt(selectedText), null);
+      toolWindowService.sendMessage(getPrompt(selectedText), project, null);
     }
   }
 

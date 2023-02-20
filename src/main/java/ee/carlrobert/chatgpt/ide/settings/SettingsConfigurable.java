@@ -1,6 +1,8 @@
-package ee.carlrobert.chatgpt.settings;
+package ee.carlrobert.chatgpt.ide.settings;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.options.Configurable;
+import ee.carlrobert.chatgpt.ide.notification.NotificationService;
 import javax.swing.JComponent;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
@@ -29,19 +31,22 @@ public class SettingsConfigurable implements Configurable {
 
   @Override
   public boolean isModified() {
-    SettingsState settings = SettingsState.getInstance();
+    var settings = SettingsState.getInstance();
     return !settingsComponent.getApiKeyField().equals(settings.secretKey);
   }
 
   @Override
   public void apply() {
-    SettingsState settings = SettingsState.getInstance();
+    var settings = SettingsState.getInstance();
     settings.secretKey = settingsComponent.getApiKeyField();
+    if (!settings.secretKey.isEmpty()) {
+      ApplicationManager.getApplication().getService(NotificationService.class).expire();
+    }
   }
 
   @Override
   public void reset() {
-    SettingsState settings = SettingsState.getInstance();
+    var settings = SettingsState.getInstance();
     settingsComponent.setApiKeyField(settings.secretKey);
   }
 

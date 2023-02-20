@@ -43,37 +43,38 @@
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <postStartupActivity implementation="ee.carlrobert.chatgpt.ShowNotificationActivity"/>
+        <postStartupActivity implementation="ee.carlrobert.chatgpt.ide.notification.ShowNotificationActivity"/>
 
-        <applicationConfigurable parentId="tools" instance="ee.carlrobert.chatgpt.settings.SettingsConfigurable"
+        <applicationConfigurable parentId="tools" instance="ee.carlrobert.chatgpt.ide.settings.SettingsConfigurable"
             id="org.intellij.sdk.settings.AppSettingsConfigurable"
             displayName="ChatGPT"/>
-        <applicationService serviceImplementation="ee.carlrobert.chatgpt.settings.SettingsState"/>
-        <applicationService serviceImplementation="ee.carlrobert.chatgpt.toolwindow.ToolWindowService"/>
+        <applicationService serviceImplementation="ee.carlrobert.chatgpt.ide.settings.SettingsState"/>
+        <applicationService serviceImplementation="ee.carlrobert.chatgpt.ide.toolwindow.ToolWindowService"/>
+        <applicationService serviceImplementation="ee.carlrobert.chatgpt.ide.notification.NotificationService"/>
         <toolWindow id="ChatGPT" secondary="true" icon="AllIcons.General.Modified" anchor="right"
-            factoryClass="ee.carlrobert.chatgpt.toolwindow.ChatGptToolWindowFactory"/>
+            factoryClass="ee.carlrobert.chatgpt.ide.toolwindow.ChatGptToolWindowFactory"/>
 
         <notificationGroup id="ChatGPT-Empty-API-Key"
             displayType="STICKY_BALLOON"
-            key="ee.carlrobert.chatgpt.notification.key"/>
+            key="ee.carlrobert.chatgpt.ide.notification.key"/>
     </extensions>
 
     <resource-bundle>messages.BasicActionsBundle</resource-bundle>
 
     <actions>
-        <group id="ee.carlrobert.chatgpt.action.ActionGroup"
-            class="ee.carlrobert.chatgpt.action.ActionGroup"
+        <group id="ee.carlrobert.chatgpt.ide.action.ActionGroup"
+            class="ee.carlrobert.chatgpt.ide.action.ActionGroup"
             popup="true">
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>
-            <action id="ee.carlrobert.chatgpt.action.WriteTestsAction" class="ee.carlrobert.chatgpt.action.WriteTestsAction"/>
-            <action id="ee.carlrobert.chatgpt.action.FindBugsAction" class="ee.carlrobert.chatgpt.action.FindBugsAction"/>
-            <action id="ee.carlrobert.chatgpt.action.RefactorAction" class="ee.carlrobert.chatgpt.action.RefactorAction"/>
-            <action id="ee.carlrobert.chatgpt.action.OptimizeAction" class="ee.carlrobert.chatgpt.action.OptimizeAction"/>
-            <action id="ee.carlrobert.chatgpt.action.ExplainAction" class="ee.carlrobert.chatgpt.action.ExplainAction"/>
+            <action id="ee.carlrobert.chatgpt.ide.action.WriteTestsAction" class="ee.carlrobert.chatgpt.ide.action.WriteTestsAction"/>
+            <action id="ee.carlrobert.chatgpt.ide.action.FindBugsAction" class="ee.carlrobert.chatgpt.ide.action.FindBugsAction"/>
+            <action id="ee.carlrobert.chatgpt.ide.action.RefactorAction" class="ee.carlrobert.chatgpt.ide.action.RefactorAction"/>
+            <action id="ee.carlrobert.chatgpt.ide.action.OptimizeAction" class="ee.carlrobert.chatgpt.ide.action.OptimizeAction"/>
+            <action id="ee.carlrobert.chatgpt.ide.action.ExplainAction" class="ee.carlrobert.chatgpt.ide.action.ExplainAction"/>
         </group>
         <action
-            id="ee.carlrobert.chatgpt.action.AskAction"
-            class="ee.carlrobert.chatgpt.action.AskAction"
+            id="ee.carlrobert.chatgpt.ide.action.AskAction"
+            class="ee.carlrobert.chatgpt.ide.action.AskAction"
             text="Ask ChatGPT"
             description="TBD"
             icon="SdkIcons.Sdk_default_icon">
