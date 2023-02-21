@@ -31,6 +31,7 @@
     <change-notes>
         <![CDATA[
       <ul>
+        <li><b>1.0.7</b> Code refactoring, add readme</li>
         <li><b>1.0.6</b> Display proper message for insufficient quota</li>
         <li><b>1.0.5</b> Replace TextField with TextArea, remove Tahoma font, increase response max token size</li>
         <li><b>1.0.4</b> Add support for 2023.* build</li>
