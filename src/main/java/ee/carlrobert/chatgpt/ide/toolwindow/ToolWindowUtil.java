@@ -16,7 +16,8 @@ public class ToolWindowUtil {
     textArea.append(selectedText);
     textArea.setLineWrap(true);
     textArea.setEditable(false);
-    textArea.setFont(new Font("Tahoma", isItalicFont ? Font.ITALIC : Font.PLAIN, textArea.getFont().getSize()));
+    var font = textArea.getFont();
+    textArea.setFont(font.deriveFont(isItalicFont ? Font.ITALIC : Font.PLAIN));
     textArea.setWrapStyleWord(true);
     textArea.setBackground(JBColor.PanelBackground);
     // textArea.setBorder(new MatteBorder(0, 2, 0, 0, JBColor.RED));

@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "ee.carlrobert"
-version = "1.0.4"
+version = "1.0.5"
 
 repositories {
   mavenCentral()
@@ -13,7 +13,6 @@ repositories {
 intellij {
   version.set("2021.2")
   type.set("IC")
-
   plugins.set(listOf())
 }
 

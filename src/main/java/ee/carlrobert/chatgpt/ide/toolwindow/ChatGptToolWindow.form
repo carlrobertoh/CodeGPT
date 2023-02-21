@@ -8,16 +8,6 @@
     <properties/>
     <border type="none"/>
     <children>
-      <component id="a7ad1" class="javax.swing.JTextField" binding="textField" custom-create="true">
-        <constraints>
-          <grid row="1" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
-            <preferred-size width="150" height="36"/>
-          </grid>
-        </constraints>
-        <properties>
-          <text value="Ask a question..."/>
-        </properties>
-      </component>
       <scrollpane id="8c1de" binding="scrollPane" custom-create="true">
         <constraints>
           <grid row="0" column="0" row-span="1" col-span="3" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
@@ -25,6 +15,22 @@
         <properties/>
         <border type="none"/>
         <children/>
+      </scrollpane>
+      <scrollpane id="a135c" binding="textAreaScrollPane" custom-create="true">
+        <constraints>
+          <grid row="1" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="7" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="db87e" class="javax.swing.JTextArea" binding="textArea" custom-create="true">
+            <constraints/>
+            <properties>
+              <lineWrap value="true"/>
+              <rows value="3"/>
+            </properties>
+          </component>
+        </children>
       </scrollpane>
     </children>
   </grid>

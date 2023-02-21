@@ -52,7 +52,7 @@ public final class ApiClient {
                   "model", "text-davinci-003",
                   "stop", List.of("<|im_end|>"),
                   "prompt", query.toString(),
-                  "max_tokens", 400,
+                  "max_tokens", 1000,
                   "temperature", 1.0,
                   "stream", true
               ))))

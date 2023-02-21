@@ -5,17 +5,19 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.ui.components.JBScrollPane;
-import ee.carlrobert.chatgpt.ide.toolwindow.components.TextField;
+import ee.carlrobert.chatgpt.ide.toolwindow.components.TextArea;
 import java.awt.Adjustable;
+import java.awt.Dimension;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
-import javax.swing.JTextField;
+import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
 import org.jetbrains.annotations.NotNull;
 
@@ -24,23 +26,25 @@ public class ChatGptToolWindow {
   private final Project project;
   private final ToolWindow toolWindow;
   private JPanel chatGptToolWindowContent;
-  private JTextField textField;
   private JScrollPane scrollPane;
+  private JTextArea textArea;
+  private JScrollPane textAreaScrollPane;
 
   public ChatGptToolWindow(@NotNull Project project, @NotNull ToolWindow toolWindow) {
     this.project = project;
     this.toolWindow = toolWindow;
   }
+
   public void handleSubmit() {
     var toolWindowService = ApplicationManager.getApplication().getService(ToolWindowService.class);
-    var searchText = textField.getText();
+    var searchText = textArea.getText();
     toolWindowService.paintUserMessage(searchText);
 
     ExecutorService executor = Executors.newSingleThreadExecutor();
     try {
       executor.execute(() -> {
         toolWindowService.sendMessage(searchText, project, this::scrollToBottom);
-        textField.setText("");
+        textArea.setText("");
         scrollToBottom();
       });
     } finally {
@@ -64,7 +68,23 @@ public class ChatGptToolWindow {
   }
 
   private void createUIComponents() {
-    textField = new TextField(this::handleSubmit);
+    textAreaScrollPane = new JBScrollPane() {
+      @Override
+      public JScrollBar createVerticalScrollBar() {
+        JScrollBar verticalScrollBar = new JScrollPane.ScrollBar(1);
+        verticalScrollBar.setPreferredSize(new Dimension(0,0));
+        return verticalScrollBar;
+      }
+    };
+    textAreaScrollPane.setBorder(null);
+    textAreaScrollPane.setViewportBorder(null);
+    textAreaScrollPane.setBorder(BorderFactory.createCompoundBorder(
+        BorderFactory.createEmptyBorder(),
+        BorderFactory.createEmptyBorder(0, 5, 0, 10)));
+    textAreaScrollPane.setViewportView(textArea);
+
+    textArea = new TextArea(this::handleSubmit, textAreaScrollPane);
+    textArea.setText("Ask a question...");
 
     ScrollablePanel scrollablePanel = new ScrollablePanel();
     scrollablePanel.setLayout(new BoxLayout(scrollablePanel, BoxLayout.Y_AXIS));

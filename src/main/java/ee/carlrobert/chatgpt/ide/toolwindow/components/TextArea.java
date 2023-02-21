@@ -3,34 +3,47 @@ package ee.carlrobert.chatgpt.ide.toolwindow.components;
 import com.intellij.ui.JBColor;
 import ee.carlrobert.chatgpt.EmptyCallback;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.Objects;
+import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JTextField;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.KeyStroke;
 
-public class TextField extends JTextField {
+public class TextArea extends JTextArea {
 
-  public TextField(EmptyCallback onSubmit) {
-    setBorder(BorderFactory.createCompoundBorder(
-        BorderFactory.createEmptyBorder(),
-        BorderFactory.createEmptyBorder(5, 5, 5, 10)));
+  public TextArea(EmptyCallback onSubmit, JScrollPane textAreaScrollPane) {
     setForeground(JBColor.GRAY);
     addFocusListener(getFocusListener());
-    addKeyListener(getKeyListener(onSubmit));
-    addSubmitButton(onSubmit);
+    addSubmitButton(onSubmit, textAreaScrollPane);
+
+    var input = getInputMap();
+    var enterStroke = KeyStroke.getKeyStroke("ENTER");
+    var shiftEnterStroke = KeyStroke.getKeyStroke("shift ENTER");
+    input.put(shiftEnterStroke, "insert-break");
+    input.put(enterStroke, "text-submit");
+
+    var actions = getActionMap();
+    actions.put("text-submit", new AbstractAction() {
+      public void actionPerformed(ActionEvent e) {
+        onSubmit.call();
+      }
+    });
   }
 
-  private void addSubmitButton(EmptyCallback onSubmit) {
+  private void addSubmitButton(EmptyCallback onSubmit, JScrollPane textAreaScrollPane) {
     var button = createSubmitButton(e -> onSubmit.call());
     ComponentBorder cb = new ComponentBorder(button);
-    cb.setAdjustInsets(false);
-    cb.install(this);
+    cb.setAdjustInsets(true);
+    cb.install(textAreaScrollPane);
   }
 
   private JButton createSubmitButton(ActionListener submitButtonListener) {
@@ -58,25 +71,6 @@ public class TextField extends JTextField {
         if (getText().isEmpty()) {
           setForeground(JBColor.GRAY);
           setText("Ask a question...");
-        }
-      }
-    };
-  }
-
-  private KeyListener getKeyListener(EmptyCallback onSubmit) {
-    return new KeyListener() {
-      @Override
-      public void keyTyped(KeyEvent e) {
-      }
-
-      @Override
-      public void keyPressed(KeyEvent e) {
-      }
-
-      @Override
-      public void keyReleased(KeyEvent e) {
-        if (e.getKeyCode() == 10) {
-          onSubmit.call();
         }
       }
     };
