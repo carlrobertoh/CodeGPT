@@ -3,7 +3,6 @@ package ee.carlrobert.chatgpt.ide.toolwindow;
 import com.intellij.ui.JBColor;
 import java.awt.Component;
 import java.awt.Font;
-import java.net.URL;
 import javax.swing.Box;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -24,8 +23,8 @@ public class ToolWindowUtil {
     return textArea;
   }
 
-  public static JLabel createIconLabel(URL iconLocation, String text) {
-    var iconLabel = new JLabel(new ImageIcon(iconLocation));
+  public static JLabel createIconLabel(ImageIcon imageIcon, String text) {
+    var iconLabel = new JLabel(imageIcon);
     iconLabel.setText(text);
     iconLabel.setFont(iconLabel.getFont().deriveFont(iconLabel.getFont().getStyle() | Font.BOLD));
     iconLabel.setIconTextGap(8);

@@ -79,7 +79,7 @@
             class="ee.carlrobert.chatgpt.ide.action.AskAction"
             text="Ask ChatGPT"
             description="TBD"
-            icon="SdkIcons.Sdk_default_icon">
+            icon="Icons.DefaultIcon">
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>
         </action>
     </actions>

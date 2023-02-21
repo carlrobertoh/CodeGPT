@@ -12,12 +12,12 @@ import ee.carlrobert.chatgpt.EmptyCallback;
 import ee.carlrobert.chatgpt.client.ApiClient;
 import ee.carlrobert.chatgpt.ide.settings.SettingsConfigurable;
 import ee.carlrobert.chatgpt.ide.settings.SettingsState;
+import icons.Icons;
 import java.awt.Cursor;
 import java.awt.GridBagLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
-import java.util.Objects;
 import javax.annotation.Nullable;
 import javax.swing.Box;
 import javax.swing.ImageIcon;
@@ -47,14 +47,14 @@ public class ToolWindowService {
     if (isLandingViewVisible) {
       removeAll();
     }
-    addIconLabel("/icons/user-icon.png", "User:");
+    addIconLabel(Icons.UserImageIcon, "User:");
     addSpacing(8);
     scrollablePanel.add(createTextArea(userMessage, true));
   }
 
   public void sendMessage(String prompt, Project project, @Nullable EmptyCallback scrollToBottom) {
     addSpacing(16);
-    addIconLabel("/icons/chatgpt-icon.png", "ChatGPT:");
+    addIconLabel(Icons.DefaultImageIcon, "ChatGPT:");
     addSpacing(8);
 
     var secretKey = SettingsState.getInstance().secretKey;
@@ -87,7 +87,7 @@ public class ToolWindowService {
 
     var imageIconPanel = new JPanel();
     imageIconPanel.setLayout(new GridBagLayout());
-    var imageIconLabel = new JLabel(new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/sun-icon.png"))));
+    var imageIconLabel = new JLabel(Icons.SunImageIcon);
     imageIconLabel.setHorizontalAlignment(JLabel.CENTER);
     imageIconPanel.add(imageIconLabel);
     scrollablePanel.add(imageIconPanel);
@@ -118,7 +118,7 @@ public class ToolWindowService {
     scrollablePanel.add(Box.createVerticalStrut(height));
   }
 
-  public void addIconLabel(String path, String text) {
-    scrollablePanel.add(justifyLeft(createIconLabel(Objects.requireNonNull(getClass().getResource(path)), text)));
+  public void addIconLabel(ImageIcon imageIcon, String text) {
+    scrollablePanel.add(justifyLeft(createIconLabel(imageIcon, text)));
   }
 }

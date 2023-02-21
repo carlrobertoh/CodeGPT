@@ -2,17 +2,14 @@ package ee.carlrobert.chatgpt.ide.toolwindow.components;
 
 import com.intellij.ui.JBColor;
 import ee.carlrobert.chatgpt.EmptyCallback;
+import icons.Icons;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.util.Objects;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -47,11 +44,11 @@ public class TextArea extends JTextArea {
   }
 
   private JButton createSubmitButton(ActionListener submitButtonListener) {
-    var imageIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/send-icon.png")));
-    var button = new JButton(imageIcon);
+    var sendIcon = Icons.SendImageIcon;
+    var button = new JButton(sendIcon);
     button.setBorder(BorderFactory.createEmptyBorder());
     button.setContentAreaFilled(false);
-    button.setPreferredSize(new Dimension(imageIcon.getIconWidth(), imageIcon.getIconHeight()));
+    button.setPreferredSize(new Dimension(sendIcon.getIconWidth(), sendIcon.getIconHeight()));
     button.addActionListener(submitButtonListener);
     return button;
   }
