@@ -68,6 +68,9 @@ public final class ApiClient {
           onMessage.accept("Incorrect API key provided.\n" +
               "You can find your API key at https://platform.openai.com/account/api-keys.");
           throw new IllegalArgumentException();
+        } else if (respInfo.statusCode() == 429) {
+          onMessage.accept("You exceeded your current quota, please check your plan and billing details.");
+          throw new RuntimeException("Insufficient quota");
         } else {
           onMessage.accept("Something went wrong. Please try again later.");
           clearQueries();
