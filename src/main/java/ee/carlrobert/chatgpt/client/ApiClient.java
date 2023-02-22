@@ -84,7 +84,7 @@ public final class ApiClient {
   private BodySubscriber<Void> subscribe(ResponseInfo responseInfo, String userPrompt, Consumer<String> onMessage) {
     if (responseInfo.statusCode() == 200) {
       return new Subscriber((messageData ->
-          onMessage.accept(messageData.getChoices().get(0).getText())),
+          onMessage.accept(messageData.choices().get(0).text())),
           (finalMsg) -> queries.add(Map.entry(userPrompt, finalMsg)));
     } else if (responseInfo.statusCode() == 401) {
       onMessage.accept("Incorrect API key provided.\n" +

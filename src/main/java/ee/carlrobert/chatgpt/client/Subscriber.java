@@ -72,11 +72,11 @@ public class Subscriber implements HttpResponse.BodySubscriber<Void> {
         for (var i = 0; i < tokens.length - 1; i++) {
           var message = tokens[i];
           var data = extractMessageData(message.split("\n"));
-          var choice = data.getChoices().get(0);
-          if ("stop".equals(choice.getFinish_reason())) {
+          var choice = data.choices().get(0);
+          if ("stop".equals(choice.finishReason())) {
             onComplete();
           } else {
-            msgBuilder.append(choice.getText());
+            msgBuilder.append(choice.text());
           }
           this.messageDataConsumer.accept(data);
         }

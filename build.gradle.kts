@@ -1,6 +1,6 @@
 plugins {
   id("java")
-  id("org.jetbrains.intellij") version "1.5.2"
+  id("org.jetbrains.intellij") version "1.13.0"
 }
 
 group = "ee.carlrobert"
@@ -11,19 +11,19 @@ repositories {
 }
 
 intellij {
-  version.set("2021.2")
+  version.set("2022.2")
   type.set("IC")
   plugins.set(listOf())
 }
 
-tasks {
-  withType<JavaCompile> {
-    sourceCompatibility = "11"
-    targetCompatibility = "11"
-  }
+java {
+  sourceCompatibility = JavaVersion.VERSION_17
+  targetCompatibility = JavaVersion.VERSION_17
+}
 
+tasks {
   patchPluginXml {
-    sinceBuild.set("212")
+    sinceBuild.set("222.0")
     untilBuild.set("231.*")
   }
 
