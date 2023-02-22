@@ -8,6 +8,7 @@ import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
 import com.intellij.openapi.wm.ToolWindow;
+import com.intellij.openapi.wm.ToolWindowManager;
 import ee.carlrobert.chatgpt.EmptyCallback;
 import ee.carlrobert.chatgpt.client.ApiClient;
 import ee.carlrobert.chatgpt.ide.settings.SettingsConfigurable;
@@ -24,23 +25,19 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import org.jetbrains.annotations.NotNull;
 
 public class ToolWindowService {
 
   private ScrollablePanel scrollablePanel;
-  private ToolWindow toolWindow;
   private boolean isLandingViewVisible;
 
   public void setScrollablePanel(ScrollablePanel scrollablePanel) {
     this.scrollablePanel = scrollablePanel;
   }
 
-  public void setToolWindow(ToolWindow toolWindow) {
-    this.toolWindow = toolWindow;
-  }
-
-  public ToolWindow getToolWindow() {
-    return toolWindow;
+  public ToolWindow getToolWindow(@NotNull Project project) {
+    return ToolWindowManager.getInstance(project).getToolWindow("ChatGPT");
   }
 
   public void paintUserMessage(String userMessage) {

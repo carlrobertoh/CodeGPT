@@ -3,7 +3,6 @@ package ee.carlrobert.chatgpt.ide.toolwindow;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
-import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.ui.components.JBScrollPane;
 import ee.carlrobert.chatgpt.ide.toolwindow.components.TextArea;
 import java.awt.Adjustable;
@@ -24,15 +23,13 @@ import org.jetbrains.annotations.NotNull;
 public class ChatGptToolWindow {
 
   private final Project project;
-  private final ToolWindow toolWindow;
   private JPanel chatGptToolWindowContent;
   private JScrollPane scrollPane;
   private JTextArea textArea;
   private JScrollPane textAreaScrollPane;
 
-  public ChatGptToolWindow(@NotNull Project project, @NotNull ToolWindow toolWindow) {
+  public ChatGptToolWindow(@NotNull Project project) {
     this.project = project;
-    this.toolWindow = toolWindow;
   }
 
   public void handleSubmit() {
@@ -72,7 +69,7 @@ public class ChatGptToolWindow {
       @Override
       public JScrollBar createVerticalScrollBar() {
         JScrollBar verticalScrollBar = new JScrollPane.ScrollBar(1);
-        verticalScrollBar.setPreferredSize(new Dimension(0,0));
+        verticalScrollBar.setPreferredSize(new Dimension(0, 0));
         return verticalScrollBar;
       }
     };
@@ -96,7 +93,6 @@ public class ChatGptToolWindow {
     scrollPane.setViewportBorder(null);
 
     var toolWindowService = ApplicationManager.getApplication().getService(ToolWindowService.class);
-    toolWindowService.setToolWindow(toolWindow);
     toolWindowService.setScrollablePanel(scrollablePanel);
     toolWindowService.paintLandingView();
   }

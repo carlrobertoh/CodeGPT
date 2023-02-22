@@ -13,7 +13,7 @@ public class ChatGptToolWindowFactory implements ToolWindowFactory, DumbAware {
   public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
     var content = ApplicationManager.getApplication()
         .getService(ContentFactory.class)
-        .createContent(new ChatGptToolWindow(project, toolWindow).getContent(), "", false);
+        .createContent(new ChatGptToolWindow(project).getContent(), "", false);
     toolWindow.getContentManager().addContent(content);
   }
 }

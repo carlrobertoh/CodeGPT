@@ -31,6 +31,7 @@
     <change-notes>
         <![CDATA[
       <ul>
+        <li><b>1.0.8</b> Migrate to Java 17, fix ToolWindow NPE</li>
         <li><b>1.0.7</b> Code refactoring, add readme</li>
         <li><b>1.0.6</b> Display proper message for insufficient quota</li>
         <li><b>1.0.5</b> Replace TextField with TextArea, remove Tahoma font, increase response max token size</li>
@@ -54,7 +55,7 @@
         <applicationService serviceImplementation="ee.carlrobert.chatgpt.ide.settings.SettingsState"/>
         <applicationService serviceImplementation="ee.carlrobert.chatgpt.ide.toolwindow.ToolWindowService"/>
         <applicationService serviceImplementation="ee.carlrobert.chatgpt.ide.notification.NotificationService"/>
-        <toolWindow id="ChatGPT" secondary="true" icon="AllIcons.General.Modified" anchor="right"
+        <toolWindow id="ChatGPT" icon="Icons.DefaultIcon" anchor="right"
             factoryClass="ee.carlrobert.chatgpt.ide.toolwindow.ChatGptToolWindowFactory"/>
 
         <notificationGroup id="ChatGPT-Empty-API-Key"
