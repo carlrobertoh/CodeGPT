@@ -1,17 +1,7 @@
-<!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
-<idea-plugin require-restart="true">
+<idea-plugin>
     <id>ee.carlrobert.chatgpt</id>
-
-    <!-- Public plugin name should be written in Title Case.
-         Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name -->
     <name>OpenAI - ChatGPT</name>
-
-    <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
     <vendor email="carlrobertoh@gmail.com" url="https://carlrobert.ee">Carl-Robert Linnupuu</vendor>
-
-    <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
-         Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
-         Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
     <description><![CDATA[
     <p><b>ChatGPT as your copilot to level up your developer experience.</b></p>
     <p>This is the perfect assistant for any programmer who wants to improve their coding skills and make more efficient use of the time.</p>
@@ -31,6 +21,7 @@
     <change-notes>
         <![CDATA[
       <ul>
+        <li><b>1.0.9</b> Add code syntax highlighting and copy functionality, remove plugin required for restart</li>
         <li><b>1.0.8</b> Migrate to Java 17, fix ToolWindow NPE</li>
         <li><b>1.0.7</b> Code refactoring, add readme</li>
         <li><b>1.0.6</b> Display proper message for insufficient quota</li>
@@ -45,6 +36,12 @@
     </change-notes>
 
     <depends>com.intellij.modules.platform</depends>
+
+    <applicationListeners>
+        <listener
+            class="ee.carlrobert.chatgpt.ide.toolwindow.ToolWindowService"
+            topic="com.intellij.ide.ui.LafManagerListener"/>
+    </applicationListeners>
 
     <extensions defaultExtensionNs="com.intellij">
         <postStartupActivity implementation="ee.carlrobert.chatgpt.ide.notification.ShowNotificationActivity"/>

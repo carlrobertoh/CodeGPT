@@ -4,6 +4,8 @@ import static ee.carlrobert.chatgpt.ide.toolwindow.ToolWindowUtil.createIconLabe
 import static ee.carlrobert.chatgpt.ide.toolwindow.ToolWindowUtil.createTextArea;
 import static ee.carlrobert.chatgpt.ide.toolwindow.ToolWindowUtil.justifyLeft;
 
+import com.intellij.ide.ui.LafManager;
+import com.intellij.ide.ui.LafManagerListener;
 import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
@@ -13,12 +15,15 @@ import ee.carlrobert.chatgpt.EmptyCallback;
 import ee.carlrobert.chatgpt.client.ApiClient;
 import ee.carlrobert.chatgpt.ide.settings.SettingsConfigurable;
 import ee.carlrobert.chatgpt.ide.settings.SettingsState;
+import ee.carlrobert.chatgpt.ide.toolwindow.components.SyntaxTextArea;
 import icons.Icons;
 import java.awt.Cursor;
 import java.awt.GridBagLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nullable;
 import javax.swing.Box;
 import javax.swing.ImageIcon;
@@ -27,10 +32,11 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import org.jetbrains.annotations.NotNull;
 
-public class ToolWindowService {
+public class ToolWindowService implements LafManagerListener {
 
   private ScrollablePanel scrollablePanel;
   private boolean isLandingViewVisible;
+  private static final List<SyntaxTextArea> textAreas = new ArrayList<>();
 
   public void setScrollablePanel(ScrollablePanel scrollablePanel) {
     this.scrollablePanel = scrollablePanel;
@@ -65,15 +71,23 @@ public class ToolWindowService {
       });
       scrollablePanel.add(justifyLeft(label));
     } else {
-      var textArea = createTextArea("", false);
+      var textArea = new SyntaxTextArea();
       scrollablePanel.add(textArea);
+      textAreas.add(textArea);
 
-      ApiClient.getInstance().getCompletionsAsync(prompt, (message) -> {
-        textArea.append(message);
-        if (scrollToBottom != null) {
-          scrollToBottom.call();
-        }
-      });
+      var messageCounter = new AtomicInteger(0);
+      ApiClient.getInstance().getCompletionsAsync(
+          prompt,
+          (message) -> {
+            if (messageCounter.getAndIncrement() == 0) {
+              message = message.replace("\n", "");
+            }
+            textArea.append(message);
+            if (scrollToBottom != null) {
+              scrollToBottom.call();
+            }
+          },
+          (finalMessage) -> textArea.displayCopyButton());
     }
 
     addSpacing(16);
@@ -111,11 +125,18 @@ public class ToolWindowService {
     scrollablePanel.removeAll();
   }
 
-  public void addSpacing(int height) {
+  private void addSpacing(int height) {
     scrollablePanel.add(Box.createVerticalStrut(height));
   }
 
-  public void addIconLabel(ImageIcon imageIcon, String text) {
+  private void addIconLabel(ImageIcon imageIcon, String text) {
     scrollablePanel.add(justifyLeft(createIconLabel(imageIcon, text)));
+  }
+
+  @Override
+  public void lookAndFeelChanged(@NotNull LafManager source) {
+    for (var textArea : textAreas) {
+      textArea.changeStyleViaThemeXml();
+    }
   }
 }

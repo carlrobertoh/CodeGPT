@@ -18,13 +18,13 @@ public class AskAction extends AnAction {
   public void actionPerformed(@NotNull AnActionEvent event) {
     var project = event.getProject();
     if (project != null) {
-      ApiClient.getInstance().clearQueries();
-      var toolWindowService = ApplicationManager.getApplication().getService(ToolWindowService.class);
-      var toolWindow = toolWindowService.getToolWindow(project);
-      toolWindow.show();
-      toolWindow.setTitle("");
-      toolWindowService.removeAll();
-      toolWindowService.paintLandingView();
+        var toolWindowService = ApplicationManager.getApplication().getService(ToolWindowService.class);
+        var toolWindow = toolWindowService.getToolWindow(project);
+        ApiClient.getInstance().clearQueries();
+        toolWindow.show();
+        toolWindow.setTitle("");
+        toolWindowService.removeAll();
+        toolWindowService.paintLandingView();
     }
   }
 }

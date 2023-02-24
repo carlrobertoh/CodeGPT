@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import javax.annotation.Nullable;
 
 public final class ApiClient {
 
@@ -30,9 +31,9 @@ public final class ApiClient {
     return instance;
   }
 
-  public void getCompletionsAsync(String userPrompt, Consumer<String> onMessage) {
+  public void getCompletionsAsync(String userPrompt, Consumer<String> onMessage, @Nullable Consumer<String> onComplete) {
     var prompt = buildCompletePrompt(userPrompt);
-    this.client.sendAsync(buildHttpRequest(prompt), respInfo -> subscribe(respInfo, userPrompt, onMessage));
+    this.client.sendAsync(buildHttpRequest(prompt), respInfo -> subscribe(respInfo, userPrompt, onMessage, onComplete));
   }
 
   public void clearQueries() {
@@ -40,7 +41,11 @@ public final class ApiClient {
   }
 
   private String buildCompletePrompt(String prompt) {
-    var basePrompt = new StringBuilder("You are ChatGPT, a large language model trained by OpenAI.\n");
+    var basePrompt = new StringBuilder("""
+        You are ChatGPT, a large language model trained by OpenAI.
+        One of your main goals is code generation but not only.
+        Answer in a markdown language. Markdown code blocks should contain language whenever possible.
+        """);
     queries.forEach(query ->
         basePrompt.append("User:\n")
             .append(query.getKey())
@@ -81,11 +86,20 @@ public final class ApiClient {
     }
   }
 
-  private BodySubscriber<Void> subscribe(ResponseInfo responseInfo, String userPrompt, Consumer<String> onMessage) {
+  private BodySubscriber<Void> subscribe(
+      ResponseInfo responseInfo,
+      String userPrompt,
+      Consumer<String> onMessage,
+      @Nullable Consumer<String> onComplete) {
     if (responseInfo.statusCode() == 200) {
       return new Subscriber((messageData ->
           onMessage.accept(messageData.choices().get(0).text())),
-          (finalMsg) -> queries.add(Map.entry(userPrompt, finalMsg)));
+          (finalMsg) -> {
+            queries.add(Map.entry(userPrompt, finalMsg));
+            if (onComplete != null) {
+              onComplete.accept(finalMsg);
+            }
+          });
     } else if (responseInfo.statusCode() == 401) {
       onMessage.accept("Incorrect API key provided.\n" +
           "You can find your API key at https://platform.openai.com/account/api-keys.");

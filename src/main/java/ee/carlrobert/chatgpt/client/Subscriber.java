@@ -9,13 +9,27 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.Flow;
+import java.util.concurrent.Flow.Subscription;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 public class Subscriber implements HttpResponse.BodySubscriber<Void> {
 
-  protected static final Pattern dataLinePattern = Pattern.compile("^data: ?(.*)$");
+  private static final Pattern dataLinePattern = Pattern.compile("^data: ?(.*)$");
+  private volatile Subscription subscription;
+  private volatile String deferredText;
+  private final Consumer<? super ApiResponse> messageDataConsumer;
+  private final CompletableFuture<Void> future;
+  private final Consumer<String> onComplete;
+  private final StringBuilder msgBuilder = new StringBuilder();
+
+  public Subscriber(Consumer<? super ApiResponse> messageDataConsumer, Consumer<String> onComplete) {
+    this.messageDataConsumer = messageDataConsumer;
+    this.future = new CompletableFuture<>();
+    this.subscription = null;
+    this.deferredText = null;
+    this.onComplete = onComplete;
+  }
 
   protected static ApiResponse extractMessageData(String[] messageLines) {
     var responseBuilder = new StringBuilder();
@@ -33,23 +47,8 @@ public class Subscriber implements HttpResponse.BodySubscriber<Void> {
     }
   }
 
-  protected final Consumer<? super ApiResponse> messageDataConsumer;
-  protected final CompletableFuture<Void> future;
-  protected volatile Flow.Subscription subscription;
-  protected volatile String deferredText;
-  private final Consumer<String> onComplete;
-  private final StringBuilder msgBuilder = new StringBuilder();
-
-  public Subscriber(Consumer<? super ApiResponse> messageDataConsumer, Consumer<String> onComplete) {
-    this.messageDataConsumer = messageDataConsumer;
-    this.future = new CompletableFuture<>();
-    this.subscription = null;
-    this.deferredText = null;
-    this.onComplete = onComplete;
-  }
-
   @Override
-  public void onSubscribe(Flow.Subscription subscription) {
+  public void onSubscribe(Subscription subscription) {
     this.subscription = subscription;
     try {
       this.deferredText = "";
@@ -66,19 +65,18 @@ public class Subscriber implements HttpResponse.BodySubscriber<Void> {
       var deferredText = this.deferredText;
 
       for (var buffer : buffers) {
-        var s = deferredText + UTF_8.decode(buffer);
-        var tokens = s.split("\n\n", -1);
+        var decodedText = deferredText + UTF_8.decode(buffer);
+        var tokens = decodedText.split("\n\n", -1);
 
         for (var i = 0; i < tokens.length - 1; i++) {
-          var message = tokens[i];
-          var data = extractMessageData(message.split("\n"));
-          var choice = data.choices().get(0);
+          var response = extractMessageData(tokens[i].split("\n"));
+          var choice = response.choices().get(0);
           if ("stop".equals(choice.finishReason())) {
             onComplete();
           } else {
             msgBuilder.append(choice.text());
           }
-          this.messageDataConsumer.accept(data);
+          this.messageDataConsumer.accept(response);
         }
         deferredText = tokens[tokens.length - 1];
       }

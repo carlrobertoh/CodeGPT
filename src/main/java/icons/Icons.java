@@ -12,6 +12,8 @@ public class Icons {
   public static final ImageIcon SendImageIcon = getImageIcon("/icons/send-icon.png");
   public static final ImageIcon SunImageIcon = getImageIcon("/icons/sun-icon.png");
   public static final ImageIcon UserImageIcon = getImageIcon("/icons/user-icon.png");
+  public static final ImageIcon CopyImageIcon = getImageIcon("/icons/copy-icon.png");
+  public static final ImageIcon DoubleTickImageIcon = getImageIcon("/icons/double-tick-icon.png");
 
   private static ImageIcon getImageIcon(String path) {
     return new ImageIcon(Objects.requireNonNull(Icons.class.getResource(path)));

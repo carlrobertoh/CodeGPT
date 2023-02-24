@@ -19,9 +19,9 @@ public abstract class BaseAction extends AnAction {
     var project = event.getProject();
     var editor = event.getData(PlatformDataKeys.EDITOR);
     if (editor != null && project != null) {
-      ApiClient.getInstance().clearQueries();
       var toolWindowService = ApplicationManager.getApplication().getService(ToolWindowService.class);
       var selectedText = editor.getSelectionModel().getSelectedText();
+      ApiClient.getInstance().clearQueries();
       initToolWindow(toolWindowService.getToolWindow(project));
       toolWindowService.removeAll();
       toolWindowService.paintUserMessage(selectedText);

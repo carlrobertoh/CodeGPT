@@ -1,15 +1,16 @@
 package ee.carlrobert.chatgpt.ide.toolwindow.components;
 
+import static ee.carlrobert.chatgpt.ide.toolwindow.ToolWindowUtil.createIconButton;
+
 import com.intellij.ui.JBColor;
+import com.intellij.util.ui.JBUI;
 import ee.carlrobert.chatgpt.EmptyCallback;
 import icons.Icons;
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import javax.swing.AbstractAction;
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -19,6 +20,7 @@ public class TextArea extends JTextArea {
 
   public TextArea(EmptyCallback onSubmit, JScrollPane textAreaScrollPane) {
     setForeground(JBColor.GRAY);
+    setMargin(JBUI.insets(5));
     addFocusListener(getFocusListener());
     addSubmitButton(onSubmit, textAreaScrollPane);
 
@@ -44,11 +46,7 @@ public class TextArea extends JTextArea {
   }
 
   private JButton createSubmitButton(ActionListener submitButtonListener) {
-    var sendIcon = Icons.SendImageIcon;
-    var button = new JButton(sendIcon);
-    button.setBorder(BorderFactory.createEmptyBorder());
-    button.setContentAreaFilled(false);
-    button.setPreferredSize(new Dimension(sendIcon.getIconWidth(), sendIcon.getIconHeight()));
+    var button = createIconButton(Icons.SendImageIcon);
     button.addActionListener(submitButtonListener);
     return button;
   }

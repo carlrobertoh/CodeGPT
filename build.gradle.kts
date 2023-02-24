@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "ee.carlrobert"
-version = "1.0.8"
+version = "1.0.9"
 
 repositories {
   mavenCentral()
@@ -14,6 +14,10 @@ intellij {
   version.set("2022.2")
   type.set("IC")
   plugins.set(listOf())
+}
+
+dependencies {
+  implementation("com.fifesoft:rsyntaxtextarea:3.3.2")
 }
 
 java {
