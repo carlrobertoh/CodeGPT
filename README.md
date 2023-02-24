@@ -1,3 +1,5 @@
+![Version](https://img.shields.io/jetbrains/plugin/v/21056-openai--chatgpt) ![Downloads](https://img.shields.io/jetbrains/plugin/d/21056-openai--chatgpt)
+
 # OpenAI - ChatGPT IntelliJ Plugin
 ChatGPT as your copilot to level up your developer experience. This is the perfect assistant for any programmer who wants to improve their coding skills and make more efficient use of the time.
 
