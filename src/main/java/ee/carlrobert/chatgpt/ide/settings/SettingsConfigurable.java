@@ -1,8 +1,6 @@
 package ee.carlrobert.chatgpt.ide.settings;
 
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.options.Configurable;
-import ee.carlrobert.chatgpt.ide.notification.NotificationService;
 import javax.swing.JComponent;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
@@ -25,29 +23,39 @@ public class SettingsConfigurable implements Configurable {
   @Nullable
   @Override
   public JComponent createComponent() {
-    settingsComponent = new SettingsComponent();
+    var settings = SettingsState.getInstance();
+    settingsComponent = new SettingsComponent(settings);
     return settingsComponent.getPanel();
   }
 
   @Override
   public boolean isModified() {
     var settings = SettingsState.getInstance();
-    return !settingsComponent.getApiKeyField().equals(settings.secretKey);
+    return !settingsComponent.getApiKey().equals(settings.apiKey) ||
+        !settingsComponent.getAccessToken().equals(settings.accessToken) ||
+        !settingsComponent.getReverseProxyUrl().equals(settings.reverseProxyUrl) ||
+        settingsComponent.isGPTOptionSelected() != settings.isGPTOptionSelected ||
+        settingsComponent.isChatGPTOptionSelected() != settings.isChatGPTOptionSelected;
   }
 
   @Override
   public void apply() {
     var settings = SettingsState.getInstance();
-    settings.secretKey = settingsComponent.getApiKeyField();
-    if (!settings.secretKey.isEmpty()) {
-      ApplicationManager.getApplication().getService(NotificationService.class).expire();
-    }
+    settings.isGPTOptionSelected = settingsComponent.isGPTOptionSelected();
+    settings.isChatGPTOptionSelected = settingsComponent.isChatGPTOptionSelected();
+    settings.accessToken = settingsComponent.getAccessToken();
+    settings.apiKey = settingsComponent.getApiKey();
+    settings.reverseProxyUrl = settingsComponent.getReverseProxyUrl();
   }
 
   @Override
   public void reset() {
     var settings = SettingsState.getInstance();
-    settingsComponent.setApiKeyField(settings.secretKey);
+    settingsComponent.setUseGPTOptionSelected(settings.isGPTOptionSelected);
+    settingsComponent.setUseChatGPTOptionSelected(settings.isChatGPTOptionSelected);
+    settingsComponent.setAccessToken(settings.accessToken);
+    settingsComponent.setApiKey(settings.apiKey);
+    settingsComponent.setReverseProxyUrl(settings.reverseProxyUrl);
   }
 
   @Override

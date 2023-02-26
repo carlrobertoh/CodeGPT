@@ -11,8 +11,8 @@ public class ShowNotificationActivity implements StartupActivity {
   @Override
   public void runActivity(@NotNull Project project) {
     var notificationService = ApplicationManager.getApplication().getService(NotificationService.class);
-    var secretKey = SettingsState.getInstance().secretKey;
-    if (secretKey == null || secretKey.isEmpty()) {
+    var apiKey = SettingsState.getInstance().apiKey;
+    if (apiKey == null || apiKey.isEmpty()) {
       notificationService.createAndNotify(project);
     }
   }

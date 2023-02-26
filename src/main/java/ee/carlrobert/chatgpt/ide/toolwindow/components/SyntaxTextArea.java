@@ -9,8 +9,6 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.io.IOException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.swing.JButton;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
@@ -23,15 +21,25 @@ public class SyntaxTextArea extends RSyntaxTextArea {
     setStyles();
   }
 
-  public Matcher getMarkdownMatcher() {
-    return Pattern.compile("`{3}([\\w]*)\\n([\\S\\s]+?)\\n`{3}").matcher(getText());
+  public void displayCopyButton() {
+    ComponentBorder cb = new ComponentBorder(createCopyButton());
+    cb.setAlignment(TOP_ALIGNMENT);
+    cb.install(this);
   }
 
-  public void displayCopyButton() {
-    if (getMarkdownMatcher().matches()) {
-      ComponentBorder cb = new ComponentBorder(createCopyButton());
-      cb.setAlignment(TOP_ALIGNMENT);
-      cb.install(this);
+  public void enableSelection() {
+    setEditable(false);
+    setEnabled(true);
+  }
+
+  public void changeStyleViaThemeXml() {
+    var baseThemePath = "/org/fife/ui/rsyntaxtextarea/themes/";
+    try {
+      Theme theme = Theme.load(getClass().getResourceAsStream(
+          UIUtil.isUnderDarcula() ? baseThemePath + "dark.xml" : baseThemePath + "idea.xml"));
+      theme.apply(this);
+    } catch (IOException e) {
+      e.printStackTrace();
     }
   }
 
@@ -48,26 +56,9 @@ public class SyntaxTextArea extends RSyntaxTextArea {
   }
 
   private void copyToClipboard() {
-    var text = getText();
-    var matcher = getMarkdownMatcher();
-    if (matcher.find()) {
-      text = matcher.group(2);
-    }
-
-    StringSelection stringSelection = new StringSelection(text);
+    StringSelection stringSelection = new StringSelection(getText());
     Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
     clipboard.setContents(stringSelection, null);
-  }
-
-  public void changeStyleViaThemeXml() {
-    var baseThemePath = "/org/fife/ui/rsyntaxtextarea/themes/";
-    try {
-      Theme theme = Theme.load(getClass().getResourceAsStream(
-          UIUtil.isUnderDarcula() ? baseThemePath + "dark.xml" : baseThemePath + "idea.xml"));
-      theme.apply(this);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
   }
 
   private JButton createCopyButton() {

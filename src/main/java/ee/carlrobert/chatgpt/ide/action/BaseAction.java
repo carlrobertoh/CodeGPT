@@ -5,7 +5,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.wm.ToolWindow;
-import ee.carlrobert.chatgpt.client.ApiClient;
+import ee.carlrobert.chatgpt.client.ClientFactory;
 import ee.carlrobert.chatgpt.ide.toolwindow.ToolWindowService;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,7 +21,7 @@ public abstract class BaseAction extends AnAction {
     if (editor != null && project != null) {
       var toolWindowService = ApplicationManager.getApplication().getService(ToolWindowService.class);
       var selectedText = editor.getSelectionModel().getSelectedText();
-      ApiClient.getInstance().clearQueries();
+      new ClientFactory().getClient().clearPreviousSession();
       initToolWindow(toolWindowService.getToolWindow(project));
       toolWindowService.removeAll();
       toolWindowService.paintUserMessage(selectedText);

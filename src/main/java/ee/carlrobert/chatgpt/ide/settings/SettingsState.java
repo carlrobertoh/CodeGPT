@@ -14,7 +14,11 @@ import org.jetbrains.annotations.Nullable;
 )
 public class SettingsState implements PersistentStateComponent<SettingsState> {
 
-  public String secretKey = "";
+  public String apiKey = "";
+  public String accessToken = "";
+  public String reverseProxyUrl = "";
+  public boolean isGPTOptionSelected = true;
+  public boolean isChatGPTOptionSelected = false;
 
   public static SettingsState getInstance() {
     return ApplicationManager.getApplication().getService(SettingsState.class);

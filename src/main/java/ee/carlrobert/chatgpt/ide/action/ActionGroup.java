@@ -17,7 +17,7 @@ public class ActionGroup extends DefaultActionGroup {
     Project project = event.getProject();
     boolean menuAllowed = false;
     if (editor != null && project != null) {
-      var secretKey = SettingsState.getInstance().secretKey;
+      var secretKey = SettingsState.getInstance().apiKey;
       menuAllowed = secretKey != null && !secretKey.isEmpty() && editor.getSelectionModel().getSelectedText() != null;
     }
     event.getPresentation().setEnabled(menuAllowed);

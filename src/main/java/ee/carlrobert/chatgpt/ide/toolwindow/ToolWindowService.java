@@ -12,7 +12,8 @@ import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import ee.carlrobert.chatgpt.EmptyCallback;
-import ee.carlrobert.chatgpt.client.ApiClient;
+import ee.carlrobert.chatgpt.client.ClientFactory;
+import ee.carlrobert.chatgpt.client.chatgpt.ChatGPTClient;
 import ee.carlrobert.chatgpt.ide.settings.SettingsConfigurable;
 import ee.carlrobert.chatgpt.ide.settings.SettingsState;
 import ee.carlrobert.chatgpt.ide.toolwindow.components.SyntaxTextArea;
@@ -23,7 +24,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nullable;
 import javax.swing.Box;
 import javax.swing.ImageIcon;
@@ -60,8 +60,8 @@ public class ToolWindowService implements LafManagerListener {
     addIconLabel(Icons.DefaultImageIcon, "ChatGPT:");
     addSpacing(8);
 
-    var secretKey = SettingsState.getInstance().secretKey;
-    if (secretKey == null || secretKey.isEmpty()) {
+    var apiKey = SettingsState.getInstance().apiKey;
+    if (apiKey == null || apiKey.isEmpty()) {
       var label = new JLabel("<html>API key not provided. <font color='#589df6'><u>Open Settings</u></font> to set one.</html>");
       label.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
       label.addMouseListener(new MouseAdapter() {
@@ -75,19 +75,21 @@ public class ToolWindowService implements LafManagerListener {
       scrollablePanel.add(textArea);
       textAreas.add(textArea);
 
-      var messageCounter = new AtomicInteger(0);
-      ApiClient.getInstance().getCompletionsAsync(
-          prompt,
-          (message) -> {
-            if (messageCounter.getAndIncrement() == 0) {
-              message = message.replace("\n", "");
-            }
-            textArea.append(message);
-            if (scrollToBottom != null) {
-              scrollToBottom.call();
-            }
-          },
-          (finalMessage) -> textArea.displayCopyButton());
+      var client = new ClientFactory().getClient();
+      client.getCompletionsAsync(prompt, message -> {
+        if (client instanceof ChatGPTClient) {
+          textArea.setText(message);
+        } else {
+          textArea.append(message);
+        }
+
+        if (scrollToBottom != null) {
+          scrollToBottom.call();
+        }
+      }, () -> {
+        textArea.displayCopyButton();
+        textArea.enableSelection();
+      });
     }
 
     addSpacing(16);
