@@ -3,6 +3,7 @@ package ee.carlrobert.chatgpt.ide.toolwindow;
 import static ee.carlrobert.chatgpt.ide.toolwindow.ToolWindowUtil.createIconLabel;
 import static ee.carlrobert.chatgpt.ide.toolwindow.ToolWindowUtil.createTextArea;
 import static ee.carlrobert.chatgpt.ide.toolwindow.ToolWindowUtil.justifyLeft;
+import static java.lang.String.format;
 
 import com.intellij.ide.ui.LafManager;
 import com.intellij.ide.ui.LafManagerListener;
@@ -60,16 +61,11 @@ public class ToolWindowService implements LafManagerListener {
     addIconLabel(Icons.DefaultImageIcon, "ChatGPT:");
     addSpacing(8);
 
-    var apiKey = SettingsState.getInstance().apiKey;
-    if (apiKey == null || apiKey.isEmpty()) {
-      var label = new JLabel("<html>API key not provided. <font color='#589df6'><u>Open Settings</u></font> to set one.</html>");
-      label.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-      label.addMouseListener(new MouseAdapter() {
-        public void mouseClicked(MouseEvent e) {
-          ShowSettingsUtil.getInstance().showSettingsDialog(project, SettingsConfigurable.class);
-        }
-      });
-      scrollablePanel.add(justifyLeft(label));
+    var settings = SettingsState.getInstance();
+    if (settings.isGPTOptionSelected && settings.apiKey.isEmpty()) {
+      notifyMissingCredential(project, "API key not provided.");
+    } else if (settings.isChatGPTOptionSelected && settings.accessToken.isEmpty()) {
+      notifyMissingCredential(project, "Access token not provided.");
     } else {
       var textArea = new SyntaxTextArea();
       scrollablePanel.add(textArea);
@@ -133,6 +129,17 @@ public class ToolWindowService implements LafManagerListener {
 
   private void addIconLabel(ImageIcon imageIcon, String text) {
     scrollablePanel.add(justifyLeft(createIconLabel(imageIcon, text)));
+  }
+
+  private void notifyMissingCredential(Project project, String text) {
+    var label = new JLabel(format("<html>%s <font color='#589df6'><u>Open Settings</u></font> to set one.</html>", text));
+    label.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+    label.addMouseListener(new MouseAdapter() {
+      public void mouseClicked(MouseEvent e) {
+        ShowSettingsUtil.getInstance().showSettingsDialog(project, SettingsConfigurable.class);
+      }
+    });
+    scrollablePanel.add(justifyLeft(label));
   }
 
   @Override

@@ -8,11 +8,11 @@
     <br />
     <span>Available commands</span>
     <ul>
-        <li><b>Find bugs:</b> Analyze and find bugs in your code. Right click on a selected block of code, run command.</li>
-        <li><b>Add tests:</b> Write tests for you. Right click on a selected block of code, run command.</li>
-        <li><b>Refactor:</b> Refactor your code. Right click on a selected block of code, run command.</li>
-        <li><b>Optimize:</b> Add suggestions to your code to improve. Right click on a selected block of code, run command.</li>
-        <li><b>Explain:</b> Explain the selected code. Right click on a selected block of code, run command.</li>
+        <li><b>Find bugs:</b> Analyze and find bugs in your code. Right-click on a selected block of code, run command.</li>
+        <li><b>Add tests:</b> Write tests for you. Right-click on a selected block of code, run command.</li>
+        <li><b>Refactor:</b> Refactor your code. Right-click on a selected block of code, run command.</li>
+        <li><b>Optimize:</b> Add suggestions to your code to improve. Right-click on a selected block of code, run command.</li>
+        <li><b>Explain:</b> Explain the selected code. Right-click on a selected block of code, run command.</li>
     </ul>
     <br />
     <p><b>Before using the plugin, it is necessary to configure the API key in the Settings → Tools → ChatGPT</b></p>
@@ -21,6 +21,8 @@
     <change-notes>
         <![CDATA[
       <ul>
+        <li><b>1.1.1</b> Remove startup notification</li>
+        <li><b>1.1.0</b> Add reverse proxy support, fix text selection and copy functionality</li>
         <li><b>1.0.9</b> Add code syntax highlighting and copy functionality, remove plugin required for restart</li>
         <li><b>1.0.8</b> Migrate to Java 17, fix ToolWindow NPE</li>
         <li><b>1.0.7</b> Code refactoring, add readme</li>
@@ -44,14 +46,11 @@
     </applicationListeners>
 
     <extensions defaultExtensionNs="com.intellij">
-        <postStartupActivity implementation="ee.carlrobert.chatgpt.ide.notification.ShowNotificationActivity"/>
-
         <applicationConfigurable parentId="tools" instance="ee.carlrobert.chatgpt.ide.settings.SettingsConfigurable"
             id="org.intellij.sdk.settings.AppSettingsConfigurable"
             displayName="ChatGPT"/>
         <applicationService serviceImplementation="ee.carlrobert.chatgpt.ide.settings.SettingsState"/>
         <applicationService serviceImplementation="ee.carlrobert.chatgpt.ide.toolwindow.ToolWindowService"/>
-        <applicationService serviceImplementation="ee.carlrobert.chatgpt.ide.notification.NotificationService"/>
         <toolWindow id="ChatGPT" icon="Icons.DefaultIcon" anchor="right"
             factoryClass="ee.carlrobert.chatgpt.ide.toolwindow.ChatGptToolWindowFactory"/>
 
