@@ -6,6 +6,7 @@ import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
+import ee.carlrobert.chatgpt.client.BaseModel;
 import java.awt.Desktop;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -21,6 +22,7 @@ public class SettingsComponent {
 
   private final JPanel mainPanel;
   private final JBTextField apiKeyField;
+  private final JComboBox<BaseModel> baseModelComboBox;
   private final JComboBox<String> reverseProxyComboBox;
   private final JBTextField accessTokenField;
   private final JBRadioButton useGPTRadioButton;
@@ -28,6 +30,7 @@ public class SettingsComponent {
 
   public SettingsComponent(SettingsState settings) {
     apiKeyField = new JBTextField(settings.apiKey);
+    baseModelComboBox = new BaseModelComboBox(settings.baseModel);
     reverseProxyComboBox = new JComboBox<>(new String[] {
         "https://chat.duti.tech/api/conversation",
         "https://gpt.pawan.krd/backend-api/conversation"
@@ -41,16 +44,8 @@ public class SettingsComponent {
         .addComponentFillVertically(new JPanel(), 0)
         .getPanel();
 
-    if (settings.isGPTOptionSelected) {
-      reverseProxyComboBox.setEnabled(false);
-      accessTokenField.setEnabled(false);
-    } else {
-      apiKeyField.setEnabled(false);
-      reverseProxyComboBox.setEnabled(true);
-      accessTokenField.setEnabled(true);
-    }
-
     registerButtons();
+    registerFields(settings.isChatGPTOptionSelected);
   }
 
   public JPanel getPanel() {
@@ -103,6 +98,14 @@ public class SettingsComponent {
     reverseProxyComboBox.setSelectedItem(reverseProxyUrl);
   }
 
+  public BaseModel getBaseModel() {
+    return (BaseModel) baseModelComboBox.getSelectedItem();
+  }
+
+  public void setBaseModel(BaseModel baseModel) {
+    reverseProxyComboBox.setSelectedItem(baseModel);
+  }
+
   private JPanel createMainSelectionForm() {
     var panel = FormBuilder.createFormBuilder()
         .addVerticalGap(8)
@@ -121,22 +124,30 @@ public class SettingsComponent {
   }
 
   private JPanel createFirstSelectionForm() {
+    var baseModelPanel = UI.PanelFactory.panel(baseModelComboBox)
+        .withLabel("Model:")
+        .createPanel();
+    var apiKeyFieldPanel = UI.PanelFactory.panel(apiKeyField)
+        .withLabel("API key:")
+        .withComment("You can find your Secret API key in your <a href=\"https://platform.openai.com/account/api-keys\">User settings</a>.")
+        .withCommentHyperlinkListener(this::handleHyperlinkClicked)
+        .createPanel();
+
+    setEqualLabelWidths(baseModelPanel, apiKeyFieldPanel);
+
     var panel = FormBuilder.createFormBuilder()
-        .addComponent(UI.PanelFactory.panel(apiKeyField)
-            .withLabel("API key:")
-            .withComment("You can find your Secret API key in your <a href=\"https://platform.openai.com/account/api-keys\">User settings</a>.")
-            .withCommentHyperlinkListener(this::handleHyperlinkClicked)
-            .createPanel())
+        .addComponent(baseModelPanel)
+        .addVerticalGap(8)
+        .addComponent(apiKeyFieldPanel)
         .getPanel();
     panel.setBorder(JBUI.Borders.emptyLeft(24));
     return panel;
   }
 
   private JPanel createSecondSelectionForm() {
-    var reverseProxyUrlPanel = FormBuilder.createFormBuilder()
-        .addLabeledComponent("Reverse proxy url:", reverseProxyComboBox)
-        .getPanel();
-
+    var reverseProxyUrlPanel = UI.PanelFactory.panel(reverseProxyComboBox)
+        .withLabel("Reverse proxy url:")
+        .createPanel();
     var accessTokenPanel = UI.PanelFactory.panel(accessTokenField)
         .withLabel("Access token:")
         .withComment(
@@ -144,11 +155,7 @@ public class SettingsComponent {
         .withCommentHyperlinkListener(this::handleHyperlinkClicked)
         .createPanel();
 
-    var accessTokenLabel = accessTokenPanel.getComponents()[0];
-    var reverseProxyUrlLabel = reverseProxyUrlPanel.getComponents()[0];
-    if (accessTokenLabel instanceof JLabel && reverseProxyUrlLabel instanceof JLabel) {
-      accessTokenLabel.setPreferredSize(reverseProxyUrlLabel.getPreferredSize());
-    }
+    setEqualLabelWidths(accessTokenPanel, reverseProxyUrlPanel);
 
     var panel = FormBuilder.createFormBuilder()
         .addComponent(reverseProxyUrlPanel)
@@ -159,16 +166,26 @@ public class SettingsComponent {
     return panel;
   }
 
+  // TODO: Find better way of doing this
+  private void setEqualLabelWidths(JPanel firstPanel, JPanel secondPanel) {
+    var firstLabel = firstPanel.getComponents()[0];
+    var secondLabel = secondPanel.getComponents()[0];
+    if (firstLabel instanceof JLabel && secondLabel instanceof JLabel) {
+      firstLabel.setPreferredSize(secondLabel.getPreferredSize());
+    }
+  }
+
   private void registerButtons() {
     ButtonGroup myButtonGroup = new ButtonGroup();
     myButtonGroup.add(useGPTRadioButton);
     myButtonGroup.add(useChatGPTRadioButton);
-    useGPTRadioButton.addActionListener(e -> handleRadioOptionChange(false));
-    useChatGPTRadioButton.addActionListener(e -> handleRadioOptionChange(true));
+    useGPTRadioButton.addActionListener(e -> registerFields(false));
+    useChatGPTRadioButton.addActionListener(e -> registerFields(true));
   }
 
-  private void handleRadioOptionChange(boolean isUseChatGPTOption) {
+  private void registerFields(boolean isUseChatGPTOption) {
     apiKeyField.setEnabled(!isUseChatGPTOption);
+    baseModelComboBox.setEnabled(!isUseChatGPTOption);
     accessTokenField.setEnabled(isUseChatGPTOption);
     reverseProxyComboBox.setEnabled(isUseChatGPTOption);
   }

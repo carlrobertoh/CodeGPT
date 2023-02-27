@@ -1,7 +1,10 @@
 package ee.carlrobert.chatgpt.client.gpt;
 
+import static java.lang.String.format;
+
 import ee.carlrobert.chatgpt.EmptyCallback;
 import ee.carlrobert.chatgpt.client.ApiRequestDetails;
+import ee.carlrobert.chatgpt.client.BaseModel;
 import ee.carlrobert.chatgpt.client.Client;
 import ee.carlrobert.chatgpt.ide.settings.SettingsState;
 import java.net.http.HttpResponse;
@@ -32,13 +35,16 @@ public class GPTClient extends Client {
 
   protected ApiRequestDetails getRequestDetails(String prompt) {
     return new ApiRequestDetails(
-        "https://api.openai.com/v1/completions",
+        format("https://api.openai.com/v1/engines/%s/completions", SettingsState.getInstance().baseModel.getModel()),
         Map.of(
-            "model", "text-davinci-003",
-            "stop", List.of("<|im_end|>"),
+            "stop", List.of(" Human:", " AI:"),
             "prompt", buildPrompt(prompt),
             "max_tokens", 1000,
-            "temperature", 1.0,
+            "temperature", 0.9,
+            "best_of", 1,
+            "frequency_penalty", 0,
+            "presence_penalty", 0.6,
+            "top_p", 1,
             "stream", true
         ),
         SettingsState.getInstance().apiKey);
@@ -68,26 +74,32 @@ public class GPTClient extends Client {
     }
   }
 
+  private StringBuilder getBasePrompt() {
+    var isDavinciModel = SettingsState.getInstance().baseModel == BaseModel.DAVINCI;
+    if (isDavinciModel) {
+      return new StringBuilder("""
+          You are ChatGPT, a large language model trained by OpenAI.
+          Answer in a markdown language, code blocks should contain language whenever possible.
+          """);
+    }
+    return new StringBuilder(
+        "The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly.\n\n");
+  }
+
   private String buildPrompt(String prompt) {
-    var basePrompt = new StringBuilder("""
-        You are ChatGPT, a large language model trained by OpenAI.
-        One of your main goals is code generation but not only.
-        Answer in a markdown language. Markdown code blocks should contain language whenever possible.
-        """);
+    var basePrompt = getBasePrompt();
     queries.forEach(query ->
-        basePrompt.append("User:\n")
+        basePrompt.append("Human: ")
             .append(query.getKey())
-            .append("<|im_end|>\n")
             .append("\n")
-            .append("ChatGPT:\n")
+            .append("AI: ")
             .append(query.getValue())
-            .append("<|im_end|>\n")
             .append("\n"));
-    basePrompt.append("User:\n")
+    basePrompt.append("Human: ")
         .append(prompt)
-        .append("<|im_end|>\n")
         .append("\n")
-        .append("ChatGPT:\n");
+        .append("AI: ")
+        .append("\n");
     return basePrompt.toString();
   }
 }
