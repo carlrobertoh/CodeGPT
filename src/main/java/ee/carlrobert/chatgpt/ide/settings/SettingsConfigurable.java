@@ -34,6 +34,7 @@ public class SettingsConfigurable implements Configurable {
     return !settingsComponent.getApiKey().equals(settings.apiKey) ||
         !settingsComponent.getAccessToken().equals(settings.accessToken) ||
         !settingsComponent.getReverseProxyUrl().equals(settings.reverseProxyUrl) ||
+        !settingsComponent.getBaseModel().equals(settings.baseModel) ||
         settingsComponent.isGPTOptionSelected() != settings.isGPTOptionSelected ||
         settingsComponent.isChatGPTOptionSelected() != settings.isChatGPTOptionSelected;
   }
@@ -46,6 +47,7 @@ public class SettingsConfigurable implements Configurable {
     settings.accessToken = settingsComponent.getAccessToken();
     settings.apiKey = settingsComponent.getApiKey();
     settings.reverseProxyUrl = settingsComponent.getReverseProxyUrl();
+    settings.baseModel = settingsComponent.getBaseModel();
   }
 
   @Override
@@ -56,6 +58,7 @@ public class SettingsConfigurable implements Configurable {
     settingsComponent.setAccessToken(settings.accessToken);
     settingsComponent.setApiKey(settings.apiKey);
     settingsComponent.setReverseProxyUrl(settings.reverseProxyUrl);
+    settingsComponent.setBaseModel(settings.baseModel);
   }
 
   @Override
