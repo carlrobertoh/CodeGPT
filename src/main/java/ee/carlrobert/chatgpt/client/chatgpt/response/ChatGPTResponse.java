@@ -26,4 +26,8 @@ public class ChatGPTResponse implements ApiResponse {
   public void setConversationId(String conversationId) {
     this.conversationId = conversationId;
   }
+
+  public String getFullMessage() {
+    return String.join("", message.getContent().getParts());
+  }
 }

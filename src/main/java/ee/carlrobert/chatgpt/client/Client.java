@@ -2,7 +2,6 @@ package ee.carlrobert.chatgpt.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ee.carlrobert.chatgpt.EmptyCallback;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -24,12 +23,9 @@ public abstract class Client {
   protected abstract BodySubscriber<Void> subscribe(
       ResponseInfo responseInfo,
       Consumer<String> onMessageReceived,
-      EmptyCallback onComplete);
+      Runnable onComplete);
 
-  public void getCompletionsAsync(
-      String prompt,
-      Consumer<String> onMessageReceived,
-      EmptyCallback onComplete) {
+  public void getCompletionsAsync(String prompt, Consumer<String> onMessageReceived, Runnable onComplete) {
     this.userPrompt = prompt;
     this.client.sendAsync(
         buildHttpRequest(prompt),

@@ -4,7 +4,6 @@ import static ee.carlrobert.chatgpt.ide.toolwindow.ToolWindowUtil.createIconButt
 
 import com.intellij.ui.JBColor;
 import com.intellij.util.ui.JBUI;
-import ee.carlrobert.chatgpt.EmptyCallback;
 import icons.Icons;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -18,7 +17,7 @@ import javax.swing.KeyStroke;
 
 public class TextArea extends JTextArea {
 
-  public TextArea(EmptyCallback onSubmit, JScrollPane textAreaScrollPane) {
+  public TextArea(Runnable onSubmit, JScrollPane textAreaScrollPane) {
     setForeground(JBColor.GRAY);
     setMargin(JBUI.insets(5));
     addFocusListener(getFocusListener());
@@ -33,13 +32,13 @@ public class TextArea extends JTextArea {
     var actions = getActionMap();
     actions.put("text-submit", new AbstractAction() {
       public void actionPerformed(ActionEvent e) {
-        onSubmit.call();
+        onSubmit.run();
       }
     });
   }
 
-  private void addSubmitButton(EmptyCallback onSubmit, JScrollPane textAreaScrollPane) {
-    var button = createSubmitButton(e -> onSubmit.call());
+  private void addSubmitButton(Runnable onSubmit, JScrollPane textAreaScrollPane) {
+    var button = createSubmitButton(e -> onSubmit.run());
     ComponentBorder cb = new ComponentBorder(button);
     cb.setAdjustInsets(true);
     cb.install(textAreaScrollPane);

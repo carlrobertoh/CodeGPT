@@ -115,7 +115,7 @@ public class SettingsComponent {
         .addComponent(createFirstSelectionForm())
         .addVerticalGap(8)
         .addComponent(UI.PanelFactory.panel(useChatGPTRadioButton)
-            .withComment("Slow and free, more suitable for conversational tasks")
+            .withComment("Slow and free, more suitable for conversational tasks, rate-limited")
             .createPanel())
         .addComponent(createSecondSelectionForm())
         .getPanel();

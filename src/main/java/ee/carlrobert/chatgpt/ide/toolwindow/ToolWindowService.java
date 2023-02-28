@@ -12,9 +12,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
-import ee.carlrobert.chatgpt.EmptyCallback;
 import ee.carlrobert.chatgpt.client.ClientFactory;
-import ee.carlrobert.chatgpt.client.chatgpt.ChatGPTClient;
 import ee.carlrobert.chatgpt.ide.settings.SettingsConfigurable;
 import ee.carlrobert.chatgpt.ide.settings.SettingsState;
 import ee.carlrobert.chatgpt.ide.toolwindow.components.SyntaxTextArea;
@@ -35,9 +33,9 @@ import org.jetbrains.annotations.NotNull;
 
 public class ToolWindowService implements LafManagerListener {
 
-  private ScrollablePanel scrollablePanel;
-  private boolean isLandingViewVisible;
   private static final List<SyntaxTextArea> textAreas = new ArrayList<>();
+  private boolean isLandingViewVisible;
+  private ScrollablePanel scrollablePanel;
 
   public void setScrollablePanel(ScrollablePanel scrollablePanel) {
     this.scrollablePanel = scrollablePanel;
@@ -56,7 +54,7 @@ public class ToolWindowService implements LafManagerListener {
     scrollablePanel.add(createTextArea(userMessage, true));
   }
 
-  public void sendMessage(String prompt, Project project, @Nullable EmptyCallback scrollToBottom) {
+  public void sendMessage(String prompt, Project project, @Nullable Runnable scrollToBottom) {
     addSpacing(16);
     addIconLabel(Icons.DefaultImageIcon, "ChatGPT:");
     addSpacing(8);
@@ -73,16 +71,13 @@ public class ToolWindowService implements LafManagerListener {
 
       var client = new ClientFactory().getClient();
       client.getCompletionsAsync(prompt, message -> {
-        if (client instanceof ChatGPTClient) {
-          textArea.setText(message);
-        } else {
-          textArea.append(message);
-        }
+        textArea.append(message);
 
         if (scrollToBottom != null) {
-          scrollToBottom.call();
+          scrollToBottom.run();
         }
       }, () -> {
+        textArea.getCaret().setVisible(false);
         textArea.displayCopyButton();
         textArea.enableSelection();
       });

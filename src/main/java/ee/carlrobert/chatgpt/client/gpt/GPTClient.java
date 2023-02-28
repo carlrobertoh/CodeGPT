@@ -2,13 +2,12 @@ package ee.carlrobert.chatgpt.client.gpt;
 
 import static java.lang.String.format;
 
-import ee.carlrobert.chatgpt.EmptyCallback;
 import ee.carlrobert.chatgpt.client.ApiRequestDetails;
 import ee.carlrobert.chatgpt.client.BaseModel;
 import ee.carlrobert.chatgpt.client.Client;
 import ee.carlrobert.chatgpt.ide.settings.SettingsState;
-import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodySubscriber;
+import java.net.http.HttpResponse.ResponseInfo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -51,26 +50,40 @@ public class GPTClient extends Client {
   }
 
   protected BodySubscriber<Void> subscribe(
-      HttpResponse.ResponseInfo responseInfo,
+      ResponseInfo responseInfo,
       Consumer<String> onMessageReceived,
-      EmptyCallback onComplete) {
+      Runnable onComplete) {
     if (responseInfo.statusCode() == 200) {
       return new GPTBodySubscriber(
-          response -> onMessageReceived.accept(response.getChoices().get(0).getText()),
+          onMessageReceived,
           finalMsg -> {
             queries.add(Map.entry(super.userPrompt, finalMsg));
-            onComplete.call();
+            onComplete.run();
           });
-    } else if (responseInfo.statusCode() == 401) {
-      onMessageReceived.accept("Incorrect API key provided.\n" +
-          "You can find your API key at https://platform.openai.com/account/api-keys.");
-      throw new IllegalArgumentException();
-    } else if (responseInfo.statusCode() == 429) {
-      onMessageReceived.accept("You exceeded your current quota, please check your plan and billing details.");
-      throw new RuntimeException("Insufficient quota");
     } else {
-      onMessageReceived.accept("Something went wrong. Please try again later.");
-      throw new RuntimeException();
+      handleError(responseInfo, onMessageReceived, onComplete);
+      return null;
+    }
+  }
+
+  private void handleError(
+      ResponseInfo responseInfo,
+      Consumer<String> onMessageReceived,
+      Runnable onComplete) {
+    try {
+      if (responseInfo.statusCode() == 401) {
+        onMessageReceived.accept("Incorrect API key provided.\n" +
+            "You can find your API key at https://platform.openai.com/account/api-keys.");
+        throw new IllegalArgumentException();
+      } else if (responseInfo.statusCode() == 429) {
+        onMessageReceived.accept("You exceeded your current quota, please check your plan and billing details.");
+        throw new RuntimeException("Insufficient quota");
+      } else {
+        onMessageReceived.accept("Something went wrong. Please try again later.");
+        throw new RuntimeException();
+      }
+    } finally {
+      onComplete.run();
     }
   }
 

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class ChatGPTResponseMessage {
 
   private String id;
+  private ChatGPTResponseMessageAuthor author;
   private ChatGPTResponseMessageContent content;
 
   public String getId() {
@@ -14,6 +15,14 @@ public class ChatGPTResponseMessage {
 
   public void setId(String id) {
     this.id = id;
+  }
+
+  public ChatGPTResponseMessageAuthor getAuthor() {
+    return author;
+  }
+
+  public void setAuthor(ChatGPTResponseMessageAuthor author) {
+    this.author = author;
   }
 
   public ChatGPTResponseMessageContent getContent() {

@@ -1,11 +1,11 @@
 package ee.carlrobert.chatgpt.client.chatgpt;
 
-import ee.carlrobert.chatgpt.EmptyCallback;
 import ee.carlrobert.chatgpt.client.ApiRequestDetails;
 import ee.carlrobert.chatgpt.client.Client;
 import ee.carlrobert.chatgpt.client.chatgpt.response.ChatGPTResponse;
 import ee.carlrobert.chatgpt.ide.settings.SettingsState;
-import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodySubscriber;
+import java.net.http.HttpResponse.ResponseInfo;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +16,6 @@ public class ChatGPTClient extends Client {
 
   private static ChatGPTClient instance;
   private static ChatGPTResponse lastReceivedResponse;
-
 
   private ChatGPTClient() {
   }
@@ -61,24 +60,20 @@ public class ChatGPTClient extends Client {
         settings.accessToken);
   }
 
-  protected HttpResponse.BodySubscriber<Void> subscribe(
-      HttpResponse.ResponseInfo responseInfo,
+  protected BodySubscriber<Void> subscribe(
+      ResponseInfo responseInfo,
       Consumer<String> onMessageReceived,
-      EmptyCallback onComplete) {
+      Runnable onComplete) {
     if (responseInfo.statusCode() == 200) {
-      return new ChatGPTBodySubscriber((
-          response -> onMessageReceived.accept(String.join("", response.getMessage().getContent().getParts()))),
+      return new ChatGPTBodySubscriber(
+          onMessageReceived,
           response -> {
             lastReceivedResponse = response;
-            onComplete.call();
-          },
-          error -> {
-            if ("invalid_api_key".equals(error.getDetail().getCode())) {
-              onMessageReceived.accept(error.getDetail().getMessage());
-            }
+            onComplete.run();
           });
     } else {
       onMessageReceived.accept("Something went wrong. Please try again later.");
+      onComplete.run();
       throw new RuntimeException();
     }
   }
