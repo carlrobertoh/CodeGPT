@@ -4,14 +4,14 @@ plugins {
 }
 
 group = "ee.carlrobert"
-version = "1.1.3"
+version = "1.1.4"
 
 repositories {
   mavenCentral()
 }
 
 intellij {
-  version.set("2022.2")
+  version.set("2021.1")
   type.set("IC")
   plugins.set(listOf())
 }
@@ -21,13 +21,13 @@ dependencies {
 }
 
 java {
-  sourceCompatibility = JavaVersion.VERSION_17
-  targetCompatibility = JavaVersion.VERSION_17
+  sourceCompatibility = JavaVersion.VERSION_11
+  targetCompatibility = JavaVersion.VERSION_11
 }
 
 tasks {
   patchPluginXml {
-    sinceBuild.set("222.0")
+    sinceBuild.set("211")
     untilBuild.set("231.*")
   }
 

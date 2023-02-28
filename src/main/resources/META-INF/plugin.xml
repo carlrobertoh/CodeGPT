@@ -21,6 +21,7 @@
     <change-notes>
         <![CDATA[
       <ul>
+        <li><b>1.1.4</b> Downgrade to Java 11 to support older IDE builds</li>
         <li><b>1.1.3</b> Improve error handling, add block caret</li>
         <li><b>1.1.2</b> Add option to select other language models</li>
         <li><b>1.1.1</b> Remove startup notification</li>

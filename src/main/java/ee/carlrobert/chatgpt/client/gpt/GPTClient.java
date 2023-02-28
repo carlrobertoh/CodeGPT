@@ -90,10 +90,9 @@ public class GPTClient extends Client {
   private StringBuilder getBasePrompt() {
     var isDavinciModel = SettingsState.getInstance().baseModel == BaseModel.DAVINCI;
     if (isDavinciModel) {
-      return new StringBuilder("""
-          You are ChatGPT, a large language model trained by OpenAI.
-          Answer in a markdown language, code blocks should contain language whenever possible.
-          """);
+      return new StringBuilder(
+          "You are ChatGPT, a large language model trained by OpenAI.\n" +
+              "Answer in a markdown language, code blocks should contain language whenever possible.\n");
     }
     return new StringBuilder(
         "The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly.\n\n");
