@@ -77,7 +77,6 @@ public class ToolWindowService implements LafManagerListener {
           scrollToBottom.run();
         }
       }, () -> {
-        textArea.getCaret().setVisible(false);
         textArea.displayCopyButton();
         textArea.enableSelection();
       });

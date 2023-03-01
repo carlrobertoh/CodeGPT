@@ -10,19 +10,15 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.io.IOException;
 import javax.swing.JButton;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rsyntaxtextarea.Theme;
-import org.fife.ui.rtextarea.CaretStyle;
 
 public class SyntaxTextArea extends RSyntaxTextArea {
 
   public SyntaxTextArea() {
     super("");
     setStyles();
-    addDocumentListener();
   }
 
   public void displayCopyButton() {
@@ -54,8 +50,6 @@ public class SyntaxTextArea extends RSyntaxTextArea {
     setPaintTabLines(false);
     setHighlightCurrentLine(false);
     setLineWrap(true);
-    setCaretStyle(0, CaretStyle.BLOCK_STYLE);
-    getCaret().setVisible(true);
     setWrapStyleWord(true);
     setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_MARKDOWN);
     changeStyleViaThemeXml();
@@ -74,24 +68,5 @@ public class SyntaxTextArea extends RSyntaxTextArea {
       button.setIcon(Icons.DoubleTickImageIcon);
     });
     return button;
-  }
-
-  private void addDocumentListener() {
-    getDocument().addDocumentListener(new DocumentListener() {
-      @Override
-      public void insertUpdate(DocumentEvent e) {
-        setCaretPosition(getText().length());
-      }
-
-      @Override
-      public void removeUpdate(DocumentEvent e) {
-        setCaretPosition(getText().length());
-      }
-
-      @Override
-      public void changedUpdate(DocumentEvent e) {
-        setCaretPosition(getText().length());
-      }
-    });
   }
 }
