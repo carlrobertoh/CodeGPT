@@ -11,14 +11,14 @@ import java.awt.datatransfer.StringSelection;
 import java.io.IOException;
 import javax.swing.JButton;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
-import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rsyntaxtextarea.Theme;
+import org.fife.ui.rtextarea.CaretStyle;
 
 public class SyntaxTextArea extends RSyntaxTextArea {
 
-  public SyntaxTextArea() {
+  public SyntaxTextArea(boolean isReadOnly, boolean withBlockCaret, String syntax) {
     super("");
-    setStyles();
+    setStyles(isReadOnly, withBlockCaret, syntax);
   }
 
   public void displayCopyButton() {
@@ -27,9 +27,8 @@ public class SyntaxTextArea extends RSyntaxTextArea {
     cb.install(this);
   }
 
-  public void enableSelection() {
-    setEditable(false);
-    setEnabled(true);
+  public void hideCaret() {
+    getCaret().setVisible(false);
   }
 
   public void changeStyleViaThemeXml() {
@@ -43,20 +42,24 @@ public class SyntaxTextArea extends RSyntaxTextArea {
     }
   }
 
-  private void setStyles() {
+  private void setStyles(boolean isReadOnly, boolean withBlockCaret, String syntax) {
     setMargin(JBUI.insets(5));
     setAntiAliasingEnabled(true);
-    setEnabled(false);
+    setEnabled(true);
+    setEditable(!isReadOnly);
     setPaintTabLines(false);
     setHighlightCurrentLine(false);
     setLineWrap(true);
-    setWrapStyleWord(true);
-    setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_MARKDOWN);
+    if (withBlockCaret) {
+      setCaretStyle(0, CaretStyle.BLOCK_STYLE);
+      getCaret().setVisible(true);
+    }
+    setSyntaxEditingStyle(syntax);
     changeStyleViaThemeXml();
   }
 
   private void copyToClipboard() {
-    StringSelection stringSelection = new StringSelection(getText());
+    StringSelection stringSelection = new StringSelection(getText().trim());
     Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
     clipboard.setContents(stringSelection, null);
   }

@@ -1,6 +1,8 @@
 package ee.carlrobert.chatgpt.client.chatgpt;
 
+import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.chatgpt.client.Subscriber;
 import ee.carlrobert.chatgpt.client.chatgpt.response.ChatGPTResponse;
@@ -27,11 +29,11 @@ public class ChatGPTBodySubscriber extends Subscriber<ChatGPTResponse> {
   }
 
   protected void onErrorOccurred() {
-    responseConsumer.accept("Something went wrong. Please try again later.");
+    responseConsumer.accept("\nSomething went wrong. Please try again later.");
   }
 
   protected void send(String responsePayload, String token) {
-    if (!responsePayload.isEmpty()) {
+    if (!responsePayload.isEmpty() && isValidJson(responsePayload)) {
       try {
         var response = objectMapper.readValue(responsePayload, ChatGPTResponse.class);
         var author = response.getMessage().getAuthor();
@@ -47,11 +49,13 @@ public class ChatGPTBodySubscriber extends Subscriber<ChatGPTResponse> {
         throw new RuntimeException("Unable to deserialize the payload", e);
       }
     } else {
-      try {
-        var response = objectMapper.readValue(token, ChatGPTResponseDetail.class);
-        this.responseConsumer.accept(response.getDetail());
-      } catch (JsonProcessingException e) {
-        tryProcessingErrorResponse(token);
+      if (token != null && !token.isEmpty() && isValidJson(token)) {
+        try {
+          var response = objectMapper.readValue(token, ChatGPTResponseDetail.class);
+          this.responseConsumer.accept(response.getDetail());
+        } catch (JsonProcessingException e) {
+          tryProcessingErrorResponse(token);
+        }
       }
     }
   }
@@ -66,5 +70,16 @@ public class ChatGPTBodySubscriber extends Subscriber<ChatGPTResponse> {
     } catch (JsonProcessingException e) {
       future.completeExceptionally(e);
     }
+  }
+
+  private boolean isValidJson(String json) {
+    ObjectMapper mapper = new ObjectMapper()
+        .enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
+    try {
+      mapper.readTree(json);
+    } catch (JacksonException e) {
+      return false;
+    }
+    return true;
   }
 }

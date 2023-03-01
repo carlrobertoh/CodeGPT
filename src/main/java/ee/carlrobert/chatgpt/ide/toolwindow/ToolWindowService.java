@@ -29,6 +29,8 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.jetbrains.annotations.NotNull;
 
 public class ToolWindowService implements LafManagerListener {
@@ -65,20 +67,21 @@ public class ToolWindowService implements LafManagerListener {
     } else if (settings.isChatGPTOptionSelected && settings.accessToken.isEmpty()) {
       notifyMissingCredential(project, "Access token not provided.");
     } else {
-      var textArea = new SyntaxTextArea();
+      var textArea = new SyntaxTextArea(true, true, SyntaxConstants.SYNTAX_STYLE_MARKDOWN);
       scrollablePanel.add(textArea);
       textAreas.add(textArea);
 
       var client = new ClientFactory().getClient();
-      client.getCompletionsAsync(prompt, message -> {
-        textArea.append(message);
-
-        if (scrollToBottom != null) {
-          scrollToBottom.run();
-        }
-      }, () -> {
+      client.getCompletionsAsync(prompt, message -> SwingUtilities.invokeLater(
+          () -> {
+            textArea.append(message);
+            if (scrollToBottom != null) {
+              scrollToBottom.run();
+            }
+          }
+      ), () -> {
         textArea.displayCopyButton();
-        textArea.enableSelection();
+        textArea.hideCaret();
       });
     }
 

@@ -21,7 +21,7 @@
     <change-notes>
         <![CDATA[
       <ul>
-        <li><b>1.1.5</b> Disable block caret when typing</li>
+        <li><b>1.1.6</b> Ability to execute custom prompts, add block caret when typing, other improvements</li>
       </ul>
     ]]>
     </change-notes>
@@ -55,6 +55,7 @@
             class="ee.carlrobert.chatgpt.ide.action.ActionGroup"
             popup="true">
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>
+            <action id="ee.carlrobert.chatgpt.ide.action.CustomPromptAction" class="ee.carlrobert.chatgpt.ide.action.CustomPromptAction"/>
             <action id="ee.carlrobert.chatgpt.ide.action.WriteTestsAction" class="ee.carlrobert.chatgpt.ide.action.WriteTestsAction"/>
             <action id="ee.carlrobert.chatgpt.ide.action.FindBugsAction" class="ee.carlrobert.chatgpt.ide.action.FindBugsAction"/>
             <action id="ee.carlrobert.chatgpt.ide.action.RefactorAction" class="ee.carlrobert.chatgpt.ide.action.RefactorAction"/>
