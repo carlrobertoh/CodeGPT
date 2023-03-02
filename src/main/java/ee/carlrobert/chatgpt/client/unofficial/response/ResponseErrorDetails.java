@@ -1,9 +1,9 @@
-package ee.carlrobert.chatgpt.client.chatgpt.response;
+package ee.carlrobert.chatgpt.client.unofficial.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ChatGPTResponseErrorDetails {
+public class ResponseErrorDetails {
 
   private String message;
   private String type;

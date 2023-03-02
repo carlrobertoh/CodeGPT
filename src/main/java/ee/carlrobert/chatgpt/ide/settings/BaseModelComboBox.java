@@ -8,13 +8,8 @@ import javax.swing.plaf.basic.BasicComboBoxRenderer;
 
 public class BaseModelComboBox extends JComboBox<BaseModel> {
 
-  public BaseModelComboBox(BaseModel selectedModel) {
-    super(new BaseModel[] {
-        BaseModel.DAVINCI,
-        BaseModel.CURIE,
-        BaseModel.BABBAGE,
-        BaseModel.ADA,
-    });
+  public BaseModelComboBox(BaseModel[] options, BaseModel selectedModel) {
+    super(options);
     setSelectedItem(selectedModel);
     setRenderer(getBasicComboBoxRenderer());
   }

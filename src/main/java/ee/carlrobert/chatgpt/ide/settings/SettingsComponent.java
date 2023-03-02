@@ -10,6 +10,7 @@ import ee.carlrobert.chatgpt.client.BaseModel;
 import java.awt.Desktop;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
 import javax.swing.ButtonGroup;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
@@ -22,22 +23,40 @@ public class SettingsComponent {
 
   private final JPanel mainPanel;
   private final JBTextField apiKeyField;
-  private final JComboBox<BaseModel> baseModelComboBox;
+  private final JComboBox<BaseModel> chatCompletionBaseModelComboBox;
+  private final JComboBox<BaseModel> textCompletionBaseModelComboBox;
   private final JComboBox<String> reverseProxyComboBox;
   private final JBTextField accessTokenField;
   private final JBRadioButton useGPTRadioButton;
+  private final JBRadioButton useChatCompletionRadioButton;
+  private final JBRadioButton useTextCompletionRadioButton;
   private final JBRadioButton useChatGPTRadioButton;
 
   public SettingsComponent(SettingsState settings) {
     apiKeyField = new JBTextField(settings.apiKey);
-    baseModelComboBox = new BaseModelComboBox(settings.baseModel);
+    chatCompletionBaseModelComboBox = new BaseModelComboBox(
+        new BaseModel[] {
+            BaseModel.CHATGPT,
+            BaseModel.CHATGPT_SNAPSHOT,
+        },
+        settings.textCompletionBaseModel);
+    textCompletionBaseModelComboBox = new BaseModelComboBox(
+        new BaseModel[] {
+            BaseModel.DAVINCI,
+            BaseModel.CURIE,
+            BaseModel.BABBAGE,
+            BaseModel.ADA,
+        },
+        settings.textCompletionBaseModel);
     reverseProxyComboBox = new JComboBox<>(new String[] {
         "https://chat.duti.tech/api/conversation",
         "https://gpt.pawan.krd/backend-api/conversation"
     });
     accessTokenField = new JBTextField(settings.accessToken, 1);
-    useGPTRadioButton = new JBRadioButton("Use OpenAI's official GPT3 API", settings.isGPTOptionSelected);
-    useChatGPTRadioButton = new JBRadioButton("Use ChatGPT's unofficial backend API", settings.isChatGPTOptionSelected);
+    useGPTRadioButton = new JBRadioButton("Use OpenAI's official API", settings.isGPTOptionSelected);
+    useChatCompletionRadioButton = new JBRadioButton("Use chat completion", settings.isChatCompletionOptionSelected);
+    useTextCompletionRadioButton = new JBRadioButton("Use text completion", settings.isTextCompletionOptionSelected);
+    useChatGPTRadioButton = new JBRadioButton("Use ChatGPT's unofficial API", settings.isChatGPTOptionSelected);
     mainPanel = FormBuilder.createFormBuilder()
         .addComponent(new TitledSeparator("Integration Preference"))
         .addComponent(createMainSelectionForm())
@@ -82,6 +101,22 @@ public class SettingsComponent {
     useGPTRadioButton.setSelected(isSelected);
   }
 
+  public boolean isChatCompletionOptionSelected() {
+    return useChatCompletionRadioButton.isSelected();
+  }
+
+  public void setUseChatCompletionSelected(boolean isSelected) {
+    useChatCompletionRadioButton.setSelected(isSelected);
+  }
+
+  public boolean isTextCompletionOptionSelected() {
+    return useTextCompletionRadioButton.isSelected();
+  }
+
+  public void setUseTextCompletionSelected(boolean isSelected) {
+    useTextCompletionRadioButton.setSelected(isSelected);
+  }
+
   public boolean isChatGPTOptionSelected() {
     return useChatGPTRadioButton.isSelected();
   }
@@ -98,21 +133,61 @@ public class SettingsComponent {
     reverseProxyComboBox.setSelectedItem(reverseProxyUrl);
   }
 
-  public BaseModel getBaseModel() {
-    return (BaseModel) baseModelComboBox.getSelectedItem();
+  public BaseModel getTextCompletionBaseModel() {
+    return (BaseModel) textCompletionBaseModelComboBox.getSelectedItem();
   }
 
-  public void setBaseModel(BaseModel baseModel) {
-    baseModelComboBox.setSelectedItem(baseModel);
+  public void setTextCompletionBaseModel(BaseModel baseModel) {
+    textCompletionBaseModelComboBox.setSelectedItem(baseModel);
+  }
+
+  public BaseModel getChatCompletionBaseModel() {
+    return (BaseModel) chatCompletionBaseModelComboBox.getSelectedItem();
+  }
+
+  public void setChatCompletionBaseModel(BaseModel baseModel) {
+    chatCompletionBaseModelComboBox.setSelectedItem(baseModel);
   }
 
   private JPanel createMainSelectionForm() {
+    var apiKeyFieldPanel = UI.PanelFactory.panel(apiKeyField)
+        .withLabel("API key:")
+        .withComment("You can find your Secret API key in your <a href=\"https://platform.openai.com/account/api-keys\">User settings</a>.")
+        .withCommentHyperlinkListener(this::handleHyperlinkClicked)
+        .createPanel();
+    apiKeyFieldPanel.setBorder(JBUI.Borders.emptyLeft(8));
+
+    var chatCompletionModelsPanel = UI.PanelFactory.panel(chatCompletionBaseModelComboBox)
+        .withLabel("Model:")
+        .createPanel();
+    chatCompletionModelsPanel.setBorder(JBUI.Borders.emptyLeft(24));
+
+    var textCompletionModelsPanel = UI.PanelFactory.panel(textCompletionBaseModelComboBox)
+        .withLabel("Model:")
+        .createPanel();
+    textCompletionModelsPanel.setBorder(JBUI.Borders.emptyLeft(24));
+
+    var gptRadioPanel = FormBuilder.createFormBuilder()
+        .addComponent(apiKeyFieldPanel)
+        .addComponent(UI.PanelFactory.panel(useChatCompletionRadioButton)
+            .withComment("OpenAI’s most advanced language model")
+            .createPanel())
+        .addComponent(chatCompletionModelsPanel)
+        .addVerticalGap(8)
+        .addComponent(UI.PanelFactory.panel(useTextCompletionRadioButton)
+            .withComment("Best for high-quality texts")
+            .createPanel())
+        .addComponent(textCompletionModelsPanel)
+        .getPanel();
+    gptRadioPanel.setBorder(JBUI.Borders.emptyLeft(16));
+
+
     var panel = FormBuilder.createFormBuilder()
         .addVerticalGap(8)
         .addComponent(UI.PanelFactory.panel(useGPTRadioButton)
             .withComment("Fast and robust, requires API key")
             .createPanel())
-        .addComponent(createFirstSelectionForm())
+        .addComponent(gptRadioPanel)
         .addVerticalGap(8)
         .addComponent(UI.PanelFactory.panel(useChatGPTRadioButton)
             .withComment("Slow and free, more suitable for conversational tasks, rate-limited")
@@ -120,27 +195,6 @@ public class SettingsComponent {
         .addComponent(createSecondSelectionForm())
         .getPanel();
     panel.setBorder(JBUI.Borders.emptyLeft(16));
-    return panel;
-  }
-
-  private JPanel createFirstSelectionForm() {
-    var baseModelPanel = UI.PanelFactory.panel(baseModelComboBox)
-        .withLabel("Model:")
-        .createPanel();
-    var apiKeyFieldPanel = UI.PanelFactory.panel(apiKeyField)
-        .withLabel("API key:")
-        .withComment("You can find your Secret API key in your <a href=\"https://platform.openai.com/account/api-keys\">User settings</a>.")
-        .withCommentHyperlinkListener(this::handleHyperlinkClicked)
-        .createPanel();
-
-    setEqualLabelWidths(baseModelPanel, apiKeyFieldPanel);
-
-    var panel = FormBuilder.createFormBuilder()
-        .addComponent(baseModelPanel)
-        .addVerticalGap(8)
-        .addComponent(apiKeyFieldPanel)
-        .getPanel();
-    panel.setBorder(JBUI.Borders.emptyLeft(24));
     return panel;
   }
 
@@ -181,11 +235,35 @@ public class SettingsComponent {
     myButtonGroup.add(useChatGPTRadioButton);
     useGPTRadioButton.addActionListener(e -> registerFields(false));
     useChatGPTRadioButton.addActionListener(e -> registerFields(true));
+
+    ButtonGroup completionButtonGroup = new ButtonGroup();
+    completionButtonGroup.add(useChatCompletionRadioButton);
+    completionButtonGroup.add(useTextCompletionRadioButton);
+    useChatCompletionRadioButton.addActionListener(e -> {
+      chatCompletionBaseModelComboBox.setEnabled(true);
+      textCompletionBaseModelComboBox.setEnabled(false);
+    });
+    useTextCompletionRadioButton.addActionListener(e -> {
+      chatCompletionBaseModelComboBox.setEnabled(false);
+      textCompletionBaseModelComboBox.setEnabled(true);
+    });
   }
 
   private void registerFields(boolean isUseChatGPTOption) {
     apiKeyField.setEnabled(!isUseChatGPTOption);
-    baseModelComboBox.setEnabled(!isUseChatGPTOption);
+    if (isUseChatGPTOption) {
+      List.of(
+          useChatCompletionRadioButton,
+          useTextCompletionRadioButton,
+          chatCompletionBaseModelComboBox,
+          textCompletionBaseModelComboBox
+      ).forEach(it -> it.setEnabled(false));
+    } else {
+      useChatCompletionRadioButton.setEnabled(true);
+      useTextCompletionRadioButton.setEnabled(true);
+      chatCompletionBaseModelComboBox.setEnabled(useChatCompletionRadioButton.isSelected());
+      textCompletionBaseModelComboBox.setEnabled(useTextCompletionRadioButton.isSelected());
+    }
     accessTokenField.setEnabled(isUseChatGPTOption);
     reverseProxyComboBox.setEnabled(isUseChatGPTOption);
   }

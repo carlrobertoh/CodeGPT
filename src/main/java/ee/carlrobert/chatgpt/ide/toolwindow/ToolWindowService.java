@@ -44,7 +44,7 @@ public class ToolWindowService implements LafManagerListener {
   }
 
   public ToolWindow getToolWindow(@NotNull Project project) {
-    return ToolWindowManager.getInstance(project).getToolWindow("ChatGPT");
+    return ToolWindowManager.getInstance(project).getToolWindow("CodeGPT");
   }
 
   public void paintUserMessage(String userMessage) {

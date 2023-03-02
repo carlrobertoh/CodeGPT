@@ -1,18 +1,19 @@
-package ee.carlrobert.chatgpt.client.gpt;
+package ee.carlrobert.chatgpt.client.official;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import ee.carlrobert.chatgpt.client.ApiResponse;
 import ee.carlrobert.chatgpt.client.Subscriber;
-import ee.carlrobert.chatgpt.client.gpt.response.GPTResponse;
 import java.util.function.Consumer;
 
-public class GPTBodySubscriber extends Subscriber<GPTResponse> {
+public abstract class CompletionSubscriber extends Subscriber<ApiResponse> {
 
-  private final Consumer<String> onCompleteCallback;
   private final StringBuilder messageBuilder = new StringBuilder();
+  private final Consumer<String> onCompleteCallback;
   private final Consumer<String> responseConsumer;
 
-  public GPTBodySubscriber(
+  protected abstract String getMessage(String responsePayload) throws JsonProcessingException;
+
+  public CompletionSubscriber(
       Consumer<String> responseConsumer,
       Consumer<String> onCompleteCallback) {
     this.responseConsumer = responseConsumer;
@@ -30,8 +31,7 @@ public class GPTBodySubscriber extends Subscriber<GPTResponse> {
   protected void send(String responsePayload, String token) {
     try {
       if (!responsePayload.isEmpty()) {
-        var response = new ObjectMapper().readValue(responsePayload, GPTResponse.class);
-        var message = response.getChoices().get(0).getText();
+        var message = getMessage(responsePayload);
         messageBuilder.append(message);
         this.responseConsumer.accept(message);
       }

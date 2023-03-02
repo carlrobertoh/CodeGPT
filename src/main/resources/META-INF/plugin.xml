@@ -1,27 +1,99 @@
 <idea-plugin>
     <id>ee.carlrobert.chatgpt</id>
-    <name>OpenAI - ChatGPT</name>
+    <name>CodeGPT</name>
     <vendor email="carlrobertoh@gmail.com" url="https://carlrobert.ee">Carl-Robert Linnupuu</vendor>
     <description><![CDATA[
-    <p><b>ChatGPT as your copilot to level up your developer experience.</b></p>
-    <p>This is the perfect assistant for any programmer who wants to improve their coding skills and make more efficient use of the time.</p>
+    <p>
+      <b>CodeGPT as your copilot to level up your developer experience.</b>
+    </p>
+    <p>
+      This is the perfect assistant for any programmer who wants to improve their coding skills
+      and make more efficient use of the time.
+    </p>
     <br />
-    <span>Available commands</span>
+    <p>
+      <b>
+        🔥🔥🔥 The official chat completions API has been released, and it is now the default option for
+        this plugin! 🔥🔥🔥
+      </b>
+    </p>
+    <br />
+    <p>Available commands</p>
     <ul>
-        <li><b>Find bugs:</b> Analyze and find bugs in your code. Right-click on a selected block of code, run command.</li>
-        <li><b>Add tests:</b> Write tests for you. Right-click on a selected block of code, run command.</li>
-        <li><b>Refactor:</b> Refactor your code. Right-click on a selected block of code, run command.</li>
-        <li><b>Optimize:</b> Add suggestions to your code to improve. Right-click on a selected block of code, run command.</li>
-        <li><b>Explain:</b> Explain the selected code. Right-click on a selected block of code, run command.</li>
+      <li>
+        <b>Custom Prompt:</b> Prefix the selected code with a custom prompt. Right-click on a
+        selected block of code, run command.
+      </li>
+      <li>
+        <b>Find Bugs:</b> Analyze and find bugs in your code. Right-click on a selected block of
+        code, run command.
+      </li>
+      <li>
+        <b>Add Tests:</b> Write tests for you. Right-click on a selected block of code, run
+        command.
+      </li>
+      <li>
+        <b>Refactor:</b> Refactor your code. Right-click on a selected block of code, run command.
+      </li>
+      <li>
+        <b>Optimize:</b> Add suggestions to your code to improve. Right-click on a selected block
+        of code, run command.
+      </li>
+      <li>
+        <b>Explain:</b> Explain the selected code. Right-click on a selected block of code, run
+        command.
+      </li>
     </ul>
     <br />
-    <p><b>Before using the plugin, it is necessary to configure the API key in the Settings → Tools → ChatGPT</b></p>
+    <p>Available APIs:</p>
+    <ul>
+      <li>
+        <b>OpenAI's official API</b>
+        <ul>
+          <li>
+            <b>Chat completion</b>
+            <ul>
+              <li>
+                <b>ChatGPT</b> - Most recent and capable model (Default)
+              </li>
+              <li>
+                <b>ChatGPT Snapshot</b> - Snapshot version from March 1st 2023
+              </li>
+            </ul>
+          </li>
+          <li>
+            <b>Text completion</b>
+            <ul>
+              <li>
+                <b>Davinci</b> - Most powerful (Default)
+              </li>
+              <li>
+                <b>Curie</b> - Fast and efficient
+              </li>
+              <li>
+                <b>Babbage</b> - Powerful
+              </li>
+              <li>
+                <b>Ada</b> - Fastest
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <b>ChatGPT's unofficial API (free)</b>
+      </li>
+    </ul>
+    <br />
+    <p>
+      Before using the plugin, it is necessary to configure the API key in the <b>Settings → Tools → CodeGPT</b>
+    </p>
   ]]></description>
 
     <change-notes>
         <![CDATA[
       <ul>
-        <li><b>1.1.6</b> Ability to execute custom prompts, add block caret when typing, other improvements</li>
+        <li><b>1.2.0</b> Add support for the official ChatGPT API</li>
       </ul>
     ]]>
     </change-notes>
@@ -37,15 +109,11 @@
     <extensions defaultExtensionNs="com.intellij">
         <applicationConfigurable parentId="tools" instance="ee.carlrobert.chatgpt.ide.settings.SettingsConfigurable"
             id="org.intellij.sdk.settings.AppSettingsConfigurable"
-            displayName="ChatGPT"/>
+            displayName="CodeGPT"/>
         <applicationService serviceImplementation="ee.carlrobert.chatgpt.ide.settings.SettingsState"/>
         <applicationService serviceImplementation="ee.carlrobert.chatgpt.ide.toolwindow.ToolWindowService"/>
-        <toolWindow id="ChatGPT" icon="Icons.DefaultIcon" anchor="right"
+        <toolWindow id="CodeGPT" icon="Icons.DefaultIcon" anchor="right"
             factoryClass="ee.carlrobert.chatgpt.ide.toolwindow.ChatGptToolWindowFactory"/>
-
-        <notificationGroup id="ChatGPT-Empty-API-Key"
-            displayType="STICKY_BALLOON"
-            key="ee.carlrobert.chatgpt.ide.notification.key"/>
     </extensions>
 
     <resource-bundle>messages.BasicActionsBundle</resource-bundle>

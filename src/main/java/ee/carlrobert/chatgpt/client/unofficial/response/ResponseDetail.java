@@ -1,9 +1,10 @@
-package ee.carlrobert.chatgpt.client.chatgpt.response;
+package ee.carlrobert.chatgpt.client.unofficial.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ChatGPTResponseDetail {
+public class ResponseDetail {
+
   private String detail;
 
   public String getDetail() {

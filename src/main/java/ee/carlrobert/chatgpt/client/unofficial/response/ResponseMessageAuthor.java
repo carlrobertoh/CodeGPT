@@ -1,9 +1,9 @@
-package ee.carlrobert.chatgpt.client.chatgpt.response;
+package ee.carlrobert.chatgpt.client.unofficial.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ChatGPTResponseMessageAuthor {
+public class ResponseMessageAuthor {
 
   private String role;
 

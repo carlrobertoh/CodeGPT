@@ -1,10 +1,10 @@
-package ee.carlrobert.chatgpt.client.gpt.response;
+package ee.carlrobert.chatgpt.client.official.text.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GPTResponseChoice {
+public class ResponseChoice {
 
   private String text;
   @JsonProperty("finish_reason")

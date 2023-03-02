@@ -1,25 +1,25 @@
-package ee.carlrobert.chatgpt.client.chatgpt;
+package ee.carlrobert.chatgpt.client.unofficial;
 
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.chatgpt.client.Subscriber;
-import ee.carlrobert.chatgpt.client.chatgpt.response.ChatGPTResponse;
-import ee.carlrobert.chatgpt.client.chatgpt.response.ChatGPTResponseDetail;
-import ee.carlrobert.chatgpt.client.chatgpt.response.ChatGPTResponseError;
+import ee.carlrobert.chatgpt.client.unofficial.response.Response;
+import ee.carlrobert.chatgpt.client.unofficial.response.ResponseDetail;
+import ee.carlrobert.chatgpt.client.unofficial.response.ResponseError;
 import java.util.function.Consumer;
 
-public class ChatGPTBodySubscriber extends Subscriber<ChatGPTResponse> {
+public class UnofficialChatGPTSubscriber extends Subscriber<Response> {
 
   private final Consumer<String> responseConsumer;
-  private final Consumer<ChatGPTResponse> onCompleteCallback;
+  private final Consumer<Response> onCompleteCallback;
   private final ObjectMapper objectMapper = new ObjectMapper();
-  private ChatGPTResponse lastReceivedResponse;
+  private Response lastReceivedResponse;
 
-  public ChatGPTBodySubscriber(
+  public UnofficialChatGPTSubscriber(
       Consumer<String> responseConsumer,
-      Consumer<ChatGPTResponse> onCompleteCallback) {
+      Consumer<Response> onCompleteCallback) {
     this.responseConsumer = responseConsumer;
     this.onCompleteCallback = onCompleteCallback;
   }
@@ -35,7 +35,7 @@ public class ChatGPTBodySubscriber extends Subscriber<ChatGPTResponse> {
   protected void send(String responsePayload, String token) {
     if (!responsePayload.isEmpty() && isValidJson(responsePayload)) {
       try {
-        var response = objectMapper.readValue(responsePayload, ChatGPTResponse.class);
+        var response = objectMapper.readValue(responsePayload, Response.class);
         var author = response.getMessage().getAuthor();
         if (author != null && "assistant".equals(author.getRole())) {
           var message = response.getFullMessage();
@@ -51,7 +51,7 @@ public class ChatGPTBodySubscriber extends Subscriber<ChatGPTResponse> {
     } else {
       if (token != null && !token.isEmpty() && isValidJson(token)) {
         try {
-          var response = objectMapper.readValue(token, ChatGPTResponseDetail.class);
+          var response = objectMapper.readValue(token, ResponseDetail.class);
           this.responseConsumer.accept(response.getDetail());
         } catch (JsonProcessingException e) {
           tryProcessingErrorResponse(token);
@@ -62,7 +62,7 @@ public class ChatGPTBodySubscriber extends Subscriber<ChatGPTResponse> {
 
   private void tryProcessingErrorResponse(String jsonPayload) {
     try {
-      var error = objectMapper.readValue(jsonPayload, ChatGPTResponseError.class);
+      var error = objectMapper.readValue(jsonPayload, ResponseError.class);
       if ("invalid_api_key".equals(error.getDetail().getCode())) {
         responseConsumer.accept(error.getDetail().getMessage());
       }

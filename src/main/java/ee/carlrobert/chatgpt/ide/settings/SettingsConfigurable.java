@@ -12,7 +12,7 @@ public class SettingsConfigurable implements Configurable {
   @Nls(capitalization = Nls.Capitalization.Title)
   @Override
   public String getDisplayName() {
-    return "ChatGPT: Settings";
+    return "CodeGPT: Settings";
   }
 
   @Override
@@ -34,8 +34,11 @@ public class SettingsConfigurable implements Configurable {
     return !settingsComponent.getApiKey().equals(settings.apiKey) ||
         !settingsComponent.getAccessToken().equals(settings.accessToken) ||
         !settingsComponent.getReverseProxyUrl().equals(settings.reverseProxyUrl) ||
-        !settingsComponent.getBaseModel().equals(settings.baseModel) ||
+        !settingsComponent.getChatCompletionBaseModel().equals(settings.chatCompletionBaseModel) ||
+        !settingsComponent.getTextCompletionBaseModel().equals(settings.textCompletionBaseModel) ||
         settingsComponent.isGPTOptionSelected() != settings.isGPTOptionSelected ||
+        settingsComponent.isChatCompletionOptionSelected() != settings.isChatCompletionOptionSelected ||
+        settingsComponent.isTextCompletionOptionSelected() != settings.isTextCompletionOptionSelected ||
         settingsComponent.isChatGPTOptionSelected() != settings.isChatGPTOptionSelected;
   }
 
@@ -47,18 +50,24 @@ public class SettingsConfigurable implements Configurable {
     settings.accessToken = settingsComponent.getAccessToken();
     settings.apiKey = settingsComponent.getApiKey();
     settings.reverseProxyUrl = settingsComponent.getReverseProxyUrl();
-    settings.baseModel = settingsComponent.getBaseModel();
+    settings.chatCompletionBaseModel = settingsComponent.getChatCompletionBaseModel();
+    settings.isChatCompletionOptionSelected = settingsComponent.isChatCompletionOptionSelected();
+    settings.isTextCompletionOptionSelected = settingsComponent.isTextCompletionOptionSelected();
+    settings.textCompletionBaseModel = settingsComponent.getTextCompletionBaseModel();
   }
 
   @Override
   public void reset() {
     var settings = SettingsState.getInstance();
     settingsComponent.setUseGPTOptionSelected(settings.isGPTOptionSelected);
+    settingsComponent.setUseChatCompletionSelected(settings.isChatCompletionOptionSelected);
+    settingsComponent.setUseTextCompletionSelected(settings.isTextCompletionOptionSelected);
     settingsComponent.setUseChatGPTOptionSelected(settings.isChatGPTOptionSelected);
     settingsComponent.setAccessToken(settings.accessToken);
     settingsComponent.setApiKey(settings.apiKey);
     settingsComponent.setReverseProxyUrl(settings.reverseProxyUrl);
-    settingsComponent.setBaseModel(settings.baseModel);
+    settingsComponent.setChatCompletionBaseModel(settings.chatCompletionBaseModel);
+    settingsComponent.setTextCompletionBaseModel(settings.textCompletionBaseModel);
   }
 
   @Override

@@ -1,8 +1,8 @@
-package ee.carlrobert.chatgpt.client.chatgpt;
+package ee.carlrobert.chatgpt.client.unofficial;
 
 import ee.carlrobert.chatgpt.client.ApiRequestDetails;
 import ee.carlrobert.chatgpt.client.Client;
-import ee.carlrobert.chatgpt.client.chatgpt.response.ChatGPTResponse;
+import ee.carlrobert.chatgpt.client.unofficial.response.Response;
 import ee.carlrobert.chatgpt.ide.settings.SettingsState;
 import java.net.http.HttpResponse.BodySubscriber;
 import java.net.http.HttpResponse.ResponseInfo;
@@ -12,17 +12,17 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-public class ChatGPTClient extends Client {
+public class UnofficialChatGPTClient extends Client {
 
-  private static ChatGPTClient instance;
-  private static ChatGPTResponse lastReceivedResponse;
+  private static UnofficialChatGPTClient instance;
+  private static Response lastReceivedResponse;
 
-  private ChatGPTClient() {
+  private UnofficialChatGPTClient() {
   }
 
-  public static ChatGPTClient getInstance() {
+  public static UnofficialChatGPTClient getInstance() {
     if (instance == null) {
-      instance = new ChatGPTClient();
+      instance = new UnofficialChatGPTClient();
     }
     return instance;
   }
@@ -65,7 +65,7 @@ public class ChatGPTClient extends Client {
       Consumer<String> onMessageReceived,
       Runnable onComplete) {
     if (responseInfo.statusCode() == 200) {
-      return new ChatGPTBodySubscriber(
+      return new UnofficialChatGPTSubscriber(
           onMessageReceived,
           response -> {
             lastReceivedResponse = response;

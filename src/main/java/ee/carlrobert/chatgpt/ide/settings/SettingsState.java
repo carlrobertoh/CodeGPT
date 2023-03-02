@@ -11,16 +11,19 @@ import org.jetbrains.annotations.Nullable;
 
 @State(
     name = "ee.carlrobert.chatgpt.ide.settings.SettingsState",
-    storages = @Storage("SdkSettingsPlugin.xml")
+    storages = @Storage("CodeGPTSettings.xml")
 )
 public class SettingsState implements PersistentStateComponent<SettingsState> {
 
   public String apiKey = "";
   public String accessToken = "";
   public String reverseProxyUrl = "";
-  public BaseModel baseModel = BaseModel.DAVINCI;
+  public BaseModel textCompletionBaseModel = BaseModel.DAVINCI;
+  public BaseModel chatCompletionBaseModel = BaseModel.CHATGPT;
   public boolean isGPTOptionSelected = true;
   public boolean isChatGPTOptionSelected = false;
+  public boolean isChatCompletionOptionSelected = true;
+  public boolean isTextCompletionOptionSelected = false;
 
   public static SettingsState getInstance() {
     return ApplicationManager.getApplication().getService(SettingsState.class);

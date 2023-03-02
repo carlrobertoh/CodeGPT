@@ -1,14 +1,12 @@
 package ee.carlrobert.chatgpt.client;
 
-import java.util.Map;
-
 public class ApiRequestDetails {
 
   private final String url;
-  private final Map<String, Object> body;
+  private final Object body;
   private final String token;
 
-  public ApiRequestDetails(String url, Map<String, Object> body, String token) {
+  public ApiRequestDetails(String url, Object body, String token) {
     this.url = url;
     this.body = body;
     this.token = token;
@@ -18,7 +16,7 @@ public class ApiRequestDetails {
     return url;
   }
 
-  public Map<String, Object> getBody() {
+  public Object getBody() {
     return body;
   }
 
