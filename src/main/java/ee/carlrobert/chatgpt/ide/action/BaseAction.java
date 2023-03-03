@@ -3,7 +3,6 @@ package ee.carlrobert.chatgpt.ide.action;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
@@ -30,7 +29,7 @@ public abstract class BaseAction extends AnAction {
   }
 
   protected void sendMessage(Project project, String prompt) {
-    var toolWindowService = ApplicationManager.getApplication().getService(ToolWindowService.class);
+    var toolWindowService = project.getService(ToolWindowService.class);
     new ClientFactory().getClient().clearPreviousSession();
     initToolWindow(toolWindowService.getToolWindow(project));
     toolWindowService.removeAll();

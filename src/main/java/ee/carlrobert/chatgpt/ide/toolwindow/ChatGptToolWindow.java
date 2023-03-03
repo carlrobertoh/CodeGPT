@@ -1,6 +1,5 @@
 package ee.carlrobert.chatgpt.ide.toolwindow;
 
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
 import com.intellij.ui.components.JBScrollPane;
@@ -33,7 +32,7 @@ public class ChatGptToolWindow {
   }
 
   public void handleSubmit() {
-    var toolWindowService = ApplicationManager.getApplication().getService(ToolWindowService.class);
+    var toolWindowService = project.getService(ToolWindowService.class);
     var searchText = textArea.getText();
     toolWindowService.paintUserMessage(searchText);
 
@@ -92,7 +91,7 @@ public class ChatGptToolWindow {
     scrollPane.setBorder(null);
     scrollPane.setViewportBorder(null);
 
-    var toolWindowService = ApplicationManager.getApplication().getService(ToolWindowService.class);
+    var toolWindowService = project.getService(ToolWindowService.class);
     toolWindowService.setScrollablePanel(scrollablePanel);
     toolWindowService.paintLandingView();
   }

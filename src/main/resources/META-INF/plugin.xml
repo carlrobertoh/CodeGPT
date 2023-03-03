@@ -93,25 +93,25 @@
     <change-notes>
         <![CDATA[
       <ul>
-        <li><b>1.2.1</b> Remove action menu group disabling when api key missing</li>
+        <li><b>1.2.2</b> Fix ToolWindow not being registered when multiple projects open</li>
       </ul>
     ]]>
     </change-notes>
 
     <depends>com.intellij.modules.platform</depends>
 
-    <applicationListeners>
+    <projectListeners>
         <listener
             class="ee.carlrobert.chatgpt.ide.toolwindow.ToolWindowService"
             topic="com.intellij.ide.ui.LafManagerListener"/>
-    </applicationListeners>
+    </projectListeners>
 
     <extensions defaultExtensionNs="com.intellij">
         <applicationConfigurable parentId="tools" instance="ee.carlrobert.chatgpt.ide.settings.SettingsConfigurable"
             id="org.intellij.sdk.settings.AppSettingsConfigurable"
             displayName="CodeGPT"/>
         <applicationService serviceImplementation="ee.carlrobert.chatgpt.ide.settings.SettingsState"/>
-        <applicationService serviceImplementation="ee.carlrobert.chatgpt.ide.toolwindow.ToolWindowService"/>
+        <projectService serviceImplementation="ee.carlrobert.chatgpt.ide.toolwindow.ToolWindowService"/>
         <toolWindow id="CodeGPT" icon="Icons.DefaultIcon" anchor="right"
             factoryClass="ee.carlrobert.chatgpt.ide.toolwindow.ChatGptToolWindowFactory"/>
     </extensions>
