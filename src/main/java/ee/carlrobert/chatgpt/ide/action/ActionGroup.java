@@ -5,7 +5,6 @@ import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
-import ee.carlrobert.chatgpt.ide.settings.SettingsState;
 import icons.Icons;
 
 public class ActionGroup extends DefaultActionGroup {
@@ -17,8 +16,7 @@ public class ActionGroup extends DefaultActionGroup {
     Project project = event.getProject();
     boolean menuAllowed = false;
     if (editor != null && project != null) {
-      var secretKey = SettingsState.getInstance().apiKey;
-      menuAllowed = secretKey != null && !secretKey.isEmpty() && editor.getSelectionModel().getSelectedText() != null;
+      menuAllowed = editor.getSelectionModel().getSelectedText() != null;
     }
     event.getPresentation().setEnabled(menuAllowed);
   }

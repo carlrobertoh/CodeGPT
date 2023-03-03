@@ -93,7 +93,7 @@
     <change-notes>
         <![CDATA[
       <ul>
-        <li><b>1.2.0</b> Add support for the official ChatGPT API</li>
+        <li><b>1.2.1</b> Remove action menu group disabling when api key missing</li>
       </ul>
     ]]>
     </change-notes>
