@@ -1,14 +1,14 @@
 package ee.carlrobert.chatgpt.client.official.chat.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import ee.carlrobert.chatgpt.client.ApiResponse;
+import ee.carlrobert.chatgpt.client.BaseApiResponse;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Response implements ApiResponse {
+public class ApiResponse implements BaseApiResponse {
 
   private String id;
-  private List<ResponseChoice> choices;
+  private List<ApiResponseChoice> choices;
 
   public String getId() {
     return id;
@@ -18,11 +18,11 @@ public class Response implements ApiResponse {
     this.id = id;
   }
 
-  public List<ResponseChoice> getChoices() {
+  public List<ApiResponseChoice> getChoices() {
     return choices;
   }
 
-  public void setChoices(List<ResponseChoice> choices) {
+  public void setChoices(List<ApiResponseChoice> choices) {
     this.choices = choices;
   }
 }

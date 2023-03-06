@@ -1,11 +1,11 @@
 package ee.carlrobert.chatgpt.client.official.chat.request;
 
-public class RequestMessage {
+public class ApiRequestMessage {
 
   private final String role;
   private final String content;
 
-  public RequestMessage(String role, String content) {
+  public ApiRequestMessage(String role, String content) {
     this.role = role;
     this.content = content;
   }

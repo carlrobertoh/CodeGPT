@@ -3,15 +3,15 @@ package ee.carlrobert.chatgpt.client.unofficial.response;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ResponseError {
+public class ApiResponseError {
 
-  private ResponseErrorDetails detail;
+  private ApiResponseErrorDetails detail;
 
-  public ResponseErrorDetails getDetail() {
+  public ApiResponseErrorDetails getDetail() {
     return detail;
   }
 
-  public void setDetail(ResponseErrorDetails detail) {
+  public void setDetail(ApiResponseErrorDetails detail) {
     this.detail = detail;
   }
 }

@@ -1,16 +1,19 @@
 package ee.carlrobert.chatgpt.client.official.chat;
 
 import ee.carlrobert.chatgpt.client.ApiRequestDetails;
-import ee.carlrobert.chatgpt.client.official.CompletionClient;
-import ee.carlrobert.chatgpt.client.official.CompletionSubscriber;
-import ee.carlrobert.chatgpt.client.official.chat.request.Request;
-import ee.carlrobert.chatgpt.client.official.chat.request.RequestMessage;
+import ee.carlrobert.chatgpt.client.Client;
+import ee.carlrobert.chatgpt.client.official.chat.request.ApiRequest;
+import ee.carlrobert.chatgpt.client.official.chat.request.ApiRequestMessage;
 import ee.carlrobert.chatgpt.ide.settings.SettingsState;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
+import okhttp3.sse.EventSourceListener;
 
-public class ChatCompletionClient extends CompletionClient {
+public class ChatCompletionClient extends Client {
 
+  private static final List<Map.Entry<String, String>> queries = new ArrayList<>();
   private static ChatCompletionClient instance;
 
   private ChatCompletionClient() {
@@ -23,20 +26,24 @@ public class ChatCompletionClient extends CompletionClient {
     return instance;
   }
 
+  public void clearPreviousSession() {
+    queries.clear();
+  }
+
   protected ApiRequestDetails getRequestDetails(String prompt) {
-    var messages = new ArrayList<RequestMessage>();
-    messages.add(new RequestMessage(
+    var messages = new ArrayList<ApiRequestMessage>();
+    messages.add(new ApiRequestMessage(
         "system",
         "You are ChatGPT, a large language model trained by OpenAI. Answer as concisely as possible."));
     queries.forEach(query -> {
-      messages.add(new RequestMessage("user", query.getKey()));
-      messages.add(new RequestMessage("assistant", query.getValue()));
+      messages.add(new ApiRequestMessage("user", query.getKey()));
+      messages.add(new ApiRequestMessage("assistant", query.getValue()));
     });
-    messages.add(new RequestMessage("user", prompt));
+    messages.add(new ApiRequestMessage("user", prompt));
 
     return new ApiRequestDetails(
         "https://api.openai.com/v1/chat/completions",
-        new Request(
+        new ApiRequest(
             SettingsState.getInstance().chatCompletionBaseModel.getModel(),
             true,
             messages
@@ -44,9 +51,10 @@ public class ChatCompletionClient extends CompletionClient {
         SettingsState.getInstance().apiKey);
   }
 
-  protected CompletionSubscriber createSubscriber(
-      Consumer<String> responseConsumer,
-      Consumer<String> onCompleteCallback) {
-    return new ChatCompletionSubscriber(responseConsumer, onCompleteCallback);
+  protected EventSourceListener getEventSourceListener(Consumer<String> onMessageReceived, Runnable onComplete) {
+    return new ChatCompletionClientEventListener(onMessageReceived, finalMessage -> {
+      queries.add(Map.entry(prompt, finalMessage));
+      onComplete.run();
+    });
   }
 }

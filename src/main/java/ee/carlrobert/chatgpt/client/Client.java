@@ -1,48 +1,69 @@
 package ee.carlrobert.chatgpt.client;
 
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse.BodySubscriber;
-import java.net.http.HttpResponse.ResponseInfo;
+import ee.carlrobert.chatgpt.ide.settings.SettingsState;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import okhttp3.Headers;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.sse.EventSourceListener;
+import okhttp3.sse.EventSources;
 
 public abstract class Client {
 
-  private final HttpClient client =
-      HttpClient.newBuilder().version(HttpClient.Version.HTTP_2).build();
   private final ObjectMapper objectMapper = new ObjectMapper();
-  protected String userPrompt = "";
+  protected String prompt = "";
 
   protected abstract ApiRequestDetails getRequestDetails(String prompt);
 
   public abstract void clearPreviousSession();
 
-  protected abstract BodySubscriber<Void> subscribe(
-      ResponseInfo responseInfo,
-      Consumer<String> onMessageReceived,
-      Runnable onComplete);
+  protected abstract EventSourceListener getEventSourceListener(Consumer<String> onMessageReceived, Runnable onComplete);
 
   public void getCompletionsAsync(String prompt, Consumer<String> onMessageReceived, Runnable onComplete) {
-    this.userPrompt = prompt;
-    this.client.sendAsync(
-        buildHttpRequest(prompt),
-        responseInfo -> subscribe(responseInfo, onMessageReceived, onComplete));
+    this.prompt = prompt;
+    EventSources.createFactory(buildClient())
+        .newEventSource(buildHttpRequest(prompt), getEventSourceListener(onMessageReceived, onComplete));
   }
 
-  private HttpRequest buildHttpRequest(String prompt) {
+  public OkHttpClient buildClient() {
+    OkHttpClient.Builder builder = new OkHttpClient.Builder()
+        .connectTimeout(60, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS);
+
+    var settings = SettingsState.getInstance();
+    var proxyHost = settings.proxyHost;
+    var proxyPort = settings.proxyPort;
+    if (!proxyHost.isEmpty() && !proxyPort.isEmpty()) {
+      builder.proxy(new Proxy(settings.proxyType, new InetSocketAddress(proxyHost, Integer.parseInt(proxyPort))));
+    }
+
+    return builder.build();
+  }
+
+  public Request buildHttpRequest(String prompt) {
     var requestDetails = getRequestDetails(prompt);
     try {
-      return HttpRequest.newBuilder()
-          .uri(URI.create(requestDetails.getUrl()))
-          .header("Accept", "text/event-stream")
-          .header("Content-Type", "application/json")
-          .header("Authorization", "Bearer " + requestDetails.getToken())
-          .POST(HttpRequest.BodyPublishers.ofString(objectMapper
-              .writerWithDefaultPrettyPrinter()
-              .writeValueAsString(requestDetails.getBody())))
+      return new Request.Builder()
+          .url(requestDetails.getUrl())
+          .headers(Headers.of(Map.of(
+              "Accept", "text/event-stream",
+              "Content-Type", "application/json",
+              "Authorization", "Bearer " + requestDetails.getToken()
+          )))
+          .post(RequestBody.create(
+              objectMapper
+                  .writerWithDefaultPrettyPrinter()
+                  .writeValueAsString(requestDetails.getBody()),
+              MediaType.parse("application/json")))
           .build();
     } catch (JsonProcessingException e) {
       throw new RuntimeException("Unable to serialize request payload", e);

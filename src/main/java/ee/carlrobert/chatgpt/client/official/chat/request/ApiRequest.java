@@ -2,13 +2,13 @@ package ee.carlrobert.chatgpt.client.official.chat.request;
 
 import java.util.List;
 
-public class Request {
+public class ApiRequest {
 
   private final String model;
   private final boolean stream;
-  private final List<RequestMessage> messages;
+  private final List<ApiRequestMessage> messages;
 
-  public Request(String model, boolean stream, List<RequestMessage> messages) {
+  public ApiRequest(String model, boolean stream, List<ApiRequestMessage> messages) {
     this.model = model;
     this.stream = stream;
     this.messages = messages;
@@ -22,7 +22,7 @@ public class Request {
     return stream;
   }
 
-  public List<RequestMessage> getMessages() {
+  public List<ApiRequestMessage> getMessages() {
     return messages;
   }
 }

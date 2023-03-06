@@ -8,7 +8,9 @@ import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.chatgpt.client.BaseModel;
 import java.awt.Desktop;
+import java.awt.FlowLayout;
 import java.io.IOException;
+import java.net.Proxy;
 import java.net.URISyntaxException;
 import java.util.List;
 import javax.swing.ButtonGroup;
@@ -31,9 +33,12 @@ public class SettingsComponent {
   private final JBRadioButton useChatCompletionRadioButton;
   private final JBRadioButton useTextCompletionRadioButton;
   private final JBRadioButton useChatGPTRadioButton;
+  private final JComboBox proxyTypeComboBox;
+  private final JBTextField proxyHostField;
+  private final JBTextField proxyPortField;
 
   public SettingsComponent(SettingsState settings) {
-    apiKeyField = new JBTextField(settings.apiKey);
+    apiKeyField = new JBTextField(settings.apiKey, 1);
     chatCompletionBaseModelComboBox = new BaseModelComboBox(
         new BaseModel[] {
             BaseModel.CHATGPT,
@@ -52,14 +57,28 @@ public class SettingsComponent {
         "https://chat.duti.tech/api/conversation",
         "https://gpt.pawan.krd/backend-api/conversation"
     });
+    reverseProxyComboBox.setSelectedItem(settings.reverseProxyUrl);
     accessTokenField = new JBTextField(settings.accessToken, 1);
+    proxyTypeComboBox = new JComboBox<>(new Proxy.Type[] {
+        Proxy.Type.SOCKS,
+        Proxy.Type.HTTP,
+        Proxy.Type.DIRECT,
+    });
+    proxyTypeComboBox.setSelectedItem(settings.proxyType);
+    proxyHostField = new JBTextField(settings.proxyHost, 15);
+    proxyPortField = new JBTextField(settings.proxyPort, 5);
     useGPTRadioButton = new JBRadioButton("Use OpenAI's official API", settings.isGPTOptionSelected);
     useChatCompletionRadioButton = new JBRadioButton("Use chat completion", settings.isChatCompletionOptionSelected);
     useTextCompletionRadioButton = new JBRadioButton("Use text completion", settings.isTextCompletionOptionSelected);
     useChatGPTRadioButton = new JBRadioButton("Use ChatGPT's unofficial API", settings.isChatGPTOptionSelected);
     mainPanel = FormBuilder.createFormBuilder()
         .addComponent(new TitledSeparator("Integration Preference"))
+        .addVerticalGap(8)
         .addComponent(createMainSelectionForm())
+        .addVerticalGap(8)
+        .addComponent(new TitledSeparator("Advanced Settings"))
+        .addVerticalGap(8)
+        .addComponent(createAdvancedSettingsForm())
         .addComponentFillVertically(new JPanel(), 0)
         .getPanel();
 
@@ -133,6 +152,31 @@ public class SettingsComponent {
     reverseProxyComboBox.setSelectedItem(reverseProxyUrl);
   }
 
+  public String getProxyHost() {
+    return proxyHostField.getText().trim();
+  }
+
+  public void setProxyHost(String host) {
+    proxyHostField.setText(host.trim());
+  }
+
+  public String getProxyPort() {
+    return proxyPortField.getText().trim();
+  }
+
+  public void setProxyPort(String port) {
+    proxyPortField.setText(port.trim());
+  }
+
+  public Proxy.Type getProxyType() {
+    return (Proxy.Type) proxyTypeComboBox.getSelectedItem();
+  }
+
+  public void setProxyType(Proxy.Type type) {
+    proxyTypeComboBox.setSelectedItem(type);
+  }
+
+
   public BaseModel getTextCompletionBaseModel() {
     return (BaseModel) textCompletionBaseModelComboBox.getSelectedItem();
   }
@@ -183,7 +227,6 @@ public class SettingsComponent {
 
 
     var panel = FormBuilder.createFormBuilder()
-        .addVerticalGap(8)
         .addComponent(UI.PanelFactory.panel(useGPTRadioButton)
             .withComment("Fast and robust, requires API key")
             .createPanel())
@@ -218,6 +261,24 @@ public class SettingsComponent {
         .getPanel();
     panel.setBorder(JBUI.Borders.emptyLeft(24));
     return panel;
+  }
+
+  private JComponent createAdvancedSettingsForm() {
+    var proxyPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    proxyPanel.setBorder(JBUI.Borders.emptyLeft(16));
+    proxyPanel.add(UI.PanelFactory.panel(proxyHostField)
+        .withLabel("Host:")
+        .createPanel());
+    proxyPanel.add(UI.PanelFactory.panel(proxyPortField)
+        .withLabel("Port:")
+        .createPanel());
+
+    var proxyTypePanel = UI.PanelFactory.panel(proxyTypeComboBox)
+        .withLabel("Type:")
+        .createPanel();
+    proxyTypePanel.setBorder(JBUI.Borders.emptyLeft(32));
+    proxyPanel.add(proxyTypePanel);
+    return proxyPanel;
   }
 
   // TODO: Find better way of doing this

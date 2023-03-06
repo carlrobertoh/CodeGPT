@@ -93,7 +93,7 @@
     <change-notes>
         <![CDATA[
       <ul>
-        <li><b>1.2.2</b> Fix ToolWindow not being registered when multiple projects open</li>
+        <li><b>1.3.0</b> Replace underlying client logic, add proxy support</li>
       </ul>
     ]]>
     </change-notes>

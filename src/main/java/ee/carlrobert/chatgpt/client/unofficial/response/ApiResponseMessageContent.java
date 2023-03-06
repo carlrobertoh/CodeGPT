@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ResponseMessageContent {
+public class ApiResponseMessageContent {
 
   @JsonProperty("content_type")
   private String contentType;

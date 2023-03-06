@@ -3,15 +3,15 @@ package ee.carlrobert.chatgpt.client.official.chat.response;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ResponseChoice {
+public class ApiResponseChoice {
 
-  private ResponseChoiceDelta delta;
+  private ApiResponseChoiceDelta delta;
 
-  public ResponseChoiceDelta getDelta() {
+  public ApiResponseChoiceDelta getDelta() {
     return delta;
   }
 
-  public void setDelta(ResponseChoiceDelta delta) {
+  public void setDelta(ApiResponseChoiceDelta delta) {
     this.delta = delta;
   }
 }

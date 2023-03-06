@@ -2,20 +2,20 @@ package ee.carlrobert.chatgpt.client.unofficial.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import ee.carlrobert.chatgpt.client.ApiResponse;
+import ee.carlrobert.chatgpt.client.BaseApiResponse;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Response implements ApiResponse {
+public class ApiResponse implements BaseApiResponse {
 
-  private ResponseMessage message;
+  private ApiResponseMessage message;
   @JsonProperty("conversation_id")
   private String conversationId;
 
-  public ResponseMessage getMessage() {
+  public ApiResponseMessage getMessage() {
     return message;
   }
 
-  public void setMessage(ResponseMessage message) {
+  public void setMessage(ApiResponseMessage message) {
     this.message = message;
   }
 

@@ -2,20 +2,19 @@ package ee.carlrobert.chatgpt.client.unofficial;
 
 import ee.carlrobert.chatgpt.client.ApiRequestDetails;
 import ee.carlrobert.chatgpt.client.Client;
-import ee.carlrobert.chatgpt.client.unofficial.response.Response;
+import ee.carlrobert.chatgpt.client.unofficial.response.ApiResponse;
 import ee.carlrobert.chatgpt.ide.settings.SettingsState;
-import java.net.http.HttpResponse.BodySubscriber;
-import java.net.http.HttpResponse.ResponseInfo;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
+import okhttp3.sse.EventSourceListener;
 
 public class UnofficialChatGPTClient extends Client {
 
   private static UnofficialChatGPTClient instance;
-  private static Response lastReceivedResponse;
+  private static ApiResponse lastReceivedResponse;
 
   private UnofficialChatGPTClient() {
   }
@@ -29,6 +28,15 @@ public class UnofficialChatGPTClient extends Client {
 
   public void clearPreviousSession() {
     lastReceivedResponse = null;
+  }
+
+  protected EventSourceListener getEventSourceListener(Consumer<String> onMessageReceived, Runnable onComplete) {
+    return new UnofficialClientEventListener(prompt, onMessageReceived, (response) -> {
+      if (response != null) {
+        lastReceivedResponse = response;
+      }
+      onComplete.run();
+    });
   }
 
   protected ApiRequestDetails getRequestDetails(String prompt) {
@@ -54,27 +62,6 @@ public class UnofficialChatGPTClient extends Client {
       payload.put("parent_message_id", UUID.randomUUID().toString());
     }
 
-    return new ApiRequestDetails(
-        settings.reverseProxyUrl,
-        payload,
-        settings.accessToken);
-  }
-
-  protected BodySubscriber<Void> subscribe(
-      ResponseInfo responseInfo,
-      Consumer<String> onMessageReceived,
-      Runnable onComplete) {
-    if (responseInfo.statusCode() == 200) {
-      return new UnofficialChatGPTSubscriber(
-          onMessageReceived,
-          response -> {
-            lastReceivedResponse = response;
-            onComplete.run();
-          });
-    } else {
-      onMessageReceived.accept("Something went wrong. Please try again later.");
-      onComplete.run();
-      throw new RuntimeException();
-    }
+    return new ApiRequestDetails(settings.reverseProxyUrl, payload, settings.accessToken);
   }
 }

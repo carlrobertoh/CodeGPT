@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ResponseChoice {
+public class ApiResponseChoice {
 
   private String text;
   @JsonProperty("finish_reason")

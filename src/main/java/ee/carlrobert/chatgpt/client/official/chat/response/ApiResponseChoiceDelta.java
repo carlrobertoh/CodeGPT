@@ -3,7 +3,7 @@ package ee.carlrobert.chatgpt.client.official.chat.response;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ResponseChoiceDelta {
+public class ApiResponseChoiceDelta {
 
   private String role;
   private String content;

@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "ee.carlrobert"
-version = "1.2.2"
+version = "1.3.0"
 
 repositories {
   mavenCentral()
@@ -18,6 +18,8 @@ intellij {
 
 dependencies {
   implementation("com.fifesoft:rsyntaxtextarea:3.3.2")
+  implementation("com.squareup.okhttp3:okhttp:4.10.0")
+  implementation("com.squareup.okhttp3:okhttp-sse:4.10.0")
 }
 
 java {

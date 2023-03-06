@@ -3,11 +3,11 @@ package ee.carlrobert.chatgpt.client.unofficial.response;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ResponseMessage {
+public class ApiResponseMessage {
 
   private String id;
-  private ResponseMessageAuthor author;
-  private ResponseMessageContent content;
+  private ApiResponseMessageAuthor author;
+  private ApiResponseMessageContent content;
 
   public String getId() {
     return id;
@@ -17,19 +17,19 @@ public class ResponseMessage {
     this.id = id;
   }
 
-  public ResponseMessageAuthor getAuthor() {
+  public ApiResponseMessageAuthor getAuthor() {
     return author;
   }
 
-  public void setAuthor(ResponseMessageAuthor author) {
+  public void setAuthor(ApiResponseMessageAuthor author) {
     this.author = author;
   }
 
-  public ResponseMessageContent getContent() {
+  public ApiResponseMessageContent getContent() {
     return content;
   }
 
-  public void setContent(ResponseMessageContent content) {
+  public void setContent(ApiResponseMessageContent content) {
     this.content = content;
   }
 }
