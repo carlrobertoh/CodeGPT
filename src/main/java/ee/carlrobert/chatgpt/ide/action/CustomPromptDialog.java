@@ -1,5 +1,7 @@
 package ee.carlrobert.chatgpt.ide.action;
 
+import static ee.carlrobert.chatgpt.ide.toolwindow.ToolWindowUtil.addShiftEnterInputMap;
+
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.FormBuilder;
@@ -15,31 +17,40 @@ public class CustomPromptDialog extends DialogWrapper {
 
   private final String selectedText;
   private final String fileExtension;
-  private final JTextArea prefixTextArea = new JTextArea();
-  private final SyntaxTextArea syntaxTextArea = new SyntaxTextArea(false, false, SyntaxConstants.SYNTAX_STYLE_MARKDOWN);
+  private final JTextArea userPromptTextArea;
+  private final SyntaxTextArea syntaxTextArea =
+      new SyntaxTextArea(false, false, SyntaxConstants.SYNTAX_STYLE_MARKDOWN);
 
-  public CustomPromptDialog(String selectedText, String fileExtension) {
+  public CustomPromptDialog(String selectedText, String fileExtension, String previousUserPrompt) {
     super(true);
     this.selectedText = selectedText;
     this.fileExtension = fileExtension;
+    this.userPromptTextArea = new JTextArea(previousUserPrompt);
+    this.userPromptTextArea.setCaretPosition(previousUserPrompt.length());
     setTitle("Custom Prompt");
     setSize(460, 320);
     init();
   }
 
   @Nullable
+  public JComponent getPreferredFocusedComponent() {
+    return userPromptTextArea;
+  }
+
+  @Nullable
   @Override
   protected JComponent createCenterPanel() {
-    prefixTextArea.setLineWrap(true);
-    prefixTextArea.setWrapStyleWord(true);
-    prefixTextArea.setMargin(JBUI.insets(5));
+    userPromptTextArea.setLineWrap(true);
+    userPromptTextArea.setWrapStyleWord(true);
+    userPromptTextArea.setMargin(JBUI.insets(5));
+    addShiftEnterInputMap(userPromptTextArea, this::clickDefaultButton);
 
     syntaxTextArea.setText(selectedText.trim());
     // syntaxTextArea.setSyntaxEditingStyle(getSyntaxForFileExtension(fileExtension));
     syntaxTextArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVA);
 
     return FormBuilder.createFormBuilder()
-        .addComponent(UI.PanelFactory.panel(prefixTextArea)
+        .addComponent(UI.PanelFactory.panel(userPromptTextArea)
             .withLabel("Prefix:")
             .moveLabelOnTop()
             .withComment(
@@ -50,8 +61,12 @@ public class CustomPromptDialog extends DialogWrapper {
         .getPanel();
   }
 
-  public String getPrompt() {
-    return prefixTextArea.getText() + "\n\n" + syntaxTextArea.getText();
+  public String getFullPrompt() {
+    return userPromptTextArea.getText() + "\n\n" + syntaxTextArea.getText();
+  }
+
+  public String getUserPrompt() {
+    return userPromptTextArea.getText();
   }
 }
 

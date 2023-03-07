@@ -8,6 +8,8 @@ import javax.swing.ImageIcon;
 public class Icons {
 
   public static final Icon DefaultIcon = IconLoader.getIcon("/icons/chatgpt-icon.svg", Icons.class);
+  public static final Icon SquareIcon = IconLoader.getIcon("/icons/square-icon.svg", Icons.class);
+  public static final Icon RefreshIcon = IconLoader.getIcon("/icons/refresh-icon.svg", Icons.class);
   public static final ImageIcon DefaultImageIcon = getImageIcon("/icons/chatgpt-icon.png");
   public static final ImageIcon SendImageIcon = getImageIcon("/icons/send-icon.png");
   public static final ImageIcon SunImageIcon = getImageIcon("/icons/sun-icon.png");

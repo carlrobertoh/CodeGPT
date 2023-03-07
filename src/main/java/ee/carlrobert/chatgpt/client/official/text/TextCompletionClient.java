@@ -50,7 +50,7 @@ public class TextCompletionClient extends Client {
   }
 
   protected EventSourceListener getEventSourceListener(Consumer<String> onMessageReceived, Runnable onComplete) {
-    return new TextCompletionClientEventListener(onMessageReceived, (finalMessage) -> {
+    return new TextCompletionClientEventListener(client, onMessageReceived, (finalMessage) -> {
       queries.add(Map.entry(prompt, finalMessage));
       onComplete.run();
     });

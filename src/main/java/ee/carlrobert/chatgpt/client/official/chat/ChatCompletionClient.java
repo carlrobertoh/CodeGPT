@@ -52,7 +52,7 @@ public class ChatCompletionClient extends Client {
   }
 
   protected EventSourceListener getEventSourceListener(Consumer<String> onMessageReceived, Runnable onComplete) {
-    return new ChatCompletionClientEventListener(onMessageReceived, finalMessage -> {
+    return new ChatCompletionClientEventListener(client, onMessageReceived, finalMessage -> {
       queries.add(Map.entry(prompt, finalMessage));
       onComplete.run();
     });

@@ -4,12 +4,15 @@ import com.intellij.ui.JBColor;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JTextArea;
+import javax.swing.KeyStroke;
 
 public class ToolWindowUtil {
 
@@ -47,6 +50,21 @@ public class ToolWindowUtil {
     box.add(component);
     box.add(Box.createHorizontalGlue());
     return box;
+  }
+
+  public static void addShiftEnterInputMap(JTextArea textArea, Runnable onEnter) {
+    var input = textArea.getInputMap();
+    var enterStroke = KeyStroke.getKeyStroke("ENTER");
+    var shiftEnterStroke = KeyStroke.getKeyStroke("shift ENTER");
+    input.put(shiftEnterStroke, "insert-break");
+    input.put(enterStroke, "text-submit");
+
+    var actions = textArea.getActionMap();
+    actions.put("text-submit", new AbstractAction() {
+      public void actionPerformed(ActionEvent e) {
+        onEnter.run();
+      }
+    });
   }
 }
 

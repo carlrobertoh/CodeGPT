@@ -93,7 +93,10 @@
     <change-notes>
         <![CDATA[
       <ul>
-        <li><b>1.3.0</b> Replace underlying client logic, add proxy support</li>
+        <li>Add stop/re-generate response logic</li>
+        <li>Preserve previous user custom prompt</li>
+        <li>Visual improvements</li>
+        <li>Wait until message has been written to text area on the event dispatch thread (Fixes <a href="https://github.com/carlrobertoh/CodeGPT/issues/15">#15</a>)</li>
       </ul>
     ]]>
     </change-notes>

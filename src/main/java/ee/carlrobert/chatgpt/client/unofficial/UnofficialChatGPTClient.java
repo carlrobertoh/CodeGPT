@@ -31,7 +31,7 @@ public class UnofficialChatGPTClient extends Client {
   }
 
   protected EventSourceListener getEventSourceListener(Consumer<String> onMessageReceived, Runnable onComplete) {
-    return new UnofficialClientEventListener(prompt, onMessageReceived, (response) -> {
+    return new UnofficialClientEventListener(client, prompt, onMessageReceived, (response) -> {
       if (response != null) {
         lastReceivedResponse = response;
       }

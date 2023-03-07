@@ -3,6 +3,7 @@ package ee.carlrobert.chatgpt.ide.toolwindow;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
 import com.intellij.ui.components.JBScrollPane;
+import ee.carlrobert.chatgpt.ide.toolwindow.components.GenerateButton;
 import ee.carlrobert.chatgpt.ide.toolwindow.components.TextArea;
 import java.awt.Adjustable;
 import java.awt.Dimension;
@@ -12,6 +13,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
@@ -26,6 +28,7 @@ public class ChatGptToolWindow {
   private JScrollPane scrollPane;
   private JTextArea textArea;
   private JScrollPane textAreaScrollPane;
+  private JButton generateButton;
 
   public ChatGptToolWindow(@NotNull Project project) {
     this.project = project;
@@ -91,7 +94,10 @@ public class ChatGptToolWindow {
     scrollPane.setBorder(null);
     scrollPane.setViewportBorder(null);
 
+    generateButton = new GenerateButton();
+
     var toolWindowService = project.getService(ToolWindowService.class);
+    toolWindowService.setGenerateButton((GenerateButton) generateButton); // TODO: Remove casting
     toolWindowService.setScrollablePanel(scrollablePanel);
     toolWindowService.paintLandingView();
   }

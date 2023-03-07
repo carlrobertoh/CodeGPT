@@ -34,7 +34,7 @@ public class SettingsConfigurable implements Configurable {
     return !settingsComponent.getApiKey().equals(settings.apiKey) ||
         !settingsComponent.getAccessToken().equals(settings.accessToken) ||
         !settingsComponent.getProxyHost().equals(settings.proxyHost) ||
-        !settingsComponent.getProxyPort().equals(settings.proxyPort) ||
+        settingsComponent.getProxyPort() != settings.proxyPort ||
         !settingsComponent.getProxyType().equals(settings.proxyType) ||
         !settingsComponent.getReverseProxyUrl().equals(settings.reverseProxyUrl) ||
         !settingsComponent.getChatCompletionBaseModel().equals(settings.chatCompletionBaseModel) ||

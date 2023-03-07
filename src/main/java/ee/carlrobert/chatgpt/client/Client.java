@@ -14,13 +14,16 @@ import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
+import okhttp3.sse.EventSource;
 import okhttp3.sse.EventSourceListener;
 import okhttp3.sse.EventSources;
 
 public abstract class Client {
 
   private final ObjectMapper objectMapper = new ObjectMapper();
+  private EventSource eventSource;
   protected String prompt = "";
+  protected OkHttpClient client;
 
   protected abstract ApiRequestDetails getRequestDetails(String prompt);
 
@@ -30,7 +33,8 @@ public abstract class Client {
 
   public void getCompletionsAsync(String prompt, Consumer<String> onMessageReceived, Runnable onComplete) {
     this.prompt = prompt;
-    EventSources.createFactory(buildClient())
+    this.client = buildClient();
+    this.eventSource = EventSources.createFactory(client)
         .newEventSource(buildHttpRequest(prompt), getEventSourceListener(onMessageReceived, onComplete));
   }
 
@@ -42,11 +46,15 @@ public abstract class Client {
     var settings = SettingsState.getInstance();
     var proxyHost = settings.proxyHost;
     var proxyPort = settings.proxyPort;
-    if (!proxyHost.isEmpty() && !proxyPort.isEmpty()) {
-      builder.proxy(new Proxy(settings.proxyType, new InetSocketAddress(proxyHost, Integer.parseInt(proxyPort))));
+    if (!proxyHost.isEmpty() && proxyPort != 0) {
+      builder.proxy(new Proxy(settings.proxyType, new InetSocketAddress(proxyHost, proxyPort)));
     }
 
     return builder.build();
+  }
+
+  public void cancelRequest() {
+    eventSource.cancel();
   }
 
   public Request buildHttpRequest(String prompt) {

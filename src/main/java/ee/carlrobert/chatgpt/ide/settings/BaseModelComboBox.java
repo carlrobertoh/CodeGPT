@@ -1,12 +1,12 @@
 package ee.carlrobert.chatgpt.ide.settings;
 
+import com.intellij.openapi.ui.ComboBox;
 import ee.carlrobert.chatgpt.client.BaseModel;
 import java.awt.Component;
-import javax.swing.JComboBox;
 import javax.swing.JList;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
 
-public class BaseModelComboBox extends JComboBox<BaseModel> {
+public class BaseModelComboBox extends ComboBox<BaseModel> {
 
   public BaseModelComboBox(BaseModel[] options, BaseModel selectedModel) {
     super(options);

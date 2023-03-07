@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
+import okhttp3.Call;
+import okhttp3.OkHttpClient;
 import okhttp3.Response;
 import okhttp3.sse.EventSource;
 import okhttp3.sse.EventSourceListener;
@@ -14,11 +16,13 @@ public abstract class CompletionClientEventListener extends EventSourceListener 
 
   private static final String DEFAULT_ERROR_MSG = "Something went wrong. Please try again later.";
 
+  private final OkHttpClient client;
   private final Consumer<String> onMessageReceived;
   private final Consumer<String> onComplete;
   private final StringBuilder messageBuilder = new StringBuilder();
 
-  public CompletionClientEventListener(Consumer<String> onMessageReceived, Consumer<String> onComplete) {
+  public CompletionClientEventListener(OkHttpClient client, Consumer<String> onMessageReceived, Consumer<String> onComplete) {
+    this.client = client;
     this.onMessageReceived = onMessageReceived;
     this.onComplete = onComplete;
   }
@@ -54,13 +58,17 @@ public abstract class CompletionClientEventListener extends EventSourceListener 
       @NotNull EventSource eventSource,
       @Nullable Throwable ex,
       @Nullable Response response) {
-    if (response == null) {
-      onMessageReceived.accept(DEFAULT_ERROR_MSG);
+    if (isRequestCancelled()) {
       onComplete.accept(messageBuilder.toString());
       return;
     }
 
     try {
+      if (response == null) {
+        onMessageReceived.accept(DEFAULT_ERROR_MSG);
+        return;
+      }
+
       var body = response.body();
       if (body != null) {
         var error = new ObjectMapper().readValue(body.string(), ApiResponseError.class);
@@ -71,5 +79,9 @@ public abstract class CompletionClientEventListener extends EventSourceListener 
     } finally {
       onComplete.accept(messageBuilder.toString());
     }
+  }
+
+  private boolean isRequestCancelled() {
+    return client.dispatcher().runningCalls().stream().anyMatch(Call::isCanceled);
   }
 }

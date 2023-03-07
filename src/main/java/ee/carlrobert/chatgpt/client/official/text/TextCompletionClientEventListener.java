@@ -5,11 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.chatgpt.client.official.CompletionClientEventListener;
 import ee.carlrobert.chatgpt.client.official.text.response.ApiResponse;
 import java.util.function.Consumer;
+import okhttp3.OkHttpClient;
 
 public class TextCompletionClientEventListener extends CompletionClientEventListener {
 
-  public TextCompletionClientEventListener(Consumer<String> onMessageReceived, Consumer<String> onComplete) {
-    super(onMessageReceived, onComplete);
+  public TextCompletionClientEventListener(OkHttpClient client, Consumer<String> onMessageReceived, Consumer<String> onComplete) {
+    super(client, onMessageReceived, onComplete);
   }
 
   protected String getMessage(String data) throws JsonProcessingException {

@@ -1,5 +1,7 @@
 package ee.carlrobert.chatgpt.ide.settings;
 
+import com.intellij.openapi.ui.ComboBox;
+import com.intellij.ui.PortField;
 import com.intellij.ui.TitledSeparator;
 import com.intellij.ui.components.JBRadioButton;
 import com.intellij.ui.components.JBTextField;
@@ -8,13 +10,12 @@ import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.chatgpt.client.BaseModel;
 import java.awt.Desktop;
-import java.awt.FlowLayout;
 import java.io.IOException;
 import java.net.Proxy;
 import java.net.URISyntaxException;
 import java.util.List;
+import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
-import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -25,17 +26,17 @@ public class SettingsComponent {
 
   private final JPanel mainPanel;
   private final JBTextField apiKeyField;
-  private final JComboBox<BaseModel> chatCompletionBaseModelComboBox;
-  private final JComboBox<BaseModel> textCompletionBaseModelComboBox;
-  private final JComboBox<String> reverseProxyComboBox;
+  private final ComboBox<BaseModel> chatCompletionBaseModelComboBox;
+  private final ComboBox<BaseModel> textCompletionBaseModelComboBox;
+  private final ComboBox<String> reverseProxyComboBox;
   private final JBTextField accessTokenField;
   private final JBRadioButton useGPTRadioButton;
   private final JBRadioButton useChatCompletionRadioButton;
   private final JBRadioButton useTextCompletionRadioButton;
   private final JBRadioButton useChatGPTRadioButton;
-  private final JComboBox proxyTypeComboBox;
+  private final ComboBox<Proxy.Type> proxyTypeComboBox;
   private final JBTextField proxyHostField;
-  private final JBTextField proxyPortField;
+  private final PortField proxyPortField;
 
   public SettingsComponent(SettingsState settings) {
     apiKeyField = new JBTextField(settings.apiKey, 1);
@@ -53,32 +54,32 @@ public class SettingsComponent {
             BaseModel.ADA,
         },
         settings.textCompletionBaseModel);
-    reverseProxyComboBox = new JComboBox<>(new String[] {
+    proxyPortField = new PortField();
+    reverseProxyComboBox = new ComboBox<>(new String[] {
         "https://chat.duti.tech/api/conversation",
         "https://gpt.pawan.krd/backend-api/conversation"
-    });
+    }, 400);
     reverseProxyComboBox.setSelectedItem(settings.reverseProxyUrl);
     accessTokenField = new JBTextField(settings.accessToken, 1);
-    proxyTypeComboBox = new JComboBox<>(new Proxy.Type[] {
+    proxyTypeComboBox = new ComboBox<>(new Proxy.Type[] {
         Proxy.Type.SOCKS,
         Proxy.Type.HTTP,
         Proxy.Type.DIRECT,
     });
     proxyTypeComboBox.setSelectedItem(settings.proxyType);
-    proxyHostField = new JBTextField(settings.proxyHost, 15);
-    proxyPortField = new JBTextField(settings.proxyPort, 5);
-    useGPTRadioButton = new JBRadioButton("Use OpenAI's official API", settings.isGPTOptionSelected);
+    proxyHostField = new JBTextField(settings.proxyHost, 20);
+    useGPTRadioButton = new JBRadioButton("Use OpenAI's official API (recommended)", settings.isGPTOptionSelected);
     useChatCompletionRadioButton = new JBRadioButton("Use chat completion", settings.isChatCompletionOptionSelected);
     useTextCompletionRadioButton = new JBRadioButton("Use text completion", settings.isTextCompletionOptionSelected);
-    useChatGPTRadioButton = new JBRadioButton("Use ChatGPT's unofficial API", settings.isChatGPTOptionSelected);
+    useChatGPTRadioButton = new JBRadioButton("Use ChatGPT's unofficial API (unstable)", settings.isChatGPTOptionSelected);
     mainPanel = FormBuilder.createFormBuilder()
         .addComponent(new TitledSeparator("Integration Preference"))
         .addVerticalGap(8)
         .addComponent(createMainSelectionForm())
         .addVerticalGap(8)
-        .addComponent(new TitledSeparator("Advanced Settings"))
+        .addComponent(new TitledSeparator("HTTP/SOCKS Proxy"))
         .addVerticalGap(8)
-        .addComponent(createAdvancedSettingsForm())
+        .addComponent(createProxySettingsForm())
         .addComponentFillVertically(new JPanel(), 0)
         .getPanel();
 
@@ -160,12 +161,12 @@ public class SettingsComponent {
     proxyHostField.setText(host.trim());
   }
 
-  public String getProxyPort() {
-    return proxyPortField.getText().trim();
+  public int getProxyPort() {
+    return proxyPortField.getNumber();
   }
 
-  public void setProxyPort(String port) {
-    proxyPortField.setText(port.trim());
+  public void setProxyPort(int port) {
+    proxyPortField.setNumber(port);
   }
 
   public Proxy.Type getProxyType() {
@@ -201,14 +202,10 @@ public class SettingsComponent {
         .createPanel();
     apiKeyFieldPanel.setBorder(JBUI.Borders.emptyLeft(8));
 
-    var chatCompletionModelsPanel = UI.PanelFactory.panel(chatCompletionBaseModelComboBox)
-        .withLabel("Model:")
-        .createPanel();
+    var chatCompletionModelsPanel = createPanel(chatCompletionBaseModelComboBox, "Model:", false);
     chatCompletionModelsPanel.setBorder(JBUI.Borders.emptyLeft(24));
 
-    var textCompletionModelsPanel = UI.PanelFactory.panel(textCompletionBaseModelComboBox)
-        .withLabel("Model:")
-        .createPanel();
+    var textCompletionModelsPanel = createPanel(textCompletionBaseModelComboBox, "Model:", false);
     textCompletionModelsPanel.setBorder(JBUI.Borders.emptyLeft(24));
 
     var gptRadioPanel = FormBuilder.createFormBuilder()
@@ -242,13 +239,11 @@ public class SettingsComponent {
   }
 
   private JPanel createSecondSelectionForm() {
-    var reverseProxyUrlPanel = UI.PanelFactory.panel(reverseProxyComboBox)
-        .withLabel("Reverse proxy url:")
-        .createPanel();
+    var reverseProxyUrlPanel = createPanel(reverseProxyComboBox, "Reverse proxy url:", false);
     var accessTokenPanel = UI.PanelFactory.panel(accessTokenField)
         .withLabel("Access token:")
         .withComment(
-            "Access token can be obtained from <a href=\"https://chat.openai.com/api/auth/session\">https://chat.openai.com/api/auth/session</a> and is valid for ~8h.")
+            "Access token can be obtained from <a href=\"https://chat.openai.com/api/auth/session\">https://chat.openai.com/api/auth/session</a>.")
         .withCommentHyperlinkListener(this::handleHyperlinkClicked)
         .createPanel();
 
@@ -263,21 +258,20 @@ public class SettingsComponent {
     return panel;
   }
 
-  private JComponent createAdvancedSettingsForm() {
-    var proxyPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+  private JComponent createProxySettingsForm() {
+    var proxyPanel = new JPanel();
     proxyPanel.setBorder(JBUI.Borders.emptyLeft(16));
-    proxyPanel.add(UI.PanelFactory.panel(proxyHostField)
-        .withLabel("Host:")
-        .createPanel());
-    proxyPanel.add(UI.PanelFactory.panel(proxyPortField)
-        .withLabel("Port:")
-        .createPanel());
+    proxyPanel.setLayout(new BoxLayout(proxyPanel, BoxLayout.PAGE_AXIS));
 
-    var proxyTypePanel = UI.PanelFactory.panel(proxyTypeComboBox)
-        .withLabel("Type:")
-        .createPanel();
-    proxyTypePanel.setBorder(JBUI.Borders.emptyLeft(32));
+    var proxyTypePanel = createPanel(proxyTypeComboBox, "Proxy:", false);
+    var proxyHostPanel = createPanel(proxyHostField, "Host name:", false);
+    var proxyPortPanel = createPanel(proxyPortField, "Port:", false);
+    setEqualLabelWidths(proxyTypePanel, proxyHostPanel);
+    setEqualLabelWidths(proxyPortPanel, proxyHostPanel);
+
     proxyPanel.add(proxyTypePanel);
+    proxyPanel.add(proxyHostPanel);
+    proxyPanel.add(proxyPortPanel);
     return proxyPanel;
   }
 
@@ -327,6 +321,18 @@ public class SettingsComponent {
     }
     accessTokenField.setEnabled(isUseChatGPTOption);
     reverseProxyComboBox.setEnabled(isUseChatGPTOption);
+  }
+
+
+  private JPanel createPanel(JComponent component, String label) {
+    return createPanel(component, label, true);
+  }
+
+  private JPanel createPanel(JComponent component, String label, boolean resizeX) {
+    return UI.PanelFactory.panel(component)
+        .withLabel(label)
+        .resizeX(resizeX)
+        .createPanel();
   }
 
   private void handleHyperlinkClicked(HyperlinkEvent event) {

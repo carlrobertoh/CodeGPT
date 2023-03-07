@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
+import okhttp3.Call;
+import okhttp3.OkHttpClient;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import okhttp3.sse.EventSource;
@@ -24,8 +26,10 @@ public class UnofficialClientEventListener extends EventSourceListener {
   private final Consumer<ApiResponse> onComplete;
   private ApiResponse lastReceivedResponse;
   private boolean eventReceived = false;
+  private final OkHttpClient client;
 
-  public UnofficialClientEventListener(String prompt, Consumer<String> onMessageReceived, Consumer<ApiResponse> onComplete) {
+  public UnofficialClientEventListener(OkHttpClient client, String prompt, Consumer<String> onMessageReceived, Consumer<ApiResponse> onComplete) {
+    this.client = client;
     this.prompt = prompt;
     this.onMessageReceived = onMessageReceived;
     this.onComplete = onComplete;
@@ -88,8 +92,14 @@ public class UnofficialClientEventListener extends EventSourceListener {
       @NotNull EventSource eventSource,
       @Nullable Throwable ex,
       @Nullable Response response) {
-    onMessageReceived.accept("Something went wrong.");
+    if (isRequestNotCancelled()) {
+      onMessageReceived.accept("Something went wrong. Please try again later. ");
+    }
     onComplete.accept(null);
+  }
+
+  private boolean isRequestNotCancelled() {
+    return client.dispatcher().runningCalls().stream().noneMatch(Call::isCanceled);
   }
 
   private Optional<String> tryExtractingErrorMessage(String jsonPayload) {

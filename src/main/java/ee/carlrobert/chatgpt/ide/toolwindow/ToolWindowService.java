@@ -15,12 +15,15 @@ import com.intellij.openapi.wm.ToolWindowManager;
 import ee.carlrobert.chatgpt.client.ClientFactory;
 import ee.carlrobert.chatgpt.ide.settings.SettingsConfigurable;
 import ee.carlrobert.chatgpt.ide.settings.SettingsState;
+import ee.carlrobert.chatgpt.ide.toolwindow.components.GenerateButton;
+import ee.carlrobert.chatgpt.ide.toolwindow.components.GenerateButton.Mode;
 import ee.carlrobert.chatgpt.ide.toolwindow.components.SyntaxTextArea;
 import icons.Icons;
 import java.awt.Cursor;
 import java.awt.GridBagLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -38,9 +41,14 @@ public class ToolWindowService implements LafManagerListener {
   private static final List<SyntaxTextArea> textAreas = new ArrayList<>();
   private boolean isLandingViewVisible;
   private ScrollablePanel scrollablePanel;
+  private GenerateButton generateButton;
 
   public void setScrollablePanel(ScrollablePanel scrollablePanel) {
     this.scrollablePanel = scrollablePanel;
+  }
+
+  public void setGenerateButton(GenerateButton generateButton) {
+    this.generateButton = generateButton;
   }
 
   public ToolWindow getToolWindow(@NotNull Project project) {
@@ -51,13 +59,14 @@ public class ToolWindowService implements LafManagerListener {
     if (isLandingViewVisible) {
       removeAll();
     }
+    addSpacing(8);
     addIconLabel(Icons.UserImageIcon, "User:");
     addSpacing(8);
     scrollablePanel.add(createTextArea(userMessage, true));
   }
 
   public void sendMessage(String prompt, Project project, @Nullable Runnable scrollToBottom) {
-    addSpacing(16);
+    addSpacing(8);
     addIconLabel(Icons.DefaultImageIcon, "ChatGPT:");
     addSpacing(8);
 
@@ -72,20 +81,35 @@ public class ToolWindowService implements LafManagerListener {
       textAreas.add(textArea);
 
       var client = new ClientFactory().getClient();
-      client.getCompletionsAsync(prompt, message -> SwingUtilities.invokeLater(
-          () -> {
-            textArea.append(message);
-            if (scrollToBottom != null) {
-              scrollToBottom.run();
-            }
+      generateButton.setVisible(true);
+      generateButton.setMode(Mode.STOP, client::cancelRequest);
+      client.getCompletionsAsync(prompt, message -> {
+        try {
+          SwingUtilities.invokeAndWait(
+              () -> {
+                textArea.append(message);
+                if (scrollToBottom != null) {
+                  scrollToBottom.run();
+                }
+              }
+          );
+        } catch (InterruptedException | InvocationTargetException e) {
+          throw new RuntimeException(e);
+        }
+      }, () -> {
+        generateButton.setMode(Mode.REFRESH, () -> {
+          sendMessage(prompt, project, scrollToBottom);
+          if (scrollToBottom != null) {
+            scrollToBottom.run();
           }
-      ), () -> {
+        });
         textArea.displayCopyButton();
         textArea.hideCaret();
+        if (scrollToBottom != null) {
+          scrollToBottom.run();
+        }
       });
     }
-
-    addSpacing(16);
   }
 
   public void paintLandingView() {
@@ -117,6 +141,7 @@ public class ToolWindowService implements LafManagerListener {
 
   public void removeAll() {
     isLandingViewVisible = false;
+    generateButton.setVisible(false);
     scrollablePanel.removeAll();
   }
 

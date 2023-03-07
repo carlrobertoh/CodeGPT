@@ -26,7 +26,7 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
   public boolean isChatCompletionOptionSelected = true;
   public boolean isTextCompletionOptionSelected = false;
   public String proxyHost = "";
-  public String proxyPort = "";
+  public int proxyPort;
   public Proxy.Type proxyType = Proxy.Type.SOCKS;
 
   public static SettingsState getInstance() {

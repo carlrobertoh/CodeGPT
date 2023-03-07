@@ -10,6 +10,8 @@ import javax.swing.SwingUtilities;
 
 public class CustomPromptAction extends BaseAction {
 
+  private static String previousUserPrompt = "";
+
   protected void initToolWindow(ToolWindow toolWindow) {
     toolWindow.setTitle("Custom Prompt");
     toolWindow.show();
@@ -18,9 +20,10 @@ public class CustomPromptAction extends BaseAction {
   protected void actionPerformed(Project project, Editor editor, String selectedText) {
     if (selectedText != null && !selectedText.isEmpty()) {
       var fileExtension = getFileExtension(((EditorImpl) editor).getVirtualFile().getName());
-      var dialog = new CustomPromptDialog(selectedText, fileExtension);
+      var dialog = new CustomPromptDialog(selectedText, fileExtension, previousUserPrompt);
       if (dialog.showAndGet()) {
-        SwingUtilities.invokeLater(() -> sendMessage(project, dialog.getPrompt()));
+        previousUserPrompt = dialog.getUserPrompt();
+        SwingUtilities.invokeLater(() -> sendMessage(project, dialog.getFullPrompt()));
       }
     }
   }
