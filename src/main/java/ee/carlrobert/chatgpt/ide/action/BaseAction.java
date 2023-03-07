@@ -24,8 +24,14 @@ public abstract class BaseAction extends AnAction {
     }
   }
 
-  public void update(AnActionEvent e) {
-    e.getPresentation().setEnabledAndVisible(e.getProject() != null);
+  public void update(AnActionEvent event) {
+    Project project = event.getProject();
+    Editor editor = event.getData(PlatformDataKeys.EDITOR);
+    boolean menuAllowed = false;
+    if (editor != null && project != null) {
+      menuAllowed = editor.getSelectionModel().getSelectedText() != null;
+    }
+    event.getPresentation().setEnabled(menuAllowed);
   }
 
   protected void sendMessage(Project project, String prompt) {

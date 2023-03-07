@@ -123,25 +123,31 @@
 
     <actions>
         <group id="CodeGPTEditorPopup">
-            <action
-                id="ee.carlrobert.chatgpt.ide.action.AskAction"
-                class="ee.carlrobert.chatgpt.ide.action.AskAction"
-                text="Ask ChatGPT"
-                description="TBD"
-                icon="Icons.DefaultIcon">
-            </action>
-            <group id="ee.carlrobert.chatgpt.ide.action.ActionGroup"
+            <group id="ActionGroup"
                 class="ee.carlrobert.chatgpt.ide.action.ActionGroup"
                 popup="true">
-                <action id="ee.carlrobert.chatgpt.ide.action.CustomPromptAction" class="ee.carlrobert.chatgpt.ide.action.CustomPromptAction"/>
-                <action id="ee.carlrobert.chatgpt.ide.action.WriteTestsAction" class="ee.carlrobert.chatgpt.ide.action.WriteTestsAction"/>
-                <action id="ee.carlrobert.chatgpt.ide.action.FindBugsAction" class="ee.carlrobert.chatgpt.ide.action.FindBugsAction"/>
-                <action id="ee.carlrobert.chatgpt.ide.action.RefactorAction" class="ee.carlrobert.chatgpt.ide.action.RefactorAction"/>
-                <action id="ee.carlrobert.chatgpt.ide.action.OptimizeAction" class="ee.carlrobert.chatgpt.ide.action.OptimizeAction"/>
-                <action id="ee.carlrobert.chatgpt.ide.action.ExplainAction" class="ee.carlrobert.chatgpt.ide.action.ExplainAction"/>
+                <action id="AskAction"
+                    class="ee.carlrobert.chatgpt.ide.action.AskAction"
+                    icon="Icons.QuestionMarkIcon">
+                </action>
+                <separator/>
+                <action id="CustomPromptAction"
+                    class="ee.carlrobert.chatgpt.ide.action.CustomPromptAction"
+                    icon="Icons.CommandIcon"/>
+                <separator/>
+                <action id="WriteTestsAction"
+                    class="ee.carlrobert.chatgpt.ide.action.WriteTestsAction"/>
+                <action id="FindBugsAction"
+                    class="ee.carlrobert.chatgpt.ide.action.FindBugsAction"/>
+                <action id="RefactorAction"
+                    class="ee.carlrobert.chatgpt.ide.action.RefactorAction"/>
+                <action id="OptimizeAction"
+                    class="ee.carlrobert.chatgpt.ide.action.OptimizeAction"/>
+                <action id="ExplainAction"
+                    class="ee.carlrobert.chatgpt.ide.action.ExplainAction"/>
             </group>
-            <separator/>
             <add-to-group group-id="EditorPopupMenu1" anchor="first"/>
+            <separator/>
         </group>
     </actions>
 </idea-plugin>

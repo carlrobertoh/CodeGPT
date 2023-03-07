@@ -16,6 +16,7 @@ import javax.swing.JTextArea;
 public class TextArea extends JTextArea {
 
   public TextArea(Runnable onSubmit, JScrollPane textAreaScrollPane) {
+    super("Ask me anything...");
     setForeground(JBColor.GRAY);
     setMargin(JBUI.insets(5));
     addFocusListener(getFocusListener());
@@ -40,7 +41,7 @@ public class TextArea extends JTextArea {
     return new FocusListener() {
       @Override
       public void focusGained(FocusEvent e) {
-        if (getText().equals("Ask a question...")) {
+        if (getText().equals("Ask me anything...")) {
           setText("");
           setForeground(JBColor.BLACK);
         }
@@ -50,7 +51,7 @@ public class TextArea extends JTextArea {
       public void focusLost(FocusEvent e) {
         if (getText().isEmpty()) {
           setForeground(JBColor.GRAY);
-          setText("Ask a question...");
+          setText("Ask me anything...");
         }
       }
     };
