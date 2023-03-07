@@ -83,7 +83,7 @@ public class ChatGptToolWindow {
     textAreaScrollPane.setViewportView(textArea);
 
     textArea = new TextArea(this::handleSubmit, textAreaScrollPane);
-    textArea.setText("Ask a question...");
+    textArea.setText("Ask me anything...");
 
     ScrollablePanel scrollablePanel = new ScrollablePanel();
     scrollablePanel.setLayout(new BoxLayout(scrollablePanel, BoxLayout.Y_AXIS));
