@@ -4,6 +4,7 @@ package ee.carlrobert.chatgpt.client;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.chatgpt.ide.conversations.Conversation;
+import ee.carlrobert.chatgpt.ide.conversations.ConversationsState;
 import ee.carlrobert.chatgpt.ide.settings.SettingsState;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -40,12 +41,15 @@ public abstract class Client {
       Consumer<String> onFailure);
 
   public void getCompletionsAsync(
-      Conversation conversation,
       String prompt,
       Consumer<String> onMessageReceived,
       Consumer<Conversation> onComplete,
       Consumer<String> onFailure) {
-    this.conversation = conversation;
+    var conversationsState = ConversationsState.getInstance();
+    this.conversation = ConversationsState.getCurrentConversation();
+    if (conversation == null) {
+      this.conversation = conversationsState.startConversation();
+    }
     this.prompt = prompt;
     this.client = buildClient();
     this.eventSource = EventSources.createFactory(client)

@@ -30,7 +30,6 @@ import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -41,7 +40,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.jetbrains.annotations.NotNull;
 
@@ -97,12 +96,6 @@ public class ToolWindowService implements LafManagerListener {
     } else if (settings.isChatGPTOptionSelected && settings.accessToken.isEmpty()) {
       notifyMissingCredential(project, "Access token not provided.");
     } else {
-      var conversationsState = ConversationsState.getInstance();
-      var conversation = ConversationsState.getCurrentConversation();
-      if (conversation == null) {
-        conversation = conversationsState.startConversation();
-      }
-
       var textArea = new SyntaxTextArea(true, true, SyntaxConstants.SYNTAX_STYLE_MARKDOWN);
       scrollablePanel.add(textArea);
       textAreas.add(textArea);
@@ -113,39 +106,43 @@ public class ToolWindowService implements LafManagerListener {
 
       var conversationMessage = new Message();
       conversationMessage.setPrompt(prompt);
-      client.getCompletionsAsync(
-          conversation,
-          prompt,
-          message -> {
+      new SwingWorker<Void, String>() {
+        protected Void doInBackground() {
+          client.getCompletionsAsync(
+              prompt,
+              this::publish,
+              (completedConversation) -> {
+                ConversationsState.getInstance().saveConversation(completedConversation);
+                stopGenerating(prompt, textArea, project, scrollToBottom);
+              },
+              (errorMessage) -> {
+                var currentConversation = ConversationsState.getCurrentConversation();
+                if (currentConversation != null) {
+                  conversationMessage.setResponse(errorMessage);
+                  currentConversation.addMessage(conversationMessage);
+                  ConversationsState.getInstance().saveConversation(currentConversation);
+                }
+                textArea.append(errorMessage);
+                stopGenerating(prompt, textArea, project, scrollToBottom);
+              });
+          return null;
+        }
+
+        protected void process(List<String> chunks) {
+          for (String text : chunks) {
             try {
-              SwingUtilities.invokeAndWait(
-                  () -> {
-                    textArea.append(message);
-                    // TODO: Should we set the text everytime?
-                    conversationMessage.setResponse(textArea.getText());
-                    if (scrollToBottom != null) {
-                      scrollToBottom.run();
-                    }
-                  }
-              );
-            } catch (InterruptedException | InvocationTargetException e) {
+              textArea.append(text);
+              conversationMessage.setResponse(textArea.getText());
+              if (scrollToBottom != null) {
+                scrollToBottom.run();
+              }
+            } catch (Exception e) {
               textArea.append("Something went wrong. Please try again later.");
               throw new RuntimeException(e);
             }
-          },
-          (completedConversation) -> {
-            ConversationsState.getInstance().saveConversation(completedConversation);
-            stopGenerating(prompt, textArea, project, scrollToBottom);
-          },
-          (errorMessage) -> {
-            var currentConversation = ConversationsState.getCurrentConversation();
-            conversationMessage.setResponse(errorMessage);
-            currentConversation.addMessage(conversationMessage);
-            ConversationsState.getInstance().saveConversation(currentConversation);
-
-            textArea.append(errorMessage);
-            stopGenerating(prompt, textArea, project, scrollToBottom);
-          });
+          }
+        }
+      }.execute();
     }
   }
 
