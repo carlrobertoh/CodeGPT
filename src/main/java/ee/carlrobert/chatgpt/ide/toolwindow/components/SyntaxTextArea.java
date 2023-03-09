@@ -2,9 +2,9 @@ package ee.carlrobert.chatgpt.ide.toolwindow.components;
 
 import static ee.carlrobert.chatgpt.ide.toolwindow.ToolWindowUtil.createIconButton;
 
+import com.intellij.icons.AllIcons;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
-import icons.Icons;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -65,10 +65,10 @@ public class SyntaxTextArea extends RSyntaxTextArea {
   }
 
   private JButton createCopyButton() {
-    var button = createIconButton(Icons.CopyImageIcon);
+    var button = createIconButton(AllIcons.General.InlineCopy);
     button.addActionListener(e -> {
       copyToClipboard();
-      button.setIcon(Icons.DoubleTickImageIcon);
+      button.setIcon(AllIcons.General.InspectionsOK);
     });
     return button;
   }

@@ -3,6 +3,7 @@ package ee.carlrobert.chatgpt.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import ee.carlrobert.chatgpt.ide.conversations.Conversation;
 import ee.carlrobert.chatgpt.ide.settings.SettingsState;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -21,21 +22,36 @@ import okhttp3.sse.EventSources;
 public abstract class Client {
 
   private final ObjectMapper objectMapper = new ObjectMapper();
+  private final ClientCode clientCode;
   private EventSource eventSource;
-  protected String prompt = "";
+  protected Conversation conversation;
+  protected String prompt;
   protected OkHttpClient client;
+
+  protected Client(ClientCode clientCode) {
+    this.clientCode = clientCode;
+  }
 
   protected abstract ApiRequestDetails getRequestDetails(String prompt);
 
-  public abstract void clearPreviousSession();
+  protected abstract EventSourceListener getEventSourceListener(
+      Consumer<String> onMessageReceived,
+      Consumer<Conversation> onComplete,
+      Consumer<String> onFailure);
 
-  protected abstract EventSourceListener getEventSourceListener(Consumer<String> onMessageReceived, Runnable onComplete);
-
-  public void getCompletionsAsync(String prompt, Consumer<String> onMessageReceived, Runnable onComplete) {
+  public void getCompletionsAsync(
+      Conversation conversation,
+      String prompt,
+      Consumer<String> onMessageReceived,
+      Consumer<Conversation> onComplete,
+      Consumer<String> onFailure) {
+    this.conversation = conversation;
     this.prompt = prompt;
     this.client = buildClient();
     this.eventSource = EventSources.createFactory(client)
-        .newEventSource(buildHttpRequest(prompt), getEventSourceListener(onMessageReceived, onComplete));
+        .newEventSource(
+            buildHttpRequest(prompt),
+            getEventSourceListener(onMessageReceived, onComplete, onFailure));
   }
 
   public OkHttpClient buildClient() {
@@ -76,5 +92,9 @@ public abstract class Client {
     } catch (JsonProcessingException e) {
       throw new RuntimeException("Unable to serialize request payload", e);
     }
+  }
+
+  public ClientCode getCode() {
+    return clientCode;
   }
 }

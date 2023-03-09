@@ -19,12 +19,18 @@ public abstract class CompletionClientEventListener extends EventSourceListener 
   private final OkHttpClient client;
   private final Consumer<String> onMessageReceived;
   private final Consumer<String> onComplete;
+  private final Consumer<String> onFailure;
   private final StringBuilder messageBuilder = new StringBuilder();
 
-  public CompletionClientEventListener(OkHttpClient client, Consumer<String> onMessageReceived, Consumer<String> onComplete) {
+  public CompletionClientEventListener(
+      OkHttpClient client,
+      Consumer<String> onMessageReceived,
+      Consumer<String> onComplete,
+      Consumer<String> onFailure) {
     this.client = client;
     this.onMessageReceived = onMessageReceived;
     this.onComplete = onComplete;
+    this.onFailure = onFailure;
   }
 
   protected abstract String getMessage(String data) throws JsonProcessingException;
@@ -47,8 +53,10 @@ public abstract class CompletionClientEventListener extends EventSourceListener 
       }
 
       var message = getMessage(data);
-      messageBuilder.append(message);
-      onMessageReceived.accept(message);
+      if (message != null) {
+        messageBuilder.append(message);
+        onMessageReceived.accept(message);
+      }
     } catch (JsonProcessingException e) {
       throw new RuntimeException("Unable to deserialize payload.", e);
     }
@@ -65,19 +73,17 @@ public abstract class CompletionClientEventListener extends EventSourceListener 
 
     try {
       if (response == null) {
-        onMessageReceived.accept(DEFAULT_ERROR_MSG);
+        onFailure.accept(DEFAULT_ERROR_MSG);
         return;
       }
 
       var body = response.body();
       if (body != null) {
         var error = new ObjectMapper().readValue(body.string(), ApiResponseError.class);
-        onMessageReceived.accept(error.getError().getMessage());
+        onFailure.accept(error.getError().getMessage());
       }
     } catch (IOException e) {
-      onMessageReceived.accept(DEFAULT_ERROR_MSG);
-    } finally {
-      onComplete.accept(messageBuilder.toString());
+      onFailure.accept(DEFAULT_ERROR_MSG);
     }
   }
 

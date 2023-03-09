@@ -23,16 +23,23 @@ public class UnofficialClientEventListener extends EventSourceListener {
   private final ObjectMapper objectMapper = new ObjectMapper();
   private final String prompt;
   private final Consumer<String> onMessageReceived;
-  private final Consumer<ApiResponse> onComplete;
+  private final Consumer<@NotNull ApiResponse> onComplete;
+  private final Consumer<String> onFailure;
   private ApiResponse lastReceivedResponse;
   private boolean eventReceived = false;
   private final OkHttpClient client;
 
-  public UnofficialClientEventListener(OkHttpClient client, String prompt, Consumer<String> onMessageReceived, Consumer<ApiResponse> onComplete) {
+  public UnofficialClientEventListener(
+      OkHttpClient client,
+      String prompt,
+      Consumer<String> onMessageReceived,
+      Consumer<ApiResponse> onComplete,
+      Consumer<String> onFailure) {
     this.client = client;
     this.prompt = prompt;
     this.onMessageReceived = onMessageReceived;
     this.onComplete = onComplete;
+    this.onFailure = onFailure;
   }
 
   public void onOpen(@NotNull EventSource eventSource, @NotNull Response response) {
@@ -45,11 +52,7 @@ public class UnofficialClientEventListener extends EventSourceListener {
         var response = client.newCall(UnofficialChatGPTClient.getInstance().buildHttpRequest(prompt)).execute();
         ResponseBody responseBody = response.body();
         if (responseBody != null) {
-          var message = tryExtractingErrorMessage(responseBody.string());
-          message.ifPresent(msg -> {
-            onMessageReceived.accept(msg);
-            onComplete.accept(null);
-          });
+          tryExtractingErrorMessage(responseBody.string()).ifPresent(onFailure);
           responseBody.close();
         }
       } catch (IOException e) {
@@ -93,9 +96,8 @@ public class UnofficialClientEventListener extends EventSourceListener {
       @Nullable Throwable ex,
       @Nullable Response response) {
     if (isRequestNotCancelled()) {
-      onMessageReceived.accept("Something went wrong. Please try again later. ");
+      onFailure.accept("Something went wrong. Please try again later.");
     }
-    onComplete.accept(null);
   }
 
   private boolean isRequestNotCancelled() {

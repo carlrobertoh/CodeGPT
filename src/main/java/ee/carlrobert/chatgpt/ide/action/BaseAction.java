@@ -5,14 +5,13 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.wm.ToolWindow;
-import ee.carlrobert.chatgpt.client.ClientFactory;
+import ee.carlrobert.chatgpt.ide.conversations.ConversationsState;
 import ee.carlrobert.chatgpt.ide.toolwindow.ToolWindowService;
+import java.util.Arrays;
+import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class BaseAction extends AnAction {
-
-  protected abstract void initToolWindow(ToolWindow toolWindow);
 
   protected abstract void actionPerformed(Project project, Editor editor, String selectedText);
 
@@ -36,8 +35,20 @@ public abstract class BaseAction extends AnAction {
 
   protected void sendMessage(Project project, String prompt) {
     var toolWindowService = project.getService(ToolWindowService.class);
-    new ClientFactory().getClient().clearPreviousSession();
-    initToolWindow(toolWindowService.getToolWindow(project));
+    var toolWindow = toolWindowService.getToolWindow(project);
+    var contentManager = toolWindow.getContentManager();
+
+    Arrays.stream(contentManager.getContents())
+        .filter(it -> "Chat".equals(it.getTabName()))
+        .findFirst()
+        .ifPresentOrElse(
+            contentManager::setSelectedContent,
+            () -> contentManager.setSelectedContent(Objects.requireNonNull(contentManager.getContent(0)))
+        );
+
+    ConversationsState.getInstance().startConversation();
+
+    toolWindowService.getToolWindow(project).show();
     toolWindowService.removeAll();
     toolWindowService.paintUserMessage(prompt);
     toolWindowService.sendMessage(prompt, project, null);

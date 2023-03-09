@@ -2,8 +2,10 @@ package ee.carlrobert.chatgpt.ide.action;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import ee.carlrobert.chatgpt.client.ClientFactory;
+import ee.carlrobert.chatgpt.ide.conversations.ConversationsState;
 import ee.carlrobert.chatgpt.ide.toolwindow.ToolWindowService;
+import java.util.Arrays;
+import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 
 public class AskAction extends AnAction {
@@ -19,9 +21,20 @@ public class AskAction extends AnAction {
     if (project != null) {
       var toolWindowService = project.getService(ToolWindowService.class);
       var toolWindow = toolWindowService.getToolWindow(project);
-      new ClientFactory().getClient().clearPreviousSession();
+      var contentManager = toolWindow.getContentManager();
+
+      Arrays.stream(contentManager.getContents())
+          .filter(it -> "Chat".equals(it.getTabName()))
+          .findFirst()
+          .ifPresentOrElse(
+              contentManager::setSelectedContent,
+              () -> contentManager.setSelectedContent(Objects.requireNonNull(contentManager.getContent(0)))
+          );
+
+      ConversationsState.getInstance().startConversation();
+
       toolWindow.show();
-      toolWindow.setTitle("");
+      toolWindow.setTitle("Chat");
       toolWindowService.removeAll();
       toolWindowService.paintLandingView();
     }

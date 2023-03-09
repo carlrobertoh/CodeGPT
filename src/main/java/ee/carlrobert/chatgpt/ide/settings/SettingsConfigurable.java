@@ -1,6 +1,7 @@
 package ee.carlrobert.chatgpt.ide.settings;
 
 import com.intellij.openapi.options.Configurable;
+import ee.carlrobert.chatgpt.ide.conversations.ConversationsState;
 import javax.swing.JComponent;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
@@ -36,18 +37,20 @@ public class SettingsConfigurable implements Configurable {
         !settingsComponent.getProxyHost().equals(settings.proxyHost) ||
         settingsComponent.getProxyPort() != settings.proxyPort ||
         !settingsComponent.getProxyType().equals(settings.proxyType) ||
-        !settingsComponent.getReverseProxyUrl().equals(settings.reverseProxyUrl) ||
         !settingsComponent.getChatCompletionBaseModel().equals(settings.chatCompletionBaseModel) ||
         !settingsComponent.getTextCompletionBaseModel().equals(settings.textCompletionBaseModel) ||
-        settingsComponent.isGPTOptionSelected() != settings.isGPTOptionSelected ||
-        settingsComponent.isChatCompletionOptionSelected() != settings.isChatCompletionOptionSelected ||
-        settingsComponent.isTextCompletionOptionSelected() != settings.isTextCompletionOptionSelected ||
-        settingsComponent.isChatGPTOptionSelected() != settings.isChatGPTOptionSelected;
+        !settingsComponent.getReverseProxyUrl().equals(settings.reverseProxyUrl) ||
+        isClientChanged(settings);
   }
 
   @Override
   public void apply() {
     var settings = SettingsState.getInstance();
+
+    if (isClientChanged(settings)) {
+      ConversationsState.getInstance().setCurrentConversation(null);
+    }
+
     settings.isGPTOptionSelected = settingsComponent.isGPTOptionSelected();
     settings.isChatGPTOptionSelected = settingsComponent.isChatGPTOptionSelected();
     settings.accessToken = settingsComponent.getAccessToken();
@@ -82,5 +85,12 @@ public class SettingsConfigurable implements Configurable {
   @Override
   public void disposeUIResources() {
     settingsComponent = null;
+  }
+
+  private boolean isClientChanged(SettingsState settings) {
+    return settingsComponent.isGPTOptionSelected() != settings.isGPTOptionSelected ||
+        settingsComponent.isChatCompletionOptionSelected() != settings.isChatCompletionOptionSelected ||
+        settingsComponent.isTextCompletionOptionSelected() != settings.isTextCompletionOptionSelected ||
+        settingsComponent.isChatGPTOptionSelected() != settings.isChatGPTOptionSelected;
   }
 }

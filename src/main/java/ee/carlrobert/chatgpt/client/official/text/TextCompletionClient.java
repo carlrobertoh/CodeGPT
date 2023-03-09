@@ -5,8 +5,11 @@ import static java.lang.String.format;
 import ee.carlrobert.chatgpt.client.ApiRequestDetails;
 import ee.carlrobert.chatgpt.client.BaseModel;
 import ee.carlrobert.chatgpt.client.Client;
+import ee.carlrobert.chatgpt.client.ClientCode;
+import ee.carlrobert.chatgpt.ide.conversations.Conversation;
+import ee.carlrobert.chatgpt.ide.conversations.message.Message;
 import ee.carlrobert.chatgpt.ide.settings.SettingsState;
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -14,10 +17,10 @@ import okhttp3.sse.EventSourceListener;
 
 public class TextCompletionClient extends Client {
 
-  private static final List<Map.Entry<String, String>> queries = new ArrayList<>();
   private static TextCompletionClient instance;
 
   private TextCompletionClient() {
+    super(ClientCode.TEXT_COMPLETIONS);
   }
 
   public static TextCompletionClient getInstance() {
@@ -27,14 +30,10 @@ public class TextCompletionClient extends Client {
     return instance;
   }
 
-  public void clearPreviousSession() {
-    queries.clear();
-  }
-
   protected ApiRequestDetails getRequestDetails(String prompt) {
     return new ApiRequestDetails(
         format("https://api.openai.com/v1/engines/%s/completions",
-            SettingsState.getInstance().textCompletionBaseModel.getModel()),
+            SettingsState.getInstance().textCompletionBaseModel.getCode()),
         Map.of(
             "stop", List.of(" Human:", " AI:"),
             "prompt", buildPrompt(prompt),
@@ -49,11 +48,18 @@ public class TextCompletionClient extends Client {
         SettingsState.getInstance().apiKey);
   }
 
-  protected EventSourceListener getEventSourceListener(Consumer<String> onMessageReceived, Runnable onComplete) {
+  protected EventSourceListener getEventSourceListener(
+      Consumer<String> onMessageReceived,
+      Consumer<Conversation> onComplete,
+      Consumer<String> onFailure) {
     return new TextCompletionClientEventListener(client, onMessageReceived, (finalMessage) -> {
-      queries.add(Map.entry(prompt, finalMessage));
-      onComplete.run();
-    });
+      var message = new Message();
+      message.setPrompt(prompt);
+      message.setResponse(finalMessage);
+      conversation.setUpdatedOn(LocalDateTime.now());
+      conversation.addMessage(message);
+      onComplete.accept(conversation);
+    }, onFailure);
   }
 
   private StringBuilder getBasePrompt() {
@@ -69,12 +75,12 @@ public class TextCompletionClient extends Client {
 
   private String buildPrompt(String prompt) {
     var basePrompt = getBasePrompt();
-    queries.forEach(query ->
+    conversation.getMessages().forEach(message ->
         basePrompt.append("Human: ")
-            .append(query.getKey())
+            .append(message.getPrompt())
             .append("\n")
             .append("AI: ")
-            .append(query.getValue())
+            .append(message.getResponse())
             .append("\n"));
     basePrompt.append("Human: ")
         .append(prompt)

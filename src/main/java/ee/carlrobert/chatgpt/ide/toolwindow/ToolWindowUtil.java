@@ -8,7 +8,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
-import javax.swing.ImageIcon;
+import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JTextArea;
@@ -16,32 +16,30 @@ import javax.swing.KeyStroke;
 
 public class ToolWindowUtil {
 
-  public static JTextArea createTextArea(String selectedText, boolean isItalicFont) {
+  public static JTextArea createTextArea(String selectedText) {
     var textArea = new JTextArea();
     textArea.append(selectedText);
     textArea.setLineWrap(true);
     textArea.setEditable(false);
-    var font = textArea.getFont();
-    textArea.setFont(font.deriveFont(isItalicFont ? Font.ITALIC : Font.PLAIN));
+    textArea.setFont(textArea.getFont().deriveFont(Font.ITALIC));
     textArea.setWrapStyleWord(true);
     textArea.setBackground(JBColor.PanelBackground);
-    // textArea.setBorder(new MatteBorder(0, 2, 0, 0, JBColor.RED));
     return textArea;
   }
 
-  public static JLabel createIconLabel(ImageIcon imageIcon, String text) {
-    var iconLabel = new JLabel(imageIcon);
+  public static JLabel createIconLabel(Icon icon, String text) {
+    var iconLabel = new JLabel(icon);
     iconLabel.setText(text);
     iconLabel.setFont(iconLabel.getFont().deriveFont(iconLabel.getFont().getStyle() | Font.BOLD));
     iconLabel.setIconTextGap(8);
     return iconLabel;
   }
 
-  public static JButton createIconButton(ImageIcon imageIcon) {
-    var button = new JButton(imageIcon);
+  public static JButton createIconButton(Icon icon) {
+    var button = new JButton(icon);
     button.setBorder(BorderFactory.createEmptyBorder());
     button.setContentAreaFilled(false);
-    button.setPreferredSize(new Dimension(imageIcon.getIconWidth(), imageIcon.getIconHeight()));
+    button.setPreferredSize(new Dimension(icon.getIconWidth(), icon.getIconHeight()));
     return button;
   }
 

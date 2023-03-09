@@ -4,6 +4,7 @@ import static ee.carlrobert.chatgpt.ide.toolwindow.ToolWindowUtil.addShiftEnterI
 import static ee.carlrobert.chatgpt.ide.toolwindow.ToolWindowUtil.createIconButton;
 
 import com.intellij.ui.JBColor;
+import com.intellij.ui.components.JBTextArea;
 import com.intellij.util.ui.JBUI;
 import icons.Icons;
 import java.awt.event.ActionListener;
@@ -11,9 +12,8 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import javax.swing.JButton;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 
-public class TextArea extends JTextArea {
+public class TextArea extends JBTextArea {
 
   public TextArea(Runnable onSubmit, JScrollPane textAreaScrollPane) {
     super("Ask me anything...");

@@ -9,8 +9,12 @@ import okhttp3.OkHttpClient;
 
 public class TextCompletionClientEventListener extends CompletionClientEventListener {
 
-  public TextCompletionClientEventListener(OkHttpClient client, Consumer<String> onMessageReceived, Consumer<String> onComplete) {
-    super(client, onMessageReceived, onComplete);
+  public TextCompletionClientEventListener(
+      OkHttpClient client,
+      Consumer<String> onMessageReceived,
+      Consumer<String> onComplete,
+      Consumer<String> onFailure) {
+    super(client, onMessageReceived, onComplete, onFailure);
   }
 
   protected String getMessage(String data) throws JsonProcessingException {

@@ -1,6 +1,6 @@
 package ee.carlrobert.chatgpt.ide.toolwindow.components;
 
-import icons.Icons;
+import com.intellij.icons.AllIcons;
 import javax.swing.JButton;
 import javax.swing.SwingConstants;
 
@@ -12,7 +12,7 @@ public class GenerateButton extends JButton {
 
   public void setMode(Mode mode, Runnable onClick) {
     var isStopMode = mode == Mode.STOP;
-    setIcon(isStopMode ? Icons.SquareIcon : Icons.RefreshIcon);
+    setIcon(isStopMode ? AllIcons.Actions.Suspend : AllIcons.Actions.Refresh);
     setText(isStopMode ? "Stop generating" : "Regenerate response");
     for (var listener : getActionListeners()) {
       removeActionListener(listener);

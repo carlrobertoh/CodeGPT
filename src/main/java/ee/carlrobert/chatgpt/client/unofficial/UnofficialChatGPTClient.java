@@ -2,8 +2,11 @@ package ee.carlrobert.chatgpt.client.unofficial;
 
 import ee.carlrobert.chatgpt.client.ApiRequestDetails;
 import ee.carlrobert.chatgpt.client.Client;
-import ee.carlrobert.chatgpt.client.unofficial.response.ApiResponse;
+import ee.carlrobert.chatgpt.client.ClientCode;
+import ee.carlrobert.chatgpt.ide.conversations.Conversation;
+import ee.carlrobert.chatgpt.ide.conversations.message.Message;
 import ee.carlrobert.chatgpt.ide.settings.SettingsState;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,9 +17,9 @@ import okhttp3.sse.EventSourceListener;
 public class UnofficialChatGPTClient extends Client {
 
   private static UnofficialChatGPTClient instance;
-  private static ApiResponse lastReceivedResponse;
 
   private UnofficialChatGPTClient() {
+    super(ClientCode.UNOFFICIAL_CHATGPT);
   }
 
   public static UnofficialChatGPTClient getInstance() {
@@ -26,17 +29,21 @@ public class UnofficialChatGPTClient extends Client {
     return instance;
   }
 
-  public void clearPreviousSession() {
-    lastReceivedResponse = null;
-  }
-
-  protected EventSourceListener getEventSourceListener(Consumer<String> onMessageReceived, Runnable onComplete) {
+  protected EventSourceListener getEventSourceListener(
+      Consumer<String> onMessageReceived,
+      Consumer<Conversation> onComplete,
+      Consumer<String> onFailure) {
     return new UnofficialClientEventListener(client, prompt, onMessageReceived, (response) -> {
-      if (response != null) {
-        lastReceivedResponse = response;
-      }
-      onComplete.run();
-    });
+      var message = new Message();
+      message.setPrompt(prompt);
+      message.setResponse(response.getFullMessage());
+
+      conversation.setUnofficialClientConversationId(response.getConversationId());
+      conversation.setParentMessageId(response.getMessage().getId());
+      conversation.setUpdatedOn(LocalDateTime.now());
+      conversation.addMessage(message);
+      onComplete.accept(conversation);
+    }, onFailure);
   }
 
   protected ApiRequestDetails getRequestDetails(String prompt) {
@@ -55,9 +62,12 @@ public class UnofficialChatGPTClient extends Client {
         "model", "text-davinci-002-render-sha"
     ));
 
-    if (lastReceivedResponse != null) {
-      payload.put("conversation_id", lastReceivedResponse.getConversationId());
-      payload.put("parent_message_id", lastReceivedResponse.getMessage().getId());
+    var conversationId = conversation.getUnofficialClientConversationId();
+    var parentMessageId = conversation.getParentMessageId();
+    if (conversationId != null && !conversationId.isEmpty() &&
+        parentMessageId != null && !parentMessageId.isEmpty()) {
+      payload.put("conversation_id", conversationId);
+      payload.put("parent_message_id", parentMessageId);
     } else {
       payload.put("parent_message_id", UUID.randomUUID().toString());
     }
