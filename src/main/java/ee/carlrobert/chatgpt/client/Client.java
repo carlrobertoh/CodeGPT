@@ -11,6 +11,7 @@ import java.net.Proxy;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import okhttp3.Credentials;
 import okhttp3.Headers;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -68,6 +69,17 @@ public abstract class Client {
     var proxyPort = settings.proxyPort;
     if (!proxyHost.isEmpty() && proxyPort != 0) {
       builder.proxy(new Proxy(settings.proxyType, new InetSocketAddress(proxyHost, proxyPort)));
+
+      var username = settings.proxyUsername;
+      var password = settings.proxyPassword;
+      if (settings.isProxyAuthSelected) {
+        builder.proxyAuthenticator((route, response) -> {
+          String credential = Credentials.basic(username, password);
+          return response.request().newBuilder()
+              .header("Proxy-Authorization", credential)
+              .build();
+        });
+      }
     }
 
     return builder.build();

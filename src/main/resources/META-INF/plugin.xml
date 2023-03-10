@@ -93,9 +93,7 @@
     <change-notes>
         <![CDATA[
       <ul>
-        <li>Add conversation history and ability to restore the previous sessions</li>
-        <li>Show the most recent conversation when opening the project</li>
-        <li>Visual improvements</li>
+        <li>Proxy auth support</li>
       </ul>
     ]]>
     </change-notes>

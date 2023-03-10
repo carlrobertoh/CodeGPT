@@ -22,12 +22,15 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
   public BaseModel textCompletionBaseModel = BaseModel.DAVINCI;
   public BaseModel chatCompletionBaseModel = BaseModel.CHATGPT;
   public boolean isGPTOptionSelected = true;
-  public boolean isChatGPTOptionSelected = false;
+  public boolean isChatGPTOptionSelected;
   public boolean isChatCompletionOptionSelected = true;
-  public boolean isTextCompletionOptionSelected = false;
+  public boolean isTextCompletionOptionSelected;
   public String proxyHost = "";
   public int proxyPort;
   public Proxy.Type proxyType = Proxy.Type.SOCKS;
+  public boolean isProxyAuthSelected;
+  public String proxyUsername;
+  public String proxyPassword;
 
   public static SettingsState getInstance() {
     return ApplicationManager.getApplication().getService(SettingsState.class);

@@ -3,6 +3,8 @@ package ee.carlrobert.chatgpt.ide.settings;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.PortField;
 import com.intellij.ui.TitledSeparator;
+import com.intellij.ui.components.JBCheckBox;
+import com.intellij.ui.components.JBPasswordField;
 import com.intellij.ui.components.JBRadioButton;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
@@ -10,6 +12,7 @@ import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.chatgpt.client.BaseModel;
 import java.awt.Desktop;
+import java.awt.event.ItemEvent;
 import java.io.IOException;
 import java.net.Proxy;
 import java.net.URISyntaxException;
@@ -37,6 +40,9 @@ public class SettingsComponent {
   private final ComboBox<Proxy.Type> proxyTypeComboBox;
   private final JBTextField proxyHostField;
   private final PortField proxyPortField;
+  private final JBCheckBox proxyAuthCheckbox;
+  private final JBTextField proxyAuthUsername;
+  private final JBPasswordField proxyAuthPassword;
 
   public SettingsComponent(SettingsState settings) {
     apiKeyField = new JBTextField(settings.apiKey, 1);
@@ -68,6 +74,16 @@ public class SettingsComponent {
     });
     proxyTypeComboBox.setSelectedItem(settings.proxyType);
     proxyHostField = new JBTextField(settings.proxyHost, 20);
+    proxyAuthCheckbox = new JBCheckBox("Proxy authentication");
+    proxyAuthUsername = new JBTextField(20);
+    proxyAuthUsername.setEnabled(settings.isProxyAuthSelected);
+    proxyAuthPassword = new JBPasswordField();
+    proxyAuthPassword.setColumns(20);
+    proxyAuthPassword.setEnabled(settings.isProxyAuthSelected);
+    proxyAuthCheckbox.addItemListener(itemEvent -> {
+      proxyAuthUsername.setEnabled(itemEvent.getStateChange() == ItemEvent.SELECTED);
+      proxyAuthPassword.setEnabled(itemEvent.getStateChange() == ItemEvent.SELECTED);
+    });
     useGPTRadioButton = new JBRadioButton("Use OpenAI's official API (recommended)", settings.isGPTOptionSelected);
     useChatCompletionRadioButton = new JBRadioButton("Use chat completion", settings.isChatCompletionOptionSelected);
     useTextCompletionRadioButton = new JBRadioButton("Use text completion", settings.isTextCompletionOptionSelected);
@@ -177,6 +193,29 @@ public class SettingsComponent {
     proxyTypeComboBox.setSelectedItem(type);
   }
 
+  public boolean isProxyAuthSelected() {
+    return proxyAuthCheckbox.isSelected();
+  }
+
+  public void setUseProxyAuthentication(boolean isProxyAuthSelected) {
+    proxyAuthCheckbox.setSelected(isProxyAuthSelected);
+  }
+
+  public String getProxyAuthUsername() {
+    return proxyAuthUsername.getText().trim();
+  }
+
+  public void setProxyUsername(String proxyUsername) {
+    proxyAuthUsername.setText(proxyUsername);
+  }
+
+  public String getProxyAuthPassword() {
+    return new String(proxyAuthPassword.getPassword());
+  }
+
+  public void setProxyPassword(String proxyPassword) {
+    proxyAuthPassword.setText(proxyPassword);
+  }
 
   public BaseModel getTextCompletionBaseModel() {
     return (BaseModel) textCompletionBaseModelComboBox.getSelectedItem();
@@ -272,6 +311,22 @@ public class SettingsComponent {
     proxyPanel.add(proxyTypePanel);
     proxyPanel.add(proxyHostPanel);
     proxyPanel.add(proxyPortPanel);
+    proxyPanel.add(UI.PanelFactory
+        .panel(proxyAuthCheckbox)
+        .createPanel());
+
+    var proxyUsernamePanel = createPanel(proxyAuthUsername, "Username:", false);
+    var proxyPasswordPanel = createPanel(proxyAuthPassword, "Password:", false);
+    setEqualLabelWidths(proxyPasswordPanel, proxyUsernamePanel);
+
+    var proxyAuthPanel = FormBuilder.createFormBuilder()
+        .addVerticalGap(8)
+        .addComponent(proxyUsernamePanel)
+        .addComponent(proxyPasswordPanel)
+        .getPanel();
+    proxyAuthPanel.setBorder(JBUI.Borders.emptyLeft(16));
+    proxyPanel.add(proxyAuthPanel);
+
     return proxyPanel;
   }
 

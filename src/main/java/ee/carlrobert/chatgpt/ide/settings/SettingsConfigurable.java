@@ -37,6 +37,9 @@ public class SettingsConfigurable implements Configurable {
         !settingsComponent.getProxyHost().equals(settings.proxyHost) ||
         settingsComponent.getProxyPort() != settings.proxyPort ||
         !settingsComponent.getProxyType().equals(settings.proxyType) ||
+        settingsComponent.isProxyAuthSelected() != settings.isProxyAuthSelected ||
+        !settingsComponent.getProxyAuthUsername().equals(settings.proxyUsername) ||
+        !settingsComponent.getProxyAuthPassword().equals(settings.proxyPassword) ||
         !settingsComponent.getChatCompletionBaseModel().equals(settings.chatCompletionBaseModel) ||
         !settingsComponent.getTextCompletionBaseModel().equals(settings.textCompletionBaseModel) ||
         !settingsComponent.getReverseProxyUrl().equals(settings.reverseProxyUrl) ||
@@ -57,6 +60,9 @@ public class SettingsConfigurable implements Configurable {
     settings.proxyHost = settingsComponent.getProxyHost();
     settings.proxyPort = settingsComponent.getProxyPort();
     settings.proxyType = settingsComponent.getProxyType();
+    settings.isProxyAuthSelected = settingsComponent.isProxyAuthSelected();
+    settings.proxyUsername = settingsComponent.getProxyAuthUsername();
+    settings.proxyPassword = settingsComponent.getProxyAuthPassword();
     settings.apiKey = settingsComponent.getApiKey();
     settings.reverseProxyUrl = settingsComponent.getReverseProxyUrl();
     settings.chatCompletionBaseModel = settingsComponent.getChatCompletionBaseModel();
@@ -76,6 +82,9 @@ public class SettingsConfigurable implements Configurable {
     settingsComponent.setProxyHost(settings.proxyHost);
     settingsComponent.setProxyPort(settings.proxyPort);
     settingsComponent.setProxyType(settings.proxyType);
+    settingsComponent.setUseProxyAuthentication(settings.isProxyAuthSelected);
+    settingsComponent.setProxyUsername(settings.proxyUsername);
+    settingsComponent.setProxyPassword(settings.proxyPassword);
     settingsComponent.setApiKey(settings.apiKey);
     settingsComponent.setReverseProxyUrl(settings.reverseProxyUrl);
     settingsComponent.setChatCompletionBaseModel(settings.chatCompletionBaseModel);
