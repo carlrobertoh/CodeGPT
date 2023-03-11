@@ -11,8 +11,6 @@ import java.awt.Adjustable;
 import java.awt.Dimension;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -40,17 +38,9 @@ public class ChatGptToolWindow {
     var toolWindowService = project.getService(ToolWindowService.class);
     var searchText = textArea.getText();
     toolWindowService.paintUserMessage(searchText);
-
-    ExecutorService executor = Executors.newSingleThreadExecutor();
-    try {
-      executor.execute(() -> {
-        toolWindowService.sendMessage(searchText, project, this::scrollToBottom);
-        textArea.setText("");
-        scrollToBottom();
-      });
-    } finally {
-      executor.shutdown();
-    }
+    toolWindowService.sendMessage(searchText, project, this::scrollToBottom);
+    textArea.setText("");
+    scrollToBottom();
   }
 
   public JPanel getContent() {

@@ -93,7 +93,7 @@
     <change-notes>
         <![CDATA[
       <ul>
-        <li>Proxy auth support</li>
+        <li>Fix revere proxy</li>
       </ul>
     ]]>
     </change-notes>

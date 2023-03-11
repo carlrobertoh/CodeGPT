@@ -95,8 +95,18 @@ public class UnofficialClientEventListener extends EventSourceListener {
       @NotNull EventSource eventSource,
       @Nullable Throwable ex,
       @Nullable Response response) {
-    if (isRequestNotCancelled()) {
-      onFailure.accept("Something went wrong. Please try again later.");
+    if (isRequestNotCancelled() && response != null) {
+      try {
+        var responseBody = response.body();
+        if (responseBody != null) {
+          tryExtractingErrorMessage(responseBody.string()).ifPresent(onFailure);
+          responseBody.close();
+        }
+      } catch (Exception e) {
+        onFailure.accept("Something went wrong. Please try again later.");
+      }
+    } else {
+      onComplete.accept(lastReceivedResponse);
     }
   }
 

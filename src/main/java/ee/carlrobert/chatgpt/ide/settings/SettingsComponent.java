@@ -62,8 +62,7 @@ public class SettingsComponent {
         settings.textCompletionBaseModel);
     proxyPortField = new PortField();
     reverseProxyComboBox = new ComboBox<>(new String[] {
-        "https://chat.duti.tech/api/conversation",
-        "https://gpt.pawan.krd/backend-api/conversation"
+        "https://bypass.duti.tech/api/conversation",
     }, 400);
     reverseProxyComboBox.setSelectedItem(settings.reverseProxyUrl);
     accessTokenField = new JBTextField(settings.accessToken, 1);
