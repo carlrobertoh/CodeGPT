@@ -81,7 +81,7 @@ Ask anything you'd like.
 
 ### Conversation History
 
-Allows users to view their conversation history and restore previous sessions, making it easy to pick up where they left off.
+View conversation history and restore previous sessions, making it easy to pick up where you left off.
 
 <p align="center">
   <img src="docs/assets/gif/conversation-history.gif" />
