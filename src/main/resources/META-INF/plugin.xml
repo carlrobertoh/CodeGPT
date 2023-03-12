@@ -1,5 +1,5 @@
 <idea-plugin>
-    <id>ee.carlrobert.chatgpt</id>
+    <id>ee.carlrobert.codegpt</id>
     <name>CodeGPT</name>
     <vendor email="carlrobertoh@gmail.com" url="https://carlrobert.ee">Carl-Robert Linnupuu</vendor>
     <description><![CDATA[
@@ -102,34 +102,34 @@
 
     <projectListeners>
         <listener
-            class="ee.carlrobert.chatgpt.ide.toolwindow.ToolWindowService"
+            class="ee.carlrobert.codegpt.ide.toolwindow.ToolWindowService"
             topic="com.intellij.ide.ui.LafManagerListener"/>
     </projectListeners>
 
     <extensions defaultExtensionNs="com.intellij">
         <applicationConfigurable id="settings.codegpt" parentId="tools" displayName="CodeGPT"
-            instance="ee.carlrobert.chatgpt.ide.settings.SettingsConfigurable"/>
-        <applicationService serviceImplementation="ee.carlrobert.chatgpt.ide.settings.SettingsState"/>
-        <applicationService serviceImplementation="ee.carlrobert.chatgpt.ide.conversations.ConversationsState"/>
-        <projectService serviceImplementation="ee.carlrobert.chatgpt.ide.toolwindow.ToolWindowService"/>
+            instance="ee.carlrobert.codegpt.ide.settings.SettingsConfigurable"/>
+        <applicationService serviceImplementation="ee.carlrobert.codegpt.ide.settings.SettingsState"/>
+        <applicationService serviceImplementation="ee.carlrobert.codegpt.ide.conversations.ConversationsState"/>
+        <projectService serviceImplementation="ee.carlrobert.codegpt.ide.toolwindow.ToolWindowService"/>
         <toolWindow id="CodeGPT" icon="Icons.ToolWindowIcon" anchor="right"
-            factoryClass="ee.carlrobert.chatgpt.ide.toolwindow.ChatGptToolWindowFactory"/>
+            factoryClass="ee.carlrobert.codegpt.ide.toolwindow.ProjectToolWindowFactory"/>
     </extensions>
 
     <resource-bundle>messages.BasicActionsBundle</resource-bundle>
 
     <actions>
         <group id="CodeGPTEditorPopup">
-            <group id="ActionGroup" class="ee.carlrobert.chatgpt.ide.action.ActionGroup" popup="true" icon="Icons.DefaultIcon">
-                <action id="AskAction" class="ee.carlrobert.chatgpt.ide.action.AskAction" icon="AllIcons.Actions.Find"/>
+            <group id="ActionGroup" class="com.intellij.openapi.actionSystem.DefaultActionGroup" popup="true" icon="Icons.DefaultIcon">
+                <action id="AskAction" class="ee.carlrobert.codegpt.ide.action.AskAction" icon="AllIcons.Actions.Find"/>
                 <separator/>
-                <action id="CustomPromptAction" class="ee.carlrobert.chatgpt.ide.action.CustomPromptAction" icon="AllIcons.Actions.Run_anything"/>
+                <action id="CustomPromptAction" class="ee.carlrobert.codegpt.ide.action.CustomPromptAction" icon="AllIcons.Actions.Run_anything"/>
                 <separator/>
-                <action id="WriteTestsAction" class="ee.carlrobert.chatgpt.ide.action.WriteTestsAction"/>
-                <action id="FindBugsAction" class="ee.carlrobert.chatgpt.ide.action.FindBugsAction"/>
-                <action id="RefactorAction" class="ee.carlrobert.chatgpt.ide.action.RefactorAction"/>
-                <action id="OptimizeAction" class="ee.carlrobert.chatgpt.ide.action.OptimizeAction"/>
-                <action id="ExplainAction" class="ee.carlrobert.chatgpt.ide.action.ExplainAction"/>
+                <action id="WriteTestsAction" class="ee.carlrobert.codegpt.ide.action.WriteTestsAction"/>
+                <action id="FindBugsAction" class="ee.carlrobert.codegpt.ide.action.FindBugsAction"/>
+                <action id="RefactorAction" class="ee.carlrobert.codegpt.ide.action.RefactorAction"/>
+                <action id="OptimizeAction" class="ee.carlrobert.codegpt.ide.action.OptimizeAction"/>
+                <action id="ExplainAction" class="ee.carlrobert.codegpt.ide.action.ExplainAction"/>
             </group>
             <add-to-group group-id="EditorPopupMenu1" anchor="first"/>
             <separator/>
