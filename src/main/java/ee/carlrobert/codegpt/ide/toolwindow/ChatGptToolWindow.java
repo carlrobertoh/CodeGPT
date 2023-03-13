@@ -37,6 +37,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.jetbrains.annotations.NotNull;
 
@@ -67,53 +68,49 @@ public class ChatGptToolWindow {
   }
 
   public void displayUserMessage(String userMessage) {
-    if (isLandingViewVisible || ConversationsState.getCurrentConversation() == null) {
-      clearWindow();
-    }
-
     addIconLabel(AllIcons.General.User, "User:");
     scrollablePanel.add(createTextArea(userMessage));
-    scrollablePanel.validate();
+    scrollablePanel.revalidate();
     scrollablePanel.repaint();
   }
 
   public void displayLandingView() {
-    isLandingViewVisible = true;
-    clearWindow();
+    if (!isLandingViewVisible) {
+      SwingUtilities.invokeLater(() -> {
+        clearWindow();
+        isLandingViewVisible = true;
 
-    var landingView = new LandingView();
-    scrollablePanel.add(landingView.createImageIconPanel());
-    addSpacing(16);
-    landingView.getQuestionPanels().forEach(panel -> {
-      scrollablePanel.add(panel);
-      addSpacing(16);
-    });
-
-    scrollablePanel.validate();
-    scrollablePanel.repaint();
+        addSpacing(16);
+        var landingView = new LandingView();
+        scrollablePanel.add(landingView.createImageIconPanel());
+        addSpacing(16);
+        landingView.getQuestionPanels().forEach(panel -> {
+          scrollablePanel.add(panel);
+          addSpacing(16);
+        });
+        scrollablePanel.revalidate();
+        scrollablePanel.repaint();
+      });
+    }
   }
 
   public void displayConversation(Conversation conversation) {
     clearWindow();
-
     conversation.getMessages().forEach(message -> {
       displayUserMessage(message.getPrompt());
-
       addIconLabel(Icons.DefaultImageIcon, "ChatGPT:");
-      var textArea = new SyntaxTextArea(true, true, SyntaxConstants.SYNTAX_STYLE_MARKDOWN);
+      var textArea = new SyntaxTextArea(true, false, SyntaxConstants.SYNTAX_STYLE_MARKDOWN);
       textArea.setText(message.getResponse());
       textArea.displayCopyButton();
-      textArea.hideCaret();
       scrollablePanel.add(textArea);
       textAreas.add(textArea);
     });
-
     scrollToBottom();
-    scrollablePanel.validate();
+    scrollablePanel.revalidate();
     scrollablePanel.repaint();
   }
 
-  public void displayResponse(String prompt) {
+  public void sendMessage(String prompt, Project project) {
     addIconLabel(Icons.DefaultImageIcon, "ChatGPT:");
 
     var settings = SettingsState.getInstance();
@@ -124,14 +121,16 @@ public class ChatGptToolWindow {
     } else {
       var textArea = new SyntaxTextArea(true, true, SyntaxConstants.SYNTAX_STYLE_MARKDOWN);
       addTextArea(textArea);
+      project.getService(ToolWindowService.class)
+          .startRequest(prompt, textArea, project);
     }
   }
 
   public void clearWindow() {
     isLandingViewVisible = false;
     generateButton.setVisible(false);
-    scrollablePanel.removeAll();
     textAreas.clear();
+    scrollablePanel.removeAll();
   }
 
   public void addSpacing(int height) {
@@ -160,8 +159,11 @@ public class ChatGptToolWindow {
     generateButton.setMode(GenerateButton.Mode.STOP, onClick);
   }
 
-  public void stopGenerating(SyntaxTextArea textArea, Runnable onRefresh) {
-    generateButton.setMode(GenerateButton.Mode.REFRESH, onRefresh);
+  public void stopGenerating(String prompt, SyntaxTextArea textArea, Project project) {
+    generateButton.setMode(GenerateButton.Mode.REFRESH, () -> {
+      sendMessage(prompt, project);
+      scrollToBottom();
+    });
     textArea.displayCopyButton();
     textArea.hideCaret();
     scrollToBottom();
@@ -184,15 +186,15 @@ public class ChatGptToolWindow {
 
   private void handleSubmit() {
     var searchText = textArea.getText();
-
+    if (isLandingViewVisible || ConversationsState.getCurrentConversation() == null) {
+      clearWindow();
+    }
     displayUserMessage(searchText);
-
-    displayResponse()
-    project.getService(ToolWindowService.class).sendMessage(searchText, project);
-
-
+    sendMessage(searchText, project);
     textArea.setText("");
     scrollToBottom();
+    scrollablePanel.revalidate();
+    scrollablePanel.repaint();
   }
 
   private void createUIComponents() {
@@ -208,16 +210,11 @@ public class ChatGptToolWindow {
     textAreaScrollPane.setBorder(BorderFactory.createCompoundBorder(
         BorderFactory.createMatteBorder(1, 0, 0, 0, JBColor.border()),
         BorderFactory.createEmptyBorder(0, 5, 0, 10)));
-    textAreaScrollPane.setViewportView(textArea);
-
     textArea = new TextArea(this::handleSubmit, textAreaScrollPane);
-
+    textAreaScrollPane.setViewportView(textArea);
     scrollablePanel = new ScrollablePanel();
     scrollablePanel.setLayout(new BoxLayout(scrollablePanel, BoxLayout.Y_AXIS));
-
     scrollPane = new ScrollPane(scrollablePanel);
     generateButton = new GenerateButton();
-
-    displayLandingView();
   }
 }

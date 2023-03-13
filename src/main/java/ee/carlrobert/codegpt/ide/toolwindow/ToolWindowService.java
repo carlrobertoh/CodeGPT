@@ -6,12 +6,9 @@ import com.intellij.openapi.project.Project;
 import ee.carlrobert.codegpt.client.ClientFactory;
 import ee.carlrobert.codegpt.ide.conversations.ConversationsState;
 import ee.carlrobert.codegpt.ide.conversations.message.Message;
-import ee.carlrobert.codegpt.ide.settings.SettingsState;
 import ee.carlrobert.codegpt.ide.toolwindow.components.SyntaxTextArea;
-import icons.Icons;
 import java.util.List;
 import javax.swing.SwingWorker;
-import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.jetbrains.annotations.NotNull;
 
 public class ToolWindowService implements LafManagerListener {
@@ -43,7 +40,7 @@ public class ToolWindowService implements LafManagerListener {
             this::publish,
             (completedConversation) -> {
               ConversationsState.getInstance().saveConversation(completedConversation);
-              stopGenerating(prompt, textArea, project);
+              chatToolWindow.stopGenerating(prompt, textArea, project);
             },
             (errorMessage) -> {
               var currentConversation = ConversationsState.getCurrentConversation();
@@ -53,7 +50,7 @@ public class ToolWindowService implements LafManagerListener {
                 ConversationsState.getInstance().saveConversation(currentConversation);
               }
               textArea.append(errorMessage);
-              stopGenerating(prompt, textArea, project);
+              chatToolWindow.stopGenerating(prompt, textArea, project);
             });
         return null;
       }
@@ -71,27 +68,5 @@ public class ToolWindowService implements LafManagerListener {
         }
       }
     }.execute();
-  }
-
-  public void sendMessage(String prompt, Project project) {
-    chatToolWindow.addIconLabel(Icons.DefaultImageIcon, "ChatGPT:");
-
-    var settings = SettingsState.getInstance();
-    if (settings.isGPTOptionSelected && settings.apiKey.isEmpty()) {
-      chatToolWindow.notifyMissingCredential(project, "API key not provided.");
-    } else if (settings.isChatGPTOptionSelected && settings.accessToken.isEmpty()) {
-      chatToolWindow.notifyMissingCredential(project, "Access token not provided.");
-    } else {
-      var textArea = new SyntaxTextArea(true, true, SyntaxConstants.SYNTAX_STYLE_MARKDOWN);
-      chatToolWindow.addTextArea(textArea);
-      startRequest(prompt, textArea, project);
-    }
-  }
-
-  private void stopGenerating(String prompt, SyntaxTextArea textArea, Project project) {
-    chatToolWindow.stopGenerating(textArea, () -> {
-      sendMessage(prompt, project);
-      chatToolWindow.scrollToBottom();
-    });
   }
 }

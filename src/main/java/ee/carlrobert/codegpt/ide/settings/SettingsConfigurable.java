@@ -40,17 +40,15 @@ public class SettingsConfigurable implements Configurable {
         settingsComponent.isProxyAuthSelected() != settings.isProxyAuthSelected ||
         !settingsComponent.getProxyAuthUsername().equals(settings.proxyUsername) ||
         !settingsComponent.getProxyAuthPassword().equals(settings.proxyPassword) ||
-        !settingsComponent.getChatCompletionBaseModel().equals(settings.chatCompletionBaseModel) ||
-        !settingsComponent.getTextCompletionBaseModel().equals(settings.textCompletionBaseModel) ||
         !settingsComponent.getReverseProxyUrl().equals(settings.reverseProxyUrl) ||
-        isClientChanged(settings);
+        isModelChanged(settings) || isClientChanged(settings);
   }
 
   @Override
   public void apply() {
     var settings = SettingsState.getInstance();
 
-    if (isClientChanged(settings)) {
+    if (isClientChanged(settings) || isModelChanged(settings)) {
       ConversationsState.getInstance().setCurrentConversation(null);
     }
 
@@ -101,5 +99,10 @@ public class SettingsConfigurable implements Configurable {
         settingsComponent.isChatCompletionOptionSelected() != settings.isChatCompletionOptionSelected ||
         settingsComponent.isTextCompletionOptionSelected() != settings.isTextCompletionOptionSelected ||
         settingsComponent.isChatGPTOptionSelected() != settings.isChatGPTOptionSelected;
+  }
+
+  private boolean isModelChanged(SettingsState settings) {
+    return !settingsComponent.getChatCompletionBaseModel().equals(settings.chatCompletionBaseModel) ||
+        !settingsComponent.getTextCompletionBaseModel().equals(settings.textCompletionBaseModel);
   }
 }

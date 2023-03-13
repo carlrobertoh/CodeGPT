@@ -7,7 +7,8 @@ public enum BaseModel {
   CURIE("text-curie-001", "Curie - Fast and efficient"),
   DAVINCI("text-davinci-003", "Davinci - Most powerful (Default)"),
   CHATGPT("gpt-3.5-turbo", "ChatGPT - Most recent and capable model (Default)"),
-  CHATGPT_SNAPSHOT("gpt-3.5-turbo-0301", "ChatGPT - Snapshot of gpt-3.5-turbo from March 1st 2023");
+  CHATGPT_SNAPSHOT("gpt-3.5-turbo-0301", "ChatGPT - Snapshot of gpt-3.5-turbo from March 1st 2023"),
+  UNOFFICIAL_CHATGPT("text-davinci-002-render-sha", "Unofficial ChatGPT");
 
   private final String code;
   private final String description;

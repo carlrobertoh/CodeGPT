@@ -1,5 +1,5 @@
 <idea-plugin>
-    <id>ee.carlrobert.codegpt</id>
+    <id>ee.carlrobert.chatgpt</id>
     <name>CodeGPT</name>
     <vendor email="carlrobertoh@gmail.com" url="https://carlrobert.ee">Carl-Robert Linnupuu</vendor>
     <description><![CDATA[
@@ -93,7 +93,8 @@
     <change-notes>
         <![CDATA[
       <ul>
-        <li>Fix revere proxy</li>
+        <li>Replace model on conversation change</li>
+        <li>Start new conversation on model change</li>
       </ul>
     ]]>
     </change-notes>

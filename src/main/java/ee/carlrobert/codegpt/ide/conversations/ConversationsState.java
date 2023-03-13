@@ -6,6 +6,7 @@ import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import com.intellij.util.xmlb.annotations.OptionTag;
+import ee.carlrobert.codegpt.client.BaseModel;
 import ee.carlrobert.codegpt.client.ClientCode;
 import ee.carlrobert.codegpt.client.ClientFactory;
 import ee.carlrobert.codegpt.ide.conversations.converter.ConversationConverter;
@@ -57,12 +58,13 @@ public class ConversationsState implements PersistentStateComponent<Conversation
     var conversation = new Conversation();
     conversation.setId(UUID.randomUUID());
     conversation.setClientCode(clientCode);
-    if (!settings.isChatGPTOptionSelected) {
-      if (settings.isChatCompletionOptionSelected) {
-        conversation.setModel(settings.chatCompletionBaseModel);
-      } else {
-        conversation.setModel(settings.textCompletionBaseModel);
-      }
+    if (settings.isChatGPTOptionSelected) {
+      conversation.setModel(BaseModel.UNOFFICIAL_CHATGPT);
+    } else {
+      conversation.setModel(
+          settings.isChatCompletionOptionSelected ?
+              settings.chatCompletionBaseModel :
+              settings.textCompletionBaseModel);
     }
     conversation.setCreatedOn(LocalDateTime.now());
     conversation.setUpdatedOn(LocalDateTime.now());

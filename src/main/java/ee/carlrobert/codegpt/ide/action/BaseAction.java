@@ -41,6 +41,6 @@ public abstract class BaseAction extends AnAction {
     chatToolWindow.show();
     chatToolWindow.clearWindow();
     chatToolWindow.displayUserMessage(prompt);
-    toolWindowService.sendMessage(prompt, project);
+    chatToolWindow.sendMessage(prompt, project);
   }
 }

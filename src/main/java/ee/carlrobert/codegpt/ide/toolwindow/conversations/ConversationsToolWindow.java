@@ -3,8 +3,10 @@ package ee.carlrobert.codegpt.ide.toolwindow.conversations;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
 import com.intellij.ui.components.JBScrollPane;
+import ee.carlrobert.codegpt.client.ClientCode;
 import ee.carlrobert.codegpt.ide.conversations.Conversation;
 import ee.carlrobert.codegpt.ide.conversations.ConversationsState;
+import ee.carlrobert.codegpt.ide.settings.SettingsState;
 import ee.carlrobert.codegpt.ide.toolwindow.ContentManagerService;
 import ee.carlrobert.codegpt.ide.toolwindow.ToolWindowService;
 import java.util.Comparator;
@@ -43,6 +45,7 @@ public class ConversationsToolWindow {
   private void addContent(Conversation conversation) {
     var mainPanel = new RootConversationPanel(() -> {
       ConversationsState.getInstance().setCurrentConversation(conversation);
+      changeSettings(conversation);
       ContentManagerService.getInstance(project).displayChatTab();
       project.getService(ToolWindowService.class)
           .getChatToolWindow()
@@ -54,6 +57,24 @@ public class ConversationsToolWindow {
     mainPanel.setBackground(conversationsToolWindowContent.getBackground());
     mainPanel.add(new ConversationPanel(conversation, isSelected));
     scrollablePanel.add(mainPanel);
+  }
+
+  private void changeSettings(Conversation conversation) {
+    var settings = SettingsState.getInstance();
+    var isUnofficialClient = ClientCode.UNOFFICIAL_CHATGPT.equals(conversation.getClientCode());
+    settings.isChatGPTOptionSelected = isUnofficialClient;
+    settings.isGPTOptionSelected = !isUnofficialClient;
+
+    if (!isUnofficialClient) {
+      var isChatCompletions = ClientCode.CHAT_COMPLETIONS.equals(conversation.getClientCode());
+      if (isChatCompletions) {
+        settings.chatCompletionBaseModel = conversation.getModel();
+      } else {
+        settings.textCompletionBaseModel = conversation.getModel();
+      }
+      settings.isChatCompletionOptionSelected = isChatCompletions;
+      settings.isTextCompletionOptionSelected = !isChatCompletions;
+    }
   }
 
   private void createUIComponents() {

@@ -30,14 +30,12 @@ public class ProjectToolWindowFactory implements ToolWindowFactory, DumbAware {
       }
     });
 
-    displayRecentConversationIfPresent(toolWindowService, contentManagerService.isChatTabSelected());
-  }
-
-  private void displayRecentConversationIfPresent(ToolWindowService toolWindowService, boolean isChatTabSelected) {
-    var conversation = ConversationsState.getCurrentConversation();
-    if (conversation != null) {
-      if (isChatTabSelected) {
-        toolWindowService.getChatToolWindow().displayConversation(conversation);
+    if (contentManagerService.isChatTabSelected()) {
+      var conversation = ConversationsState.getCurrentConversation();
+      if (conversation == null) {
+        chatToolWindow.displayLandingView();
+      } else {
+        chatToolWindow.displayConversation(conversation);
       }
     }
   }

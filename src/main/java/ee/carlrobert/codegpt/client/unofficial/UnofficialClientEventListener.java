@@ -16,12 +16,8 @@ import okhttp3.Response;
 import okhttp3.sse.EventSource;
 import okhttp3.sse.EventSourceListener;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class UnofficialClientEventListener extends EventSourceListener {
-
-  private static final Logger LOG = LoggerFactory.getLogger(UnofficialClientEventListener.class);
 
   private final ObjectMapper objectMapper = new ObjectMapper();
   private final String prompt;
