@@ -5,12 +5,22 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.NlsActions;
 import ee.carlrobert.codegpt.ide.conversations.ConversationsState;
 import ee.carlrobert.codegpt.ide.toolwindow.ContentManagerService;
 import ee.carlrobert.codegpt.ide.toolwindow.ToolWindowService;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class BaseAction extends AnAction {
+
+  public BaseAction() {
+    super();
+  }
+
+  public BaseAction(@Nullable @NlsActions.ActionText String text) {
+    super(text);
+  }
 
   protected abstract void actionPerformed(Project project, Editor editor, String selectedText);
 
@@ -34,7 +44,7 @@ public abstract class BaseAction extends AnAction {
 
   protected void sendMessage(@NotNull Project project, String prompt) {
     ConversationsState.getInstance().startConversation();
-    ContentManagerService.getInstance(project).displayChatTab();
+    project.getService(ContentManagerService.class).displayChatTab();
 
     var toolWindowService = project.getService(ToolWindowService.class);
     var chatToolWindow = toolWindowService.getChatToolWindow();

@@ -216,5 +216,6 @@ public class ChatGptToolWindow {
     scrollablePanel.setLayout(new BoxLayout(scrollablePanel, BoxLayout.Y_AXIS));
     scrollPane = new ScrollPane(scrollablePanel);
     generateButton = new GenerateButton();
+    displayLandingView();
   }
 }

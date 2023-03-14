@@ -93,8 +93,7 @@
     <change-notes>
         <![CDATA[
       <ul>
-        <li>Replace model on conversation change</li>
-        <li>Start new conversation on model change</li>
+        <li>Fix ToolWindow's NPE when reopening the project</li>
       </ul>
     ]]>
     </change-notes>
@@ -113,6 +112,7 @@
         <applicationService serviceImplementation="ee.carlrobert.codegpt.ide.settings.SettingsState"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.ide.conversations.ConversationsState"/>
         <projectService serviceImplementation="ee.carlrobert.codegpt.ide.toolwindow.ToolWindowService"/>
+        <projectService serviceImplementation="ee.carlrobert.codegpt.ide.toolwindow.ContentManagerService"/>
         <toolWindow id="CodeGPT" icon="Icons.ToolWindowIcon" anchor="right"
             factoryClass="ee.carlrobert.codegpt.ide.toolwindow.ProjectToolWindowFactory"/>
     </extensions>

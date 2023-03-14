@@ -19,7 +19,7 @@ public class AskAction extends AnAction {
     var project = event.getProject();
     if (project != null) {
       ConversationsState.getInstance().startConversation();
-      ContentManagerService.getInstance(project).displayChatTab();
+      project.getService(ContentManagerService.class).displayChatTab();
       var chatToolWindow = project.getService(ToolWindowService.class).getChatToolWindow();
       chatToolWindow.show();
       chatToolWindow.displayLandingView();

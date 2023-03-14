@@ -18,7 +18,8 @@ public class ProjectToolWindowFactory implements ToolWindowFactory, DumbAware {
     var conversationsToolWindow = new ConversationsToolWindow(project);
     toolWindowService.setChatToolWindow(chatToolWindow);
 
-    var contentManagerService = ContentManagerService.getInstance(project);
+    var contentManagerService = project.getService(ContentManagerService.class);
+    contentManagerService.setToolWindow(toolWindow);
     contentManagerService.addContent(chatToolWindow.getContent(), "Chat");
     contentManagerService.addContent(conversationsToolWindow.getContent(), "Conversation History");
     toolWindow.addContentManagerListener(new ContentManagerListener() {
