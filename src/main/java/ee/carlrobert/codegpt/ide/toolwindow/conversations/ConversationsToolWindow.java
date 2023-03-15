@@ -46,7 +46,7 @@ public class ConversationsToolWindow {
     var mainPanel = new RootConversationPanel(() -> {
       ConversationsState.getInstance().setCurrentConversation(conversation);
       changeSettings(conversation);
-      project.getService(ContentManagerService.class).displayChatTab();
+      project.getService(ContentManagerService.class).displayChatTab(project);
       project.getService(ToolWindowService.class)
           .getChatToolWindow()
           .displayConversation(conversation);

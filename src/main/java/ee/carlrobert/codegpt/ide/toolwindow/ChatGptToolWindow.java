@@ -9,7 +9,6 @@ import com.intellij.icons.AllIcons;
 import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
-import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBScrollPane;
 import ee.carlrobert.codegpt.ide.conversations.Conversation;
@@ -45,7 +44,6 @@ public class ChatGptToolWindow {
 
   private static final List<SyntaxTextArea> textAreas = new ArrayList<>();
   private final Project project;
-  private final ToolWindow toolWindow;
   private JPanel chatGptToolWindowContent;
   private ScrollPane scrollPane;
   private ScrollablePanel scrollablePanel;
@@ -54,17 +52,12 @@ public class ChatGptToolWindow {
   private GenerateButton generateButton;
   private boolean isLandingViewVisible;
 
-  public ChatGptToolWindow(@NotNull Project project, @NotNull ToolWindow toolWindow) {
+  public ChatGptToolWindow(@NotNull Project project) {
     this.project = project;
-    this.toolWindow = toolWindow;
   }
 
   public JPanel getContent() {
     return chatGptToolWindowContent;
-  }
-
-  public void show() {
-    toolWindow.show();
   }
 
   public void displayUserMessage(String userMessage) {

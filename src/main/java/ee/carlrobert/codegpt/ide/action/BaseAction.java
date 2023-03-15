@@ -48,11 +48,8 @@ public abstract class BaseAction extends AnAction {
 
   protected void sendMessage(@NotNull Project project, String prompt) {
     ConversationsState.getInstance().startConversation();
-    project.getService(ContentManagerService.class).displayChatTab();
-
-    var toolWindowService = project.getService(ToolWindowService.class);
-    var chatToolWindow = toolWindowService.getChatToolWindow();
-    chatToolWindow.show();
+    project.getService(ContentManagerService.class).displayChatTab(project);
+    var chatToolWindow = project.getService(ToolWindowService.class).getChatToolWindow();
     chatToolWindow.clearWindow();
     chatToolWindow.displayUserMessage(prompt);
     chatToolWindow.sendMessage(prompt, project);

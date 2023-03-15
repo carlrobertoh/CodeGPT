@@ -2,50 +2,35 @@ package ee.carlrobert.codegpt.ide.toolwindow;
 
 import static java.util.Objects.requireNonNull;
 
-import com.intellij.openapi.wm.ToolWindow;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.content.Content;
-import com.intellij.ui.content.ContentFactory;
 import com.intellij.ui.content.ContentManager;
 import java.util.Arrays;
 import java.util.Optional;
-import javax.swing.JPanel;
 import org.jetbrains.annotations.NotNull;
 
 public class ContentManagerService {
 
-  private ToolWindow toolWindow;
-
-  public void setToolWindow(@NotNull ToolWindow toolWindow) {
-    this.toolWindow = toolWindow;
-  }
-
-  public void addContent(JPanel panel, String displayName) {
-    ContentFactory contentFactory = ContentFactory.SERVICE.getInstance();
-    Content content = contentFactory.createContent(panel, displayName, false);
-    toolWindow.getContentManager().addContent(content);
-  }
-
-  public void displayChatTab() {
-    var contentManager = getContentManager();
-    tryFindChatTabContent().ifPresentOrElse(
+  public void displayChatTab(@NotNull Project project) {
+    var toolWindow = requireNonNull(ToolWindowManager.getInstance(project).getToolWindow("CodeGPT"));
+    toolWindow.show();
+    var contentManager = toolWindow.getContentManager();
+    tryFindChatTabContent(contentManager).ifPresentOrElse(
         contentManager::setSelectedContent,
-        () -> contentManager.setSelectedContent(requireNonNull(getContentManager().getContent(0)))
+        () -> contentManager.setSelectedContent(requireNonNull(contentManager.getContent(0)))
     );
   }
 
-  public Optional<Content> tryFindChatTabContent() {
-    return Arrays.stream(getContentManager().getContents())
+  public Optional<Content> tryFindChatTabContent(ContentManager contentManager) {
+    return Arrays.stream(contentManager.getContents())
         .filter(content -> "Chat".equals(content.getTabName()))
         .findFirst();
   }
 
-  public boolean isChatTabSelected() {
-    return tryFindChatTabContent()
-        .filter(content -> getContentManager().isSelected(content))
+  public boolean isChatTabSelected(ContentManager contentManager) {
+    return tryFindChatTabContent(contentManager)
+        .filter(contentManager::isSelected)
         .isPresent();
-  }
-
-  private ContentManager getContentManager() {
-    return toolWindow.getContentManager();
   }
 }
