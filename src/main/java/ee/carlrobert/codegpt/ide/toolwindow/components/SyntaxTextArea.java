@@ -1,6 +1,6 @@
 package ee.carlrobert.codegpt.ide.toolwindow.components;
 
-import static ee.carlrobert.codegpt.ide.toolwindow.components.SwingUtils.createIconButton;
+import static ee.carlrobert.codegpt.ide.util.SwingUtils.createIconButton;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.util.ui.JBUI;

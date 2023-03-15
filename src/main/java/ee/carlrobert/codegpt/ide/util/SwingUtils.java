@@ -1,6 +1,7 @@
-package ee.carlrobert.codegpt.ide.toolwindow.components;
+package ee.carlrobert.codegpt.ide.util;
 
 import com.intellij.ui.JBColor;
+import com.intellij.util.ui.UI;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -10,7 +11,9 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.Icon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 
@@ -63,6 +66,21 @@ public class SwingUtils {
         onEnter.run();
       }
     });
+  }
+
+  public static void setEqualLabelWidths(JPanel firstPanel, JPanel secondPanel) {
+    var firstLabel = firstPanel.getComponents()[0];
+    var secondLabel = secondPanel.getComponents()[0];
+    if (firstLabel instanceof JLabel && secondLabel instanceof JLabel) {
+      firstLabel.setPreferredSize(secondLabel.getPreferredSize());
+    }
+  }
+
+  public static JPanel createPanel(JComponent component, String label, boolean resizeX) {
+    return UI.PanelFactory.panel(component)
+        .withLabel(label)
+        .resizeX(resizeX)
+        .createPanel();
   }
 }
 

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.codegpt.ide.conversations.Conversation;
 import ee.carlrobert.codegpt.ide.conversations.ConversationsState;
-import ee.carlrobert.codegpt.ide.settings.SettingsState;
+import ee.carlrobert.codegpt.ide.settings.advanced.AdvancedSettingsState;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.Map;
@@ -63,7 +63,7 @@ public abstract class Client {
         .connectTimeout(60, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS);
 
-    var settings = SettingsState.getInstance();
+    var settings = AdvancedSettingsState.getInstance();
     var proxyHost = settings.proxyHost;
     var proxyPort = settings.proxyPort;
     if (!proxyHost.isEmpty() && proxyPort != 0) {

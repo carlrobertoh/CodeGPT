@@ -6,7 +6,6 @@ import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import ee.carlrobert.codegpt.client.BaseModel;
-import java.net.Proxy;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,12 +24,6 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
   public boolean isChatGPTOptionSelected;
   public boolean isChatCompletionOptionSelected = true;
   public boolean isTextCompletionOptionSelected;
-  public String proxyHost = "";
-  public int proxyPort;
-  public Proxy.Type proxyType = Proxy.Type.SOCKS;
-  public boolean isProxyAuthSelected;
-  public String proxyUsername;
-  public String proxyPassword;
 
   public static SettingsState getInstance() {
     return ApplicationManager.getApplication().getService(SettingsState.class);

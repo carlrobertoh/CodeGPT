@@ -1,6 +1,6 @@
 package ee.carlrobert.codegpt.ide.toolwindow.conversations;
 
-import static ee.carlrobert.codegpt.ide.toolwindow.components.SwingUtils.justifyLeft;
+import static ee.carlrobert.codegpt.ide.util.SwingUtils.justifyLeft;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.ui.JBColor;

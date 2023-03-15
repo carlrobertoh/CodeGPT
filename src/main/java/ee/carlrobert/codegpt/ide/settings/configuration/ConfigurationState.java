@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 
 @State(
     name = "ee.carlrobert.codegpt.ide.settings.configuration.ConfigurationState",
-    storages = @Storage("CodeGPTConfigurationTemp.xml")
+    storages = @Storage("CodeGPTConfiguration.xml")
 )
 public class ConfigurationState implements PersistentStateComponent<ConfigurationState> {
 

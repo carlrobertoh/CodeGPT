@@ -1,6 +1,6 @@
 package ee.carlrobert.codegpt.ide.action;
 
-import static ee.carlrobert.codegpt.ide.toolwindow.components.SwingUtils.addShiftEnterInputMap;
+import static ee.carlrobert.codegpt.ide.util.SwingUtils.addShiftEnterInputMap;
 
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.ui.components.JBScrollPane;

@@ -1,26 +1,20 @@
 package ee.carlrobert.codegpt.ide.settings;
 
 import com.intellij.openapi.ui.ComboBox;
-import com.intellij.ui.PortField;
 import com.intellij.ui.TitledSeparator;
-import com.intellij.ui.components.JBCheckBox;
-import com.intellij.ui.components.JBPasswordField;
 import com.intellij.ui.components.JBRadioButton;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.client.BaseModel;
+import ee.carlrobert.codegpt.ide.util.SwingUtils;
 import java.awt.Desktop;
-import java.awt.event.ItemEvent;
 import java.io.IOException;
-import java.net.Proxy;
 import java.net.URISyntaxException;
 import java.util.List;
-import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.event.HyperlinkEvent;
 import org.jetbrains.annotations.NotNull;
@@ -37,12 +31,6 @@ public class SettingsComponent {
   private final JBRadioButton useChatCompletionRadioButton;
   private final JBRadioButton useTextCompletionRadioButton;
   private final JBRadioButton useChatGPTRadioButton;
-  private final ComboBox<Proxy.Type> proxyTypeComboBox;
-  private final JBTextField proxyHostField;
-  private final PortField proxyPortField;
-  private final JBCheckBox proxyAuthCheckbox;
-  private final JBTextField proxyAuthUsername;
-  private final JBPasswordField proxyAuthPassword;
 
   public SettingsComponent(SettingsState settings) {
     apiKeyField = new JBTextField(settings.apiKey, 1);
@@ -60,29 +48,11 @@ public class SettingsComponent {
             BaseModel.ADA,
         },
         settings.textCompletionBaseModel);
-    proxyPortField = new PortField();
     reverseProxyComboBox = new ComboBox<>(new String[] {
         "https://bypass.duti.tech/api/conversation",
     }, 400);
     reverseProxyComboBox.setSelectedItem(settings.reverseProxyUrl);
     accessTokenField = new JBTextField(settings.accessToken, 1);
-    proxyTypeComboBox = new ComboBox<>(new Proxy.Type[] {
-        Proxy.Type.SOCKS,
-        Proxy.Type.HTTP,
-        Proxy.Type.DIRECT,
-    });
-    proxyTypeComboBox.setSelectedItem(settings.proxyType);
-    proxyHostField = new JBTextField(settings.proxyHost, 20);
-    proxyAuthCheckbox = new JBCheckBox("Proxy authentication");
-    proxyAuthUsername = new JBTextField(20);
-    proxyAuthUsername.setEnabled(settings.isProxyAuthSelected);
-    proxyAuthPassword = new JBPasswordField();
-    proxyAuthPassword.setColumns(20);
-    proxyAuthPassword.setEnabled(settings.isProxyAuthSelected);
-    proxyAuthCheckbox.addItemListener(itemEvent -> {
-      proxyAuthUsername.setEnabled(itemEvent.getStateChange() == ItemEvent.SELECTED);
-      proxyAuthPassword.setEnabled(itemEvent.getStateChange() == ItemEvent.SELECTED);
-    });
     useGPTRadioButton = new JBRadioButton("Use OpenAI's official API (recommended)", settings.isGPTOptionSelected);
     useChatCompletionRadioButton = new JBRadioButton("Use chat completion", settings.isChatCompletionOptionSelected);
     useTextCompletionRadioButton = new JBRadioButton("Use text completion", settings.isTextCompletionOptionSelected);
@@ -92,9 +62,6 @@ public class SettingsComponent {
         .addVerticalGap(8)
         .addComponent(createMainSelectionForm())
         .addVerticalGap(8)
-        .addComponent(new TitledSeparator("HTTP/SOCKS Proxy"))
-        .addVerticalGap(8)
-        .addComponent(createProxySettingsForm())
         .addComponentFillVertically(new JPanel(), 0)
         .getPanel();
 
@@ -168,54 +135,6 @@ public class SettingsComponent {
     reverseProxyComboBox.setSelectedItem(reverseProxyUrl);
   }
 
-  public String getProxyHost() {
-    return proxyHostField.getText().trim();
-  }
-
-  public void setProxyHost(String host) {
-    proxyHostField.setText(host.trim());
-  }
-
-  public int getProxyPort() {
-    return proxyPortField.getNumber();
-  }
-
-  public void setProxyPort(int port) {
-    proxyPortField.setNumber(port);
-  }
-
-  public Proxy.Type getProxyType() {
-    return (Proxy.Type) proxyTypeComboBox.getSelectedItem();
-  }
-
-  public void setProxyType(Proxy.Type type) {
-    proxyTypeComboBox.setSelectedItem(type);
-  }
-
-  public boolean isProxyAuthSelected() {
-    return proxyAuthCheckbox.isSelected();
-  }
-
-  public void setUseProxyAuthentication(boolean isProxyAuthSelected) {
-    proxyAuthCheckbox.setSelected(isProxyAuthSelected);
-  }
-
-  public String getProxyAuthUsername() {
-    return proxyAuthUsername.getText().trim();
-  }
-
-  public void setProxyUsername(String proxyUsername) {
-    proxyAuthUsername.setText(proxyUsername);
-  }
-
-  public String getProxyAuthPassword() {
-    return new String(proxyAuthPassword.getPassword());
-  }
-
-  public void setProxyPassword(String proxyPassword) {
-    proxyAuthPassword.setText(proxyPassword);
-  }
-
   public BaseModel getTextCompletionBaseModel() {
     return (BaseModel) textCompletionBaseModelComboBox.getSelectedItem();
   }
@@ -240,10 +159,10 @@ public class SettingsComponent {
         .createPanel();
     apiKeyFieldPanel.setBorder(JBUI.Borders.emptyLeft(8));
 
-    var chatCompletionModelsPanel = createPanel(chatCompletionBaseModelComboBox, "Model:", false);
+    var chatCompletionModelsPanel = SwingUtils.createPanel(chatCompletionBaseModelComboBox, "Model:", false);
     chatCompletionModelsPanel.setBorder(JBUI.Borders.emptyLeft(24));
 
-    var textCompletionModelsPanel = createPanel(textCompletionBaseModelComboBox, "Model:", false);
+    var textCompletionModelsPanel = SwingUtils.createPanel(textCompletionBaseModelComboBox, "Model:", false);
     textCompletionModelsPanel.setBorder(JBUI.Borders.emptyLeft(24));
 
     var gptRadioPanel = FormBuilder.createFormBuilder()
@@ -277,7 +196,7 @@ public class SettingsComponent {
   }
 
   private JPanel createSecondSelectionForm() {
-    var reverseProxyUrlPanel = createPanel(reverseProxyComboBox, "Reverse proxy url:", false);
+    var reverseProxyUrlPanel = SwingUtils.createPanel(reverseProxyComboBox, "Reverse proxy url:", false);
     var accessTokenPanel = UI.PanelFactory.panel(accessTokenField)
         .withLabel("Access token:")
         .withComment(
@@ -285,7 +204,7 @@ public class SettingsComponent {
         .withCommentHyperlinkListener(this::handleHyperlinkClicked)
         .createPanel();
 
-    setEqualLabelWidths(accessTokenPanel, reverseProxyUrlPanel);
+    SwingUtils.setEqualLabelWidths(accessTokenPanel, reverseProxyUrlPanel);
 
     var panel = FormBuilder.createFormBuilder()
         .addComponent(reverseProxyUrlPanel)
@@ -294,48 +213,6 @@ public class SettingsComponent {
         .getPanel();
     panel.setBorder(JBUI.Borders.emptyLeft(24));
     return panel;
-  }
-
-  private JComponent createProxySettingsForm() {
-    var proxyPanel = new JPanel();
-    proxyPanel.setBorder(JBUI.Borders.emptyLeft(16));
-    proxyPanel.setLayout(new BoxLayout(proxyPanel, BoxLayout.PAGE_AXIS));
-
-    var proxyTypePanel = createPanel(proxyTypeComboBox, "Proxy:", false);
-    var proxyHostPanel = createPanel(proxyHostField, "Host name:", false);
-    var proxyPortPanel = createPanel(proxyPortField, "Port:", false);
-    setEqualLabelWidths(proxyTypePanel, proxyHostPanel);
-    setEqualLabelWidths(proxyPortPanel, proxyHostPanel);
-
-    proxyPanel.add(proxyTypePanel);
-    proxyPanel.add(proxyHostPanel);
-    proxyPanel.add(proxyPortPanel);
-    proxyPanel.add(UI.PanelFactory
-        .panel(proxyAuthCheckbox)
-        .createPanel());
-
-    var proxyUsernamePanel = createPanel(proxyAuthUsername, "Username:", false);
-    var proxyPasswordPanel = createPanel(proxyAuthPassword, "Password:", false);
-    setEqualLabelWidths(proxyPasswordPanel, proxyUsernamePanel);
-
-    var proxyAuthPanel = FormBuilder.createFormBuilder()
-        .addVerticalGap(8)
-        .addComponent(proxyUsernamePanel)
-        .addComponent(proxyPasswordPanel)
-        .getPanel();
-    proxyAuthPanel.setBorder(JBUI.Borders.emptyLeft(16));
-    proxyPanel.add(proxyAuthPanel);
-
-    return proxyPanel;
-  }
-
-  // TODO: Find better way of doing this
-  private void setEqualLabelWidths(JPanel firstPanel, JPanel secondPanel) {
-    var firstLabel = firstPanel.getComponents()[0];
-    var secondLabel = secondPanel.getComponents()[0];
-    if (firstLabel instanceof JLabel && secondLabel instanceof JLabel) {
-      firstLabel.setPreferredSize(secondLabel.getPreferredSize());
-    }
   }
 
   private void registerButtons() {
@@ -375,18 +252,6 @@ public class SettingsComponent {
     }
     accessTokenField.setEnabled(isUseChatGPTOption);
     reverseProxyComboBox.setEnabled(isUseChatGPTOption);
-  }
-
-
-  private JPanel createPanel(JComponent component, String label) {
-    return createPanel(component, label, true);
-  }
-
-  private JPanel createPanel(JComponent component, String label, boolean resizeX) {
-    return UI.PanelFactory.panel(component)
-        .withLabel(label)
-        .resizeX(resizeX)
-        .createPanel();
   }
 
   private void handleHyperlinkClicked(HyperlinkEvent event) {

@@ -1,7 +1,7 @@
 package ee.carlrobert.codegpt.ide.toolwindow.components;
 
-import static ee.carlrobert.codegpt.ide.toolwindow.components.SwingUtils.addShiftEnterInputMap;
-import static ee.carlrobert.codegpt.ide.toolwindow.components.SwingUtils.createIconButton;
+import static ee.carlrobert.codegpt.ide.util.SwingUtils.addShiftEnterInputMap;
+import static ee.carlrobert.codegpt.ide.util.SwingUtils.createIconButton;
 
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBTextArea;

@@ -1,8 +1,8 @@
 package ee.carlrobert.codegpt.ide.toolwindow;
 
-import static ee.carlrobert.codegpt.ide.toolwindow.components.SwingUtils.createIconLabel;
-import static ee.carlrobert.codegpt.ide.toolwindow.components.SwingUtils.createTextArea;
-import static ee.carlrobert.codegpt.ide.toolwindow.components.SwingUtils.justifyLeft;
+import static ee.carlrobert.codegpt.ide.util.SwingUtils.createIconLabel;
+import static ee.carlrobert.codegpt.ide.util.SwingUtils.createTextArea;
+import static ee.carlrobert.codegpt.ide.util.SwingUtils.justifyLeft;
 import static java.lang.String.format;
 
 import com.intellij.icons.AllIcons;

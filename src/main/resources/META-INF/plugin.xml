@@ -112,8 +112,11 @@
             instance="ee.carlrobert.codegpt.ide.settings.SettingsConfigurable"/>
         <applicationConfigurable id="settings.codegpt.configuration" parentId="settings.codegpt" displayName="Configuration"
             instance="ee.carlrobert.codegpt.ide.settings.configuration.ConfigurationConfigurable"/>
+        <applicationConfigurable id="settings.codegpt.advanced" parentId="settings.codegpt" displayName="Advanced Settings"
+            instance="ee.carlrobert.codegpt.ide.settings.advanced.AdvancedSettingsConfigurable"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.ide.settings.SettingsState"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.ide.settings.configuration.ConfigurationState"/>
+        <applicationService serviceImplementation="ee.carlrobert.codegpt.ide.settings.advanced.AdvancedSettingsState"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.ide.conversations.ConversationsState"/>
         <projectService serviceImplementation="ee.carlrobert.codegpt.ide.toolwindow.ToolWindowService"/>
         <projectService serviceImplementation="ee.carlrobert.codegpt.ide.toolwindow.ContentManagerService"/>

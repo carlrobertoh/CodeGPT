@@ -34,12 +34,6 @@ public class SettingsConfigurable implements Configurable {
     var settings = SettingsState.getInstance();
     return !settingsComponent.getApiKey().equals(settings.apiKey) ||
         !settingsComponent.getAccessToken().equals(settings.accessToken) ||
-        !settingsComponent.getProxyHost().equals(settings.proxyHost) ||
-        settingsComponent.getProxyPort() != settings.proxyPort ||
-        !settingsComponent.getProxyType().equals(settings.proxyType) ||
-        settingsComponent.isProxyAuthSelected() != settings.isProxyAuthSelected ||
-        !settingsComponent.getProxyAuthUsername().equals(settings.proxyUsername) ||
-        !settingsComponent.getProxyAuthPassword().equals(settings.proxyPassword) ||
         !settingsComponent.getReverseProxyUrl().equals(settings.reverseProxyUrl) ||
         isModelChanged(settings) || isClientChanged(settings);
   }
@@ -55,12 +49,6 @@ public class SettingsConfigurable implements Configurable {
     settings.isGPTOptionSelected = settingsComponent.isGPTOptionSelected();
     settings.isChatGPTOptionSelected = settingsComponent.isChatGPTOptionSelected();
     settings.accessToken = settingsComponent.getAccessToken();
-    settings.proxyHost = settingsComponent.getProxyHost();
-    settings.proxyPort = settingsComponent.getProxyPort();
-    settings.proxyType = settingsComponent.getProxyType();
-    settings.isProxyAuthSelected = settingsComponent.isProxyAuthSelected();
-    settings.proxyUsername = settingsComponent.getProxyAuthUsername();
-    settings.proxyPassword = settingsComponent.getProxyAuthPassword();
     settings.apiKey = settingsComponent.getApiKey();
     settings.reverseProxyUrl = settingsComponent.getReverseProxyUrl();
     settings.chatCompletionBaseModel = settingsComponent.getChatCompletionBaseModel();
@@ -77,12 +65,6 @@ public class SettingsConfigurable implements Configurable {
     settingsComponent.setUseTextCompletionSelected(settings.isTextCompletionOptionSelected);
     settingsComponent.setUseChatGPTOptionSelected(settings.isChatGPTOptionSelected);
     settingsComponent.setAccessToken(settings.accessToken);
-    settingsComponent.setProxyHost(settings.proxyHost);
-    settingsComponent.setProxyPort(settings.proxyPort);
-    settingsComponent.setProxyType(settings.proxyType);
-    settingsComponent.setUseProxyAuthentication(settings.isProxyAuthSelected);
-    settingsComponent.setProxyUsername(settings.proxyUsername);
-    settingsComponent.setProxyPassword(settings.proxyPassword);
     settingsComponent.setApiKey(settings.apiKey);
     settingsComponent.setReverseProxyUrl(settings.reverseProxyUrl);
     settingsComponent.setChatCompletionBaseModel(settings.chatCompletionBaseModel);
