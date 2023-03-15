@@ -20,7 +20,7 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
   public String accessToken = "";
   public String reverseProxyUrl = "";
   public BaseModel textCompletionBaseModel = BaseModel.DAVINCI;
-  public BaseModel chatCompletionBaseModel = BaseModel.CHATGPT;
+  public BaseModel chatCompletionBaseModel = BaseModel.CHATGPT_3_5;
   public boolean isGPTOptionSelected = true;
   public boolean isChatGPTOptionSelected;
   public boolean isChatCompletionOptionSelected = true;

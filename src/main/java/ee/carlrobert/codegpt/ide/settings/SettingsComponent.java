@@ -48,8 +48,8 @@ public class SettingsComponent {
     apiKeyField = new JBTextField(settings.apiKey, 1);
     chatCompletionBaseModelComboBox = new BaseModelComboBox(
         new BaseModel[] {
-            BaseModel.CHATGPT,
-            BaseModel.CHATGPT_SNAPSHOT,
+            BaseModel.CHATGPT_3_5,
+            BaseModel.CHATGPT_3_5_SNAPSHOT,
         },
         settings.textCompletionBaseModel);
     textCompletionBaseModelComboBox = new BaseModelComboBox(

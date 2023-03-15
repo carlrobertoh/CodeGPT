@@ -9,13 +9,17 @@ import com.intellij.openapi.util.NlsActions;
 import ee.carlrobert.codegpt.ide.conversations.ConversationsState;
 import ee.carlrobert.codegpt.ide.toolwindow.ContentManagerService;
 import ee.carlrobert.codegpt.ide.toolwindow.ToolWindowService;
+import javax.swing.Icon;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class BaseAction extends AnAction {
 
-  public BaseAction() {
-    super();
+  public BaseAction(
+      @Nullable @NlsActions.ActionText String text,
+      @Nullable @NlsActions.ActionDescription String description,
+      @Nullable Icon icon) {
+    super(text, description, icon);
   }
 
   public BaseAction(@Nullable @NlsActions.ActionText String text) {
