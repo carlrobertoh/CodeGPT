@@ -94,6 +94,8 @@
         <![CDATA[
       <ul>
         <li>Fix ToolWindow's NPE when reopening the project</li>
+        <li>Ability to create/override actions</li>
+        <li>Move proxy settings to a new settings panel (requires to enter them again)</li>
       </ul>
     ]]>
     </change-notes>
