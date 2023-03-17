@@ -38,6 +38,7 @@ public class SettingsComponent {
         new BaseModel[] {
             BaseModel.CHATGPT,
             BaseModel.CHATGPT_SNAPSHOT,
+            BaseModel.CHATGPT_4
         },
         settings.textCompletionBaseModel);
     textCompletionBaseModelComboBox = new BaseModelComboBox(
@@ -57,6 +58,7 @@ public class SettingsComponent {
     useChatCompletionRadioButton = new JBRadioButton("Use chat completion", settings.isChatCompletionOptionSelected);
     useTextCompletionRadioButton = new JBRadioButton("Use text completion", settings.isTextCompletionOptionSelected);
     useChatGPTRadioButton = new JBRadioButton("Use ChatGPT's unofficial API (unstable)", settings.isChatGPTOptionSelected);
+    useChatGPTRadioButton.setEnabled(false);
     mainPanel = FormBuilder.createFormBuilder()
         .addComponent(new TitledSeparator("Integration Preference"))
         .addVerticalGap(8)
