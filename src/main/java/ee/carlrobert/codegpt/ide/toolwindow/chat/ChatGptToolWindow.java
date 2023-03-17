@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.ide.toolwindow;
+package ee.carlrobert.codegpt.ide.toolwindow.chat;
 
 import static ee.carlrobert.codegpt.ide.util.SwingUtils.createIconLabel;
 import static ee.carlrobert.codegpt.ide.util.SwingUtils.createTextArea;
@@ -6,20 +6,27 @@ import static ee.carlrobert.codegpt.ide.util.SwingUtils.justifyLeft;
 import static java.lang.String.format;
 
 import com.intellij.icons.AllIcons;
+import com.intellij.openapi.actionSystem.ActionManager;
+import com.intellij.openapi.actionSystem.ActionToolbar;
+import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
+import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBScrollPane;
 import ee.carlrobert.codegpt.ide.conversations.Conversation;
 import ee.carlrobert.codegpt.ide.conversations.ConversationsState;
 import ee.carlrobert.codegpt.ide.settings.SettingsConfigurable;
 import ee.carlrobert.codegpt.ide.settings.SettingsState;
+import ee.carlrobert.codegpt.ide.toolwindow.ToolWindowService;
 import ee.carlrobert.codegpt.ide.toolwindow.components.GenerateButton;
 import ee.carlrobert.codegpt.ide.toolwindow.components.LandingView;
 import ee.carlrobert.codegpt.ide.toolwindow.components.ScrollPane;
 import ee.carlrobert.codegpt.ide.toolwindow.components.SyntaxTextArea;
 import ee.carlrobert.codegpt.ide.toolwindow.components.TextArea;
+import ee.carlrobert.codegpt.ide.toolwindow.chat.actions.CreateNewConversationAction;
+import ee.carlrobert.codegpt.ide.toolwindow.chat.actions.OpenInEditorAction;
 import icons.Icons;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -57,7 +64,21 @@ public class ChatGptToolWindow {
   }
 
   public JPanel getContent() {
-    return chatGptToolWindowContent;
+    SimpleToolWindowPanel panel = new SimpleToolWindowPanel(true);
+    panel.setContent(chatGptToolWindowContent);
+
+    var actionGroup = new DefaultActionGroup("TOOLBAR_ACTION_GROUP", false);
+    actionGroup.add(new CreateNewConversationAction());
+    actionGroup.addSeparator();
+    actionGroup.add(new OpenInEditorAction());
+
+    // TODO: Data usage not enabled in stream mode https://community.openai.com/t/usage-info-in-api-responses/18862/11
+    // actionGroup.add(new TokenToolbarLabelAction());
+
+    ActionToolbar actionToolbar = ActionManager.getInstance()
+        .createActionToolbar("NAVIGATION_BAR_TOOLBAR", actionGroup, false);
+    panel.setToolbar(actionToolbar.getComponent());
+    return panel;
   }
 
   public void displayUserMessage(String userMessage) {
@@ -205,10 +226,12 @@ public class ChatGptToolWindow {
         BorderFactory.createEmptyBorder(0, 5, 0, 10)));
     textArea = new TextArea(this::handleSubmit, textAreaScrollPane);
     textAreaScrollPane.setViewportView(textArea);
+
     scrollablePanel = new ScrollablePanel();
     scrollablePanel.setLayout(new BoxLayout(scrollablePanel, BoxLayout.Y_AXIS));
     scrollPane = new ScrollPane(scrollablePanel);
+
     generateButton = new GenerateButton();
-    displayLandingView();
+    // displayLandingView();
   }
 }

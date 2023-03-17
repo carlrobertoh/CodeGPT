@@ -3,6 +3,7 @@ package ee.carlrobert.codegpt.client.official;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import okhttp3.Call;
@@ -11,8 +12,12 @@ import okhttp3.Response;
 import okhttp3.sse.EventSource;
 import okhttp3.sse.EventSourceListener;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class CompletionClientEventListener extends EventSourceListener {
+
+  private static final Logger LOG = LoggerFactory.getLogger(CompletionClientEventListener.class);
 
   private static final String DEFAULT_ERROR_MSG = "Something went wrong. Please try again later.";
 
@@ -71,6 +76,11 @@ public abstract class CompletionClientEventListener extends EventSourceListener 
       return;
     }
 
+    if (ex instanceof SocketTimeoutException) {
+      onFailure.accept("Request timed out. This may be due to the server being overloaded.");
+      return;
+    }
+
     try {
       if (response == null) {
         onFailure.accept(DEFAULT_ERROR_MSG);
@@ -83,6 +93,7 @@ public abstract class CompletionClientEventListener extends EventSourceListener 
         onFailure.accept(error.getError().getMessage());
       }
     } catch (IOException e) {
+      LOG.error("Something went wrong.", ex);
       onFailure.accept(DEFAULT_ERROR_MSG);
     }
   }

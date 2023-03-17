@@ -1,7 +1,11 @@
 package ee.carlrobert.codegpt.ide.toolwindow.conversations;
 
+import com.intellij.openapi.actionSystem.ActionManager;
+import com.intellij.openapi.actionSystem.ActionToolbar;
+import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
+import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.ui.components.JBScrollPane;
 import ee.carlrobert.codegpt.client.ClientCode;
 import ee.carlrobert.codegpt.ide.conversations.Conversation;
@@ -9,7 +13,10 @@ import ee.carlrobert.codegpt.ide.conversations.ConversationsState;
 import ee.carlrobert.codegpt.ide.settings.SettingsState;
 import ee.carlrobert.codegpt.ide.toolwindow.ContentManagerService;
 import ee.carlrobert.codegpt.ide.toolwindow.ToolWindowService;
-import java.util.Comparator;
+import ee.carlrobert.codegpt.ide.toolwindow.conversations.actions.ClearAllConversationsAction;
+import ee.carlrobert.codegpt.ide.toolwindow.conversations.actions.DeleteConversationAction;
+import ee.carlrobert.codegpt.ide.toolwindow.conversations.actions.MoveDownAction;
+import ee.carlrobert.codegpt.ide.toolwindow.conversations.actions.MoveUpAction;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -29,17 +36,29 @@ public class ConversationsToolWindow {
   }
 
   public JPanel getContent() {
-    return conversationsToolWindowContent;
+    SimpleToolWindowPanel panel = new SimpleToolWindowPanel(true);
+    panel.setContent(conversationsToolWindowContent);
+
+    var actionGroup = new DefaultActionGroup("TOOLBAR_ACTION_GROUP", false);
+    actionGroup.add(new MoveDownAction(this::refresh));
+    actionGroup.add(new MoveUpAction(this::refresh));
+    actionGroup.addSeparator();
+    actionGroup.add(new DeleteConversationAction(this::refresh));
+    actionGroup.add(new ClearAllConversationsAction(this::refresh));
+
+    ActionToolbar actionToolbar = ActionManager.getInstance()
+        .createActionToolbar("NAVIGATION_BAR_TOOLBAR", actionGroup, true);
+    panel.setToolbar(actionToolbar.getComponent());
+    return panel;
   }
 
   public void refresh() {
     scrollablePanel.removeAll();
     ConversationsState.getInstance()
-        .conversationsContainer
-        .getConversationsMapping()
-        .forEach((key, value) -> value.stream()
-            .sorted(Comparator.comparing(Conversation::getUpdatedOn).reversed())
-            .forEach(this::addContent));
+        .getSortedConversations()
+        .forEach(this::addContent);
+    scrollablePanel.revalidate();
+    scrollablePanel.repaint();
   }
 
   private void addContent(Conversation conversation) {

@@ -6,6 +6,7 @@ import com.intellij.openapi.project.Project;
 import ee.carlrobert.codegpt.client.ClientFactory;
 import ee.carlrobert.codegpt.ide.conversations.ConversationsState;
 import ee.carlrobert.codegpt.ide.conversations.message.Message;
+import ee.carlrobert.codegpt.ide.toolwindow.chat.ChatGptToolWindow;
 import ee.carlrobert.codegpt.ide.toolwindow.components.SyntaxTextArea;
 import java.util.List;
 import javax.swing.SwingWorker;

@@ -14,7 +14,11 @@ import ee.carlrobert.codegpt.ide.conversations.converter.ConversationsConverter;
 import ee.carlrobert.codegpt.ide.settings.SettingsState;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -51,6 +55,16 @@ public class ConversationsState implements PersistentStateComponent<Conversation
 
   public static @Nullable Conversation getCurrentConversation() {
     return getInstance().currentConversation;
+  }
+
+  public List<Conversation> getSortedConversations() {
+    return conversationsContainer
+        .getConversationsMapping()
+        .values()
+        .stream()
+        .flatMap(List::stream)
+        .sorted(Comparator.comparing(Conversation::getUpdatedOn).reversed())
+        .collect(Collectors.toList());
   }
 
   public Conversation createConversation(ClientCode clientCode) {
@@ -100,5 +114,54 @@ public class ConversationsState implements PersistentStateComponent<Conversation
     setCurrentConversation(conversation);
     addConversation(conversation);
     return conversation;
+  }
+
+  public void clearAll() {
+    conversationsContainer.getConversationsMapping().clear();
+    currentConversation = null;
+  }
+
+  public Optional<Conversation> getNextConversation() {
+    return tryGetNextOrPreviousConversation(true);
+  }
+
+  public Optional<Conversation> getPreviousConversation() {
+    return tryGetNextOrPreviousConversation(false);
+  }
+
+  private Optional<Conversation> tryGetNextOrPreviousConversation(boolean isNext) {
+    if (currentConversation != null) {
+      var sortedConversations = getSortedConversations();
+      for (int i = 0; i < sortedConversations.size(); i++) {
+        var conversation = sortedConversations.get(i);
+        if (conversation != null && conversation.getId().equals(currentConversation.getId())) {
+          var nextIndex = isNext ? i + 1 : i - 1;
+          if (isNext ? nextIndex < sortedConversations.size() : nextIndex != -1) {
+            return Optional.of(sortedConversations.get(nextIndex));
+          }
+        }
+      }
+    }
+    return Optional.empty();
+  }
+
+  public void deleteSelectedConversation() {
+    var nextConversation = getNextConversation();
+    if (nextConversation.isEmpty()) {
+      nextConversation = getPreviousConversation();
+    }
+
+    var iterator = conversationsContainer.getConversationsMapping()
+        .get(currentConversation.getClientCode())
+        .listIterator();
+    while (iterator.hasNext()) {
+      var next = iterator.next();
+      if (next.getId().equals(currentConversation.getId())) {
+        iterator.remove();
+        break;
+      }
+    }
+
+    nextConversation.ifPresent(this::setCurrentConversation);
   }
 }
