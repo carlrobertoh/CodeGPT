@@ -87,6 +87,29 @@ public abstract class Client {
     }
   }
 
+  public Subscription getSubscription() {
+    try {
+      var response = buildClient().newCall(new Request.Builder()
+              .url("https://api.openai.com/dashboard/billing/subscription")
+              .headers(Headers.of(Map.of(
+                  "Content-Type", "application/json",
+                  "Authorization", "Bearer " + SettingsState.getInstance().apiKey
+              )))
+              .get()
+              .build())
+          .execute();
+
+      if (response.body() == null) {
+        return null;
+      }
+
+      return objectMapper.readValue(response.body().string(), Subscription.class);
+    } catch (IOException ex) {
+      LOG.error("Unable to retrieve subscription info", ex);
+      return null;
+    }
+  }
+
   public OkHttpClient buildClient() {
     OkHttpClient.Builder builder = new OkHttpClient.Builder()
         .connectTimeout(60, TimeUnit.SECONDS)

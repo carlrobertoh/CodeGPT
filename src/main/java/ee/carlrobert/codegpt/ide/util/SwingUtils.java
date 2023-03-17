@@ -1,10 +1,11 @@
 package ee.carlrobert.codegpt.ide.util;
 
 import com.intellij.ui.JBColor;
+import com.intellij.util.ui.JBFont;
+import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -15,26 +16,26 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
+import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
 
 public class SwingUtils {
 
-  public static JTextArea createTextArea(String selectedText) {
-    var textArea = new JTextArea();
-    textArea.append(selectedText);
-    textArea.setLineWrap(true);
-    textArea.setEditable(false);
-    textArea.setFont(textArea.getFont().deriveFont(Font.ITALIC));
-    textArea.setWrapStyleWord(true);
-    textArea.setBackground(JBColor.PanelBackground);
-    return textArea;
+  public static JTextPane createTextPane(String selectedText) {
+    var textPane = new JTextPane();
+    textPane.setText(selectedText);
+    textPane.setEditable(false);
+    textPane.setBackground(JBColor.PanelBackground);
+    textPane.setBorder(JBUI.Borders.emptyLeft(4));
+    return textPane;
   }
 
   public static JLabel createIconLabel(Icon icon, String text) {
     var iconLabel = new JLabel(icon);
     iconLabel.setText(text);
-    iconLabel.setFont(iconLabel.getFont().deriveFont(iconLabel.getFont().getStyle() | Font.BOLD));
+    iconLabel.setFont(JBFont.h4());
     iconLabel.setIconTextGap(8);
+    iconLabel.setBorder(JBUI.Borders.emptyLeft(4));
     return iconLabel;
   }
 

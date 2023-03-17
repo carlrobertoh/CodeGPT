@@ -1,7 +1,7 @@
 package ee.carlrobert.codegpt.ide.toolwindow.chat;
 
 import static ee.carlrobert.codegpt.ide.util.SwingUtils.createIconLabel;
-import static ee.carlrobert.codegpt.ide.util.SwingUtils.createTextArea;
+import static ee.carlrobert.codegpt.ide.util.SwingUtils.createTextPane;
 import static ee.carlrobert.codegpt.ide.util.SwingUtils.justifyLeft;
 import static java.lang.String.format;
 
@@ -84,8 +84,9 @@ public class ChatGptToolWindow {
   }
 
   public void displayUserMessage(String userMessage) {
-    addIconLabel(AllIcons.General.User, "User:");
-    scrollablePanel.add(createTextArea(userMessage));
+    addIconLabel(AllIcons.General.User, SettingsState.getInstance().accountName);
+
+    scrollablePanel.add(createTextPane(userMessage));
     scrollablePanel.revalidate();
     scrollablePanel.repaint();
   }
@@ -234,6 +235,5 @@ public class ChatGptToolWindow {
     scrollPane = new ScrollPane(scrollablePanel);
 
     generateButton = new GenerateButton();
-    // displayLandingView();
   }
 }

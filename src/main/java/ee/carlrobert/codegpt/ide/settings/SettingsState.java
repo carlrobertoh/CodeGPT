@@ -24,6 +24,7 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
   public boolean isChatGPTOptionSelected;
   public boolean isChatCompletionOptionSelected = true;
   public boolean isTextCompletionOptionSelected;
+  public String accountName = "User";
 
   public static SettingsState getInstance() {
     return ApplicationManager.getApplication().getService(SettingsState.class);

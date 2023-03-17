@@ -3,6 +3,7 @@ package ee.carlrobert.codegpt.ide.toolwindow.components;
 import static ee.carlrobert.codegpt.ide.util.SwingUtils.createIconButton;
 
 import com.intellij.icons.AllIcons;
+import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 import java.awt.Toolkit;
@@ -36,6 +37,7 @@ public class SyntaxTextArea extends RSyntaxTextArea {
     try {
       Theme theme = Theme.load(getClass().getResourceAsStream(
           UIUtil.isUnderDarcula() ? baseThemePath + "dark.xml" : baseThemePath + "idea.xml"));
+      theme.baseFont = JBFont.regular();
       theme.apply(this);
     } catch (IOException e) {
       e.printStackTrace();

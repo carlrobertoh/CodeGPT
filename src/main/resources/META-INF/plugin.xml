@@ -93,6 +93,7 @@
     <change-notes>
         <![CDATA[
       <ul>
+        <li>Relative fonts</li>
         <li>Disable support for unofficial reverse proxy</li>
         <li>New Chat toolbar</li>
             <ul>
