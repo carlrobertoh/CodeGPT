@@ -93,10 +93,20 @@
     <change-notes>
         <![CDATA[
       <ul>
-        <li>Fix ToolWindow's NPE when reopening the project</li>
-        <li>Ability to create/override actions</li>
-        <li>Move proxy settings to a new settings panel (requires to enter them again)</li>
-        <li>Revert chat completion model enum renaming</li>
+        <li>Disable support for unofficial reverse proxy</li>
+        <li>New Chat toolbar</li>
+            <ul>
+                <li>Start new conversations</li>
+                <li>Open the conversation in the editor</li>
+                <li>Display credit usage</li>
+            </ul>
+        <li>
+        <li>New Conversation History toolbar</li>
+            <ul>
+                <li>Delete all conversations</li>
+                <li>Delete single conversation</li>
+            </ul>
+        <li>Add GPT-4 model</li>
       </ul>
     ]]>
     </change-notes>
