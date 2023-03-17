@@ -6,10 +6,11 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.ui.content.ContentManagerEvent;
 import com.intellij.ui.content.ContentManagerListener;
+import com.intellij.ui.jcef.JBCefBrowser;
 import ee.carlrobert.codegpt.ide.conversations.ConversationsState;
 import ee.carlrobert.codegpt.ide.toolwindow.chat.ChatGptToolWindow;
 import ee.carlrobert.codegpt.ide.toolwindow.conversations.ConversationsToolWindow;
-import javax.swing.JPanel;
+import javax.swing.JComponent;
 import org.jetbrains.annotations.NotNull;
 
 public class ProjectToolWindowFactory implements ToolWindowFactory, DumbAware {
@@ -23,6 +24,7 @@ public class ProjectToolWindowFactory implements ToolWindowFactory, DumbAware {
     var contentManagerService = project.getService(ContentManagerService.class);
     addContent(toolWindow, chatToolWindow.getContent(), "Chat");
     addContent(toolWindow, conversationsToolWindow.getContent(), "Conversation History");
+    addContent(toolWindow, new JBCefBrowser("https://chat.openai.com/chat").getComponent(), "Browser");
     toolWindow.addContentManagerListener(new ContentManagerListener() {
       public void selectionChanged(@NotNull ContentManagerEvent event) {
         var content = event.getContent();
@@ -42,7 +44,7 @@ public class ProjectToolWindowFactory implements ToolWindowFactory, DumbAware {
     }
   }
 
-  public void addContent(ToolWindow toolWindow, JPanel panel, String displayName) {
+  public void addContent(ToolWindow toolWindow, JComponent panel, String displayName) {
     var contentManager = toolWindow.getContentManager();
     var content = contentManager.getFactory().createContent(panel, displayName, false);
     contentManager.addContent(content);
