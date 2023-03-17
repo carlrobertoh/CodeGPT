@@ -4,7 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.codegpt.ide.conversations.Conversation;
 import ee.carlrobert.codegpt.ide.conversations.ConversationsState;
+import ee.carlrobert.codegpt.ide.settings.SettingsState;
 import ee.carlrobert.codegpt.ide.settings.advanced.AdvancedSettingsState;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.Map;
@@ -19,8 +21,12 @@ import okhttp3.RequestBody;
 import okhttp3.sse.EventSource;
 import okhttp3.sse.EventSourceListener;
 import okhttp3.sse.EventSources;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class Client {
+
+  private static final Logger LOG = LoggerFactory.getLogger(Client.class);
 
   private final ObjectMapper objectMapper = new ObjectMapper();
   private final ClientCode clientCode;
@@ -56,6 +62,29 @@ public abstract class Client {
         .newEventSource(
             buildHttpRequest(prompt),
             getEventSourceListener(onMessageReceived, onComplete, onFailure));
+  }
+
+  public CreditUsage getCreditGrants() {
+    try {
+      var response = buildClient().newCall(new Request.Builder()
+              .url("https://api.openai.com/dashboard/billing/credit_grants")
+              .headers(Headers.of(Map.of(
+                  "Content-Type", "application/json",
+                  "Authorization", "Bearer " + SettingsState.getInstance().apiKey
+              )))
+              .get()
+              .build())
+          .execute();
+
+      if (response.body() == null) {
+        return null;
+      }
+
+      return objectMapper.readValue(response.body().string(), CreditUsage.class);
+    } catch (IOException ex) {
+      LOG.error("Unable to retrieve credit info", ex);
+      return null;
+    }
   }
 
   public OkHttpClient buildClient() {

@@ -20,13 +20,14 @@ import ee.carlrobert.codegpt.ide.conversations.ConversationsState;
 import ee.carlrobert.codegpt.ide.settings.SettingsConfigurable;
 import ee.carlrobert.codegpt.ide.settings.SettingsState;
 import ee.carlrobert.codegpt.ide.toolwindow.ToolWindowService;
+import ee.carlrobert.codegpt.ide.toolwindow.chat.actions.CreateNewConversationAction;
+import ee.carlrobert.codegpt.ide.toolwindow.chat.actions.OpenInEditorAction;
+import ee.carlrobert.codegpt.ide.toolwindow.chat.actions.UsageToolbarLabelAction;
 import ee.carlrobert.codegpt.ide.toolwindow.components.GenerateButton;
 import ee.carlrobert.codegpt.ide.toolwindow.components.LandingView;
 import ee.carlrobert.codegpt.ide.toolwindow.components.ScrollPane;
 import ee.carlrobert.codegpt.ide.toolwindow.components.SyntaxTextArea;
 import ee.carlrobert.codegpt.ide.toolwindow.components.TextArea;
-import ee.carlrobert.codegpt.ide.toolwindow.chat.actions.CreateNewConversationAction;
-import ee.carlrobert.codegpt.ide.toolwindow.chat.actions.OpenInEditorAction;
 import icons.Icons;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -69,8 +70,9 @@ public class ChatGptToolWindow {
 
     var actionGroup = new DefaultActionGroup("TOOLBAR_ACTION_GROUP", false);
     actionGroup.add(new CreateNewConversationAction());
-    actionGroup.addSeparator();
     actionGroup.add(new OpenInEditorAction());
+    actionGroup.addSeparator();
+    actionGroup.add(new UsageToolbarLabelAction());
 
     // TODO: Data usage not enabled in stream mode https://community.openai.com/t/usage-info-in-api-responses/18862/11
     // actionGroup.add(new TokenToolbarLabelAction());
