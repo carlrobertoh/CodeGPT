@@ -3,91 +3,53 @@
     <name>CodeGPT</name>
     <vendor email="carlrobertoh@gmail.com" url="https://carlrobert.ee">Carl-Robert Linnupuu</vendor>
     <description><![CDATA[
-    <p>
-      <b>CodeGPT as your copilot to level up your developer experience.</b>
-    </p>
+    <p><b>CodeGPT as your copilot to level up your developer experience.</b></p>
     <p>
       This is the perfect assistant for any programmer who wants to improve their coding skills
       and make more efficient use of the time.
     </p>
-    <br />
-    <p>
-      <b>
-        🔥🔥🔥 The official chat completions API has been released, and it is now the default option for
-        this plugin! 🔥🔥🔥
-      </b>
-    </p>
-    <br />
-    <p>Available commands</p>
+    <h2>Getting Started</h2>
+    <h3>Prerequisites</h3>
+    <p>In order to use the extension, you need to have the API key configured. You can find the API key in your <a href="https://platform.openai.com/account/api-keys">User Settings</a>.</p>
+    <h3>API Key Configuration</h3>
+    <p>After the plugin has been successfully installed, the API key needs to be configured.
+    <p>You can configure the key by going to the plugin's settings via the <b>File | Settings/Preferences | Tools | CodeGPT</b>. On the settings panel simply click
+    on the API key field, paste the key obtained from the OpenAI website and click <b>Apply/OK</b>.</p>
+    <h2>Features</h2>
     <ul>
-      <li>
-        <b>Custom Prompt:</b> Prefix the selected code with a custom prompt. Right-click on a
-        selected block of code, run command.
-      </li>
-      <li>
-        <b>Find Bugs:</b> Analyze and find bugs in your code. Right-click on a selected block of
-        code, run command.
-      </li>
-      <li>
-        <b>Add Tests:</b> Write tests for you. Right-click on a selected block of code, run
-        command.
-      </li>
-      <li>
-        <b>Refactor:</b> Refactor your code. Right-click on a selected block of code, run command.
-      </li>
-      <li>
-        <b>Optimize:</b> Add suggestions to your code to improve. Right-click on a selected block
-        of code, run command.
-      </li>
-      <li>
-        <b>Explain:</b> Explain the selected code. Right-click on a selected block of code, run
-        command.
-      </li>
+      <li><b>Ask ChatGPT</b> - Ask anything</li>
+      <li><b>Conversation History</b> - View recent conversation history and restore previous sessions, making it easy to pick up where you left off</li>
+      <li><b>Predefined Actions</b> - Create your own code actions or override the existing ones, saving time rewriting the same prompt repeatedly</li>
+      <li><b>Custom Prompt</b> - Create a custom prompt for your selected code. The previous prompt will be remembered for subsequent questions</li>
+      <li><b>Stop/Regenerate response</b> - Stop the response generation or re-generate a new response from the existing query</li>
     </ul>
-    <br />
-    <p>Available APIs:</p>
+    <h2>Available Models:</h2>
     <ul>
       <li>
-        <b>OpenAI's official API</b>
+        <b>Chat Completion</b>
         <ul>
-          <li>
-            <b>Chat completion</b>
-            <ul>
-              <li>
-                <b>ChatGPT</b> - Most recent and capable model (Default)
-              </li>
-              <li>
-                <b>ChatGPT Snapshot</b> - Snapshot version from March 1st 2023
-              </li>
-            </ul>
-          </li>
-          <li>
-            <b>Text completion</b>
-            <ul>
-              <li>
-                <b>Davinci</b> - Most powerful (Default)
-              </li>
-              <li>
-                <b>Curie</b> - Fast and efficient
-              </li>
-              <li>
-                <b>Babbage</b> - Powerful
-              </li>
-              <li>
-                <b>Ada</b> - Fastest
-              </li>
-            </ul>
-          </li>
+          <li><b>GPT - 3.5 Turbo</b> (Default)</li>
+          <li><b>GPT - 4.0</b> (Requires access which is behind the waitlist approval process)</li>
         </ul>
       </li>
       <li>
-        <b>ChatGPT's unofficial API (free)</b>
+        <b>Text Completion</b>
+        <ul>
+          <li>
+            <b>Davinci</b> - Most powerful (Default)
+          </li>
+          <li>
+            <b>Curie</b> - Fast and efficient
+          </li>
+          <li>
+            <b>Babbage</b> - Powerful
+          </li>
+          <li>
+            <b>Ada</b> - Fastest
+          </li>
+        </ul>
       </li>
     </ul>
-    <br />
-    <p>
-      Before using the plugin, it is necessary to configure the API key in the <b>Settings → Tools → CodeGPT</b>
-    </p>
   ]]></description>
 
     <change-notes>
@@ -95,18 +57,21 @@
       <ul>
         <li>Relative fonts</li>
         <li>Disable support for unofficial reverse proxy</li>
-        <li>New Chat toolbar</li>
+        <li>
+            New Chat toolbar
             <ul>
                 <li>Start new conversations</li>
                 <li>Open the conversation in the editor</li>
                 <li>Display credit usage</li>
             </ul>
+        </li>
         <li>
-        <li>New Conversation History toolbar</li>
+            New Conversation History toolbar
             <ul>
                 <li>Delete all conversations</li>
                 <li>Delete single conversation</li>
             </ul>
+        </li>
         <li>Add GPT-4 model</li>
       </ul>
     ]]>
