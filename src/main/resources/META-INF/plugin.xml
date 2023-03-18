@@ -132,6 +132,7 @@
         <applicationService serviceImplementation="ee.carlrobert.codegpt.ide.settings.configuration.ConfigurationState"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.ide.settings.advanced.AdvancedSettingsState"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.ide.conversations.ConversationsState"/>
+        <applicationService serviceImplementation="ee.carlrobert.codegpt.ide.account.AccountDetailsState"/>
         <projectService serviceImplementation="ee.carlrobert.codegpt.ide.toolwindow.ToolWindowService"/>
         <projectService serviceImplementation="ee.carlrobert.codegpt.ide.toolwindow.ContentManagerService"/>
         <toolWindow id="CodeGPT" icon="Icons.ToolWindowIcon" anchor="right"

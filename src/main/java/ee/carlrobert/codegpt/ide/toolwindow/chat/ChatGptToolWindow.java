@@ -15,6 +15,7 @@ import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBScrollPane;
+import ee.carlrobert.codegpt.ide.account.AccountDetailsState;
 import ee.carlrobert.codegpt.ide.conversations.Conversation;
 import ee.carlrobert.codegpt.ide.conversations.ConversationsState;
 import ee.carlrobert.codegpt.ide.settings.SettingsConfigurable;
@@ -84,7 +85,7 @@ public class ChatGptToolWindow {
   }
 
   public void displayUserMessage(String userMessage) {
-    addIconLabel(AllIcons.General.User, SettingsState.getInstance().accountName);
+    addIconLabel(AllIcons.General.User, AccountDetailsState.getInstance().accountName);
 
     scrollablePanel.add(createTextPane(userMessage));
     scrollablePanel.revalidate();

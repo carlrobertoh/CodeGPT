@@ -87,27 +87,16 @@ public abstract class Client {
     }
   }
 
-  public Subscription getSubscription() {
-    try {
-      var response = buildClient().newCall(new Request.Builder()
-              .url("https://api.openai.com/dashboard/billing/subscription")
-              .headers(Headers.of(Map.of(
-                  "Content-Type", "application/json",
-                  "Authorization", "Bearer " + SettingsState.getInstance().apiKey
-              )))
-              .get()
-              .build())
-          .execute();
+  public void getCreditUsageAsync(Consumer<CreditUsage> responseConsumer) {
+    buildClient()
+        .newCall(buildRequest("https://api.openai.com/dashboard/billing/credit_grants"))
+        .enqueue(new CreditUsageCallback(responseConsumer));
+  }
 
-      if (response.body() == null) {
-        return null;
-      }
-
-      return objectMapper.readValue(response.body().string(), Subscription.class);
-    } catch (IOException ex) {
-      LOG.error("Unable to retrieve subscription info", ex);
-      return null;
-    }
+  public void getSubscriptionAsync(Consumer<Subscription> responseConsumer) {
+    buildClient()
+        .newCall(buildRequest("https://api.openai.com/dashboard/billing/subscription"))
+        .enqueue(new SubscriptionCallback(responseConsumer));
   }
 
   public OkHttpClient buildClient() {
@@ -162,5 +151,16 @@ public abstract class Client {
 
   public ClientCode getCode() {
     return clientCode;
+  }
+
+  private Request buildRequest(String url) {
+    return new Request.Builder()
+        .url(url)
+        .headers(Headers.of(Map.of(
+            "Content-Type", "application/json",
+            "Authorization", "Bearer " + SettingsState.getInstance().apiKey
+        )))
+        .get()
+        .build();
   }
 }
