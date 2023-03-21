@@ -28,10 +28,6 @@ public class SyntaxTextArea extends RSyntaxTextArea {
     cb.install(this);
   }
 
-  public void hideCaret() {
-    getCaret().setVisible(false);
-  }
-
   public void changeStyleViaThemeXml() {
     var baseThemePath = "/org/fife/ui/rsyntaxtextarea/themes/";
     try {
@@ -42,6 +38,14 @@ public class SyntaxTextArea extends RSyntaxTextArea {
     } catch (IOException e) {
       e.printStackTrace();
     }
+  }
+
+  public void clear() {
+    removeAll();
+    setText("");
+    getCaret().setVisible(true);
+    revalidate();
+    repaint();
   }
 
   private void setStyles(boolean isReadOnly, boolean withBlockCaret, String syntax) {

@@ -129,16 +129,28 @@ public class ChatGptToolWindow {
   }
 
   public void sendMessage(String prompt, Project project) {
-    addIconLabel(Icons.DefaultImageIcon, "ChatGPT");
+    sendMessage(prompt, project, false);
+  }
+
+  public void sendMessage(String prompt, Project project, boolean isRetry) {
+    if (!isRetry) {
+      addIconLabel(Icons.DefaultImageIcon, "ChatGPT");
+    }
 
     var settings = SettingsState.getInstance();
     if (settings.apiKey.isEmpty()) {
       notifyMissingCredential(project, "API key not provided.");
     } else {
-      var textArea = new SyntaxTextArea(true, true, SyntaxConstants.SYNTAX_STYLE_MARKDOWN);
-      addTextArea(textArea);
+      SyntaxTextArea textArea;
+      if (isRetry) {
+        textArea = textAreas.get(textAreas.size() - 1);
+        textArea.clear();
+      } else {
+        textArea = new SyntaxTextArea(true, true, SyntaxConstants.SYNTAX_STYLE_MARKDOWN);
+        addTextArea(textArea);
+      }
       project.getService(ToolWindowService.class)
-          .startRequest(prompt, textArea, project);
+          .startRequest(prompt, textArea, project, isRetry);
     }
   }
 
@@ -177,11 +189,11 @@ public class ChatGptToolWindow {
 
   public void stopGenerating(String prompt, SyntaxTextArea textArea, Project project) {
     generateButton.setMode(GenerateButton.Mode.REFRESH, () -> {
-      sendMessage(prompt, project);
+      sendMessage(prompt, project, true);
       scrollToBottom();
     });
     textArea.displayCopyButton();
-    textArea.hideCaret();
+    textArea.getCaret().setVisible(false);
     scrollToBottom();
   }
 
