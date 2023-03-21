@@ -20,8 +20,7 @@ dependencies {
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.14.2")
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.2")
   implementation("com.fifesoft:rsyntaxtextarea:3.3.2")
-  implementation("com.squareup.okhttp3:okhttp:4.10.0")
-  implementation("com.squareup.okhttp3:okhttp-sse:4.10.0")
+  implementation("ee.carlrobert:openai-client:1.0.1")
 }
 
 java {

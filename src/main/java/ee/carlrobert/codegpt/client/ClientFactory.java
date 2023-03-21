@@ -1,19 +1,47 @@
 package ee.carlrobert.codegpt.client;
 
-import ee.carlrobert.codegpt.client.unofficial.UnofficialChatGPTClient;
-import ee.carlrobert.codegpt.client.official.chat.ChatCompletionClient;
-import ee.carlrobert.codegpt.client.official.text.TextCompletionClient;
-import ee.carlrobert.codegpt.ide.settings.SettingsState;
+import ee.carlrobert.codegpt.settings.SettingsState;
+import ee.carlrobert.codegpt.settings.advanced.AdvancedSettingsState;
+import ee.carlrobert.openai.client.OpenAIClient;
+import ee.carlrobert.openai.client.ProxyAuthenticator;
+import ee.carlrobert.openai.client.billing.BillingClient;
+import ee.carlrobert.openai.client.completion.chat.ChatCompletionClient;
+import ee.carlrobert.openai.client.completion.text.TextCompletionClient;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.util.concurrent.TimeUnit;
 
 public class ClientFactory {
 
-  public Client getClient() {
-    if (SettingsState.getInstance().isGPTOptionSelected) {
-      if (SettingsState.getInstance().isChatCompletionOptionSelected) {
-        return ChatCompletionClient.getInstance();
+  public static BillingClient getBillingClient() {
+    return getClientBuilder().buildBillingClient();
+  }
+
+  public static ChatCompletionClient getChatCompletionClient() {
+    return getClientBuilder().buildChatCompletionClient();
+  }
+
+  public static TextCompletionClient getTextCompletionClient() {
+    return getClientBuilder().buildTextCompletionClient();
+  }
+
+  private static OpenAIClient.Builder getClientBuilder() {
+    var builder = new OpenAIClient.Builder(SettingsState.getInstance().apiKey) // TODO: ENV var?
+        .setConnectTimeout(60L, TimeUnit.SECONDS)
+        .setReadTimeout(30L, TimeUnit.SECONDS);
+
+    var settings = AdvancedSettingsState.getInstance();
+    var proxyHost = settings.proxyHost;
+    var proxyPort = settings.proxyPort;
+    if (!proxyHost.isEmpty() && proxyPort != 0) {
+      builder.setProxy(new Proxy(settings.proxyType, new InetSocketAddress(proxyHost, proxyPort)));
+      if (settings.isProxyAuthSelected) {
+        builder.setProxyAuthenticator(new ProxyAuthenticator(settings.proxyUsername, settings.proxyPassword));
       }
-      return TextCompletionClient.getInstance();
     }
-    return UnofficialChatGPTClient.getInstance();
+
+    return builder;
   }
 }
+
+
