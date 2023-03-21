@@ -34,7 +34,7 @@ public class OpenInEditorAction extends AnAction {
     var currentConversation = ConversationsState.getCurrentConversation();
     if (project != null && currentConversation != null) {
       var dateTimeStamp = currentConversation.getUpdatedOn().format(DateTimeFormatter.ofPattern("yyyyMMddHHmm"));
-      var fileName = String.format("%s_%s.md", currentConversation.getModel().getCode(), dateTimeStamp);
+      var fileName = String.format("%s_%s.md", currentConversation.getModel(), dateTimeStamp);
       var fileContent = currentConversation
           .getMessages()
           .stream()

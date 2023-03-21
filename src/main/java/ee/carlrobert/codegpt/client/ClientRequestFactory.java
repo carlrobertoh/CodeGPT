@@ -21,14 +21,14 @@ public class ClientRequestFactory {
 
   public ChatCompletionRequest buildChatCompletionRequest(SettingsState settings) {
     return new ChatCompletionRequest.Builder(buildMessages(prompt, conversation))
-        .setModel(settings.chatCompletionBaseModel.getCode())
+        .setModel(settings.chatCompletionBaseModel)
         .build();
   }
 
   public TextCompletionRequest buildTextCompletionRequest(SettingsState settings) {
     return new TextCompletionRequest.Builder(buildPrompt(conversation, prompt))
         .setStop(List.of(" Human:", " AI:"))
-        .setModel(settings.textCompletionBaseModel.getCode())
+        .setModel(settings.textCompletionBaseModel)
         .build();
   }
 
@@ -46,7 +46,7 @@ public class ClientRequestFactory {
   }
 
   private StringBuilder getBasePrompt() {
-    var isDavinciModel = SettingsState.getInstance().textCompletionBaseModel == TextCompletionModel.DAVINCI;
+    var isDavinciModel = TextCompletionModel.DAVINCI.getCode().equals(SettingsState.getInstance().textCompletionBaseModel);
     if (isDavinciModel) {
       return new StringBuilder(
           "You are ChatGPT, a large language model trained by OpenAI.\n" +

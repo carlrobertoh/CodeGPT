@@ -22,7 +22,7 @@ import org.jetbrains.annotations.Nullable;
 
 @State(
     name = "ee.carlrobert.codegpt.conversations.ConversationsState",
-    storages = @Storage("ChatGPTConversations.xml")
+    storages = @Storage("ChatGPTConversations_170.xml")
 )
 public class ConversationsState implements PersistentStateComponent<ConversationsState> {
 

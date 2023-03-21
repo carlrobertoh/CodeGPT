@@ -32,8 +32,7 @@ public class SettingsConfigurable implements Configurable {
   @Override
   public boolean isModified() {
     var settings = SettingsState.getInstance();
-    return !settingsComponent.getApiKey().equals(settings.apiKey) ||
-        isModelChanged(settings) || isClientChanged(settings);
+    return !settingsComponent.getApiKey().equals(settings.apiKey) || isModelChanged(settings) || isClientChanged(settings);
   }
 
   @Override
@@ -45,10 +44,10 @@ public class SettingsConfigurable implements Configurable {
     }
 
     settings.apiKey = settingsComponent.getApiKey();
-    settings.chatCompletionBaseModel = settingsComponent.getChatCompletionBaseModel();
+    settings.chatCompletionBaseModel = settingsComponent.getChatCompletionBaseModel().getCode();
     settings.isChatCompletionOptionSelected = settingsComponent.isChatCompletionOptionSelected();
     settings.isTextCompletionOptionSelected = settingsComponent.isTextCompletionOptionSelected();
-    settings.textCompletionBaseModel = settingsComponent.getTextCompletionBaseModel();
+    settings.textCompletionBaseModel = settingsComponent.getTextCompletionBaseModel().getCode();
   }
 
   @Override
@@ -72,7 +71,7 @@ public class SettingsConfigurable implements Configurable {
   }
 
   private boolean isModelChanged(SettingsState settings) {
-    return !settingsComponent.getChatCompletionBaseModel().equals(settings.chatCompletionBaseModel) ||
-        !settingsComponent.getTextCompletionBaseModel().equals(settings.textCompletionBaseModel);
+    return !settingsComponent.getChatCompletionBaseModel().getCode().equals(settings.chatCompletionBaseModel) ||
+        !settingsComponent.getTextCompletionBaseModel().getCode().equals(settings.textCompletionBaseModel);
   }
 }

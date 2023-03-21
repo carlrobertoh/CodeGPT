@@ -76,7 +76,7 @@ class ConversationPanel extends JPanel {
         .format(DateTimeFormatter.ofPattern("M/d/yyyy, h:mm:ss a"))));
     bottomPanel.add(Box.createHorizontalGlue());
     if (conversation.getModel() != null) {
-      bottomPanel.add(new JLabel(conversation.getModel().getCode()));
+      bottomPanel.add(new JLabel(conversation.getModel()));
     }
     textPanel.add(bottomPanel);
     return textPanel;

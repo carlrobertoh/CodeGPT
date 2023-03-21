@@ -36,7 +36,7 @@ public class SettingsComponent {
             ChatCompletionModel.GPT_3_5_SNAPSHOT,
             ChatCompletionModel.GPT_4
         },
-        settings.textCompletionBaseModel);
+        ChatCompletionModel.findByCode(settings.chatCompletionBaseModel));
     textCompletionBaseModelComboBox = new BaseModelComboBox(
         new TextCompletionModel[] {
             TextCompletionModel.DAVINCI,
@@ -44,7 +44,7 @@ public class SettingsComponent {
             TextCompletionModel.BABBAGE,
             TextCompletionModel.ADA,
         },
-        settings.textCompletionBaseModel);
+        TextCompletionModel.findByCode(settings.textCompletionBaseModel));
     useChatCompletionRadioButton = new JBRadioButton("Use chat completion", settings.isChatCompletionOptionSelected);
     useTextCompletionRadioButton = new JBRadioButton("Use text completion", settings.isTextCompletionOptionSelected);
     mainPanel = FormBuilder.createFormBuilder()
@@ -95,16 +95,16 @@ public class SettingsComponent {
     return (TextCompletionModel) textCompletionBaseModelComboBox.getSelectedItem();
   }
 
-  public void setTextCompletionBaseModel(CompletionModel model) {
-    textCompletionBaseModelComboBox.setSelectedItem(model);
+  public void setTextCompletionBaseModel(String model) {
+    textCompletionBaseModelComboBox.setSelectedItem(TextCompletionModel.valueOf(model));
   }
 
   public ChatCompletionModel getChatCompletionBaseModel() {
     return (ChatCompletionModel) chatCompletionBaseModelComboBox.getSelectedItem();
   }
 
-  public void setChatCompletionBaseModel(CompletionModel model) {
-    chatCompletionBaseModelComboBox.setSelectedItem(model);
+  public void setChatCompletionBaseModel(String model) {
+    chatCompletionBaseModelComboBox.setSelectedItem(ChatCompletionModel.valueOf(model));
   }
 
   private JPanel createMainSelectionForm() {

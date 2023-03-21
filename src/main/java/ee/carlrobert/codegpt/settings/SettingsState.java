@@ -5,7 +5,6 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
-import ee.carlrobert.openai.client.completion.CompletionModel;
 import ee.carlrobert.openai.client.completion.chat.ChatCompletionModel;
 import ee.carlrobert.openai.client.completion.text.TextCompletionModel;
 import org.jetbrains.annotations.NotNull;
@@ -13,13 +12,13 @@ import org.jetbrains.annotations.Nullable;
 
 @State(
     name = "ee.carlrobert.codegpt.settings.SettingsState",
-    storages = @Storage("CodeGPTSettings.xml")
+    storages = @Storage("CodeGPTSettings_170.xml")
 )
 public class SettingsState implements PersistentStateComponent<SettingsState> {
 
   public String apiKey = "";
-  public CompletionModel textCompletionBaseModel = TextCompletionModel.DAVINCI;
-  public CompletionModel chatCompletionBaseModel = ChatCompletionModel.GPT_3_5;
+  public String textCompletionBaseModel = TextCompletionModel.DAVINCI.getCode();
+  public String chatCompletionBaseModel = ChatCompletionModel.GPT_3_5.getCode();
   public boolean isChatCompletionOptionSelected = true;
   public boolean isTextCompletionOptionSelected;
 

@@ -2,7 +2,6 @@ package ee.carlrobert.codegpt.conversations;
 
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.openai.client.ClientCode;
-import ee.carlrobert.openai.client.completion.CompletionModel;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +12,7 @@ public class Conversation {
   private UUID id;
   private List<Message> messages = new ArrayList<>();
   private ClientCode clientCode;
-  private CompletionModel model;
+  private String model;
   private LocalDateTime createdOn;
   private LocalDateTime updatedOn;
 
@@ -45,11 +44,11 @@ public class Conversation {
     messages.add(message);
   }
 
-  public CompletionModel getModel() {
+  public String getModel() {
     return model;
   }
 
-  public void setModel(CompletionModel model) {
+  public void setModel(String model) {
     this.model = model;
   }
 
