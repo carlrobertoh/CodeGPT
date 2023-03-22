@@ -54,25 +54,11 @@
 
     <change-notes>
         <![CDATA[
+      <b>Update will delete the existing conversations and requires to enter the settings again, if you would like to restore the previous conversations then contact developer directly!</b>
       <ul>
-        <li>Relative fonts</li>
-        <li>Disable support for unofficial reverse proxy</li>
-        <li>
-            New Chat toolbar
-            <ul>
-                <li>Start new conversations</li>
-                <li>Open the conversation in the editor</li>
-                <li>Display credit usage</li>
-            </ul>
-        </li>
-        <li>
-            New Conversation History toolbar
-            <ul>
-                <li>Delete all conversations</li>
-                <li>Delete single conversation</li>
-            </ul>
-        </li>
-        <li>Add GPT-4 model</li>
+        <li>Remove support for unofficial reverse proxy</li>
+        <li>Replace last message when regenerating response</li>
+        <li>Switch to openai-client</li>
       </ul>
     ]]>
     </change-notes>
