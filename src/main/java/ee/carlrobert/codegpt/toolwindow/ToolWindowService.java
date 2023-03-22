@@ -1,40 +1,27 @@
 package ee.carlrobert.codegpt.toolwindow;
 
-import com.intellij.ide.ui.LafManager;
-import com.intellij.ide.ui.LafManagerListener;
 import com.intellij.openapi.project.Project;
 import ee.carlrobert.codegpt.client.ClientFactory;
 import ee.carlrobert.codegpt.client.ClientRequestFactory;
 import ee.carlrobert.codegpt.client.EventListener;
-import ee.carlrobert.codegpt.conversations.ConversationsState;
+import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.SettingsState;
-import ee.carlrobert.codegpt.toolwindow.chat.ChatGptToolWindow;
+import ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowPanel;
 import ee.carlrobert.codegpt.toolwindow.components.SyntaxTextArea;
 import java.util.List;
 import javax.swing.SwingWorker;
 import okhttp3.sse.EventSource;
-import org.jetbrains.annotations.NotNull;
 
-public class ToolWindowService implements LafManagerListener {
+public class ToolWindowService {
 
-  private ChatGptToolWindow chatToolWindow;
-
-  @Override
-  public void lookAndFeelChanged(@NotNull LafManager source) {
-    chatToolWindow.changeStyle();
-  }
-
-  public void setChatToolWindow(ChatGptToolWindow chatToolWindow) {
-    this.chatToolWindow = chatToolWindow;
-  }
-
-  public ChatGptToolWindow getChatToolWindow() {
-    return chatToolWindow;
-  }
-
-  public void startRequest(String prompt, SyntaxTextArea textArea, Project project, boolean isRetry) {
-    var conversation = ConversationsState.getInstance().getOrStartNew();
+  public void startRequest(
+      String prompt,
+      SyntaxTextArea textArea,
+      Project project,
+      boolean isRetry,
+      ChatToolWindowPanel toolWindow,
+      Conversation conversation) {
     var conversationMessage = new Message(prompt);
 
     new SwingWorker<Void, String>() {
@@ -42,7 +29,7 @@ public class ToolWindowService implements LafManagerListener {
         var eventListener = new EventListener(
             conversationMessage,
             textArea::append,
-            () -> chatToolWindow.stopGenerating(prompt, textArea, project),
+            () -> toolWindow.stopGenerating(prompt, textArea, project),
             isRetry) {
           public void onMessage(String message) {
             publish(message);
@@ -59,7 +46,7 @@ public class ToolWindowService implements LafManagerListener {
           call = ClientFactory.getTextCompletionClient().stream(
               requestFactory.buildTextCompletionRequest(settings), eventListener);
         }
-        chatToolWindow.displayGenerateButton(call::cancel);
+        toolWindow.displayGenerateButton(call::cancel);
         return null;
       }
 
@@ -68,7 +55,7 @@ public class ToolWindowService implements LafManagerListener {
           try {
             textArea.append(text);
             conversationMessage.setResponse(textArea.getText());
-            chatToolWindow.scrollToBottom();
+            toolWindow.scrollToBottom();
           } catch (Exception e) {
             textArea.append("Something went wrong. Please try again later.");
             throw new RuntimeException(e);

@@ -6,13 +6,9 @@ import static ee.carlrobert.codegpt.util.SwingUtils.justifyLeft;
 import static java.lang.String.format;
 
 import com.intellij.icons.AllIcons;
-import com.intellij.openapi.actionSystem.ActionManager;
-import com.intellij.openapi.actionSystem.ActionToolbar;
-import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
-import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBScrollPane;
 import ee.carlrobert.codegpt.account.AccountDetailsState;
@@ -21,9 +17,6 @@ import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.settings.SettingsConfigurable;
 import ee.carlrobert.codegpt.settings.SettingsState;
 import ee.carlrobert.codegpt.toolwindow.ToolWindowService;
-import ee.carlrobert.codegpt.toolwindow.chat.actions.CreateNewConversationAction;
-import ee.carlrobert.codegpt.toolwindow.chat.actions.OpenInEditorAction;
-import ee.carlrobert.codegpt.toolwindow.chat.actions.UsageToolbarLabelAction;
 import ee.carlrobert.codegpt.toolwindow.components.GenerateButton;
 import ee.carlrobert.codegpt.toolwindow.components.LandingView;
 import ee.carlrobert.codegpt.toolwindow.components.ScrollPane;
@@ -36,6 +29,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -49,7 +43,7 @@ import javax.swing.SwingUtilities;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.jetbrains.annotations.NotNull;
 
-public class ChatGptToolWindow {
+public class ChatToolWindowPanel {
 
   private static final List<SyntaxTextArea> textAreas = new ArrayList<>();
   private final Project project;
@@ -60,33 +54,18 @@ public class ChatGptToolWindow {
   private JScrollPane textAreaScrollPane;
   private GenerateButton generateButton;
   private boolean isLandingViewVisible;
+  private UUID conversationId;
 
-  public ChatGptToolWindow(@NotNull Project project) {
+  public ChatToolWindowPanel(@NotNull Project project) {
     this.project = project;
   }
 
   public JPanel getContent() {
-    SimpleToolWindowPanel panel = new SimpleToolWindowPanel(true);
-    panel.setContent(chatGptToolWindowContent);
-
-    var actionGroup = new DefaultActionGroup("TOOLBAR_ACTION_GROUP", false);
-    actionGroup.add(new CreateNewConversationAction());
-    actionGroup.add(new OpenInEditorAction());
-    actionGroup.addSeparator();
-    actionGroup.add(new UsageToolbarLabelAction());
-
-    // TODO: Data usage not enabled in stream mode https://community.openai.com/t/usage-info-in-api-responses/18862/11
-    // actionGroup.add(new TokenToolbarLabelAction());
-
-    ActionToolbar actionToolbar = ActionManager.getInstance()
-        .createActionToolbar("NAVIGATION_BAR_TOOLBAR", actionGroup, false);
-    panel.setToolbar(actionToolbar.getComponent());
-    return panel;
+    return chatGptToolWindowContent;
   }
 
   public void displayUserMessage(String userMessage) {
     addIconLabel(AllIcons.General.User, AccountDetailsState.getInstance().accountName);
-
     scrollablePanel.add(createTextPane(userMessage));
     scrollablePanel.revalidate();
     scrollablePanel.repaint();
@@ -113,6 +92,7 @@ public class ChatGptToolWindow {
   }
 
   public void displayConversation(Conversation conversation) {
+    setConversationId(conversation.getId());
     clearWindow();
     conversation.getMessages().forEach(message -> {
       displayUserMessage(message.getPrompt());
@@ -149,8 +129,11 @@ public class ChatGptToolWindow {
         textArea = new SyntaxTextArea(true, true, SyntaxConstants.SYNTAX_STYLE_MARKDOWN);
         addTextArea(textArea);
       }
+
+      var conversation = ConversationsState.getInstance().getOrStartNew();
+      setConversationId(conversation.getId());
       project.getService(ToolWindowService.class)
-          .startRequest(prompt, textArea, project, isRetry);
+          .startRequest(prompt, textArea, project, isRetry, this, conversation);
     }
   }
 
@@ -246,5 +229,13 @@ public class ChatGptToolWindow {
     scrollPane = new ScrollPane(scrollablePanel);
 
     generateButton = new GenerateButton();
+  }
+
+  public UUID getConversationId() {
+    return conversationId;
+  }
+
+  public void setConversationId(UUID conversationId) {
+    this.conversationId = conversationId;
   }
 }

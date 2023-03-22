@@ -4,13 +4,15 @@ import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
-import ee.carlrobert.codegpt.toolwindow.ToolWindowService;
 import org.jetbrains.annotations.NotNull;
 
 public class CreateNewConversationAction extends AnAction {
 
-  public CreateNewConversationAction() {
-    super("Create New Conversation", "Create new conversation", AllIcons.General.Add);
+  private final Runnable onCreate;
+
+  public CreateNewConversationAction(Runnable onCreate) {
+    super("Create New Chat", "Create new chat", AllIcons.General.Add);
+    this.onCreate = onCreate;
   }
 
   @Override
@@ -18,9 +20,7 @@ public class CreateNewConversationAction extends AnAction {
     var project = event.getProject();
     if (project != null) {
       ConversationsState.getInstance().startConversation();
-      project.getService(ToolWindowService.class)
-          .getChatToolWindow()
-          .displayLandingView();
+      onCreate.run();
     }
   }
 }

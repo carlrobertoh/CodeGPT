@@ -13,7 +13,7 @@ import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.settings.SettingsState;
 import ee.carlrobert.codegpt.toolwindow.ContentManagerService;
-import ee.carlrobert.codegpt.toolwindow.ToolWindowService;
+import ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowPanel;
 import ee.carlrobert.codegpt.toolwindow.conversations.actions.ClearAllConversationsAction;
 import ee.carlrobert.codegpt.toolwindow.conversations.actions.DeleteConversationAction;
 import ee.carlrobert.codegpt.toolwindow.conversations.actions.MoveDownAction;
@@ -76,17 +76,24 @@ public class ConversationsToolWindow {
     var mainPanel = new RootConversationPanel(() -> {
       ConversationsState.getInstance().setCurrentConversation(conversation);
       changeSettings(conversation);
-      project.getService(ContentManagerService.class).displayChatTab(project);
-      project.getService(ToolWindowService.class)
-          .getChatToolWindow()
-          .displayConversation(conversation);
+
+      var contentManagerService = project.getService(ContentManagerService.class);
+      contentManagerService.displayChatTab(project);
+      contentManagerService.tryFindChatTabbedPane(project)
+          .ifPresent(tabbedPane -> tabbedPane.tryFindActiveConversationIndex(conversation.getId())
+              .ifPresentOrElse(tabbedPane::setSelectedIndex, () -> {
+                var panel = new ChatToolWindowPanel(project);
+                panel.displayConversation(conversation);
+
+                tabbedPane.addTab("Chat " + (tabbedPane.getTabCount() + 1), panel);
+                tabbedPane.setSelectedIndex(tabbedPane.getTabCount() - 1);
+              }));
     });
-    mainPanel.setBackground(conversationsToolWindowContent.getBackground());
 
     var currentConversation = ConversationsState.getCurrentConversation();
     var isSelected = currentConversation != null && currentConversation.getId().equals(conversation.getId());
     mainPanel.add(new ConversationPanel(conversation, isSelected));
-
+    mainPanel.setBackground(conversationsToolWindowContent.getBackground());
     scrollablePanel.add(mainPanel);
   }
 
