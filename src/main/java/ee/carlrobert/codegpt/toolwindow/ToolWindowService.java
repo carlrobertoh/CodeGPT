@@ -34,25 +34,16 @@ public class ToolWindowService implements LafManagerListener {
   }
 
   public void startRequest(String prompt, SyntaxTextArea textArea, Project project, boolean isRetry) {
-    var conversationsState = ConversationsState.getInstance();
-    var currentConversation = ConversationsState.getCurrentConversation();
-    var conversation = currentConversation == null ? conversationsState.startConversation() : currentConversation;
-
-    Message conversationMessage;
-    if (isRetry) {
-      var messages = conversation.getMessages();
-      conversationMessage = messages.get(messages.size() - 1);
-      conversationMessage.setResponse("");
-    } else {
-      conversationMessage = new Message(prompt);
-    }
+    var conversation = ConversationsState.getInstance().getOrStartNew();
+    var conversationMessage = new Message(prompt);
 
     new SwingWorker<Void, String>() {
       protected Void doInBackground() {
         var eventListener = new EventListener(
             conversationMessage,
             textArea::append,
-            () -> chatToolWindow.stopGenerating(prompt, textArea, project)) {
+            () -> chatToolWindow.stopGenerating(prompt, textArea, project),
+            isRetry) {
           public void onMessage(String message) {
             publish(message);
           }

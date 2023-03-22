@@ -159,4 +159,8 @@ public class ConversationsState implements PersistentStateComponent<Conversation
 
     nextConversation.ifPresent(this::setCurrentConversation);
   }
+
+  public Conversation getOrStartNew() {
+    return currentConversation == null ? startConversation() : currentConversation;
+  }
 }

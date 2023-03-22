@@ -10,11 +10,13 @@ public class EventListener implements CompletionEventListener {
   private final Message message;
   private final Consumer<String> onAppend;
   private final Runnable onStopGenerating;
+  private final boolean isRetry;
 
-  public EventListener(Message message, Consumer<String> onAppend, Runnable onStopGenerating) {
+  public EventListener(Message message, Consumer<String> onAppend, Runnable onStopGenerating, boolean isRetry) {
     this.onStopGenerating = onStopGenerating;
     this.onAppend = onAppend;
     this.message = message;
+    this.isRetry = isRetry;
   }
 
   @Override
@@ -32,10 +34,12 @@ public class EventListener implements CompletionEventListener {
 
   private void saveConversation(String response) {
     var conversationsState = ConversationsState.getInstance();
-    var currentConversation = ConversationsState.getCurrentConversation();
-    final var conversation = currentConversation == null ?
-        conversationsState.startConversation() :
-        currentConversation;
+    var conversation = conversationsState.getOrStartNew();
+    var conversationMessages = conversation.getMessages();
+
+    if (isRetry) {
+      conversationMessages.remove(conversationMessages.size() - 1);
+    }
 
     message.setResponse(response);
     conversation.addMessage(message);

@@ -17,15 +17,23 @@ import org.fife.ui.rtextarea.CaretStyle;
 
 public class SyntaxTextArea extends RSyntaxTextArea {
 
+  private JButton copyButton;
+
   public SyntaxTextArea(boolean isReadOnly, boolean withBlockCaret, String syntax) {
     super("");
     setStyles(isReadOnly, withBlockCaret, syntax);
   }
 
   public void displayCopyButton() {
-    ComponentBorder cb = new ComponentBorder(createCopyButton());
-    cb.setAlignment(TOP_ALIGNMENT);
-    cb.install(this);
+    if (copyButton == null) {
+      copyButton = createCopyButton();
+      ComponentBorder cb = new ComponentBorder(copyButton);
+      cb.setAlignment(TOP_ALIGNMENT);
+      cb.setAdjustInsets(true);
+      cb.install(this);
+    } else {
+      copyButton.setVisible(true);
+    }
   }
 
   public void changeStyleViaThemeXml() {
@@ -41,11 +49,9 @@ public class SyntaxTextArea extends RSyntaxTextArea {
   }
 
   public void clear() {
-    removeAll();
     setText("");
+    copyButton.setVisible(false);
     getCaret().setVisible(true);
-    revalidate();
-    repaint();
   }
 
   private void setStyles(boolean isReadOnly, boolean withBlockCaret, String syntax) {
