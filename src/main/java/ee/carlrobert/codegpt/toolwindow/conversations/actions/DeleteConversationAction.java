@@ -6,6 +6,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import org.jetbrains.annotations.NotNull;
+import static icons.Icons.DefaultImageIcon;
 
 public class DeleteConversationAction extends AnAction {
 
@@ -18,7 +19,7 @@ public class DeleteConversationAction extends AnAction {
 
   @Override
   public void actionPerformed(@NotNull AnActionEvent e) {
-    int answer = Messages.showYesNoDialog("Are you sure you want to delete this convesation?", "Delete Converation", null);
+    int answer = Messages.showYesNoDialog("Are you sure you want to delete this convesation?","Delete Converation", DefaultImageIcon);
     if (answer == Messages.YES) {
       ConversationsState.getInstance().deleteSelectedConversation();
       onRefresh.run();
