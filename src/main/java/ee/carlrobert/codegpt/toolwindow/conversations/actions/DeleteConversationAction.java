@@ -19,7 +19,7 @@ public class DeleteConversationAction extends AnAction {
 
   @Override
   public void actionPerformed(@NotNull AnActionEvent e) {
-    int answer = Messages.showYesNoDialog("Are you sure you want to delete this conversation?","Delete Converation", DefaultImageIcon);
+    int answer = Messages.showYesNoDialog("Are you sure you want to delete this conversation?", "Delete Converation", DefaultImageIcon);
     if (answer == Messages.YES) {
       ConversationsState.getInstance().deleteSelectedConversation();
       onRefresh.run();
