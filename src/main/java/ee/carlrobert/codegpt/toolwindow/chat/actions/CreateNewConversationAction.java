@@ -3,7 +3,6 @@ package ee.carlrobert.codegpt.toolwindow.chat.actions;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import ee.carlrobert.codegpt.conversations.ConversationsState;
 import org.jetbrains.annotations.NotNull;
 
 public class CreateNewConversationAction extends AnAction {
@@ -19,7 +18,6 @@ public class CreateNewConversationAction extends AnAction {
   public void actionPerformed(@NotNull AnActionEvent event) {
     var project = event.getProject();
     if (project != null) {
-      ConversationsState.getInstance().startConversation();
       onCreate.run();
     }
   }

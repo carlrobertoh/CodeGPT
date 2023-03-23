@@ -12,8 +12,8 @@ import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.settings.SettingsState;
-import ee.carlrobert.codegpt.toolwindow.ContentManagerService;
-import ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowPanel;
+import ee.carlrobert.codegpt.toolwindow.chat.ChatContentManagerService;
+import ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowTabPanel;
 import ee.carlrobert.codegpt.toolwindow.conversations.actions.ClearAllConversationsAction;
 import ee.carlrobert.codegpt.toolwindow.conversations.actions.DeleteConversationAction;
 import ee.carlrobert.codegpt.toolwindow.conversations.actions.MoveDownAction;
@@ -77,16 +77,14 @@ public class ConversationsToolWindow {
       ConversationsState.getInstance().setCurrentConversation(conversation);
       changeSettings(conversation);
 
-      var contentManagerService = project.getService(ContentManagerService.class);
+      var contentManagerService = project.getService(ChatContentManagerService.class);
       contentManagerService.displayChatTab(project);
       contentManagerService.tryFindChatTabbedPane(project)
           .ifPresent(tabbedPane -> tabbedPane.tryFindActiveConversationIndex(conversation.getId())
               .ifPresentOrElse(tabbedPane::setSelectedIndex, () -> {
-                var panel = new ChatToolWindowPanel(project);
+                var panel = new ChatToolWindowTabPanel(project);
                 panel.displayConversation(conversation);
-
-                tabbedPane.addTab("Chat " + (tabbedPane.getTabCount() + 1), panel);
-                tabbedPane.setSelectedIndex(tabbedPane.getTabCount() - 1);
+                tabbedPane.addNewTab(panel);
               }));
     });
 

@@ -1,13 +1,13 @@
 package ee.carlrobert.codegpt.toolwindow;
 
 import com.intellij.openapi.project.Project;
-import ee.carlrobert.codegpt.client.ClientFactory;
-import ee.carlrobert.codegpt.client.ClientRequestFactory;
+import ee.carlrobert.codegpt.client.ClientProvider;
+import ee.carlrobert.codegpt.client.CompletionRequestProvider;
 import ee.carlrobert.codegpt.client.EventListener;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.SettingsState;
-import ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowPanel;
+import ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowTabPanel;
 import ee.carlrobert.codegpt.toolwindow.components.SyntaxTextArea;
 import java.util.List;
 import javax.swing.SwingWorker;
@@ -20,7 +20,7 @@ public class ToolWindowService {
       SyntaxTextArea textArea,
       Project project,
       boolean isRetry,
-      ChatToolWindowPanel toolWindow,
+      ChatToolWindowTabPanel toolWindow,
       Conversation conversation) {
     var conversationMessage = new Message(prompt);
 
@@ -38,13 +38,13 @@ public class ToolWindowService {
 
         EventSource call;
         var settings = SettingsState.getInstance();
-        var requestFactory = new ClientRequestFactory(prompt, conversation);
+        var requestProvider = new CompletionRequestProvider(prompt, conversation);
         if (settings.isChatCompletionOptionSelected) {
-          call = ClientFactory.getChatCompletionClient().stream(
-              requestFactory.buildChatCompletionRequest(settings), eventListener);
+          call = ClientProvider.getChatCompletionClient().stream(
+              requestProvider.buildChatCompletionRequest(settings.chatCompletionBaseModel), eventListener);
         } else {
-          call = ClientFactory.getTextCompletionClient().stream(
-              requestFactory.buildTextCompletionRequest(settings), eventListener);
+          call = ClientProvider.getTextCompletionClient().stream(
+              requestProvider.buildTextCompletionRequest(settings.textCompletionBaseModel), eventListener);
         }
         toolWindow.displayGenerateButton(call::cancel);
         return null;

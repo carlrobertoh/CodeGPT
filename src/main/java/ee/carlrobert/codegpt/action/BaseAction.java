@@ -6,8 +6,9 @@ import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.NlsActions;
-import ee.carlrobert.codegpt.toolwindow.ContentManagerService;
-import ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowPanel;
+import ee.carlrobert.codegpt.conversations.ConversationsState;
+import ee.carlrobert.codegpt.toolwindow.chat.ChatContentManagerService;
+import ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowTabPanel;
 import javax.swing.Icon;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -46,14 +47,15 @@ public abstract class BaseAction extends AnAction {
   }
 
   protected void sendMessage(@NotNull Project project, String prompt) {
-    var contentManagerService = project.getService(ContentManagerService.class);
+    var contentManagerService = project.getService(ChatContentManagerService.class);
     contentManagerService.displayChatTab(project);
     contentManagerService.tryFindChatTabbedPane(project)
         .ifPresent(tabbedPane -> {
-          var panel = new ChatToolWindowPanel(project);
+          var conversation = ConversationsState.getInstance().startConversation();
+          var panel = new ChatToolWindowTabPanel(project);
+          panel.setConversationId(conversation.getId());
           panel.displayUserMessage(prompt);
-          tabbedPane.addTab("Chat " + (tabbedPane.getTabCount() + 1), panel);
-          tabbedPane.setSelectedIndex(tabbedPane.getTabCount() - 1);
+          tabbedPane.addNewTab(panel);
           panel.sendMessage(prompt, project);
         });
   }

@@ -11,7 +11,7 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.concurrent.TimeUnit;
 
-public class ClientFactory {
+public class ClientProvider {
 
   public static BillingClient getBillingClient() {
     return getClientBuilder().buildBillingClient();

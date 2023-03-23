@@ -12,6 +12,7 @@ import ee.carlrobert.codegpt.settings.SettingsState;
 import ee.carlrobert.openai.client.ClientCode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -162,5 +163,14 @@ public class ConversationsState implements PersistentStateComponent<Conversation
 
   public Conversation getOrStartNew() {
     return currentConversation == null ? startConversation() : currentConversation;
+  }
+
+  public Optional<Conversation> getConversation(UUID conversationId) {
+    return conversationsContainer.getConversationsMapping()
+        .values()
+        .stream()
+        .flatMap(Collection::stream)
+        .filter(it -> conversationId.equals(it.getId()))
+        .findFirst();
   }
 }
