@@ -14,10 +14,7 @@ import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.settings.SettingsState;
 import ee.carlrobert.codegpt.toolwindow.ContentManagerService;
 import ee.carlrobert.codegpt.toolwindow.ToolWindowService;
-import ee.carlrobert.codegpt.toolwindow.conversations.actions.ClearAllConversationsAction;
-import ee.carlrobert.codegpt.toolwindow.conversations.actions.DeleteConversationAction;
-import ee.carlrobert.codegpt.toolwindow.conversations.actions.MoveDownAction;
-import ee.carlrobert.codegpt.toolwindow.conversations.actions.MoveUpAction;
+import ee.carlrobert.codegpt.toolwindow.conversations.actions.*;
 import ee.carlrobert.openai.client.ClientCode;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
@@ -48,6 +45,8 @@ public class ConversationsToolWindow {
     actionGroup.addSeparator();
     actionGroup.add(new DeleteConversationAction(this::refresh));
     actionGroup.add(new ClearAllConversationsAction(this::refresh));
+    actionGroup.addSeparator();
+    actionGroup.add(new RefreshConversationHistoryAction(this::refresh));
 
     ActionToolbar actionToolbar = ActionManager.getInstance()
         .createActionToolbar("NAVIGATION_BAR_TOOLBAR", actionGroup, true);
@@ -80,6 +79,8 @@ public class ConversationsToolWindow {
       project.getService(ToolWindowService.class)
           .getChatToolWindow()
           .displayConversation(conversation);
+      // refresh the conversations list to update the selection when clicking on a conversation item
+      refresh();
     });
     mainPanel.setBackground(conversationsToolWindowContent.getBackground());
 
