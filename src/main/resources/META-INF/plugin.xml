@@ -59,6 +59,7 @@
         <li>Remove support for unofficial reverse proxy</li>
         <li>Replace last message when regenerating response</li>
         <li>Switch to openai-client</li>
+        <li>Add confirmation message dialog when clearing all conversations</li>
       </ul>
     ]]>
     </change-notes>
