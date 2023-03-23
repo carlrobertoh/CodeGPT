@@ -95,16 +95,16 @@ public class SettingsComponent {
     return (TextCompletionModel) textCompletionBaseModelComboBox.getSelectedItem();
   }
 
-  public void setTextCompletionBaseModel(String model) {
-    textCompletionBaseModelComboBox.setSelectedItem(TextCompletionModel.valueOf(model));
+  public void setTextCompletionBaseModel(String modelCode) {
+    textCompletionBaseModelComboBox.setSelectedItem(TextCompletionModel.findByCode(modelCode));
   }
 
   public ChatCompletionModel getChatCompletionBaseModel() {
     return (ChatCompletionModel) chatCompletionBaseModelComboBox.getSelectedItem();
   }
 
-  public void setChatCompletionBaseModel(String model) {
-    chatCompletionBaseModelComboBox.setSelectedItem(ChatCompletionModel.valueOf(model));
+  public void setChatCompletionBaseModel(String modelCode) {
+    chatCompletionBaseModelComboBox.setSelectedItem(ChatCompletionModel.findByCode(modelCode));
   }
 
   private JPanel createMainSelectionForm() {
