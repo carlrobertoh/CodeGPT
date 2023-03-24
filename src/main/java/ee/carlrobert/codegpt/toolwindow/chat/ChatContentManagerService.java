@@ -44,7 +44,7 @@ public class ChatContentManagerService {
 
   public void resetTabbedPane(@NotNull Project project) {
     tryFindChatTabbedPane(project).ifPresent(tabbedPane -> {
-      tabbedPane.removeAll();
+      tabbedPane.clearAll();
       var tabPanel = new ChatToolWindowTabPanel(project);
       tabPanel.displayLandingView();
       tabbedPane.addNewTab(tabPanel);

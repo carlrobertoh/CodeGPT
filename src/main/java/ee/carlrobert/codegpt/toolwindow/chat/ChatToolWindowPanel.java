@@ -25,14 +25,11 @@ public class ChatToolWindowPanel extends SimpleToolWindowPanel {
     setToolbar(createActionToolbar(project, tabbedPane).getComponent());
     setContent(tabbedPane);
 
-    var contentManagerService = project.getService(ChatContentManagerService.class);
-    if (contentManagerService.isChatTabSelected(toolWindow.getContentManager())) {
-      var conversation = ConversationsState.getCurrentConversation();
-      if (conversation == null) {
-        tabPanel.displayLandingView();
-      } else {
-        tabPanel.displayConversation(conversation);
-      }
+    var conversation = ConversationsState.getCurrentConversation();
+    if (conversation == null) {
+      tabPanel.displayLandingView();
+    } else {
+      tabPanel.displayConversation(conversation);
     }
   }
 

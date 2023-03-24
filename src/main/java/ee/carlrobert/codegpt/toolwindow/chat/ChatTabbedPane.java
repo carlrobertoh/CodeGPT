@@ -3,10 +3,13 @@ package ee.carlrobert.codegpt.toolwindow.chat;
 import com.intellij.ui.components.JBTabbedPane;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import javax.swing.JPanel;
 
 public class ChatTabbedPane extends JBTabbedPane {
 
@@ -19,10 +22,24 @@ public class ChatTabbedPane extends JBTabbedPane {
   }
 
   public void addNewTab(ChatToolWindowTabPanel toolWindowPanel) {
-    super.addTab("Chat " + (getTabCount() + 1), toolWindowPanel.getContent());
-    var tabIndex = getTabCount() - 1;
-    super.setSelectedIndex(tabIndex);
-    activeTabMapping.put(tabIndex, toolWindowPanel);
+    var tabIndices = activeTabMapping.keySet().toArray(new Integer[0]);
+    var nextIndex = 0;
+    for (Integer val : tabIndices) {
+      if (val == nextIndex) {
+        nextIndex++;
+      } else {
+        break;
+      }
+    }
+
+    var title = "Chat " + (nextIndex + 1);
+    super.insertTab(title, null, toolWindowPanel.getContent(), null, nextIndex);
+    activeTabMapping.put(nextIndex, toolWindowPanel);
+    super.setSelectedIndex(nextIndex);
+
+    if (nextIndex > 0) {
+      setTabComponentAt(nextIndex, createCloseableTabButtonPanel(title, nextIndex));
+    }
   }
 
   public Optional<Integer> tryFindActiveConversationIndex(UUID conversationId) {
@@ -38,5 +55,35 @@ public class ChatTabbedPane extends JBTabbedPane {
       return Optional.empty();
     }
     return ConversationsState.getInstance().getConversation(toolWindowPanel.getConversationId());
+  }
+
+  private JPanel createCloseableTabButtonPanel(String title, int tabIndex) {
+    var button = new CloseableTabButton(title);
+    button.addActionListener(new CloseActionListener(title, tabIndex));
+    return button.getComponent();
+  }
+
+  class CloseActionListener implements ActionListener {
+
+    private final String title;
+    private final int tabMappingIndex;
+
+    public CloseActionListener(String title, int tabMappingIndex) {
+      this.title = title;
+      this.tabMappingIndex = tabMappingIndex;
+    }
+
+    public void actionPerformed(ActionEvent evt) {
+      var tabIndex = indexOfTab(title);
+      if (tabIndex >= 0) {
+        removeTabAt(tabIndex);
+        activeTabMapping.remove(tabMappingIndex);
+      }
+    }
+  }
+
+  public void clearAll() {
+    removeAll();
+    activeTabMapping.clear();
   }
 }

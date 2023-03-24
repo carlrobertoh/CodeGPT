@@ -29,6 +29,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -45,7 +46,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class ChatToolWindowTabPanel {
 
-  private static final List<SyntaxTextArea> textAreas = new ArrayList<>();
+  private final List<SyntaxTextArea> textAreas = new ArrayList<>();
   private final Project project;
   private JPanel chatGptToolWindowContent;
   private ScrollPane scrollPane;
@@ -130,10 +131,15 @@ public class ChatToolWindowTabPanel {
         addTextArea(textArea);
       }
 
-      var conversation = ConversationsState.getInstance().getOrStartNew();
-      setConversationId(conversation.getId());
+      var conversation = ConversationsState.getInstance().getConversation(conversationId);
+      if (conversation.isEmpty()) {
+        conversation = Optional.of(ConversationsState.getInstance().startConversation());
+      }
       project.getService(ToolWindowService.class)
-          .startRequest(prompt, textArea, project, isRetry, this, conversation);
+          .startRequest(prompt, textArea, isRetry, conversation.get(),
+              () -> stopGenerating(prompt, textArea, project),
+              (eventSource) -> displayGenerateButton(eventSource::cancel),
+              this::scrollToBottom);
     }
   }
 

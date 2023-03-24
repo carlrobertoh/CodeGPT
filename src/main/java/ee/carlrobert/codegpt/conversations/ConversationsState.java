@@ -170,7 +170,7 @@ public class ConversationsState implements PersistentStateComponent<Conversation
         .values()
         .stream()
         .flatMap(Collection::stream)
-        .filter(it -> conversationId.equals(it.getId()))
+        .filter(item -> item.getId().equals(conversationId))
         .findFirst();
   }
 }

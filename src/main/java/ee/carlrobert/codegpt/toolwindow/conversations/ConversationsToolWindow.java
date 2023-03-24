@@ -74,7 +74,6 @@ public class ConversationsToolWindow {
 
   private void addContent(Conversation conversation) {
     var mainPanel = new RootConversationPanel(() -> {
-      ConversationsState.getInstance().setCurrentConversation(conversation);
       changeSettings(conversation);
 
       var contentManagerService = project.getService(ChatContentManagerService.class);
