@@ -11,12 +11,13 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBScrollPane;
-import ee.carlrobert.codegpt.account.AccountDetailsState;
-import ee.carlrobert.codegpt.conversations.Conversation;
-import ee.carlrobert.codegpt.conversations.ConversationsState;
-import ee.carlrobert.codegpt.settings.SettingsConfigurable;
-import ee.carlrobert.codegpt.settings.SettingsState;
-import ee.carlrobert.codegpt.toolwindow.ToolWindowService;
+import ee.carlrobert.codegpt.state.AccountDetailsState;
+import ee.carlrobert.codegpt.state.conversations.Conversation;
+import ee.carlrobert.codegpt.state.conversations.ConversationsState;
+import ee.carlrobert.codegpt.state.conversations.message.Message;
+import ee.carlrobert.codegpt.state.settings.SettingsConfigurable;
+import ee.carlrobert.codegpt.state.settings.SettingsState;
+import ee.carlrobert.codegpt.client.RequestHandler;
 import ee.carlrobert.codegpt.toolwindow.components.GenerateButton;
 import ee.carlrobert.codegpt.toolwindow.components.LandingView;
 import ee.carlrobert.codegpt.toolwindow.components.ScrollPane;
@@ -29,8 +30,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -55,7 +54,7 @@ public class ChatToolWindowTabPanel {
   private JScrollPane textAreaScrollPane;
   private GenerateButton generateButton;
   private boolean isLandingViewVisible;
-  private UUID conversationId;
+  private Conversation conversation;
 
   public ChatToolWindowTabPanel(@NotNull Project project) {
     this.project = project;
@@ -63,6 +62,14 @@ public class ChatToolWindowTabPanel {
 
   public JPanel getContent() {
     return chatGptToolWindowContent;
+  }
+
+  public Conversation getConversation() {
+    return conversation;
+  }
+
+  public void setConversation(Conversation conversation) {
+    this.conversation = conversation;
   }
 
   public void displayUserMessage(String userMessage) {
@@ -93,7 +100,7 @@ public class ChatToolWindowTabPanel {
   }
 
   public void displayConversation(Conversation conversation) {
-    setConversationId(conversation.getId());
+    setConversation(conversation);
     clearWindow();
     conversation.getMessages().forEach(message -> {
       displayUserMessage(message.getPrompt());
@@ -128,19 +135,41 @@ public class ChatToolWindowTabPanel {
         textArea.clear();
       } else {
         textArea = new SyntaxTextArea(true, true, SyntaxConstants.SYNTAX_STYLE_MARKDOWN);
-        addTextArea(textArea);
+        scrollablePanel.add(textArea);
+        textAreas.add(textArea);
+      }
+      call(textArea, prompt, isRetry);
+    }
+  }
+
+  public void call(SyntaxTextArea textArea, String prompt, boolean isRetry) {
+    if (conversation == null) {
+      conversation = ConversationsState.getInstance().startConversation();
+    }
+
+    var conversationMessage = new Message(prompt);
+    var requestService = new RequestHandler(conversation) {
+      public void handleMessage(String message) {
+        try {
+          textArea.append(message);
+          conversationMessage.setResponse(textArea.getText());
+          scrollToBottom();
+        } catch (Exception e) {
+          textArea.append("Something went wrong. Please try again later.");
+          throw new RuntimeException(e);
+        }
       }
 
-      var conversation = ConversationsState.getInstance().getConversation(conversationId);
-      if (conversation.isEmpty()) {
-        conversation = Optional.of(ConversationsState.getInstance().startConversation());
+      public void handleComplete() {
+        stopGenerating(prompt, textArea);
       }
-      project.getService(ToolWindowService.class)
-          .startRequest(prompt, textArea, isRetry, conversation.get(),
-              () -> stopGenerating(prompt, textArea, project),
-              (eventSource) -> displayGenerateButton(eventSource::cancel),
-              this::scrollToBottom);
-    }
+
+      public void handleError(String errorMessage) {
+        textArea.append(errorMessage);
+      }
+    };
+    requestService.call(conversationMessage, isRetry);
+    displayGenerateButton(requestService::cancel);
   }
 
   public void clearWindow() {
@@ -176,7 +205,7 @@ public class ChatToolWindowTabPanel {
     generateButton.setMode(GenerateButton.Mode.STOP, onClick);
   }
 
-  public void stopGenerating(String prompt, SyntaxTextArea textArea, Project project) {
+  public void stopGenerating(String prompt, SyntaxTextArea textArea) {
     generateButton.setMode(GenerateButton.Mode.REFRESH, () -> {
       sendMessage(prompt, project, true);
       scrollToBottom();
@@ -190,21 +219,13 @@ public class ChatToolWindowTabPanel {
     scrollPane.scrollToBottom();
   }
 
-  public void addTextArea(SyntaxTextArea textArea) {
-    scrollablePanel.add(textArea);
-    textAreas.add(textArea);
-  }
-
-  public void changeStyle() {
-    for (var textArea : textAreas) {
-      textArea.changeStyleViaThemeXml();
-    }
-  }
-
   private void handleSubmit() {
     var searchText = textArea.getText();
-    if (isLandingViewVisible || ConversationsState.getCurrentConversation() == null) {
+    if (isLandingViewVisible) {
       clearWindow();
+    }
+    if (ConversationsState.getCurrentConversation() == null) {
+      setConversation(ConversationsState.getInstance().startConversation());
     }
     displayUserMessage(searchText);
     sendMessage(searchText, project);
@@ -235,13 +256,5 @@ public class ChatToolWindowTabPanel {
     scrollPane = new ScrollPane(scrollablePanel);
 
     generateButton = new GenerateButton();
-  }
-
-  public UUID getConversationId() {
-    return conversationId;
-  }
-
-  public void setConversationId(UUID conversationId) {
-    this.conversationId = conversationId;
   }
 }

@@ -5,8 +5,7 @@ import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
-import com.intellij.openapi.wm.ToolWindow;
-import ee.carlrobert.codegpt.conversations.ConversationsState;
+import ee.carlrobert.codegpt.state.conversations.ConversationsState;
 import ee.carlrobert.codegpt.toolwindow.chat.actions.CreateNewConversationAction;
 import ee.carlrobert.codegpt.toolwindow.chat.actions.OpenInEditorAction;
 import ee.carlrobert.codegpt.toolwindow.chat.actions.UsageToolbarLabelAction;
@@ -14,31 +13,30 @@ import org.jetbrains.annotations.NotNull;
 
 public class ChatToolWindowPanel extends SimpleToolWindowPanel {
 
-  public ChatToolWindowPanel(@NotNull Project project, @NotNull ToolWindow toolWindow) {
+  public ChatToolWindowPanel(@NotNull Project project) {
     super(true);
-    initialize(project, toolWindow);
+    initialize(project);
   }
 
-  private void initialize(Project project, ToolWindow toolWindow) {
+  private void initialize(Project project) {
     var tabPanel = new ChatToolWindowTabPanel(project);
-    var tabbedPane = createTabbedPane(tabPanel);
-    setToolbar(createActionToolbar(project, tabbedPane).getComponent());
-    setContent(tabbedPane);
-
     var conversation = ConversationsState.getCurrentConversation();
     if (conversation == null) {
       tabPanel.displayLandingView();
     } else {
       tabPanel.displayConversation(conversation);
     }
+
+    var tabbedPane = createTabbedPane(tabPanel);
+    setToolbar(createActionToolbar(project, tabbedPane).getComponent());
+    setContent(tabbedPane);
   }
 
   private ActionToolbar createActionToolbar(Project project, ChatTabbedPane tabbedPane) {
     var actionGroup = new DefaultActionGroup("TOOLBAR_ACTION_GROUP", false);
     actionGroup.add(new CreateNewConversationAction(() -> {
-      var conversation = ConversationsState.getInstance().startConversation();
       var panel = new ChatToolWindowTabPanel(project);
-      panel.setConversationId(conversation.getId());
+      panel.setConversation(ConversationsState.getInstance().startConversation());
       panel.displayLandingView();
       tabbedPane.addNewTab(panel);
       repaint();

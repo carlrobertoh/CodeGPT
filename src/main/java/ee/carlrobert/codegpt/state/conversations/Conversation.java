@@ -1,6 +1,6 @@
-package ee.carlrobert.codegpt.conversations;
+package ee.carlrobert.codegpt.state.conversations;
 
-import ee.carlrobert.codegpt.conversations.message.Message;
+import ee.carlrobert.codegpt.state.conversations.message.Message;
 import ee.carlrobert.openai.client.ClientCode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;

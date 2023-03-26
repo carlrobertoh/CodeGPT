@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.settings.advanced;
+package ee.carlrobert.codegpt.state.settings.advanced;
 
 import com.intellij.openapi.options.Configurable;
 import javax.swing.JComponent;

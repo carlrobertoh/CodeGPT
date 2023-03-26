@@ -1,6 +1,6 @@
 package ee.carlrobert.codegpt.client;
 
-import ee.carlrobert.codegpt.conversations.Conversation;
+import ee.carlrobert.codegpt.state.conversations.Conversation;
 import ee.carlrobert.openai.client.completion.chat.request.ChatCompletionMessage;
 import ee.carlrobert.openai.client.completion.chat.request.ChatCompletionRequest;
 import ee.carlrobert.openai.client.completion.text.TextCompletionModel;
@@ -8,12 +8,12 @@ import ee.carlrobert.openai.client.completion.text.request.TextCompletionRequest
 import java.util.ArrayList;
 import java.util.List;
 
-public class CompletionRequestProvider {
+class CompletionRequestProvider {
 
   private final String prompt;
   private final Conversation conversation;
 
-  public CompletionRequestProvider(String prompt, Conversation conversation) {
+  CompletionRequestProvider(String prompt, Conversation conversation) {
     this.prompt = prompt;
     this.conversation = conversation;
   }

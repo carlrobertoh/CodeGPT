@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.settings;
+package ee.carlrobert.codegpt.state.settings;
 
 import com.intellij.openapi.ui.ComboBox;
 import ee.carlrobert.openai.client.completion.CompletionModel;

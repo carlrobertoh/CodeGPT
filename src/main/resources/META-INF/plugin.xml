@@ -66,26 +66,19 @@
 
     <depends>com.intellij.modules.platform</depends>
 
-    <projectListeners>
-        <listener
-            class="ee.carlrobert.codegpt.toolwindow.ToolWindowService"
-            topic="com.intellij.ide.ui.LafManagerListener"/>
-    </projectListeners>
-
     <extensions defaultExtensionNs="com.intellij">
         <postStartupActivity implementation="ee.carlrobert.codegpt.PluginStartupActivity"/>
         <applicationConfigurable id="settings.codegpt" parentId="tools" displayName="CodeGPT"
-            instance="ee.carlrobert.codegpt.settings.SettingsConfigurable"/>
+            instance="ee.carlrobert.codegpt.state.settings.SettingsConfigurable"/>
         <applicationConfigurable id="settings.codegpt.configuration" parentId="settings.codegpt" displayName="Configuration"
-            instance="ee.carlrobert.codegpt.settings.configuration.ConfigurationConfigurable"/>
+            instance="ee.carlrobert.codegpt.state.settings.configuration.ConfigurationConfigurable"/>
         <applicationConfigurable id="settings.codegpt.advanced" parentId="settings.codegpt" displayName="Advanced Settings"
-            instance="ee.carlrobert.codegpt.settings.advanced.AdvancedSettingsConfigurable"/>
-        <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.SettingsState"/>
-        <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.configuration.ConfigurationState"/>
-        <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.advanced.AdvancedSettingsState"/>
-        <applicationService serviceImplementation="ee.carlrobert.codegpt.conversations.ConversationsState"/>
-        <applicationService serviceImplementation="ee.carlrobert.codegpt.account.AccountDetailsState"/>
-        <projectService serviceImplementation="ee.carlrobert.codegpt.toolwindow.ToolWindowService"/>
+            instance="ee.carlrobert.codegpt.state.settings.advanced.AdvancedSettingsConfigurable"/>
+        <applicationService serviceImplementation="ee.carlrobert.codegpt.state.settings.SettingsState"/>
+        <applicationService serviceImplementation="ee.carlrobert.codegpt.state.settings.configuration.ConfigurationState"/>
+        <applicationService serviceImplementation="ee.carlrobert.codegpt.state.settings.advanced.AdvancedSettingsState"/>
+        <applicationService serviceImplementation="ee.carlrobert.codegpt.state.conversations.ConversationsState"/>
+        <applicationService serviceImplementation="ee.carlrobert.codegpt.state.AccountDetailsState"/>
         <projectService serviceImplementation="ee.carlrobert.codegpt.toolwindow.chat.ChatContentManagerService"/>
         <toolWindow id="CodeGPT" icon="Icons.ToolWindowIcon" anchor="right"
             factoryClass="ee.carlrobert.codegpt.toolwindow.ProjectToolWindowFactory"/>

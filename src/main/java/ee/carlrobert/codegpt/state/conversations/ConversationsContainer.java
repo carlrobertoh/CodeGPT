@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.conversations;
+package ee.carlrobert.codegpt.state.conversations;
 
 import ee.carlrobert.openai.client.ClientCode;
 import java.util.HashMap;

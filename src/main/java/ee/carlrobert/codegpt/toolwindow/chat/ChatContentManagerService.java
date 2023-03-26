@@ -2,35 +2,46 @@ package ee.carlrobert.codegpt.toolwindow.chat;
 
 import static java.util.Objects.requireNonNull;
 
+import com.intellij.openapi.components.Service;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.content.Content;
-import com.intellij.ui.content.ContentManager;
 import java.util.Arrays;
 import java.util.Optional;
-import org.jetbrains.annotations.NotNull;
 
+@Service(Service.Level.PROJECT)
 public class ChatContentManagerService {
 
-  public void displayChatTab(@NotNull Project project) {
-    var toolWindow = getToolWindow(project);
+  private final Project project;
+
+  public ChatContentManagerService(Project project) {
+    this.project = project;
+  }
+
+  public ChatToolWindowTabPanel createNewTabPanel() {
+    displayChatTab();
+    var tabbedPane = tryFindChatTabbedPane();
+    if (tabbedPane.isPresent()) {
+      var panel = new ChatToolWindowTabPanel(project);
+      tabbedPane.get().addNewTab(panel);
+      return panel;
+    }
+    return null;
+  }
+
+  public void displayChatTab() {
+    var toolWindow = getToolWindow();
     toolWindow.show();
     var contentManager = toolWindow.getContentManager();
-    tryFindChatTabContent(contentManager).ifPresentOrElse(
+    tryFindChatTabContent().ifPresentOrElse(
         contentManager::setSelectedContent,
         () -> contentManager.setSelectedContent(requireNonNull(contentManager.getContent(0)))
     );
   }
 
-  public boolean isChatTabSelected(ContentManager contentManager) {
-    return tryFindChatTabContent(contentManager)
-        .filter(contentManager::isSelected)
-        .isPresent();
-  }
-
-  public Optional<ChatTabbedPane> tryFindChatTabbedPane(@NotNull Project project) {
-    var chatTabContent = tryFindChatTabContent(getToolWindow(project).getContentManager());
+  public Optional<ChatTabbedPane> tryFindChatTabbedPane() {
+    var chatTabContent = tryFindChatTabContent();
     if (chatTabContent.isPresent()) {
       var tabbedPane = Arrays.stream(chatTabContent.get().getComponent().getComponents())
           .filter(component -> component instanceof ChatTabbedPane)
@@ -42,8 +53,8 @@ public class ChatContentManagerService {
     return Optional.empty();
   }
 
-  public void resetTabbedPane(@NotNull Project project) {
-    tryFindChatTabbedPane(project).ifPresent(tabbedPane -> {
+  public void resetTabbedPane() {
+    tryFindChatTabbedPane().ifPresent(tabbedPane -> {
       tabbedPane.clearAll();
       var tabPanel = new ChatToolWindowTabPanel(project);
       tabPanel.displayLandingView();
@@ -51,13 +62,13 @@ public class ChatContentManagerService {
     });
   }
 
-  private Optional<Content> tryFindChatTabContent(ContentManager contentManager) {
-    return Arrays.stream(contentManager.getContents())
+  private Optional<Content> tryFindChatTabContent() {
+    return Arrays.stream(getToolWindow().getContentManager().getContents())
         .filter(content -> "Chat".equals(content.getTabName()))
         .findFirst();
   }
 
-  private ToolWindow getToolWindow(@NotNull Project project) {
+  private ToolWindow getToolWindow() {
     return requireNonNull(ToolWindowManager.getInstance(project).getToolWindow("CodeGPT"));
   }
 }

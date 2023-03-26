@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.settings.configuration;
+package ee.carlrobert.codegpt.state.settings.configuration;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @State(
-    name = "ee.carlrobert.codegpt.settings.configuration.ConfigurationState",
+    name = "ee.carlrobert.codegpt.state.settings.configuration.ConfigurationState",
     storages = @Storage("CodeGPTConfiguration.xml")
 )
 public class ConfigurationState implements PersistentStateComponent<ConfigurationState> {

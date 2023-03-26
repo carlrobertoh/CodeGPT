@@ -1,6 +1,6 @@
-package ee.carlrobert.codegpt.conversations.converter;
+package ee.carlrobert.codegpt.state.conversations.converter;
 
-import ee.carlrobert.codegpt.conversations.Conversation;
+import ee.carlrobert.codegpt.state.conversations.Conversation;
 
 public class ConversationConverter extends BaseConverter<Conversation> {
 

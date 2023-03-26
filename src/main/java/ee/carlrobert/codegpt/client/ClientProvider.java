@@ -1,7 +1,7 @@
 package ee.carlrobert.codegpt.client;
 
-import ee.carlrobert.codegpt.settings.SettingsState;
-import ee.carlrobert.codegpt.settings.advanced.AdvancedSettingsState;
+import ee.carlrobert.codegpt.state.settings.SettingsState;
+import ee.carlrobert.codegpt.state.settings.advanced.AdvancedSettingsState;
 import ee.carlrobert.openai.client.OpenAIClient;
 import ee.carlrobert.openai.client.ProxyAuthenticator;
 import ee.carlrobert.openai.client.billing.BillingClient;

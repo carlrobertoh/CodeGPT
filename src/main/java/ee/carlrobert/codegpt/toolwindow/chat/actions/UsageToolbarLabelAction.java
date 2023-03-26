@@ -4,7 +4,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.actionSystem.ex.ToolbarLabelAction;
 import com.intellij.util.ui.JBUI;
-import ee.carlrobert.codegpt.account.AccountDetailsState;
+import ee.carlrobert.codegpt.state.AccountDetailsState;
 import javax.swing.JComponent;
 import org.jetbrains.annotations.NotNull;
 

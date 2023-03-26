@@ -1,23 +1,28 @@
 package ee.carlrobert.codegpt.client;
 
-import ee.carlrobert.codegpt.conversations.Conversation;
-import ee.carlrobert.codegpt.conversations.ConversationsState;
-import ee.carlrobert.codegpt.conversations.message.Message;
+import ee.carlrobert.codegpt.state.conversations.Conversation;
+import ee.carlrobert.codegpt.state.conversations.ConversationsState;
+import ee.carlrobert.codegpt.state.conversations.message.Message;
 import ee.carlrobert.openai.client.completion.CompletionEventListener;
 import java.util.function.Consumer;
 
-public class EventListener implements CompletionEventListener {
+class EventListener implements CompletionEventListener {
 
   private final Conversation conversation;
   private final Message message;
-  private final Consumer<String> onAppend;
-  private final Runnable onStopGenerating;
+  private final Consumer<String> errorListener;
+  private final Runnable completeListener;
   private final boolean isRetry;
 
-  public EventListener(Conversation conversation, Message message, Consumer<String> onAppend, Runnable onStopGenerating, boolean isRetry) {
+  EventListener(
+      Conversation conversation,
+      Message message,
+      Runnable completeListener,
+      Consumer<String> errorListener,
+      boolean isRetry) {
     this.conversation = conversation;
-    this.onStopGenerating = onStopGenerating;
-    this.onAppend = onAppend;
+    this.completeListener = completeListener;
+    this.errorListener = errorListener;
     this.message = message;
     this.isRetry = isRetry;
   }
@@ -25,14 +30,14 @@ public class EventListener implements CompletionEventListener {
   @Override
   public void onComplete(StringBuilder messageBuilder) {
     saveConversation(messageBuilder.toString());
-    onStopGenerating.run();
+    completeListener.run();
   }
 
   @Override
   public void onFailure(String errorMessage) {
     saveConversation(errorMessage);
-    onAppend.accept("\n" + errorMessage);
-    onStopGenerating.run();
+    errorListener.accept("\n" + errorMessage);
+    completeListener.run();
   }
 
   private void saveConversation(String response) {

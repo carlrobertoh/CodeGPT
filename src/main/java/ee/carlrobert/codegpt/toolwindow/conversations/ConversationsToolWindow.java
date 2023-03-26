@@ -9,9 +9,9 @@ import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
-import ee.carlrobert.codegpt.conversations.Conversation;
-import ee.carlrobert.codegpt.conversations.ConversationsState;
-import ee.carlrobert.codegpt.settings.SettingsState;
+import ee.carlrobert.codegpt.state.conversations.Conversation;
+import ee.carlrobert.codegpt.state.conversations.ConversationsState;
+import ee.carlrobert.codegpt.state.settings.SettingsState;
 import ee.carlrobert.codegpt.toolwindow.chat.ChatContentManagerService;
 import ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowTabPanel;
 import ee.carlrobert.codegpt.toolwindow.conversations.actions.ClearAllConversationsAction;
@@ -77,14 +77,16 @@ public class ConversationsToolWindow {
       changeSettings(conversation);
 
       var contentManagerService = project.getService(ChatContentManagerService.class);
-      contentManagerService.displayChatTab(project);
-      contentManagerService.tryFindChatTabbedPane(project)
-          .ifPresent(tabbedPane -> tabbedPane.tryFindActiveConversationIndex(conversation.getId())
-              .ifPresentOrElse(tabbedPane::setSelectedIndex, () -> {
-                var panel = new ChatToolWindowTabPanel(project);
-                panel.displayConversation(conversation);
-                tabbedPane.addNewTab(panel);
-              }));
+      contentManagerService.displayChatTab();
+      contentManagerService.tryFindChatTabbedPane()
+          .ifPresent(tabbedPane -> tabbedPane.tryFindActiveConversationTitle(conversation.getId())
+              .ifPresentOrElse(
+                  title -> tabbedPane.setSelectedIndex(tabbedPane.indexOfTab(title)),
+                  () -> {
+                    var panel = new ChatToolWindowTabPanel(project);
+                    panel.displayConversation(conversation);
+                    tabbedPane.addNewTab(panel);
+                  }));
     });
 
     var currentConversation = ConversationsState.getCurrentConversation();

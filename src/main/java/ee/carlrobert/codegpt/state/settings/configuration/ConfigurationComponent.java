@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.settings.configuration;
+package ee.carlrobert.codegpt.state.settings.configuration;
 
 import static ee.carlrobert.codegpt.action.ActionsUtil.DEFAULT_ACTIONS_ARRAY;
 

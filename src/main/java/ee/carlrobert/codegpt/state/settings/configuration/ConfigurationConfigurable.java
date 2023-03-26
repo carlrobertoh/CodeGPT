@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.settings.configuration;
+package ee.carlrobert.codegpt.state.settings.configuration;
 
 import com.intellij.openapi.options.Configurable;
 import ee.carlrobert.codegpt.action.ActionsUtil;

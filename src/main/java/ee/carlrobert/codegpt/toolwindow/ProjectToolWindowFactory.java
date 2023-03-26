@@ -6,7 +6,7 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.ui.content.ContentManagerEvent;
 import com.intellij.ui.content.ContentManagerListener;
-import ee.carlrobert.codegpt.account.AccountDetailsState;
+import ee.carlrobert.codegpt.state.AccountDetailsState;
 import ee.carlrobert.codegpt.client.ClientProvider;
 import ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowPanel;
 import ee.carlrobert.codegpt.toolwindow.conversations.ConversationsToolWindow;
@@ -17,7 +17,7 @@ public class ProjectToolWindowFactory implements ToolWindowFactory, DumbAware {
 
   public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
     var conversationsToolWindow = new ConversationsToolWindow(project);
-    var chatToolWindowPanel = new ChatToolWindowPanel(project, toolWindow);
+    var chatToolWindowPanel = new ChatToolWindowPanel(project);
 
     addContent(toolWindow, chatToolWindowPanel, "Chat");
     addContent(toolWindow, conversationsToolWindow.getContent(), "Conversation History");

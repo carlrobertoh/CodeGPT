@@ -9,7 +9,7 @@ import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.testFramework.LightVirtualFile;
-import ee.carlrobert.codegpt.conversations.ConversationsState;
+import ee.carlrobert.codegpt.state.conversations.ConversationsState;
 import java.time.format.DateTimeFormatter;
 import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;

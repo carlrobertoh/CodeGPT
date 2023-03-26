@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.account;
+package ee.carlrobert.codegpt.state;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @State(
-    name = "ee.carlrobert.codegpt.account.AccountDetailsState",
+    name = "ee.carlrobert.codegpt.state.AccountDetailsState",
     storages = @Storage("CodeGPTAccountDetails.xml")
 )
 public class AccountDetailsState implements PersistentStateComponent<AccountDetailsState> {

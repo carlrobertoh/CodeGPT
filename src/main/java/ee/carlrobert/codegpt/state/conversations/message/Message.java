@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.conversations.message;
+package ee.carlrobert.codegpt.state.conversations.message;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
