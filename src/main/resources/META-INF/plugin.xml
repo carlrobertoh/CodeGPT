@@ -18,6 +18,7 @@
     <h2>Features</h2>
     <ul>
       <li><b>Ask ChatGPT</b> - Ask anything</li>
+      <li><b>Concurrent conversations</b> - Chat with the AI in multiple tabs simultaneously</li>
       <li><b>Conversation History</b> - View recent conversation history and restore previous sessions, making it easy to pick up where you left off</li>
       <li><b>Predefined Actions</b> - Create your own code actions or override the existing ones, saving time rewriting the same prompt repeatedly</li>
       <li><b>Custom Prompt</b> - Create a custom prompt for your selected code. The previous prompt will be remembered for subsequent questions</li>
@@ -54,12 +55,8 @@
 
     <change-notes>
         <![CDATA[
-      <b>Update will delete the existing conversations and requires to enter the settings again, if you would like to restore the previous conversations then contact developer directly!</b>
       <ul>
-        <li>Remove support for unofficial reverse proxy</li>
-        <li>Replace last message when regenerating response</li>
-        <li>Switch to openai-client</li>
-        <li>Add confirmation message dialog when clearing all conversations</li>
+        <li>Add tabs for multiple concurrent conversations</li>
       </ul>
     ]]>
     </change-notes>
