@@ -13,7 +13,7 @@ import javax.swing.JPanel;
 
 public class ChatTabbedPane extends JBTabbedPane {
 
-  private final Map<String, ChatToolWindowTabPanel> activeTabMapping = new TreeMap<>((o1, o2) -> {
+  private final Map<String, ToolWindowTabPanel> activeTabMapping = new TreeMap<>((o1, o2) -> {
     int n1 = Integer.parseInt(o1.replaceAll("\\D", ""));
     int n2 = Integer.parseInt(o2.replaceAll("\\D", ""));
     return Integer.compare(n1, n2);
@@ -25,7 +25,7 @@ public class ChatTabbedPane extends JBTabbedPane {
         .ifPresent(conversation -> ConversationsState.getInstance().setCurrentConversation(conversation)));
   }
 
-  public void addNewTab(ChatToolWindowTabPanel toolWindowPanel) {
+  public void addNewTab(ToolWindowTabPanel toolWindowPanel) {
     var tabIndices = activeTabMapping.keySet().toArray(new String[0]);
     var nextIndex = 0;
     for (String title : tabIndices) {
@@ -49,7 +49,10 @@ public class ChatTabbedPane extends JBTabbedPane {
 
   public Optional<String> tryFindActiveConversationTitle(UUID conversationId) {
     return activeTabMapping.entrySet().stream()
-        .filter(entry -> conversationId.equals(entry.getValue().getConversation().getId()))
+        .filter(entry -> {
+          var panelConversation = entry.getValue().getConversation();
+          return panelConversation != null && conversationId.equals(panelConversation.getId());
+        })
         .findFirst()
         .map(Map.Entry::getKey);
   }

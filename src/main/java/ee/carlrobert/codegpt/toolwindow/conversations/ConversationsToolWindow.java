@@ -13,7 +13,7 @@ import ee.carlrobert.codegpt.state.conversations.Conversation;
 import ee.carlrobert.codegpt.state.conversations.ConversationsState;
 import ee.carlrobert.codegpt.state.settings.SettingsState;
 import ee.carlrobert.codegpt.toolwindow.chat.ChatContentManagerService;
-import ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowTabPanel;
+import ee.carlrobert.codegpt.toolwindow.chat.ToolWindowTabPanelFactory;
 import ee.carlrobert.codegpt.toolwindow.conversations.actions.ClearAllConversationsAction;
 import ee.carlrobert.codegpt.toolwindow.conversations.actions.DeleteConversationAction;
 import ee.carlrobert.codegpt.toolwindow.conversations.actions.MoveDownAction;
@@ -83,7 +83,7 @@ public class ConversationsToolWindow {
               .ifPresentOrElse(
                   title -> tabbedPane.setSelectedIndex(tabbedPane.indexOfTab(title)),
                   () -> {
-                    var panel = new ChatToolWindowTabPanel(project);
+                    var panel = ToolWindowTabPanelFactory.getTabPanel(project);
                     panel.displayConversation(conversation);
                     tabbedPane.addNewTab(panel);
                   }));

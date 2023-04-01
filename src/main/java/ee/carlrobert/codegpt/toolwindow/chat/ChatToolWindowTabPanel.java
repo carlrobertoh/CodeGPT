@@ -11,13 +11,13 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBScrollPane;
+import ee.carlrobert.codegpt.client.RequestHandler;
 import ee.carlrobert.codegpt.state.AccountDetailsState;
 import ee.carlrobert.codegpt.state.conversations.Conversation;
 import ee.carlrobert.codegpt.state.conversations.ConversationsState;
 import ee.carlrobert.codegpt.state.conversations.message.Message;
 import ee.carlrobert.codegpt.state.settings.SettingsConfigurable;
 import ee.carlrobert.codegpt.state.settings.SettingsState;
-import ee.carlrobert.codegpt.client.RequestHandler;
 import ee.carlrobert.codegpt.toolwindow.components.GenerateButton;
 import ee.carlrobert.codegpt.toolwindow.components.LandingView;
 import ee.carlrobert.codegpt.toolwindow.components.ScrollPane;
@@ -43,7 +43,7 @@ import javax.swing.SwingUtilities;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.jetbrains.annotations.NotNull;
 
-public class ChatToolWindowTabPanel {
+public class ChatToolWindowTabPanel implements ToolWindowTabPanel {
 
   private final List<SyntaxTextArea> textAreas = new ArrayList<>();
   private final Project project;
@@ -60,25 +60,17 @@ public class ChatToolWindowTabPanel {
     this.project = project;
   }
 
+  @Override
   public JPanel getContent() {
     return chatGptToolWindowContent;
   }
 
+  @Override
   public Conversation getConversation() {
     return conversation;
   }
 
-  public void setConversation(Conversation conversation) {
-    this.conversation = conversation;
-  }
-
-  public void displayUserMessage(String userMessage) {
-    addIconLabel(AllIcons.General.User, AccountDetailsState.getInstance().accountName);
-    scrollablePanel.add(createTextPane(userMessage));
-    scrollablePanel.revalidate();
-    scrollablePanel.repaint();
-  }
-
+  @Override
   public void displayLandingView() {
     if (!isLandingViewVisible) {
       SwingUtilities.invokeLater(() -> {
@@ -99,6 +91,7 @@ public class ChatToolWindowTabPanel {
     }
   }
 
+  @Override
   public void displayConversation(Conversation conversation) {
     setConversation(conversation);
     clearWindow();
@@ -116,11 +109,14 @@ public class ChatToolWindowTabPanel {
     scrollablePanel.repaint();
   }
 
-  public void sendMessage(String prompt, Project project) {
-    sendMessage(prompt, project, false);
+  @Override
+  public void startNewConversation(String prompt) {
+    conversation = ConversationsState.getInstance().startConversation();
+    startConversation(prompt, false);
   }
 
-  public void sendMessage(String prompt, Project project, boolean isRetry) {
+  @Override
+  public void startConversation(String prompt, boolean isRetry) {
     if (!isRetry) {
       addIconLabel(Icons.DefaultImageIcon, "ChatGPT");
     }
@@ -142,6 +138,17 @@ public class ChatToolWindowTabPanel {
     }
   }
 
+  public void setConversation(Conversation conversation) {
+    this.conversation = conversation;
+  }
+
+  public void displayUserMessage(String userMessage) {
+    addIconLabel(AllIcons.General.User, AccountDetailsState.getInstance().accountName);
+    scrollablePanel.add(createTextPane(userMessage));
+    scrollablePanel.revalidate();
+    scrollablePanel.repaint();
+  }
+
   public void call(SyntaxTextArea textArea, String prompt, boolean isRetry) {
     if (conversation == null) {
       conversation = ConversationsState.getInstance().startConversation();
@@ -149,10 +156,9 @@ public class ChatToolWindowTabPanel {
 
     var conversationMessage = new Message(prompt);
     var requestService = new RequestHandler(conversation) {
-      public void handleMessage(String message) {
+      public void handleMessage(String message, String fullMessage) {
         try {
           textArea.append(message);
-          conversationMessage.setResponse(textArea.getText());
           scrollToBottom();
         } catch (Exception e) {
           textArea.append("Something went wrong. Please try again later.");
@@ -207,7 +213,7 @@ public class ChatToolWindowTabPanel {
 
   public void stopGenerating(String prompt, SyntaxTextArea textArea) {
     generateButton.setMode(GenerateButton.Mode.REFRESH, () -> {
-      sendMessage(prompt, project, true);
+      startConversation(prompt, true);
       scrollToBottom();
     });
     textArea.displayCopyButton();
@@ -228,7 +234,7 @@ public class ChatToolWindowTabPanel {
       setConversation(ConversationsState.getInstance().startConversation());
     }
     displayUserMessage(searchText);
-    sendMessage(searchText, project);
+    startNewConversation(searchText);
     textArea.setText("");
     scrollToBottom();
     scrollablePanel.revalidate();

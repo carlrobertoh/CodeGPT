@@ -10,6 +10,7 @@ import okhttp3.sse.EventSource;
 public class RequestHandler implements ActionListener {
 
   private final Conversation conversation;
+  private final StringBuilder messageBuilder = new StringBuilder();
   private SwingWorker<Void, String> swingWorker;
   private EventSource eventSource;
 
@@ -35,8 +36,10 @@ public class RequestHandler implements ActionListener {
       }
 
       protected void process(List<String> chunks) {
+        message.setResponse(messageBuilder.toString());
         for (String text : chunks) {
-          handleMessage(text);
+          messageBuilder.append(text);
+          handleMessage(text, messageBuilder.toString());
         }
       }
     };
@@ -49,13 +52,17 @@ public class RequestHandler implements ActionListener {
   }
 
   private EventSource startCall(Message message, EventListener eventListener) {
-    var settings = SettingsState.getInstance();
-    var requestProvider = new CompletionRequestProvider(message.getPrompt(), conversation);
-    if (settings.isChatCompletionOptionSelected) {
-      return ClientProvider.getChatCompletionClient().stream(
-          requestProvider.buildChatCompletionRequest(settings.chatCompletionBaseModel), eventListener);
+    try {
+      var settings = SettingsState.getInstance();
+      var requestProvider = new CompletionRequestProvider(message.getPrompt(), conversation);
+      if (settings.isChatCompletionOptionSelected) {
+        return ClientProvider.getChatCompletionClient().stream(
+            requestProvider.buildChatCompletionRequest(settings.chatCompletionBaseModel), eventListener);
+      }
+      return ClientProvider.getTextCompletionClient().stream(
+          requestProvider.buildTextCompletionRequest(settings.textCompletionBaseModel), eventListener);
+    } finally {
+      conversation.addMessage(message);
     }
-    return ClientProvider.getTextCompletionClient().stream(
-        requestProvider.buildTextCompletionRequest(settings.textCompletionBaseModel), eventListener);
   }
 }

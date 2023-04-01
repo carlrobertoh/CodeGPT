@@ -49,7 +49,6 @@ class EventListener implements CompletionEventListener {
     }
 
     message.setResponse(response);
-    conversation.addMessage(message);
     conversationsState.saveConversation(conversation);
   }
 }

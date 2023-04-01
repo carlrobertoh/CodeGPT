@@ -19,7 +19,7 @@ public class ChatToolWindowPanel extends SimpleToolWindowPanel {
   }
 
   private void initialize(Project project) {
-    var tabPanel = new ChatToolWindowTabPanel(project);
+    var tabPanel = ToolWindowTabPanelFactory.getTabPanel(project);
     var conversation = ConversationsState.getCurrentConversation();
     if (conversation == null) {
       tabPanel.displayLandingView();
@@ -35,8 +35,7 @@ public class ChatToolWindowPanel extends SimpleToolWindowPanel {
   private ActionToolbar createActionToolbar(Project project, ChatTabbedPane tabbedPane) {
     var actionGroup = new DefaultActionGroup("TOOLBAR_ACTION_GROUP", false);
     actionGroup.add(new CreateNewConversationAction(() -> {
-      var panel = new ChatToolWindowTabPanel(project);
-      panel.setConversation(ConversationsState.getInstance().startConversation());
+      var panel = ToolWindowTabPanelFactory.getTabPanel(project);
       panel.displayLandingView();
       tabbedPane.addNewTab(panel);
       repaint();
@@ -45,14 +44,13 @@ public class ChatToolWindowPanel extends SimpleToolWindowPanel {
     actionGroup.add(new OpenInEditorAction());
     actionGroup.addSeparator();
     actionGroup.add(new UsageToolbarLabelAction());
-
-    // TODO: Data usage not enabled in stream mode https://community.openai.com/t/usage-info-in-api-responses/18862/11
+    // actionGroup.addSeparator();
     // actionGroup.add(new TokenToolbarLabelAction());
 
     return ActionManager.getInstance().createActionToolbar("NAVIGATION_BAR_TOOLBAR", actionGroup, false);
   }
 
-  private ChatTabbedPane createTabbedPane(ChatToolWindowTabPanel tabPanel) {
+  private ChatTabbedPane createTabbedPane(ToolWindowTabPanel tabPanel) {
     var tabbedPane = new ChatTabbedPane();
     tabbedPane.addNewTab(tabPanel);
     return tabbedPane;

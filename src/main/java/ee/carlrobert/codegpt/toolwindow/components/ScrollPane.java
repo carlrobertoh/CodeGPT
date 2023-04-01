@@ -5,12 +5,13 @@ import com.intellij.ui.components.JBScrollPane;
 import java.awt.Adjustable;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
+import javax.swing.JComponent;
 import javax.swing.JScrollBar;
 import javax.swing.ScrollPaneConstants;
 
 public class ScrollPane extends JBScrollPane {
 
-  public ScrollPane(ScrollablePanel scrollablePanel) {
+  public ScrollPane(JComponent scrollablePanel) {
     super(scrollablePanel);
     setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
     setBorder(null);

@@ -7,6 +7,6 @@ interface ActionListener {
   default void handleError(String errorMessage) {
   }
 
-  default void handleMessage(String message) {
+  default void handleMessage(String message, String fullMessage) {
   }
 }

@@ -7,7 +7,9 @@ import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.project.Project;
+import ee.carlrobert.codegpt.util.FileUtils;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -43,7 +45,9 @@ public class ActionsUtil {
       tableData.forEach((action, prompt) -> group.add(new BaseAction(action) {
         @Override
         protected void actionPerformed(Project project, Editor editor, String selectedText) {
-          sendMessage(project, prompt.replace("{{selectedCode}}", format("\n\n%s", selectedText)));
+          var fileExtension = FileUtils.getFileExtension(((EditorImpl) editor).getVirtualFile().getName());
+          // TODO: Requires more sophisticated language parsing(can't always rely on the file extension)
+          sendMessage(project, prompt.replace("{{selectedCode}}", format("\n```%s\n%s\n```", fileExtension, selectedText)));
         }
       }));
     }

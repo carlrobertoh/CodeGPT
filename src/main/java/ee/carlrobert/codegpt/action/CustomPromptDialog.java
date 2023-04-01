@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt.action;
 
 import static ee.carlrobert.codegpt.util.SwingUtils.addShiftEnterInputMap;
+import static java.lang.String.format;
 
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.ui.components.JBScrollPane;
@@ -28,7 +29,7 @@ public class CustomPromptDialog extends DialogWrapper {
     this.userPromptTextArea = new JTextArea(previousUserPrompt);
     this.userPromptTextArea.setCaretPosition(previousUserPrompt.length());
     setTitle("Custom Prompt");
-    setSize(460, 320);
+    setSize(600, 400);
     init();
   }
 
@@ -62,7 +63,7 @@ public class CustomPromptDialog extends DialogWrapper {
   }
 
   public String getFullPrompt() {
-    return userPromptTextArea.getText() + "\n\n" + syntaxTextArea.getText();
+    return userPromptTextArea.getText() + format("\n```%s\n%s\n```", fileExtension, syntaxTextArea.getText());
   }
 
   public String getUserPrompt() {

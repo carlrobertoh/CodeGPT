@@ -19,11 +19,11 @@ public class ChatContentManagerService {
     this.project = project;
   }
 
-  public ChatToolWindowTabPanel createNewTabPanel() {
+  public ToolWindowTabPanel createNewTabPanel() {
     displayChatTab();
     var tabbedPane = tryFindChatTabbedPane();
     if (tabbedPane.isPresent()) {
-      var panel = new ChatToolWindowTabPanel(project);
+      var panel = ToolWindowTabPanelFactory.getTabPanel(project);
       tabbedPane.get().addNewTab(panel);
       return panel;
     }
@@ -56,7 +56,7 @@ public class ChatContentManagerService {
   public void resetTabbedPane() {
     tryFindChatTabbedPane().ifPresent(tabbedPane -> {
       tabbedPane.clearAll();
-      var tabPanel = new ChatToolWindowTabPanel(project);
+      var tabPanel = ToolWindowTabPanelFactory.getTabPanel(project);
       tabPanel.displayLandingView();
       tabbedPane.addNewTab(tabPanel);
     });

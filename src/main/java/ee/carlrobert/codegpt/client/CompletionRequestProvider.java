@@ -35,7 +35,9 @@ class CompletionRequestProvider {
     var messages = new ArrayList<ChatCompletionMessage>();
     messages.add(new ChatCompletionMessage(
         "system",
-        "You are ChatGPT, a large language model trained by OpenAI. Answer as concisely as possible."));
+        "You are ChatGPT, a large language model trained by OpenAI. " +
+            "Answer as concisely as possible. " +
+            "Include code language in markdown snippets whenever possible."));
     conversation.getMessages().forEach(message -> {
       messages.add(new ChatCompletionMessage("user", message.getPrompt()));
       messages.add(new ChatCompletionMessage("assistant", message.getResponse()));
