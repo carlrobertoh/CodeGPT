@@ -1,20 +1,22 @@
 package ee.carlrobert.codegpt.toolwindow.chat;
 
+import static ee.carlrobert.codegpt.util.ThemeUtils.getBackgroundColorRGB;
+import static ee.carlrobert.codegpt.util.ThemeUtils.getFontColorRGB;
+import static ee.carlrobert.codegpt.util.ThemeUtils.getFontSize;
+import static ee.carlrobert.codegpt.util.ThemeUtils.getPanelBackgroundColorRGB;
+import static ee.carlrobert.codegpt.util.ThemeUtils.getSeparatorColorRGB;
 import static java.lang.String.format;
 
-import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.ui.jcef.JCEFHtmlPanel;
-import com.intellij.util.ui.JBFont;
-import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 import ee.carlrobert.codegpt.state.AccountDetailsState;
 import ee.carlrobert.codegpt.state.conversations.Conversation;
-import java.awt.Color;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import javax.swing.UIManager;
 import org.cef.browser.CefBrowser;
 import org.cef.browser.CefFrame;
 import org.cef.handler.CefLoadHandlerAdapter;
@@ -28,7 +30,6 @@ public class MarkdownJCEFHtmlPanel extends JCEFHtmlPanel {
   public MarkdownJCEFHtmlPanel() {
     super(null);
     this.browserContentManager = new BrowserContentManager(getCefBrowser());
-    setPageBackgroundColor(getRGB(UIUtil.getPanelBackground()));
     setHtml(getIndexContent());
     getJBCefClient().addLoadHandler(new CefLoadHandlerAdapter() {
       public void onLoadEnd(CefBrowser browser, CefFrame frame, int httpStatusCode) {
@@ -37,6 +38,22 @@ public class MarkdownJCEFHtmlPanel extends JCEFHtmlPanel {
         }
       }
     }, getCefBrowser());
+
+    UIManager.addPropertyChangeListener(e -> {
+      if ("lookAndFeel".equals(e.getPropertyName())) {
+        var browser = getCefBrowser();
+        browser.executeJavaScript(
+            // TODO: Handle prism theme change
+            format("document.documentElement.style.setProperty('--bg', '%s');", getBackgroundColorRGB()) +
+                format("document.documentElement.style.setProperty('--font-color', '%s');", getFontColorRGB()) +
+                format("document.documentElement.style.setProperty('--font-size', '%dpx');", getFontSize()) +
+                format("document.documentElement.style.setProperty('--separator-color', '%s');", getSeparatorColorRGB()) +
+                format("document.documentElement.style.setProperty('--panel-background-color', '%s');", getPanelBackgroundColorRGB()),
+            null,
+            0
+        );
+      }
+    });
 
     /*var popupMenu = new HtmlPanelPopupMenu();
     getComponent().addMouseListener(popupMenu.getMouseAdapter());
@@ -95,33 +112,17 @@ public class MarkdownJCEFHtmlPanel extends JCEFHtmlPanel {
   }
 
   private String getIndexContent() {
-    var panelBg = UIUtil.getPanelBackground();
     try {
       var stream = Objects.requireNonNull(MarkdownJCEFHtmlPanel.class.getResourceAsStream("/html/index.html"));
       return new String(stream.readAllBytes(), StandardCharsets.UTF_8)
-          .replace("[font-color]", getForegroundRGB())
-          .replace("[font-size]", String.valueOf(JBFont.regular().getSize()))
-          .replace("[separator-color]", getRGB(JBUI.CurrentTheme.CustomFrameDecorations.separatorForeground()))
-          .replace("[panel-background-color]", getRGB(UIUtil.isUnderDarcula() ? toDarker(panelBg) : panelBg.brighter()));
+          .replace("[prism-theme]", UIUtil.isUnderDarcula() ? "prism-darcula" : "prism-vs")
+          .replace("[bg]", getBackgroundColorRGB())
+          .replace("[font-color]", getFontColorRGB())
+          .replace("[font-size]", String.valueOf(getFontSize()))
+          .replace("[separator-color]", getSeparatorColorRGB())
+          .replace("[panel-background-color]", getPanelBackgroundColorRGB());
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-  }
-
-  private static Color toDarker(Color color) {
-    var factor = 0.9;
-    return new Color(
-        Math.max((int) (color.getRed() * factor), 0),
-        Math.max((int) (color.getGreen() * factor), 0),
-        Math.max((int) (color.getBlue() * factor), 0),
-        color.getAlpha());
-  }
-
-  private static String getForegroundRGB() {
-    return getRGB(EditorColorsManager.getInstance().getSchemeForCurrentUITheme().getDefaultForeground());
-  }
-
-  private static String getRGB(Color color) {
-    return format("rgb(%d, %d, %d)", color.getRed(), color.getGreen(), color.getBlue());
   }
 }

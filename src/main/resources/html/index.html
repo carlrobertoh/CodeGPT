@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <link
       rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-vs.min.css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/[prism-theme].min.css"
       crossorigin="anonymous"
   />
   <script
@@ -18,6 +18,7 @@
 
   <style>
       :root {
+          --bg: [bg];
           --font-color: [font-color];
           --font-size: [font-size]px;
           --separator-color: [separator-color];
@@ -25,6 +26,7 @@
       }
 
       html {
+          background-color: var(--bg);
           color: var(--font-color);
           font-family: 'Inter', sans-serif;
           font-size: var(--font-size);
