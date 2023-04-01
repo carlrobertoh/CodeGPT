@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-vs.min.css"
+      crossorigin="anonymous"
+  />
+  <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.0/prism.min.js"
+      crossorigin="anonymous"
+  ></script>
+  <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.0/plugins/autoloader/prism-autoloader.min.js"
+      crossorigin="anonymous"
+  ></script>
+
+  <style>
+      :root {
+          --font-color: [font-color];
+          --font-size: [font-size]px;
+          --separator-color: [separator-color];
+          --panel-background-color: [panel-background-color];
+      }
+
+      html {
+          color: var(--font-color);
+          font-family: 'Inter', sans-serif;
+          font-size: var(--font-size);
+      }
+
+      body {
+          margin: 0;
+      }
+
+      pre[class*='language-'] {
+          font-size: var(--font-size);
+          overflow: auto;
+      }
+
+      @keyframes roll {
+          0% {
+              transform: rotate(0deg);
+          }
+          100% {
+              transform: rotate(360deg);
+          }
+      }
+
+      #landing-view {
+          display: flex;
+          justify-content: center;
+          margin-top: 40px;
+      }
+
+      #landing-view > div {
+          display: inline-flex;
+          flex-direction: column;
+          gap: 16px;
+      }
+
+      #landing-view > div > h1 {
+          margin-bottom: 0;
+      }
+
+      .example-text {
+          background-color: var(--panel-background-color);
+          color: inherit;
+          padding: 16px;
+          border: 0;
+          border-radius: 6px;
+          text-align: center;
+      }
+
+      .user-message {
+          padding: 0 8px;
+      }
+
+      .user-message > p {
+          font-weight: 600;
+      }
+
+      .response {
+          padding: 0 8px;
+          background-color: var(--panel-background-color);
+          border-top: 1px solid var(--separator-color);
+          border-bottom: 1px solid var(--separator-color);
+      }
+
+      .response > p {
+          display: flex;
+          gap: 6px;
+          align-items: center;
+      }
+
+      .icon-wrapper {
+          width: 20px;
+          height: 20px;
+      }
+  </style>
+</head>
+<body></body>
+</html>

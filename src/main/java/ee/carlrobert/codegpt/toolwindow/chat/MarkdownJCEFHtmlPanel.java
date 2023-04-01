@@ -10,6 +10,9 @@ import com.intellij.util.ui.UIUtil;
 import ee.carlrobert.codegpt.state.AccountDetailsState;
 import ee.carlrobert.codegpt.state.conversations.Conversation;
 import java.awt.Color;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import org.cef.browser.CefBrowser;
@@ -93,79 +96,16 @@ public class MarkdownJCEFHtmlPanel extends JCEFHtmlPanel {
 
   private String getIndexContent() {
     var panelBg = UIUtil.getPanelBackground();
-    var theme = UIUtil.isUnderDarcula() ? "darcula" : "vs";
-    var bgColor = getRGB(UIUtil.isUnderDarcula() ? toDarker(panelBg) : panelBg.brighter());
-    var separatorColor = JBUI.CurrentTheme.CustomFrameDecorations.separatorForeground();
-    return "<html>" +
-        "<head>" +
-        format(
-            "<link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-%s.min.css\" crossorigin=\"anonymous\" />",
-            theme) +
-        "<script src=\"https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.0/prism.min.js\" crossorigin=\"anonymous\"></script>" +
-        "<script src=\"https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.0/plugins/autoloader/prism-autoloader.min.js\" crossorigin=\"anonymous\"></script>" +
-        "<style>" +
-        "  html {" +
-        "    color: " + getForegroundRGB() + ";" +
-        "    font-family: 'Inter', sans-serif;" +
-        "    font-size: " + JBFont.regular().getSize() + "px;" +
-        "  }" +
-        "  body {" +
-        "    margin: 0;" +
-        "  }" +
-        "  pre[class*=language-] {" +
-        "    font-size: " + JBFont.regular().getSize() + "px;" +
-        "    overflow: auto; " +
-        "  }" +
-        "  @keyframes roll {" +
-        "    0% {" +
-        "      transform: rotate(0deg);" +
-        "    }" +
-        "    100% {" +
-        "      transform: rotate(360deg);" +
-        "    }" +
-        "  }" +
-        "  #landing-view {" +
-        "    display: flex;" +
-        "    justify-content: center;" +
-        "    margin-top: 40px;" +
-        "  }" +
-        "  #landing-view > div {" +
-        "    display: inline-flex;" +
-        "    flex-direction: column;" +
-        "    gap: 16px;" +
-        "  }" +
-        "  #landing-view > div > h1 {" +
-        "    margin-bottom: 0;" +
-        "  }" +
-        "  .example-text {" +
-        "    background-color: " + bgColor + ";" +
-        "    color: inherit;" +
-        "    padding: 16px;" +
-        "    border: 0;" +
-        "    border-radius: 6px;" +
-        "    text-align: center;" +
-        "  }" +
-        "  .user-message {" +
-        "    padding: 0 8px;" +
-        "  }" +
-        "  .user-message > p {" +
-        "    font-weight: 600;" +
-        "  }" +
-        "  .response {" +
-        "    padding: 0 8px;" +
-        "    background-color: " + bgColor + ";" +
-        "    border-top: 1px solid " + getRGB(separatorColor) + ";" +
-        "    border-bottom: 1px solid " + getRGB(separatorColor) + ";" +
-        "  }" +
-        "  .response > p {" +
-        "    display: flex;" +
-        "    gap: 6px;" +
-        "    align-items: center;" +
-        "  }" +
-        "</style>" +
-        "</head>" +
-        "<body></body>" +
-        "</html>";
+    try {
+      var stream = Objects.requireNonNull(MarkdownJCEFHtmlPanel.class.getResourceAsStream("/html/index.html"));
+      return new String(stream.readAllBytes(), StandardCharsets.UTF_8)
+          .replace("[font-color]", getForegroundRGB())
+          .replace("[font-size]", String.valueOf(JBFont.regular().getSize()))
+          .replace("[separator-color]", getRGB(JBUI.CurrentTheme.CustomFrameDecorations.separatorForeground()))
+          .replace("[panel-background-color]", getRGB(UIUtil.isUnderDarcula() ? toDarker(panelBg) : panelBg.brighter()));
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   private static Color toDarker(Color color) {

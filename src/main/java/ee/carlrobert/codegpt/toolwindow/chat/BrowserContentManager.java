@@ -180,7 +180,7 @@ public class BrowserContentManager {
   private String getSvgIcon() {
     try {
       var stream = Objects.requireNonNull(BrowserContentManager.class.getResourceAsStream(
-          UIUtil.isUnderDarcula() ? "/icons/html/codegpt-icon_dark.svg" : "/icons/html/codegpt-icon.svg"));
+          UIUtil.isUnderDarcula() ? "/html/icons/codegpt-icon_dark.svg" : "/html/icons/codegpt-icon.svg"));
       return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
     } catch (IOException e) {
       throw new RuntimeException(e);
