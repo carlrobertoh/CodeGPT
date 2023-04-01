@@ -110,8 +110,10 @@ Stop the response generation or re-generate a new response from the existing que
     - [x] Ability to start/restore sessions
     - [ ] Ability to export conversations in Markdown/JSON format
 - [ ] Add codex and user's fine-tuned models
+- [ ] Ability to have a seamless conversation despite to token limitation
+- [ ] Add support for copying and replacing generated code snippets
+- [ ] Add support for editing/deleting previous conversations  
 - [ ] Add support for overriding prompts and request params
-- [ ] Add support for custom fonts, colors and sizes
 - [ ] Add support for model fine-tuning
 
 See the [open issues][open-issues] for a full list of proposed features (and known issues).
