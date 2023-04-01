@@ -3,7 +3,7 @@
     <name>CodeGPT</name>
     <vendor email="carlrobertoh@gmail.com" url="https://carlrobert.ee">Carl-Robert Linnupuu</vendor>
     <description><![CDATA[
-    <p><b>CodeGPT as your copilot to level up your developer experience.</b></p>
+    <p><b>ChatGPT as your copilot to level up your developer experience.</b></p>
     <p>
       This is the perfect assistant for any programmer who wants to improve their coding skills
       and make more efficient use of the time.
@@ -56,7 +56,9 @@
     <change-notes>
         <![CDATA[
       <ul>
-        <li>Add tabs for multiple concurrent conversations</li>
+        <li>New Chat UI</li>
+        <li>Markdown rendering</li>
+        <li>Fix text input placeholder</li>
       </ul>
     ]]>
     </change-notes>
