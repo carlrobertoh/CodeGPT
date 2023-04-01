@@ -143,7 +143,6 @@ public class ChatToolWindowTabHtmlPanel implements ToolWindowTabPanel {
     textAreaScrollPane.setViewportView(textArea);
     markdownHtmlPanel = new MarkdownJCEFHtmlPanel();
     contentPanel = new JPanel(new BorderLayout());
-    contentPanel.setBorder(JBUI.Borders.emptyTop(8));
     contentPanel.add(markdownHtmlPanel.getComponent(), BorderLayout.CENTER);
     contentPanel.setPreferredSize(markdownHtmlPanel.getComponent().getPreferredSize());
     reloadResponseButton = new GenerateButton();

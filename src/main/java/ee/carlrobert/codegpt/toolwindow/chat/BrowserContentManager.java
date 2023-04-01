@@ -1,5 +1,7 @@
 package ee.carlrobert.codegpt.toolwindow.chat;
 
+import static org.apache.commons.text.StringEscapeUtils.escapeEcmaScript;
+
 import com.intellij.util.ui.UIUtil;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
@@ -37,6 +39,7 @@ public class BrowserContentManager {
         "document.body.appendChild(wrapper);" +
         "Prism.highlightAll();"
     );
+    scrollToBottom();
   }
 
   // language=javascript
@@ -48,7 +51,7 @@ public class BrowserContentManager {
         "const iconLabelContainer = document.createElement('p');" +
         "const svgWrapper = document.createElement('span');" +
         "svgWrapper.classList.add('icon-wrapper');" +
-        "svgWrapper.innerHTML = '" + normalizeHtml(getSvgIcon()) + "';" +
+        "svgWrapper.innerHTML = '" + escapeEcmaScript(getSvgIcon()) + "';" +
         (animate ? "svgWrapper.style.animation = 'roll 2.4s infinite linear';" : "") +
         "iconLabelContainer.appendChild(svgWrapper);" +
         "const label = document.createElement('strong');" +
@@ -168,13 +171,7 @@ public class BrowserContentManager {
     var html = HtmlRenderer.builder(options)
         .build()
         .render(document);
-    return normalizeHtml(html);
-  }
-
-  private String normalizeHtml(String text) {
-    return text.replace("'", "\\'")
-        .replace("\n", "\\n")
-        .replace("\"", "\\\"");
+    return escapeEcmaScript(html);
   }
 
   private String getSvgIcon() {
