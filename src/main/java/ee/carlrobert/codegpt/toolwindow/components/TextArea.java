@@ -3,7 +3,6 @@ package ee.carlrobert.codegpt.toolwindow.components;
 import static ee.carlrobert.codegpt.util.SwingUtils.addShiftEnterInputMap;
 import static ee.carlrobert.codegpt.util.SwingUtils.createIconButton;
 
-import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBTextArea;
 import com.intellij.util.ui.JBUI;
 import icons.Icons;
