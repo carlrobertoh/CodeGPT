@@ -59,6 +59,7 @@
         <li>New Chat UI</li>
         <li>Markdown rendering</li>
         <li>Fix text input placeholder</li>
+        <li>Fix code from overflowing</li>
       </ul>
     ]]>
     </change-notes>
