@@ -16,5 +16,4 @@ public interface ToolWindowTabPanel {
   void startNewConversation(String prompt);
 
   void startConversation(String prompt, boolean isRetry);
-
 }

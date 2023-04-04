@@ -22,10 +22,20 @@
           --font-color: [font-color];
           --font-size: [font-size]px;
           --separator-color: [separator-color];
+          --disabled-color: [disabled-color];
           --panel-background-color: [panel-background-color];
+          --button-background-color: [button-background-color];
+          --button-disabled-background-color: [button-disabled-background-color];
+      }
+
+      button[disabled] {
+          color: var(--disabled-color);
+          background-color: var(--button-disabled-background-color);
+          cursor: not-allowed;
       }
 
       html {
+          scroll-behavior: smooth;
           background-color: var(--bg);
           color: var(--font-color);
           font-family: 'Inter', sans-serif;
@@ -36,9 +46,18 @@
           margin: 0;
       }
 
-      pre[class*='language-'] {
-          font-size: var(--font-size);
+      pre, pre[class*='language-'] {
           overflow: auto;
+          font-size: var(--font-size);
+          padding: 8px;
+          margin-top: 0;
+          border-bottom-left-radius: 6px;
+          border-bottom-right-radius: 6px;
+          border: 1px solid var(--separator-color);
+      }
+
+      pre:focus {
+          outline: none;
       }
 
       @keyframes roll {
@@ -99,6 +118,34 @@
       .icon-wrapper {
           width: 20px;
           height: 20px;
+      }
+
+      .code-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          background: var(--bg);
+          padding: 8px;
+          border-top-left-radius: 6px;
+          border-top-right-radius: 6px;
+          border: 1px solid var(--separator-color);
+      }
+
+      .code-header .actions {
+          display: flex;
+          gap: 8px;
+      }
+
+      .lang {
+          letter-spacing: 1.2px;
+      }
+
+      .copy-button, .replace-button {
+          cursor: pointer;
+          border-radius: 4px;
+          border: 1px solid var(--separator-color);
+          background-color: var(--button-background-color);
+          color: inherit;
       }
   </style>
 </head>

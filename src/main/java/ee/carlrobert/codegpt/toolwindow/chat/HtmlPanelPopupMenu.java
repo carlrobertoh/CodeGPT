@@ -1,50 +1,45 @@
 package ee.carlrobert.codegpt.toolwindow.chat;
 
 import com.intellij.icons.AllIcons;
-import java.awt.Toolkit;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.StringSelection;
+import com.intellij.openapi.editor.Editor;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import org.cef.browser.CefBrowser;
+import org.jetbrains.annotations.Nullable;
 
 class HtmlPanelPopupMenu extends JPopupMenu {
 
-  private final JMenuItem copyMenuItem;
-  private final JMenuItem replaceMenuItem;
-
-  HtmlPanelPopupMenu() {
+  HtmlPanelPopupMenu(@Nullable Editor editor, CefBrowser cefBrowser) {
     super();
-    copyMenuItem = new JMenuItem("Copy", AllIcons.Actions.Copy);
-    replaceMenuItem = new JMenuItem("Replace Editor Selection", AllIcons.Actions.Replace);
+    var copyMenuItem = new JMenuItem("Copy", AllIcons.Actions.Copy);
+    copyMenuItem.addActionListener(e -> {
+      cefBrowser.executeJavaScript("window.JavaPanelBridge.copyCode(window.getSelection().toString());", null, 0);
+    });
     add(copyMenuItem);
-    add(replaceMenuItem);
+
+    if (editor != null) {
+      var replaceMenuItem = new JMenuItem("Replace Editor Selection", AllIcons.Actions.Replace);
+      replaceMenuItem.addActionListener(e -> {
+        cefBrowser.executeJavaScript("window.JavaPanelBridge.replaceCode(window.getSelection().toString());", null, 0);
+      });
+      add(replaceMenuItem);
+    }
   }
 
   MouseAdapter getMouseAdapter() {
     return new MouseAdapter() {
       public void mousePressed(MouseEvent e) {
         if (e.isPopupTrigger()) {
-          showPopupMenu(e.getX(), e.getY());
+          show(getComponent(), e.getX(), e.getY());
         }
       }
 
       public void mouseReleased(MouseEvent e) {
         if (e.isPopupTrigger()) {
-          showPopupMenu(e.getX(), e.getY());
+          show(getComponent(), e.getX(), e.getY());
         }
-      }
-
-      private void showPopupMenu(int x, int y) {
-        copyMenuItem.addActionListener(e -> {
-          Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-          // String selection = (String) browser.executeJavaScriptAndReturnValue("window.getSelection().toString();").getValue();
-          StringSelection data = new StringSelection("selection");
-          clipboard.setContents(data, null);
-        });
-        replaceMenuItem.addActionListener(e -> {});
-        show(getComponent(), x, y);
       }
     };
   }

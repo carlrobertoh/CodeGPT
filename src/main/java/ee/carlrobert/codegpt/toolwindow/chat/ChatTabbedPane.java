@@ -61,8 +61,13 @@ public class ChatTabbedPane extends JBTabbedPane {
     var selectedIndex = getSelectedIndex();
     if (selectedIndex != -1) {
       var toolWindowPanel = activeTabMapping.get(getTitleAt(selectedIndex));
-      if (toolWindowPanel != null && toolWindowPanel.getConversation() != null) {
-        return ConversationsState.getInstance().getConversation(toolWindowPanel.getConversation().getId());
+      if (toolWindowPanel != null) {
+        if (toolWindowPanel instanceof ChatToolWindowTabHtmlPanel) {
+          ((ChatToolWindowTabHtmlPanel) toolWindowPanel).refreshMarkdownPanel();
+        }
+        if (toolWindowPanel.getConversation() != null) {
+          return ConversationsState.getInstance().getConversation(toolWindowPanel.getConversation().getId());
+        }
       }
     }
     return Optional.empty();
@@ -85,6 +90,11 @@ public class ChatTabbedPane extends JBTabbedPane {
     public void actionPerformed(ActionEvent evt) {
       var tabIndex = indexOfTab(title);
       if (tabIndex >= 0) {
+        var toolWindowPanel = activeTabMapping.get(title);
+        if (toolWindowPanel instanceof ChatToolWindowTabHtmlPanel) {
+          ((ChatToolWindowTabHtmlPanel) toolWindowPanel).dispose();
+        }
+
         removeTabAt(tabIndex);
         activeTabMapping.remove(title);
       }

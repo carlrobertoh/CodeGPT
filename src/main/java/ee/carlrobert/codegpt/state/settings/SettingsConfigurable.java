@@ -49,7 +49,7 @@ public class SettingsConfigurable implements Configurable {
           .tryFindChatTabbedPane()
           .ifPresent(tabbedPane -> {
             tabbedPane.clearAll();
-            var tabPanel = ToolWindowTabPanelFactory.getTabPanel(project);
+            var tabPanel = ToolWindowTabPanelFactory.getTabPanel(project, null);
             tabPanel.displayLandingView();
             tabbedPane.addNewTab(tabPanel);
           });

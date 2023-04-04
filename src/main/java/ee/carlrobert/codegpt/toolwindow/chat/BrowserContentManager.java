@@ -2,6 +2,7 @@ package ee.carlrobert.codegpt.toolwindow.chat;
 
 import static org.apache.commons.text.StringEscapeUtils.escapeEcmaScript;
 
+import com.intellij.openapi.editor.Editor;
 import com.intellij.util.ui.UIUtil;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
@@ -11,14 +12,17 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.UUID;
 import org.cef.browser.CefBrowser;
+import org.jetbrains.annotations.Nullable;
 
 // TODO: Find a better way to work with JS
 public class BrowserContentManager {
 
   private final CefBrowser browser;
+  private final Editor editor;
 
-  BrowserContentManager(CefBrowser browser) {
+  BrowserContentManager(CefBrowser browser, @Nullable Editor editor) {
     this.browser = browser;
+    this.editor = editor;
   }
 
   // language=javascript
@@ -33,7 +37,7 @@ public class BrowserContentManager {
         "wrapper.appendChild(nameLabel);" +
 
         "const message = document.createElement('div');" +
-        "message.innerHTML = \"" + convertToHtml(prompt) + "\";" +
+        "message.innerHTML = \"" + convertToHtml(prompt, false) + "\";" +
         "wrapper.appendChild(message);" +
 
         "document.body.appendChild(wrapper);" +
@@ -72,7 +76,7 @@ public class BrowserContentManager {
   public void replaceResponseContent(UUID responseId, String message) {
     executeIIFE(
         "const responseWrapper = document.getElementById('" + responseId + "');" +
-        "responseWrapper.innerHTML = \"" + convertToHtml(message) + "\";" +
+        "responseWrapper.innerHTML = \"" + convertToHtml(message, editor != null) + "\";" +
         "Prism.highlightAll();"
     );
     scrollToBottom();
@@ -99,7 +103,7 @@ public class BrowserContentManager {
   public void displayErrorMessage(UUID responseId, String errorMessage) {
     executeIIFE(
         "const errorLabel = document.createElement('p');" +
-        "errorLabel.textContent = '" + convertToHtml(errorMessage) + "';" +
+        "errorLabel.innerHTML = '" + convertToHtml(errorMessage, false) + "';" +
         "const responseWrapper = document.getElementById('" + responseId + "');" +
         "responseWrapper.appendChild(errorLabel);"
     );
@@ -165,10 +169,11 @@ public class BrowserContentManager {
     browser.executeJavaScript(code, null, 0);
   }
 
-  private String convertToHtml(String message) {
+  private String convertToHtml(String message, boolean isReplaceButtonVisible) {
     MutableDataSet options = new MutableDataSet();
     var document = Parser.builder(options).build().parse(message);
     var html = HtmlRenderer.builder(options)
+        .nodeRendererFactory(new CodeBlockNodeRenderer.Factory(isReplaceButtonVisible))
         .build()
         .render(document);
     return escapeEcmaScript(html);
@@ -182,5 +187,16 @@ public class BrowserContentManager {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  // language=javascript
+  public void setReplaceButtonDisabled(boolean isDisabled) {
+    executeIIFE(
+        "var buttons  = document.getElementsByClassName('replace-button');" +
+        "for (let i = 0; i < buttons.length; i++) {" +
+        "  buttons[i].disabled = " + isDisabled + ";" +
+        "  buttons[i].title = '" + (isDisabled ? "No text highlighted" : "") + "';" +
+        "}"
+    );
   }
 }

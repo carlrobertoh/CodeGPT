@@ -3,12 +3,14 @@ package ee.carlrobert.codegpt.toolwindow.chat;
 import static java.util.Objects.requireNonNull;
 
 import com.intellij.openapi.components.Service;
+import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.content.Content;
 import java.util.Arrays;
 import java.util.Optional;
+import org.jetbrains.annotations.Nullable;
 
 @Service(Service.Level.PROJECT)
 public class ChatContentManagerService {
@@ -19,11 +21,11 @@ public class ChatContentManagerService {
     this.project = project;
   }
 
-  public ToolWindowTabPanel createNewTabPanel() {
+  public ToolWindowTabPanel createNewTabPanel(@Nullable Editor editor) {
     displayChatTab();
     var tabbedPane = tryFindChatTabbedPane();
     if (tabbedPane.isPresent()) {
-      var panel = ToolWindowTabPanelFactory.getTabPanel(project);
+      var panel = ToolWindowTabPanelFactory.getTabPanel(project, editor);
       tabbedPane.get().addNewTab(panel);
       return panel;
     }
@@ -56,7 +58,7 @@ public class ChatContentManagerService {
   public void resetTabbedPane() {
     tryFindChatTabbedPane().ifPresent(tabbedPane -> {
       tabbedPane.clearAll();
-      var tabPanel = ToolWindowTabPanelFactory.getTabPanel(project);
+      var tabPanel = ToolWindowTabPanelFactory.getTabPanel(project, null);
       tabPanel.displayLandingView();
       tabbedPane.addNewTab(tabPanel);
     });

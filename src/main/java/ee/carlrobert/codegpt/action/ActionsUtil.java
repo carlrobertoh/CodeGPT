@@ -47,7 +47,7 @@ public class ActionsUtil {
         protected void actionPerformed(Project project, Editor editor, String selectedText) {
           var fileExtension = FileUtils.getFileExtension(((EditorImpl) editor).getVirtualFile().getName());
           // TODO: Requires more sophisticated language parsing(can't always rely on the file extension)
-          sendMessage(project, prompt.replace("{{selectedCode}}", format("\n```%s\n%s\n```", fileExtension, selectedText)));
+          sendMessage(project, editor, prompt.replace("{{selectedCode}}", format("\n```%s\n%s\n```", fileExtension, selectedText)));
         }
       }));
     }

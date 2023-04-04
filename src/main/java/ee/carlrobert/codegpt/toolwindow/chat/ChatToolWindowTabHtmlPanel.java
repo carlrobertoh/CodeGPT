@@ -1,9 +1,9 @@
 package ee.carlrobert.codegpt.toolwindow.chat;
 
+import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBScrollPane;
-import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.client.RequestHandler;
 import ee.carlrobert.codegpt.state.conversations.Conversation;
 import ee.carlrobert.codegpt.state.conversations.ConversationsState;
@@ -21,20 +21,32 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class ChatToolWindowTabHtmlPanel implements ToolWindowTabPanel {
 
   private final Project project;
+  private final Editor editor;
   private JPanel rootPanel;
   private JTextArea textArea;
   private JScrollPane textAreaScrollPane;
   private JPanel contentPanel;
   private JButton reloadResponseButton;
-  private MarkdownJCEFHtmlPanel markdownHtmlPanel;
   private Conversation conversation;
+  private MarkdownJCEFHtmlPanel markdownHtmlPanel;
 
-  public ChatToolWindowTabHtmlPanel(@NotNull Project project) {
+  public ChatToolWindowTabHtmlPanel(@NotNull Project project, @Nullable Editor editor) {
     this.project = project;
+    this.editor = editor;
+  }
+
+  // Ugly workaround for focusing JBCefBrowser on tab changes
+  public void refreshMarkdownPanel() {
+    contentPanel.removeAll();
+    contentPanel.add(markdownHtmlPanel.getComponent(), BorderLayout.CENTER);
+    contentPanel.setPreferredSize(markdownHtmlPanel.getComponent().getPreferredSize());
+    contentPanel.repaint();
+    contentPanel.revalidate();
   }
 
   @Override
@@ -77,6 +89,10 @@ public class ChatToolWindowTabHtmlPanel implements ToolWindowTabPanel {
     }
   }
 
+  public void dispose() {
+    markdownHtmlPanel.dispose();
+  }
+
   private void call(String prompt, boolean isRetry) {
     if (conversation == null) {
       conversation = ConversationsState.getInstance().startConversation();
@@ -97,6 +113,7 @@ public class ChatToolWindowTabHtmlPanel implements ToolWindowTabPanel {
       public void handleComplete() {
         stopGenerating(prompt);
         markdownHtmlPanel.stopTyping();
+        markdownHtmlPanel.updateReplaceButton(editor);
       }
 
       public void handleError(String errorMessage) {
@@ -141,7 +158,7 @@ public class ChatToolWindowTabHtmlPanel implements ToolWindowTabPanel {
         BorderFactory.createEmptyBorder(0, 5, 0, 10)));
     textArea = new TextArea(this::handleSubmit, textAreaScrollPane);
     textAreaScrollPane.setViewportView(textArea);
-    markdownHtmlPanel = new MarkdownJCEFHtmlPanel();
+    markdownHtmlPanel = new MarkdownJCEFHtmlPanel(editor);
     contentPanel = new JPanel(new BorderLayout());
     contentPanel.add(markdownHtmlPanel.getComponent(), BorderLayout.CENTER);
     contentPanel.setPreferredSize(markdownHtmlPanel.getComponent().getPreferredSize());

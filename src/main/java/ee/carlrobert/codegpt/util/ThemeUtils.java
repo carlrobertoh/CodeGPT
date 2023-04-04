@@ -7,6 +7,7 @@ import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 import java.awt.Color;
+import javax.swing.UIManager;
 
 public class ThemeUtils {
 
@@ -22,9 +23,21 @@ public class ThemeUtils {
     return getRGB(JBUI.CurrentTheme.CustomFrameDecorations.separatorForeground());
   }
 
+  public static String getDisabledTextColorRGB() {
+    return getRGB(UIUtil.getInactiveTextColor());
+  }
+
   public static String getPanelBackgroundColorRGB() {
     var panelBg = UIUtil.getPanelBackground();
     return getRGB(UIUtil.isUnderDarcula() ? toDarker(panelBg) : panelBg.brighter());
+  }
+
+  public static String getButtonBackgroundColorRGB() {
+    return getRGB(UIManager.getColor("Button.background"));
+  }
+
+  public static String getDisabledButtonBackgroundColorRGB() {
+    return getRGB(UIUtil.getInactiveTextFieldBackgroundColor());
   }
 
   public static int getFontSize() {
