@@ -15,8 +15,6 @@ import org.jetbrains.annotations.Nullable;
 public class AccountDetailsState implements PersistentStateComponent<AccountDetailsState> {
 
   public String accountName = "User";
-  public Double totalAmountGranted;
-  public Double totalAmountUsed;
 
   public static AccountDetailsState getInstance() {
     return ApplicationManager.getApplication().getService(AccountDetailsState.class);

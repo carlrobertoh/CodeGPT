@@ -6,8 +6,6 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.ui.content.ContentManagerEvent;
 import com.intellij.ui.content.ContentManagerListener;
-import ee.carlrobert.codegpt.state.AccountDetailsState;
-import ee.carlrobert.codegpt.client.ClientProvider;
 import ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowPanel;
 import ee.carlrobert.codegpt.toolwindow.conversations.ConversationsToolWindow;
 import javax.swing.JComponent;
@@ -26,13 +24,6 @@ public class ProjectToolWindowFactory implements ToolWindowFactory, DumbAware {
         var content = event.getContent();
         if ("Conversation History".equals(content.getTabName()) && content.isSelected()) {
           conversationsToolWindow.refresh();
-        } else if ("Chat".equals(content.getTabName()) && content.isSelected()) {
-          ClientProvider.getBillingClient()
-              .getCreditUsageAsync(creditUsage -> {
-                var accountDetails = AccountDetailsState.getInstance();
-                accountDetails.totalAmountGranted = creditUsage.getTotalGranted();
-                accountDetails.totalAmountUsed = creditUsage.getTotalUsed();
-              });
         }
       }
     });

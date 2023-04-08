@@ -20,12 +20,14 @@ import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ChatToolWindowTabHtmlPanel implements ToolWindowTabPanel {
 
-  private final Project project;
+  private static final Logger LOG = LoggerFactory.getLogger(ChatToolWindowTabHtmlPanel.class);
+
   private final Editor editor;
   private JPanel rootPanel;
   private JTextArea textArea;
@@ -35,8 +37,7 @@ public class ChatToolWindowTabHtmlPanel implements ToolWindowTabPanel {
   private Conversation conversation;
   private MarkdownJCEFHtmlPanel markdownHtmlPanel;
 
-  public ChatToolWindowTabHtmlPanel(@NotNull Project project, @Nullable Editor editor) {
-    this.project = project;
+  public ChatToolWindowTabHtmlPanel(@Nullable Editor editor) {
     this.editor = editor;
   }
 
@@ -105,6 +106,7 @@ public class ChatToolWindowTabHtmlPanel implements ToolWindowTabPanel {
         try {
           markdownHtmlPanel.replaceHtml(responseId, fullMessage);
         } catch (Exception e) {
+          LOG.error("Error while replacing the html content", e);
           markdownHtmlPanel.displayErrorMessage();
           throw new RuntimeException(e);
         }

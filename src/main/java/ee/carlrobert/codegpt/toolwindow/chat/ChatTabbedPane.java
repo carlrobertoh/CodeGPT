@@ -1,7 +1,6 @@
 package ee.carlrobert.codegpt.toolwindow.chat;
 
 import com.intellij.ui.components.JBTabbedPane;
-import ee.carlrobert.codegpt.state.conversations.Conversation;
 import ee.carlrobert.codegpt.state.conversations.ConversationsState;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -21,8 +20,7 @@ public class ChatTabbedPane extends JBTabbedPane {
 
   public ChatTabbedPane() {
     setTabComponentInsets(null);
-    addChangeListener(e -> tryFindCurrentlyActiveConversation()
-        .ifPresent(conversation -> ConversationsState.getInstance().setCurrentConversation(conversation)));
+    addChangeListener(e -> refreshTabState());
   }
 
   public void addNewTab(ToolWindowTabPanel toolWindowPanel) {
@@ -57,20 +55,21 @@ public class ChatTabbedPane extends JBTabbedPane {
         .map(Map.Entry::getKey);
   }
 
-  public Optional<Conversation> tryFindCurrentlyActiveConversation() {
+  private void refreshTabState() {
     var selectedIndex = getSelectedIndex();
-    if (selectedIndex != -1) {
-      var toolWindowPanel = activeTabMapping.get(getTitleAt(selectedIndex));
-      if (toolWindowPanel != null) {
-        if (toolWindowPanel instanceof ChatToolWindowTabHtmlPanel) {
-          ((ChatToolWindowTabHtmlPanel) toolWindowPanel).refreshMarkdownPanel();
-        }
-        if (toolWindowPanel.getConversation() != null) {
-          return ConversationsState.getInstance().getConversation(toolWindowPanel.getConversation().getId());
-        }
+    if (selectedIndex == -1) {
+      return;
+    }
+
+    var toolWindowPanel = activeTabMapping.get(getTitleAt(selectedIndex));
+    if (toolWindowPanel != null) {
+      if (toolWindowPanel instanceof ChatToolWindowTabHtmlPanel) {
+        ((ChatToolWindowTabHtmlPanel) toolWindowPanel).refreshMarkdownPanel();
+      }
+      if (toolWindowPanel.getConversation() != null) {
+        ConversationsState.getInstance().setCurrentConversation(toolWindowPanel.getConversation());
       }
     }
-    return Optional.empty();
   }
 
   private JPanel createCloseableTabButtonPanel(String title) {

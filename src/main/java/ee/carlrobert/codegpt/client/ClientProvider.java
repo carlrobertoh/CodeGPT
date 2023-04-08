@@ -4,17 +4,17 @@ import ee.carlrobert.codegpt.state.settings.SettingsState;
 import ee.carlrobert.codegpt.state.settings.advanced.AdvancedSettingsState;
 import ee.carlrobert.openai.client.OpenAIClient;
 import ee.carlrobert.openai.client.ProxyAuthenticator;
-import ee.carlrobert.openai.client.billing.BillingClient;
 import ee.carlrobert.openai.client.completion.chat.ChatCompletionClient;
 import ee.carlrobert.openai.client.completion.text.TextCompletionClient;
+import ee.carlrobert.openai.client.dashboard.DashboardClient;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.concurrent.TimeUnit;
 
 public class ClientProvider {
 
-  public static BillingClient getBillingClient() {
-    return getClientBuilder().buildBillingClient();
+  public static DashboardClient getDashboardClient() {
+    return getClientBuilder().buildDashboardClient();
   }
 
   public static ChatCompletionClient getChatCompletionClient() {

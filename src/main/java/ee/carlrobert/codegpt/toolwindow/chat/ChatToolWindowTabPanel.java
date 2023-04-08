@@ -42,8 +42,12 @@ import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ChatToolWindowTabPanel implements ToolWindowTabPanel {
+
+  private static final Logger LOG = LoggerFactory.getLogger(ChatToolWindowTabPanel.class);
 
   private final List<SyntaxTextArea> textAreas = new ArrayList<>();
   private final Project project;
@@ -161,6 +165,7 @@ public class ChatToolWindowTabPanel implements ToolWindowTabPanel {
           textArea.append(message);
           scrollToBottom();
         } catch (Exception e) {
+          LOG.error("Error while appending the content", e);
           textArea.append("Something went wrong. Please try again later.");
           throw new RuntimeException(e);
         }

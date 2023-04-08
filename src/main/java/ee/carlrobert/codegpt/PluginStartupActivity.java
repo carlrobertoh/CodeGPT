@@ -15,7 +15,7 @@ public class PluginStartupActivity implements StartupActivity {
     ActionsUtil.refreshActions(ConfigurationState.getInstance().tableData);
     var accountDetails = AccountDetailsState.getInstance();
     if ("User".equals(accountDetails.accountName) || accountDetails.accountName == null) {
-      ClientProvider.getBillingClient()
+      ClientProvider.getDashboardClient()
           .getSubscriptionAsync(subscription ->
               accountDetails.accountName = subscription.getAccountName());
     }

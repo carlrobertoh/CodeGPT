@@ -8,7 +8,6 @@ import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import ee.carlrobert.codegpt.state.conversations.ConversationsState;
 import ee.carlrobert.codegpt.toolwindow.chat.actions.CreateNewConversationAction;
 import ee.carlrobert.codegpt.toolwindow.chat.actions.OpenInEditorAction;
-import ee.carlrobert.codegpt.toolwindow.chat.actions.UsageToolbarLabelAction;
 import org.jetbrains.annotations.NotNull;
 
 public class ChatToolWindowPanel extends SimpleToolWindowPanel {
@@ -43,7 +42,6 @@ public class ChatToolWindowPanel extends SimpleToolWindowPanel {
     }));
     actionGroup.add(new OpenInEditorAction());
     actionGroup.addSeparator();
-    actionGroup.add(new UsageToolbarLabelAction());
     // actionGroup.addSeparator();
     // actionGroup.add(new TokenToolbarLabelAction());
 
