@@ -12,6 +12,7 @@ import com.intellij.openapi.project.Project;
 import ee.carlrobert.codegpt.util.FileUtils;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ActionsUtil {
 
@@ -42,14 +43,37 @@ public class ActionsUtil {
       group.addSeparator();
       group.add(new CustomPromptAction());
       group.addSeparator();
-      tableData.forEach((action, prompt) -> group.add(new BaseAction(action) {
-        @Override
-        protected void actionPerformed(Project project, Editor editor, String selectedText) {
-          var fileExtension = FileUtils.getFileExtension(((EditorImpl) editor).getVirtualFile().getName());
-          // TODO: Requires more sophisticated language parsing(can't always rely on the file extension)
-          sendMessage(project, editor, prompt.replace("{{selectedCode}}", format("\n```%s\n%s\n```", fileExtension, selectedText)));
+
+      AtomicInteger counter = new AtomicInteger(1);
+      tableData.forEach((action, prompt) -> {
+        action = "Codegpt -"+action;
+        String actionId = "ee.carlrobert.codegpt.action" + action;
+        AnAction anAction = new BaseAction(action) {
+          @Override
+          protected void actionPerformed(Project project, Editor editor, String selectedText) {
+            var fileExtension = FileUtils.getFileExtension(((EditorImpl) editor).getVirtualFile().getName());
+            // TODO: Requires more sophisticated language parsing(can't always rely on the file extension)
+            sendMessage(project, editor, prompt.replace("{{selectedCode}}", format("\n```%s\n%s\n```", fileExtension, selectedText)));
+          }
+        };
+
+
+        group.add(anAction);
+        // Unregister the previous action instance if already exists with the same ID
+        AnAction oldAction = actionManager.getAction(actionId);
+        if (oldAction != null) {
+          actionManager.unregisterAction(actionId);
         }
-      }));
+        actionManager.registerAction(actionId, anAction);
+
+      });
+    }
+
+
+
     }
   }
-}
+
+
+
+

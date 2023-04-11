@@ -86,10 +86,10 @@
     <resource-bundle>messages.BasicActionsBundle</resource-bundle>
 
     <actions>
-        <group id="CodeGPTEditorPopup">
+        <group id="CodeGPTEditorPopup" text="My Plugin Actions" description="Actions for my plugin">
             <group id="ActionGroup" class="com.intellij.openapi.actionSystem.DefaultActionGroup" popup="true" icon="Icons.DefaultIcon">
             </group>
-            <add-to-group group-id="EditorPopupMenu1" anchor="first"/>
+            <add-to-group group-id="EditorPopupMenu" anchor="first"/>
             <separator/>
         </group>
     </actions>
