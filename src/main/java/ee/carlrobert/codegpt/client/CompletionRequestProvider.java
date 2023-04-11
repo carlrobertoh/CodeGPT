@@ -39,7 +39,7 @@ class CompletionRequestProvider {
   private List<ChatCompletionMessage> buildMessages() {
     var messages = new ArrayList<ChatCompletionMessage>();
     messages.add(new ChatCompletionMessage(
-        "system",   this.conversation.SYSTEM_INIT_MESSAGE));
+        "system",   this.conversation.getSystemInitMessage()));
     conversation.getMessages().forEach(message -> {
       messages.add(new ChatCompletionMessage("user", message.getPrompt()));
       messages.add(new ChatCompletionMessage("assistant", message.getResponse()));

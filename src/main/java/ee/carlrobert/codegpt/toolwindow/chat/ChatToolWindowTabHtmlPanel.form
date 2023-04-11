@@ -40,16 +40,6 @@
         <border type="none"/>
         <children/>
       </grid>
-      <component id="66588" class="javax.swing.JTextField" binding="SYSTEM_INIT_MESSAGE">
-        <constraints>
-          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
-            <preferred-size width="150" height="-1"/>
-          </grid>
-        </constraints>
-        <properties>
-          <text value=""/>
-        </properties>
-      </component>
       <component id="7f5aa" class="javax.swing.JLabel">
         <constraints>
           <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
@@ -59,6 +49,32 @@
           <text value="System init role message"/>
         </properties>
       </component>
+      <scrollpane id="ef0f2">
+        <constraints>
+          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <horizontalScrollBarPolicy value="31"/>
+          <verticalScrollBarPolicy value="20"/>
+        </properties>
+        <border type="none"/>
+        <children>
+          <component id="87c3a" class="javax.swing.JTextArea" binding="systemInitMessageArea">
+            <constraints/>
+            <properties>
+              <caretPosition value="0"/>
+              <font size="12" style="2"/>
+              <lineWrap value="true"/>
+              <margin top="4" left="4" bottom="4" right="4"/>
+              <rows value="3"/>
+              <text value="You are ChatGPT, a large language model trained by OpenAI.Answer as concisely as possible."/>
+            </properties>
+            <clientProperties>
+              <html.disable class="java.lang.Boolean" value="true"/>
+            </clientProperties>
+          </component>
+        </children>
+      </scrollpane>
     </children>
   </grid>
 </form>

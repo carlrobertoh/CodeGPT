@@ -28,7 +28,7 @@ public class ChatToolWindowTabHtmlPanel implements ToolWindowTabPanel {
   private JScrollPane textAreaScrollPane;
   private JPanel contentPanel;
   private JButton reloadResponseButton;
-  private JTextField SYSTEM_INIT_MESSAGE;
+  private JTextArea systemInitMessageArea;
   private Conversation conversation;
   private MarkdownJCEFHtmlPanel markdownHtmlPanel;
 
@@ -63,7 +63,7 @@ public class ChatToolWindowTabHtmlPanel implements ToolWindowTabPanel {
   @Override
   public void displayConversation(Conversation conversation) {
     this.conversation = conversation;
-    SYSTEM_INIT_MESSAGE.setText(this.conversation.SYSTEM_INIT_MESSAGE);
+    systemInitMessageArea.setText(this.conversation.getSystemInitMessage());
     markdownHtmlPanel.displayConversation(conversation);
   }
 
@@ -83,7 +83,7 @@ public class ChatToolWindowTabHtmlPanel implements ToolWindowTabPanel {
       conversation = ConversationsState.getInstance().startConversation();
     }
 
-    conversation.SYSTEM_INIT_MESSAGE = systemRole;
+    conversation.systemInitMessage = systemRole;
 
 
 
@@ -117,7 +117,7 @@ public class ChatToolWindowTabHtmlPanel implements ToolWindowTabPanel {
     if (conversation == null) {
       conversation = ConversationsState.getInstance().startConversation();
     }
-    SYSTEM_INIT_MESSAGE.setText(conversation.getSYSTEM_INIT_MESSAGE());
+    systemInitMessageArea.setText(conversation.getSystemInitMessage());
     var responseId = markdownHtmlPanel.prepareResponse(true, isRetry);
     var conversationMessage = new Message(prompt);
     var requestService = new RequestHandler(conversation) {
@@ -147,7 +147,7 @@ public class ChatToolWindowTabHtmlPanel implements ToolWindowTabPanel {
 
   private void handleSubmit() {
 
-    startConversation(textArea.getText(), false,  SYSTEM_INIT_MESSAGE.getText());
+    startConversation(textArea.getText(), false,  systemInitMessageArea.getText());
     textArea.setText("");
   }
 
