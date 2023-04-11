@@ -1,7 +1,6 @@
 package ee.carlrobert.codegpt.toolwindow.chat;
 
 import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBScrollPane;
 import ee.carlrobert.codegpt.client.RequestHandler;
@@ -13,13 +12,8 @@ import ee.carlrobert.codegpt.toolwindow.components.GenerateButton;
 import ee.carlrobert.codegpt.toolwindow.components.TextArea;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.JScrollBar;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
+
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +28,7 @@ public class ChatToolWindowTabHtmlPanel implements ToolWindowTabPanel {
   private JScrollPane textAreaScrollPane;
   private JPanel contentPanel;
   private JButton reloadResponseButton;
+  private JTextField SYSTEM_INIT_MESSAGE;
   private Conversation conversation;
   private MarkdownJCEFHtmlPanel markdownHtmlPanel;
 
@@ -68,6 +63,7 @@ public class ChatToolWindowTabHtmlPanel implements ToolWindowTabPanel {
   @Override
   public void displayConversation(Conversation conversation) {
     this.conversation = conversation;
+    SYSTEM_INIT_MESSAGE.setText(this.conversation.SYSTEM_INIT_MESSAGE);
     markdownHtmlPanel.displayConversation(conversation);
   }
 
@@ -75,12 +71,33 @@ public class ChatToolWindowTabHtmlPanel implements ToolWindowTabPanel {
   public void startNewConversation(String prompt) {
     markdownHtmlPanel.runWhenLoaded(() -> {
       conversation = ConversationsState.getInstance().startConversation();
+
       startConversation(prompt, false);
     });
   }
 
+  public void startConversation(String prompt, boolean isRetry,String systemRole ) {
+    markdownHtmlPanel.displayUserMessage(prompt);
+    var settings = SettingsState.getInstance();
+    if (conversation == null) {
+      conversation = ConversationsState.getInstance().startConversation();
+    }
+
+    conversation.SYSTEM_INIT_MESSAGE = systemRole;
+
+
+
+    if (settings.apiKey.isEmpty()) {
+      markdownHtmlPanel.displayMissingCredential();
+    } else {
+      SwingUtilities.invokeLater(() -> call(prompt, isRetry));
+    }
+  }
+
+
   @Override
   public void startConversation(String prompt, boolean isRetry) {
+
     markdownHtmlPanel.displayUserMessage(prompt);
     var settings = SettingsState.getInstance();
     if (settings.apiKey.isEmpty()) {
@@ -88,6 +105,8 @@ public class ChatToolWindowTabHtmlPanel implements ToolWindowTabPanel {
     } else {
       SwingUtilities.invokeLater(() -> call(prompt, isRetry));
     }
+
+
   }
 
   public void dispose() {
@@ -98,7 +117,7 @@ public class ChatToolWindowTabHtmlPanel implements ToolWindowTabPanel {
     if (conversation == null) {
       conversation = ConversationsState.getInstance().startConversation();
     }
-
+    SYSTEM_INIT_MESSAGE.setText(conversation.getSYSTEM_INIT_MESSAGE());
     var responseId = markdownHtmlPanel.prepareResponse(true, isRetry);
     var conversationMessage = new Message(prompt);
     var requestService = new RequestHandler(conversation) {
@@ -127,7 +146,8 @@ public class ChatToolWindowTabHtmlPanel implements ToolWindowTabPanel {
   }
 
   private void handleSubmit() {
-    startConversation(textArea.getText(), false);
+
+    startConversation(textArea.getText(), false,  SYSTEM_INIT_MESSAGE.getText());
     textArea.setText("");
   }
 
@@ -165,5 +185,6 @@ public class ChatToolWindowTabHtmlPanel implements ToolWindowTabPanel {
     contentPanel.add(markdownHtmlPanel.getComponent(), BorderLayout.CENTER);
     contentPanel.setPreferredSize(markdownHtmlPanel.getComponent().getPreferredSize());
     reloadResponseButton = new GenerateButton();
+
   }
 }

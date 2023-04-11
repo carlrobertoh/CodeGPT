@@ -76,6 +76,7 @@ public class ConversationsState implements PersistentStateComponent<Conversation
         settings.textCompletionBaseModel);
     conversation.setCreatedOn(LocalDateTime.now());
     conversation.setUpdatedOn(LocalDateTime.now());
+
     return conversation;
   }
 
@@ -109,6 +110,7 @@ public class ConversationsState implements PersistentStateComponent<Conversation
     var conversation = createConversation(currentClientCode);
     setCurrentConversation(conversation);
     addConversation(conversation);
+
     return conversation;
   }
 

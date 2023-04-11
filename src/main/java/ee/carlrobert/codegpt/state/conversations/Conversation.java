@@ -16,6 +16,21 @@ public class Conversation {
   private LocalDateTime createdOn;
   private LocalDateTime updatedOn;
 
+  public   String SYSTEM_INIT_MESSAGE ;
+
+  public Conversation() {
+    this.SYSTEM_INIT_MESSAGE = SYSTEM_INIT_DEFAULT_MESSAGE;
+  }
+
+  public static String SYSTEM_INIT_DEFAULT_MESSAGE ="You are ChatGPT, a large language model trained by OpenAI. " +
+          "Answer as concisely as possible. " +
+          "Include code language in markdown snippets whenever possible.";
+  public String getSYSTEM_INIT_MESSAGE(){
+    if(this.SYSTEM_INIT_MESSAGE.equals("")){
+      this.SYSTEM_INIT_MESSAGE = SYSTEM_INIT_DEFAULT_MESSAGE;
+    }
+    return     this.SYSTEM_INIT_MESSAGE;
+  }
   public UUID getId() {
     return id;
   }

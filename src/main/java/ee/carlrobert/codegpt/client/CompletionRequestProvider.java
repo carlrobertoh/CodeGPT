@@ -13,10 +13,15 @@ class CompletionRequestProvider {
   private final String prompt;
   private final Conversation conversation;
 
+
+
   CompletionRequestProvider(String prompt, Conversation conversation) {
     this.prompt = prompt;
     this.conversation = conversation;
+
   }
+
+
 
   public ChatCompletionRequest buildChatCompletionRequest(String model) {
     return new ChatCompletionRequest.Builder(buildMessages())
@@ -34,10 +39,7 @@ class CompletionRequestProvider {
   private List<ChatCompletionMessage> buildMessages() {
     var messages = new ArrayList<ChatCompletionMessage>();
     messages.add(new ChatCompletionMessage(
-        "system",
-        "You are ChatGPT, a large language model trained by OpenAI. " +
-            "Answer as concisely as possible. " +
-            "Include code language in markdown snippets whenever possible."));
+        "system",   this.conversation.SYSTEM_INIT_MESSAGE));
     conversation.getMessages().forEach(message -> {
       messages.add(new ChatCompletionMessage("user", message.getPrompt()));
       messages.add(new ChatCompletionMessage("assistant", message.getResponse()));
