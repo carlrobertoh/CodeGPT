@@ -28,12 +28,6 @@
           --button-disabled-background-color: [button-disabled-background-color];
       }
 
-      button[disabled] {
-          color: var(--disabled-color);
-          background-color: var(--button-disabled-background-color);
-          cursor: not-allowed;
-      }
-
       html {
           scroll-behavior: smooth;
           background-color: var(--bg);
@@ -64,13 +58,10 @@
           white-space: normal;
       }
 
-      @keyframes roll {
-          0% {
-              transform: rotate(0deg);
-          }
-          100% {
-              transform: rotate(360deg);
-          }
+      button[disabled] {
+          color: var(--disabled-color);
+          background-color: var(--button-disabled-background-color);
+          cursor: not-allowed;
       }
 
       #landing-view {
@@ -150,6 +141,44 @@
           border: 1px solid var(--separator-color);
           background-color: var(--button-background-color);
           color: inherit;
+      }
+
+      .user-message-name-wrapper {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+      }
+
+      .user-message-actions {
+          display: flex;
+          gap: 8px;
+      }
+
+      .user-message-actions > button {
+          background-color: var(--bg);
+          display: inline-flex;
+          border: 1px solid var(--separator-color);
+          padding: 4px;
+          border-radius: 6px;
+          cursor: pointer;
+          transition: background-color 150ms ease-in;
+      }
+
+      .user-message-actions > button:hover {
+          background-color: var(--panel-background-color);
+      }
+
+      .user-message-actions > button path, polygon {
+          color: var(--font-color);
+      }
+
+      @keyframes roll {
+          0% {
+              transform: rotate(0deg);
+          }
+          100% {
+              transform: rotate(360deg);
+          }
       }
   </style>
 </head>

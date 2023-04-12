@@ -21,7 +21,7 @@ public class CustomPromptAction extends BaseAction {
       var dialog = new CustomPromptDialog(selectedText, fileExtension, previousUserPrompt);
       if (dialog.showAndGet()) {
         previousUserPrompt = dialog.getUserPrompt();
-        SwingUtilities.invokeLater(() -> sendMessage(project, editor, dialog.getFullPrompt()));
+        SwingUtilities.invokeLater(() -> sendMessage(project, dialog.getFullPrompt()));
       }
     }
   }

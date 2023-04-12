@@ -44,8 +44,8 @@ public abstract class BaseAction extends AnAction {
     event.getPresentation().setEnabled(menuAllowed);
   }
 
-  protected void sendMessage(@NotNull Project project, Editor editor, String prompt) {
-    var newTabPanel = project.getService(ChatContentManagerService.class).createNewTabPanel(editor);
+  protected void sendMessage(@NotNull Project project, String prompt) {
+    var newTabPanel = project.getService(ChatContentManagerService.class).createNewTabPanel();
     if (newTabPanel != null) {
       newTabPanel.startNewConversation(prompt);
     }

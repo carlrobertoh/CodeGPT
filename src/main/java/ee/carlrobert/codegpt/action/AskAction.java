@@ -3,7 +3,6 @@ package ee.carlrobert.codegpt.action;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import ee.carlrobert.codegpt.state.conversations.ConversationsState;
 import ee.carlrobert.codegpt.toolwindow.chat.ChatContentManagerService;
 import org.jetbrains.annotations.NotNull;
@@ -24,7 +23,7 @@ public class AskAction extends AnAction {
     var project = event.getProject();
     if (project != null) {
       ConversationsState.getInstance().setCurrentConversation(null);
-      var tabPanel = project.getService(ChatContentManagerService.class).createNewTabPanel(event.getData(PlatformDataKeys.EDITOR));
+      var tabPanel = project.getService(ChatContentManagerService.class).createNewTabPanel();
       if (tabPanel != null) {
         tabPanel.displayLandingView();
       }

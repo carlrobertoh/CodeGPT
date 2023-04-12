@@ -18,7 +18,7 @@ public class ChatToolWindowPanel extends SimpleToolWindowPanel {
   }
 
   private void initialize(Project project) {
-    var tabPanel = ToolWindowTabPanelFactory.getTabPanel(project, null);
+    var tabPanel = ToolWindowTabPanelFactory.getTabPanel(project);
     var conversation = ConversationsState.getCurrentConversation();
     if (conversation == null) {
       tabPanel.displayLandingView();
@@ -34,7 +34,7 @@ public class ChatToolWindowPanel extends SimpleToolWindowPanel {
   private ActionToolbar createActionToolbar(Project project, ChatTabbedPane tabbedPane) {
     var actionGroup = new DefaultActionGroup("TOOLBAR_ACTION_GROUP", false);
     actionGroup.add(new CreateNewConversationAction(() -> {
-      var panel = ToolWindowTabPanelFactory.getTabPanel(project, null);
+      var panel = ToolWindowTabPanelFactory.getTabPanel(project);
       panel.displayLandingView();
       tabbedPane.addNewTab(panel);
       repaint();

@@ -1,6 +1,5 @@
 package ee.carlrobert.codegpt.toolwindow.chat;
 
-import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBScrollPane;
@@ -20,15 +19,15 @@ import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ChatToolWindowTabHtmlPanel implements ToolWindowTabPanel {
 
   private static final Logger LOG = LoggerFactory.getLogger(ChatToolWindowTabHtmlPanel.class);
+  private final Project project;
 
-  private final Editor editor;
   private JPanel rootPanel;
   private JTextArea textArea;
   private JScrollPane textAreaScrollPane;
@@ -37,17 +36,8 @@ public class ChatToolWindowTabHtmlPanel implements ToolWindowTabPanel {
   private Conversation conversation;
   private MarkdownJCEFHtmlPanel markdownHtmlPanel;
 
-  public ChatToolWindowTabHtmlPanel(@Nullable Editor editor) {
-    this.editor = editor;
-  }
-
-  // Ugly workaround for focusing JBCefBrowser on tab changes
-  public void refreshMarkdownPanel() {
-    contentPanel.removeAll();
-    contentPanel.add(markdownHtmlPanel.getComponent(), BorderLayout.CENTER);
-    contentPanel.setPreferredSize(markdownHtmlPanel.getComponent().getPreferredSize());
-    contentPanel.repaint();
-    contentPanel.revalidate();
+  public ChatToolWindowTabHtmlPanel(@NotNull Project project) {
+    this.project = project;
   }
 
   @Override
@@ -81,13 +71,24 @@ public class ChatToolWindowTabHtmlPanel implements ToolWindowTabPanel {
 
   @Override
   public void startConversation(String prompt, boolean isRetry) {
-    markdownHtmlPanel.displayUserMessage(prompt);
-    var settings = SettingsState.getInstance();
-    if (settings.apiKey.isEmpty()) {
-      markdownHtmlPanel.displayMissingCredential();
-    } else {
-      SwingUtilities.invokeLater(() -> call(prompt, isRetry));
-    }
+    markdownHtmlPanel.runWhenLoaded(() -> {
+      markdownHtmlPanel.displayUserMessage(prompt);
+      var settings = SettingsState.getInstance();
+      if (settings.apiKey.isEmpty()) {
+        markdownHtmlPanel.displayMissingCredential();
+      } else {
+        SwingUtilities.invokeLater(() -> call(prompt, isRetry));
+      }
+    });
+  }
+
+  // Ugly workaround for focusing JBCefBrowser on tab changes
+  public void refreshMarkdownPanel() {
+    contentPanel.removeAll();
+    contentPanel.add(markdownHtmlPanel.getComponent(), BorderLayout.CENTER);
+    contentPanel.setPreferredSize(markdownHtmlPanel.getComponent().getPreferredSize());
+    contentPanel.repaint();
+    contentPanel.revalidate();
   }
 
   public void dispose() {
@@ -115,7 +116,7 @@ public class ChatToolWindowTabHtmlPanel implements ToolWindowTabPanel {
       public void handleComplete() {
         stopGenerating(prompt);
         markdownHtmlPanel.stopTyping();
-        markdownHtmlPanel.updateReplaceButton(editor);
+        markdownHtmlPanel.updateReplaceButton();
       }
 
       public void handleError(String errorMessage) {
@@ -160,7 +161,7 @@ public class ChatToolWindowTabHtmlPanel implements ToolWindowTabPanel {
         BorderFactory.createEmptyBorder(0, 5, 0, 10)));
     textArea = new TextArea(this::handleSubmit, textAreaScrollPane);
     textAreaScrollPane.setViewportView(textArea);
-    markdownHtmlPanel = new MarkdownJCEFHtmlPanel(editor);
+    markdownHtmlPanel = new MarkdownJCEFHtmlPanel(project);
     contentPanel = new JPanel(new BorderLayout());
     contentPanel.add(markdownHtmlPanel.getComponent(), BorderLayout.CENTER);
     contentPanel.setPreferredSize(markdownHtmlPanel.getComponent().getPreferredSize());

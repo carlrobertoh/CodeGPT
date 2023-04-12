@@ -83,7 +83,7 @@ public class ConversationsToolWindow {
               .ifPresentOrElse(
                   title -> tabbedPane.setSelectedIndex(tabbedPane.indexOfTab(title)),
                   () -> {
-                    var panel = ToolWindowTabPanelFactory.getTabPanel(project, null);
+                    var panel = ToolWindowTabPanelFactory.getTabPanel(project);
                     panel.displayConversation(conversation);
                     tabbedPane.addNewTab(panel);
                   }));

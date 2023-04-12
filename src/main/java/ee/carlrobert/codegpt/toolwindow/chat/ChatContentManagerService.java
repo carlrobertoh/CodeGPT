@@ -21,11 +21,11 @@ public class ChatContentManagerService {
     this.project = project;
   }
 
-  public ToolWindowTabPanel createNewTabPanel(@Nullable Editor editor) {
+  public ToolWindowTabPanel createNewTabPanel() {
     displayChatTab();
     var tabbedPane = tryFindChatTabbedPane();
     if (tabbedPane.isPresent()) {
-      var panel = ToolWindowTabPanelFactory.getTabPanel(project, editor);
+      var panel = ToolWindowTabPanelFactory.getTabPanel(project);
       tabbedPane.get().addNewTab(panel);
       return panel;
     }
@@ -58,7 +58,7 @@ public class ChatContentManagerService {
   public void resetTabbedPane() {
     tryFindChatTabbedPane().ifPresent(tabbedPane -> {
       tabbedPane.clearAll();
-      var tabPanel = ToolWindowTabPanelFactory.getTabPanel(project, null);
+      var tabPanel = ToolWindowTabPanelFactory.getTabPanel(project);
       tabPanel.displayLandingView();
       tabbedPane.addNewTab(tabPanel);
     });

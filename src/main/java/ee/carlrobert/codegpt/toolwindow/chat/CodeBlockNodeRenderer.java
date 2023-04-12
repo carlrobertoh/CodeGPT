@@ -14,12 +14,6 @@ import org.jetbrains.annotations.NotNull;
 
 public class CodeBlockNodeRenderer implements NodeRenderer {
 
-  private final boolean isReplaceButtonVisible;
-
-  public CodeBlockNodeRenderer(boolean isReplaceButtonVisible) {
-    this.isReplaceButtonVisible = isReplaceButtonVisible;
-  }
-
   @Override
   public Set<NodeRenderingHandler<?>> getNodeRenderingHandlers() {
     return Set.of(new NodeRenderingHandler<>(FencedCodeBlock.class, this::render));
@@ -41,15 +35,13 @@ public class CodeBlockNodeRenderer implements NodeRenderer {
         .withAttr().tag("button")
         .text("Copy")
         .tag("/button");
-    if (isReplaceButtonVisible) {
-      html.attr("class", "replace-button")
-          .attr("disabled", "")
-          .attr("title", "Please wait until the response has been generated")
-          .attr("onclick", String.format("window.JavaPanelBridge.replaceCode('%s')", escapeEcmaScript(code)))
-          .withAttr().tag("button")
-          .text("Replace Selection")
-          .tag("/button");
-    }
+    html.attr("class", "replace-button")
+        .attr("disabled", "")
+        .attr("title", "Please wait until the response has been generated")
+        .attr("onclick", String.format("window.JavaPanelBridge.replaceCode('%s')", escapeEcmaScript(code)))
+        .withAttr().tag("button")
+        .text("Replace Selection")
+        .tag("/button");
     html.tag("/div")
         .tag("/div")
         .attr("class", "code-wrapper")
@@ -60,17 +52,10 @@ public class CodeBlockNodeRenderer implements NodeRenderer {
 
   public static class Factory implements NodeRendererFactory {
 
-    private final boolean isReplaceButtonVisible;
-
-    public Factory(boolean isReplaceButtonVisible) {
-      super();
-      this.isReplaceButtonVisible = isReplaceButtonVisible;
-    }
-
     @NotNull
     @Override
     public NodeRenderer apply(@NotNull DataHolder options) {
-      return new CodeBlockNodeRenderer(isReplaceButtonVisible);
+      return new CodeBlockNodeRenderer();
     }
   }
 }
