@@ -59,6 +59,7 @@
       <ul>
         <li>Copy/Replace Code support</li>
         <li>Remove data usage support</li>
+        <li>Ability to remove previous messages</li>
       </ul>
     ]]>
     </change-notes>
