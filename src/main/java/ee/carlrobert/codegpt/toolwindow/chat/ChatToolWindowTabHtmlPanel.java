@@ -62,22 +62,22 @@ public class ChatToolWindowTabHtmlPanel implements ToolWindowTabPanel {
   }
 
   @Override
-  public void startNewConversation(String prompt) {
+  public void startNewConversation(Message message) {
     markdownHtmlPanel.runWhenLoaded(() -> {
       conversation = ConversationsState.getInstance().startConversation();
-      startConversation(prompt, false);
+      startConversation(message, false);
     });
   }
 
   @Override
-  public void startConversation(String prompt, boolean isRetry) {
+  public void startConversation(Message message, boolean isRetry) {
     markdownHtmlPanel.runWhenLoaded(() -> {
-      markdownHtmlPanel.displayUserMessage(prompt);
+      markdownHtmlPanel.displayUserMessage(message);
       var settings = SettingsState.getInstance();
       if (settings.apiKey.isEmpty()) {
-        markdownHtmlPanel.displayMissingCredential();
+        markdownHtmlPanel.displayMissingCredential(message.getId());
       } else {
-        SwingUtilities.invokeLater(() -> call(prompt, isRetry));
+        SwingUtilities.invokeLater(() -> call(message, isRetry));
       }
     });
   }
@@ -95,15 +95,14 @@ public class ChatToolWindowTabHtmlPanel implements ToolWindowTabPanel {
     markdownHtmlPanel.dispose();
   }
 
-  private void call(String prompt, boolean isRetry) {
+  private void call(Message message, boolean isRetry) {
     if (conversation == null) {
       conversation = ConversationsState.getInstance().startConversation();
     }
 
-    var responseId = markdownHtmlPanel.prepareResponse(true, isRetry);
-    var conversationMessage = new Message(prompt);
+    var responseId = markdownHtmlPanel.prepareResponse(message.getId(), true, isRetry);
     var requestService = new RequestHandler(conversation) {
-      public void handleMessage(String message, String fullMessage) {
+      public void handleMessage(String response, String fullMessage) {
         try {
           markdownHtmlPanel.replaceHtml(responseId, fullMessage);
         } catch (Exception e) {
@@ -114,7 +113,7 @@ public class ChatToolWindowTabHtmlPanel implements ToolWindowTabPanel {
       }
 
       public void handleComplete() {
-        stopGenerating(prompt);
+        stopGenerating(message);
         markdownHtmlPanel.stopTyping();
         markdownHtmlPanel.updateReplaceButton();
       }
@@ -123,12 +122,12 @@ public class ChatToolWindowTabHtmlPanel implements ToolWindowTabPanel {
         markdownHtmlPanel.displayErrorMessage(errorMessage);
       }
     };
-    requestService.call(conversationMessage, isRetry);
+    requestService.call(message, isRetry);
     displayReloadResponseButton(requestService::cancel);
   }
 
   private void handleSubmit() {
-    startConversation(textArea.getText(), false);
+    startConversation(new Message(textArea.getText()), false);
     textArea.setText("");
   }
 
@@ -138,8 +137,8 @@ public class ChatToolWindowTabHtmlPanel implements ToolWindowTabPanel {
     button.setMode(GenerateButton.Mode.STOP, onClick);
   }
 
-  private void stopGenerating(String prompt) {
-    getReloadResponseButton().setMode(GenerateButton.Mode.REFRESH, () -> call(prompt, true));
+  private void stopGenerating(Message message) {
+    getReloadResponseButton().setMode(GenerateButton.Mode.REFRESH, () -> call(message, true));
   }
 
   private GenerateButton getReloadResponseButton() {

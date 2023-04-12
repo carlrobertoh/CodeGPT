@@ -1,5 +1,7 @@
 package ee.carlrobert.codegpt.state.conversations;
 
+import static java.util.stream.Collectors.toList;
+
 import ee.carlrobert.codegpt.state.conversations.message.Message;
 import ee.carlrobert.openai.client.ClientCode;
 import java.time.LocalDateTime;
@@ -66,5 +68,11 @@ public class Conversation {
 
   public void setUpdatedOn(LocalDateTime updatedOn) {
     this.updatedOn = updatedOn;
+  }
+
+  public void removeMessage(UUID messageId) {
+    setMessages(messages.stream()
+        .filter(message -> !message.getId().equals(messageId))
+        .collect(toList()));
   }
 }

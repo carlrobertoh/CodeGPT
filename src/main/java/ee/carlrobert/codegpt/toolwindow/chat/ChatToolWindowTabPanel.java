@@ -114,13 +114,13 @@ public class ChatToolWindowTabPanel implements ToolWindowTabPanel {
   }
 
   @Override
-  public void startNewConversation(String prompt) {
+  public void startNewConversation(Message message) {
     conversation = ConversationsState.getInstance().startConversation();
-    startConversation(prompt, false);
+    startConversation(message, false);
   }
 
   @Override
-  public void startConversation(String prompt, boolean isRetry) {
+  public void startConversation(Message message, boolean isRetry) {
     if (!isRetry) {
       addIconLabel(Icons.DefaultImageIcon, "ChatGPT");
     }
@@ -138,7 +138,7 @@ public class ChatToolWindowTabPanel implements ToolWindowTabPanel {
         scrollablePanel.add(textArea);
         textAreas.add(textArea);
       }
-      call(textArea, prompt, isRetry);
+      call(textArea, message, isRetry);
     }
   }
 
@@ -153,12 +153,11 @@ public class ChatToolWindowTabPanel implements ToolWindowTabPanel {
     scrollablePanel.repaint();
   }
 
-  public void call(SyntaxTextArea textArea, String prompt, boolean isRetry) {
+  public void call(SyntaxTextArea textArea, Message message, boolean isRetry) {
     if (conversation == null) {
       conversation = ConversationsState.getInstance().startConversation();
     }
 
-    var conversationMessage = new Message(prompt);
     var requestService = new RequestHandler(conversation) {
       public void handleMessage(String message, String fullMessage) {
         try {
@@ -172,14 +171,14 @@ public class ChatToolWindowTabPanel implements ToolWindowTabPanel {
       }
 
       public void handleComplete() {
-        stopGenerating(prompt, textArea);
+        stopGenerating(message, textArea);
       }
 
       public void handleError(String errorMessage) {
         textArea.append(errorMessage);
       }
     };
-    requestService.call(conversationMessage, isRetry);
+    requestService.call(message, isRetry);
     displayGenerateButton(requestService::cancel);
   }
 
@@ -216,9 +215,9 @@ public class ChatToolWindowTabPanel implements ToolWindowTabPanel {
     generateButton.setMode(GenerateButton.Mode.STOP, onClick);
   }
 
-  public void stopGenerating(String prompt, SyntaxTextArea textArea) {
+  public void stopGenerating(Message message, SyntaxTextArea textArea) {
     generateButton.setMode(GenerateButton.Mode.REFRESH, () -> {
-      startConversation(prompt, true);
+      startConversation(message, true);
       scrollToBottom();
     });
     textArea.displayCopyButton();
@@ -231,15 +230,15 @@ public class ChatToolWindowTabPanel implements ToolWindowTabPanel {
   }
 
   private void handleSubmit() {
-    var searchText = textArea.getText();
+    var message = new Message(textArea.getText());
     if (isLandingViewVisible) {
       clearWindow();
     }
     if (ConversationsState.getCurrentConversation() == null) {
       setConversation(ConversationsState.getInstance().startConversation());
     }
-    displayUserMessage(searchText);
-    startNewConversation(searchText);
+    displayUserMessage(message.getPrompt());
+    startNewConversation(message);
     textArea.setText("");
     scrollToBottom();
     scrollablePanel.revalidate();

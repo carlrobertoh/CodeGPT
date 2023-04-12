@@ -18,21 +18,28 @@ window.CodeGPTBridge = {
     }));
     document.body.appendChild(wrapper);
   },
-  displayUserMessage: function (accountName, htmlMessage, deleteSvgIcon) {
+  prepareMessage: function (messageId) {
+    const wrapper = createElement({tagName: 'div', className: 'message'});
+    wrapper.setAttribute("id", messageId);
+    document.body.appendChild(wrapper);
+  },
+  displayUserMessage: function (messageId, accountName, htmlMessage, deleteSvgIcon) {
     document.getElementById("landing-view")?.remove();
 
-    const actions = createElement({tagName: 'span', className: 'user-message-actions'});
-    actions.appendChild(createElement({tagName: 'button', className: 'delete-icon-wrapper', innerHTML: deleteSvgIcon}));
+    const deleteButton = createElement({tagName: 'button', className: 'delete-button', innerHTML: deleteSvgIcon});
+    deleteButton.addEventListener("click", function () {
+      window.JavaPanelBridge.deleteMessage(messageId)
+    });
 
     const nameWrapper = createElement({tagName: 'p', className: 'user-message-name-wrapper'});
     nameWrapper.appendChild(createElement({tagName: 'span', textContent: accountName}));
-    nameWrapper.appendChild(actions);
+    nameWrapper.appendChild(deleteButton);
 
     const wrapper = createElement({tagName: 'div', className: 'user-message'});
     wrapper.appendChild(nameWrapper);
-    wrapper.appendChild(createElement({tagName: 'div', innerHTML: htmlMessage}));
-    document.body.appendChild(wrapper);
+    wrapper.appendChild(createElement({tagName: 'div', className: 'user-prompt', innerHTML: htmlMessage}));
 
+    document.getElementById(messageId)?.appendChild(wrapper);
     scrollToBottom();
     Prism.highlightAll();
   },
@@ -44,7 +51,7 @@ window.CodeGPTBridge = {
     // TODO: Add anchor link for opening the settings panel
     responseWrapper.innerHTML = "<p>API key not provided.</p>";
   },
-  displayResponse: function (responseId, animate, svgIcon) {
+  displayResponse: function (messageId, responseId, animate, svgIcon) {
     const wrapper = createElement({tagName: 'div', className: 'response'})
 
     const iconLabelContainer = document.createElement('p');
@@ -62,7 +69,7 @@ window.CodeGPTBridge = {
     const responseWrapper = createElement({tagName: 'div', innerHTML: "<p>&#8205;</p>"})
     responseWrapper.setAttribute('id', responseId);
     wrapper.appendChild(responseWrapper);
-    document.body.appendChild(wrapper);
+    document.getElementById(messageId)?.appendChild(wrapper);
     scrollToBottom();
   },
   clearResponse: function (responseId) {
@@ -91,6 +98,12 @@ window.CodeGPTBridge = {
     const icons = Array.from(document.getElementsByClassName('icon-wrapper'));
     for (const icon of icons) {
       icon.style = null;
+    }
+  },
+  deleteMessage: function (messageId) {
+    document.getElementById(messageId)?.remove();
+    if (document.getElementsByClassName('message').length === 0) {
+      this.displayLandingView();
     }
   }
 }

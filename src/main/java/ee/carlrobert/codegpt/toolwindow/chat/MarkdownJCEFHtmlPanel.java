@@ -8,17 +8,21 @@ import static ee.carlrobert.codegpt.util.ThemeUtils.getFontColorRGB;
 import static ee.carlrobert.codegpt.util.ThemeUtils.getFontSize;
 import static ee.carlrobert.codegpt.util.ThemeUtils.getPanelBackgroundColorRGB;
 import static ee.carlrobert.codegpt.util.ThemeUtils.getSeparatorColorRGB;
+import static icons.Icons.DefaultImageIcon;
 import static java.lang.String.format;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.Messages;
 import com.intellij.ui.jcef.JBCefBrowserBase;
 import com.intellij.ui.jcef.JBCefJSQuery;
 import com.intellij.ui.jcef.JCEFHtmlPanel;
 import com.intellij.util.ui.UIUtil;
 import ee.carlrobert.codegpt.state.AccountDetailsState;
 import ee.carlrobert.codegpt.state.conversations.Conversation;
+import ee.carlrobert.codegpt.state.conversations.ConversationsState;
+import ee.carlrobert.codegpt.state.conversations.message.Message;
 import ee.carlrobert.codegpt.util.FileUtils;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -29,6 +33,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import org.cef.browser.CefBrowser;
 import org.cef.browser.CefFrame;
@@ -39,9 +44,10 @@ public class MarkdownJCEFHtmlPanel extends JCEFHtmlPanel {
 
   private final CompletableFuture<Void> isLoaded = new CompletableFuture<>();
   private final JBCefJSQuery copyCodeQuery = JBCefJSQuery.create((JBCefBrowserBase) this);
+  private final JBCefJSQuery deleteMessageQuery = JBCefJSQuery.create((JBCefBrowserBase) this);
+  private final JBCefJSQuery replaceInEditorQuery;
   private final BrowserContentManager browserContentManager;
   private final Project project;
-  private final JBCefJSQuery replaceInEditorQuery;
   private UUID previousResponseId;
 
   public MarkdownJCEFHtmlPanel(@NotNull Project project) {
@@ -55,24 +61,42 @@ public class MarkdownJCEFHtmlPanel extends JCEFHtmlPanel {
       clipboard.setContents(stringSelection, null);
       return null;
     });
+    this.deleteMessageQuery.addHandler((messageId) -> {
+      SwingUtilities.invokeLater(() -> {
+        int answer = Messages.showYesNoDialog("Are you sure you want to delete this message?", "Delete Message", DefaultImageIcon);
+        if (answer == Messages.YES) {
+          browserContentManager.deleteMessage(UUID.fromString(messageId));
+          var conversation = ConversationsState.getCurrentConversation();
+          if (conversation != null) {
+            conversation.removeMessage(UUID.fromString(messageId));
+            ConversationsState.getInstance().saveConversation(conversation);
+          }
+        }
+      });
+      return null;
+    });
 
     setHtml(getIndexContent());
     addBrowserLoadHandler();
     addLookAndFeelChangeListener();
   }
 
-  public void displayUserMessage(String prompt) {
+  public void displayUserMessage(Message message) {
     var name = AccountDetailsState.getInstance().accountName;
-    browserContentManager.displayUserMessage(name == null || name.isEmpty() ? "User" : name, prompt);
+    browserContentManager.displayUserMessage(name == null || name.isEmpty() ? "User" : name, message);
   }
 
-  public UUID prepareResponse(boolean animate, boolean isRetry) {
+  public UUID prepareResponse(UUID messageId) {
+    return prepareResponse(messageId, false, false);
+  }
+
+  public UUID prepareResponse(UUID messageId, boolean animate, boolean isRetry) {
     if (isRetry) {
       browserContentManager.clearResponse(previousResponseId);
       browserContentManager.animateSvg(previousResponseId);
     } else {
       previousResponseId = UUID.randomUUID();
-      browserContentManager.displayResponse(previousResponseId, animate);
+      browserContentManager.displayResponse(messageId, previousResponseId, animate);
     }
     return previousResponseId;
   }
@@ -80,8 +104,8 @@ public class MarkdownJCEFHtmlPanel extends JCEFHtmlPanel {
   public void displayConversation(Conversation conversation) {
     runWhenLoaded(() -> {
       conversation.getMessages().forEach(message -> {
-        displayUserMessage(message.getPrompt());
-        replaceHtml(prepareResponse(false, false), message.getResponse());
+        displayUserMessage(message);
+        replaceHtml(prepareResponse(message.getId()), message.getResponse());
       });
       updateReplaceButton();
     });
@@ -95,8 +119,8 @@ public class MarkdownJCEFHtmlPanel extends JCEFHtmlPanel {
     browserContentManager.displayErrorMessage(previousResponseId, errorMessage);
   }
 
-  public void displayMissingCredential() {
-    browserContentManager.displayMissingCredential(prepareResponse(false, false));
+  public void displayMissingCredential(UUID messageId) {
+    browserContentManager.displayMissingCredential(prepareResponse(messageId));
   }
 
   public void displayLandingView() {
@@ -134,13 +158,16 @@ public class MarkdownJCEFHtmlPanel extends JCEFHtmlPanel {
         if (httpStatusCode == 200) {
           myCefBrowser.executeJavaScript(
               "window.JavaPanelBridge = {" +
-                  "copyCode : function(responseId) {" +
-                  copyCodeQuery.inject("responseId") +
+                  "copyCode : function(code) {" +
+                    copyCodeQuery.inject("code") +
                   "}," +
-                  "replaceCode : function(responseId) {" +
-                  replaceInEditorQuery.inject("responseId") +
+                  "replaceCode : function(code) {" +
+                    replaceInEditorQuery.inject("code") +
+                  "}," +
+                  "deleteMessage : function(messageId) {" +
+                    deleteMessageQuery.inject("messageId") +
                   "}" +
-                  "};",
+              "};",
               myCefBrowser.getURL(), 0);
           myCefBrowser.executeJavaScript(FileUtils.getResource("/html/js/main.js"), myCefBrowser.getURL(), 0);
           isLoaded.complete(null);

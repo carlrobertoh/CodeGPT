@@ -6,6 +6,7 @@ import static org.apache.commons.text.StringEscapeUtils.escapeEcmaScript;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.data.MutableDataSet;
+import ee.carlrobert.codegpt.state.conversations.message.Message;
 import java.util.UUID;
 import org.cef.browser.CefBrowser;
 
@@ -17,12 +18,13 @@ public class BrowserContentManager {
     this.browser = browser;
   }
 
-  public void displayUserMessage(String accountName, String prompt) {
-    executeJS("window.CodeGPTBridge.displayUserMessage(?, ?, ?);", accountName, convertToHtml(prompt), getHtmlSvgIcon("delete-icon"));
+  public void displayUserMessage(String accountName, Message message) {
+    executeJS("window.CodeGPTBridge.prepareMessage(?);", message.getId());
+    executeJS("window.CodeGPTBridge.displayUserMessage(?, ?, ?, ?);", message.getId(), accountName, convertToHtml(message.getPrompt()), getHtmlSvgIcon("delete-icon"));
   }
 
-  public void displayResponse(UUID responseId, boolean animate) {
-    executeJS("window.CodeGPTBridge.displayResponse(?, ?, ?);", responseId, animate, getHtmlSvgIcon("codegpt-icon"));
+  public void displayResponse(UUID messageId, UUID responseId, boolean animate) {
+    executeJS("window.CodeGPTBridge.displayResponse(?, ?, ?, ?);", messageId, responseId, animate, getHtmlSvgIcon("codegpt-icon"));
   }
 
   public void replaceResponseContent(UUID responseId, String message) {
@@ -55,6 +57,10 @@ public class BrowserContentManager {
 
   public void updateRegenerateButton(String title, boolean isDisabled) {
     executeJS("window.CodeGPTBridge.updateRegenerateButton(?, ?);", title, isDisabled);
+  }
+
+  public void deleteMessage(UUID messageId) {
+    executeJS("window.CodeGPTBridge.deleteMessage(?);", messageId);
   }
 
   private void executeJS(String query, Object... params) {

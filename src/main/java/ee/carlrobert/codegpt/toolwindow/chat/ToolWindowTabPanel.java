@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt.toolwindow.chat;
 
 import ee.carlrobert.codegpt.state.conversations.Conversation;
+import ee.carlrobert.codegpt.state.conversations.message.Message;
 import javax.swing.JPanel;
 
 public interface ToolWindowTabPanel {
@@ -13,7 +14,7 @@ public interface ToolWindowTabPanel {
 
   void displayConversation(Conversation conversation);
 
-  void startNewConversation(String prompt);
+  void startNewConversation(Message message);
 
-  void startConversation(String prompt, boolean isRetry);
+  void startConversation(Message message, boolean isRetry);
 }

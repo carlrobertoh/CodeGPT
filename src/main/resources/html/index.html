@@ -147,14 +147,14 @@
           display: flex;
           justify-content: space-between;
           align-items: center;
+          margin-block-end: 0.5em;
       }
 
-      .user-message-actions {
-          display: flex;
-          gap: 8px;
+      .user-prompt > p:first-child {
+          margin-block-start: 0.5em;
       }
 
-      .user-message-actions > button {
+      .delete-button {
           background-color: var(--bg);
           display: inline-flex;
           border: 1px solid var(--separator-color);
@@ -164,11 +164,11 @@
           transition: background-color 150ms ease-in;
       }
 
-      .user-message-actions > button:hover {
+      .delete-button:hover {
           background-color: var(--panel-background-color);
       }
 
-      .user-message-actions > button path, polygon {
+      .delete-button path, polygon {
           color: var(--font-color);
       }
 
