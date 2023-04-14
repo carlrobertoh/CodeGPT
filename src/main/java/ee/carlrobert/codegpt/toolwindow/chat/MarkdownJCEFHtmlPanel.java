@@ -7,6 +7,8 @@ import static ee.carlrobert.codegpt.util.ThemeUtils.getDisabledTextColorRGB;
 import static ee.carlrobert.codegpt.util.ThemeUtils.getFontColorRGB;
 import static ee.carlrobert.codegpt.util.ThemeUtils.getFontSize;
 import static ee.carlrobert.codegpt.util.ThemeUtils.getPanelBackgroundColorRGB;
+import static ee.carlrobert.codegpt.util.ThemeUtils.getScrollBarForegroundColorRGB;
+import static ee.carlrobert.codegpt.util.ThemeUtils.getScrollBarRadius;
 import static ee.carlrobert.codegpt.util.ThemeUtils.getSeparatorColorRGB;
 import static icons.Icons.DefaultImageIcon;
 import static java.lang.String.format;
@@ -147,6 +149,8 @@ public class MarkdownJCEFHtmlPanel extends JCEFHtmlPanel {
         .replace("[font-size]", String.valueOf(getFontSize()))
         .replace("[separator-color]", getSeparatorColorRGB())
         .replace("[disabled-color]", getDisabledTextColorRGB())
+        .replace("[scrollbar-color]", getScrollBarForegroundColorRGB())
+        .replace("[scrollbar-radius]", String.valueOf(getScrollBarRadius()))
         .replace("[panel-background-color]", getPanelBackgroundColorRGB())
         .replace("[button-background-color]", getButtonBackgroundColorRGB())
         .replace("[button-disabled-background-color]", getDisabledButtonBackgroundColorRGB());

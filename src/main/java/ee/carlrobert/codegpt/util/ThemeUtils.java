@@ -3,6 +3,7 @@ package ee.carlrobert.codegpt.util;
 import static java.lang.String.format;
 
 import com.intellij.openapi.editor.colors.EditorColorsManager;
+import com.intellij.openapi.util.SystemInfo;
 import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
@@ -42,6 +43,14 @@ public class ThemeUtils {
 
   public static int getFontSize() {
     return JBFont.regular().getSize();
+  }
+
+  public static String getScrollBarForegroundColorRGB() {
+    return "rgb(187, 187, 187, 0.8)"; // TODO: Get theme's scrollbar color
+  }
+
+  public static int getScrollBarRadius() {
+    return SystemInfo.isMac ? 10 : 0;
   }
 
   private static Color toDarker(Color color) {
