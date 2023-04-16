@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.toolwindow.components;
+package ee.carlrobert.codegpt.toolwindow.chat.swing;
 
 import static ee.carlrobert.codegpt.util.SwingUtils.createIconButton;
 
@@ -6,6 +6,7 @@ import com.intellij.icons.AllIcons;
 import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
+import ee.carlrobert.codegpt.toolwindow.components.ComponentBorder;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;

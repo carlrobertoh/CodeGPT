@@ -2,11 +2,12 @@ package ee.carlrobert.codegpt.client;
 
 import static ee.carlrobert.openai.client.completion.chat.ChatCompletionModel.GPT_3_5;
 import static ee.carlrobert.openai.client.completion.chat.ChatCompletionModel.GPT_3_5_SNAPSHOT;
+import static java.util.stream.Collectors.toList;
 
+import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.state.conversations.Conversation;
 import ee.carlrobert.codegpt.state.conversations.ConversationsState;
 import ee.carlrobert.codegpt.state.settings.SettingsState;
-import ee.carlrobert.codegpt.toolwindow.chat.EncodingManager;
 import ee.carlrobert.openai.client.completion.chat.request.ChatCompletionMessage;
 import ee.carlrobert.openai.client.completion.chat.request.ChatCompletionRequest;
 import ee.carlrobert.openai.client.completion.text.TextCompletionModel;
@@ -14,7 +15,6 @@ import ee.carlrobert.openai.client.completion.text.request.TextCompletionRequest
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 class CompletionRequestProvider {
 
@@ -52,42 +52,42 @@ class CompletionRequestProvider {
     messages.add(new ChatCompletionMessage("user", prompt));
 
     var settingsState = SettingsState.getInstance();
+
     // TODO: Add support for other models
-    if (settingsState.isChatCompletionOptionSelected &&
-        List.of(GPT_3_5.getCode(), GPT_3_5_SNAPSHOT.getCode()).contains(settingsState.chatCompletionBaseModel)) {
-      var totalMessagesUsage = messages.parallelStream().mapToInt(this::getMessageTokenCount).sum();
-      var totalUsage = totalMessagesUsage + 1000; // 1000 - total completion tokens, currently not customizable
-
-      var messageSize = messages.size();
-
-      if (totalUsage > 4097) {
-        if (!ConversationsState.getInstance().discardAllTokenLimits) {
-          if (!conversation.isDiscardTokenLimit()) {
-            throw new TotalUsageExceededException();
-          }
-        }
-
-        // skip the system prompt
-        for (int i = 1; i < messageSize; i++) {
-          if (totalUsage <= 4097) {
-            break;
-          }
-
-          totalUsage -= getMessageTokenCount(messages.get(i));
-          messages.set(i, null);
-        }
-
-        return messages.stream().filter(Objects::nonNull).collect(Collectors.toList());
-      }
+    var isSeamlessConversationSupported = settingsState.isChatCompletionOptionSelected &&
+        List.of(GPT_3_5.getCode(), GPT_3_5_SNAPSHOT.getCode()).contains(settingsState.chatCompletionBaseModel);
+    if (isSeamlessConversationSupported) {
+      return tryReducingMessagesOrThrow(messages);
     }
-
     return messages;
   }
 
-  private int getMessageTokenCount(ChatCompletionMessage message) {
-    // TODO: Size 4 for GPT-3.5, 3 for GPT-4
-    var tokensPerMessage = 4; // every message follows <|start|>{role/name}\n{content}<|end|>\n
-    return encodingManager.countTokens(message.getRole() + message.getContent()) + tokensPerMessage;
+  private List<ChatCompletionMessage> tryReducingMessagesOrThrow(List<ChatCompletionMessage> messages) {
+    int MAX_TOKEN_LIMIT = 4097;
+    int totalMessagesUsage = messages.parallelStream().mapToInt(encodingManager::countMessageTokens).sum();
+    int totalUsage = totalMessagesUsage + 1000; // 1000 - max completion token size (currently not customizable)
+
+    if (totalUsage <= MAX_TOKEN_LIMIT) {
+      return messages;
+    }
+
+    if (!ConversationsState.getInstance().discardAllTokenLimits) {
+      if (!conversation.isDiscardTokenLimit()) {
+        throw new TotalUsageExceededException();
+      }
+    }
+
+    // skip the system prompt
+    for (int i = 1; i < messages.size(); i++) {
+      if (totalUsage <= MAX_TOKEN_LIMIT) {
+        break;
+      }
+
+      totalUsage -= encodingManager.countMessageTokens(messages.get(i));
+      messages.set(i, null);
+    }
+
+    return messages.stream().filter(Objects::nonNull).collect(toList());
   }
 
   private StringBuilder getBasePrompt(String model) {

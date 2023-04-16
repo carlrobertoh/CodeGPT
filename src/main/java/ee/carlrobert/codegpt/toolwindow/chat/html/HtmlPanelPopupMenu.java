@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.toolwindow.chat;
+package ee.carlrobert.codegpt.toolwindow.chat.html;
 
 import com.intellij.icons.AllIcons;
 import java.awt.event.MouseAdapter;

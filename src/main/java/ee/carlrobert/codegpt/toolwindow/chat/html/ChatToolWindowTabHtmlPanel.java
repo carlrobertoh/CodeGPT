@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.toolwindow.chat;
+package ee.carlrobert.codegpt.toolwindow.chat.html;
 
 import static icons.Icons.DefaultImageIcon;
 
@@ -13,6 +13,8 @@ import ee.carlrobert.codegpt.state.conversations.Conversation;
 import ee.carlrobert.codegpt.state.conversations.ConversationsState;
 import ee.carlrobert.codegpt.state.conversations.message.Message;
 import ee.carlrobert.codegpt.state.settings.SettingsState;
+import ee.carlrobert.codegpt.toolwindow.chat.ToolWindowTabPanel;
+import ee.carlrobert.codegpt.toolwindow.chat.html.MarkdownJCEFHtmlPanel;
 import ee.carlrobert.codegpt.toolwindow.components.GenerateButton;
 import ee.carlrobert.codegpt.toolwindow.components.TextArea;
 import ee.carlrobert.openai.client.completion.ErrorDetails;

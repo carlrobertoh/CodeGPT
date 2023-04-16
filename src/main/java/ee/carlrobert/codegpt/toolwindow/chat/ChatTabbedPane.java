@@ -2,6 +2,7 @@ package ee.carlrobert.codegpt.toolwindow.chat;
 
 import com.intellij.ui.components.JBTabbedPane;
 import ee.carlrobert.codegpt.state.conversations.ConversationsState;
+import ee.carlrobert.codegpt.toolwindow.chat.html.ChatToolWindowTabHtmlPanel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Map;

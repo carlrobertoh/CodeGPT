@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.toolwindow.chat;
+package ee.carlrobert.codegpt.toolwindow.chat.html;
 
 import static ee.carlrobert.codegpt.util.ThemeUtils.getBackgroundColorRGB;
 import static ee.carlrobert.codegpt.util.ThemeUtils.getButtonBackgroundColorRGB;
@@ -163,15 +163,15 @@ public class MarkdownJCEFHtmlPanel extends JCEFHtmlPanel {
           myCefBrowser.executeJavaScript(
               "window.JavaPanelBridge = {" +
                   "copyCode : function(code) {" +
-                    copyCodeQuery.inject("code") +
+                  copyCodeQuery.inject("code") +
                   "}," +
                   "replaceCode : function(code) {" +
-                    replaceInEditorQuery.inject("code") +
+                  replaceInEditorQuery.inject("code") +
                   "}," +
                   "deleteMessage : function(messageId) {" +
-                    deleteMessageQuery.inject("messageId") +
+                  deleteMessageQuery.inject("messageId") +
                   "}" +
-              "};",
+                  "};",
               myCefBrowser.getURL(), 0);
           myCefBrowser.executeJavaScript(FileUtils.getResource("/html/js/main.js"), myCefBrowser.getURL(), 0);
           isLoaded.complete(null);

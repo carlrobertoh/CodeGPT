@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.toolwindow.chat;
+package ee.carlrobert.codegpt.toolwindow.chat.swing;
 
 import static ee.carlrobert.codegpt.util.SwingUtils.createIconLabel;
 import static ee.carlrobert.codegpt.util.SwingUtils.createTextPane;
@@ -18,10 +18,8 @@ import ee.carlrobert.codegpt.state.conversations.ConversationsState;
 import ee.carlrobert.codegpt.state.conversations.message.Message;
 import ee.carlrobert.codegpt.state.settings.SettingsConfigurable;
 import ee.carlrobert.codegpt.state.settings.SettingsState;
+import ee.carlrobert.codegpt.toolwindow.chat.ToolWindowTabPanel;
 import ee.carlrobert.codegpt.toolwindow.components.GenerateButton;
-import ee.carlrobert.codegpt.toolwindow.components.LandingView;
-import ee.carlrobert.codegpt.toolwindow.components.ScrollPane;
-import ee.carlrobert.codegpt.toolwindow.components.SyntaxTextArea;
 import ee.carlrobert.codegpt.toolwindow.components.TextArea;
 import ee.carlrobert.openai.client.completion.ErrorDetails;
 import icons.Icons;

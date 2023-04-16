@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.toolwindow.chat;
+package ee.carlrobert.codegpt.toolwindow.chat.html;
 
 import static icons.Icons.getHtmlSvgIcon;
 import static org.apache.commons.text.StringEscapeUtils.escapeEcmaScript;

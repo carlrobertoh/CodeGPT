@@ -4,7 +4,7 @@ import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.project.ProjectUtil;
 import ee.carlrobert.codegpt.state.conversations.ConversationsState;
 import ee.carlrobert.codegpt.toolwindow.chat.ChatContentManagerService;
-import ee.carlrobert.codegpt.toolwindow.chat.EncodingManager;
+import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.toolwindow.chat.ToolWindowTabPanelFactory;
 import javax.swing.JComponent;
 import org.jetbrains.annotations.Nls;

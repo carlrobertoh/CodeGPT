@@ -8,7 +8,7 @@ import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
-import ee.carlrobert.codegpt.toolwindow.components.SyntaxTextArea;
+import ee.carlrobert.codegpt.toolwindow.chat.swing.SyntaxTextArea;
 import javax.annotation.Nullable;
 import javax.swing.JComponent;
 import javax.swing.JTextArea;

@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.toolwindow.components;
+package ee.carlrobert.codegpt.toolwindow.chat.swing;
 
 import static java.util.stream.Collectors.toList;
 

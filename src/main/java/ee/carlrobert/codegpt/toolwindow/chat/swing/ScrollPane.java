@@ -1,6 +1,5 @@
-package ee.carlrobert.codegpt.toolwindow.components;
+package ee.carlrobert.codegpt.toolwindow.chat.swing;
 
-import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
 import com.intellij.ui.components.JBScrollPane;
 import java.awt.Adjustable;
 import java.awt.event.AdjustmentEvent;
