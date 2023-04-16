@@ -1,13 +1,10 @@
 package ee.carlrobert.codegpt.client;
 
-import static ee.carlrobert.openai.client.completion.chat.ChatCompletionModel.GPT_3_5;
-import static ee.carlrobert.openai.client.completion.chat.ChatCompletionModel.GPT_3_5_SNAPSHOT;
 import static java.util.stream.Collectors.toList;
 
 import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.state.conversations.Conversation;
 import ee.carlrobert.codegpt.state.conversations.ConversationsState;
-import ee.carlrobert.codegpt.state.settings.SettingsState;
 import ee.carlrobert.openai.client.completion.chat.ChatCompletionModel;
 import ee.carlrobert.openai.client.completion.chat.request.ChatCompletionMessage;
 import ee.carlrobert.openai.client.completion.chat.request.ChatCompletionRequest;
@@ -21,7 +18,6 @@ class CompletionRequestProvider {
 
   private static final int MAX_COMPLETION_TOKENS = 1000;
 
-  private final SettingsState settings = SettingsState.getInstance();
   private final EncodingManager encodingManager = EncodingManager.getInstance();
   private final String prompt;
   private final Conversation conversation;
@@ -32,7 +28,7 @@ class CompletionRequestProvider {
   }
 
   public ChatCompletionRequest buildChatCompletionRequest(String model) {
-    return (ChatCompletionRequest) new ChatCompletionRequest.Builder(buildMessages())
+    return (ChatCompletionRequest) new ChatCompletionRequest.Builder(buildMessages(model))
         .setModel(model)
         .setMaxTokens(MAX_COMPLETION_TOKENS)
         .build();
@@ -46,7 +42,7 @@ class CompletionRequestProvider {
         .build();
   }
 
-  private List<ChatCompletionMessage> buildMessages() {
+  private List<ChatCompletionMessage> buildMessages(String model) {
     var messages = new ArrayList<ChatCompletionMessage>();
     messages.add(new ChatCompletionMessage(
         "system",
@@ -57,23 +53,17 @@ class CompletionRequestProvider {
     });
     messages.add(new ChatCompletionMessage("user", prompt));
 
-    // TODO: Add support for other models
-    var isSeamlessConversationSupported = settings.isChatCompletionOptionSelected &&
-        List.of(GPT_3_5.getCode(), GPT_3_5_SNAPSHOT.getCode()).contains(settings.chatCompletionBaseModel);
-    if (isSeamlessConversationSupported) {
-      return tryReducingMessagesOrThrow(messages);
-    }
-    return messages;
-  }
-
-  private List<ChatCompletionMessage> tryReducingMessagesOrThrow(List<ChatCompletionMessage> messages) {
-    var modelMaxTokens = ChatCompletionModel.findByCode(settings.chatCompletionBaseModel).getMaxTokens();
     int totalUsage = messages.parallelStream().mapToInt(encodingManager::countMessageTokens).sum() + MAX_COMPLETION_TOKENS;
+    int modelMaxTokens = ChatCompletionModel.findByCode(model).getMaxTokens();
 
     if (totalUsage <= modelMaxTokens) {
       return messages;
     }
 
+    return tryReducingMessagesOrThrow(messages, totalUsage, modelMaxTokens);
+  }
+
+  private List<ChatCompletionMessage> tryReducingMessagesOrThrow(List<ChatCompletionMessage> messages, int totalUsage, int modelMaxTokens) {
     if (!ConversationsState.getInstance().discardAllTokenLimits) {
       if (!conversation.isDiscardTokenLimit()) {
         throw new TotalUsageExceededException();
