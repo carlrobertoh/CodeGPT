@@ -23,6 +23,7 @@ import ee.carlrobert.codegpt.toolwindow.components.LandingView;
 import ee.carlrobert.codegpt.toolwindow.components.ScrollPane;
 import ee.carlrobert.codegpt.toolwindow.components.SyntaxTextArea;
 import ee.carlrobert.codegpt.toolwindow.components.TextArea;
+import ee.carlrobert.openai.client.completion.ErrorDetails;
 import icons.Icons;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -174,8 +175,8 @@ public class ChatToolWindowTabPanel implements ToolWindowTabPanel {
         stopGenerating(message, textArea);
       }
 
-      public void handleError(String errorMessage) {
-        textArea.append(errorMessage);
+      public void handleError(ErrorDetails error) {
+        textArea.append("\n" + error.getMessage());
       }
     };
     requestService.call(message, isRetry);

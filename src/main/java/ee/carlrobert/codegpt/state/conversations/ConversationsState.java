@@ -12,7 +12,6 @@ import ee.carlrobert.codegpt.state.settings.SettingsState;
 import ee.carlrobert.openai.client.ClientCode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +32,8 @@ public class ConversationsState implements PersistentStateComponent<Conversation
   @OptionTag(converter = ConversationConverter.class)
   public Conversation currentConversation;
 
+  public boolean discardAllTokenLimits;
+
   public static ConversationsState getInstance() {
     return ApplicationManager.getApplication().getService(ConversationsState.class);
   }
@@ -46,6 +47,10 @@ public class ConversationsState implements PersistentStateComponent<Conversation
   @Override
   public void loadState(@NotNull ConversationsState state) {
     XmlSerializerUtil.copyBean(state, this);
+  }
+
+  public void discardAllTokenLimits() {
+    this.discardAllTokenLimits = true;
   }
 
   public void setCurrentConversation(@Nullable Conversation conversation) {
@@ -159,14 +164,5 @@ public class ConversationsState implements PersistentStateComponent<Conversation
     }
 
     nextConversation.ifPresent(this::setCurrentConversation);
-  }
-
-  public Optional<Conversation> getConversation(UUID conversationId) {
-    return conversationsContainer.getConversationsMapping()
-        .values()
-        .stream()
-        .flatMap(Collection::stream)
-        .filter(item -> item.getId().equals(conversationId))
-        .findFirst();
   }
 }

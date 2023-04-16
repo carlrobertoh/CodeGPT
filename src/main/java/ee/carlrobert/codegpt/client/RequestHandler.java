@@ -31,7 +31,12 @@ public class RequestHandler implements ActionListener {
             publish(message);
           }
         };
-        eventSource = startCall(message, eventListener);
+
+        try {
+          eventSource = startCall(message, eventListener);
+        } catch (TotalUsageExceededException e) {
+          handleTokensExceeded();
+        }
         return null;
       }
 
@@ -44,6 +49,7 @@ public class RequestHandler implements ActionListener {
       }
     };
     swingWorker.execute();
+
   }
 
   public void cancel() {
@@ -52,17 +58,13 @@ public class RequestHandler implements ActionListener {
   }
 
   private EventSource startCall(Message message, EventListener eventListener) {
-    try {
-      var settings = SettingsState.getInstance();
-      var requestProvider = new CompletionRequestProvider(message.getPrompt(), conversation);
-      if (settings.isChatCompletionOptionSelected) {
-        return ClientProvider.getChatCompletionClient().stream(
-            requestProvider.buildChatCompletionRequest(settings.chatCompletionBaseModel), eventListener);
-      }
-      return ClientProvider.getTextCompletionClient().stream(
-          requestProvider.buildTextCompletionRequest(settings.textCompletionBaseModel), eventListener);
-    } finally {
-      conversation.addMessage(message);
+    var settings = SettingsState.getInstance();
+    var requestProvider = new CompletionRequestProvider(message.getPrompt(), conversation);
+    if (settings.isChatCompletionOptionSelected) {
+      return ClientProvider.getChatCompletionClient().stream(
+          requestProvider.buildChatCompletionRequest(settings.chatCompletionBaseModel), eventListener);
     }
+    return ClientProvider.getTextCompletionClient().stream(
+        requestProvider.buildTextCompletionRequest(settings.textCompletionBaseModel), eventListener);
   }
 }

@@ -1,6 +1,11 @@
 package ee.carlrobert.codegpt.toolwindow.chat;
 
+import static icons.Icons.DefaultImageIcon;
+
+import com.intellij.execution.ExecutionBundle;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.openapi.ui.Messages;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBScrollPane;
 import ee.carlrobert.codegpt.client.RequestHandler;
@@ -10,6 +15,7 @@ import ee.carlrobert.codegpt.state.conversations.message.Message;
 import ee.carlrobert.codegpt.state.settings.SettingsState;
 import ee.carlrobert.codegpt.toolwindow.components.GenerateButton;
 import ee.carlrobert.codegpt.toolwindow.components.TextArea;
+import ee.carlrobert.openai.client.completion.ErrorDetails;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import javax.swing.BorderFactory;
@@ -113,13 +119,32 @@ public class ChatToolWindowTabHtmlPanel implements ToolWindowTabPanel {
       }
 
       public void handleComplete() {
+        stop();
+        conversation.addMessage(message);
+      }
+
+      public void handleTokensExceeded() {
+        SwingUtilities.invokeLater(() -> {
+          var answer = showTokenLimitExceededDialog();
+          if (answer == Messages.OK) {
+            conversation.discardTokenLimits();
+            ConversationsState.getInstance().saveConversation(conversation);
+            call(message, true);
+          } else {
+            stop();
+          }
+        });
+      }
+
+      public void handleError(ErrorDetails error) {
+        stop();
+        markdownHtmlPanel.displayErrorMessage(error.getMessage());
+      }
+
+      private void stop() {
         stopGenerating(message);
         markdownHtmlPanel.stopTyping();
         markdownHtmlPanel.updateReplaceButton();
-      }
-
-      public void handleError(String errorMessage) {
-        markdownHtmlPanel.displayErrorMessage(errorMessage);
       }
     };
     requestService.call(message, isRetry);
@@ -143,6 +168,34 @@ public class ChatToolWindowTabHtmlPanel implements ToolWindowTabPanel {
 
   private GenerateButton getReloadResponseButton() {
     return ((GenerateButton) reloadResponseButton);
+  }
+
+  private int showTokenLimitExceededDialog() {
+    return Messages.showOkCancelDialog(
+        "The maximum default token limit has been reached. Do you want to proceed with the conversation despite the higher messaging cost?",
+        "Token Limit Exceeded",
+        "Continue",
+        "Cancel",
+        DefaultImageIcon,
+        new DialogWrapper.DoNotAskOption.Adapter() {
+          @Override
+          public void rememberChoice(boolean isSelected, int exitCode) {
+            if (isSelected) {
+              ConversationsState.getInstance().discardAllTokenLimits();
+            }
+          }
+
+          @NotNull
+          @Override
+          public String getDoNotShowMessage() {
+            return ExecutionBundle.message("don.t.ask.again");
+          }
+
+          @Override
+          public boolean shouldSaveOptionsOnCancel() {
+            return true;
+          }
+        });
   }
 
   private void createUIComponents() {

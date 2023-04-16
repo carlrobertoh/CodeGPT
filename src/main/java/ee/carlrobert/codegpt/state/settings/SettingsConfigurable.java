@@ -4,6 +4,7 @@ import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.project.ProjectUtil;
 import ee.carlrobert.codegpt.state.conversations.ConversationsState;
 import ee.carlrobert.codegpt.toolwindow.chat.ChatContentManagerService;
+import ee.carlrobert.codegpt.toolwindow.chat.EncodingManager;
 import ee.carlrobert.codegpt.toolwindow.chat.ToolWindowTabPanelFactory;
 import javax.swing.JComponent;
 import org.jetbrains.annotations.Nls;
@@ -41,8 +42,14 @@ public class SettingsConfigurable implements Configurable {
   @Override
   public void apply() {
     var settings = SettingsState.getInstance();
+    var isModelChanged = isModelChanged(settings);
 
-    if (isClientChanged(settings) || isModelChanged(settings)) {
+    if (isModelChanged) {
+      EncodingManager.getInstance()
+          .setEncoding(settings.isChatCompletionOptionSelected ? settings.chatCompletionBaseModel : settings.textCompletionBaseModel);
+    }
+
+    if (isClientChanged(settings) || isModelChanged) {
       ConversationsState.getInstance().setCurrentConversation(null);
       var project = ProjectUtil.guessCurrentProject(settingsComponent.getPanel()); // TODO: Find a better way
       project.getService(ChatContentManagerService.class)

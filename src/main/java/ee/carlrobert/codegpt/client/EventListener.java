@@ -4,13 +4,14 @@ import ee.carlrobert.codegpt.state.conversations.Conversation;
 import ee.carlrobert.codegpt.state.conversations.ConversationsState;
 import ee.carlrobert.codegpt.state.conversations.message.Message;
 import ee.carlrobert.openai.client.completion.CompletionEventListener;
+import ee.carlrobert.openai.client.completion.ErrorDetails;
 import java.util.function.Consumer;
 
 class EventListener implements CompletionEventListener {
 
   private final Conversation conversation;
   private final Message message;
-  private final Consumer<String> errorListener;
+  private final Consumer<ErrorDetails> errorListener;
   private final Runnable completeListener;
   private final boolean isRetry;
 
@@ -18,7 +19,7 @@ class EventListener implements CompletionEventListener {
       Conversation conversation,
       Message message,
       Runnable completeListener,
-      Consumer<String> errorListener,
+      Consumer<ErrorDetails> errorListener,
       boolean isRetry) {
     this.conversation = conversation;
     this.completeListener = completeListener;
@@ -34,10 +35,8 @@ class EventListener implements CompletionEventListener {
   }
 
   @Override
-  public void onFailure(String errorMessage) {
-    saveConversation(errorMessage);
-    errorListener.accept("\n" + errorMessage);
-    completeListener.run();
+  public void onError(ErrorDetails errorDetails) {
+    errorListener.accept(errorDetails);
   }
 
   private void saveConversation(String response) {

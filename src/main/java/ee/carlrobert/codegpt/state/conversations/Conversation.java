@@ -17,6 +17,7 @@ public class Conversation {
   private String model;
   private LocalDateTime createdOn;
   private LocalDateTime updatedOn;
+  private boolean discardTokenLimit;
 
   public UUID getId() {
     return id;
@@ -68,6 +69,14 @@ public class Conversation {
 
   public void setUpdatedOn(LocalDateTime updatedOn) {
     this.updatedOn = updatedOn;
+  }
+
+  public void discardTokenLimits() {
+    this.discardTokenLimit = true;
+  }
+
+  public boolean isDiscardTokenLimit() {
+    return discardTokenLimit;
   }
 
   public void removeMessage(UUID messageId) {
