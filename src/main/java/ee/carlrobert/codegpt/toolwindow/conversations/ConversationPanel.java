@@ -29,6 +29,7 @@ class ConversationPanel extends JPanel {
     constraints.insets = JBUI.insets(0, 10);
     addChatIcon(constraints);
     addTextPanel(constraints);
+    setCursor(new Cursor(Cursor.HAND_CURSOR));
   }
 
   private void addStyles(boolean isSelected) {

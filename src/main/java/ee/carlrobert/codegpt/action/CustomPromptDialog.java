@@ -4,23 +4,18 @@ import static ee.carlrobert.codegpt.util.SwingUtils.addShiftEnterInputMap;
 import static java.lang.String.format;
 
 import com.intellij.openapi.ui.DialogWrapper;
-import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
-import ee.carlrobert.codegpt.toolwindow.chat.swing.SyntaxTextArea;
 import javax.annotation.Nullable;
 import javax.swing.JComponent;
 import javax.swing.JTextArea;
-import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 
 public class CustomPromptDialog extends DialogWrapper {
 
   private final String selectedText;
   private final String fileExtension;
   private final JTextArea userPromptTextArea;
-  private final SyntaxTextArea syntaxTextArea =
-      new SyntaxTextArea(false, false, SyntaxConstants.SYNTAX_STYLE_MARKDOWN);
 
   public CustomPromptDialog(String selectedText, String fileExtension, String previousUserPrompt) {
     super(true);
@@ -29,7 +24,7 @@ public class CustomPromptDialog extends DialogWrapper {
     this.userPromptTextArea = new JTextArea(previousUserPrompt);
     this.userPromptTextArea.setCaretPosition(previousUserPrompt.length());
     setTitle("Custom Prompt");
-    setSize(600, 400);
+    setSize(400, getRootPane().getPreferredSize().height);
     init();
   }
 
@@ -46,10 +41,6 @@ public class CustomPromptDialog extends DialogWrapper {
     userPromptTextArea.setMargin(JBUI.insets(5));
     addShiftEnterInputMap(userPromptTextArea, this::clickDefaultButton);
 
-    syntaxTextArea.setText(selectedText.trim());
-    // syntaxTextArea.setSyntaxEditingStyle(getSyntaxForFileExtension(fileExtension));
-    syntaxTextArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVA);
-
     return FormBuilder.createFormBuilder()
         .addComponent(UI.PanelFactory.panel(userPromptTextArea)
             .withLabel("Prefix:")
@@ -57,13 +48,11 @@ public class CustomPromptDialog extends DialogWrapper {
             .withComment(
                 "Example: Find bugs in the following code")
             .createPanel())
-        .addVerticalGap(16)
-        .addComponent(new JBScrollPane(syntaxTextArea))
         .getPanel();
   }
 
   public String getFullPrompt() {
-    return userPromptTextArea.getText() + format("\n```%s\n%s\n```", fileExtension, syntaxTextArea.getText());
+    return userPromptTextArea.getText() + format("\n```%s\n%s\n```", fileExtension, selectedText);
   }
 
   public String getUserPrompt() {

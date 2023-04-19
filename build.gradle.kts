@@ -1,17 +1,17 @@
 plugins {
   id("java")
-  id("org.jetbrains.intellij") version "1.13.1"
+  id("org.jetbrains.intellij") version "1.13.3"
 }
 
 group = "ee.carlrobert"
-version = "1.10.2"
+version = "1.10.3"
 
 repositories {
   mavenCentral()
 }
 
 intellij {
-  version.set("2021.1")
+  version.set("2022.2")
   type.set("IC")
   plugins.set(listOf())
 }
@@ -22,7 +22,7 @@ dependencies {
   implementation("com.fifesoft:rsyntaxtextarea:3.3.2")
   implementation("com.vladsch.flexmark:flexmark-all:0.64.0")
   implementation("org.apache.commons:commons-text:1.10.0")
-  implementation("ee.carlrobert:openai-client:1.0.6")
+  implementation("ee.carlrobert:openai-client:1.0.8")
   implementation("com.knuddels:jtokkit:0.2.0")
 }
 

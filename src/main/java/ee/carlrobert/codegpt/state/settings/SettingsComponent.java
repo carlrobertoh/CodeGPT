@@ -31,22 +31,25 @@ public class SettingsComponent {
   public SettingsComponent(SettingsState settings) {
     apiKeyField = new JBTextField(settings.apiKey, 1);
     chatCompletionBaseModelComboBox = new BaseModelComboBox(
-        new ChatCompletionModel[] {
+        new ChatCompletionModel[]{
             ChatCompletionModel.GPT_3_5,
             ChatCompletionModel.GPT_3_5_SNAPSHOT,
-            ChatCompletionModel.GPT_4
+            ChatCompletionModel.GPT_4,
+            ChatCompletionModel.GPT_4_32k
         },
         ChatCompletionModel.findByCode(settings.chatCompletionBaseModel));
     textCompletionBaseModelComboBox = new BaseModelComboBox(
-        new TextCompletionModel[] {
+        new TextCompletionModel[]{
             TextCompletionModel.DAVINCI,
             TextCompletionModel.CURIE,
             TextCompletionModel.BABBAGE,
             TextCompletionModel.ADA,
         },
         TextCompletionModel.findByCode(settings.textCompletionBaseModel));
-    useChatCompletionRadioButton = new JBRadioButton("Use chat completion", settings.isChatCompletionOptionSelected);
-    useTextCompletionRadioButton = new JBRadioButton("Use text completion", settings.isTextCompletionOptionSelected);
+    useChatCompletionRadioButton = new JBRadioButton("Use chat completion",
+        settings.isChatCompletionOptionSelected);
+    useTextCompletionRadioButton = new JBRadioButton("Use text completion",
+        settings.isTextCompletionOptionSelected);
     mainPanel = FormBuilder.createFormBuilder()
         .addComponent(new TitledSeparator("Integration Preference"))
         .addVerticalGap(8)
@@ -110,15 +113,18 @@ public class SettingsComponent {
   private JPanel createMainSelectionForm() {
     var apiKeyFieldPanel = UI.PanelFactory.panel(apiKeyField)
         .withLabel("API key:")
-        .withComment("You can find your Secret API key in your <a href=\"https://platform.openai.com/account/api-keys\">User settings</a>.")
+        .withComment(
+            "You can find your Secret API key in your <a href=\"https://platform.openai.com/account/api-keys\">User settings</a>.")
         .withCommentHyperlinkListener(this::handleHyperlinkClicked)
         .createPanel();
     apiKeyFieldPanel.setBorder(JBUI.Borders.emptyLeft(8));
 
-    var chatCompletionModelsPanel = SwingUtils.createPanel(chatCompletionBaseModelComboBox, "Model:", false);
+    var chatCompletionModelsPanel = SwingUtils.createPanel(
+        chatCompletionBaseModelComboBox, "Model:", false);
     chatCompletionModelsPanel.setBorder(JBUI.Borders.emptyLeft(24));
 
-    var textCompletionModelsPanel = SwingUtils.createPanel(textCompletionBaseModelComboBox, "Model:", false);
+    var textCompletionModelsPanel = SwingUtils.createPanel(
+        textCompletionBaseModelComboBox, "Model:", false);
     textCompletionModelsPanel.setBorder(JBUI.Borders.emptyLeft(24));
 
     var panel = FormBuilder.createFormBuilder()
