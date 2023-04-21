@@ -21,10 +21,10 @@ import com.intellij.ui.jcef.JBCefBrowserBase;
 import com.intellij.ui.jcef.JBCefJSQuery;
 import com.intellij.ui.jcef.JCEFHtmlPanel;
 import com.intellij.util.ui.UIUtil;
-import ee.carlrobert.codegpt.state.AccountDetailsState;
 import ee.carlrobert.codegpt.state.conversations.Conversation;
 import ee.carlrobert.codegpt.state.conversations.ConversationsState;
 import ee.carlrobert.codegpt.state.conversations.message.Message;
+import ee.carlrobert.codegpt.state.settings.SettingsState;
 import ee.carlrobert.codegpt.util.FileUtils;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -56,7 +56,8 @@ public class MarkdownJCEFHtmlPanel extends JCEFHtmlPanel {
     super(null);
     this.project = project;
     this.browserContentManager = new BrowserContentManager(getCefBrowser());
-    this.replaceInEditorQuery = new ReplaceInEditorQuery(project, this, editor -> updateReplaceButton()).getQuery();
+    this.replaceInEditorQuery = new ReplaceInEditorQuery(
+        project, this, editor -> updateReplaceButton()).getQuery();
     this.copyCodeQuery.addHandler((text) -> {
       StringSelection stringSelection = new StringSelection(text);
       Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
@@ -65,7 +66,8 @@ public class MarkdownJCEFHtmlPanel extends JCEFHtmlPanel {
     });
     this.deleteMessageQuery.addHandler((messageId) -> {
       SwingUtilities.invokeLater(() -> {
-        int answer = Messages.showYesNoDialog("Are you sure you want to delete this message?", "Delete Message", DefaultImageIcon);
+        int answer = Messages.showYesNoDialog(
+            "Are you sure you want to delete this message?", "Delete Message", DefaultImageIcon);
         if (answer == Messages.YES) {
           browserContentManager.deleteMessage(UUID.fromString(messageId));
           var conversation = ConversationsState.getCurrentConversation();
@@ -85,8 +87,9 @@ public class MarkdownJCEFHtmlPanel extends JCEFHtmlPanel {
   }
 
   public void displayUserMessage(Message message) {
-    var name = AccountDetailsState.getInstance().accountName;
-    browserContentManager.displayUserMessage(name == null || name.isEmpty() ? "User" : name, message);
+    var name = SettingsState.getInstance().displayName;
+    browserContentManager.displayUserMessage(
+        name == null || name.isEmpty() ? "User" : name, message);
   }
 
   public UUID prepareResponse(UUID messageId) {
@@ -146,7 +149,8 @@ public class MarkdownJCEFHtmlPanel extends JCEFHtmlPanel {
       } else {
         var selectedText = editor.getSelectionModel().getSelectedText();
         var isDisabled = selectedText == null || selectedText.isEmpty();
-        browserContentManager.updateRegenerateButton(isDisabled ? "No text highlighted" : "", isDisabled);
+        browserContentManager.updateRegenerateButton(
+            isDisabled ? "No text highlighted" : "", isDisabled);
       }
     });
   }
@@ -187,7 +191,8 @@ public class MarkdownJCEFHtmlPanel extends JCEFHtmlPanel {
                   "}" +
                   "};",
               myCefBrowser.getURL(), 0);
-          myCefBrowser.executeJavaScript(FileUtils.getResource("/html/js/main.js"), myCefBrowser.getURL(), 0);
+          myCefBrowser.executeJavaScript(
+              FileUtils.getResource("/html/js/main.js"), myCefBrowser.getURL(), 0);
           isLoaded.complete(null);
         }
       }
@@ -214,7 +219,8 @@ public class MarkdownJCEFHtmlPanel extends JCEFHtmlPanel {
       private void execute(Map<String, String> params) {
         var query = params.entrySet()
             .stream()
-            .map((entry) -> format("document.documentElement.style.setProperty('%s', '%s');", entry.getKey(), entry.getValue()))
+            .map((entry) -> format("document.documentElement.style.setProperty('%s', '%s');",
+                entry.getKey(), entry.getValue()))
             .collect(Collectors.joining());
         getCefBrowser().executeJavaScript(query, null, 0);
       }

@@ -2,8 +2,10 @@ package ee.carlrobert.codegpt.state.settings;
 
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.TitledSeparator;
+import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBRadioButton;
 import com.intellij.ui.components.JBTextField;
+import com.intellij.util.ui.CheckBox;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
@@ -24,6 +26,8 @@ public class SettingsComponent {
   private final JPanel mainPanel;
   private final JBTextField apiKeyField;
   private final JBTextField organizationField;
+  private final JBTextField displayNameField;
+  private final JBCheckBox useOpenAIAccountNameCheckBox;
   private final ComboBox<CompletionModel> chatCompletionBaseModelComboBox;
   private final ComboBox<CompletionModel> textCompletionBaseModelComboBox;
   private final JBRadioButton useChatCompletionRadioButton;
@@ -32,6 +36,8 @@ public class SettingsComponent {
   public SettingsComponent(SettingsState settings) {
     apiKeyField = new JBTextField(settings.apiKey, 40);
     organizationField = new JBTextField(settings.organization, 40);
+    displayNameField = new JBTextField(settings.displayName, 20);
+    useOpenAIAccountNameCheckBox = new JBCheckBox("Use OpenAI account name", true);
     chatCompletionBaseModelComboBox = new BaseModelComboBox(
         new ChatCompletionModel[]{
             ChatCompletionModel.GPT_3_5,
@@ -88,6 +94,22 @@ public class SettingsComponent {
     organizationField.setText(organization);
   }
 
+  public String getDisplayName() {
+    return displayNameField.getText();
+  }
+
+  public void setDisplayName(String displayName) {
+    displayNameField.setText(displayName);
+  }
+
+  public void setUseOpenAIAccountNameCheckBox(boolean selected) {
+    useOpenAIAccountNameCheckBox.setSelected(selected);
+  }
+
+  public boolean isUseOpenAIAccountName() {
+    return useOpenAIAccountNameCheckBox.isSelected();
+  }
+
   public boolean isChatCompletionOptionSelected() {
     return useChatCompletionRadioButton.isSelected();
   }
@@ -128,31 +150,32 @@ public class SettingsComponent {
             "You can find your Secret API key in your <a href=\"https://platform.openai.com/account/api-keys\">User settings</a>.")
         .withCommentHyperlinkListener(this::handleHyperlinkClicked)
         .createPanel();
-    apiKeyFieldPanel.setBorder(JBUI.Borders.emptyLeft(8));
-
-
     var organizationFieldPanel = UI.PanelFactory.panel(organizationField)
         .withLabel("Organization:")
         .resizeX(false)
         .withComment("Useful when you are part of multiple organizations")
         .createPanel();
-    organizationFieldPanel.setBorder(JBUI.Borders.emptyLeft(8));
+    var displayNameFieldPanel = SwingUtils.createPanel(displayNameField, "Display name:", false);
 
-    SwingUtils.setEqualLabelWidths(apiKeyFieldPanel, organizationFieldPanel);
+    SwingUtils.setEqualLabelWidths(organizationFieldPanel, displayNameFieldPanel);
+    SwingUtils.setEqualLabelWidths(apiKeyFieldPanel, displayNameFieldPanel);
 
     var chatCompletionModelsPanel = SwingUtils.createPanel(
         chatCompletionBaseModelComboBox, "Model:", false);
-    chatCompletionModelsPanel.setBorder(JBUI.Borders.emptyLeft(24));
+    chatCompletionModelsPanel.setBorder(JBUI.Borders.emptyLeft(16));
 
     var textCompletionModelsPanel = SwingUtils.createPanel(
         textCompletionBaseModelComboBox, "Model:", false);
-    textCompletionModelsPanel.setBorder(JBUI.Borders.emptyLeft(24));
+    textCompletionModelsPanel.setBorder(JBUI.Borders.emptyLeft(16));
 
     var panel = FormBuilder.createFormBuilder()
         .addComponent(FormBuilder.createFormBuilder()
             .addComponent(apiKeyFieldPanel)
             .addComponent(organizationFieldPanel)
             .addVerticalGap(8)
+            .addComponent(displayNameFieldPanel)
+            .addComponent(useOpenAIAccountNameCheckBox)
+            .addVerticalGap(16)
             .addComponent(UI.PanelFactory.panel(useChatCompletionRadioButton)
                 .withComment("OpenAI’s most advanced language model")
                 .createPanel())

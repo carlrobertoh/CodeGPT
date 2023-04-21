@@ -18,6 +18,8 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
 
   public String apiKey = "";
   public String organization = "";
+  public String displayName = getDisplayName();
+  public boolean useOpenAIAccountName = true;
   public String textCompletionBaseModel = TextCompletionModel.DAVINCI.getCode();
   public String chatCompletionBaseModel = ChatCompletionModel.GPT_3_5.getCode();
   public boolean isChatCompletionOptionSelected = true;
@@ -36,5 +38,10 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
   @Override
   public void loadState(@NotNull SettingsState state) {
     XmlSerializerUtil.copyBean(state, this);
+  }
+
+  private String getDisplayName() {
+    var name = System.getProperty("user.name");
+    return name == null || name.isEmpty() ? "User" : name;
   }
 }

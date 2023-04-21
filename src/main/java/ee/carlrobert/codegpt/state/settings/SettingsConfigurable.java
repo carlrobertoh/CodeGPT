@@ -38,6 +38,8 @@ public class SettingsConfigurable implements Configurable {
     var settings = SettingsState.getInstance();
     return !settingsComponent.getApiKey().equals(settings.apiKey) ||
         !settingsComponent.getOrganization().equals(settings.organization) ||
+        !settingsComponent.getDisplayName().equals(settings.displayName) ||
+        settingsComponent.isUseOpenAIAccountName() != settings.useOpenAIAccountName ||
         isModelChanged(settings) ||
         isClientChanged(settings);
   }
@@ -69,6 +71,8 @@ public class SettingsConfigurable implements Configurable {
 
     settings.apiKey = settingsComponent.getApiKey();
     settings.organization = settingsComponent.getOrganization();
+    settings.displayName = settingsComponent.getDisplayName();
+    settings.useOpenAIAccountName = settingsComponent.isUseOpenAIAccountName();
     settings.chatCompletionBaseModel = settingsComponent.getChatCompletionBaseModel().getCode();
     settings.isChatCompletionOptionSelected = settingsComponent.isChatCompletionOptionSelected();
     settings.isTextCompletionOptionSelected = settingsComponent.isTextCompletionOptionSelected();
@@ -82,6 +86,8 @@ public class SettingsConfigurable implements Configurable {
     settingsComponent.setUseTextCompletionSelected(settings.isTextCompletionOptionSelected);
     settingsComponent.setApiKey(settings.apiKey);
     settingsComponent.setOrganization(settings.organization);
+    settingsComponent.setDisplayName(settings.displayName);
+    settingsComponent.setUseOpenAIAccountNameCheckBox(settings.useOpenAIAccountName);
     settingsComponent.setChatCompletionBaseModel(settings.chatCompletionBaseModel);
     settingsComponent.setTextCompletionBaseModel(settings.textCompletionBaseModel);
   }

@@ -81,7 +81,6 @@
         <applicationService serviceImplementation="ee.carlrobert.codegpt.state.settings.configuration.ConfigurationState"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.state.settings.advanced.AdvancedSettingsState"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.state.conversations.ConversationsState"/>
-        <applicationService serviceImplementation="ee.carlrobert.codegpt.state.AccountDetailsState"/>
         <projectService serviceImplementation="ee.carlrobert.codegpt.toolwindow.chat.ChatContentManagerService"/>
         <toolWindow id="CodeGPT" icon="Icons.ToolWindowIcon" anchor="right"
             factoryClass="ee.carlrobert.codegpt.toolwindow.ProjectToolWindowFactory"/>

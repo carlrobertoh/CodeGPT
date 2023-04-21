@@ -12,7 +12,6 @@ import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBScrollPane;
 import ee.carlrobert.codegpt.client.RequestHandler;
-import ee.carlrobert.codegpt.state.AccountDetailsState;
 import ee.carlrobert.codegpt.state.conversations.Conversation;
 import ee.carlrobert.codegpt.state.conversations.ConversationsState;
 import ee.carlrobert.codegpt.state.conversations.message.Message;
@@ -146,7 +145,7 @@ public class ChatToolWindowTabPanel implements ToolWindowTabPanel {
   }
 
   public void displayUserMessage(String userMessage) {
-    addIconLabel(AllIcons.General.User, AccountDetailsState.getInstance().accountName);
+    addIconLabel(AllIcons.General.User, SettingsState.getInstance().displayName);
     scrollablePanel.add(createTextPane(userMessage));
     scrollablePanel.revalidate();
     scrollablePanel.repaint();
@@ -199,7 +198,8 @@ public class ChatToolWindowTabPanel implements ToolWindowTabPanel {
   }
 
   public void notifyMissingCredential(Project project, String text) {
-    var label = new JLabel(format("<html>%s <font color='#589df6'><u>Open Settings</u></font> to set one.</html>", text));
+    var label = new JLabel(format(
+        "<html>%s <font color='#589df6'><u>Open Settings</u></font> to set one.</html>", text));
     label.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     label.addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
