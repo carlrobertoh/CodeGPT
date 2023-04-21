@@ -1,11 +1,13 @@
 package ee.carlrobert.codegpt.toolwindow.chat.html;
 
+import static com.intellij.openapi.ui.Messages.CANCEL;
+import static com.intellij.openapi.ui.Messages.OK;
 import static icons.Icons.DefaultImageIcon;
 
 import com.intellij.execution.ExecutionBundle;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.DialogWrapper;
-import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.ui.DoNotAskOption;
+import com.intellij.openapi.ui.MessageDialogBuilder;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBScrollPane;
 import ee.carlrobert.codegpt.client.RequestHandler;
@@ -127,7 +129,7 @@ public class ChatToolWindowTabHtmlPanel implements ToolWindowTabPanel {
       public void handleTokensExceeded() {
         SwingUtilities.invokeLater(() -> {
           var answer = showTokenLimitExceededDialog();
-          if (answer == Messages.OK) {
+          if (answer == OK) {
             conversation.discardTokenLimits();
             ConversationsState.getInstance().saveConversation(conversation);
             call(message, true);
@@ -172,13 +174,12 @@ public class ChatToolWindowTabHtmlPanel implements ToolWindowTabPanel {
   }
 
   private int showTokenLimitExceededDialog() {
-    return Messages.showOkCancelDialog(
-        "The maximum default token limit has been reached. Do you want to proceed with the conversation despite the higher messaging cost?",
-        "Token Limit Exceeded",
-        "Continue",
-        "Cancel",
-        DefaultImageIcon,
-        new DialogWrapper.DoNotAskOption.Adapter() {
+    return MessageDialogBuilder.okCancel("Token Limit Exceeded",
+            "The maximum default token limit has been reached. Do you want to proceed with the conversation despite the higher messaging cost?")
+        .yesText("Continue")
+        .noText("Cancel")
+        .icon(DefaultImageIcon)
+        .doNotAsk(new DoNotAskOption.Adapter() {
           @Override
           public void rememberChoice(boolean isSelected, int exitCode) {
             if (isSelected) {
@@ -196,7 +197,8 @@ public class ChatToolWindowTabHtmlPanel implements ToolWindowTabPanel {
           public boolean shouldSaveOptionsOnCancel() {
             return true;
           }
-        });
+        })
+        .guessWindowAndAsk() ? OK : CANCEL;
   }
 
   private void createUIComponents() {

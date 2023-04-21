@@ -45,7 +45,10 @@ public class ChatToolWindowPanel extends SimpleToolWindowPanel {
     // actionGroup.addSeparator();
     // actionGroup.add(new TokenToolbarLabelAction());
 
-    return ActionManager.getInstance().createActionToolbar("NAVIGATION_BAR_TOOLBAR", actionGroup, false);
+    var toolbar = ActionManager.getInstance()
+        .createActionToolbar("NAVIGATION_BAR_TOOLBAR", actionGroup, false);
+    toolbar.setTargetComponent(this);
+    return toolbar;
   }
 
   private ChatTabbedPane createTabbedPane(ToolWindowTabPanel tabPanel) {

@@ -44,6 +44,7 @@ window.CodeGPTBridge = {
     Prism.highlightAll();
   },
   displayErrorMessage: function (responseId, errorMsgHtml) {
+    document.getElementById("empty-response")?.remove();
     document.getElementById(responseId).appendChild(createElement({tagName: 'p', innerHTML: errorMsgHtml}));
   },
   displayMissingCredential: function (responseId) {
@@ -66,7 +67,7 @@ window.CodeGPTBridge = {
     iconLabelContainer.appendChild(label);
     wrapper.appendChild(iconLabelContainer);
 
-    const responseWrapper = createElement({tagName: 'div', innerHTML: "<p>&#8205;</p>"})
+    const responseWrapper = createElement({tagName: 'div', innerHTML: "<p id=\"empty-response\">&#8205;</p>"})
     responseWrapper.setAttribute('id', responseId);
     wrapper.appendChild(responseWrapper);
     document.getElementById(messageId)?.appendChild(wrapper);
@@ -74,7 +75,7 @@ window.CodeGPTBridge = {
   },
   clearResponse: function (responseId) {
     const responseWrapper = document.getElementById(responseId);
-    responseWrapper.innerHTML = "<p>&#8205;</p>"
+    responseWrapper.innerHTML = "<p id=\"empty-response\">&#8205;</p>"
   },
   replaceResponseContent: function (responseId, htmlContent) {
     const responseWrapper = document.getElementById(responseId);

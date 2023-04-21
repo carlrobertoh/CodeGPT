@@ -81,6 +81,7 @@ public class MarkdownJCEFHtmlPanel extends JCEFHtmlPanel {
     setHtml(getIndexContent());
     addBrowserLoadHandler();
     addLookAndFeelChangeListener();
+    addPopupMenu();
   }
 
   public void displayUserMessage(Message message) {
@@ -135,6 +136,19 @@ public class MarkdownJCEFHtmlPanel extends JCEFHtmlPanel {
 
   public void stopTyping() {
     browserContentManager.stopTyping();
+  }
+
+  public void updateReplaceButton() {
+    ApplicationManager.getApplication().invokeLater(() -> {
+      var editor = FileEditorManager.getInstance(project).getSelectedTextEditor();
+      if (editor == null) {
+        browserContentManager.updateRegenerateButton("Active editor not found", true);
+      } else {
+        var selectedText = editor.getSelectionModel().getSelectedText();
+        var isDisabled = selectedText == null || selectedText.isEmpty();
+        browserContentManager.updateRegenerateButton(isDisabled ? "No text highlighted" : "", isDisabled);
+      }
+    });
   }
 
   public void runWhenLoaded(Runnable runnable) {
@@ -207,16 +221,9 @@ public class MarkdownJCEFHtmlPanel extends JCEFHtmlPanel {
     });
   }
 
-  public void updateReplaceButton() {
-    ApplicationManager.getApplication().invokeLater(() -> {
-      var editor = FileEditorManager.getInstance(project).getSelectedTextEditor();
-      if (editor == null) {
-        browserContentManager.updateRegenerateButton("Active editor not found", true);
-      } else {
-        var selectedText = editor.getSelectionModel().getSelectedText();
-        var isDisabled = selectedText == null || selectedText.isEmpty();
-        browserContentManager.updateRegenerateButton(isDisabled ? "No text highlighted" : "", isDisabled);
-      }
-    });
+  private void addPopupMenu() {
+    var popupMenu = new HtmlPanelPopupMenu(getCefBrowser());
+    getComponent().addMouseListener(popupMenu.getMouseAdapter());
+    getComponent().setComponentPopupMenu(popupMenu);
   }
 }

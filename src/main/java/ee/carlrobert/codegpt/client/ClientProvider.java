@@ -26,17 +26,19 @@ public class ClientProvider {
   }
 
   private static OpenAIClient.Builder getClientBuilder() {
-    var builder = new OpenAIClient.Builder(SettingsState.getInstance().apiKey) // TODO: ENV var?
+    var settings = SettingsState.getInstance();
+    var builder = new OpenAIClient.Builder(settings.apiKey) // TODO: ENV var?
+        .setOrganization(settings.organization)
         .setConnectTimeout(60L, TimeUnit.SECONDS)
         .setReadTimeout(30L, TimeUnit.SECONDS);
 
-    var settings = AdvancedSettingsState.getInstance();
-    var proxyHost = settings.proxyHost;
-    var proxyPort = settings.proxyPort;
+    var advancedSettings = AdvancedSettingsState.getInstance();
+    var proxyHost = advancedSettings.proxyHost;
+    var proxyPort = advancedSettings.proxyPort;
     if (!proxyHost.isEmpty() && proxyPort != 0) {
-      builder.setProxy(new Proxy(settings.proxyType, new InetSocketAddress(proxyHost, proxyPort)));
-      if (settings.isProxyAuthSelected) {
-        builder.setProxyAuthenticator(new ProxyAuthenticator(settings.proxyUsername, settings.proxyPassword));
+      builder.setProxy(new Proxy(advancedSettings.proxyType, new InetSocketAddress(proxyHost, proxyPort)));
+      if (advancedSettings.isProxyAuthSelected) {
+        builder.setProxyAuthenticator(new ProxyAuthenticator(advancedSettings.proxyUsername, advancedSettings.proxyPassword));
       }
     }
 

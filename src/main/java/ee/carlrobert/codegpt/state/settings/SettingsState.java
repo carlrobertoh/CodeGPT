@@ -17,6 +17,7 @@ import org.jetbrains.annotations.Nullable;
 public class SettingsState implements PersistentStateComponent<SettingsState> {
 
   public String apiKey = "";
+  public String organization = "";
   public String textCompletionBaseModel = TextCompletionModel.DAVINCI.getCode();
   public String chatCompletionBaseModel = ChatCompletionModel.GPT_3_5.getCode();
   public boolean isChatCompletionOptionSelected = true;

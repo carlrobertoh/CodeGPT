@@ -1,7 +1,6 @@
 package ee.carlrobert.codegpt.toolwindow.conversations;
 
 import com.intellij.openapi.actionSystem.ActionManager;
-import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
@@ -49,9 +48,10 @@ public class ConversationsToolWindow {
     actionGroup.add(new DeleteConversationAction(this::refresh));
     actionGroup.add(new ClearAllConversationsAction(this::refresh));
 
-    ActionToolbar actionToolbar = ActionManager.getInstance()
+    var toolbar = ActionManager.getInstance()
         .createActionToolbar("NAVIGATION_BAR_TOOLBAR", actionGroup, true);
-    panel.setToolbar(actionToolbar.getComponent());
+    toolbar.setTargetComponent(panel);
+    panel.setToolbar(toolbar.getComponent());
     return panel;
   }
 
@@ -90,7 +90,8 @@ public class ConversationsToolWindow {
     });
 
     var currentConversation = ConversationsState.getCurrentConversation();
-    var isSelected = currentConversation != null && currentConversation.getId().equals(conversation.getId());
+    var isSelected =
+        currentConversation != null && currentConversation.getId().equals(conversation.getId());
     mainPanel.add(new ConversationPanel(conversation, isSelected));
     mainPanel.setBackground(conversationsToolWindowContent.getBackground());
     scrollablePanel.add(mainPanel);

@@ -23,13 +23,15 @@ public class SettingsComponent {
 
   private final JPanel mainPanel;
   private final JBTextField apiKeyField;
+  private final JBTextField organizationField;
   private final ComboBox<CompletionModel> chatCompletionBaseModelComboBox;
   private final ComboBox<CompletionModel> textCompletionBaseModelComboBox;
   private final JBRadioButton useChatCompletionRadioButton;
   private final JBRadioButton useTextCompletionRadioButton;
 
   public SettingsComponent(SettingsState settings) {
-    apiKeyField = new JBTextField(settings.apiKey, 1);
+    apiKeyField = new JBTextField(settings.apiKey, 40);
+    organizationField = new JBTextField(settings.organization, 40);
     chatCompletionBaseModelComboBox = new BaseModelComboBox(
         new ChatCompletionModel[]{
             ChatCompletionModel.GPT_3_5,
@@ -78,6 +80,14 @@ public class SettingsComponent {
     apiKeyField.setText(apiKey);
   }
 
+  public String getOrganization() {
+    return organizationField.getText();
+  }
+
+  public void setOrganization(String organization) {
+    organizationField.setText(organization);
+  }
+
   public boolean isChatCompletionOptionSelected() {
     return useChatCompletionRadioButton.isSelected();
   }
@@ -113,11 +123,22 @@ public class SettingsComponent {
   private JPanel createMainSelectionForm() {
     var apiKeyFieldPanel = UI.PanelFactory.panel(apiKeyField)
         .withLabel("API key:")
+        .resizeX(false)
         .withComment(
             "You can find your Secret API key in your <a href=\"https://platform.openai.com/account/api-keys\">User settings</a>.")
         .withCommentHyperlinkListener(this::handleHyperlinkClicked)
         .createPanel();
     apiKeyFieldPanel.setBorder(JBUI.Borders.emptyLeft(8));
+
+
+    var organizationFieldPanel = UI.PanelFactory.panel(organizationField)
+        .withLabel("Organization:")
+        .resizeX(false)
+        .withComment("Useful when you are part of multiple organizations")
+        .createPanel();
+    organizationFieldPanel.setBorder(JBUI.Borders.emptyLeft(8));
+
+    SwingUtils.setEqualLabelWidths(apiKeyFieldPanel, organizationFieldPanel);
 
     var chatCompletionModelsPanel = SwingUtils.createPanel(
         chatCompletionBaseModelComboBox, "Model:", false);
@@ -130,6 +151,8 @@ public class SettingsComponent {
     var panel = FormBuilder.createFormBuilder()
         .addComponent(FormBuilder.createFormBuilder()
             .addComponent(apiKeyFieldPanel)
+            .addComponent(organizationFieldPanel)
+            .addVerticalGap(8)
             .addComponent(UI.PanelFactory.panel(useChatCompletionRadioButton)
                 .withComment("OpenAI’s most advanced language model")
                 .createPanel())

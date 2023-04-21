@@ -2,9 +2,9 @@ package ee.carlrobert.codegpt.state.settings;
 
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.project.ProjectUtil;
+import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.state.conversations.ConversationsState;
 import ee.carlrobert.codegpt.toolwindow.chat.ChatContentManagerService;
-import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.toolwindow.chat.ToolWindowTabPanelFactory;
 import javax.swing.JComponent;
 import org.jetbrains.annotations.Nls;
@@ -36,7 +36,10 @@ public class SettingsConfigurable implements Configurable {
   @Override
   public boolean isModified() {
     var settings = SettingsState.getInstance();
-    return !settingsComponent.getApiKey().equals(settings.apiKey) || isModelChanged(settings) || isClientChanged(settings);
+    return !settingsComponent.getApiKey().equals(settings.apiKey) ||
+        !settingsComponent.getOrganization().equals(settings.organization) ||
+        isModelChanged(settings) ||
+        isClientChanged(settings);
   }
 
   @Override
@@ -46,12 +49,14 @@ public class SettingsConfigurable implements Configurable {
 
     if (isModelChanged) {
       EncodingManager.getInstance()
-          .setEncoding(settings.isChatCompletionOptionSelected ? settings.chatCompletionBaseModel : settings.textCompletionBaseModel);
+          .setEncoding(settings.isChatCompletionOptionSelected ? settings.chatCompletionBaseModel
+              : settings.textCompletionBaseModel);
     }
 
     if (isClientChanged(settings) || isModelChanged) {
       ConversationsState.getInstance().setCurrentConversation(null);
-      var project = ProjectUtil.guessCurrentProject(settingsComponent.getPanel()); // TODO: Find a better way
+      var project = ProjectUtil.guessCurrentProject(
+          settingsComponent.getPanel()); // TODO: Find a better way
       project.getService(ChatContentManagerService.class)
           .tryFindChatTabbedPane()
           .ifPresent(tabbedPane -> {
@@ -63,6 +68,7 @@ public class SettingsConfigurable implements Configurable {
     }
 
     settings.apiKey = settingsComponent.getApiKey();
+    settings.organization = settingsComponent.getOrganization();
     settings.chatCompletionBaseModel = settingsComponent.getChatCompletionBaseModel().getCode();
     settings.isChatCompletionOptionSelected = settingsComponent.isChatCompletionOptionSelected();
     settings.isTextCompletionOptionSelected = settingsComponent.isTextCompletionOptionSelected();
@@ -75,6 +81,7 @@ public class SettingsConfigurable implements Configurable {
     settingsComponent.setUseChatCompletionSelected(settings.isChatCompletionOptionSelected);
     settingsComponent.setUseTextCompletionSelected(settings.isTextCompletionOptionSelected);
     settingsComponent.setApiKey(settings.apiKey);
+    settingsComponent.setOrganization(settings.organization);
     settingsComponent.setChatCompletionBaseModel(settings.chatCompletionBaseModel);
     settingsComponent.setTextCompletionBaseModel(settings.textCompletionBaseModel);
   }
@@ -85,12 +92,16 @@ public class SettingsConfigurable implements Configurable {
   }
 
   private boolean isClientChanged(SettingsState settings) {
-    return settingsComponent.isChatCompletionOptionSelected() != settings.isChatCompletionOptionSelected ||
-        settingsComponent.isTextCompletionOptionSelected() != settings.isTextCompletionOptionSelected;
+    return settingsComponent.isChatCompletionOptionSelected()
+        != settings.isChatCompletionOptionSelected ||
+        settingsComponent.isTextCompletionOptionSelected()
+            != settings.isTextCompletionOptionSelected;
   }
 
   private boolean isModelChanged(SettingsState settings) {
-    return !settingsComponent.getChatCompletionBaseModel().getCode().equals(settings.chatCompletionBaseModel) ||
-        !settingsComponent.getTextCompletionBaseModel().getCode().equals(settings.textCompletionBaseModel);
+    return !settingsComponent.getChatCompletionBaseModel().getCode()
+        .equals(settings.chatCompletionBaseModel) ||
+        !settingsComponent.getTextCompletionBaseModel().getCode()
+            .equals(settings.textCompletionBaseModel);
   }
 }
