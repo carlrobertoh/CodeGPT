@@ -14,7 +14,7 @@ public class PluginStartupActivity implements StartupActivity {
   public void runActivity(@NotNull Project project) {
     ActionsUtil.refreshActions(ConfigurationState.getInstance().tableData);
     var settings = SettingsState.getInstance();
-    if (settings.useOpenAIAccountName) {
+    if (settings.apiKey != null && settings.useOpenAIAccountName) {
       ClientProvider.getDashboardClient()
           .getSubscriptionAsync(subscription ->
               settings.displayName = subscription.getAccountName());

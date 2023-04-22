@@ -2,6 +2,7 @@ package ee.carlrobert.codegpt.toolwindow.chat;
 
 import com.intellij.ui.components.JBTabbedPane;
 import ee.carlrobert.codegpt.state.conversations.ConversationsState;
+import ee.carlrobert.codegpt.state.settings.SettingsState;
 import ee.carlrobert.codegpt.toolwindow.chat.html.ChatToolWindowTabHtmlPanel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -67,8 +68,10 @@ public class ChatTabbedPane extends JBTabbedPane {
       if (toolWindowPanel instanceof ChatToolWindowTabHtmlPanel) {
         ((ChatToolWindowTabHtmlPanel) toolWindowPanel).refreshMarkdownPanel();
       }
-      if (toolWindowPanel.getConversation() != null) {
-        ConversationsState.getInstance().setCurrentConversation(toolWindowPanel.getConversation());
+      var conversation = toolWindowPanel.getConversation();
+      if (conversation != null) {
+        ConversationsState.getInstance().setCurrentConversation(conversation);
+        SettingsState.getInstance().syncSettings(conversation);
       }
     }
   }

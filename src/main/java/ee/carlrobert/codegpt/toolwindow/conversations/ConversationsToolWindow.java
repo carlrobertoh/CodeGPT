@@ -17,7 +17,6 @@ import ee.carlrobert.codegpt.toolwindow.conversations.actions.ClearAllConversati
 import ee.carlrobert.codegpt.toolwindow.conversations.actions.DeleteConversationAction;
 import ee.carlrobert.codegpt.toolwindow.conversations.actions.MoveDownAction;
 import ee.carlrobert.codegpt.toolwindow.conversations.actions.MoveUpAction;
-import ee.carlrobert.openai.client.ClientCode;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -74,7 +73,7 @@ public class ConversationsToolWindow {
 
   private void addContent(Conversation conversation) {
     var mainPanel = new RootConversationPanel(() -> {
-      changeSettings(conversation);
+      SettingsState.getInstance().syncSettings(conversation);
 
       var contentManagerService = project.getService(ChatContentManagerService.class);
       contentManagerService.displayChatTab();
@@ -95,18 +94,6 @@ public class ConversationsToolWindow {
     mainPanel.add(new ConversationPanel(conversation, isSelected));
     mainPanel.setBackground(conversationsToolWindowContent.getBackground());
     scrollablePanel.add(mainPanel);
-  }
-
-  private void changeSettings(Conversation conversation) {
-    var settings = SettingsState.getInstance();
-    var isChatCompletions = ClientCode.CHAT_COMPLETION.equals(conversation.getClientCode());
-    if (isChatCompletions) {
-      settings.chatCompletionBaseModel = conversation.getModel();
-    } else {
-      settings.textCompletionBaseModel = conversation.getModel();
-    }
-    settings.isChatCompletionOptionSelected = isChatCompletions;
-    settings.isTextCompletionOptionSelected = !isChatCompletions;
   }
 
   private void createUIComponents() {

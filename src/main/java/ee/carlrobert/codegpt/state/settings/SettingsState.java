@@ -5,6 +5,8 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
+import ee.carlrobert.codegpt.state.conversations.Conversation;
+import ee.carlrobert.openai.client.ClientCode;
 import ee.carlrobert.openai.client.completion.chat.ChatCompletionModel;
 import ee.carlrobert.openai.client.completion.text.TextCompletionModel;
 import org.jetbrains.annotations.NotNull;
@@ -38,6 +40,17 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
   @Override
   public void loadState(@NotNull SettingsState state) {
     XmlSerializerUtil.copyBean(state, this);
+  }
+
+  public void syncSettings(Conversation conversation) {
+    var isChatCompletions = ClientCode.CHAT_COMPLETION.equals(conversation.getClientCode());
+    if (isChatCompletions) {
+      chatCompletionBaseModel = conversation.getModel();
+    } else {
+      textCompletionBaseModel = conversation.getModel();
+    }
+    isChatCompletionOptionSelected = isChatCompletions;
+    isTextCompletionOptionSelected = !isChatCompletions;
   }
 
   private String getDisplayName() {
