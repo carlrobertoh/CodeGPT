@@ -63,6 +63,10 @@
         <li>Ability to remove previous messages</li>
         <li>Fix scrollbar issues</li>
         <li>Ability to have a seamless chat experience</li>
+        <li>Add organization field</li>
+        <li>Make display name configurable</li>
+        <li>Sync model settings on tab change</li>
+        <li>Improve error msg display</li>
       </ul>
     ]]>
     </change-notes>
