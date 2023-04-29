@@ -60,9 +60,20 @@ public class RequestHandler implements ActionListener {
   private EventSource startCall(Message message, EventListener eventListener) {
     var settings = SettingsState.getInstance();
     var requestProvider = new CompletionRequestProvider(message.getPrompt(), conversation);
+
+    // todo - combine common features of clients into proper interfaces
     if (settings.isChatCompletionOptionSelected) {
+      if (settings.useAzure) {
+        return ClientProvider.getAzureChatCompletionClient().stream(
+                requestProvider.buildChatCompletionRequest(settings.chatCompletionBaseModel), eventListener);
+      }
       return ClientProvider.getChatCompletionClient().stream(
           requestProvider.buildChatCompletionRequest(settings.chatCompletionBaseModel), eventListener);
+    }
+
+    if (settings.useAzure) {
+      return ClientProvider.getAzureTextCompletionClient().stream(
+              requestProvider.buildTextCompletionRequest(settings.textCompletionBaseModel), eventListener);
     }
     return ClientProvider.getTextCompletionClient().stream(
         requestProvider.buildTextCompletionRequest(settings.textCompletionBaseModel), eventListener);

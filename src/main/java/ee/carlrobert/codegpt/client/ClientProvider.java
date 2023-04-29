@@ -4,6 +4,9 @@ import ee.carlrobert.codegpt.state.settings.SettingsState;
 import ee.carlrobert.codegpt.state.settings.advanced.AdvancedSettingsState;
 import ee.carlrobert.openai.client.OpenAIClient;
 import ee.carlrobert.openai.client.ProxyAuthenticator;
+import ee.carlrobert.openai.client.azure.AzureChatCompletionClient;
+import ee.carlrobert.openai.client.azure.AzureClientRequestParams;
+import ee.carlrobert.openai.client.azure.AzureTextCompletionClient;
 import ee.carlrobert.openai.client.completion.chat.ChatCompletionClient;
 import ee.carlrobert.openai.client.completion.text.TextCompletionClient;
 import ee.carlrobert.openai.client.dashboard.DashboardClient;
@@ -23,6 +26,19 @@ public class ClientProvider {
 
   public static TextCompletionClient getTextCompletionClient() {
     return getClientBuilder().buildTextCompletionClient();
+  }
+
+  public static AzureChatCompletionClient getAzureChatCompletionClient() {
+    return getClientBuilder().buildAzureChatCompletionClient(getAzureRequestParams());
+  }
+
+  public static AzureTextCompletionClient getAzureTextCompletionClient() {
+    return getClientBuilder().buildAzureTextCompletionClient(getAzureRequestParams());
+  }
+
+  private static AzureClientRequestParams getAzureRequestParams() {
+    var settings = SettingsState.getInstance();
+    return new AzureClientRequestParams(settings.resourceName, settings.deploymentId, settings.apiVersion);
   }
 
   private static OpenAIClient.Builder getClientBuilder() {
