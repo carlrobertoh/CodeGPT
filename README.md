@@ -95,14 +95,6 @@ Create a custom prompt for your selected code. The previous prompt will be remem
   <img src="docs/assets/gif/custom-prompt.gif" />
 </p>
 
-### Stop/Regenerate Response
-
-Stop the response generation or re-generate a new response from the existing query.
-
-<p align="center">
-  <img src="docs/assets/gif/stop-reload.gif" />
-</p>
-
 ## Roadmap
 
 - [x] Add proxy support
@@ -110,10 +102,13 @@ Stop the response generation or re-generate a new response from the existing que
     - [x] Ability to start/restore sessions
     - [ ] Ability to export conversations in Markdown/JSON format
 - [ ] Add codex and user's fine-tuned models
-- [ ] Ability to have a seamless conversation despite to token limitation
-- [ ] Add support for copying and replacing generated code snippets
-- [ ] Add support for editing/deleting previous conversations  
-- [ ] Add support for overriding prompts and request params
+- [x] Ability to have a seamless conversation despite to token limitation
+- [x] Add support for copying and replacing generated code snippets
+- [x] Add support for deleting previous conversations  
+- [x] Add support for overriding prompts and request params
+- [ ] Add Azure OpenAI service support
+- [ ] Add action key mappings
+- [ ] Add support for code search using embeddings 
 - [ ] Add support for model fine-tuning
 
 See the [open issues][open-issues] for a full list of proposed features (and known issues).
