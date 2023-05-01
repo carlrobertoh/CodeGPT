@@ -67,6 +67,7 @@
         <li>Make display name configurable</li>
         <li>Sync model settings on tab change</li>
         <li>Improve error msg display</li>
+        <li>Add Azure Service support</li>
       </ul>
     ]]>
     </change-notes>

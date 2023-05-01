@@ -106,7 +106,7 @@ Create a custom prompt for your selected code. The previous prompt will be remem
 - [x] Add support for copying and replacing generated code snippets
 - [x] Add support for deleting previous conversations  
 - [x] Add support for overriding prompts and request params
-- [ ] Add Azure OpenAI service support
+- [x] Add Azure OpenAI service support
 - [ ] Add action key mappings
 - [ ] Add support for code search using embeddings 
 - [ ] Add support for model fine-tuning
