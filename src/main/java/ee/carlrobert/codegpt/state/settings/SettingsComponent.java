@@ -205,11 +205,13 @@ public class SettingsComponent {
         textCompletionBaseModelComboBox, "Model:", false);
     textCompletionModelsPanel.setBorder(JBUI.Borders.emptyLeft(16));
 
+    var azureRelatedFieldsPanel = createAzureServicePanel();
+
     var panel = FormBuilder.createFormBuilder()
         .addComponent(FormBuilder.createFormBuilder()
             .addComponent(apiKeyFieldPanel)
             .addComponent(useAzureCheckbox)
-            .addComponent(createAzureServicePanel())
+            .addComponent(azureRelatedFieldsPanel)
             .addComponent(organizationFieldPanel)
             .addVerticalGap(8)
             .addComponent(displayNameFieldPanel)
@@ -227,6 +229,12 @@ public class SettingsComponent {
             .getPanel())
         .getPanel();
     panel.setBorder(JBUI.Borders.emptyLeft(16));
+
+    useAzureCheckbox.addItemListener(e -> {
+      azureRelatedFieldsPanel.setVisible(e.getStateChange() == ItemEvent.SELECTED);
+      organizationFieldPanel.setVisible(e.getStateChange() != ItemEvent.SELECTED);
+    });
+
     return panel;
   }
 
@@ -251,6 +259,7 @@ public class SettingsComponent {
                     "API version to be used for Azure OpenAI Service")
             .createPanel();
     azureRelatedFieldsPanel.setLayout(new BoxLayout(azureRelatedFieldsPanel, BoxLayout.Y_AXIS));
+    azureRelatedFieldsPanel.setBorder(JBUI.Borders.emptyLeft(16));
 
     azureRelatedFieldsPanel.add(resourceNameFieldPanel);
     azureRelatedFieldsPanel.add(deploymentIdFieldPanel);
@@ -259,8 +268,6 @@ public class SettingsComponent {
     SwingUtils.setEqualLabelWidths(apiVersionFieldPanel, resourceNameFieldPanel);
 
     azureRelatedFieldsPanel.setVisible(false);
-
-    useAzureCheckbox.addItemListener(e -> azureRelatedFieldsPanel.setVisible(e.getStateChange() == ItemEvent.SELECTED));
 
     return azureRelatedFieldsPanel;
   }

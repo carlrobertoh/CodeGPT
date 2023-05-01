@@ -7,6 +7,7 @@ import ee.carlrobert.openai.client.ProxyAuthenticator;
 import ee.carlrobert.openai.client.azure.AzureChatCompletionClient;
 import ee.carlrobert.openai.client.azure.AzureClientRequestParams;
 import ee.carlrobert.openai.client.azure.AzureTextCompletionClient;
+import ee.carlrobert.openai.client.completion.CompletionClient;
 import ee.carlrobert.openai.client.completion.chat.ChatCompletionClient;
 import ee.carlrobert.openai.client.completion.text.TextCompletionClient;
 import ee.carlrobert.openai.client.dashboard.DashboardClient;
@@ -19,21 +20,18 @@ public class ClientProvider {
   public static DashboardClient getDashboardClient() {
     return getClientBuilder().buildDashboardClient();
   }
-
-  public static ChatCompletionClient getChatCompletionClient() {
+  public static CompletionClient getChatCompletionClient(SettingsState settings) {
+    if (settings.useAzure) {
+      return getClientBuilder().buildAzureChatCompletionClient(getAzureRequestParams());
+    }
     return getClientBuilder().buildChatCompletionClient();
   }
 
-  public static TextCompletionClient getTextCompletionClient() {
+  public static CompletionClient getTextCompletionClient(SettingsState settings) {
+    if (settings.useAzure) {
+      return getClientBuilder().buildAzureTextCompletionClient(getAzureRequestParams());
+    }
     return getClientBuilder().buildTextCompletionClient();
-  }
-
-  public static AzureChatCompletionClient getAzureChatCompletionClient() {
-    return getClientBuilder().buildAzureChatCompletionClient(getAzureRequestParams());
-  }
-
-  public static AzureTextCompletionClient getAzureTextCompletionClient() {
-    return getClientBuilder().buildAzureTextCompletionClient(getAzureRequestParams());
   }
 
   private static AzureClientRequestParams getAzureRequestParams() {
@@ -44,9 +42,12 @@ public class ClientProvider {
   private static OpenAIClient.Builder getClientBuilder() {
     var settings = SettingsState.getInstance();
     var builder = new OpenAIClient.Builder(settings.apiKey) // TODO: ENV var?
-        .setOrganization(settings.organization)
         .setConnectTimeout(60L, TimeUnit.SECONDS)
         .setReadTimeout(30L, TimeUnit.SECONDS);
+
+    if (!settings.useAzure) {
+      builder.setOrganization(settings.organization);
+    }
 
     var advancedSettings = AdvancedSettingsState.getInstance();
     var proxyHost = advancedSettings.proxyHost;
