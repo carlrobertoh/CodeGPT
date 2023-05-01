@@ -4,12 +4,8 @@ import ee.carlrobert.codegpt.state.settings.SettingsState;
 import ee.carlrobert.codegpt.state.settings.advanced.AdvancedSettingsState;
 import ee.carlrobert.openai.client.OpenAIClient;
 import ee.carlrobert.openai.client.ProxyAuthenticator;
-import ee.carlrobert.openai.client.azure.AzureChatCompletionClient;
 import ee.carlrobert.openai.client.azure.AzureClientRequestParams;
-import ee.carlrobert.openai.client.azure.AzureTextCompletionClient;
 import ee.carlrobert.openai.client.completion.CompletionClient;
-import ee.carlrobert.openai.client.completion.chat.ChatCompletionClient;
-import ee.carlrobert.openai.client.completion.text.TextCompletionClient;
 import ee.carlrobert.openai.client.dashboard.DashboardClient;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -21,14 +17,14 @@ public class ClientProvider {
     return getClientBuilder().buildDashboardClient();
   }
   public static CompletionClient getChatCompletionClient(SettingsState settings) {
-    if (settings.useAzure) {
+    if (settings.useAzureService) {
       return getClientBuilder().buildAzureChatCompletionClient(getAzureRequestParams());
     }
     return getClientBuilder().buildChatCompletionClient();
   }
 
   public static CompletionClient getTextCompletionClient(SettingsState settings) {
-    if (settings.useAzure) {
+    if (settings.useAzureService) {
       return getClientBuilder().buildAzureTextCompletionClient(getAzureRequestParams());
     }
     return getClientBuilder().buildTextCompletionClient();
@@ -45,7 +41,7 @@ public class ClientProvider {
         .setConnectTimeout(60L, TimeUnit.SECONDS)
         .setReadTimeout(30L, TimeUnit.SECONDS);
 
-    if (!settings.useAzure) {
+    if (settings.useOpenAIService) {
       builder.setOrganization(settings.organization);
     }
 

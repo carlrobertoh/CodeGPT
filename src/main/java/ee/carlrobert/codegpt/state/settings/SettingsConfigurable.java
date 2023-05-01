@@ -37,7 +37,8 @@ public class SettingsConfigurable implements Configurable {
   public boolean isModified() {
     var settings = SettingsState.getInstance();
     return !settingsComponent.getApiKey().equals(settings.apiKey) ||
-        settingsComponent.isUseAzure() != settings.useAzure ||
+        settingsComponent.isUseOpenAIService() != settings.useOpenAIService ||
+        settingsComponent.isUseAzureService() != settings.useAzureService ||
         !settingsComponent.getResourceName().equals(settings.resourceName) ||
         !settingsComponent.getDeploymentId().equals(settings.deploymentId) ||
         !settingsComponent.getApiVersion().equals(settings.apiVersion) ||
@@ -74,7 +75,8 @@ public class SettingsConfigurable implements Configurable {
     }
 
     settings.apiKey = settingsComponent.getApiKey();
-    settings.useAzure = settingsComponent.isUseAzure();
+    settings.useOpenAIService = settingsComponent.isUseOpenAIService();
+    settings.useAzureService = settingsComponent.isUseAzureService();
     settings.resourceName = settingsComponent.getResourceName();
     settings.deploymentId = settingsComponent.getDeploymentId();
     settings.apiVersion = settingsComponent.getApiVersion();
@@ -93,7 +95,8 @@ public class SettingsConfigurable implements Configurable {
     settingsComponent.setUseChatCompletionSelected(settings.isChatCompletionOptionSelected);
     settingsComponent.setUseTextCompletionSelected(settings.isTextCompletionOptionSelected);
     settingsComponent.setApiKey(settings.apiKey);
-    settingsComponent.setUseAzureCheckbox(settings.useAzure);
+    settingsComponent.setUseOpenAIServiceSelected(settings.useAzureService);
+    settingsComponent.setUseAzureServiceSelected(settings.useAzureService);
     settingsComponent.setResourceName(settings.resourceName);
     settingsComponent.setDeploymentId(settings.deploymentId);
     settingsComponent.setApiVersionField(settings.apiVersion);

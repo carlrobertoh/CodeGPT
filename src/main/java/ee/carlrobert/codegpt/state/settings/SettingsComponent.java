@@ -13,10 +13,12 @@ import ee.carlrobert.openai.client.completion.CompletionModel;
 import ee.carlrobert.openai.client.completion.chat.ChatCompletionModel;
 import ee.carlrobert.openai.client.completion.text.TextCompletionModel;
 import java.awt.Desktop;
-import java.awt.event.ItemEvent;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import javax.swing.*;
+import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
 import javax.swing.event.HyperlinkEvent;
 
 public class SettingsComponent {
@@ -29,7 +31,8 @@ public class SettingsComponent {
   private final JBTextField organizationField;
   private final JBTextField displayNameField;
   private final JBCheckBox useOpenAIAccountNameCheckBox;
-  private final JBCheckBox useAzureCheckbox;
+  private final JBRadioButton useAzureServiceRadioButton;
+  private final JBRadioButton useOpenAIServiceRadioButton;
   private final ComboBox<CompletionModel> chatCompletionBaseModelComboBox;
   private final ComboBox<CompletionModel> textCompletionBaseModelComboBox;
   private final JBRadioButton useChatCompletionRadioButton;
@@ -37,7 +40,10 @@ public class SettingsComponent {
 
   public SettingsComponent(SettingsState settings) {
     apiKeyField = new JBTextField(settings.apiKey, 40);
-    useAzureCheckbox = new JBCheckBox("Use Azure OpenAI service API", false);
+    useOpenAIServiceRadioButton = new JBRadioButton("Use OpenAI service API",
+        settings.useOpenAIService);
+    useAzureServiceRadioButton = new JBRadioButton("Use Azure OpenAI service API",
+        settings.useAzureService);
     resourceNameField = new JBTextField(settings.resourceName, 40);
     deploymentIdField = new JBTextField(settings.resourceName, 40);
     apiVersionField = new JBTextField(settings.resourceName, 40);
@@ -69,10 +75,17 @@ public class SettingsComponent {
         .addVerticalGap(8)
         .addComponent(createMainSelectionForm())
         .addVerticalGap(8)
+        .addComponent(new TitledSeparator("Service Preference"))
+        .addVerticalGap(8)
+        .addComponent(createServiceSelectionForm())
+        .addVerticalGap(8)
+        .addComponent(new TitledSeparator("Model Preference"))
+        .addVerticalGap(8)
+        .addComponent(createModelSelectionForm())
         .addComponentFillVertically(new JPanel(), 0)
         .getPanel();
 
-    registerButtons();
+    registerCompletionButtons();
     registerFields();
   }
 
@@ -92,12 +105,20 @@ public class SettingsComponent {
     apiKeyField.setText(apiKey);
   }
 
-  public void setUseAzureCheckbox(boolean selected) {
-    useAzureCheckbox.setSelected(selected);
+  public void setUseOpenAIServiceSelected(boolean selected) {
+    useOpenAIServiceRadioButton.setSelected(selected);
   }
 
-  public boolean isUseAzure() {
-    return useAzureCheckbox.isSelected();
+  public boolean isUseOpenAIService() {
+    return useOpenAIServiceRadioButton.isSelected();
+  }
+
+  public void setUseAzureServiceSelected(boolean selected) {
+    useAzureServiceRadioButton.setSelected(selected);
+  }
+
+  public boolean isUseAzureService() {
+    return useAzureServiceRadioButton.isSelected();
   }
 
   public String getResourceName() {
@@ -115,6 +136,7 @@ public class SettingsComponent {
   public void setDeploymentId(String deploymentId) {
     deploymentIdField.setText(deploymentId);
   }
+
   public String getApiVersion() {
     return apiVersionField.getText();
   }
@@ -187,16 +209,47 @@ public class SettingsComponent {
             "You can find your Secret API key in your <a href=\"https://platform.openai.com/account/api-keys\">User settings</a>.")
         .withCommentHyperlinkListener(this::handleHyperlinkClicked)
         .createPanel();
+    var displayNameFieldPanel = SwingUtils.createPanel(displayNameField, "Display name:", false);
+
+    SwingUtils.setEqualLabelWidths(apiKeyFieldPanel, displayNameFieldPanel);
+
+    var panel = FormBuilder.createFormBuilder()
+        .addComponent(FormBuilder.createFormBuilder()
+            .addComponent(apiKeyFieldPanel)
+            .addComponent(displayNameFieldPanel)
+            .addComponent(useOpenAIAccountNameCheckBox)
+            .getPanel())
+        .getPanel();
+    panel.setBorder(JBUI.Borders.emptyLeft(16));
+    return panel;
+  }
+
+  private JPanel createServiceSelectionForm() {
     var organizationFieldPanel = UI.PanelFactory.panel(organizationField)
         .withLabel("Organization:")
         .resizeX(false)
-        .withComment("Useful when you are part of multiple organizations")
+        .withComment(
+            "<span>Useful when you are part of multiple organizations <sup><strong>optional</strong></sup></span")
         .createPanel();
-    var displayNameFieldPanel = SwingUtils.createPanel(displayNameField, "Display name:", false);
+    organizationFieldPanel.setBorder(JBUI.Borders.empty(8, 16, 0, 0));
+    var azureRelatedFieldsPanel = createAzureServicePanel();
 
-    SwingUtils.setEqualLabelWidths(organizationFieldPanel, displayNameFieldPanel);
-    SwingUtils.setEqualLabelWidths(apiKeyFieldPanel, displayNameFieldPanel);
+    registerServiceButtons(azureRelatedFieldsPanel, organizationFieldPanel);
 
+    var panel = FormBuilder.createFormBuilder()
+        .addComponent(FormBuilder.createFormBuilder()
+            .addComponent(useOpenAIServiceRadioButton)
+            .addComponent(organizationFieldPanel)
+            .addVerticalGap(8)
+            .addComponent(useAzureServiceRadioButton)
+            .addComponent(azureRelatedFieldsPanel)
+            .getPanel())
+        .getPanel();
+    panel.setBorder(JBUI.Borders.emptyLeft(16));
+    return panel;
+  }
+
+  private JPanel createModelSelectionForm() {
     var chatCompletionModelsPanel = SwingUtils.createPanel(
         chatCompletionBaseModelComboBox, "Model:", false);
     chatCompletionModelsPanel.setBorder(JBUI.Borders.emptyLeft(16));
@@ -205,23 +258,12 @@ public class SettingsComponent {
         textCompletionBaseModelComboBox, "Model:", false);
     textCompletionModelsPanel.setBorder(JBUI.Borders.emptyLeft(16));
 
-    var azureRelatedFieldsPanel = createAzureServicePanel();
-
     var panel = FormBuilder.createFormBuilder()
         .addComponent(FormBuilder.createFormBuilder()
-            .addComponent(apiKeyFieldPanel)
-            .addComponent(useAzureCheckbox)
-            .addComponent(azureRelatedFieldsPanel)
-            .addComponent(organizationFieldPanel)
-            .addVerticalGap(8)
-            .addComponent(displayNameFieldPanel)
-            .addComponent(useOpenAIAccountNameCheckBox)
-            .addVerticalGap(16)
             .addComponent(UI.PanelFactory.panel(useChatCompletionRadioButton)
                 .withComment("OpenAI’s most advanced language model")
                 .createPanel())
             .addComponent(chatCompletionModelsPanel)
-            .addVerticalGap(8)
             .addComponent(UI.PanelFactory.panel(useTextCompletionRadioButton)
                 .withComment("Best for high-quality texts")
                 .createPanel())
@@ -229,37 +271,31 @@ public class SettingsComponent {
             .getPanel())
         .getPanel();
     panel.setBorder(JBUI.Borders.emptyLeft(16));
-
-    useAzureCheckbox.addItemListener(e -> {
-      azureRelatedFieldsPanel.setVisible(e.getStateChange() == ItemEvent.SELECTED);
-      organizationFieldPanel.setVisible(e.getStateChange() != ItemEvent.SELECTED);
-    });
-
     return panel;
   }
 
   private JPanel createAzureServicePanel() {
     JPanel azureRelatedFieldsPanel = new JPanel();
     var resourceNameFieldPanel = UI.PanelFactory.panel(resourceNameField)
-            .withLabel("Resource name:")
-            .resizeX(false)
-            .withComment(
-                    "Azure OpenAI Service resource name")
-            .createPanel();
+        .withLabel("Resource name:")
+        .resizeX(false)
+        .withComment(
+            "Azure OpenAI Service resource name")
+        .createPanel();
     var deploymentIdFieldPanel = UI.PanelFactory.panel(deploymentIdField)
-            .withLabel("Deployment ID:")
-            .resizeX(false)
-            .withComment(
-                    "Azure OpenAI Service deployment ID")
-            .createPanel();
+        .withLabel("Deployment ID:")
+        .resizeX(false)
+        .withComment(
+            "Azure OpenAI Service deployment ID")
+        .createPanel();
     var apiVersionFieldPanel = UI.PanelFactory.panel(apiVersionField)
-            .withLabel("API version:")
-            .resizeX(false)
-            .withComment(
-                    "API version to be used for Azure OpenAI Service")
-            .createPanel();
+        .withLabel("API version:")
+        .resizeX(false)
+        .withComment(
+            "API version to be used for Azure OpenAI Service")
+        .createPanel();
     azureRelatedFieldsPanel.setLayout(new BoxLayout(azureRelatedFieldsPanel, BoxLayout.Y_AXIS));
-    azureRelatedFieldsPanel.setBorder(JBUI.Borders.emptyLeft(16));
+    azureRelatedFieldsPanel.setBorder(JBUI.Borders.empty(8, 16, 0, 0));
 
     azureRelatedFieldsPanel.add(resourceNameFieldPanel);
     azureRelatedFieldsPanel.add(deploymentIdFieldPanel);
@@ -267,13 +303,28 @@ public class SettingsComponent {
     SwingUtils.setEqualLabelWidths(deploymentIdFieldPanel, resourceNameFieldPanel);
     SwingUtils.setEqualLabelWidths(apiVersionFieldPanel, resourceNameFieldPanel);
 
-    azureRelatedFieldsPanel.setVisible(false);
+    azureRelatedFieldsPanel.setVisible(SettingsState.getInstance().useAzureService);
 
     return azureRelatedFieldsPanel;
   }
 
-  private void registerButtons() {
-    ButtonGroup completionButtonGroup = new ButtonGroup();
+  private void registerServiceButtons(
+      JPanel azureRelatedFieldsPanel, JPanel organizationFieldPanel) {
+    var serviceButtonGroup = new ButtonGroup();
+    serviceButtonGroup.add(useOpenAIServiceRadioButton);
+    serviceButtonGroup.add(useAzureServiceRadioButton);
+    useOpenAIServiceRadioButton.addActionListener(e -> {
+      azureRelatedFieldsPanel.setVisible(false);
+      organizationFieldPanel.setVisible(true);
+    });
+    useAzureServiceRadioButton.addActionListener(e -> {
+      azureRelatedFieldsPanel.setVisible(true);
+      organizationFieldPanel.setVisible(false);
+    });
+  }
+
+  private void registerCompletionButtons() {
+    var completionButtonGroup = new ButtonGroup();
     completionButtonGroup.add(useChatCompletionRadioButton);
     completionButtonGroup.add(useTextCompletionRadioButton);
     useChatCompletionRadioButton.addActionListener(e -> {
@@ -285,6 +336,7 @@ public class SettingsComponent {
       textCompletionBaseModelComboBox.setEnabled(true);
     });
   }
+
 
   private void registerFields() {
     chatCompletionBaseModelComboBox.setEnabled(useChatCompletionRadioButton.isSelected());

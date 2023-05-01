@@ -13,6 +13,7 @@ import ee.carlrobert.codegpt.state.conversations.ConversationsState;
 import ee.carlrobert.codegpt.state.conversations.message.Message;
 import ee.carlrobert.codegpt.state.settings.SettingsState;
 import ee.carlrobert.codegpt.state.settings.advanced.AdvancedSettingsState;
+import ee.carlrobert.openai.client.completion.chat.ChatCompletionModel;
 import ee.carlrobert.openai.client.completion.text.TextCompletionModel;
 import ee.carlrobert.openai.http.LocalCallbackServer;
 import ee.carlrobert.openai.http.exchange.StreamHttpExchange;
@@ -40,6 +41,11 @@ public class RequestHandlerTest extends BasePlatformTestCase {
 
   public void testChatCompletionCall() {
     var conversation = ConversationsState.getInstance().startConversation();
+    var settings = SettingsState.getInstance();
+    settings.isTextCompletionOptionSelected = false;
+    settings.isChatCompletionOptionSelected = true;
+    settings.useOpenAIService = true;
+    settings.useAzureService = false;
     expectStreamRequest("/v1/chat/completions", request -> {
       assertThat(request.getMethod()).isEqualTo("POST");
       assertThat(request.getHeaders().get(AUTHORIZATION).get(0)).isEqualTo("Bearer TEST_API_KEY");
@@ -74,10 +80,14 @@ public class RequestHandlerTest extends BasePlatformTestCase {
     var settings = SettingsState.getInstance();
     settings.isTextCompletionOptionSelected = true;
     settings.isChatCompletionOptionSelected = false;
+    settings.useOpenAIService = true;
+    settings.useAzureService = false;
     settings.textCompletionBaseModel = TextCompletionModel.CURIE.getCode();
+    settings.organization = "TEST_ORGANIZATION";
     expectStreamRequest("/v1/completions", request -> {
-      assertThat(request.getMethod()).isEqualTo("POST");
-      assertThat(request.getHeaders().get("Authorization").get(0)).isEqualTo("Bearer TEST_API_KEY");
+      var headers = request.getHeaders();
+      assertThat(headers.get("Authorization").get(0)).isEqualTo("Bearer TEST_API_KEY");
+      assertThat(headers.get("Openai-organization").get(0)).isEqualTo("TEST_ORGANIZATION");
       assertThat(request.getBody())
           .extracting(
               "model",
@@ -92,6 +102,45 @@ public class RequestHandlerTest extends BasePlatformTestCase {
           jsonMapResponse("choices", jsonArray(jsonMap("text", "He"))),
           jsonMapResponse("choices", jsonArray(jsonMap("text", "llo"))),
           jsonMapResponse("choices", jsonArray(jsonMap("text", "!"))));
+    });
+
+    new RequestHandler(conversation).call(new Message("TEST_PROMPT"), false);
+
+    await().atMost(5, SECONDS).until(() -> {
+      var messages = conversation.getMessages();
+      return !messages.isEmpty() && "Hello!".contentEquals(messages.get(0).getResponse());
+    });
+  }
+
+  public void testAzureChatCompletionCall() {
+    var conversation = ConversationsState.getInstance().startConversation();
+    var settings = SettingsState.getInstance();
+    settings.isTextCompletionOptionSelected = false;
+    settings.isChatCompletionOptionSelected = true;
+    settings.useOpenAIService = false;
+    settings.useAzureService = true;
+    settings.resourceName = "TEST_RESOURCE_NAME";
+    settings.apiVersion = "TEST_API_VERSION";
+    settings.deploymentId = "TEST_DEPLOYMENT_ID"; // TODO: Add support for asserting the host
+    settings.chatCompletionBaseModel = ChatCompletionModel.GPT_3_5.getCode();
+    expectStreamRequest("/openai/deployments/TEST_DEPLOYMENT_ID/chat/completions", request -> {
+      assertThat(request.getUri().getQuery()).isEqualTo("api-version=TEST_API_VERSION");
+      assertThat(request.getHeaders().get("Authorization").get(0)).isEqualTo("Bearer TEST_API_KEY");
+      assertThat(request.getBody())
+          .extracting(
+              "model",
+              "messages")
+          .containsExactly(
+              "gpt-3.5-turbo",
+              List.of(
+                  Map.of("role", "system", "content",
+                      "You are ChatGPT, a large language model trained by OpenAI. Answer as concisely as possible. Include code language in markdown snippets whenever possible."),
+                  Map.of("role", "user", "content", "TEST_PROMPT")));
+      return List.of(
+          jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("role", "assistant")))),
+          jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "Hel")))),
+          jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "lo")))),
+          jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "!")))));
     });
 
     new RequestHandler(conversation).call(new Message("TEST_PROMPT"), false);
