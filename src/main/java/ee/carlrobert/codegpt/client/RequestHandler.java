@@ -49,7 +49,6 @@ public class RequestHandler implements ActionListener {
       }
     };
     swingWorker.execute();
-
   }
 
   public void cancel() {
@@ -63,10 +62,11 @@ public class RequestHandler implements ActionListener {
 
     if (settings.isChatCompletionOptionSelected) {
       return ClientProvider.getChatCompletionClient(settings).stream(
-              requestProvider.buildChatCompletionRequest(settings.chatCompletionBaseModel),
-              eventListener);
+          requestProvider.buildChatCompletionRequest(settings.chatCompletionBaseModel),
+          eventListener);
     }
     return ClientProvider.getTextCompletionClient(settings).stream(
-            requestProvider.buildTextCompletionRequest(settings.textCompletionBaseModel),
-            eventListener);  }
+        requestProvider.buildTextCompletionRequest(settings.textCompletionBaseModel),
+        eventListener);
+  }
 }

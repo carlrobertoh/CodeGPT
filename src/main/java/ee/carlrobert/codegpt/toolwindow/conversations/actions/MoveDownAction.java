@@ -20,6 +20,6 @@ public class MoveDownAction extends MoveAction {
 
   @Override
   protected Optional<Conversation> getConversation() {
-    return ConversationsState.getInstance().getNextConversation();
+    return ConversationsState.getInstance().getPreviousConversation();
   }
 }

@@ -53,10 +53,16 @@ public class ClientProvider {
     var proxyHost = advancedSettings.proxyHost;
     var proxyPort = advancedSettings.proxyPort;
     if (!proxyHost.isEmpty() && proxyPort != 0) {
-      builder.setProxy(new Proxy(advancedSettings.proxyType, new InetSocketAddress(proxyHost, proxyPort)));
+      builder.setProxy(
+          new Proxy(advancedSettings.proxyType, new InetSocketAddress(proxyHost, proxyPort)));
       if (advancedSettings.isProxyAuthSelected) {
-        builder.setProxyAuthenticator(new ProxyAuthenticator(advancedSettings.proxyUsername, advancedSettings.proxyPassword));
+        builder.setProxyAuthenticator(
+            new ProxyAuthenticator(advancedSettings.proxyUsername, advancedSettings.proxyPassword));
       }
+    }
+
+    if (!advancedSettings.host.isEmpty()) {
+      builder.setHost(advancedSettings.host);
     }
 
     return builder;

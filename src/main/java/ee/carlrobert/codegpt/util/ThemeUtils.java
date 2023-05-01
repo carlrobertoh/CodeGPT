@@ -17,7 +17,8 @@ public class ThemeUtils {
   }
 
   public static String getFontColorRGB() {
-    return getRGB(EditorColorsManager.getInstance().getSchemeForCurrentUITheme().getDefaultForeground());
+    return getRGB(
+        EditorColorsManager.getInstance().getSchemeForCurrentUITheme().getDefaultForeground());
   }
 
   public static String getSeparatorColorRGB() {

@@ -40,14 +40,13 @@ class EventListener implements CompletionEventListener {
   }
 
   private void saveConversation(String response) {
-    var conversationsState = ConversationsState.getInstance();
     var conversationMessages = conversation.getMessages();
-
     if (isRetry && !conversationMessages.isEmpty()) {
       conversationMessages.remove(conversationMessages.size() - 1);
     }
 
     message.setResponse(response);
-    conversationsState.saveConversation(conversation);
+    conversation.addMessage(message);
+    ConversationsState.getInstance().saveConversation(conversation);
   }
 }

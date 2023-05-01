@@ -123,7 +123,6 @@ public class ChatToolWindowTabHtmlPanel implements ToolWindowTabPanel {
 
       public void handleComplete() {
         stop();
-        conversation.addMessage(message);
       }
 
       public void handleTokensExceeded() {

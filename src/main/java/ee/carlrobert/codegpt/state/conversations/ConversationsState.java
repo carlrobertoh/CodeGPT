@@ -122,23 +122,24 @@ public class ConversationsState implements PersistentStateComponent<Conversation
     currentConversation = null;
   }
 
-  public Optional<Conversation> getNextConversation() {
+  public Optional<Conversation> getPreviousConversation() {
     return tryGetNextOrPreviousConversation(true);
   }
 
-  public Optional<Conversation> getPreviousConversation() {
+  public Optional<Conversation> getNextConversation() {
     return tryGetNextOrPreviousConversation(false);
   }
 
-  private Optional<Conversation> tryGetNextOrPreviousConversation(boolean isNext) {
+  private Optional<Conversation> tryGetNextOrPreviousConversation(boolean isPrevious) {
     if (currentConversation != null) {
       var sortedConversations = getSortedConversations();
       for (int i = 0; i < sortedConversations.size(); i++) {
         var conversation = sortedConversations.get(i);
         if (conversation != null && conversation.getId().equals(currentConversation.getId())) {
-          var nextIndex = isNext ? i + 1 : i - 1;
-          if (isNext ? nextIndex < sortedConversations.size() : nextIndex != -1) {
-            return Optional.of(sortedConversations.get(nextIndex));
+          // higher index indicates older conversation
+          var previousIndex = isPrevious ? i + 1 : i - 1;
+          if (isPrevious ? previousIndex < sortedConversations.size() : previousIndex != -1) {
+            return Optional.of(sortedConversations.get(previousIndex));
           }
         }
       }
@@ -147,9 +148,9 @@ public class ConversationsState implements PersistentStateComponent<Conversation
   }
 
   public void deleteSelectedConversation() {
-    var nextConversation = getNextConversation();
+    var nextConversation = getPreviousConversation();
     if (nextConversation.isEmpty()) {
-      nextConversation = getPreviousConversation();
+      nextConversation = getNextConversation();
     }
 
     var iterator = conversationsContainer.getConversationsMapping()
