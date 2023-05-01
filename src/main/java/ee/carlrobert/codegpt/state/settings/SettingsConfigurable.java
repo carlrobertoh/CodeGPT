@@ -37,6 +37,10 @@ public class SettingsConfigurable implements Configurable {
   public boolean isModified() {
     var settings = SettingsState.getInstance();
     return !settingsComponent.getApiKey().equals(settings.apiKey) ||
+        settingsComponent.isUseAzure() != settings.useAzure ||
+        !settingsComponent.getResourceName().equals(settings.resourceName) ||
+        !settingsComponent.getDeploymentId().equals(settings.deploymentId) ||
+        !settingsComponent.getApiVersion().equals(settings.apiVersion) ||
         !settingsComponent.getOrganization().equals(settings.organization) ||
         !settingsComponent.getDisplayName().equals(settings.displayName) ||
         settingsComponent.isUseOpenAIAccountName() != settings.useOpenAIAccountName ||
@@ -70,6 +74,10 @@ public class SettingsConfigurable implements Configurable {
     }
 
     settings.apiKey = settingsComponent.getApiKey();
+    settings.useAzure = settingsComponent.isUseAzure();
+    settings.resourceName = settingsComponent.getResourceName();
+    settings.deploymentId = settingsComponent.getDeploymentId();
+    settings.apiVersion = settingsComponent.getApiVersion();
     settings.organization = settingsComponent.getOrganization();
     settings.displayName = settingsComponent.getDisplayName();
     settings.useOpenAIAccountName = settingsComponent.isUseOpenAIAccountName();
@@ -85,6 +93,10 @@ public class SettingsConfigurable implements Configurable {
     settingsComponent.setUseChatCompletionSelected(settings.isChatCompletionOptionSelected);
     settingsComponent.setUseTextCompletionSelected(settings.isTextCompletionOptionSelected);
     settingsComponent.setApiKey(settings.apiKey);
+    settingsComponent.setUseAzureCheckbox(settings.useAzure);
+    settingsComponent.setResourceName(settings.resourceName);
+    settingsComponent.setDeploymentId(settings.deploymentId);
+    settingsComponent.setApiVersionField(settings.apiVersion);
     settingsComponent.setOrganization(settings.organization);
     settingsComponent.setDisplayName(settings.displayName);
     settingsComponent.setUseOpenAIAccountNameCheckBox(settings.useOpenAIAccountName);

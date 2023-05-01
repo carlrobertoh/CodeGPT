@@ -60,11 +60,13 @@ public class RequestHandler implements ActionListener {
   private EventSource startCall(Message message, EventListener eventListener) {
     var settings = SettingsState.getInstance();
     var requestProvider = new CompletionRequestProvider(message.getPrompt(), conversation);
+
     if (settings.isChatCompletionOptionSelected) {
-      return ClientProvider.getChatCompletionClient().stream(
-          requestProvider.buildChatCompletionRequest(settings.chatCompletionBaseModel), eventListener);
+      return ClientProvider.getChatCompletionClient(settings).stream(
+              requestProvider.buildChatCompletionRequest(settings.chatCompletionBaseModel),
+              eventListener);
     }
-    return ClientProvider.getTextCompletionClient().stream(
-        requestProvider.buildTextCompletionRequest(settings.textCompletionBaseModel), eventListener);
-  }
+    return ClientProvider.getTextCompletionClient(settings).stream(
+            requestProvider.buildTextCompletionRequest(settings.textCompletionBaseModel),
+            eventListener);  }
 }
