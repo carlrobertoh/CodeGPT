@@ -2,6 +2,8 @@ package ee.carlrobert.codegpt.client;
 
 import ee.carlrobert.codegpt.state.settings.SettingsState;
 import ee.carlrobert.codegpt.state.settings.advanced.AdvancedSettingsState;
+import ee.carlrobert.openai.client.AzureClient;
+import ee.carlrobert.openai.client.Client;
 import ee.carlrobert.openai.client.OpenAIClient;
 import ee.carlrobert.openai.client.ProxyAuthenticator;
 import ee.carlrobert.openai.client.azure.AzureClientRequestParams;
@@ -14,37 +16,41 @@ import java.util.concurrent.TimeUnit;
 public class ClientProvider {
 
   public static DashboardClient getDashboardClient() {
-    return getClientBuilder().buildDashboardClient();
+    return getOpenAIClientBuilder().buildDashboardClient();
   }
+
   public static CompletionClient getChatCompletionClient(SettingsState settings) {
-    if (settings.useAzureService) {
-      return getClientBuilder().buildAzureChatCompletionClient(getAzureRequestParams());
-    }
-    return getClientBuilder().buildChatCompletionClient();
+    return getClientBuilder(settings).buildChatCompletionClient();
   }
 
   public static CompletionClient getTextCompletionClient(SettingsState settings) {
-    if (settings.useAzureService) {
-      return getClientBuilder().buildAzureTextCompletionClient(getAzureRequestParams());
-    }
-    return getClientBuilder().buildTextCompletionClient();
+    return getClientBuilder(settings).buildTextCompletionClient();
   }
 
-  private static AzureClientRequestParams getAzureRequestParams() {
-    var settings = SettingsState.getInstance();
-    return new AzureClientRequestParams(settings.resourceName, settings.deploymentId, settings.apiVersion);
+  private static Client.Builder getClientBuilder(SettingsState settings) {
+    return settings.useAzureService ? getAzureClientBuilder() : getOpenAIClientBuilder();
   }
 
-  private static OpenAIClient.Builder getClientBuilder() {
+  private static OpenAIClient.Builder getOpenAIClientBuilder() {
     var settings = SettingsState.getInstance();
-    var builder = new OpenAIClient.Builder(settings.apiKey) // TODO: ENV var?
-        .setConnectTimeout(60L, TimeUnit.SECONDS)
-        .setReadTimeout(30L, TimeUnit.SECONDS);
+    var builder = new OpenAIClient.Builder(settings.apiKey);
 
     if (settings.useOpenAIService) {
       builder.setOrganization(settings.organization);
     }
+    return (OpenAIClient.Builder) addDefaultClientParams(builder);
+  }
 
+  private static AzureClient.Builder getAzureClientBuilder() {
+    var settings = SettingsState.getInstance();
+    var params = new AzureClientRequestParams(
+        settings.resourceName, settings.deploymentId, settings.apiVersion);
+    var builder = new AzureClient.Builder(settings.apiKey, params)
+        .setActiveDirectoryAuthentication(settings.useActiveDirectoryAuthentication);
+    return (AzureClient.Builder) addDefaultClientParams(builder);
+  }
+
+  private static Client.Builder addDefaultClientParams(Client.Builder builder) {
     var advancedSettings = AdvancedSettingsState.getInstance();
     var proxyHost = advancedSettings.proxyHost;
     var proxyPort = advancedSettings.proxyPort;
@@ -61,7 +67,9 @@ public class ClientProvider {
       builder.setHost(advancedSettings.host);
     }
 
-    return builder;
+    return builder
+        .setConnectTimeout(60L, TimeUnit.SECONDS)
+        .setReadTimeout(30L, TimeUnit.SECONDS);
   }
 }
 

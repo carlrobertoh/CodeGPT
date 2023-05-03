@@ -125,7 +125,7 @@ public class RequestHandlerTest extends BasePlatformTestCase {
     settings.chatCompletionBaseModel = ChatCompletionModel.GPT_3_5.getCode();
     expectStreamRequest("/openai/deployments/TEST_DEPLOYMENT_ID/chat/completions", request -> {
       assertThat(request.getUri().getQuery()).isEqualTo("api-version=TEST_API_VERSION");
-      assertThat(request.getHeaders().get("Authorization").get(0)).isEqualTo("Bearer TEST_API_KEY");
+      assertThat(request.getHeaders().get("Api-key").get(0)).isEqualTo("TEST_API_KEY");
       assertThat(request.getBody())
           .extracting(
               "model",

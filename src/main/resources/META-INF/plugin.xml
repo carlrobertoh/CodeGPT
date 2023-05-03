@@ -68,6 +68,7 @@
         <li>Sync model settings on tab change</li>
         <li>Improve error msg display</li>
         <li>Add Azure Service support</li>
+        <li>Support both Azure authentications</li>
       </ul>
     ]]>
     </change-notes>

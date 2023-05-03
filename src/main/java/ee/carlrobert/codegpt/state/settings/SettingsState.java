@@ -24,6 +24,7 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
   public String resourceName = "";
   public String deploymentId = "";
   public String apiVersion = "";
+  public boolean useActiveDirectoryAuthentication;
   public String organization = "";
   public String displayName = getDisplayName();
   public boolean useOpenAIAccountName = true;

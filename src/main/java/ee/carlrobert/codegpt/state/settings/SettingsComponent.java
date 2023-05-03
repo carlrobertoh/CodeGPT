@@ -24,13 +24,14 @@ import javax.swing.event.HyperlinkEvent;
 public class SettingsComponent {
 
   private final JPanel mainPanel;
+  private final JBTextField apiKeyField;
+  private final JBTextField organizationField;
   private final JBTextField resourceNameField;
   private final JBTextField deploymentIdField;
   private final JBTextField apiVersionField;
-  private final JBTextField apiKeyField;
-  private final JBTextField organizationField;
   private final JBTextField displayNameField;
   private final JBCheckBox useOpenAIAccountNameCheckBox;
+  private final JBCheckBox useActiveDirectoryAuthenticationCheckBox;
   private final JBRadioButton useAzureServiceRadioButton;
   private final JBRadioButton useOpenAIServiceRadioButton;
   private final ComboBox<CompletionModel> chatCompletionBaseModelComboBox;
@@ -49,7 +50,10 @@ public class SettingsComponent {
     apiVersionField = new JBTextField(settings.resourceName, 40);
     organizationField = new JBTextField(settings.organization, 40);
     displayNameField = new JBTextField(settings.displayName, 20);
-    useOpenAIAccountNameCheckBox = new JBCheckBox("Use OpenAI account name", true);
+    useOpenAIAccountNameCheckBox = new JBCheckBox(
+        "Use OpenAI account name", settings.useOpenAIAccountName);
+    useActiveDirectoryAuthenticationCheckBox = new JBCheckBox(
+        "Use Azure Active Directory authentication", settings.useActiveDirectoryAuthentication);
     chatCompletionBaseModelComboBox = new BaseModelComboBox(
         new ChatCompletionModel[]{
             ChatCompletionModel.GPT_3_5,
@@ -115,6 +119,14 @@ public class SettingsComponent {
 
   public void setUseAzureServiceSelected(boolean selected) {
     useAzureServiceRadioButton.setSelected(selected);
+  }
+
+  public boolean isUseActiveDirectoryAuthentication() {
+    return useActiveDirectoryAuthenticationCheckBox.isSelected();
+  }
+
+  public void setUseActiveDirectoryAuthenticationSelected(boolean selected) {
+    useActiveDirectoryAuthenticationCheckBox.setSelected(selected);
   }
 
   public boolean isUseAzureService() {
@@ -294,12 +306,16 @@ public class SettingsComponent {
         .withComment(
             "API version to be used for Azure OpenAI Service")
         .createPanel();
+    var authFieldPanel = UI.PanelFactory.panel(useActiveDirectoryAuthenticationCheckBox)
+        .resizeX(false)
+        .createPanel();
     azureRelatedFieldsPanel.setLayout(new BoxLayout(azureRelatedFieldsPanel, BoxLayout.Y_AXIS));
     azureRelatedFieldsPanel.setBorder(JBUI.Borders.empty(8, 16, 0, 0));
 
     azureRelatedFieldsPanel.add(resourceNameFieldPanel);
     azureRelatedFieldsPanel.add(deploymentIdFieldPanel);
     azureRelatedFieldsPanel.add(apiVersionFieldPanel);
+    azureRelatedFieldsPanel.add(authFieldPanel);
     SwingUtils.setEqualLabelWidths(deploymentIdFieldPanel, resourceNameFieldPanel);
     SwingUtils.setEqualLabelWidths(apiVersionFieldPanel, resourceNameFieldPanel);
 
