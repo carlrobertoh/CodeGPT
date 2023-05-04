@@ -31,7 +31,8 @@ public class AdvancedSettingsConfigurable implements Configurable {
         advancedSettingsComponent.getProxyPort() != advancedSettings.proxyPort ||
         advancedSettingsComponent.isProxyAuthSelected() != advancedSettings.isProxyAuthSelected ||
         !advancedSettingsComponent.getProxyAuthUsername().equals(advancedSettings.proxyUsername) ||
-        !advancedSettingsComponent.getProxyAuthPassword().equals(advancedSettings.proxyPassword);
+        !advancedSettingsComponent.getProxyAuthPassword().equals(advancedSettings.proxyPassword) ||
+        advancedSettingsComponent.isUseOffScreenRendering() != advancedSettings.useOffScreenRendering;
   }
 
   @Override
@@ -43,6 +44,7 @@ public class AdvancedSettingsConfigurable implements Configurable {
     advancedSettings.isProxyAuthSelected = advancedSettingsComponent.isProxyAuthSelected();
     advancedSettings.proxyUsername = advancedSettingsComponent.getProxyAuthUsername();
     advancedSettings.proxyPassword = advancedSettingsComponent.getProxyAuthPassword();
+    advancedSettings.useOffScreenRendering = advancedSettingsComponent.isUseOffScreenRendering();
   }
 
   @Override
@@ -54,6 +56,7 @@ public class AdvancedSettingsConfigurable implements Configurable {
     advancedSettingsComponent.setUseProxyAuthentication(advancedSettings.isProxyAuthSelected);
     advancedSettingsComponent.setProxyUsername(advancedSettings.proxyUsername);
     advancedSettingsComponent.setProxyPassword(advancedSettings.proxyPassword);
+    advancedSettingsComponent.setUseOffScreenRendering(advancedSettings.useOffScreenRendering);
   }
 
   @Override

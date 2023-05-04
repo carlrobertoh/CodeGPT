@@ -25,6 +25,7 @@ public class AdvancedSettingsComponent {
   private final JBCheckBox proxyAuthCheckbox;
   private final JBTextField proxyAuthUsername;
   private final JBPasswordField proxyAuthPassword;
+  private final JBCheckBox offScreenRenderingCheckbox;
 
   public AdvancedSettingsComponent(AdvancedSettingsState advancedSettings) {
     proxyTypeComboBox = new ComboBox<>(new Proxy.Type[] {
@@ -45,11 +46,14 @@ public class AdvancedSettingsComponent {
       proxyAuthUsername.setEnabled(itemEvent.getStateChange() == ItemEvent.SELECTED);
       proxyAuthPassword.setEnabled(itemEvent.getStateChange() == ItemEvent.SELECTED);
     });
+    offScreenRenderingCheckbox = new JBCheckBox("Use off-screen browser rendering");
 
     mainPanel = FormBuilder.createFormBuilder()
         .addComponent(new TitledSeparator("HTTP/SOCKS Proxy"))
         .addVerticalGap(8)
         .addComponent(createProxySettingsForm())
+        .addComponent(new TitledSeparator("Browser Settings"))
+        .addComponent(createBrowserSettingsForm())
         .addComponentFillVertically(new JPanel(), 0)
         .getPanel();
   }
@@ -106,6 +110,14 @@ public class AdvancedSettingsComponent {
     proxyAuthPassword.setText(proxyPassword);
   }
 
+  public boolean isUseOffScreenRendering() {
+    return offScreenRenderingCheckbox.isSelected();
+  }
+
+  public void setUseOffScreenRendering(boolean isUseOffscreenRendering) {
+    offScreenRenderingCheckbox.setSelected(isUseOffscreenRendering);
+  }
+
   private JComponent createProxySettingsForm() {
     var proxyPanel = new JPanel();
     proxyPanel.setBorder(JBUI.Borders.emptyLeft(16));
@@ -137,5 +149,15 @@ public class AdvancedSettingsComponent {
     proxyPanel.add(proxyAuthPanel);
 
     return proxyPanel;
+  }
+
+  private JComponent createBrowserSettingsForm() {
+    var panel = FormBuilder.createFormBuilder()
+        .addComponent(FormBuilder.createFormBuilder()
+            .addComponent(offScreenRenderingCheckbox)
+            .getPanel())
+        .getPanel();
+    panel.setBorder(JBUI.Borders.emptyLeft(16));
+    return panel;
   }
 }

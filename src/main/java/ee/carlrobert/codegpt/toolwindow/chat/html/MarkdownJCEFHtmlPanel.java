@@ -17,6 +17,7 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.ui.jcef.JBCefApp;
 import com.intellij.ui.jcef.JBCefBrowserBase;
 import com.intellij.ui.jcef.JBCefJSQuery;
 import com.intellij.ui.jcef.JCEFHtmlPanel;
@@ -25,6 +26,7 @@ import ee.carlrobert.codegpt.state.conversations.Conversation;
 import ee.carlrobert.codegpt.state.conversations.ConversationsState;
 import ee.carlrobert.codegpt.state.conversations.message.Message;
 import ee.carlrobert.codegpt.state.settings.SettingsState;
+import ee.carlrobert.codegpt.state.settings.advanced.AdvancedSettingsState;
 import ee.carlrobert.codegpt.util.FileUtils;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -53,7 +55,8 @@ public class MarkdownJCEFHtmlPanel extends JCEFHtmlPanel {
   private UUID previousResponseId;
 
   public MarkdownJCEFHtmlPanel(@NotNull Project project) {
-    super(null);
+    super(AdvancedSettingsState.getInstance().useOffScreenRendering,
+        JBCefApp.getInstance().createClient(), null);
     this.project = project;
     this.browserContentManager = new BrowserContentManager(getCefBrowser());
     this.replaceInEditorQuery = new ReplaceInEditorQuery(

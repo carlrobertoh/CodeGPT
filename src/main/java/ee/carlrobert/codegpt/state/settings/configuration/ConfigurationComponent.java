@@ -3,7 +3,10 @@ package ee.carlrobert.codegpt.state.settings.configuration;
 import static ee.carlrobert.codegpt.action.ActionsUtil.DEFAULT_ACTIONS_ARRAY;
 
 import com.intellij.icons.AllIcons;
+import com.intellij.icons.AllIcons.Nodes;
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.keymap.impl.ui.EditKeymapsDialog;
 import com.intellij.ui.AnActionButton;
 import com.intellij.ui.TitledSeparator;
 import com.intellij.ui.ToolbarDecorator;
@@ -27,11 +30,10 @@ public class ConfigurationComponent {
   public ConfigurationComponent(ConfigurationState configuration) {
     table = new JBTable(new DefaultTableModel(
         ActionsUtil.toArray(configuration.tableData),
-        new String[] {"Action", "Prompt"}));
-    table.getColumnModel().getColumn(0).setPreferredWidth(140);
-    table.getColumnModel().getColumn(0).setMaxWidth(140);
+        new String[]{"Action", "Prompt"}));
+    table.getColumnModel().getColumn(0).setPreferredWidth(60);
+    table.getColumnModel().getColumn(1).setPreferredWidth(240);
     table.getEmptyText().setText("No actions configured");
-
     var tablePanel = createTablePanel();
     tablePanel.setBorder(BorderFactory.createTitledBorder("Action prompts"));
 
@@ -61,11 +63,12 @@ public class ConfigurationComponent {
   private JPanel createTablePanel() {
     return ToolbarDecorator.createDecorator(table)
         .setPreferredSize(new Dimension(table.getPreferredSize().width, 160))
-        .setAddAction(anActionButton -> getModel().addRow(new Object[] {"", ""}))
+        .setAddAction(anActionButton -> getModel().addRow(new Object[]{"", ""}))
         .setRemoveAction(anActionButton -> getModel().removeRow(table.getSelectedRow()))
         .disableUpAction()
         .disableDownAction()
         .addExtraAction(new RevertToDefaultsActionButton())
+        .addExtraAction(new KeymapActionButton())
         .createPanel();
   }
 
@@ -76,7 +79,7 @@ public class ConfigurationComponent {
   public void setTableData(Map<String, String> tableData) {
     var model = getModel();
     model.setNumRows(0);
-    tableData.forEach((action, prompt) -> model.addRow(new Object[] {action, prompt}));
+    tableData.forEach((action, prompt) -> model.addRow(new Object[]{action, prompt}));
   }
 
   class RevertToDefaultsActionButton extends AnActionButton {
@@ -88,8 +91,41 @@ public class ConfigurationComponent {
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
       var model = getModel();
-      model.setNumRows(0);
+      model.setRowCount(0);
       Arrays.stream(DEFAULT_ACTIONS_ARRAY).forEach(model::addRow);
+      ActionsUtil.refreshActions();
+    }
+
+    @Override
+    @NotNull
+    public ActionUpdateThread getActionUpdateThread() {
+      return ActionUpdateThread.EDT;
+    }
+  }
+
+  class KeymapActionButton extends AnActionButton {
+
+    KeymapActionButton() {
+      super("Add Shortcut", Nodes.KeymapEditor);
+    }
+
+    @Override
+    public void actionPerformed(@NotNull AnActionEvent e) {
+      var label = getModel()
+          .getDataVector()
+          .get(table.getSelectedRow())
+          .get(0);
+      var actionId = "codegpt.AskChatGPT";
+      if (label != null && !label.toString().isEmpty()) {
+        actionId = ActionsUtil.convertToId(label.toString());
+      }
+      new EditKeymapsDialog(e.getProject(), actionId, false).show();
+    }
+
+    @Override
+    @NotNull
+    public ActionUpdateThread getActionUpdateThread() {
+      return ActionUpdateThread.EDT;
     }
   }
 }

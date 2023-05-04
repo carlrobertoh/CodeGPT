@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.action;
 
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
@@ -19,10 +20,17 @@ public abstract class BaseAction extends AnAction {
       @Nullable @NlsActions.ActionDescription String description,
       @Nullable Icon icon) {
     super(text, description, icon);
+    ActionsUtil.registerOrReplaceAction(this);
   }
 
   public BaseAction(@Nullable @NlsActions.ActionText String text) {
-    super(text);
+    this(text, null, null);
+  }
+
+  @Override
+  @NotNull
+  public ActionUpdateThread getActionUpdateThread() {
+    return ActionUpdateThread.EDT;
   }
 
   protected abstract void actionPerformed(Project project, Editor editor, String selectedText);

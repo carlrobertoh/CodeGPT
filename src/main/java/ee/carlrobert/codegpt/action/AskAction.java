@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt.action;
 
 import com.intellij.icons.AllIcons;
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import ee.carlrobert.codegpt.state.conversations.ConversationsState;
@@ -11,6 +12,7 @@ public class AskAction extends AnAction {
 
   public AskAction() {
     super("Ask ChatGPT", "Ask ChatGPT description", AllIcons.Actions.Find);
+    ActionsUtil.registerOrReplaceAction(this);
   }
 
   @Override
@@ -28,5 +30,11 @@ public class AskAction extends AnAction {
         tabPanel.displayLandingView();
       }
     }
+  }
+
+  @Override
+  @NotNull
+  public ActionUpdateThread getActionUpdateThread() {
+    return ActionUpdateThread.EDT;
   }
 }
