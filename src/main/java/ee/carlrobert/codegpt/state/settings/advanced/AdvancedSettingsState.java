@@ -22,6 +22,7 @@ public class AdvancedSettingsState implements PersistentStateComponent<AdvancedS
   public boolean isProxyAuthSelected;
   public String proxyUsername;
   public String proxyPassword;
+  public boolean useOffScreenRendering;
 
   public static AdvancedSettingsState getInstance() {
     return ApplicationManager.getApplication().getService(AdvancedSettingsState.class);

@@ -11,6 +11,7 @@ public class AskAction extends AnAction {
 
   public AskAction() {
     super("Ask ChatGPT", "Ask ChatGPT description", AllIcons.Actions.Find);
+    ActionsUtil.registerOrReplaceAction(this);
   }
 
   @Override

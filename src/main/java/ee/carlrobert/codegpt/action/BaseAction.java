@@ -19,10 +19,11 @@ public abstract class BaseAction extends AnAction {
       @Nullable @NlsActions.ActionDescription String description,
       @Nullable Icon icon) {
     super(text, description, icon);
+    ActionsUtil.registerOrReplaceAction(this);
   }
 
   public BaseAction(@Nullable @NlsActions.ActionText String text) {
-    super(text);
+    this(text, null, null);
   }
 
   protected abstract void actionPerformed(Project project, Editor editor, String selectedText);

@@ -34,13 +34,14 @@ public class ConfigurationConfigurable implements Configurable {
   public void apply() {
     var configuration = ConfigurationState.getInstance();
     configuration.tableData = configurationComponent.getTableData();
-    ActionsUtil.refreshActions(configuration.tableData);
+    ActionsUtil.refreshActions();
   }
 
   @Override
   public void reset() {
     var configuration = ConfigurationState.getInstance();
     configurationComponent.setTableData(configuration.tableData);
+    ActionsUtil.refreshActions();
   }
 
   @Override

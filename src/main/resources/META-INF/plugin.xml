@@ -69,6 +69,8 @@
         <li>Improve error msg display</li>
         <li>Add Azure Service support</li>
         <li>Support both Azure authentications</li>
+        <li>Add keymap support for plugin actions</li>
+        <li>Support off-screen browser rendering</li>
       </ul>
     ]]>
     </change-notes>
@@ -96,7 +98,7 @@
 
     <actions>
         <group id="CodeGPTEditorPopup">
-            <group id="ActionGroup" class="com.intellij.openapi.actionSystem.DefaultActionGroup" popup="true" icon="Icons.DefaultIcon">
+            <group id="codegpt.EditorActionGroup" class="com.intellij.openapi.actionSystem.DefaultActionGroup" popup="true" icon="Icons.DefaultIcon">
             </group>
             <add-to-group group-id="EditorPopupMenu1" anchor="first"/>
             <separator/>
