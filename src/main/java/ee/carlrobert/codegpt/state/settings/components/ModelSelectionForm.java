@@ -5,7 +5,6 @@ import com.intellij.ui.components.JBRadioButton;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
-import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.state.settings.BaseModelComboBox;
 import ee.carlrobert.codegpt.state.settings.SettingsState;
 import ee.carlrobert.codegpt.util.SwingUtils;
@@ -70,14 +69,10 @@ public class ModelSelectionForm {
 
   public JPanel getForm() {
     var panel = FormBuilder.createFormBuilder()
-        .addComponent(UI.PanelFactory.panel(useChatCompletionRadioButton)
-            .withComment("OpenAI’s most advanced language model")
-            .createPanel())
+        .addComponent(useChatCompletionRadioButton)
         .addComponent(customChatCompletionModelPanel)
         .addComponent(chatCompletionModelsPanel)
-        .addComponent(UI.PanelFactory.panel(useTextCompletionRadioButton)
-            .withComment("Best for high-quality texts")
-            .createPanel())
+        .addComponent(useTextCompletionRadioButton)
         .addComponent(customTextCompletionModelPanel)
         .addComponent(textCompletionModelsPanel)
         .getPanel();
