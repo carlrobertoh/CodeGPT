@@ -58,19 +58,8 @@
     <change-notes>
         <![CDATA[
       <ul>
-        <li>Copy/Replace Code support</li>
-        <li>Remove data usage support</li>
-        <li>Ability to remove previous messages</li>
-        <li>Fix scrollbar issues</li>
-        <li>Ability to have a seamless chat experience</li>
-        <li>Add organization field</li>
-        <li>Make display name configurable</li>
-        <li>Sync model settings on tab change</li>
-        <li>Improve error msg display</li>
-        <li>Add Azure Service support</li>
-        <li>Support both Azure authentications</li>
-        <li>Add keymap support for plugin actions</li>
-        <li>Support off-screen browser rendering</li>
+        <li>Support custom server/model configuration, allowing easy integration with <a href="https://github.com/go-skynet/LocalAI">LocalAI</a> and <a href="https://python.langchain.com/en/latest/index.html">Langchain</a></li>
+        <li>Support API Key retrieval from environment variable</li>
       </ul>
     ]]>
     </change-notes>
