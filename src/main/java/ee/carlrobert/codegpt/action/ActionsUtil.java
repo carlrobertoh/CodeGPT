@@ -47,7 +47,9 @@ public class ActionsUtil {
 
       var configuredActions = ConfigurationState.getInstance().tableData;
       configuredActions.forEach((label, prompt) -> {
-        var action = new BaseAction(label) {
+        // using label as action description to prevent com.intellij.diagnostic.PluginException
+        // https://github.com/carlrobertoh/CodeGPT/issues/95
+        var action = new BaseAction(label, label) {
           @Override
           protected void actionPerformed(Project project, Editor editor, String selectedText) {
             var fileExtension = FileUtils.getFileExtension(

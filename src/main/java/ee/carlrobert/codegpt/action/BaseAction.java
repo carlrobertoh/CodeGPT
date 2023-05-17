@@ -22,8 +22,10 @@ public abstract class BaseAction extends AnAction {
     ActionsUtil.registerOrReplaceAction(this);
   }
 
-  public BaseAction(@Nullable @NlsActions.ActionText String text) {
-    this(text, null, null);
+  public BaseAction(
+      @Nullable @NlsActions.ActionText String text,
+      @Nullable @NlsActions.ActionDescription String description) {
+    this(text, description, null);
   }
 
   protected abstract void actionPerformed(Project project, Editor editor, String selectedText);
