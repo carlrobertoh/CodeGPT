@@ -6,11 +6,18 @@ import static org.assertj.core.groups.Tuple.tuple;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import ee.carlrobert.codegpt.state.conversations.ConversationsState;
 import ee.carlrobert.codegpt.state.conversations.message.Message;
+import ee.carlrobert.codegpt.state.settings.SettingsState;
 import ee.carlrobert.openai.client.ClientCode;
 import ee.carlrobert.openai.client.completion.chat.ChatCompletionModel;
 import ee.carlrobert.openai.client.completion.text.TextCompletionModel;
+import ee.carlrobert.openai.http.LocalCallbackServer;
 
 public class CompletionRequestProviderTest extends BasePlatformTestCase {
+
+  @Override
+  protected void setUp() throws Exception {
+    super.setUp();
+  }
 
   public void testTextCompletionRequest() {
     var conversation = ConversationsState.getInstance()

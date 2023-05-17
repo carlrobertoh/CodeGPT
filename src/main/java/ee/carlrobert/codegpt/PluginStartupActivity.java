@@ -13,7 +13,7 @@ public class PluginStartupActivity implements StartupActivity {
   public void runActivity(@NotNull Project project) {
     ActionsUtil.refreshActions();
     var settings = SettingsState.getInstance();
-    if (!settings.apiKey.isEmpty() && settings.useOpenAIAccountName) {
+    if (!settings.getApiKey().isEmpty() && settings.useOpenAIAccountName) {
       ClientProvider.getDashboardClient()
           .getSubscriptionAsync(subscription ->
               settings.displayName = subscription.getAccountName());

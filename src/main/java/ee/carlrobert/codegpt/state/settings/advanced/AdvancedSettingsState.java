@@ -15,7 +15,6 @@ import org.jetbrains.annotations.Nullable;
 )
 public class AdvancedSettingsState implements PersistentStateComponent<AdvancedSettingsState> {
 
-  public String host = "";
   public String proxyHost = "";
   public int proxyPort;
   public Proxy.Type proxyType = Proxy.Type.SOCKS;

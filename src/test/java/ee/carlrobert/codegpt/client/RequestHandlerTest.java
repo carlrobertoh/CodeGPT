@@ -13,7 +13,6 @@ import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import ee.carlrobert.codegpt.state.conversations.ConversationsState;
 import ee.carlrobert.codegpt.state.conversations.message.Message;
 import ee.carlrobert.codegpt.state.settings.SettingsState;
-import ee.carlrobert.codegpt.state.settings.advanced.AdvancedSettingsState;
 import ee.carlrobert.openai.client.completion.chat.ChatCompletionModel;
 import ee.carlrobert.openai.client.completion.text.TextCompletionModel;
 import ee.carlrobert.openai.http.LocalCallbackServer;
@@ -29,8 +28,10 @@ public class RequestHandlerTest extends BasePlatformTestCase {
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    SettingsState.getInstance().apiKey = "TEST_API_KEY";
-    AdvancedSettingsState.getInstance().host = "http://localhost:8000";
+    var settings = SettingsState.getInstance();
+    settings.useApiKeyFromEnvVar = false;
+    settings.apiKey = "TEST_API_KEY";
+    settings.customHost = "http://localhost:8000";
     server = new LocalCallbackServer();
   }
 

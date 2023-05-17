@@ -124,7 +124,7 @@ public class ChatToolWindowTabPanel implements ToolWindowTabPanel {
     }
 
     var settings = SettingsState.getInstance();
-    if (settings.apiKey.isEmpty()) {
+    if (settings.getApiKey().isEmpty()) {
       notifyMissingCredential(project, "API key not provided.");
     } else {
       SyntaxTextArea textArea;

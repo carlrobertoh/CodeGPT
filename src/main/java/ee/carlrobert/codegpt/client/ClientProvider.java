@@ -1,5 +1,7 @@
 package ee.carlrobert.codegpt.client;
 
+import com.intellij.openapi.application.Application;
+import com.intellij.openapi.application.ApplicationManager;
 import ee.carlrobert.codegpt.state.settings.SettingsState;
 import ee.carlrobert.codegpt.state.settings.advanced.AdvancedSettingsState;
 import ee.carlrobert.openai.client.AzureClient;
@@ -16,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 public class ClientProvider {
 
   public static DashboardClient getDashboardClient() {
-    return getOpenAIClientBuilder().buildDashboardClient();
+    return getOpenAIClientBuilder(false).buildDashboardClient();
   }
 
   public static CompletionClient getChatCompletionClient(SettingsState settings) {
@@ -32,25 +34,32 @@ public class ClientProvider {
   }
 
   private static OpenAIClient.Builder getOpenAIClientBuilder() {
+    return getOpenAIClientBuilder(true);
+  }
+
+  private static OpenAIClient.Builder getOpenAIClientBuilder(boolean isCustomServiceEnabled) {
     var settings = SettingsState.getInstance();
-    var builder = new OpenAIClient.Builder(settings.apiKey);
+    var builder = new OpenAIClient.Builder(settings.getApiKey());
 
     if (settings.useOpenAIService) {
       builder.setOrganization(settings.organization);
     }
-    return (OpenAIClient.Builder) addDefaultClientParams(builder);
+
+    return (OpenAIClient.Builder) addDefaultClientParams(builder, isCustomServiceEnabled);
   }
 
   private static AzureClient.Builder getAzureClientBuilder() {
     var settings = SettingsState.getInstance();
     var params = new AzureClientRequestParams(
         settings.resourceName, settings.deploymentId, settings.apiVersion);
-    var builder = new AzureClient.Builder(settings.apiKey, params)
+    var builder = new AzureClient.Builder(settings.getApiKey(), params)
         .setActiveDirectoryAuthentication(settings.useActiveDirectoryAuthentication);
-    return (AzureClient.Builder) addDefaultClientParams(builder);
+    return (AzureClient.Builder) addDefaultClientParams(builder, true);
   }
 
-  private static Client.Builder addDefaultClientParams(Client.Builder builder) {
+  private static Client.Builder addDefaultClientParams(
+      Client.Builder builder, boolean isCustomServiceEnabled) {
+    var settings = SettingsState.getInstance();
     var advancedSettings = AdvancedSettingsState.getInstance();
     var proxyHost = advancedSettings.proxyHost;
     var proxyPort = advancedSettings.proxyPort;
@@ -63,13 +72,18 @@ public class ClientProvider {
       }
     }
 
-    if (!advancedSettings.host.isEmpty()) {
-      builder.setHost(advancedSettings.host);
+    if (isUnitTestingMode() || (isCustomServiceEnabled && settings.useCustomService)) {
+      builder.setHost(settings.customHost);
     }
 
     return builder
-        .setConnectTimeout(60L, TimeUnit.SECONDS)
-        .setReadTimeout(30L, TimeUnit.SECONDS);
+        .setConnectTimeout(120L, TimeUnit.SECONDS)
+        .setReadTimeout(60L, TimeUnit.SECONDS);
+  }
+
+  private static boolean isUnitTestingMode() {
+    Application app = ApplicationManager.getApplication();
+    return app != null && app.isUnitTestMode();
   }
 }
 

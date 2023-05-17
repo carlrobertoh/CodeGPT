@@ -62,11 +62,11 @@ public class RequestHandler implements ActionListener {
 
     if (settings.isChatCompletionOptionSelected) {
       return ClientProvider.getChatCompletionClient(settings).stream(
-          requestProvider.buildChatCompletionRequest(settings.chatCompletionBaseModel),
+          requestProvider.buildChatCompletionRequest(settings.getChatCompletionModel()),
           eventListener);
     }
     return ClientProvider.getTextCompletionClient(settings).stream(
-        requestProvider.buildTextCompletionRequest(settings.textCompletionBaseModel),
+        requestProvider.buildTextCompletionRequest(settings.getTextCompletionModel()),
         eventListener);
   }
 }

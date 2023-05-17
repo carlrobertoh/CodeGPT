@@ -77,8 +77,8 @@ public class ConversationsState implements PersistentStateComponent<Conversation
     conversation.setId(UUID.randomUUID());
     conversation.setClientCode(clientCode);
     conversation.setModel(settings.isChatCompletionOptionSelected ?
-        settings.chatCompletionBaseModel :
-        settings.textCompletionBaseModel);
+        settings.getChatCompletionModel() :
+        settings.getTextCompletionModel());
     conversation.setCreatedOn(LocalDateTime.now());
     conversation.setUpdatedOn(LocalDateTime.now());
     return conversation;

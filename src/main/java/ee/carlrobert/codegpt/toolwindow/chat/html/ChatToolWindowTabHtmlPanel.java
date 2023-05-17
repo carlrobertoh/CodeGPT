@@ -83,7 +83,7 @@ public class ChatToolWindowTabHtmlPanel implements ToolWindowTabPanel {
     markdownHtmlPanel.runWhenLoaded(() -> {
       markdownHtmlPanel.displayUserMessage(message);
       var settings = SettingsState.getInstance();
-      if (settings.apiKey.isEmpty()) {
+      if (settings.getApiKey().isEmpty()) {
         markdownHtmlPanel.displayMissingCredential(message.getId());
       } else {
         SwingUtilities.invokeLater(() -> call(message, isRetry));

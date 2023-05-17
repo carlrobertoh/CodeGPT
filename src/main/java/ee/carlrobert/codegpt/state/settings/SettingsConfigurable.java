@@ -36,19 +36,28 @@ public class SettingsConfigurable implements Configurable {
   @Override
   public boolean isModified() {
     var settings = SettingsState.getInstance();
+    var serviceSelectionForm = settingsComponent.getServiceSelectionForm();
+    var modelSelectionForm = settingsComponent.getModelSelectionForm();
     return !settingsComponent.getApiKey().equals(settings.apiKey) ||
-        settingsComponent.isUseOpenAIService() != settings.useOpenAIService ||
-        settingsComponent.isUseAzureService() != settings.useAzureService ||
-        settingsComponent.isUseActiveDirectoryAuthentication() !=
-            settings.useActiveDirectoryAuthentication ||
-        !settingsComponent.getResourceName().equals(settings.resourceName) ||
-        !settingsComponent.getDeploymentId().equals(settings.deploymentId) ||
-        !settingsComponent.getApiVersion().equals(settings.apiVersion) ||
-        !settingsComponent.getOrganization().equals(settings.organization) ||
         !settingsComponent.getDisplayName().equals(settings.displayName) ||
+        settingsComponent.isUseApiKeyFromEnvVar() != settings.useApiKeyFromEnvVar ||
         settingsComponent.isUseOpenAIAccountName() != settings.useOpenAIAccountName ||
+        serviceSelectionForm.isUseOpenAIService() != settings.useOpenAIService ||
+        serviceSelectionForm.isUseAzureService() != settings.useAzureService ||
+        serviceSelectionForm.isUseCustomService() != settings.useCustomService ||
+        serviceSelectionForm.isUseActiveDirectoryAuthentication() !=
+            settings.useActiveDirectoryAuthentication ||
+        !serviceSelectionForm.getCustomHost().equals(settings.customHost) ||
+        !serviceSelectionForm.getResourceName().equals(settings.resourceName) ||
+        !serviceSelectionForm.getDeploymentId().equals(settings.deploymentId) ||
+        !serviceSelectionForm.getApiVersion().equals(settings.apiVersion) ||
+        !serviceSelectionForm.getOrganization().equals(settings.organization) ||
+        !modelSelectionForm.getCustomChatCompletionModel()
+            .equals(settings.customChatCompletionModel) ||
+        !modelSelectionForm.getCustomTextCompletionModel()
+            .equals(settings.customTextCompletionModel) ||
         isModelChanged(settings) ||
-        isClientChanged(settings);
+        isCompletionOptionChanged(settings);
   }
 
   @Override
@@ -62,7 +71,7 @@ public class SettingsConfigurable implements Configurable {
               : settings.textCompletionBaseModel);
     }
 
-    if (isClientChanged(settings) || isModelChanged) {
+    if (isCompletionOptionChanged(settings) || isModelChanged) {
       ConversationsState.getInstance().setCurrentConversation(null);
       var project = ProjectUtil.guessCurrentProject(
           settingsComponent.getPanel()); // TODO: Find a better way
@@ -76,40 +85,56 @@ public class SettingsConfigurable implements Configurable {
           });
     }
 
+    var serviceSelectionForm = settingsComponent.getServiceSelectionForm();
+    var modelSelectionForm = settingsComponent.getModelSelectionForm();
+
     settings.apiKey = settingsComponent.getApiKey();
-    settings.useOpenAIService = settingsComponent.isUseOpenAIService();
-    settings.useAzureService = settingsComponent.isUseAzureService();
-    settings.useActiveDirectoryAuthentication = settingsComponent.isUseActiveDirectoryAuthentication();
-    settings.resourceName = settingsComponent.getResourceName();
-    settings.deploymentId = settingsComponent.getDeploymentId();
-    settings.apiVersion = settingsComponent.getApiVersion();
-    settings.organization = settingsComponent.getOrganization();
     settings.displayName = settingsComponent.getDisplayName();
+    settings.useApiKeyFromEnvVar = settingsComponent.isUseApiKeyFromEnvVar();
     settings.useOpenAIAccountName = settingsComponent.isUseOpenAIAccountName();
-    settings.chatCompletionBaseModel = settingsComponent.getChatCompletionBaseModel().getCode();
-    settings.isChatCompletionOptionSelected = settingsComponent.isChatCompletionOptionSelected();
-    settings.isTextCompletionOptionSelected = settingsComponent.isTextCompletionOptionSelected();
-    settings.textCompletionBaseModel = settingsComponent.getTextCompletionBaseModel().getCode();
+    settings.useOpenAIService = serviceSelectionForm.isUseOpenAIService();
+    settings.useAzureService = serviceSelectionForm.isUseAzureService();
+    settings.useCustomService = serviceSelectionForm.isUseCustomService();
+    settings.customHost = serviceSelectionForm.getCustomHost();
+    settings.useActiveDirectoryAuthentication = serviceSelectionForm.isUseActiveDirectoryAuthentication();
+    settings.resourceName = serviceSelectionForm.getResourceName();
+    settings.deploymentId = serviceSelectionForm.getDeploymentId();
+    settings.apiVersion = serviceSelectionForm.getApiVersion();
+    settings.organization = serviceSelectionForm.getOrganization();
+    settings.chatCompletionBaseModel = modelSelectionForm.getChatCompletionBaseModel().getCode();
+    settings.textCompletionBaseModel = modelSelectionForm.getTextCompletionBaseModel().getCode();
+    settings.customChatCompletionModel = modelSelectionForm.getCustomChatCompletionModel();
+    settings.customTextCompletionModel = modelSelectionForm.getCustomTextCompletionModel();
+    settings.isChatCompletionOptionSelected = modelSelectionForm.isChatCompletionOptionSelected();
+    settings.isTextCompletionOptionSelected = modelSelectionForm.isTextCompletionOptionSelected();
   }
 
   @Override
   public void reset() {
     var settings = SettingsState.getInstance();
-    settingsComponent.setUseChatCompletionSelected(settings.isChatCompletionOptionSelected);
-    settingsComponent.setUseTextCompletionSelected(settings.isTextCompletionOptionSelected);
+    var serviceSelectionForm = settingsComponent.getServiceSelectionForm();
+    var modelSelectionForm = settingsComponent.getModelSelectionForm();
+
     settingsComponent.setApiKey(settings.apiKey);
-    settingsComponent.setUseOpenAIServiceSelected(settings.useAzureService);
-    settingsComponent.setUseAzureServiceSelected(settings.useAzureService);
-    settingsComponent.setUseActiveDirectoryAuthenticationSelected(
-        settings.useActiveDirectoryAuthentication);
-    settingsComponent.setResourceName(settings.resourceName);
-    settingsComponent.setDeploymentId(settings.deploymentId);
-    settingsComponent.setApiVersionField(settings.apiVersion);
-    settingsComponent.setOrganization(settings.organization);
+    settingsComponent.setUseApiKeyFromEnvVarCheckBox(settings.useApiKeyFromEnvVar);
     settingsComponent.setDisplayName(settings.displayName);
     settingsComponent.setUseOpenAIAccountNameCheckBox(settings.useOpenAIAccountName);
-    settingsComponent.setChatCompletionBaseModel(settings.chatCompletionBaseModel);
-    settingsComponent.setTextCompletionBaseModel(settings.textCompletionBaseModel);
+    serviceSelectionForm.setUseOpenAIServiceSelected(settings.useAzureService);
+    serviceSelectionForm.setUseAzureServiceSelected(settings.useAzureService);
+    serviceSelectionForm.setUseCustomServiceSelected(settings.useCustomService);
+    serviceSelectionForm.setCustomHost(settings.customHost);
+    serviceSelectionForm.setUseActiveDirectoryAuthenticationSelected(
+        settings.useActiveDirectoryAuthentication);
+    serviceSelectionForm.setResourceName(settings.resourceName);
+    serviceSelectionForm.setDeploymentId(settings.deploymentId);
+    serviceSelectionForm.setApiVersionField(settings.apiVersion);
+    serviceSelectionForm.setOrganization(settings.organization);
+    modelSelectionForm.setUseChatCompletionSelected(settings.isChatCompletionOptionSelected);
+    modelSelectionForm.setUseTextCompletionSelected(settings.isTextCompletionOptionSelected);
+    modelSelectionForm.setChatCompletionBaseModel(settings.chatCompletionBaseModel);
+    modelSelectionForm.setTextCompletionBaseModel(settings.textCompletionBaseModel);
+    modelSelectionForm.setCustomChatCompletionModel(settings.customChatCompletionModel);
+    modelSelectionForm.setCustomTextCompletionModel(settings.customTextCompletionModel);
   }
 
   @Override
@@ -117,17 +142,19 @@ public class SettingsConfigurable implements Configurable {
     settingsComponent = null;
   }
 
-  private boolean isClientChanged(SettingsState settings) {
-    return settingsComponent.isChatCompletionOptionSelected()
+  private boolean isCompletionOptionChanged(SettingsState settings) {
+    var modelSelectionForm = settingsComponent.getModelSelectionForm();
+    return modelSelectionForm.isChatCompletionOptionSelected()
         != settings.isChatCompletionOptionSelected ||
-        settingsComponent.isTextCompletionOptionSelected()
+        modelSelectionForm.isTextCompletionOptionSelected()
             != settings.isTextCompletionOptionSelected;
   }
 
   private boolean isModelChanged(SettingsState settings) {
-    return !settingsComponent.getChatCompletionBaseModel().getCode()
+    var modelSelectionForm = settingsComponent.getModelSelectionForm();
+    return !modelSelectionForm.getChatCompletionBaseModel().getCode()
         .equals(settings.chatCompletionBaseModel) ||
-        !settingsComponent.getTextCompletionBaseModel().getCode()
+        !modelSelectionForm.getTextCompletionBaseModel().getCode()
             .equals(settings.textCompletionBaseModel);
   }
 }
