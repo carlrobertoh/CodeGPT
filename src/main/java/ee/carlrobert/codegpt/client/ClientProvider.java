@@ -35,6 +35,10 @@ public class ClientProvider {
     var settings = SettingsState.getInstance();
     var builder = new OpenAIClient.Builder(settings.apiKey);
 
+    if (!settings.apiHost.isEmpty()){
+      builder.setHost(settings.apiHost);
+    }
+
     if (settings.useOpenAIService) {
       builder.setOrganization(settings.organization);
     }

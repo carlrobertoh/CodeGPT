@@ -19,6 +19,7 @@ import org.jetbrains.annotations.Nullable;
 public class SettingsState implements PersistentStateComponent<SettingsState> {
 
   public String apiKey = "";
+  public String apiHost = "";
   public boolean useOpenAIService = true;
   public boolean useAzureService;
   public String resourceName = "";

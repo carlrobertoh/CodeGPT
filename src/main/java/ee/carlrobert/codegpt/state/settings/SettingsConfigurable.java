@@ -37,6 +37,7 @@ public class SettingsConfigurable implements Configurable {
   public boolean isModified() {
     var settings = SettingsState.getInstance();
     return !settingsComponent.getApiKey().equals(settings.apiKey) ||
+            !settingsComponent.getApiHost().equals(settings.apiHost) ||
         settingsComponent.isUseOpenAIService() != settings.useOpenAIService ||
         settingsComponent.isUseAzureService() != settings.useAzureService ||
         settingsComponent.isUseActiveDirectoryAuthentication() !=
@@ -77,6 +78,7 @@ public class SettingsConfigurable implements Configurable {
     }
 
     settings.apiKey = settingsComponent.getApiKey();
+    settings.apiHost = settingsComponent.getApiHost();
     settings.useOpenAIService = settingsComponent.isUseOpenAIService();
     settings.useAzureService = settingsComponent.isUseAzureService();
     settings.useActiveDirectoryAuthentication = settingsComponent.isUseActiveDirectoryAuthentication();
@@ -98,6 +100,7 @@ public class SettingsConfigurable implements Configurable {
     settingsComponent.setUseChatCompletionSelected(settings.isChatCompletionOptionSelected);
     settingsComponent.setUseTextCompletionSelected(settings.isTextCompletionOptionSelected);
     settingsComponent.setApiKey(settings.apiKey);
+    settingsComponent.setApiHost(settings.apiHost);
     settingsComponent.setUseOpenAIServiceSelected(settings.useAzureService);
     settingsComponent.setUseAzureServiceSelected(settings.useAzureService);
     settingsComponent.setUseActiveDirectoryAuthenticationSelected(
