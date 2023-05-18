@@ -15,16 +15,14 @@ import ee.carlrobert.openai.client.completion.text.TextCompletionModel;
 import java.awt.Desktop;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
+import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
 
 public class SettingsComponent {
 
   private final JPanel mainPanel;
   private final JBTextField apiKeyField;
+  private final JBTextField apiHostField;
   private final JBTextField organizationField;
   private final JBTextField resourceNameField;
   private final JBTextField deploymentIdField;
@@ -41,6 +39,8 @@ public class SettingsComponent {
 
   public SettingsComponent(SettingsState settings) {
     apiKeyField = new JBTextField(settings.apiKey, 40);
+    apiHostField = new JBTextField(settings.apiHost,40);
+    apiHostField.setInputVerifier(HostInputVerifier());
     useOpenAIServiceRadioButton = new JBRadioButton("Use OpenAI service API",
         settings.useOpenAIService);
     useAzureServiceRadioButton = new JBRadioButton("Use Azure OpenAI service API",
@@ -107,6 +107,14 @@ public class SettingsComponent {
 
   public void setApiKey(String apiKey) {
     apiKeyField.setText(apiKey);
+  }
+
+  public String getApiHost() {
+    return apiHostField.getText();
+  }
+
+  public void setApiHost(String apiHost) {
+    apiHostField.setText(apiHost);
   }
 
   public void setUseOpenAIServiceSelected(boolean selected) {
@@ -221,13 +229,22 @@ public class SettingsComponent {
             "You can find your Secret API key in your <a href=\"https://platform.openai.com/account/api-keys\">User settings</a>.")
         .withCommentHyperlinkListener(this::handleHyperlinkClicked)
         .createPanel();
+    var apiHostFieldPanel = UI.PanelFactory.panel(apiHostField)
+            .withLabel("API Host:")
+            .resizeX(false)
+            .withComment(
+                    "You can input your api host. default: https://api.openai.com")
+            .withCommentHyperlinkListener(this::handleHyperlinkClicked)
+            .createPanel();
     var displayNameFieldPanel = SwingUtils.createPanel(displayNameField, "Display name:", false);
 
     SwingUtils.setEqualLabelWidths(apiKeyFieldPanel, displayNameFieldPanel);
+    SwingUtils.setEqualLabelWidths(apiHostFieldPanel, displayNameFieldPanel);
 
     var panel = FormBuilder.createFormBuilder()
         .addComponent(FormBuilder.createFormBuilder()
             .addComponent(apiKeyFieldPanel)
+            .addComponent(apiHostFieldPanel)
             .addComponent(displayNameFieldPanel)
             .addComponent(useOpenAIAccountNameCheckBox)
             .getPanel())
@@ -369,5 +386,19 @@ public class SettingsComponent {
         }
       }
     }
+  }
+
+  private InputVerifier HostInputVerifier(){
+    return new InputVerifier() {
+      @Override
+      public boolean verify(JComponent input) {
+        String text = ((JTextField) input).getText();
+        boolean valid = text.matches("^(http|https)://([\\w-]+\\.)+[\\w-]+(/[\\w- ./?%&=]*)?$");
+        if (!valid) {
+          JOptionPane.showMessageDialog(input, "Please input right Host！like: https://api.openai.com");
+        }
+        return valid;
+      }
+    };
   }
 }
