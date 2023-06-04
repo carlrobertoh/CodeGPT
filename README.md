@@ -11,10 +11,10 @@
   </p>
 </div>
 
-[![Contributions welcome][contributions-welcome-svg]][contributions-welcome]
 [![Downloads][downloads-shield]][plugin-repo]
 [![Rating][Rating-shield]][plugin-repo]
 [![Version][version-shield]][plugin-repo]
+[![Contributions not available][contributions-not-available-svg]][contributions-not-available]
 
 <!-- TABLE OF CONTENTS -->
 <details>
@@ -31,7 +31,6 @@
     </li>
     <li><a href="#features">Features</a></li>
     <li><a href="#roadmap">Roadmap</a></li>
-    <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
   </ol>
 </details>
@@ -79,7 +78,7 @@ Ask anything you'd like.
   <img src="docs/assets/gif/ask-anything.gif" alt="animated" />
 </p>
 
-### Select & Ask
+### Select and Ask
 
 Ask anything related to your selected code.
 
@@ -128,18 +127,6 @@ Expected a different answer? Re-generate any response of your choosing.
 
 See the [open issues][open-issues] for a full list of proposed features (and known issues).
 
-## Contributing
-
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
 ## License
 
 MIT © [Carl-Robert Linnupuu][portfolio]
@@ -154,8 +141,8 @@ If you found this project interesting, kindly rate it on the marketplace and don
 [downloads-shield]: https://img.shields.io/jetbrains/plugin/d/21056-codegpt
 [version-shield]: https://img.shields.io/jetbrains/plugin/v/21056-codegpt?label=version
 [rating-shield]: https://img.shields.io/jetbrains/plugin/r/rating/21056-codegpt
-[contributions-welcome-svg]: http://img.shields.io/badge/contributions-welcome-brightgreen
-[contributions-welcome]: https://github.com/JetBrains/ideavim/blob/master/CONTRIBUTING.md
+[contributions-not-available-svg]: https://img.shields.io/badge/Contributions-Currently%20Unavailable-yellow
+[contributions-not-available]: #
 [marketplace-img]: docs/assets/marketplace.png
 [plugin-repo]: https://plugins.jetbrains.com/plugin/21056-codegpt
 [plugin-settings]: docs/assets/plugin-settings.png
