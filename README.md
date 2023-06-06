@@ -66,6 +66,13 @@ On the settings panel simply click on the `API key` field, paste the key obtaine
 
 ![plugin-settings][plugin-settings]
 
+#### Azure OpenAI configuration
+Specifically for Azure OpenAI services, you will have to input three supplementary fields:
+* the `Resource Name`, which is the name of your Azure OpenAI Cognitive Services. It's the first part of the url you're provided to use the service: `https://my-resource-name.openai.azure.com/` -> use `my-resource-name`. You can find it in your Azure Cognitive Services page, under `Resource Management` -> `Resource Management` -> `Keys and Endpoints`.
+* the `Deployment ID`, which is the name of your Deployment. You can find it in the Azure AI Studio, under `Management` -> `Deployment` -> `Deployment Name` column in the table.
+* the `API Version`, I usually used the last non-preview version, which is currently `2023-05-15`. 
+In addition to these, you need to input one of the two API Keys provided, found along with the `Resource Name`.
+
 ## Features
 
 The plugin provides several key features, such as:
