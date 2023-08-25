@@ -1,12 +1,14 @@
 package ee.carlrobert.codegpt.util;
 
-import com.intellij.ui.JBColor;
-import com.intellij.util.ui.JBFont;
-import com.intellij.util.ui.JBUI;
+import static javax.swing.event.HyperlinkEvent.EventType.ACTIVATED;
+
 import com.intellij.util.ui.UI;
 import java.awt.Component;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -16,28 +18,10 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
-import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
+import javax.swing.event.HyperlinkEvent;
 
 public class SwingUtils {
-
-  public static JTextPane createTextPane(String selectedText) {
-    var textPane = new JTextPane();
-    textPane.setText(selectedText);
-    textPane.setEditable(false);
-    textPane.setBackground(JBColor.PanelBackground);
-    textPane.setBorder(JBUI.Borders.emptyLeft(4));
-    return textPane;
-  }
-
-  public static JLabel createIconLabel(Icon icon, String text) {
-    var iconLabel = new JLabel(icon);
-    iconLabel.setText(text);
-    iconLabel.setFont(JBFont.h4());
-    iconLabel.setIconTextGap(8);
-    iconLabel.setBorder(JBUI.Borders.emptyLeft(4));
-    return iconLabel;
-  }
 
   public static JButton createIconButton(Icon icon) {
     var button = new JButton(icon);
@@ -54,21 +38,6 @@ public class SwingUtils {
     return box;
   }
 
-  public static void addShiftEnterInputMap(JTextArea textArea, Runnable onEnter) {
-    var input = textArea.getInputMap();
-    var enterStroke = KeyStroke.getKeyStroke("ENTER");
-    var shiftEnterStroke = KeyStroke.getKeyStroke("shift ENTER");
-    input.put(shiftEnterStroke, "insert-break");
-    input.put(enterStroke, "text-submit");
-
-    var actions = textArea.getActionMap();
-    actions.put("text-submit", new AbstractAction() {
-      public void actionPerformed(ActionEvent e) {
-        onEnter.run();
-      }
-    });
-  }
-
   public static void setEqualLabelWidths(JPanel firstPanel, JPanel secondPanel) {
     var firstLabel = firstPanel.getComponents()[0];
     var secondLabel = secondPanel.getComponents()[0];
@@ -77,11 +46,39 @@ public class SwingUtils {
     }
   }
 
+  public static JPanel createPanel(JComponent component, String label) {
+    return createPanel(component, label, false);
+  }
+
   public static JPanel createPanel(JComponent component, String label, boolean resizeX) {
     return UI.PanelFactory.panel(component)
         .withLabel(label)
         .resizeX(resizeX)
         .createPanel();
+  }
+
+  public static void handleHyperlinkClicked(HyperlinkEvent event) {
+    if (ACTIVATED.equals(event.getEventType()) && event.getURL() != null) {
+      if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+        try {
+          Desktop.getDesktop().browse(event.getURL().toURI());
+        } catch (IOException | URISyntaxException e) {
+          throw new RuntimeException("Couldn't open the browser.", e);
+        }
+      }
+    }
+  }
+
+  public static void addShiftEnterInputMap(JTextArea textArea, Runnable onSubmit) {
+    var enterStroke = KeyStroke.getKeyStroke("ENTER");
+    var shiftEnterStroke = KeyStroke.getKeyStroke("shift ENTER");
+    textArea.getInputMap().put(shiftEnterStroke, "insert-break");
+    textArea.getInputMap().put(enterStroke, "text-submit");
+    textArea.getActionMap().put("text-submit", new AbstractAction() {
+      public void actionPerformed(ActionEvent e) {
+        onSubmit.run();
+      }
+    });
   }
 }
 

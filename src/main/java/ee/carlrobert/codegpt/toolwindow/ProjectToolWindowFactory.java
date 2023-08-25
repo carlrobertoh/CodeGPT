@@ -6,7 +6,7 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.ui.content.ContentManagerEvent;
 import com.intellij.ui.content.ContentManagerListener;
-import ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowPanel;
+import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowPanel;
 import ee.carlrobert.codegpt.toolwindow.conversations.ConversationsToolWindow;
 import javax.swing.JComponent;
 import org.jetbrains.annotations.NotNull;
@@ -14,15 +14,17 @@ import org.jetbrains.annotations.NotNull;
 public class ProjectToolWindowFactory implements ToolWindowFactory, DumbAware {
 
   public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
+    var chatToolWindowPanel = new StandardChatToolWindowPanel(project, toolWindow.getDisposable());
+    // var contextualChatToolWindowPanel = new ContextualChatToolWindowPanel(project, toolWindow.getDisposable());
     var conversationsToolWindow = new ConversationsToolWindow(project);
-    var chatToolWindowPanel = new ChatToolWindowPanel(project);
 
     addContent(toolWindow, chatToolWindowPanel, "Chat");
-    addContent(toolWindow, conversationsToolWindow.getContent(), "Conversation History");
+    // addContent(toolWindow, contextualChatToolWindowPanel, "Contextual Chat");
+    addContent(toolWindow, conversationsToolWindow.getContent(), "Chat History");
     toolWindow.addContentManagerListener(new ContentManagerListener() {
       public void selectionChanged(@NotNull ContentManagerEvent event) {
         var content = event.getContent();
-        if ("Conversation History".equals(content.getTabName()) && content.isSelected()) {
+        if ("Chat History".equals(content.getTabName()) && content.isSelected()) {
           conversationsToolWindow.refresh();
         }
       }
@@ -31,7 +33,6 @@ public class ProjectToolWindowFactory implements ToolWindowFactory, DumbAware {
 
   public void addContent(ToolWindow toolWindow, JComponent panel, String displayName) {
     var contentManager = toolWindow.getContentManager();
-    var content = contentManager.getFactory().createContent(panel, displayName, false);
-    contentManager.addContent(content);
+    contentManager.addContent(contentManager.getFactory().createContent(panel, displayName, false));
   }
 }

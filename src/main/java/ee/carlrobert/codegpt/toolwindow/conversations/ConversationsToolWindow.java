@@ -8,15 +8,16 @@ import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
-import ee.carlrobert.codegpt.state.conversations.Conversation;
-import ee.carlrobert.codegpt.state.conversations.ConversationsState;
-import ee.carlrobert.codegpt.state.settings.SettingsState;
-import ee.carlrobert.codegpt.toolwindow.chat.ChatContentManagerService;
-import ee.carlrobert.codegpt.toolwindow.chat.ToolWindowTabPanelFactory;
-import ee.carlrobert.codegpt.toolwindow.conversations.actions.ClearAllConversationsAction;
-import ee.carlrobert.codegpt.toolwindow.conversations.actions.DeleteConversationAction;
-import ee.carlrobert.codegpt.toolwindow.conversations.actions.MoveDownAction;
-import ee.carlrobert.codegpt.toolwindow.conversations.actions.MoveUpAction;
+import ee.carlrobert.codegpt.actions.toolwindow.DeleteAllConversationsAction;
+import ee.carlrobert.codegpt.actions.toolwindow.DeleteConversationAction;
+import ee.carlrobert.codegpt.actions.toolwindow.MoveDownAction;
+import ee.carlrobert.codegpt.actions.toolwindow.MoveUpAction;
+import ee.carlrobert.codegpt.conversations.Conversation;
+import ee.carlrobert.codegpt.conversations.ConversationService;
+import ee.carlrobert.codegpt.conversations.ConversationsState;
+import ee.carlrobert.codegpt.settings.SettingsState;
+import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
+import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowTabPanel;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -27,12 +28,14 @@ import org.jetbrains.annotations.NotNull;
 public class ConversationsToolWindow {
 
   private final Project project;
+  private final ConversationService conversationService;
   private JPanel conversationsToolWindowContent;
   private JScrollPane scrollPane;
   private ScrollablePanel scrollablePanel;
 
   public ConversationsToolWindow(@NotNull Project project) {
     this.project = project;
+    this.conversationService = ConversationService.getInstance();
     refresh();
   }
 
@@ -45,7 +48,7 @@ public class ConversationsToolWindow {
     actionGroup.add(new MoveUpAction(this::refresh));
     actionGroup.addSeparator();
     actionGroup.add(new DeleteConversationAction(this::refresh));
-    actionGroup.add(new ClearAllConversationsAction(this::refresh));
+    actionGroup.add(new DeleteAllConversationsAction(this::refresh));
 
     var toolbar = ActionManager.getInstance()
         .createActionToolbar("NAVIGATION_BAR_TOOLBAR", actionGroup, true);
@@ -57,7 +60,7 @@ public class ConversationsToolWindow {
   public void refresh() {
     scrollablePanel.removeAll();
 
-    var sortedConversations = ConversationsState.getInstance().getSortedConversations();
+    var sortedConversations = conversationService.getSortedConversations();
     if (sortedConversations.isEmpty()) {
       var emptyLabel = new JLabel("No conversations exist.");
       emptyLabel.setFont(JBFont.h2());
@@ -75,14 +78,14 @@ public class ConversationsToolWindow {
     var mainPanel = new RootConversationPanel(() -> {
       SettingsState.getInstance().syncSettings(conversation);
 
-      var contentManagerService = project.getService(ChatContentManagerService.class);
-      contentManagerService.displayChatTab();
-      contentManagerService.tryFindChatTabbedPane()
+      var toolWindowContentManager = StandardChatToolWindowContentManager.getInstance(project);
+      toolWindowContentManager.displayChatTab();
+      toolWindowContentManager.tryFindChatTabbedPane()
           .ifPresent(tabbedPane -> tabbedPane.tryFindActiveConversationTitle(conversation.getId())
               .ifPresentOrElse(
                   title -> tabbedPane.setSelectedIndex(tabbedPane.indexOfTab(title)),
                   () -> {
-                    var panel = ToolWindowTabPanelFactory.getTabPanel(project);
+                    var panel = new StandardChatToolWindowTabPanel(project);
                     panel.displayConversation(conversation);
                     tabbedPane.addNewTab(panel);
                   }));

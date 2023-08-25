@@ -1,0 +1,3606 @@
+[
+  {
+    "extension": "1",
+    "value": "Groff"
+  },
+  {
+    "extension": "2",
+    "value": "Groff"
+  },
+  {
+    "extension": "3",
+    "value": "Groff"
+  },
+  {
+    "extension": "4",
+    "value": "Groff"
+  },
+  {
+    "extension": "5",
+    "value": "Groff"
+  },
+  {
+    "extension": "6",
+    "value": "Groff"
+  },
+  {
+    "extension": "7",
+    "value": "Groff"
+  },
+  {
+    "extension": "8",
+    "value": "Groff"
+  },
+  {
+    "extension": "9",
+    "value": "Groff"
+  },
+  {
+    "extension": "abap",
+    "value": "ABAP"
+  },
+  {
+    "extension": "asc",
+    "value": "Public Key"
+  },
+  {
+    "extension": "ash",
+    "value": "AGS Script"
+  },
+  {
+    "extension": "ampl",
+    "value": "AMPL"
+  },
+  {
+    "extension": "mod",
+    "value": "XML"
+  },
+  {
+    "extension": "g4",
+    "value": "ANTLR"
+  },
+  {
+    "extension": "apib",
+    "value": "API Blueprint"
+  },
+  {
+    "extension": "apl",
+    "value": "APL"
+  },
+  {
+    "extension": "dyalog",
+    "value": "APL"
+  },
+  {
+    "extension": "asp",
+    "value": "ASP"
+  },
+  {
+    "extension": "asax",
+    "value": "ASP"
+  },
+  {
+    "extension": "ascx",
+    "value": "ASP"
+  },
+  {
+    "extension": "ashx",
+    "value": "ASP"
+  },
+  {
+    "extension": "asmx",
+    "value": "ASP"
+  },
+  {
+    "extension": "aspx",
+    "value": "ASP"
+  },
+  {
+    "extension": "axd",
+    "value": "ASP"
+  },
+  {
+    "extension": "dats",
+    "value": "ATS"
+  },
+  {
+    "extension": "hats",
+    "value": "ATS"
+  },
+  {
+    "extension": "sats",
+    "value": "ATS"
+  },
+  {
+    "extension": "as",
+    "value": "ActionScript"
+  },
+  {
+    "extension": "adb",
+    "value": "Ada"
+  },
+  {
+    "extension": "ada",
+    "value": "Ada"
+  },
+  {
+    "extension": "ads",
+    "value": "Ada"
+  },
+  {
+    "extension": "agda",
+    "value": "Agda"
+  },
+  {
+    "extension": "als",
+    "value": "Alloy"
+  },
+  {
+    "extension": "apacheconf",
+    "value": "ApacheConf"
+  },
+  {
+    "extension": "vhost",
+    "value": "Nginx"
+  },
+  {
+    "extension": "cls",
+    "value": "Visual Basic"
+  },
+  {
+    "extension": "applescript",
+    "value": "AppleScript"
+  },
+  {
+    "extension": "scpt",
+    "value": "AppleScript"
+  },
+  {
+    "extension": "arc",
+    "value": "Arc"
+  },
+  {
+    "extension": "ino",
+    "value": "Arduino"
+  },
+  {
+    "extension": "asciidoc",
+    "value": "AsciiDoc"
+  },
+  {
+    "extension": "adoc",
+    "value": "AsciiDoc"
+  },
+  {
+    "extension": "aj",
+    "value": "AspectJ"
+  },
+  {
+    "extension": "asm",
+    "value": "Assembly"
+  },
+  {
+    "extension": "a51",
+    "value": "Assembly"
+  },
+  {
+    "extension": "inc",
+    "value": "SourcePawn"
+  },
+  {
+    "extension": "nasm",
+    "value": "Assembly"
+  },
+  {
+    "extension": "aug",
+    "value": "Augeas"
+  },
+  {
+    "extension": "ahk",
+    "value": "AutoHotkey"
+  },
+  {
+    "extension": "ahkl",
+    "value": "AutoHotkey"
+  },
+  {
+    "extension": "au3",
+    "value": "AutoIt"
+  },
+  {
+    "extension": "awk",
+    "value": "Awk"
+  },
+  {
+    "extension": "auk",
+    "value": "Awk"
+  },
+  {
+    "extension": "gawk",
+    "value": "Awk"
+  },
+  {
+    "extension": "mawk",
+    "value": "Awk"
+  },
+  {
+    "extension": "nawk",
+    "value": "Awk"
+  },
+  {
+    "extension": "bat",
+    "value": "Batchfile"
+  },
+  {
+    "extension": "cmd",
+    "value": "Batchfile"
+  },
+  {
+    "extension": "befunge",
+    "value": "Befunge"
+  },
+  {
+    "extension": "bison",
+    "value": "Bison"
+  },
+  {
+    "extension": "bb",
+    "value": "BlitzBasic"
+  },
+  {
+    "extension": "decls",
+    "value": "BlitzBasic"
+  },
+  {
+    "extension": "bmx",
+    "value": "BlitzMax"
+  },
+  {
+    "extension": "bsv",
+    "value": "Bluespec"
+  },
+  {
+    "extension": "boo",
+    "value": "Boo"
+  },
+  {
+    "extension": "b",
+    "value": "Limbo"
+  },
+  {
+    "extension": "bf",
+    "value": "HyPhy"
+  },
+  {
+    "extension": "brs",
+    "value": "Brightscript"
+  },
+  {
+    "extension": "bro",
+    "value": "Bro"
+  },
+  {
+    "extension": "c",
+    "value": "C"
+  },
+  {
+    "extension": "cats",
+    "value": "C"
+  },
+  {
+    "extension": "h",
+    "value": "Objective-C"
+  },
+  {
+    "extension": "idc",
+    "value": "C"
+  },
+  {
+    "extension": "w",
+    "value": "C"
+  },
+  {
+    "extension": "cs",
+    "value": "Smalltalk"
+  },
+  {
+    "extension": "cake",
+    "value": "CoffeeScript"
+  },
+  {
+    "extension": "csharp",
+    "value": "C#"
+  },
+  {
+    "extension": "cshtml",
+    "value": "C#"
+  },
+  {
+    "extension": "csx",
+    "value": "C#"
+  },
+  {
+    "extension": "cpp",
+    "value": "C++"
+  },
+  {
+    "extension": "c++",
+    "value": "C++"
+  },
+  {
+    "extension": "cc",
+    "value": "C++"
+  },
+  {
+    "extension": "cp",
+    "value": "Component Pascal"
+  },
+  {
+    "extension": "cxx",
+    "value": "C++"
+  },
+  {
+    "extension": "h++",
+    "value": "C++"
+  },
+  {
+    "extension": "hh",
+    "value": "Hack"
+  },
+  {
+    "extension": "hpp",
+    "value": "C++"
+  },
+  {
+    "extension": "hxx",
+    "value": "C++"
+  },
+  {
+    "extension": "inl",
+    "value": "C++"
+  },
+  {
+    "extension": "ipp",
+    "value": "C++"
+  },
+  {
+    "extension": "tcc",
+    "value": "C++"
+  },
+  {
+    "extension": "tpp",
+    "value": "C++"
+  },
+  {
+    "extension": "c-objdump",
+    "value": "C-ObjDump"
+  },
+  {
+    "extension": "chs",
+    "value": "C2hs Haskell"
+  },
+  {
+    "extension": "clp",
+    "value": "CLIPS"
+  },
+  {
+    "extension": "cmake",
+    "value": "CMake"
+  },
+  {
+    "extension": "cmake.in",
+    "value": "CMake"
+  },
+  {
+    "extension": "cob",
+    "value": "COBOL"
+  },
+  {
+    "extension": "cbl",
+    "value": "COBOL"
+  },
+  {
+    "extension": "ccp",
+    "value": "COBOL"
+  },
+  {
+    "extension": "cobol",
+    "value": "COBOL"
+  },
+  {
+    "extension": "cpy",
+    "value": "COBOL"
+  },
+  {
+    "extension": "css",
+    "value": "CSS"
+  },
+  {
+    "extension": "csv",
+    "value": "CSV"
+  },
+  {
+    "extension": "capnp",
+    "value": "Cap'n Proto"
+  },
+  {
+    "extension": "mss",
+    "value": "CartoCSS"
+  },
+  {
+    "extension": "ceylon",
+    "value": "Ceylon"
+  },
+  {
+    "extension": "chpl",
+    "value": "Chapel"
+  },
+  {
+    "extension": "ch",
+    "value": "xBase"
+  },
+  {
+    "extension": "ck",
+    "value": "ChucK"
+  },
+  {
+    "extension": "cirru",
+    "value": "Cirru"
+  },
+  {
+    "extension": "clw",
+    "value": "Clarion"
+  },
+  {
+    "extension": "icl",
+    "value": "Clean"
+  },
+  {
+    "extension": "dcl",
+    "value": "Clean"
+  },
+  {
+    "extension": "click",
+    "value": "Click"
+  },
+  {
+    "extension": "clj",
+    "value": "Clojure"
+  },
+  {
+    "extension": "boot",
+    "value": "Clojure"
+  },
+  {
+    "extension": "cl2",
+    "value": "Clojure"
+  },
+  {
+    "extension": "cljc",
+    "value": "Clojure"
+  },
+  {
+    "extension": "cljs",
+    "value": "Clojure"
+  },
+  {
+    "extension": "cljs.hl",
+    "value": "Clojure"
+  },
+  {
+    "extension": "cljscm",
+    "value": "Clojure"
+  },
+  {
+    "extension": "cljx",
+    "value": "Clojure"
+  },
+  {
+    "extension": "hic",
+    "value": "Clojure"
+  },
+  {
+    "extension": "coffee",
+    "value": "CoffeeScript"
+  },
+  {
+    "extension": "_coffee",
+    "value": "CoffeeScript"
+  },
+  {
+    "extension": "cjsx",
+    "value": "CoffeeScript"
+  },
+  {
+    "extension": "cson",
+    "value": "CoffeeScript"
+  },
+  {
+    "extension": "iced",
+    "value": "CoffeeScript"
+  },
+  {
+    "extension": "cfm",
+    "value": "ColdFusion"
+  },
+  {
+    "extension": "cfml",
+    "value": "ColdFusion"
+  },
+  {
+    "extension": "cfc",
+    "value": "ColdFusion CFC"
+  },
+  {
+    "extension": "lisp",
+    "value": "NewLisp"
+  },
+  {
+    "extension": "asd",
+    "value": "Common Lisp"
+  },
+  {
+    "extension": "cl",
+    "value": "OpenCL"
+  },
+  {
+    "extension": "l",
+    "value": "PicoLisp"
+  },
+  {
+    "extension": "lsp",
+    "value": "NewLisp"
+  },
+  {
+    "extension": "ny",
+    "value": "Common Lisp"
+  },
+  {
+    "extension": "podsl",
+    "value": "Common Lisp"
+  },
+  {
+    "extension": "sexp",
+    "value": "Common Lisp"
+  },
+  {
+    "extension": "cps",
+    "value": "Component Pascal"
+  },
+  {
+    "extension": "coq",
+    "value": "Coq"
+  },
+  {
+    "extension": "v",
+    "value": "Verilog"
+  },
+  {
+    "extension": "cppobjdump",
+    "value": "Cpp-ObjDump"
+  },
+  {
+    "extension": "c++-objdump",
+    "value": "Cpp-ObjDump"
+  },
+  {
+    "extension": "c++objdump",
+    "value": "Cpp-ObjDump"
+  },
+  {
+    "extension": "cpp-objdump",
+    "value": "Cpp-ObjDump"
+  },
+  {
+    "extension": "cxx-objdump",
+    "value": "Cpp-ObjDump"
+  },
+  {
+    "extension": "creole",
+    "value": "Creole"
+  },
+  {
+    "extension": "cr",
+    "value": "Crystal"
+  },
+  {
+    "extension": "feature",
+    "value": "Cucumber"
+  },
+  {
+    "extension": "cu",
+    "value": "Cuda"
+  },
+  {
+    "extension": "cuh",
+    "value": "Cuda"
+  },
+  {
+    "extension": "cy",
+    "value": "Cycript"
+  },
+  {
+    "extension": "pyx",
+    "value": "Cython"
+  },
+  {
+    "extension": "pxd",
+    "value": "Cython"
+  },
+  {
+    "extension": "pxi",
+    "value": "Cython"
+  },
+  {
+    "extension": "d",
+    "value": "Makefile"
+  },
+  {
+    "extension": "di",
+    "value": "D"
+  },
+  {
+    "extension": "d-objdump",
+    "value": "D-ObjDump"
+  },
+  {
+    "extension": "com",
+    "value": "DIGITAL Command Language"
+  },
+  {
+    "extension": "dm",
+    "value": "DM"
+  },
+  {
+    "extension": "zone",
+    "value": "DNS Zone"
+  },
+  {
+    "extension": "arpa",
+    "value": "DNS Zone"
+  },
+  {
+    "extension": "darcspatch",
+    "value": "Darcs Patch"
+  },
+  {
+    "extension": "dpatch",
+    "value": "Darcs Patch"
+  },
+  {
+    "extension": "dart",
+    "value": "Dart"
+  },
+  {
+    "extension": "diff",
+    "value": "Diff"
+  },
+  {
+    "extension": "patch",
+    "value": "Diff"
+  },
+  {
+    "extension": "dockerfile",
+    "value": "Dockerfile"
+  },
+  {
+    "extension": "djs",
+    "value": "Dogescript"
+  },
+  {
+    "extension": "dylan",
+    "value": "Dylan"
+  },
+  {
+    "extension": "dyl",
+    "value": "Dylan"
+  },
+  {
+    "extension": "intr",
+    "value": "Dylan"
+  },
+  {
+    "extension": "lid",
+    "value": "Dylan"
+  },
+  {
+    "extension": "E",
+    "value": "E"
+  },
+  {
+    "extension": "ecl",
+    "value": "ECLiPSe"
+  },
+  {
+    "extension": "eclxml",
+    "value": "ECL"
+  },
+  {
+    "extension": "sch",
+    "value": "KiCad"
+  },
+  {
+    "extension": "brd",
+    "value": "KiCad"
+  },
+  {
+    "extension": "epj",
+    "value": "Ecere Projects"
+  },
+  {
+    "extension": "e",
+    "value": "Eiffel"
+  },
+  {
+    "extension": "ex",
+    "value": "Elixir"
+  },
+  {
+    "extension": "exs",
+    "value": "Elixir"
+  },
+  {
+    "extension": "elm",
+    "value": "Elm"
+  },
+  {
+    "extension": "el",
+    "value": "Emacs Lisp"
+  },
+  {
+    "extension": "emacs",
+    "value": "Emacs Lisp"
+  },
+  {
+    "extension": "emacs.desktop",
+    "value": "Emacs Lisp"
+  },
+  {
+    "extension": "em",
+    "value": "EmberScript"
+  },
+  {
+    "extension": "emberscript",
+    "value": "EmberScript"
+  },
+  {
+    "extension": "erl",
+    "value": "Erlang"
+  },
+  {
+    "extension": "es",
+    "value": "JavaScript"
+  },
+  {
+    "extension": "escript",
+    "value": "Erlang"
+  },
+  {
+    "extension": "hrl",
+    "value": "Erlang"
+  },
+  {
+    "extension": "xrl",
+    "value": "Erlang"
+  },
+  {
+    "extension": "yrl",
+    "value": "Erlang"
+  },
+  {
+    "extension": "fs",
+    "value": "GLSL"
+  },
+  {
+    "extension": "fsi",
+    "value": "F#"
+  },
+  {
+    "extension": "fsx",
+    "value": "F#"
+  },
+  {
+    "extension": "fx",
+    "value": "HLSL"
+  },
+  {
+    "extension": "flux",
+    "value": "FLUX"
+  },
+  {
+    "extension": "f90",
+    "value": "FORTRAN"
+  },
+  {
+    "extension": "f",
+    "value": "Forth"
+  },
+  {
+    "extension": "f03",
+    "value": "FORTRAN"
+  },
+  {
+    "extension": "f08",
+    "value": "FORTRAN"
+  },
+  {
+    "extension": "f77",
+    "value": "FORTRAN"
+  },
+  {
+    "extension": "f95",
+    "value": "FORTRAN"
+  },
+  {
+    "extension": "for",
+    "value": "Forth"
+  },
+  {
+    "extension": "fpp",
+    "value": "FORTRAN"
+  },
+  {
+    "extension": "factor",
+    "value": "Factor"
+  },
+  {
+    "extension": "fy",
+    "value": "Fancy"
+  },
+  {
+    "extension": "fancypack",
+    "value": "Fancy"
+  },
+  {
+    "extension": "fan",
+    "value": "Fantom"
+  },
+  {
+    "extension": "eam.fs",
+    "value": "Formatted"
+  },
+  {
+    "extension": "fth",
+    "value": "Forth"
+  },
+  {
+    "extension": "4th",
+    "value": "Forth"
+  },
+  {
+    "extension": "forth",
+    "value": "Forth"
+  },
+  {
+    "extension": "fr",
+    "value": "Text"
+  },
+  {
+    "extension": "frt",
+    "value": "Forth"
+  },
+  {
+    "extension": "ftl",
+    "value": "FreeMarker"
+  },
+  {
+    "extension": "g",
+    "value": "GAP"
+  },
+  {
+    "extension": "gco",
+    "value": "G-code"
+  },
+  {
+    "extension": "gcode",
+    "value": "G-code"
+  },
+  {
+    "extension": "gms",
+    "value": "GAMS"
+  },
+  {
+    "extension": "gap",
+    "value": "GAP"
+  },
+  {
+    "extension": "gd",
+    "value": "GDScript"
+  },
+  {
+    "extension": "gi",
+    "value": "GAP"
+  },
+  {
+    "extension": "tst",
+    "value": "Scilab"
+  },
+  {
+    "extension": "s",
+    "value": "GAS"
+  },
+  {
+    "extension": "ms",
+    "value": "MAXScript"
+  },
+  {
+    "extension": "glsl",
+    "value": "GLSL"
+  },
+  {
+    "extension": "fp",
+    "value": "GLSL"
+  },
+  {
+    "extension": "frag",
+    "value": "JavaScript"
+  },
+  {
+    "extension": "frg",
+    "value": "GLSL"
+  },
+  {
+    "extension": "fsh",
+    "value": "GLSL"
+  },
+  {
+    "extension": "fshader",
+    "value": "GLSL"
+  },
+  {
+    "extension": "geo",
+    "value": "GLSL"
+  },
+  {
+    "extension": "geom",
+    "value": "GLSL"
+  },
+  {
+    "extension": "glslv",
+    "value": "GLSL"
+  },
+  {
+    "extension": "gshader",
+    "value": "GLSL"
+  },
+  {
+    "extension": "shader",
+    "value": "GLSL"
+  },
+  {
+    "extension": "vert",
+    "value": "GLSL"
+  },
+  {
+    "extension": "vrx",
+    "value": "GLSL"
+  },
+  {
+    "extension": "vsh",
+    "value": "GLSL"
+  },
+  {
+    "extension": "vshader",
+    "value": "GLSL"
+  },
+  {
+    "extension": "gml",
+    "value": "XML"
+  },
+  {
+    "extension": "kid",
+    "value": "Genshi"
+  },
+  {
+    "extension": "ebuild",
+    "value": "Gentoo Ebuild"
+  },
+  {
+    "extension": "eclass",
+    "value": "Gentoo Eclass"
+  },
+  {
+    "extension": "po",
+    "value": "Gettext Catalog"
+  },
+  {
+    "extension": "pot",
+    "value": "Gettext Catalog"
+  },
+  {
+    "extension": "glf",
+    "value": "Glyph"
+  },
+  {
+    "extension": "gp",
+    "value": "Gnuplot"
+  },
+  {
+    "extension": "gnu",
+    "value": "Gnuplot"
+  },
+  {
+    "extension": "gnuplot",
+    "value": "Gnuplot"
+  },
+  {
+    "extension": "plot",
+    "value": "Gnuplot"
+  },
+  {
+    "extension": "plt",
+    "value": "Gnuplot"
+  },
+  {
+    "extension": "go",
+    "value": "Go"
+  },
+  {
+    "extension": "golo",
+    "value": "Golo"
+  },
+  {
+    "extension": "gs",
+    "value": "JavaScript"
+  },
+  {
+    "extension": "gst",
+    "value": "Gosu"
+  },
+  {
+    "extension": "gsx",
+    "value": "Gosu"
+  },
+  {
+    "extension": "vark",
+    "value": "Gosu"
+  },
+  {
+    "extension": "grace",
+    "value": "Grace"
+  },
+  {
+    "extension": "gradle",
+    "value": "Gradle"
+  },
+  {
+    "extension": "gf",
+    "value": "Grammatical Framework"
+  },
+  {
+    "extension": "graphql",
+    "value": "GraphQL"
+  },
+  {
+    "extension": "dot",
+    "value": "Graphviz (DOT)"
+  },
+  {
+    "extension": "gv",
+    "value": "Graphviz (DOT)"
+  },
+  {
+    "extension": "man",
+    "value": "Groff"
+  },
+  {
+    "extension": "1in",
+    "value": "Groff"
+  },
+  {
+    "extension": "1m",
+    "value": "Groff"
+  },
+  {
+    "extension": "1x",
+    "value": "Groff"
+  },
+  {
+    "extension": "3in",
+    "value": "Groff"
+  },
+  {
+    "extension": "3m",
+    "value": "Groff"
+  },
+  {
+    "extension": "3qt",
+    "value": "Groff"
+  },
+  {
+    "extension": "3x",
+    "value": "Groff"
+  },
+  {
+    "extension": "me",
+    "value": "Groff"
+  },
+  {
+    "extension": "n",
+    "value": "Nemerle"
+  },
+  {
+    "extension": "rno",
+    "value": "Groff"
+  },
+  {
+    "extension": "roff",
+    "value": "Groff"
+  },
+  {
+    "extension": "groovy",
+    "value": "Groovy"
+  },
+  {
+    "extension": "grt",
+    "value": "Groovy"
+  },
+  {
+    "extension": "gtpl",
+    "value": "Groovy"
+  },
+  {
+    "extension": "gvy",
+    "value": "Groovy"
+  },
+  {
+    "extension": "gsp",
+    "value": "Groovy Server Pages"
+  },
+  {
+    "extension": "hcl",
+    "value": "HCL"
+  },
+  {
+    "extension": "tf",
+    "value": "HCL"
+  },
+  {
+    "extension": "hlsl",
+    "value": "HLSL"
+  },
+  {
+    "extension": "fxh",
+    "value": "HLSL"
+  },
+  {
+    "extension": "hlsli",
+    "value": "HLSL"
+  },
+  {
+    "extension": "html",
+    "value": "HTML"
+  },
+  {
+    "extension": "htm",
+    "value": "HTML"
+  },
+  {
+    "extension": "html.hl",
+    "value": "HTML"
+  },
+  {
+    "extension": "st",
+    "value": "Smalltalk"
+  },
+  {
+    "extension": "xht",
+    "value": "HTML"
+  },
+  {
+    "extension": "xhtml",
+    "value": "HTML"
+  },
+  {
+    "extension": "mustache",
+    "value": "HTML+Django"
+  },
+  {
+    "extension": "jinja",
+    "value": "HTML+Django"
+  },
+  {
+    "extension": "eex",
+    "value": "HTML+EEX"
+  },
+  {
+    "extension": "erb",
+    "value": "HTML+ERB"
+  },
+  {
+    "extension": "erb.deface",
+    "value": "HTML+ERB"
+  },
+  {
+    "extension": "phtml",
+    "value": "HTML+PHP"
+  },
+  {
+    "extension": "http",
+    "value": "HTTP"
+  },
+  {
+    "extension": "php",
+    "value": "PHP"
+  },
+  {
+    "extension": "haml",
+    "value": "Haml"
+  },
+  {
+    "extension": "haml.deface",
+    "value": "Haml"
+  },
+  {
+    "extension": "handlebars",
+    "value": "Handlebars"
+  },
+  {
+    "extension": "hbs",
+    "value": "Handlebars"
+  },
+  {
+    "extension": "hb",
+    "value": "Harbour"
+  },
+  {
+    "extension": "hs",
+    "value": "Haskell"
+  },
+  {
+    "extension": "hsc",
+    "value": "Haskell"
+  },
+  {
+    "extension": "hx",
+    "value": "Haxe"
+  },
+  {
+    "extension": "hxsl",
+    "value": "Haxe"
+  },
+  {
+    "extension": "hy",
+    "value": "Hy"
+  },
+  {
+    "extension": "pro",
+    "value": "QMake"
+  },
+  {
+    "extension": "dlm",
+    "value": "IDL"
+  },
+  {
+    "extension": "ipf",
+    "value": "IGOR Pro"
+  },
+  {
+    "extension": "ini",
+    "value": "INI"
+  },
+  {
+    "extension": "cfg",
+    "value": "INI"
+  },
+  {
+    "extension": "prefs",
+    "value": "INI"
+  },
+  {
+    "extension": "properties",
+    "value": "INI"
+  },
+  {
+    "extension": "irclog",
+    "value": "IRC log"
+  },
+  {
+    "extension": "weechatlog",
+    "value": "IRC log"
+  },
+  {
+    "extension": "idr",
+    "value": "Idris"
+  },
+  {
+    "extension": "lidr",
+    "value": "Idris"
+  },
+  {
+    "extension": "ni",
+    "value": "Inform 7"
+  },
+  {
+    "extension": "i7x",
+    "value": "Inform 7"
+  },
+  {
+    "extension": "iss",
+    "value": "Inno Setup"
+  },
+  {
+    "extension": "io",
+    "value": "Io"
+  },
+  {
+    "extension": "ik",
+    "value": "Ioke"
+  },
+  {
+    "extension": "thy",
+    "value": "Isabelle"
+  },
+  {
+    "extension": "ijs",
+    "value": "J"
+  },
+  {
+    "extension": "flex",
+    "value": "JFlex"
+  },
+  {
+    "extension": "jflex",
+    "value": "JFlex"
+  },
+  {
+    "extension": "json",
+    "value": "JSON"
+  },
+  {
+    "extension": "geojson",
+    "value": "JSON"
+  },
+  {
+    "extension": "lock",
+    "value": "JSON"
+  },
+  {
+    "extension": "topojson",
+    "value": "JSON"
+  },
+  {
+    "extension": "json5",
+    "value": "JSON5"
+  },
+  {
+    "extension": "jsonld",
+    "value": "JSONLD"
+  },
+  {
+    "extension": "jq",
+    "value": "JSONiq"
+  },
+  {
+    "extension": "jsx",
+    "value": "JSX"
+  },
+  {
+    "extension": "jade",
+    "value": "Jade"
+  },
+  {
+    "extension": "j",
+    "value": "Objective-J"
+  },
+  {
+    "extension": "java",
+    "value": "Java"
+  },
+  {
+    "extension": "jsp",
+    "value": "Java Server Pages"
+  },
+  {
+    "extension": "js",
+    "value": "JavaScript"
+  },
+  {
+    "extension": "_js",
+    "value": "JavaScript"
+  },
+  {
+    "extension": "bones",
+    "value": "JavaScript"
+  },
+  {
+    "extension": "es6",
+    "value": "JavaScript"
+  },
+  {
+    "extension": "jake",
+    "value": "JavaScript"
+  },
+  {
+    "extension": "jsb",
+    "value": "JavaScript"
+  },
+  {
+    "extension": "jscad",
+    "value": "JavaScript"
+  },
+  {
+    "extension": "jsfl",
+    "value": "JavaScript"
+  },
+  {
+    "extension": "jsm",
+    "value": "JavaScript"
+  },
+  {
+    "extension": "jss",
+    "value": "JavaScript"
+  },
+  {
+    "extension": "njs",
+    "value": "JavaScript"
+  },
+  {
+    "extension": "pac",
+    "value": "JavaScript"
+  },
+  {
+    "extension": "sjs",
+    "value": "JavaScript"
+  },
+  {
+    "extension": "ssjs",
+    "value": "JavaScript"
+  },
+  {
+    "extension": "sublime-build",
+    "value": "JavaScript"
+  },
+  {
+    "extension": "sublime-commands",
+    "value": "JavaScript"
+  },
+  {
+    "extension": "sublime-completions",
+    "value": "JavaScript"
+  },
+  {
+    "extension": "sublime-keymap",
+    "value": "JavaScript"
+  },
+  {
+    "extension": "sublime-macro",
+    "value": "JavaScript"
+  },
+  {
+    "extension": "sublime-menu",
+    "value": "JavaScript"
+  },
+  {
+    "extension": "sublime-mousemap",
+    "value": "JavaScript"
+  },
+  {
+    "extension": "sublime-project",
+    "value": "JavaScript"
+  },
+  {
+    "extension": "sublime-settings",
+    "value": "JavaScript"
+  },
+  {
+    "extension": "sublime-theme",
+    "value": "JavaScript"
+  },
+  {
+    "extension": "sublime-workspace",
+    "value": "JavaScript"
+  },
+  {
+    "extension": "sublime_metrics",
+    "value": "JavaScript"
+  },
+  {
+    "extension": "sublime_session",
+    "value": "JavaScript"
+  },
+  {
+    "extension": "xsjs",
+    "value": "JavaScript"
+  },
+  {
+    "extension": "xsjslib",
+    "value": "JavaScript"
+  },
+  {
+    "extension": "jl",
+    "value": "Julia"
+  },
+  {
+    "extension": "ipynb",
+    "value": "Jupyter Notebook"
+  },
+  {
+    "extension": "krl",
+    "value": "KRL"
+  },
+  {
+    "extension": "kicad_pcb",
+    "value": "KiCad"
+  },
+  {
+    "extension": "kit",
+    "value": "Kit"
+  },
+  {
+    "extension": "kt",
+    "value": "Kotlin"
+  },
+  {
+    "extension": "ktm",
+    "value": "Kotlin"
+  },
+  {
+    "extension": "kts",
+    "value": "Kotlin"
+  },
+  {
+    "extension": "lfe",
+    "value": "LFE"
+  },
+  {
+    "extension": "ll",
+    "value": "LLVM"
+  },
+  {
+    "extension": "lol",
+    "value": "LOLCODE"
+  },
+  {
+    "extension": "lsl",
+    "value": "LSL"
+  },
+  {
+    "extension": "lslp",
+    "value": "LSL"
+  },
+  {
+    "extension": "lvproj",
+    "value": "LabVIEW"
+  },
+  {
+    "extension": "lasso",
+    "value": "Lasso"
+  },
+  {
+    "extension": "las",
+    "value": "Lasso"
+  },
+  {
+    "extension": "lasso8",
+    "value": "Lasso"
+  },
+  {
+    "extension": "lasso9",
+    "value": "Lasso"
+  },
+  {
+    "extension": "ldml",
+    "value": "Lasso"
+  },
+  {
+    "extension": "latte",
+    "value": "Latte"
+  },
+  {
+    "extension": "lean",
+    "value": "Lean"
+  },
+  {
+    "extension": "hlean",
+    "value": "Lean"
+  },
+  {
+    "extension": "less",
+    "value": "Less"
+  },
+  {
+    "extension": "lex",
+    "value": "Lex"
+  },
+  {
+    "extension": "ly",
+    "value": "LilyPond"
+  },
+  {
+    "extension": "ily",
+    "value": "LilyPond"
+  },
+  {
+    "extension": "m",
+    "value": "Objective-C"
+  },
+  {
+    "extension": "ld",
+    "value": "Linker Script"
+  },
+  {
+    "extension": "lds",
+    "value": "Linker Script"
+  },
+  {
+    "extension": "liquid",
+    "value": "Liquid"
+  },
+  {
+    "extension": "lagda",
+    "value": "Literate Agda"
+  },
+  {
+    "extension": "litcoffee",
+    "value": "Literate CoffeeScript"
+  },
+  {
+    "extension": "lhs",
+    "value": "Literate Haskell"
+  },
+  {
+    "extension": "ls",
+    "value": "LoomScript"
+  },
+  {
+    "extension": "_ls",
+    "value": "LiveScript"
+  },
+  {
+    "extension": "xm",
+    "value": "Logos"
+  },
+  {
+    "extension": "x",
+    "value": "Logos"
+  },
+  {
+    "extension": "xi",
+    "value": "Logos"
+  },
+  {
+    "extension": "lgt",
+    "value": "Logtalk"
+  },
+  {
+    "extension": "logtalk",
+    "value": "Logtalk"
+  },
+  {
+    "extension": "lookml",
+    "value": "LookML"
+  },
+  {
+    "extension": "lua",
+    "value": "Lua"
+  },
+  {
+    "extension": "fcgi",
+    "value": "Shell"
+  },
+  {
+    "extension": "nse",
+    "value": "Lua"
+  },
+  {
+    "extension": "pd_lua",
+    "value": "Lua"
+  },
+  {
+    "extension": "rbxs",
+    "value": "Lua"
+  },
+  {
+    "extension": "wlua",
+    "value": "Lua"
+  },
+  {
+    "extension": "mumps",
+    "value": "M"
+  },
+  {
+    "extension": "m4",
+    "value": "M4Sugar"
+  },
+  {
+    "extension": "mcr",
+    "value": "MAXScript"
+  },
+  {
+    "extension": "mtml",
+    "value": "MTML"
+  },
+  {
+    "extension": "muf",
+    "value": "MUF"
+  },
+  {
+    "extension": "mak",
+    "value": "Makefile"
+  },
+  {
+    "extension": "mk",
+    "value": "Makefile"
+  },
+  {
+    "extension": "mkfile",
+    "value": "Makefile"
+  },
+  {
+    "extension": "mako",
+    "value": "Mako"
+  },
+  {
+    "extension": "mao",
+    "value": "Mako"
+  },
+  {
+    "extension": "md",
+    "value": "Markdown"
+  },
+  {
+    "extension": "markdown",
+    "value": "Markdown"
+  },
+  {
+    "extension": "mkd",
+    "value": "Markdown"
+  },
+  {
+    "extension": "mkdn",
+    "value": "Markdown"
+  },
+  {
+    "extension": "mkdown",
+    "value": "Markdown"
+  },
+  {
+    "extension": "ron",
+    "value": "Markdown"
+  },
+  {
+    "extension": "mask",
+    "value": "Mask"
+  },
+  {
+    "extension": "mathematica",
+    "value": "Mathematica"
+  },
+  {
+    "extension": "cdf",
+    "value": "Mathematica"
+  },
+  {
+    "extension": "ma",
+    "value": "Mathematica"
+  },
+  {
+    "extension": "mt",
+    "value": "Mathematica"
+  },
+  {
+    "extension": "nb",
+    "value": "Text"
+  },
+  {
+    "extension": "nbp",
+    "value": "Mathematica"
+  },
+  {
+    "extension": "wl",
+    "value": "Mathematica"
+  },
+  {
+    "extension": "wlt",
+    "value": "Mathematica"
+  },
+  {
+    "extension": "matlab",
+    "value": "Matlab"
+  },
+  {
+    "extension": "maxpat",
+    "value": "Max"
+  },
+  {
+    "extension": "maxhelp",
+    "value": "Max"
+  },
+  {
+    "extension": "maxproj",
+    "value": "Max"
+  },
+  {
+    "extension": "mxt",
+    "value": "Max"
+  },
+  {
+    "extension": "pat",
+    "value": "Max"
+  },
+  {
+    "extension": "mediawiki",
+    "value": "MediaWiki"
+  },
+  {
+    "extension": "wiki",
+    "value": "MediaWiki"
+  },
+  {
+    "extension": "moo",
+    "value": "Moocode"
+  },
+  {
+    "extension": "metal",
+    "value": "Metal"
+  },
+  {
+    "extension": "minid",
+    "value": "MiniD"
+  },
+  {
+    "extension": "druby",
+    "value": "Mirah"
+  },
+  {
+    "extension": "duby",
+    "value": "Mirah"
+  },
+  {
+    "extension": "mir",
+    "value": "Mirah"
+  },
+  {
+    "extension": "mirah",
+    "value": "Mirah"
+  },
+  {
+    "extension": "mo",
+    "value": "Modelica"
+  },
+  {
+    "extension": "mms",
+    "value": "Module Management System"
+  },
+  {
+    "extension": "mmk",
+    "value": "Module Management System"
+  },
+  {
+    "extension": "monkey",
+    "value": "Monkey"
+  },
+  {
+    "extension": "moon",
+    "value": "MoonScript"
+  },
+  {
+    "extension": "myt",
+    "value": "Myghty"
+  },
+  {
+    "extension": "ncl",
+    "value": "Text"
+  },
+  {
+    "extension": "nl",
+    "value": "NewLisp"
+  },
+  {
+    "extension": "nsi",
+    "value": "NSIS"
+  },
+  {
+    "extension": "nsh",
+    "value": "NSIS"
+  },
+  {
+    "extension": "axs",
+    "value": "NetLinx"
+  },
+  {
+    "extension": "axi",
+    "value": "NetLinx"
+  },
+  {
+    "extension": "axs.erb",
+    "value": "NetLinx+ERB"
+  },
+  {
+    "extension": "axi.erb",
+    "value": "NetLinx+ERB"
+  },
+  {
+    "extension": "nlogo",
+    "value": "NetLogo"
+  },
+  {
+    "extension": "nginxconf",
+    "value": "Nginx"
+  },
+  {
+    "extension": "nim",
+    "value": "Nimrod"
+  },
+  {
+    "extension": "nimrod",
+    "value": "Nimrod"
+  },
+  {
+    "extension": "ninja",
+    "value": "Ninja"
+  },
+  {
+    "extension": "nit",
+    "value": "Nit"
+  },
+  {
+    "extension": "nix",
+    "value": "Nix"
+  },
+  {
+    "extension": "nu",
+    "value": "Nu"
+  },
+  {
+    "extension": "numpy",
+    "value": "NumPy"
+  },
+  {
+    "extension": "numpyw",
+    "value": "NumPy"
+  },
+  {
+    "extension": "numsc",
+    "value": "NumPy"
+  },
+  {
+    "extension": "ml",
+    "value": "OCaml"
+  },
+  {
+    "extension": "eliom",
+    "value": "OCaml"
+  },
+  {
+    "extension": "eliomi",
+    "value": "OCaml"
+  },
+  {
+    "extension": "ml4",
+    "value": "OCaml"
+  },
+  {
+    "extension": "mli",
+    "value": "OCaml"
+  },
+  {
+    "extension": "mll",
+    "value": "OCaml"
+  },
+  {
+    "extension": "mly",
+    "value": "OCaml"
+  },
+  {
+    "extension": "objdump",
+    "value": "ObjDump"
+  },
+  {
+    "extension": "mm",
+    "value": "XML"
+  },
+  {
+    "extension": "sj",
+    "value": "Objective-J"
+  },
+  {
+    "extension": "omgrofl",
+    "value": "Omgrofl"
+  },
+  {
+    "extension": "opa",
+    "value": "Opa"
+  },
+  {
+    "extension": "opal",
+    "value": "Opal"
+  },
+  {
+    "extension": "opencl",
+    "value": "OpenCL"
+  },
+  {
+    "extension": "p",
+    "value": "OpenEdge ABL"
+  },
+  {
+    "extension": "scad",
+    "value": "OpenSCAD"
+  },
+  {
+    "extension": "org",
+    "value": "Org"
+  },
+  {
+    "extension": "ox",
+    "value": "Ox"
+  },
+  {
+    "extension": "oxh",
+    "value": "Ox"
+  },
+  {
+    "extension": "oxo",
+    "value": "Ox"
+  },
+  {
+    "extension": "oxygene",
+    "value": "Oxygene"
+  },
+  {
+    "extension": "oz",
+    "value": "Oz"
+  },
+  {
+    "extension": "pwn",
+    "value": "PAWN"
+  },
+  {
+    "extension": "aw",
+    "value": "PHP"
+  },
+  {
+    "extension": "ctp",
+    "value": "PHP"
+  },
+  {
+    "extension": "php3",
+    "value": "PHP"
+  },
+  {
+    "extension": "php4",
+    "value": "PHP"
+  },
+  {
+    "extension": "php5",
+    "value": "PHP"
+  },
+  {
+    "extension": "phps",
+    "value": "PHP"
+  },
+  {
+    "extension": "phpt",
+    "value": "PHP"
+  },
+  {
+    "extension": "pls",
+    "value": "PLSQL"
+  },
+  {
+    "extension": "pck",
+    "value": "PLSQL"
+  },
+  {
+    "extension": "pkb",
+    "value": "PLSQL"
+  },
+  {
+    "extension": "pks",
+    "value": "PLSQL"
+  },
+  {
+    "extension": "plb",
+    "value": "PLSQL"
+  },
+  {
+    "extension": "plsql",
+    "value": "PLSQL"
+  },
+  {
+    "extension": "sql",
+    "value": "SQLPL"
+  },
+  {
+    "extension": "pov",
+    "value": "POV-Ray SDL"
+  },
+  {
+    "extension": "pan",
+    "value": "Pan"
+  },
+  {
+    "extension": "psc",
+    "value": "Papyrus"
+  },
+  {
+    "extension": "parrot",
+    "value": "Parrot"
+  },
+  {
+    "extension": "pasm",
+    "value": "Parrot Assembly"
+  },
+  {
+    "extension": "pir",
+    "value": "Parrot Internal Representation"
+  },
+  {
+    "extension": "pas",
+    "value": "Pascal"
+  },
+  {
+    "extension": "dfm",
+    "value": "Pascal"
+  },
+  {
+    "extension": "dpr",
+    "value": "Pascal"
+  },
+  {
+    "extension": "lpr",
+    "value": "Pascal"
+  },
+  {
+    "extension": "pp",
+    "value": "Puppet"
+  },
+  {
+    "extension": "pl",
+    "value": "Prolog"
+  },
+  {
+    "extension": "al",
+    "value": "Perl"
+  },
+  {
+    "extension": "cgi",
+    "value": "Shell"
+  },
+  {
+    "extension": "perl",
+    "value": "Perl"
+  },
+  {
+    "extension": "ph",
+    "value": "Perl"
+  },
+  {
+    "extension": "plx",
+    "value": "Perl"
+  },
+  {
+    "extension": "pm",
+    "value": "Perl6"
+  },
+  {
+    "extension": "pod",
+    "value": "Pod"
+  },
+  {
+    "extension": "psgi",
+    "value": "Perl"
+  },
+  {
+    "extension": "t",
+    "value": "Turing"
+  },
+  {
+    "extension": "6pl",
+    "value": "Perl6"
+  },
+  {
+    "extension": "6pm",
+    "value": "Perl6"
+  },
+  {
+    "extension": "nqp",
+    "value": "Perl6"
+  },
+  {
+    "extension": "p6",
+    "value": "Perl6"
+  },
+  {
+    "extension": "p6l",
+    "value": "Perl6"
+  },
+  {
+    "extension": "p6m",
+    "value": "Perl6"
+  },
+  {
+    "extension": "pl6",
+    "value": "Perl6"
+  },
+  {
+    "extension": "pm6",
+    "value": "Perl6"
+  },
+  {
+    "extension": "pkl",
+    "value": "Pickle"
+  },
+  {
+    "extension": "pig",
+    "value": "PigLatin"
+  },
+  {
+    "extension": "pike",
+    "value": "Pike"
+  },
+  {
+    "extension": "pmod",
+    "value": "Pike"
+  },
+  {
+    "extension": "pogo",
+    "value": "PogoScript"
+  },
+  {
+    "extension": "pony",
+    "value": "Pony"
+  },
+  {
+    "extension": "ps",
+    "value": "PostScript"
+  },
+  {
+    "extension": "eps",
+    "value": "PostScript"
+  },
+  {
+    "extension": "ps1",
+    "value": "PowerShell"
+  },
+  {
+    "extension": "psd1",
+    "value": "PowerShell"
+  },
+  {
+    "extension": "psm1",
+    "value": "PowerShell"
+  },
+  {
+    "extension": "pde",
+    "value": "Processing"
+  },
+  {
+    "extension": "prolog",
+    "value": "Prolog"
+  },
+  {
+    "extension": "yap",
+    "value": "Prolog"
+  },
+  {
+    "extension": "spin",
+    "value": "Propeller Spin"
+  },
+  {
+    "extension": "proto",
+    "value": "Protocol Buffer"
+  },
+  {
+    "extension": "pub",
+    "value": "Public Key"
+  },
+  {
+    "extension": "pd",
+    "value": "Pure Data"
+  },
+  {
+    "extension": "pb",
+    "value": "PureBasic"
+  },
+  {
+    "extension": "pbi",
+    "value": "PureBasic"
+  },
+  {
+    "extension": "purs",
+    "value": "PureScript"
+  },
+  {
+    "extension": "py",
+    "value": "Python"
+  },
+  {
+    "extension": "bzl",
+    "value": "Python"
+  },
+  {
+    "extension": "gyp",
+    "value": "Python"
+  },
+  {
+    "extension": "lmi",
+    "value": "Python"
+  },
+  {
+    "extension": "pyde",
+    "value": "Python"
+  },
+  {
+    "extension": "pyp",
+    "value": "Python"
+  },
+  {
+    "extension": "pyt",
+    "value": "Python"
+  },
+  {
+    "extension": "pyw",
+    "value": "Python"
+  },
+  {
+    "extension": "rpy",
+    "value": "Ren'Py"
+  },
+  {
+    "extension": "tac",
+    "value": "Python"
+  },
+  {
+    "extension": "wsgi",
+    "value": "Python"
+  },
+  {
+    "extension": "xpy",
+    "value": "Python"
+  },
+  {
+    "extension": "pytb",
+    "value": "Python traceback"
+  },
+  {
+    "extension": "qml",
+    "value": "QML"
+  },
+  {
+    "extension": "qbs",
+    "value": "QML"
+  },
+  {
+    "extension": "pri",
+    "value": "QMake"
+  },
+  {
+    "extension": "r",
+    "value": "Rebol"
+  },
+  {
+    "extension": "rd",
+    "value": "R"
+  },
+  {
+    "extension": "rsx",
+    "value": "R"
+  },
+  {
+    "extension": "raml",
+    "value": "RAML"
+  },
+  {
+    "extension": "rdoc",
+    "value": "RDoc"
+  },
+  {
+    "extension": "rbbas",
+    "value": "REALbasic"
+  },
+  {
+    "extension": "rbfrm",
+    "value": "REALbasic"
+  },
+  {
+    "extension": "rbmnu",
+    "value": "REALbasic"
+  },
+  {
+    "extension": "rbres",
+    "value": "REALbasic"
+  },
+  {
+    "extension": "rbtbar",
+    "value": "REALbasic"
+  },
+  {
+    "extension": "rbuistate",
+    "value": "REALbasic"
+  },
+  {
+    "extension": "rhtml",
+    "value": "RHTML"
+  },
+  {
+    "extension": "rmd",
+    "value": "RMarkdown"
+  },
+  {
+    "extension": "rkt",
+    "value": "Racket"
+  },
+  {
+    "extension": "rktd",
+    "value": "Racket"
+  },
+  {
+    "extension": "rktl",
+    "value": "Racket"
+  },
+  {
+    "extension": "scrbl",
+    "value": "Racket"
+  },
+  {
+    "extension": "rl",
+    "value": "Ragel in Ruby Host"
+  },
+  {
+    "extension": "raw",
+    "value": "Raw token data"
+  },
+  {
+    "extension": "reb",
+    "value": "Rebol"
+  },
+  {
+    "extension": "r2",
+    "value": "Rebol"
+  },
+  {
+    "extension": "r3",
+    "value": "Rebol"
+  },
+  {
+    "extension": "rebol",
+    "value": "Rebol"
+  },
+  {
+    "extension": "red",
+    "value": "Red"
+  },
+  {
+    "extension": "reds",
+    "value": "Red"
+  },
+  {
+    "extension": "cw",
+    "value": "Redcode"
+  },
+  {
+    "extension": "rs",
+    "value": "Rust"
+  },
+  {
+    "extension": "rsh",
+    "value": "RenderScript"
+  },
+  {
+    "extension": "robot",
+    "value": "RobotFramework"
+  },
+  {
+    "extension": "rg",
+    "value": "Rouge"
+  },
+  {
+    "extension": "rb",
+    "value": "Ruby"
+  },
+  {
+    "extension": "builder",
+    "value": "Ruby"
+  },
+  {
+    "extension": "gemspec",
+    "value": "Ruby"
+  },
+  {
+    "extension": "god",
+    "value": "Ruby"
+  },
+  {
+    "extension": "irbrc",
+    "value": "Ruby"
+  },
+  {
+    "extension": "jbuilder",
+    "value": "Ruby"
+  },
+  {
+    "extension": "mspec",
+    "value": "Ruby"
+  },
+  {
+    "extension": "pluginspec",
+    "value": "XML"
+  },
+  {
+    "extension": "podspec",
+    "value": "Ruby"
+  },
+  {
+    "extension": "rabl",
+    "value": "Ruby"
+  },
+  {
+    "extension": "rake",
+    "value": "Ruby"
+  },
+  {
+    "extension": "rbuild",
+    "value": "Ruby"
+  },
+  {
+    "extension": "rbw",
+    "value": "Ruby"
+  },
+  {
+    "extension": "rbx",
+    "value": "Ruby"
+  },
+  {
+    "extension": "ru",
+    "value": "Ruby"
+  },
+  {
+    "extension": "ruby",
+    "value": "Ruby"
+  },
+  {
+    "extension": "thor",
+    "value": "Ruby"
+  },
+  {
+    "extension": "watchr",
+    "value": "Ruby"
+  },
+  {
+    "extension": "rs.in",
+    "value": "Rust"
+  },
+  {
+    "extension": "sas",
+    "value": "SAS"
+  },
+  {
+    "extension": "scss",
+    "value": "SCSS"
+  },
+  {
+    "extension": "smt2",
+    "value": "SMT"
+  },
+  {
+    "extension": "smt",
+    "value": "SMT"
+  },
+  {
+    "extension": "sparql",
+    "value": "SPARQL"
+  },
+  {
+    "extension": "rq",
+    "value": "SPARQL"
+  },
+  {
+    "extension": "sqf",
+    "value": "SQF"
+  },
+  {
+    "extension": "hqf",
+    "value": "SQF"
+  },
+  {
+    "extension": "cql",
+    "value": "SQL"
+  },
+  {
+    "extension": "ddl",
+    "value": "SQL"
+  },
+  {
+    "extension": "prc",
+    "value": "SQL"
+  },
+  {
+    "extension": "tab",
+    "value": "SQL"
+  },
+  {
+    "extension": "udf",
+    "value": "SQL"
+  },
+  {
+    "extension": "viw",
+    "value": "SQL"
+  },
+  {
+    "extension": "db2",
+    "value": "SQLPL"
+  },
+  {
+    "extension": "ston",
+    "value": "STON"
+  },
+  {
+    "extension": "svg",
+    "value": "SVG"
+  },
+  {
+    "extension": "sage",
+    "value": "Sage"
+  },
+  {
+    "extension": "sagews",
+    "value": "Sage"
+  },
+  {
+    "extension": "sls",
+    "value": "Scheme"
+  },
+  {
+    "extension": "sass",
+    "value": "Sass"
+  },
+  {
+    "extension": "scala",
+    "value": "Scala"
+  },
+  {
+    "extension": "sbt",
+    "value": "Scala"
+  },
+  {
+    "extension": "sc",
+    "value": "SuperCollider"
+  },
+  {
+    "extension": "scaml",
+    "value": "Scaml"
+  },
+  {
+    "extension": "scm",
+    "value": "Scheme"
+  },
+  {
+    "extension": "sld",
+    "value": "Scheme"
+  },
+  {
+    "extension": "sps",
+    "value": "Scheme"
+  },
+  {
+    "extension": "ss",
+    "value": "Scheme"
+  },
+  {
+    "extension": "sci",
+    "value": "Scilab"
+  },
+  {
+    "extension": "sce",
+    "value": "Scilab"
+  },
+  {
+    "extension": "self",
+    "value": "Self"
+  },
+  {
+    "extension": "sh",
+    "value": "Shell"
+  },
+  {
+    "extension": "bash",
+    "value": "Shell"
+  },
+  {
+    "extension": "bats",
+    "value": "Shell"
+  },
+  {
+    "extension": "command",
+    "value": "Shell"
+  },
+  {
+    "extension": "ksh",
+    "value": "Shell"
+  },
+  {
+    "extension": "sh.in",
+    "value": "Shell"
+  },
+  {
+    "extension": "tmux",
+    "value": "Shell"
+  },
+  {
+    "extension": "tool",
+    "value": "Shell"
+  },
+  {
+    "extension": "zsh",
+    "value": "Shell"
+  },
+  {
+    "extension": "sh-session",
+    "value": "ShellSession"
+  },
+  {
+    "extension": "shen",
+    "value": "Shen"
+  },
+  {
+    "extension": "sl",
+    "value": "Slash"
+  },
+  {
+    "extension": "slim",
+    "value": "Slim"
+  },
+  {
+    "extension": "smali",
+    "value": "Smali"
+  },
+  {
+    "extension": "tpl",
+    "value": "Smarty"
+  },
+  {
+    "extension": "sp",
+    "value": "SourcePawn"
+  },
+  {
+    "extension": "sma",
+    "value": "SourcePawn"
+  },
+  {
+    "extension": "nut",
+    "value": "Squirrel"
+  },
+  {
+    "extension": "stan",
+    "value": "Stan"
+  },
+  {
+    "extension": "ML",
+    "value": "Standard ML"
+  },
+  {
+    "extension": "fun",
+    "value": "Standard ML"
+  },
+  {
+    "extension": "sig",
+    "value": "Standard ML"
+  },
+  {
+    "extension": "sml",
+    "value": "Standard ML"
+  },
+  {
+    "extension": "do",
+    "value": "Stata"
+  },
+  {
+    "extension": "ado",
+    "value": "Stata"
+  },
+  {
+    "extension": "doh",
+    "value": "Stata"
+  },
+  {
+    "extension": "ihlp",
+    "value": "Stata"
+  },
+  {
+    "extension": "mata",
+    "value": "Stata"
+  },
+  {
+    "extension": "matah",
+    "value": "Stata"
+  },
+  {
+    "extension": "sthlp",
+    "value": "Stata"
+  },
+  {
+    "extension": "styl",
+    "value": "Stylus"
+  },
+  {
+    "extension": "scd",
+    "value": "SuperCollider"
+  },
+  {
+    "extension": "swift",
+    "value": "Swift"
+  },
+  {
+    "extension": "sv",
+    "value": "SystemVerilog"
+  },
+  {
+    "extension": "svh",
+    "value": "SystemVerilog"
+  },
+  {
+    "extension": "vh",
+    "value": "SystemVerilog"
+  },
+  {
+    "extension": "toml",
+    "value": "TOML"
+  },
+  {
+    "extension": "txl",
+    "value": "TXL"
+  },
+  {
+    "extension": "tcl",
+    "value": "Tcl"
+  },
+  {
+    "extension": "adp",
+    "value": "Tcl"
+  },
+  {
+    "extension": "tm",
+    "value": "Tcl"
+  },
+  {
+    "extension": "tcsh",
+    "value": "Tcsh"
+  },
+  {
+    "extension": "csh",
+    "value": "Tcsh"
+  },
+  {
+    "extension": "tex",
+    "value": "TeX"
+  },
+  {
+    "extension": "aux",
+    "value": "TeX"
+  },
+  {
+    "extension": "bbx",
+    "value": "TeX"
+  },
+  {
+    "extension": "bib",
+    "value": "TeX"
+  },
+  {
+    "extension": "cbx",
+    "value": "TeX"
+  },
+  {
+    "extension": "dtx",
+    "value": "TeX"
+  },
+  {
+    "extension": "ins",
+    "value": "TeX"
+  },
+  {
+    "extension": "lbx",
+    "value": "TeX"
+  },
+  {
+    "extension": "ltx",
+    "value": "TeX"
+  },
+  {
+    "extension": "mkii",
+    "value": "TeX"
+  },
+  {
+    "extension": "mkiv",
+    "value": "TeX"
+  },
+  {
+    "extension": "mkvi",
+    "value": "TeX"
+  },
+  {
+    "extension": "sty",
+    "value": "TeX"
+  },
+  {
+    "extension": "toc",
+    "value": "TeX"
+  },
+  {
+    "extension": "tea",
+    "value": "Tea"
+  },
+  {
+    "extension": "txt",
+    "value": "Text"
+  },
+  {
+    "extension": "no",
+    "value": "Text"
+  },
+  {
+    "extension": "textile",
+    "value": "Textile"
+  },
+  {
+    "extension": "thrift",
+    "value": "Thrift"
+  },
+  {
+    "extension": "tu",
+    "value": "Turing"
+  },
+  {
+    "extension": "ttl",
+    "value": "Turtle"
+  },
+  {
+    "extension": "twig",
+    "value": "Twig"
+  },
+  {
+    "extension": "ts",
+    "value": "TypeScript"
+  },
+  {
+    "extension": "tsx",
+    "value": "TypeScript"
+  },
+  {
+    "extension": "upc",
+    "value": "Unified Parallel C"
+  },
+  {
+    "extension": "anim",
+    "value": "Unity3D Asset"
+  },
+  {
+    "extension": "asset",
+    "value": "Unity3D Asset"
+  },
+  {
+    "extension": "mat",
+    "value": "Unity3D Asset"
+  },
+  {
+    "extension": "meta",
+    "value": "Unity3D Asset"
+  },
+  {
+    "extension": "prefab",
+    "value": "Unity3D Asset"
+  },
+  {
+    "extension": "unity",
+    "value": "Unity3D Asset"
+  },
+  {
+    "extension": "uno",
+    "value": "Uno"
+  },
+  {
+    "extension": "uc",
+    "value": "UnrealScript"
+  },
+  {
+    "extension": "ur",
+    "value": "UrWeb"
+  },
+  {
+    "extension": "urs",
+    "value": "UrWeb"
+  },
+  {
+    "extension": "vcl",
+    "value": "VCL"
+  },
+  {
+    "extension": "vhdl",
+    "value": "VHDL"
+  },
+  {
+    "extension": "vhd",
+    "value": "VHDL"
+  },
+  {
+    "extension": "vhf",
+    "value": "VHDL"
+  },
+  {
+    "extension": "vhi",
+    "value": "VHDL"
+  },
+  {
+    "extension": "vho",
+    "value": "VHDL"
+  },
+  {
+    "extension": "vhs",
+    "value": "VHDL"
+  },
+  {
+    "extension": "vht",
+    "value": "VHDL"
+  },
+  {
+    "extension": "vhw",
+    "value": "VHDL"
+  },
+  {
+    "extension": "vala",
+    "value": "Vala"
+  },
+  {
+    "extension": "vapi",
+    "value": "Vala"
+  },
+  {
+    "extension": "veo",
+    "value": "Verilog"
+  },
+  {
+    "extension": "vim",
+    "value": "VimL"
+  },
+  {
+    "extension": "vb",
+    "value": "Visual Basic"
+  },
+  {
+    "extension": "bas",
+    "value": "Visual Basic"
+  },
+  {
+    "extension": "frm",
+    "value": "Visual Basic"
+  },
+  {
+    "extension": "frx",
+    "value": "Visual Basic"
+  },
+  {
+    "extension": "vba",
+    "value": "Visual Basic"
+  },
+  {
+    "extension": "vbhtml",
+    "value": "Visual Basic"
+  },
+  {
+    "extension": "vbs",
+    "value": "Visual Basic"
+  },
+  {
+    "extension": "volt",
+    "value": "Volt"
+  },
+  {
+    "extension": "vue",
+    "value": "Vue"
+  },
+  {
+    "extension": "owl",
+    "value": "Web Ontology Language"
+  },
+  {
+    "extension": "webidl",
+    "value": "WebIDL"
+  },
+  {
+    "extension": "x10",
+    "value": "X10"
+  },
+  {
+    "extension": "xc",
+    "value": "XC"
+  },
+  {
+    "extension": "xml",
+    "value": "XML"
+  },
+  {
+    "extension": "ant",
+    "value": "XML"
+  },
+  {
+    "extension": "axml",
+    "value": "XML"
+  },
+  {
+    "extension": "ccxml",
+    "value": "XML"
+  },
+  {
+    "extension": "clixml",
+    "value": "XML"
+  },
+  {
+    "extension": "cproject",
+    "value": "XML"
+  },
+  {
+    "extension": "csl",
+    "value": "XML"
+  },
+  {
+    "extension": "csproj",
+    "value": "XML"
+  },
+  {
+    "extension": "ct",
+    "value": "XML"
+  },
+  {
+    "extension": "dita",
+    "value": "XML"
+  },
+  {
+    "extension": "ditamap",
+    "value": "XML"
+  },
+  {
+    "extension": "ditaval",
+    "value": "XML"
+  },
+  {
+    "extension": "dll.config",
+    "value": "XML"
+  },
+  {
+    "extension": "dotsettings",
+    "value": "XML"
+  },
+  {
+    "extension": "filters",
+    "value": "XML"
+  },
+  {
+    "extension": "fsproj",
+    "value": "XML"
+  },
+  {
+    "extension": "fxml",
+    "value": "XML"
+  },
+  {
+    "extension": "glade",
+    "value": "XML"
+  },
+  {
+    "extension": "grxml",
+    "value": "XML"
+  },
+  {
+    "extension": "iml",
+    "value": "XML"
+  },
+  {
+    "extension": "ivy",
+    "value": "XML"
+  },
+  {
+    "extension": "jelly",
+    "value": "XML"
+  },
+  {
+    "extension": "jsproj",
+    "value": "XML"
+  },
+  {
+    "extension": "kml",
+    "value": "XML"
+  },
+  {
+    "extension": "launch",
+    "value": "XML"
+  },
+  {
+    "extension": "mdpolicy",
+    "value": "XML"
+  },
+  {
+    "extension": "mxml",
+    "value": "XML"
+  },
+  {
+    "extension": "nproj",
+    "value": "XML"
+  },
+  {
+    "extension": "nuspec",
+    "value": "XML"
+  },
+  {
+    "extension": "odd",
+    "value": "XML"
+  },
+  {
+    "extension": "osm",
+    "value": "XML"
+  },
+  {
+    "extension": "plist",
+    "value": "XML"
+  },
+  {
+    "extension": "props",
+    "value": "XML"
+  },
+  {
+    "extension": "ps1xml",
+    "value": "XML"
+  },
+  {
+    "extension": "psc1",
+    "value": "XML"
+  },
+  {
+    "extension": "pt",
+    "value": "XML"
+  },
+  {
+    "extension": "rdf",
+    "value": "XML"
+  },
+  {
+    "extension": "rss",
+    "value": "XML"
+  },
+  {
+    "extension": "scxml",
+    "value": "XML"
+  },
+  {
+    "extension": "srdf",
+    "value": "XML"
+  },
+  {
+    "extension": "storyboard",
+    "value": "XML"
+  },
+  {
+    "extension": "stTheme",
+    "value": "XML"
+  },
+  {
+    "extension": "sublime-snippet",
+    "value": "XML"
+  },
+  {
+    "extension": "targets",
+    "value": "XML"
+  },
+  {
+    "extension": "tmCommand",
+    "value": "XML"
+  },
+  {
+    "extension": "tml",
+    "value": "XML"
+  },
+  {
+    "extension": "tmLanguage",
+    "value": "XML"
+  },
+  {
+    "extension": "tmPreferences",
+    "value": "XML"
+  },
+  {
+    "extension": "tmSnippet",
+    "value": "XML"
+  },
+  {
+    "extension": "tmTheme",
+    "value": "XML"
+  },
+  {
+    "extension": "ui",
+    "value": "XML"
+  },
+  {
+    "extension": "urdf",
+    "value": "XML"
+  },
+  {
+    "extension": "ux",
+    "value": "XML"
+  },
+  {
+    "extension": "vbproj",
+    "value": "XML"
+  },
+  {
+    "extension": "vcxproj",
+    "value": "XML"
+  },
+  {
+    "extension": "vssettings",
+    "value": "XML"
+  },
+  {
+    "extension": "vxml",
+    "value": "XML"
+  },
+  {
+    "extension": "wsdl",
+    "value": "XML"
+  },
+  {
+    "extension": "wsf",
+    "value": "XML"
+  },
+  {
+    "extension": "wxi",
+    "value": "XML"
+  },
+  {
+    "extension": "wxl",
+    "value": "XML"
+  },
+  {
+    "extension": "wxs",
+    "value": "XML"
+  },
+  {
+    "extension": "x3d",
+    "value": "XML"
+  },
+  {
+    "extension": "xacro",
+    "value": "XML"
+  },
+  {
+    "extension": "xaml",
+    "value": "XML"
+  },
+  {
+    "extension": "xib",
+    "value": "XML"
+  },
+  {
+    "extension": "xlf",
+    "value": "XML"
+  },
+  {
+    "extension": "xliff",
+    "value": "XML"
+  },
+  {
+    "extension": "xmi",
+    "value": "XML"
+  },
+  {
+    "extension": "xml.dist",
+    "value": "XML"
+  },
+  {
+    "extension": "xproj",
+    "value": "XML"
+  },
+  {
+    "extension": "xsd",
+    "value": "XML"
+  },
+  {
+    "extension": "xul",
+    "value": "XML"
+  },
+  {
+    "extension": "zcml",
+    "value": "XML"
+  },
+  {
+    "extension": "xsp-config",
+    "value": "XPages"
+  },
+  {
+    "extension": "xsp.metadata",
+    "value": "XPages"
+  },
+  {
+    "extension": "xpl",
+    "value": "XProc"
+  },
+  {
+    "extension": "xproc",
+    "value": "XProc"
+  },
+  {
+    "extension": "xquery",
+    "value": "XQuery"
+  },
+  {
+    "extension": "xq",
+    "value": "XQuery"
+  },
+  {
+    "extension": "xql",
+    "value": "XQuery"
+  },
+  {
+    "extension": "xqm",
+    "value": "XQuery"
+  },
+  {
+    "extension": "xqy",
+    "value": "XQuery"
+  },
+  {
+    "extension": "xs",
+    "value": "XS"
+  },
+  {
+    "extension": "xslt",
+    "value": "XSLT"
+  },
+  {
+    "extension": "xsl",
+    "value": "XSLT"
+  },
+  {
+    "extension": "xojo_code",
+    "value": "Xojo"
+  },
+  {
+    "extension": "xojo_menu",
+    "value": "Xojo"
+  },
+  {
+    "extension": "xojo_report",
+    "value": "Xojo"
+  },
+  {
+    "extension": "xojo_script",
+    "value": "Xojo"
+  },
+  {
+    "extension": "xojo_toolbar",
+    "value": "Xojo"
+  },
+  {
+    "extension": "xojo_window",
+    "value": "Xojo"
+  },
+  {
+    "extension": "xtend",
+    "value": "Xtend"
+  },
+  {
+    "extension": "yml",
+    "value": "YAML"
+  },
+  {
+    "extension": "reek",
+    "value": "YAML"
+  },
+  {
+    "extension": "rviz",
+    "value": "YAML"
+  },
+  {
+    "extension": "sublime-syntax",
+    "value": "YAML"
+  },
+  {
+    "extension": "syntax",
+    "value": "YAML"
+  },
+  {
+    "extension": "yaml",
+    "value": "YAML"
+  },
+  {
+    "extension": "yaml-tmlanguage",
+    "value": "YAML"
+  },
+  {
+    "extension": "yang",
+    "value": "YANG"
+  },
+  {
+    "extension": "y",
+    "value": "Yacc"
+  },
+  {
+    "extension": "yacc",
+    "value": "Yacc"
+  },
+  {
+    "extension": "yy",
+    "value": "Yacc"
+  },
+  {
+    "extension": "zep",
+    "value": "Zephir"
+  },
+  {
+    "extension": "zimpl",
+    "value": "Zimpl"
+  },
+  {
+    "extension": "zmpl",
+    "value": "Zimpl"
+  },
+  {
+    "extension": "zpl",
+    "value": "Zimpl"
+  },
+  {
+    "extension": "desktop",
+    "value": "desktop"
+  },
+  {
+    "extension": "desktop.in",
+    "value": "desktop"
+  },
+  {
+    "extension": "ec",
+    "value": "eC"
+  },
+  {
+    "extension": "eh",
+    "value": "eC"
+  },
+  {
+    "extension": "edn",
+    "value": "edn"
+  },
+  {
+    "extension": "fish",
+    "value": "fish"
+  },
+  {
+    "extension": "mu",
+    "value": "mupad"
+  },
+  {
+    "extension": "nc",
+    "value": "nesC"
+  },
+  {
+    "extension": "ooc",
+    "value": "ooc"
+  },
+  {
+    "extension": "rst",
+    "value": "reStructuredText"
+  },
+  {
+    "extension": "rest",
+    "value": "reStructuredText"
+  },
+  {
+    "extension": "rest.txt",
+    "value": "reStructuredText"
+  },
+  {
+    "extension": "rst.txt",
+    "value": "reStructuredText"
+  },
+  {
+    "extension": "wisp",
+    "value": "wisp"
+  },
+  {
+    "extension": "prg",
+    "value": "xBase"
+  },
+  {
+    "extension": "prw",
+    "value": "xBase"
+  }
+]

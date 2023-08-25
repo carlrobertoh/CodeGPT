@@ -116,21 +116,20 @@ Expected a different answer? Re-generate any response of your choosing.
 - **Seamless conversations** - Chat with the AI regardless of the maximum token limitations
 - **Predefined Actions** - Create your own editor actions or override the existing ones, saving time rewriting the same prompt repeatedly
 
-## Roadmap
+## Running locally
 
-- [x] Add proxy support
-- [ ] Add conversation history
-    - [x] Ability to start/restore sessions
-    - [ ] Ability to export conversations in Markdown/JSON format
-- [ ] Add codex and user's fine-tuned models
-- [x] Ability to have a seamless conversation despite to token limitation
-- [x] Add support for copying and replacing generated code snippets
-- [x] Add support for deleting previous conversations  
-- [x] Add support for overriding prompts and request params
-- [x] Add Azure OpenAI service support
-- [x] Add action key mappings
-- [ ] Add support for code search using embeddings 
-- [ ] Add support for model fine-tuning
+Build the plugin
+```shell
+./gradlew generateGrammarSource
+./gradlew buildPlugin
+```
+
+Run the plugin
+```shell
+./gradlew runIde
+```
+
+## Issues
 
 See the [open issues][open-issues] for a full list of proposed features (and known issues).
 

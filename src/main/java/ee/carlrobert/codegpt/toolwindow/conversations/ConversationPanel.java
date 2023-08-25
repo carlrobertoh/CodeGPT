@@ -5,7 +5,7 @@ import static ee.carlrobert.codegpt.util.SwingUtils.justifyLeft;
 import com.intellij.icons.AllIcons;
 import com.intellij.ui.JBColor;
 import com.intellij.util.ui.JBUI;
-import ee.carlrobert.codegpt.state.conversations.Conversation;
+import ee.carlrobert.codegpt.conversations.Conversation;
 import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
