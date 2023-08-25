@@ -1,3 +1,10 @@
+src/main/java/grammar/*
+!src/main/java/grammar/PythonLexerBase.java
+!src/main/java/grammar/PythonParserBase.java
+!src/main/java/grammar/PythonVersion.java
+!src/main/java/grammar/TypeScriptLexerBase.java
+!src/main/java/grammar/TypeScriptParserBase.java
+
 .gradle
 build/
 !gradle/wrapper/gradle-wrapper.jar

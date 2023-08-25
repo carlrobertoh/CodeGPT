@@ -1,9 +1,10 @@
 package grammar;
 
-import org.antlr.v4.runtime.*;
-
 import java.util.ArrayDeque;
 import java.util.Deque;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.Lexer;
+import org.antlr.v4.runtime.Token;
 
 /**
  * All lexer methods that used in grammar (IsStrictMode)

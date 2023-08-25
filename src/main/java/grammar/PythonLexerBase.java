@@ -1,12 +1,11 @@
 package grammar;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.Token;
-
-import java.util.ArrayDeque;
-import java.util.Deque;
 
 public abstract class PythonLexerBase extends Lexer {
     public static int TabSize = 8;

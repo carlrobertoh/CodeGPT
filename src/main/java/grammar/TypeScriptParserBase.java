@@ -1,6 +1,9 @@
 package grammar;
 
-import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.Lexer;
+import org.antlr.v4.runtime.Parser;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.TokenStream;
 
 /**
  * All parser methods that used in grammar (p, prev, notLineTerminator, etc.)
