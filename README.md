@@ -116,19 +116,6 @@ Expected a different answer? Re-generate any response of your choosing.
 - **Seamless conversations** - Chat with the AI regardless of the maximum token limitations
 - **Predefined Actions** - Create your own editor actions or override the existing ones, saving time rewriting the same prompt repeatedly
 
-## Running locally
-
-Build the plugin
-```shell
-./gradlew generateGrammarSource
-./gradlew buildPlugin
-```
-
-Run the plugin
-```shell
-./gradlew runIde
-```
-
 ## Issues
 
 See the [open issues][open-issues] for a full list of proposed features (and known issues).
