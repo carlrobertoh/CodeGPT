@@ -14,7 +14,7 @@
 [![Downloads][downloads-shield]][plugin-repo]
 [![Rating][Rating-shield]][plugin-repo]
 [![Version][version-shield]][plugin-repo]
-[![Contributions not available][contributions-not-available-svg]][contributions-not-available]
+[![Contributions welcome][contributions-welcome-svg]][contributions-welcome]
 
 <!-- TABLE OF CONTENTS -->
 <details>
@@ -147,8 +147,8 @@ If you found this project interesting, kindly rate it on the marketplace and don
 [downloads-shield]: https://img.shields.io/jetbrains/plugin/d/21056-codegpt
 [version-shield]: https://img.shields.io/jetbrains/plugin/v/21056-codegpt?label=version
 [rating-shield]: https://img.shields.io/jetbrains/plugin/r/rating/21056-codegpt
-[contributions-not-available-svg]: https://img.shields.io/badge/Contributions-Currently%20Unavailable-yellow
-[contributions-not-available]: #
+[contributions-welcome-svg]: http://img.shields.io/badge/contributions-welcome-brightgreen
+[contributions-welcome]: #
 [marketplace-img]: docs/assets/marketplace.png
 [plugin-repo]: https://plugins.jetbrains.com/plugin/21056-codegpt
 [plugin-settings]: docs/assets/plugin-settings.png
