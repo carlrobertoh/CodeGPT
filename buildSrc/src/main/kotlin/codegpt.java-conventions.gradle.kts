@@ -8,19 +8,6 @@ plugins {
 
 version = properties("pluginVersion")
 
-tasks {
-  properties("javaVersion").let {
-    withType<JavaCompile> {
-      sourceCompatibility = it
-      targetCompatibility = it
-    }
-  }
-
-  jar {
-    archiveBaseName.set(properties("pluginName") + "-" + project.name)
-  }
-}
-
 repositories {
   mavenCentral()
 }
@@ -32,4 +19,25 @@ intellij {
 
 dependencies {
   implementation("ee.carlrobert:openai-client:1.2.0")
+}
+
+tasks {
+  properties("javaVersion").let {
+    withType<JavaCompile> {
+      sourceCompatibility = it
+      targetCompatibility = it
+    }
+  }
+
+  jar {
+    archiveBaseName.set(properties("pluginName") + "-" + project.name)
+  }
+
+  verifyPlugin {
+    enabled = false
+  }
+
+  runPluginVerifier {
+    enabled = false
+  }
 }

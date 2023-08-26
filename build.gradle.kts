@@ -1,6 +1,7 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
+import org.jetbrains.intellij.tasks.RunPluginVerifierTask
 
 fun properties(key: String) = providers.gradleProperty(key)
 fun environment(key: String) = providers.environmentVariable(key)
@@ -56,6 +57,14 @@ dependencies {
 tasks {
   wrapper {
     gradleVersion = properties("gradleVersion").get()
+  }
+
+  verifyPlugin {
+    enabled = true
+  }
+
+  runPluginVerifier {
+    enabled = true
   }
 
   patchPluginXml {
