@@ -2,13 +2,13 @@ package ee.carlrobert.codegpt.toolwindow.chat.contextual;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
+import ee.carlrobert.codegpt.conversations.Conversation;
+import ee.carlrobert.codegpt.conversations.message.Message;
+import ee.carlrobert.codegpt.indexes.CodebaseIndexingCompletedNotifier;
+import ee.carlrobert.codegpt.toolwindow.chat.BaseChatToolWindowTabPanel;
 import ee.carlrobert.codegpt.user.UserManager;
 import ee.carlrobert.codegpt.user.auth.AuthenticationNotifier;
 import ee.carlrobert.codegpt.user.auth.SignedOutNotifier;
-import ee.carlrobert.codegpt.conversations.Conversation;
-import ee.carlrobert.codegpt.conversations.message.Message;
-import ee.carlrobert.codegpt.embeddings.CodebaseIndexingCompletedNotifier;
-import ee.carlrobert.codegpt.toolwindow.chat.BaseChatToolWindowTabPanel;
 import javax.swing.JComponent;
 import org.jetbrains.annotations.NotNull;
 

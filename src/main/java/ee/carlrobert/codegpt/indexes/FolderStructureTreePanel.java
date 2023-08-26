@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.embeddings;
+package ee.carlrobert.codegpt.indexes;
 
 import static java.util.stream.Collectors.toList;
 
@@ -19,6 +19,7 @@ import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.AsyncProcessIcon;
 import com.intellij.util.ui.JBUI;
+import ee.carlrobert.codegpt.embeddings.model.CheckedFile;
 import ee.carlrobert.codegpt.util.FileUtils;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;

@@ -22,7 +22,7 @@ import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
-import ee.carlrobert.codegpt.embeddings.FolderStructureTreePanel;
+import ee.carlrobert.codegpt.indexes.FolderStructureTreePanel;
 import java.awt.Point;
 import org.jetbrains.annotations.NotNull;
 

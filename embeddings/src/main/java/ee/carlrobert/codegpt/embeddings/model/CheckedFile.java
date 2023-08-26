@@ -1,9 +1,11 @@
-package ee.carlrobert.codegpt.embeddings;
+package ee.carlrobert.codegpt.embeddings.model;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CheckedFile {
 
@@ -31,5 +33,15 @@ public class CheckedFile {
 
   public String getFileContent() {
     return fileContent;
+  }
+
+  public String getFileExtension() {
+    Pattern pattern = Pattern.compile("[^.]+$");
+    Matcher matcher = pattern.matcher(fileName);
+
+    if (matcher.find()) {
+      return matcher.group();
+    }
+    return "";
   }
 }

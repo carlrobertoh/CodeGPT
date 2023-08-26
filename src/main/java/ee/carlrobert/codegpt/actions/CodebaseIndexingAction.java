@@ -5,8 +5,8 @@ import static com.intellij.openapi.ui.DialogWrapper.OK_EXIT_CODE;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import ee.carlrobert.codegpt.embeddings.CodebaseIndexingTask;
-import ee.carlrobert.codegpt.embeddings.FolderStructureTreePanel;
+import ee.carlrobert.codegpt.indexes.CodebaseIndexingTask;
+import ee.carlrobert.codegpt.indexes.FolderStructureTreePanel;
 import ee.carlrobert.codegpt.util.OverlayUtils;
 import org.jetbrains.annotations.NotNull;
 

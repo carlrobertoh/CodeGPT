@@ -54,7 +54,7 @@ public class CompletionRequestProviderTest extends BasePlatformTestCase {
     conversation.addMessage(firstMsg);
     conversation.addMessage(new Message("TEST_PROMPT_2", "TEST_RESPONSE_2"));
 
-    var request = new CompletionRequestProvider(getProject(), conversation)
+    var request = new CompletionRequestProvider(conversation)
         .buildTextCompletionRequest(TextCompletionModel.DAVINCI.getCode(), new Message("TEST_TEXT_COMPLETION_PROMPT"), false);
 
     assertThat(request.getPrompt())
@@ -73,7 +73,7 @@ public class CompletionRequestProviderTest extends BasePlatformTestCase {
     conversation.addMessage(firstMsg);
     conversation.addMessage(new Message("TEST_PROMPT_2", "TEST_RESPONSE_2"));
 
-    var request = new CompletionRequestProvider(getProject(), conversation)
+    var request = new CompletionRequestProvider(conversation)
         .buildTextCompletionRequest(TextCompletionModel.DAVINCI.getCode(), new Message("TEST_TEXT_COMPLETION_PROMPT"), false);
 
     assertThat(request.getPrompt())
@@ -95,7 +95,7 @@ public class CompletionRequestProviderTest extends BasePlatformTestCase {
     conversation.addMessage(firstMessage);
     conversation.addMessage(secondMessage);
 
-    var request = new CompletionRequestProvider(getProject(), conversation)
+    var request = new CompletionRequestProvider(conversation)
         .buildChatCompletionRequest(ChatCompletionModel.GPT_3_5.getCode(), new Message("TEST_CHAT_COMPLETION_PROMPT"), false, false);
 
     assertThat(request.getMessages())
@@ -116,7 +116,7 @@ public class CompletionRequestProviderTest extends BasePlatformTestCase {
     conversation.addMessage(firstMessage);
     conversation.addMessage(secondMessage);
 
-    var request = new CompletionRequestProvider(getProject(), conversation)
+    var request = new CompletionRequestProvider(conversation)
         .buildChatCompletionRequest(ChatCompletionModel.GPT_3_5.getCode(), new Message("TEST_CHAT_COMPLETION_PROMPT"), false);
 
     assertThat(request.getMessages())
@@ -137,7 +137,7 @@ public class CompletionRequestProviderTest extends BasePlatformTestCase {
     conversation.addMessage(firstMessage);
     conversation.addMessage(secondMessage);
 
-    var request = new CompletionRequestProvider(getProject(), conversation)
+    var request = new CompletionRequestProvider(conversation)
         .buildChatCompletionRequest(ChatCompletionModel.GPT_3_5.getCode(), secondMessage, true);
 
     assertThat(request.getMessages())
@@ -159,7 +159,7 @@ public class CompletionRequestProviderTest extends BasePlatformTestCase {
     conversation.addMessage(remainingMessage);
     conversation.discardTokenLimits();
 
-    var request = new CompletionRequestProvider(getProject(), conversation)
+    var request = new CompletionRequestProvider(conversation)
         .buildChatCompletionRequest(ChatCompletionModel.GPT_3_5.getCode(), new Message("TEST_CHAT_COMPLETION_PROMPT"), false);
 
     assertThat(request.getMessages())
@@ -178,7 +178,7 @@ public class CompletionRequestProviderTest extends BasePlatformTestCase {
     conversation.addMessage(createDummyMessage(1500));
 
     assertThrows(TotalUsageExceededException.class,
-        () -> new CompletionRequestProvider(getProject(), conversation)
+        () -> new CompletionRequestProvider(conversation)
             .buildChatCompletionRequest(ChatCompletionModel.GPT_3_5.getCode(), createDummyMessage(100), false));
   }
 
@@ -222,7 +222,7 @@ public class CompletionRequestProviderTest extends BasePlatformTestCase {
       return new ResponseEntity(200, jsonMapResponse("data", jsonArray(jsonMap("embedding", List.of(-0.00692, -0.0053, -4.5471, -0.0240)))));
     });
 
-    var request = new CompletionRequestProvider(getProject(), conversation)
+    var request = new CompletionRequestProvider(conversation)
         .buildChatCompletionRequest(ChatCompletionModel.GPT_3_5.getCode(), new Message("TEST_CHAT_COMPLETION_PROMPT"), false, true);
 
     assertThat(request.getModel()).isEqualTo("gpt-3.5-turbo");

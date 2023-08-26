@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.embeddings;
+package ee.carlrobert.codegpt.embeddings.model;
 
 import java.util.Set;
 
