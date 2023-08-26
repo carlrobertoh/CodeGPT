@@ -1,16 +1,15 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
+import org.jetbrains.intellij.tasks.RunPluginVerifierTask
 
 fun properties(key: String) = providers.gradleProperty(key)
 fun environment(key: String) = providers.environmentVariable(key)
 
 plugins {
-  id("java")
-  id("antlr")
-  id("org.jetbrains.intellij") version "1.15.0"
-  id("org.jetbrains.kotlin.jvm") version "1.8.21"
-  id("org.jetbrains.changelog") version "2.1.0"
+  id("codegpt.java-conventions")
+  id("org.jetbrains.changelog") version "2.1.2"
+  id("org.jetbrains.grammarkit") version "2021.2.2"
 }
 
 group = properties("pluginGroup").get()
@@ -34,8 +33,8 @@ changelog {
 }
 
 dependencies {
-  antlr("org.antlr:antlr4:4.5")
-  implementation("org.antlr:antlr4-runtime:4.7.1")
+  implementation(project("embeddings", "instrumentedJar"))
+  implementation(project(mapOf("path" to ":embeddings")))
 
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.14.2")
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.2")
@@ -45,16 +44,8 @@ dependencies {
   }
   implementation("org.jsoup:jsoup:1.16.1")
   implementation("org.apache.commons:commons-text:1.10.0")
-  implementation("ee.carlrobert:openai-client:1.2.0")
   implementation("com.knuddels:jtokkit:0.2.0")
-  implementation("io.socket:socket.io-client:2.1.0") {
-    // vulnerable transitive dependency
-    exclude(group = "org.json", module = "json")
-  }
-  implementation("org.json:json:20230618")
   implementation("org.quartz-scheduler:quartz:2.3.2")
-  implementation("com.github.jelmerk:hnswlib-core:1.1.0")
-  implementation("com.github.jelmerk:hnswlib-utils:1.1.0")
 
   testImplementation("org.assertj:assertj-core:3.24.2")
   testImplementation("org.awaitility:awaitility:4.2.0")
@@ -63,19 +54,17 @@ dependencies {
   testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.6.1")
 }
 
-java {
-  sourceCompatibility = JavaVersion.VERSION_11
-  targetCompatibility = JavaVersion.VERSION_11
-}
-
 tasks {
   wrapper {
     gradleVersion = properties("gradleVersion").get()
   }
 
-  generateGrammarSource {
-    outputDirectory = file("src/main/java/grammar")
-    arguments = arguments + listOf("-package", "grammar")
+  verifyPlugin {
+    enabled = true
+  }
+
+  runPluginVerifier {
+    enabled = true
   }
 
   patchPluginXml {

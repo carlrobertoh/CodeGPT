@@ -3,12 +3,13 @@ package ee.carlrobert.codegpt.completions;
 import static java.util.stream.Collectors.toList;
 
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.project.Project;
+import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.embeddings.EmbeddingsService;
+import ee.carlrobert.codegpt.settings.SettingsState;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
 import ee.carlrobert.codegpt.util.FileUtils;
 import ee.carlrobert.openai.client.completion.chat.ChatCompletionModel;
@@ -46,8 +47,11 @@ public class CompletionRequestProvider {
   private final EmbeddingsService embeddingsService;
   private final Conversation conversation;
 
-  public CompletionRequestProvider(Project project, Conversation conversation) {
-    this.embeddingsService = EmbeddingsService.getInstance(project);
+  public CompletionRequestProvider(Conversation conversation) {
+    this.embeddingsService = new EmbeddingsService(
+        CompletionClientProvider.getEmbeddingsClient(),
+        CompletionClientProvider.getChatCompletionClient(SettingsState.getInstance()),
+        CodeGPTPlugin.getPluginBasePath());
     this.conversation = conversation;
   }
 

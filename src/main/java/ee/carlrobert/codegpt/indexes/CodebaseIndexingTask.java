@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.embeddings;
+package ee.carlrobert.codegpt.indexes;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,6 +12,11 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.io.FileUtil;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
+import ee.carlrobert.codegpt.completions.CompletionClientProvider;
+import ee.carlrobert.codegpt.embeddings.EmbeddingsService;
+import ee.carlrobert.codegpt.embeddings.VectorStore;
+import ee.carlrobert.codegpt.embeddings.CheckedFile;
+import ee.carlrobert.codegpt.settings.SettingsState;
 import ee.carlrobert.codegpt.util.FileUtils;
 import ee.carlrobert.codegpt.util.OverlayUtils;
 import java.util.List;
@@ -23,11 +28,16 @@ public class CodebaseIndexingTask extends Task.Backgroundable {
   private static final Logger LOG = Logger.getInstance(CodebaseIndexingTask.class);
   private final Project project;
   private final List<CheckedFile> checkedFiles;
+  private final EmbeddingsService embeddingsService;
 
   public CodebaseIndexingTask(Project project, List<CheckedFile> checkedFiles) {
     super(project, CodeGPTBundle.get("codebaseIndexing.task.title"), true);
     this.project = project;
     this.checkedFiles = checkedFiles;
+    this.embeddingsService = new EmbeddingsService(
+        CompletionClientProvider.getEmbeddingsClient(),
+        CompletionClientProvider.getChatCompletionClient(SettingsState.getInstance()),
+        CodeGPTPlugin.getPluginBasePath());
   }
 
   public void run() {
@@ -53,8 +63,8 @@ public class CodebaseIndexingTask extends Task.Backgroundable {
 
     try {
       indicator.setFraction(0);
-      var embeddings = EmbeddingsService.getInstance(project).createEmbeddings(checkedFiles, indicator);
-      VectorStore.getInstance(project).save(embeddings);
+      var embeddings = embeddingsService.createEmbeddings(checkedFiles, indicator);
+      VectorStore.getInstance(CodeGPTPlugin.getPluginBasePath()).save(embeddings);
       OverlayUtils.showNotification("Indexing completed", NotificationType.INFORMATION);
 
       project.getMessageBus()

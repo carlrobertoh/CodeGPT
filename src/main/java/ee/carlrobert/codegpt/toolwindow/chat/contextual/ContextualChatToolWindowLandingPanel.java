@@ -8,17 +8,18 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
+import ee.carlrobert.codegpt.CodeGPTPlugin;
+import ee.carlrobert.codegpt.indexes.CodebaseIndexingCompletedNotifier;
+import ee.carlrobert.codegpt.indexes.CodebaseIndexingTask;
+import ee.carlrobert.codegpt.indexes.FolderStructureTreePanel;
+import ee.carlrobert.codegpt.settings.SettingsConfigurable;
+import ee.carlrobert.codegpt.toolwindow.chat.ResponsePanel;
 import ee.carlrobert.codegpt.user.UserManager;
 import ee.carlrobert.codegpt.user.auth.AuthenticationNotifier;
 import ee.carlrobert.codegpt.user.auth.SignedOutNotifier;
-import ee.carlrobert.codegpt.embeddings.CodebaseIndexingCompletedNotifier;
-import ee.carlrobert.codegpt.embeddings.CodebaseIndexingTask;
-import ee.carlrobert.codegpt.embeddings.FolderStructureTreePanel;
-import ee.carlrobert.codegpt.embeddings.VectorStore;
-import ee.carlrobert.codegpt.settings.SettingsConfigurable;
-import ee.carlrobert.codegpt.toolwindow.chat.ResponsePanel;
 import ee.carlrobert.codegpt.util.OverlayUtils;
 import ee.carlrobert.codegpt.util.SwingUtils;
+import ee.carlrobert.codegpt.embeddings.VectorStore;
 import javax.swing.JTextPane;
 import javax.swing.event.HyperlinkEvent;
 
@@ -66,7 +67,7 @@ class ContextualChatToolWindowLandingPanel extends ResponsePanel {
       return description;
     }
 
-    if (project.getService(VectorStore.class).isIndexExists()) {
+    if (VectorStore.getInstance(CodeGPTPlugin.getPluginBasePath()).isIndexExists()) {
       description.setText("<html>" +
           "<p style=\"margin-top: 4px; margin-bottom: 4px;\">Feel free to ask me anything about your codebase, and I'll be your helpful guide, dedicated to providing you with the best answers possible!</p>" +
           "<p style=\"margin-top: 4px; margin-bottom: 4px;\">Here are a few examples of how I might be helpful:</p>" +

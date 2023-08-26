@@ -109,7 +109,7 @@ public class CompletionRequestHandler {
       boolean isRetry,
       CompletionEventListener eventListener) {
     var settings = SettingsState.getInstance();
-    var requestProvider = new CompletionRequestProvider(project, conversation);
+    var requestProvider = new CompletionRequestProvider(conversation);
 
     if (settings.isChatCompletionOptionSelected) {
       return CompletionClientProvider.getChatCompletionClient(settings).stream(

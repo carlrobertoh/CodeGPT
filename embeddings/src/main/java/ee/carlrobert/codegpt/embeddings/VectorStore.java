@@ -4,34 +4,31 @@ import com.github.jelmerk.knn.DistanceFunctions;
 import com.github.jelmerk.knn.Item;
 import com.github.jelmerk.knn.hnsw.HnswIndex;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.io.FileUtil;
-import ee.carlrobert.codegpt.CodeGPTPlugin;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
 public class VectorStore {
 
   private static VectorStore instance;
 
-  private final String indexPath;
-  private final Project project;
+  private final String storePath;
 
-  private VectorStore(Project project) {
-    this.project = project;
-    this.indexPath = getIndexStorePath(project);
+  private VectorStore(Path pluginPath) {
+    this.storePath = getIndexStorePath(pluginPath.toString());
   }
 
-  public static VectorStore getInstance(Project project) {
+  public static VectorStore getInstance(Path pluginPath) {
     if (instance == null) {
-      instance = new VectorStore(project);
+      instance = new VectorStore(pluginPath);
     }
     return instance;
   }
 
   public HnswIndex<Object, double[], Word, Object> loadIndex() throws IOException {
-    return loadIndex(indexPath);
+    return loadIndex(storePath);
   }
 
   public HnswIndex<Object, double[], Word, Object> loadIndex(String path) throws IOException {
@@ -44,21 +41,20 @@ public class VectorStore {
         .build();
     try {
       hnswIndex.addAll(words);
-      hnswIndex.save(new File(indexPath));
+      hnswIndex.save(new File(storePath));
     } catch (IOException | InterruptedException e) {
       throw new RuntimeException(e);
     }
   }
 
   public boolean isIndexExists() {
-    return FileUtil.exists(CodeGPTPlugin.getProjectIndexPath(project));
+    return FileUtil.exists(storePath);
   }
 
-  private String getIndexStorePath(Project project) {
-    var basePath = CodeGPTPlugin.getProjectIndexStorePath(project);
+  private String getIndexStorePath(String pluginBasePath) {
     if (ApplicationManager.getApplication().isUnitTestMode()) {
-      basePath = new File("src/test/resources/indexes").getAbsolutePath();
+      pluginBasePath = new File("src/test/resources/indexes").getAbsolutePath();
     }
-    return basePath + File.separator + "hnsw.index";
+    return pluginBasePath + File.separator + "hnsw.index";
   }
 }

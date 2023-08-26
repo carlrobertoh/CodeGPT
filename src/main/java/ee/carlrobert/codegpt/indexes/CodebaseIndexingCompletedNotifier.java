@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.embeddings;
+package ee.carlrobert.codegpt.indexes;
 
 import com.intellij.util.messages.Topic;
 
