@@ -5,7 +5,6 @@ import com.github.jelmerk.knn.Item;
 import com.github.jelmerk.knn.hnsw.HnswIndex;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.util.io.FileUtil;
-import ee.carlrobert.codegpt.embeddings.model.Word;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -18,7 +17,7 @@ public class VectorStore {
   private final String storePath;
 
   private VectorStore(Path pluginPath) {
-    this.storePath = getIndexStorePath(pluginPath);
+    this.storePath = getIndexStorePath(pluginPath.toString());
   }
 
   public static VectorStore getInstance(Path pluginPath) {
@@ -52,10 +51,10 @@ public class VectorStore {
     return FileUtil.exists(storePath);
   }
 
-  private String getIndexStorePath(Path pluginPath) {
+  private String getIndexStorePath(String pluginBasePath) {
     if (ApplicationManager.getApplication().isUnitTestMode()) {
-      return new File("src/test/resources/indexes").getAbsolutePath();
+      pluginBasePath = new File("src/test/resources/indexes").getAbsolutePath();
     }
-    return pluginPath + File.separator + "hnsw.index";
+    return pluginBasePath + File.separator + "hnsw.index";
   }
 }

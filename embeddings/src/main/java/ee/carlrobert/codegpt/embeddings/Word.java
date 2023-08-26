@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.embeddings.model;
+package ee.carlrobert.codegpt.embeddings;
 
 import com.github.jelmerk.knn.Item;
 import java.util.Arrays;

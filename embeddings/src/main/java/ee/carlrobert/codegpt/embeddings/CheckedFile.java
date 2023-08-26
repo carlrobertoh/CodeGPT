@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.embeddings.model;
+package ee.carlrobert.codegpt.embeddings;
 
 import java.io.File;
 import java.io.IOException;
