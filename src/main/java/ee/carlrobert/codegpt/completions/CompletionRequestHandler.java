@@ -1,9 +1,9 @@
 package ee.carlrobert.codegpt.completions;
 
-import com.intellij.openapi.project.Project;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.message.Message;
-import ee.carlrobert.codegpt.settings.SettingsState;
+import ee.carlrobert.codegpt.settings.state.ModelSettingsState;
+import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.openai.client.completion.CompletionEventListener;
 import ee.carlrobert.openai.client.completion.ErrorDetails;
 import java.util.List;
@@ -16,7 +16,6 @@ import org.jetbrains.annotations.Nullable;
 
 public class CompletionRequestHandler {
 
-  private final Project project;
   private final StringBuilder messageBuilder = new StringBuilder();
   private SwingWorker<Void, String> swingWorker;
   private EventSource eventSource;
@@ -25,10 +24,6 @@ public class CompletionRequestHandler {
   private @Nullable Consumer<String> completedListener;
   private @Nullable Runnable tokensExceededListener;
   private boolean useContextualSearch;
-
-  public CompletionRequestHandler(@NotNull Project project) {
-    this.project = project;
-  }
 
   public CompletionRequestHandler withContextualSearch(boolean useContextualSearch) {
     this.useContextualSearch = useContextualSearch;
@@ -109,13 +104,14 @@ public class CompletionRequestHandler {
       boolean isRetry,
       CompletionEventListener eventListener) {
     var settings = SettingsState.getInstance();
+    var modelSettings = ModelSettingsState.getInstance();
     var requestProvider = new CompletionRequestProvider(conversation);
 
-    if (settings.isChatCompletionOptionSelected) {
+    if (modelSettings.isUseChatCompletion()) {
       return CompletionClientProvider.getChatCompletionClient(settings).stream(
-          requestProvider.buildChatCompletionRequest(settings.getChatCompletionModel(), message, isRetry, useContextualSearch), eventListener);
+          requestProvider.buildChatCompletionRequest(modelSettings.getChatCompletionModel(), message, isRetry, useContextualSearch), eventListener);
     }
     return CompletionClientProvider.getTextCompletionClient(settings).stream(
-        requestProvider.buildTextCompletionRequest(settings.getTextCompletionModel(), message, isRetry), eventListener);
+        requestProvider.buildTextCompletionRequest(modelSettings.getTextCompletionModel(), message, isRetry), eventListener);
   }
 }

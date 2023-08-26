@@ -8,7 +8,7 @@ import com.intellij.openapi.project.ProjectManagerListener;
 import com.intellij.openapi.startup.StartupActivity;
 import ee.carlrobert.codegpt.actions.editor.EditorActionsUtil;
 import ee.carlrobert.codegpt.credentials.UserCredentialsManager;
-import ee.carlrobert.codegpt.settings.SettingsState;
+import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.user.UserManager;
 import ee.carlrobert.codegpt.user.auth.AuthenticationHandler;
 import ee.carlrobert.codegpt.user.auth.AuthenticationService;
@@ -34,7 +34,7 @@ public class PluginStartupActivity implements StartupActivity {
     var userManager = UserManager.getInstance();
     var session = userManager.getSession();
     if (session == null || session.isExpired()) {
-      handleAuthentication(project);
+      handleAuthentication();
     } else {
       startSessionVerificationJob();
     }
@@ -76,16 +76,16 @@ public class PluginStartupActivity implements StartupActivity {
     }
   }
 
-  private void handleAuthentication(Project project) {
+  private void handleAuthentication() {
     var settings = SettingsState.getInstance();
-    if (settings == null || !settings.previouslySignedIn) {
+    if (settings == null || !settings.isPreviouslySignedIn()) {
       return;
     }
 
     var password = UserCredentialsManager.getInstance().getAccountPassword();
-    if (!settings.email.isEmpty() && password != null && !password.isEmpty()) {
+    if (!settings.getEmail().isEmpty() && password != null && !password.isEmpty()) {
       AuthenticationService.getInstance()
-          .signInAsync(settings.email, password, new AuthenticationHandler() {
+          .signInAsync(settings.getEmail(), password, new AuthenticationHandler() {
             @Override
             public void handleAuthenticated() {
               OverlayUtils.showNotification("Authentication successful.", NotificationType.INFORMATION);

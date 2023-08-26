@@ -27,40 +27,40 @@ public class AdvancedSettingsConfigurable implements Configurable {
   @Override
   public boolean isModified() {
     var advancedSettings = AdvancedSettingsState.getInstance();
-    return !advancedSettingsComponent.getProxyType().equals(advancedSettings.proxyType) ||
-        !advancedSettingsComponent.getProxyHost().equals(advancedSettings.proxyHost) ||
-        advancedSettingsComponent.getProxyPort() != advancedSettings.proxyPort ||
-        advancedSettingsComponent.isProxyAuthSelected() != advancedSettings.isProxyAuthSelected ||
-        !advancedSettingsComponent.getProxyAuthUsername().equals(advancedSettings.proxyUsername) ||
-        !advancedSettingsComponent.getProxyAuthPassword().equals(advancedSettings.proxyPassword) ||
-        advancedSettingsComponent.getConnectionTimeout() != advancedSettings.connectTimeout ||
-        advancedSettingsComponent.getReadTimeout() != advancedSettings.readTimeout;
+    return !advancedSettingsComponent.getProxyType().equals(advancedSettings.getProxyType()) ||
+        !advancedSettingsComponent.getProxyHost().equals(advancedSettings.getProxyHost()) ||
+        advancedSettingsComponent.getProxyPort() != advancedSettings.getProxyPort() ||
+        advancedSettingsComponent.isProxyAuthSelected() != advancedSettings.isProxyAuthSelected() ||
+        !advancedSettingsComponent.getProxyAuthUsername().equals(advancedSettings.getProxyUsername()) ||
+        !advancedSettingsComponent.getProxyAuthPassword().equals(advancedSettings.getProxyPassword()) ||
+        advancedSettingsComponent.getConnectionTimeout() != advancedSettings.getConnectTimeout() ||
+        advancedSettingsComponent.getReadTimeout() != advancedSettings.getReadTimeout();
   }
 
   @Override
   public void apply() {
     var advancedSettings = AdvancedSettingsState.getInstance();
-    advancedSettings.proxyType = advancedSettingsComponent.getProxyType();
-    advancedSettings.proxyHost = advancedSettingsComponent.getProxyHost();
-    advancedSettings.proxyPort = advancedSettingsComponent.getProxyPort();
-    advancedSettings.isProxyAuthSelected = advancedSettingsComponent.isProxyAuthSelected();
-    advancedSettings.proxyUsername = advancedSettingsComponent.getProxyAuthUsername();
-    advancedSettings.proxyPassword = advancedSettingsComponent.getProxyAuthPassword();
-    advancedSettings.connectTimeout = advancedSettingsComponent.getConnectionTimeout();
-    advancedSettings.readTimeout = advancedSettingsComponent.getReadTimeout();
+    advancedSettings.setProxyType(advancedSettingsComponent.getProxyType());
+    advancedSettings.setProxyHost(advancedSettingsComponent.getProxyHost());
+    advancedSettings.setProxyPort(advancedSettingsComponent.getProxyPort());
+    advancedSettings.setProxyAuthSelected(advancedSettingsComponent.isProxyAuthSelected());
+    advancedSettings.setProxyUsername(advancedSettingsComponent.getProxyAuthUsername());
+    advancedSettings.setProxyPassword(advancedSettingsComponent.getProxyAuthPassword());
+    advancedSettings.setConnectTimeout(advancedSettingsComponent.getConnectionTimeout());
+    advancedSettings.setReadTimeout(advancedSettingsComponent.getReadTimeout());
   }
 
   @Override
   public void reset() {
     var advancedSettings = AdvancedSettingsState.getInstance();
-    advancedSettingsComponent.setProxyType(advancedSettings.proxyType);
-    advancedSettingsComponent.setProxyHost(advancedSettings.proxyHost);
-    advancedSettingsComponent.setProxyPort(advancedSettings.proxyPort);
-    advancedSettingsComponent.setUseProxyAuthentication(advancedSettings.isProxyAuthSelected);
-    advancedSettingsComponent.setProxyUsername(advancedSettings.proxyUsername);
-    advancedSettingsComponent.setProxyPassword(advancedSettings.proxyPassword);
-    advancedSettingsComponent.setConnectionTimeoutField(advancedSettings.connectTimeout);
-    advancedSettingsComponent.setReadTimeout(advancedSettings.readTimeout);
+    advancedSettingsComponent.setProxyType(advancedSettings.getProxyType());
+    advancedSettingsComponent.setProxyHost(advancedSettings.getProxyHost());
+    advancedSettingsComponent.setProxyPort(advancedSettings.getProxyPort());
+    advancedSettingsComponent.setUseProxyAuthentication(advancedSettings.isProxyAuthSelected());
+    advancedSettingsComponent.setProxyUsername(advancedSettings.getProxyUsername());
+    advancedSettingsComponent.setProxyPassword(advancedSettings.getProxyPassword());
+    advancedSettingsComponent.setConnectionTimeoutField(advancedSettings.getConnectTimeout());
+    advancedSettingsComponent.setReadTimeout(advancedSettings.getReadTimeout());
   }
 
   @Override

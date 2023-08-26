@@ -12,7 +12,10 @@
             instance="ee.carlrobert.codegpt.settings.configuration.ConfigurationConfigurable"/>
         <applicationConfigurable id="settings.codegpt.advanced" parentId="settings.codegpt" displayName="Advanced Settings"
             instance="ee.carlrobert.codegpt.settings.advanced.AdvancedSettingsConfigurable"/>
-        <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.SettingsState"/>
+        <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.SettingsState"/>
+        <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.AzureSettingsState"/>
+        <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.OpenAISettingsState"/>
+        <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.ModelSettingsState"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.configuration.ConfigurationState"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.advanced.AdvancedSettingsState"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.conversations.ConversationsState"/>

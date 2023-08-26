@@ -10,6 +10,9 @@ import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
+import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
+import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
+import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.util.SwingUtils;
 import java.util.Map;
 import javax.swing.ButtonGroup;
@@ -38,6 +41,8 @@ public class ServiceSelectionForm {
   private final JPanel azureServiceSectionPanel;
 
   public ServiceSelectionForm(SettingsState settings) {
+    var openAISettings = OpenAISettingsState.getInstance();
+    var azureSettings = AzureSettingsState.getInstance();
     openAIApiKey = new JBPasswordField();
     openAIApiKey.setColumns(30);
     openAIApiKey.setText(OpenAICredentialsManager.getInstance().getApiKey());
@@ -62,28 +67,28 @@ public class ServiceSelectionForm {
 
     useAzureApiKeyAuthenticationRadioButton = new JBRadioButton(
         "Use API Key authentication",
-        settings.useAzureApiKeyAuthentication);
+        azureSettings.isUseAzureApiKeyAuthentication());
     useAzureActiveDirectoryAuthenticationRadioButton = new JBRadioButton(
         "Use Active Directory authentication",
-        settings.useAzureActiveDirectoryAuthentication);
+        azureSettings.isUseAzureActiveDirectoryAuthentication());
 
     useOpenAIServiceRadioButton = new JBRadioButton(
-        CodeGPTBundle.get("settingsConfigurable.section.service.useOpenAIServiceRadioButtonLabel"), settings.useOpenAIService);
+        CodeGPTBundle.get("settingsConfigurable.section.service.useOpenAIServiceRadioButtonLabel"), settings.isUseOpenAIService());
     useAzureServiceRadioButton = new JBRadioButton(
-        CodeGPTBundle.get("settingsConfigurable.section.service.useAzureServiceRadioButtonLabel"), settings.useAzureService);
+        CodeGPTBundle.get("settingsConfigurable.section.service.useAzureServiceRadioButtonLabel"), settings.isUseAzureService());
 
-    openAIBaseHostField = new JBTextField(settings.openAIBaseHost, 30);
-    openAIOrganizationField = new JBTextField(settings.openAIOrganization, 30);
+    openAIBaseHostField = new JBTextField(openAISettings.getBaseHost(), 30);
+    openAIOrganizationField = new JBTextField(openAISettings.getOrganization(), 30);
 
-    azureBaseHostField = new JBTextField(settings.azureBaseHost, 30);
-    azureResourceNameField = new JBTextField(settings.azureResourceName, 30);
-    azureDeploymentIdField = new JBTextField(settings.azureDeploymentId, 30);
-    azureApiVersionField = new JBTextField(settings.azureApiVersion, 30);
+    azureBaseHostField = new JBTextField(azureSettings.getBaseHost(), 30);
+    azureResourceNameField = new JBTextField(azureSettings.getResourceName(), 30);
+    azureDeploymentIdField = new JBTextField(azureSettings.getDeploymentId(), 30);
+    azureApiVersionField = new JBTextField(azureSettings.getApiVersion(), 30);
 
     openAIServiceSectionPanel = createOpenAIServiceSectionPanel();
     azureServiceSectionPanel = createAzureServiceSectionPanel();
 
-    registerPanelsVisibility(settings);
+    registerPanelsVisibility(settings, azureSettings);
     registerRadioButtons();
   }
 
@@ -262,11 +267,11 @@ public class ServiceSelectionForm {
     return form;
   }
 
-  private void registerPanelsVisibility(SettingsState settings) {
-    openAIServiceSectionPanel.setVisible(settings.useOpenAIService);
-    azureServiceSectionPanel.setVisible(settings.useAzureService);
-    azureApiKeyFieldPanel.setVisible(settings.useAzureApiKeyAuthentication);
-    azureActiveDirectoryTokenFieldPanel.setVisible(settings.useAzureActiveDirectoryAuthentication);
+  private void registerPanelsVisibility(SettingsState settings, AzureSettingsState azureSettings) {
+    openAIServiceSectionPanel.setVisible(settings.isUseOpenAIService());
+    azureServiceSectionPanel.setVisible(settings.isUseAzureService());
+    azureApiKeyFieldPanel.setVisible(azureSettings.isUseAzureApiKeyAuthentication());
+    azureActiveDirectoryTokenFieldPanel.setVisible(azureSettings.isUseAzureActiveDirectoryAuthentication());
   }
 
   private void registerRadioButtons() {

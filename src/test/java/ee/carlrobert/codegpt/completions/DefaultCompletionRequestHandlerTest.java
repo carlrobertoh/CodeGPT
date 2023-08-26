@@ -14,7 +14,10 @@ import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
-import ee.carlrobert.codegpt.settings.SettingsState;
+import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
+import ee.carlrobert.codegpt.settings.state.ModelSettingsState;
+import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
+import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
 import ee.carlrobert.openai.client.completion.chat.ChatCompletionModel;
 import ee.carlrobert.openai.client.completion.text.TextCompletionModel;
@@ -33,9 +36,9 @@ public class DefaultCompletionRequestHandlerTest extends BasePlatformTestCase {
     super.setUp();
     AzureCredentialsManager.getInstance().setApiKey("TEST_API_KEY");
     OpenAICredentialsManager.getInstance().setApiKey("TEST_API_KEY");
-    SettingsState.getInstance().openAIBaseHost = "http://127.0.0.1:8000";
-    SettingsState.getInstance().azureBaseHost = "http://127.0.0.1:8000";
-    ConfigurationState.getInstance().systemPrompt = "";
+    OpenAISettingsState.getInstance().setBaseHost("http://127.0.0.1:8000");
+    AzureSettingsState.getInstance().setBaseHost("http://127.0.0.1:8000");
+    ConfigurationState.getInstance().setSystemPrompt("");
     server = new LocalCallbackServer(8000);
   }
 
@@ -48,13 +51,14 @@ public class DefaultCompletionRequestHandlerTest extends BasePlatformTestCase {
   public void testChatCompletionCall() {
     var message = new Message("TEST_PROMPT");
     var conversation = ConversationService.getInstance().startConversation();
-    var requestHandler = new CompletionRequestHandler(getProject());
+    var requestHandler = new CompletionRequestHandler();
     requestHandler.addRequestCompletedListener(message::setResponse);
     var settings = SettingsState.getInstance();
-    settings.isTextCompletionOptionSelected = false;
-    settings.isChatCompletionOptionSelected = true;
-    settings.useOpenAIService = true;
-    settings.useAzureService = false;
+    var modelSettings = ModelSettingsState.getInstance();
+    modelSettings.setUseChatCompletion(true);
+    modelSettings.setUseTextCompletion(false);
+    settings.setUseOpenAIService(true);
+    settings.setUseAzureService(false);
     expectStreamRequest("/v1/chat/completions", request -> {
       assertThat(request.getMethod()).isEqualTo("POST");
       assertThat(request.getHeaders().get(AUTHORIZATION).get(0)).isEqualTo("Bearer TEST_API_KEY");
@@ -83,15 +87,16 @@ public class DefaultCompletionRequestHandlerTest extends BasePlatformTestCase {
   public void testTextCompletionCall() {
     var message = new Message("TEST_PROMPT");
     var conversation = ConversationService.getInstance().startConversation();
-    var requestHandler = new CompletionRequestHandler(getProject());
+    var requestHandler = new CompletionRequestHandler();
     requestHandler.addRequestCompletedListener(message::setResponse);
     var settings = SettingsState.getInstance();
-    settings.isTextCompletionOptionSelected = true;
-    settings.isChatCompletionOptionSelected = false;
-    settings.useOpenAIService = true;
-    settings.useAzureService = false;
-    settings.textCompletionBaseModel = TextCompletionModel.CURIE.getCode();
-    settings.openAIOrganization = "TEST_ORGANIZATION";
+    var modelSettings = ModelSettingsState.getInstance();
+    modelSettings.setUseTextCompletion(true);
+    modelSettings.setUseChatCompletion(false);
+    modelSettings.setTextCompletionModel(TextCompletionModel.CURIE.getCode());
+    settings.setUseOpenAIService(true);
+    settings.setUseAzureService(false);
+    OpenAISettingsState.getInstance().setOrganization("TEST_ORGANIZATION");
     expectStreamRequest("/v1/completions", request -> {
       var headers = request.getHeaders();
       assertThat(headers.get("Authorization").get(0)).isEqualTo("Bearer TEST_API_KEY");
@@ -120,17 +125,19 @@ public class DefaultCompletionRequestHandlerTest extends BasePlatformTestCase {
   public void testAzureChatCompletionCall() {
     var message = new Message("TEST_PROMPT");
     var settings = SettingsState.getInstance();
-    settings.isTextCompletionOptionSelected = false;
-    settings.isChatCompletionOptionSelected = true;
-    settings.useOpenAIService = false;
-    settings.useAzureService = true;
-    settings.azureResourceName = "TEST_RESOURCE_NAME";
-    settings.azureApiVersion = "TEST_API_VERSION";
-    settings.azureDeploymentId = "TEST_DEPLOYMENT_ID"; // TODO: Add support for asserting the host
-    settings.chatCompletionBaseModel = ChatCompletionModel.GPT_3_5.getCode();
+    var modelSettings = ModelSettingsState.getInstance();
+    var azureSettings = AzureSettingsState.getInstance();
+    modelSettings.setUseTextCompletion(false);
+    modelSettings.setUseChatCompletion(true);
+    modelSettings.setChatCompletionModel(ChatCompletionModel.GPT_3_5.getCode());
+    settings.setUseOpenAIService(false);
+    settings.setUseAzureService(true);
+    azureSettings.setResourceName("TEST_RESOURCE_NAME");
+    azureSettings.setApiVersion("TEST_API_VERSION");
+    azureSettings.setDeploymentId("TEST_DEPLOYMENT_ID");
     var conversationService = ConversationService.getInstance();
     var conversation = conversationService.startConversation();
-    var requestHandler = new CompletionRequestHandler(getProject());
+    var requestHandler = new CompletionRequestHandler();
     requestHandler.addRequestCompletedListener(message::setResponse);
     var prevMessage = new Message("TEST_PREV_PROMPT");
     prevMessage.setResponse("TEST_PREV_RESPONSE");

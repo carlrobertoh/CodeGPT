@@ -1,7 +1,7 @@
 package ee.carlrobert.codegpt.credentials;
 
 import com.intellij.credentialStore.CredentialAttributes;
-import ee.carlrobert.codegpt.settings.SettingsState;
+import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import org.jetbrains.annotations.Nullable;
 
 public class AzureCredentialsManager {
@@ -27,6 +27,10 @@ public class AzureCredentialsManager {
     return instance;
   }
 
+  public String getSecret() {
+    return AzureSettingsState.getInstance().isUseAzureActiveDirectoryAuthentication() ? azureActiveDirectoryToken : azureOpenAIApiKey;
+  }
+
   public @Nullable String getAzureOpenAIApiKey() {
     return azureOpenAIApiKey;
   }
@@ -46,8 +50,7 @@ public class AzureCredentialsManager {
   }
 
   public boolean isCredentialSet() {
-    var settings = SettingsState.getInstance();
-    if (settings.useAzureApiKeyAuthentication) {
+    if (AzureSettingsState.getInstance().isUseAzureApiKeyAuthentication()) {
       return isKeySet();
     }
     return isTokenSet();

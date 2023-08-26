@@ -35,21 +35,21 @@ public class AdvancedSettingsComponent {
         Proxy.Type.HTTP,
         Proxy.Type.DIRECT,
     });
-    proxyTypeComboBox.setSelectedItem(advancedSettings.proxyType);
-    proxyHostField = new JBTextField(advancedSettings.proxyHost, 20);
+    proxyTypeComboBox.setSelectedItem(advancedSettings.getProxyType());
+    proxyHostField = new JBTextField(advancedSettings.getProxyHost(), 20);
     proxyPortField = new PortField();
     proxyAuthCheckbox = new JBCheckBox(CodeGPTBundle.get("advancedSettingsConfigurable.section.proxy.authCheckBoxField.label"));
     proxyAuthUsername = new JBTextField(20);
-    proxyAuthUsername.setEnabled(advancedSettings.isProxyAuthSelected);
+    proxyAuthUsername.setEnabled(advancedSettings.isProxyAuthSelected());
     proxyAuthPassword = new JBPasswordField();
     proxyAuthPassword.setColumns(20);
-    proxyAuthPassword.setEnabled(advancedSettings.isProxyAuthSelected);
+    proxyAuthPassword.setEnabled(advancedSettings.isProxyAuthSelected());
     proxyAuthCheckbox.addItemListener(itemEvent -> {
       proxyAuthUsername.setEnabled(itemEvent.getStateChange() == ItemEvent.SELECTED);
       proxyAuthPassword.setEnabled(itemEvent.getStateChange() == ItemEvent.SELECTED);
     });
-    connectionTimeoutField = new PortField(advancedSettings.connectTimeout);
-    readTimeoutField = new PortField(advancedSettings.readTimeout);
+    connectionTimeoutField = new PortField(advancedSettings.getConnectTimeout());
+    readTimeoutField = new PortField(advancedSettings.getReadTimeout());
 
     mainPanel = FormBuilder.createFormBuilder()
         .addComponent(new TitledSeparator(CodeGPTBundle.get("advancedSettingsConfigurable.section.proxy.title")))

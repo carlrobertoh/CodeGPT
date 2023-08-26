@@ -6,6 +6,7 @@ import com.intellij.ui.components.JBRadioButton;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
+import ee.carlrobert.codegpt.settings.state.ModelSettingsState;
 import ee.carlrobert.codegpt.util.SwingUtils;
 import ee.carlrobert.openai.client.completion.CompletionModel;
 import ee.carlrobert.openai.client.completion.chat.ChatCompletionModel;
@@ -27,25 +28,26 @@ public class ModelSelectionForm {
   private final JPanel chatCompletionModelsPanel;
   private final JPanel textCompletionModelsPanel;
 
-  private CompletionModel findChatCompletionModelOrGetDefault(SettingsState settings) {
+  private CompletionModel findChatCompletionModelOrGetDefault(ModelSettingsState settings) {
     try {
-      return ChatCompletionModel.findByCode(settings.chatCompletionBaseModel);
+      return ChatCompletionModel.findByCode(settings.getChatCompletionModel());
     } catch (NoSuchElementException e) {
-      LOG.warn("Couldn't find completion model with code: " + settings.chatCompletionBaseModel);
+      LOG.warn("Couldn't find completion model with code: " + settings.getChatCompletionModel());
       return ChatCompletionModel.GPT_3_5;
     }
   }
 
-  private CompletionModel findTextCompletionModelOrGetDefault(SettingsState settings) {
+  private CompletionModel findTextCompletionModelOrGetDefault(ModelSettingsState settings) {
     try {
-      return TextCompletionModel.findByCode(settings.textCompletionBaseModel);
+      return TextCompletionModel.findByCode(settings.getTextCompletionModel());
     } catch (NoSuchElementException e) {
-      LOG.warn("Couldn't find completion model with code: " + settings.textCompletionBaseModel);
+      LOG.warn("Couldn't find completion model with code: " + settings.getTextCompletionModel());
       return TextCompletionModel.DAVINCI;
     }
   }
 
-  public ModelSelectionForm(SettingsState settings) {
+  public ModelSelectionForm() {
+    var settings = ModelSettingsState.getInstance();
     chatCompletionBaseModelComboBox = new BaseModelComboBox(
         new ChatCompletionModel[] {
             ChatCompletionModel.GPT_3_5,
@@ -69,10 +71,10 @@ public class ModelSelectionForm {
     textCompletionModelsPanel.setBorder(JBUI.Borders.emptyLeft(16));
     useChatCompletionRadioButton = new JBRadioButton(
         CodeGPTBundle.get("settingsConfigurable.section.model.useChatCompletionRadioButtonLabel"),
-        settings.isChatCompletionOptionSelected);
+        settings.isUseChatCompletion());
     useTextCompletionRadioButton = new JBRadioButton(
         CodeGPTBundle.get("settingsConfigurable.section.model.useTextCompletionRadioButtonLabel"),
-        settings.isTextCompletionOptionSelected);
+        settings.isUseTextCompletion());
 
     registerFields();
     registerRadioButtons();

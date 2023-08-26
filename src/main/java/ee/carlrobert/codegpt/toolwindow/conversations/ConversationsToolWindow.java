@@ -15,7 +15,7 @@ import ee.carlrobert.codegpt.actions.toolwindow.MoveUpAction;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
-import ee.carlrobert.codegpt.settings.SettingsState;
+import ee.carlrobert.codegpt.settings.state.ModelSettingsState;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowTabPanel;
 import javax.swing.BoxLayout;
@@ -76,7 +76,7 @@ public class ConversationsToolWindow {
 
   private void addContent(Conversation conversation) {
     var mainPanel = new RootConversationPanel(() -> {
-      SettingsState.getInstance().syncSettings(conversation);
+      ModelSettingsState.getInstance().sync(conversation);
 
       var toolWindowContentManager = StandardChatToolWindowContentManager.getInstance(project);
       toolWindowContentManager.displayChatTab();

@@ -48,7 +48,7 @@ public class StandardChatToolWindowContentManager {
       toolWindow.show();
     }
 
-    if (ConfigurationState.getInstance().createNewChatOnEachAction || ConversationsState.getCurrentConversation() == null) {
+    if (ConfigurationState.getInstance().isCreateNewChatOnEachAction() || ConversationsState.getCurrentConversation() == null) {
       toolWindowTabPanel.startNewConversation(message);
     } else {
       toolWindowTabPanel.sendMessage(message);

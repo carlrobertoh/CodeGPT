@@ -8,7 +8,7 @@ import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 import ee.carlrobert.codegpt.conversations.message.Message;
-import ee.carlrobert.codegpt.settings.SettingsState;
+import ee.carlrobert.codegpt.settings.state.SettingsState;
 import java.awt.BorderLayout;
 import javax.swing.JPanel;
 
