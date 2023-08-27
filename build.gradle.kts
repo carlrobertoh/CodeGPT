@@ -49,7 +49,7 @@ dependencies {
   testImplementation("org.assertj:assertj-core:3.24.2")
   testImplementation("org.awaitility:awaitility:4.2.0")
   testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.6.1")
-  testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.6.1")
+  testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
   testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.6.1")
 }
 
