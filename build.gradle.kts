@@ -44,7 +44,7 @@ dependencies {
   }
   implementation("org.jsoup:jsoup:1.16.1")
   implementation("org.apache.commons:commons-text:1.10.0")
-  implementation("com.knuddels:jtokkit:0.2.0")
+  implementation("com.knuddels:jtokkit:0.6.1")
   implementation("org.quartz-scheduler:quartz:2.3.2")
 
   testImplementation("org.assertj:assertj-core:3.24.2")
