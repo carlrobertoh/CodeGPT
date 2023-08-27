@@ -6,7 +6,7 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.diagnostic.Logger;
 import ee.carlrobert.codegpt.credentials.UserCredentialsManager;
-import ee.carlrobert.codegpt.settings.SettingsState;
+import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.user.ApiClient;
 import ee.carlrobert.codegpt.user.UserManager;
 import ee.carlrobert.codegpt.util.OverlayUtils;
@@ -68,7 +68,7 @@ public final class AuthenticationService {
   }
 
   private void handleSuccessfulAuthentication(Session session) {
-    SettingsState.getInstance().previouslySignedIn = true;
+    SettingsState.getInstance().setPreviouslySignedIn(true);
 
     var userManager = UserManager.getInstance();
     userManager.setSession(session);
@@ -111,7 +111,7 @@ public final class AuthenticationService {
           try {
             var session = new ObjectMapper().readValue(body.string(), Session.class);
             handleSuccessfulAuthentication(session);
-            SettingsState.getInstance().email = email;
+            SettingsState.getInstance().setEmail(email);
             UserCredentialsManager.getInstance().setAccountPassword(password);
             authenticationHandler.handleAuthenticated();
             return;

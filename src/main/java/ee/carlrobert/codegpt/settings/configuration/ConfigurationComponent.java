@@ -50,7 +50,7 @@ public class ConfigurationComponent {
 
   public ConfigurationComponent(Disposable parentDisposable, ConfigurationState configuration) {
     table = new JBTable(new DefaultTableModel(
-        EditorActionsUtil.toArray(configuration.tableData),
+        EditorActionsUtil.toArray(configuration.getTableData()),
         new String[] {
             CodeGPTBundle.get("configurationConfigurable.table.header.actionColumnLabel"),
             CodeGPTBundle.get("configurationConfigurable.table.header.promptColumnLabel")
@@ -62,7 +62,7 @@ public class ConfigurationComponent {
     tablePanel.setBorder(BorderFactory.createTitledBorder(CodeGPTBundle.get("configurationConfigurable.table.title")));
 
     temperatureField = new JBTextField(12);
-    temperatureField.setText(String.valueOf(configuration.temperature));
+    temperatureField.setText(String.valueOf(configuration.getTemperature()));
 
     var temperatureFieldValidator = createInputValidator(parentDisposable, temperatureField);
     temperatureField.getDocument().addDocumentListener(new DocumentListener() {
@@ -84,7 +84,7 @@ public class ConfigurationComponent {
 
     maxTokensField = new IntegerField("max_tokens", 100, 2000);
     maxTokensField.setColumns(12);
-    maxTokensField.setValue(configuration.maxTokens);
+    maxTokensField.setValue(configuration.getMaxTokens());
 
     systemPromptTextArea = new JTextArea();
     systemPromptTextArea.setLineWrap(true);

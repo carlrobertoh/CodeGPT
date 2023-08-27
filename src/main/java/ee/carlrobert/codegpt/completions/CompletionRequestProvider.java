@@ -9,7 +9,7 @@ import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.embeddings.EmbeddingsService;
-import ee.carlrobert.codegpt.settings.SettingsState;
+import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
 import ee.carlrobert.codegpt.util.FileUtils;
 import ee.carlrobert.openai.client.completion.chat.ChatCompletionModel;
@@ -62,8 +62,8 @@ public class CompletionRequestProvider {
   public ChatCompletionRequest buildChatCompletionRequest(String model, Message message, boolean isRetry, boolean useContextualSearch) {
     return (ChatCompletionRequest) new ChatCompletionRequest.Builder(buildMessages(model, message, isRetry, useContextualSearch))
         .setModel(model)
-        .setMaxTokens(ConfigurationState.getInstance().maxTokens)
-        .setTemperature(ConfigurationState.getInstance().temperature)
+        .setMaxTokens(ConfigurationState.getInstance().getMaxTokens())
+        .setTemperature(ConfigurationState.getInstance().getTemperature())
         .build();
   }
 
@@ -71,8 +71,8 @@ public class CompletionRequestProvider {
     return (TextCompletionRequest) new TextCompletionRequest.Builder(buildPrompt(model, message, isRetry))
         .setStop(List.of(" Human:", " AI:"))
         .setModel(model)
-        .setMaxTokens(ConfigurationState.getInstance().maxTokens)
-        .setTemperature(ConfigurationState.getInstance().temperature)
+        .setMaxTokens(ConfigurationState.getInstance().getMaxTokens())
+        .setTemperature(ConfigurationState.getInstance().getTemperature())
         .build();
   }
 
@@ -87,7 +87,7 @@ public class CompletionRequestProvider {
       LOG.info("Retrieved context:\n" + prompt);
       messages.add(new ChatCompletionMessage("user", prompt));
     } else {
-      var systemPrompt = ConfigurationState.getInstance().systemPrompt;
+      var systemPrompt = ConfigurationState.getInstance().getSystemPrompt();
       messages.add(new ChatCompletionMessage("system",
           systemPrompt.isEmpty() ? COMPLETION_SYSTEM_PROMPT : systemPrompt));
 
@@ -103,7 +103,7 @@ public class CompletionRequestProvider {
 
     int totalUsage = messages.parallelStream()
         .mapToInt(encodingManager::countMessageTokens)
-        .sum() + ConfigurationState.getInstance().maxTokens;
+        .sum() + ConfigurationState.getInstance().getMaxTokens();
     int modelMaxTokens = ChatCompletionModel.findByCode(model).getMaxTokens();
 
     if (totalUsage <= modelMaxTokens) {
@@ -145,7 +145,7 @@ public class CompletionRequestProvider {
   }
 
   private String buildPrompt(String model, Message message, boolean isRetry) {
-    var systemPrompt = ConfigurationState.getInstance().systemPrompt;
+    var systemPrompt = ConfigurationState.getInstance().getSystemPrompt();
     var basePrompt = systemPrompt.isEmpty() ? getBasePrompt(model) : new StringBuilder(systemPrompt + "\n");
     conversation.getMessages().forEach(prevMessage ->
         basePrompt.append("Human: ")

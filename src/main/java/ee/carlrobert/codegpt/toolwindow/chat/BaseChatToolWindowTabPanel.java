@@ -16,7 +16,7 @@ import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
-import ee.carlrobert.codegpt.settings.SettingsState;
+import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.util.EditorUtils;
 import ee.carlrobert.codegpt.util.FileUtils;
 import ee.carlrobert.codegpt.util.OverlayUtils;
@@ -113,7 +113,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
   }
 
   private boolean isCredentialSet() {
-    if (SettingsState.getInstance().useAzureService) {
+    if (SettingsState.getInstance().isUseAzureService()) {
       return AzureCredentialsManager.getInstance().isCredentialSet();
     }
     return OpenAICredentialsManager.getInstance().isApiKeySet();
@@ -127,7 +127,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
       return;
     }
 
-    var requestHandler = new CompletionRequestHandler(project);
+    var requestHandler = new CompletionRequestHandler();
     requestHandler.withContextualSearch(useContextualSearch);
     requestHandler.addMessageListener(partialMessage -> {
       try {

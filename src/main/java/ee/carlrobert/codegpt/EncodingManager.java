@@ -5,7 +5,7 @@ import com.intellij.openapi.components.Service;
 import com.knuddels.jtokkit.Encodings;
 import com.knuddels.jtokkit.api.Encoding;
 import com.knuddels.jtokkit.api.EncodingRegistry;
-import ee.carlrobert.codegpt.settings.SettingsState;
+import ee.carlrobert.codegpt.settings.state.ModelSettingsState;
 import ee.carlrobert.openai.client.completion.chat.request.ChatCompletionMessage;
 
 @Service
@@ -15,8 +15,7 @@ public final class EncodingManager {
   private Encoding encoding;
 
   private EncodingManager() {
-    var settings = SettingsState.getInstance();
-    setEncoding(settings.isChatCompletionOptionSelected ? settings.chatCompletionBaseModel : settings.textCompletionBaseModel);
+    setEncoding(ModelSettingsState.getInstance().getCompletionModel());
   }
 
   public static EncodingManager getInstance() {

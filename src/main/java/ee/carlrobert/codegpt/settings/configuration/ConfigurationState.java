@@ -16,12 +16,11 @@ import org.jetbrains.annotations.Nullable;
 )
 public class ConfigurationState implements PersistentStateComponent<ConfigurationState> {
 
-  public String systemPrompt = "";
-  public int maxTokens = 1000;
-  public double temperature = 0.2;
-  public boolean createNewChatOnEachAction;
-
-  public Map<String, String> tableData = EditorActionsUtil.DEFAULT_ACTIONS;
+  private String systemPrompt = "";
+  private int maxTokens = 1000;
+  private double temperature = 0.2;
+  private boolean createNewChatOnEachAction;
+  private Map<String, String> tableData = EditorActionsUtil.DEFAULT_ACTIONS;
 
   public static ConfigurationState getInstance() {
     return ApplicationManager.getApplication().getService(ConfigurationState.class);
@@ -36,5 +35,45 @@ public class ConfigurationState implements PersistentStateComponent<Configuratio
   @Override
   public void loadState(@NotNull ConfigurationState state) {
     XmlSerializerUtil.copyBean(state, this);
+  }
+
+  public String getSystemPrompt() {
+    return systemPrompt;
+  }
+
+  public void setSystemPrompt(String systemPrompt) {
+    this.systemPrompt = systemPrompt;
+  }
+
+  public int getMaxTokens() {
+    return maxTokens;
+  }
+
+  public void setMaxTokens(int maxTokens) {
+    this.maxTokens = maxTokens;
+  }
+
+  public double getTemperature() {
+    return temperature;
+  }
+
+  public void setTemperature(double temperature) {
+    this.temperature = temperature;
+  }
+
+  public boolean isCreateNewChatOnEachAction() {
+    return createNewChatOnEachAction;
+  }
+
+  public void setCreateNewChatOnEachAction(boolean createNewChatOnEachAction) {
+    this.createNewChatOnEachAction = createNewChatOnEachAction;
+  }
+
+  public Map<String, String> getTableData() {
+    return tableData;
+  }
+
+  public void setTableData(Map<String, String> tableData) {
+    this.tableData = tableData;
   }
 }

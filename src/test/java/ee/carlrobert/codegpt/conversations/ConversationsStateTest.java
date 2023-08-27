@@ -4,17 +4,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import ee.carlrobert.codegpt.conversations.message.Message;
-import ee.carlrobert.codegpt.settings.SettingsState;
+import ee.carlrobert.codegpt.settings.state.ModelSettingsState;
 import ee.carlrobert.openai.client.ClientCode;
 import ee.carlrobert.openai.client.completion.chat.ChatCompletionModel;
 
 public class ConversationsStateTest extends BasePlatformTestCase {
 
   public void testStartNewDefaultConversation() {
-    var settings = SettingsState.getInstance();
-    settings.isChatCompletionOptionSelected = true;
-    settings.isTextCompletionOptionSelected = false;
-    settings.chatCompletionBaseModel = ChatCompletionModel.GPT_3_5.getCode();
+    var modelSettings = ModelSettingsState.getInstance();
+    modelSettings.setUseChatCompletion(true);
+    modelSettings.setUseTextCompletion(false);
+    modelSettings.setChatCompletionModel(ChatCompletionModel.GPT_3_5.getCode());
 
     var conversation = ConversationService.getInstance().startConversation();
 

@@ -14,7 +14,9 @@ import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
-import ee.carlrobert.codegpt.settings.SettingsState;
+import ee.carlrobert.codegpt.settings.state.ModelSettingsState;
+import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
+import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
 import ee.carlrobert.openai.client.ClientCode;
 import ee.carlrobert.openai.client.completion.chat.ChatCompletionModel;
@@ -36,9 +38,9 @@ public class CompletionRequestProviderTest extends BasePlatformTestCase {
   protected void setUp() throws Exception {
     super.setUp();
     server = new LocalCallbackServer(8000);
-    SettingsState.getInstance().openAIBaseHost = "http://127.0.0.1:8000";
+    OpenAISettingsState.getInstance().setBaseHost("http://127.0.0.1:8000");
     OpenAICredentialsManager.getInstance().setApiKey("TEST_API_KEY");
-    ConfigurationState.getInstance().systemPrompt = "";
+    ConfigurationState.getInstance().setSystemPrompt("");
   }
 
   @Override
@@ -48,7 +50,7 @@ public class CompletionRequestProviderTest extends BasePlatformTestCase {
   }
 
   public void testTextCompletionRequestWithSystemPromptOverride() {
-    ConfigurationState.getInstance().systemPrompt = "TEST_SYSTEM_PROMPT";
+    ConfigurationState.getInstance().setSystemPrompt("TEST_SYSTEM_PROMPT");
     var conversation = createConversation(ClientCode.TEXT_COMPLETION);
     var firstMsg = new Message("TEST_PROMPT", "TEST_RESPONSE");
     conversation.addMessage(firstMsg);
@@ -88,7 +90,7 @@ public class CompletionRequestProviderTest extends BasePlatformTestCase {
   }
 
   public void testChatCompletionRequestWithSystemPromptOverride() {
-    ConfigurationState.getInstance().systemPrompt = "TEST_SYSTEM_PROMPT";
+    ConfigurationState.getInstance().setSystemPrompt("TEST_SYSTEM_PROMPT");
     var conversation = ConversationService.getInstance().startConversation();
     var firstMessage = createDummyMessage(500);
     var secondMessage = createDummyMessage(250);
@@ -185,10 +187,11 @@ public class CompletionRequestProviderTest extends BasePlatformTestCase {
   public void testContextualSearch() {
     var conversation = ConversationService.getInstance().startConversation();
     var settings = SettingsState.getInstance();
-    settings.isTextCompletionOptionSelected = false;
-    settings.isChatCompletionOptionSelected = true;
-    settings.useOpenAIService = true;
-    settings.useAzureService = false;
+    var modelSettings = ModelSettingsState.getInstance();
+    modelSettings.setUseTextCompletion(false);
+    modelSettings.setUseChatCompletion(true);
+    settings.setUseOpenAIService(true);
+    settings.setUseAzureService(false);
     expectRequest("/v1/chat/completions", request -> {
       assertThat(request.getMethod()).isEqualTo("POST");
       assertThat(request.getHeaders().get(AUTHORIZATION).get(0)).isEqualTo("Bearer TEST_API_KEY");
@@ -242,13 +245,13 @@ public class CompletionRequestProviderTest extends BasePlatformTestCase {
   }
 
   private Conversation createConversation(ClientCode clientCode) {
-    var settings = SettingsState.getInstance();
+    var modelSettings = ModelSettingsState.getInstance();
     var conversation = new Conversation();
     conversation.setId(UUID.randomUUID());
     conversation.setClientCode(clientCode);
-    conversation.setModel(settings.isChatCompletionOptionSelected ?
-        settings.getChatCompletionModel() :
-        settings.getTextCompletionModel());
+    conversation.setModel(modelSettings.isUseChatCompletion() ?
+        modelSettings.getChatCompletionModel() :
+        modelSettings.getTextCompletionModel());
     conversation.setCreatedOn(LocalDateTime.now());
     conversation.setUpdatedOn(LocalDateTime.now());
     return conversation;

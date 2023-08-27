@@ -16,7 +16,7 @@ import ee.carlrobert.codegpt.completions.CompletionClientProvider;
 import ee.carlrobert.codegpt.embeddings.EmbeddingsService;
 import ee.carlrobert.codegpt.embeddings.VectorStore;
 import ee.carlrobert.codegpt.embeddings.CheckedFile;
-import ee.carlrobert.codegpt.settings.SettingsState;
+import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.util.FileUtils;
 import ee.carlrobert.codegpt.util.OverlayUtils;
 import java.util.List;

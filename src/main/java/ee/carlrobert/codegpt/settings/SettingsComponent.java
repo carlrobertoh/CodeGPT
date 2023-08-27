@@ -6,6 +6,7 @@ import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
+import ee.carlrobert.codegpt.settings.state.SettingsState;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
@@ -18,10 +19,10 @@ public class SettingsComponent {
   private final UserDetailsSettingsPanel userDetailsSettingsPanel;
 
   public SettingsComponent(Disposable parentDisposable, SettingsState settings) {
-    modelSelectionForm = new ModelSelectionForm(settings);
+    modelSelectionForm = new ModelSelectionForm();
     serviceSelectionForm = new ServiceSelectionForm(settings);
 
-    displayNameField = new JBTextField(settings.displayName, 20);
+    displayNameField = new JBTextField(settings.getDisplayName(), 20);
 
     userDetailsSettingsPanel = new UserDetailsSettingsPanel(parentDisposable, settings);
 

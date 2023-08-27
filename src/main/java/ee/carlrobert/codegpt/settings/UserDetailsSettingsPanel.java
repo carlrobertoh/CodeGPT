@@ -15,6 +15,7 @@ import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.credentials.UserCredentialsManager;
+import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.user.UserManager;
 import ee.carlrobert.codegpt.user.auth.AuthenticationHandler;
 import ee.carlrobert.codegpt.user.auth.AuthenticationService;
@@ -38,10 +39,10 @@ public class UserDetailsSettingsPanel extends JPanel {
 
   public UserDetailsSettingsPanel(Disposable parentDisposable, SettingsState settings) {
     super(new BorderLayout());
-    emailField = new JBTextField(settings.email, 25);
+    emailField = new JBTextField(settings.getEmail(), 25);
     passwordField = new JBPasswordField();
     passwordField.setColumns(25);
-    if (!settings.email.isEmpty()) {
+    if (!settings.getEmail().isEmpty()) {
       passwordField.setText(UserCredentialsManager.getInstance().getAccountPassword());
     }
     signInButton = new JButton(CodeGPTBundle.get("settingsConfigurable.section.userAuthentication.signIn.label"));

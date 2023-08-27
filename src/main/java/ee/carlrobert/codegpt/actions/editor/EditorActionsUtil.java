@@ -46,7 +46,7 @@ public class EditorActionsUtil {
       group.add(new CustomPromptAction());
       group.addSeparator();
 
-      var configuredActions = ConfigurationState.getInstance().tableData;
+      var configuredActions = ConfigurationState.getInstance().getTableData();
       configuredActions.forEach((label, prompt) -> {
         // using label as action description to prevent com.intellij.diagnostic.PluginException
         // https://github.com/carlrobertoh/CodeGPT/issues/95
@@ -61,7 +61,7 @@ public class EditorActionsUtil {
             if (toolWindow != null) {
               toolWindow.show();
 
-              if (ConfigurationState.getInstance().createNewChatOnEachAction) {
+              if (ConfigurationState.getInstance().isCreateNewChatOnEachAction()) {
                 toolWindowContentManager.createNewTabPanel();
               }
             }

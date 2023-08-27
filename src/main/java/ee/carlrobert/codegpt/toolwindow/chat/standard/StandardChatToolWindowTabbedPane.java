@@ -8,7 +8,7 @@ import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBTabbedPane;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
-import ee.carlrobert.codegpt.settings.SettingsState;
+import ee.carlrobert.codegpt.settings.state.ModelSettingsState;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -19,7 +19,6 @@ import java.util.TreeMap;
 import java.util.UUID;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
@@ -105,7 +104,7 @@ public class StandardChatToolWindowTabbedPane extends JBTabbedPane {
       var conversation = toolWindowPanel.getConversation();
       if (conversation != null) {
         ConversationsState.getInstance().setCurrentConversation(conversation);
-        SettingsState.getInstance().syncSettings(conversation);
+        ModelSettingsState.getInstance().sync(conversation);
       }
     }
   }

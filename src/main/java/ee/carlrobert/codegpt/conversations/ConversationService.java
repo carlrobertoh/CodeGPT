@@ -3,7 +3,7 @@ package ee.carlrobert.codegpt.conversations;
 import static java.util.stream.Collectors.toList;
 
 import ee.carlrobert.codegpt.conversations.message.Message;
-import ee.carlrobert.codegpt.settings.SettingsState;
+import ee.carlrobert.codegpt.settings.state.ModelSettingsState;
 import ee.carlrobert.openai.client.ClientCode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -38,13 +38,10 @@ public class ConversationService {
   }
 
   public Conversation createConversation(ClientCode clientCode) {
-    var settings = SettingsState.getInstance();
     var conversation = new Conversation();
     conversation.setId(UUID.randomUUID());
     conversation.setClientCode(clientCode);
-    conversation.setModel(settings.isChatCompletionOptionSelected ?
-        settings.getChatCompletionModel() :
-        settings.getTextCompletionModel());
+    conversation.setModel(ModelSettingsState.getInstance().getCompletionModel());
     conversation.setCreatedOn(LocalDateTime.now());
     conversation.setUpdatedOn(LocalDateTime.now());
     return conversation;
@@ -111,8 +108,7 @@ public class ConversationService {
   }
 
   public Conversation startConversation() {
-    var currentClientCode = SettingsState.getInstance().isChatCompletionOptionSelected ?
-        ClientCode.CHAT_COMPLETION : ClientCode.TEXT_COMPLETION;
+    var currentClientCode = ModelSettingsState.getInstance().isUseChatCompletion() ? ClientCode.CHAT_COMPLETION : ClientCode.TEXT_COMPLETION;
     var conversation = createConversation(currentClientCode);
     conversationState.setCurrentConversation(conversation);
     addConversation(conversation);
