@@ -4,7 +4,7 @@ plugins {
 }
 
 dependencies {
-  antlr("org.antlr:antlr4:4.5")
+  antlr("org.antlr:antlr4:4.13.0")
   implementation("org.antlr:antlr4-runtime:4.13.0")
   implementation("org.json:json:20230618")
   implementation("com.github.jelmerk:hnswlib-core:1.1.0")
