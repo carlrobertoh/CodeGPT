@@ -33,6 +33,10 @@ tasks {
     archiveBaseName.set(properties("pluginName") + "-" + project.name)
   }
 
+  runIde {
+    enabled = false
+  }
+
   verifyPlugin {
     enabled = false
   }
