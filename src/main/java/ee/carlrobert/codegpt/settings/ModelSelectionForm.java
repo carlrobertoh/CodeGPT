@@ -13,12 +13,12 @@ import ee.carlrobert.openai.client.completion.chat.ChatCompletionModel;
 import ee.carlrobert.openai.client.completion.text.TextCompletionModel;
 import java.util.NoSuchElementException;
 import javax.swing.ButtonGroup;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 
 public class ModelSelectionForm {
 
   private static final Logger LOG = Logger.getInstance(ModelSelectionForm.class);
-
   private static final String modelSelectionLabel = CodeGPTBundle.get("settingsConfigurable.section.model.selectionFieldLabel");
 
   private final ComboBox<CompletionModel> chatCompletionBaseModelComboBox;
@@ -27,6 +27,60 @@ public class ModelSelectionForm {
   private final JBRadioButton useTextCompletionRadioButton;
   private final JPanel chatCompletionModelsPanel;
   private final JPanel textCompletionModelsPanel;
+
+  public ModelSelectionForm() {
+    var settings = ModelSettingsState.getInstance();
+    chatCompletionBaseModelComboBox = new ModelComboBox(
+        new ChatCompletionModel[] {
+            ChatCompletionModel.GPT_3_5,
+            ChatCompletionModel.GPT_3_5_16k,
+            ChatCompletionModel.GPT_4,
+            ChatCompletionModel.GPT_4_32k
+        },
+        findChatCompletionModelOrGetDefault(settings));
+    chatCompletionModelsPanel = SwingUtils.createPanel(
+        chatCompletionBaseModelComboBox, modelSelectionLabel, false);
+    textCompletionBaseModelComboBox = new ModelComboBox(
+        new TextCompletionModel[] {
+            TextCompletionModel.DAVINCI,
+            TextCompletionModel.CURIE,
+            TextCompletionModel.BABBAGE,
+            TextCompletionModel.ADA,
+        },
+        findTextCompletionModelOrGetDefault(settings));
+    textCompletionModelsPanel = SwingUtils.createPanel(textCompletionBaseModelComboBox, modelSelectionLabel);
+    useChatCompletionRadioButton = new JBRadioButton(
+        CodeGPTBundle.get("settingsConfigurable.section.model.useChatCompletionRadioButtonLabel"),
+        settings.isUseChatCompletion());
+    useTextCompletionRadioButton = new JBRadioButton(
+        CodeGPTBundle.get("settingsConfigurable.section.model.useTextCompletionRadioButtonLabel"),
+        settings.isUseTextCompletion());
+
+    enableModelFields(useChatCompletionRadioButton.isSelected());
+    registerRadioButtons();
+  }
+
+  public JPanel getForm() {
+    return FormBuilder.createFormBuilder()
+        .addComponent(useChatCompletionRadioButton)
+        .addComponent(withEmptyLeftBorder(chatCompletionModelsPanel))
+        .addComponent(useTextCompletionRadioButton)
+        .addComponent(withEmptyLeftBorder(textCompletionModelsPanel))
+        .getPanel();
+  }
+
+  private void registerRadioButtons() {
+    var completionButtonGroup = new ButtonGroup();
+    completionButtonGroup.add(useChatCompletionRadioButton);
+    completionButtonGroup.add(useTextCompletionRadioButton);
+    useChatCompletionRadioButton.addActionListener(e -> enableModelFields(true));
+    useTextCompletionRadioButton.addActionListener(e -> enableModelFields(false));
+  }
+
+  private void enableModelFields(boolean isChatCompletionModel) {
+    chatCompletionBaseModelComboBox.setEnabled(isChatCompletionModel);
+    textCompletionBaseModelComboBox.setEnabled(!isChatCompletionModel);
+  }
 
   private CompletionModel findChatCompletionModelOrGetDefault(ModelSettingsState settings) {
     try {
@@ -46,49 +100,9 @@ public class ModelSelectionForm {
     }
   }
 
-  public ModelSelectionForm() {
-    var settings = ModelSettingsState.getInstance();
-    chatCompletionBaseModelComboBox = new BaseModelComboBox(
-        new ChatCompletionModel[] {
-            ChatCompletionModel.GPT_3_5,
-            ChatCompletionModel.GPT_3_5_16k,
-            ChatCompletionModel.GPT_4,
-            ChatCompletionModel.GPT_4_32k
-        },
-        findChatCompletionModelOrGetDefault(settings));
-    chatCompletionModelsPanel = SwingUtils.createPanel(
-        chatCompletionBaseModelComboBox, modelSelectionLabel, false);
-    chatCompletionModelsPanel.setBorder(JBUI.Borders.emptyLeft(16));
-    textCompletionBaseModelComboBox = new BaseModelComboBox(
-        new TextCompletionModel[] {
-            TextCompletionModel.DAVINCI,
-            TextCompletionModel.CURIE,
-            TextCompletionModel.BABBAGE,
-            TextCompletionModel.ADA,
-        },
-        findTextCompletionModelOrGetDefault(settings));
-    textCompletionModelsPanel = SwingUtils.createPanel(textCompletionBaseModelComboBox, modelSelectionLabel);
-    textCompletionModelsPanel.setBorder(JBUI.Borders.emptyLeft(16));
-    useChatCompletionRadioButton = new JBRadioButton(
-        CodeGPTBundle.get("settingsConfigurable.section.model.useChatCompletionRadioButtonLabel"),
-        settings.isUseChatCompletion());
-    useTextCompletionRadioButton = new JBRadioButton(
-        CodeGPTBundle.get("settingsConfigurable.section.model.useTextCompletionRadioButtonLabel"),
-        settings.isUseTextCompletion());
-
-    registerFields();
-    registerRadioButtons();
-  }
-
-  public JPanel getForm() {
-    var form = FormBuilder.createFormBuilder()
-        .addComponent(useChatCompletionRadioButton)
-        .addComponent(chatCompletionModelsPanel)
-        .addComponent(useTextCompletionRadioButton)
-        .addComponent(textCompletionModelsPanel)
-        .getPanel();
-    form.setBorder(JBUI.Borders.emptyLeft(16));
-    return form;
+  private JComponent withEmptyLeftBorder(JComponent component) {
+    component.setBorder(JBUI.Borders.emptyLeft(16));
+    return component;
   }
 
   public boolean isChatCompletionOptionSelected() {
@@ -121,22 +135,5 @@ public class ModelSelectionForm {
 
   public void setChatCompletionBaseModel(String modelCode) {
     chatCompletionBaseModelComboBox.setSelectedItem(ChatCompletionModel.findByCode(modelCode));
-  }
-
-  private void registerRadioButtons() {
-    var completionButtonGroup = new ButtonGroup();
-    completionButtonGroup.add(useChatCompletionRadioButton);
-    completionButtonGroup.add(useTextCompletionRadioButton);
-    useChatCompletionRadioButton.addActionListener(e -> enableModelFields(true));
-    useTextCompletionRadioButton.addActionListener(e -> enableModelFields(false));
-  }
-
-  private void registerFields() {
-    enableModelFields(useChatCompletionRadioButton.isSelected());
-  }
-
-  private void enableModelFields(boolean isChatCompletionModel) {
-    chatCompletionBaseModelComboBox.setEnabled(isChatCompletionModel);
-    textCompletionBaseModelComboBox.setEnabled(!isChatCompletionModel);
   }
 }

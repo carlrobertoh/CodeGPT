@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.toolwindow.chat;
+package ee.carlrobert.codegpt.toolwindow.chat.components;
 
 import static ee.carlrobert.codegpt.util.ThemeUtils.getPanelBackgroundColor;
 

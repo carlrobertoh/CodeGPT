@@ -15,6 +15,7 @@
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.SettingsState"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.AzureSettingsState"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.OpenAISettingsState"/>
+        <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.CustomSettingsState"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.ModelSettingsState"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.configuration.ConfigurationState"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.advanced.AdvancedSettingsState"/>

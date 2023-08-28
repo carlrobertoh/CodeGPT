@@ -17,6 +17,10 @@ import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
+import ee.carlrobert.codegpt.toolwindow.chat.components.ChatMessageResponseBody;
+import ee.carlrobert.codegpt.toolwindow.chat.components.ResponsePanel;
+import ee.carlrobert.codegpt.toolwindow.chat.components.UserMessagePanel;
+import ee.carlrobert.codegpt.toolwindow.chat.components.UserPromptTextArea;
 import ee.carlrobert.codegpt.util.EditorUtils;
 import ee.carlrobert.codegpt.util.FileUtils;
 import ee.carlrobert.codegpt.util.OverlayUtils;
@@ -43,7 +47,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
   private final Map<UUID, JPanel> visibleMessagePanels = new HashMap<>();
 
   protected final Project project;
-  protected final UserTextArea userTextArea;
+  protected final UserPromptTextArea userPromptTextArea;
   protected final ConversationService conversationService;
   protected @Nullable Conversation conversation;
 
@@ -55,12 +59,12 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     this.conversationService = ConversationService.getInstance();
     this.rootPanel = new JPanel(new GridBagLayout());
     this.scrollablePanel = new ScrollablePanel();
-    this.userTextArea = new UserTextArea(this::handleSubmit);
+    this.userPromptTextArea = new UserPromptTextArea(this::handleSubmit);
     init();
   }
 
   public void requestFocusForTextArea() {
-    userTextArea.focus();
+    userPromptTextArea.focus();
   }
 
   @Override
@@ -156,8 +160,8 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
       responseContainer.displayError(error.getMessage());
       stopStreaming(responseContainer);
     });
-    userTextArea.setRequestHandler(requestHandler);
-    userTextArea.setSubmitEnabled(false);
+    userPromptTextArea.setRequestHandler(requestHandler);
+    userPromptTextArea.setSubmitEnabled(false);
     requestHandler.call(conversation, message, isRetry);
   }
 
@@ -215,7 +219,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
 
   private void stopStreaming(ChatMessageResponseBody responseContainer) {
     SwingUtilities.invokeLater(() -> {
-      userTextArea.setSubmitEnabled(true);
+      userPromptTextArea.setSubmitEnabled(true);
       responseContainer.hideCarets();
     });
   }
@@ -267,9 +271,9 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
         JBUI.Borders.customLine(JBColor.border(), 1, 0, 0, 0),
         JBUI.Borders.empty(8)));
     chatTextAreaWrapper.setBackground(getPanelBackgroundColor());
-    chatTextAreaWrapper.add(userTextArea, BorderLayout.SOUTH);
+    chatTextAreaWrapper.add(userPromptTextArea, BorderLayout.SOUTH);
     rootPanel.add(chatTextAreaWrapper, gbc);
-    userTextArea.requestFocusInWindow();
-    userTextArea.requestFocus();
+    userPromptTextArea.requestFocusInWindow();
+    userPromptTextArea.requestFocus();
   }
 }

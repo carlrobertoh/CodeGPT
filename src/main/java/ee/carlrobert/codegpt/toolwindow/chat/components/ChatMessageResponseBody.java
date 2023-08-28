@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.toolwindow.chat;
+package ee.carlrobert.codegpt.toolwindow.chat.components;
 
 import static ee.carlrobert.codegpt.util.ThemeUtils.getPanelBackgroundColor;
 import static java.lang.String.format;
@@ -20,6 +20,10 @@ import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.data.MutableDataSet;
 import ee.carlrobert.codegpt.settings.SettingsConfigurable;
+import ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowTabPanelEditor;
+import ee.carlrobert.codegpt.toolwindow.chat.ResponseNodeRenderer;
+import ee.carlrobert.codegpt.toolwindow.chat.StreamParser;
+import ee.carlrobert.codegpt.toolwindow.chat.StreamResponseType;
 import ee.carlrobert.codegpt.util.MarkdownUtils;
 import ee.carlrobert.codegpt.util.SwingUtils;
 import java.awt.BorderLayout;

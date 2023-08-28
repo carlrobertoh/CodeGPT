@@ -50,7 +50,7 @@ public class CompletionRequestProvider {
   public CompletionRequestProvider(Conversation conversation) {
     this.embeddingsService = new EmbeddingsService(
         CompletionClientProvider.getEmbeddingsClient(),
-        CompletionClientProvider.getChatCompletionClient(SettingsState.getInstance()),
+        CompletionClientProvider.getChatCompletionClient(),
         CodeGPTPlugin.getPluginBasePath());
     this.conversation = conversation;
   }
@@ -79,11 +79,7 @@ public class CompletionRequestProvider {
   private List<ChatCompletionMessage> buildMessages(String model, Message message, boolean isRetry, boolean useContextualSearch) {
     var messages = new ArrayList<ChatCompletionMessage>();
     if (useContextualSearch) {
-      var context = embeddingsService.buildRelevantContext(message.getPrompt());
-      var prompt = FileUtils.getResourceContent("/prompts/retrieval-prompt.txt")
-          .replace("{prompt}", message.getPrompt())
-          .replace("{context}", context.getContext());
-
+      var prompt = embeddingsService.buildPromptWithContext(message.getPrompt());
       LOG.info("Retrieved context:\n" + prompt);
       messages.add(new ChatCompletionMessage("user", prompt));
     } else {

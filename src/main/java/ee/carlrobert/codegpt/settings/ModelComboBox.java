@@ -6,9 +6,9 @@ import java.awt.Component;
 import javax.swing.JList;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
 
-public class BaseModelComboBox extends ComboBox<CompletionModel> {
+public class ModelComboBox extends ComboBox<CompletionModel> {
 
-  public BaseModelComboBox(CompletionModel[] options, CompletionModel selectedModel) {
+  public ModelComboBox(CompletionModel[] options, CompletionModel selectedModel) {
     super(options);
     setSelectedItem(selectedModel);
     setRenderer(getBasicComboBoxRenderer());

@@ -13,7 +13,7 @@ import ee.carlrobert.codegpt.indexes.CodebaseIndexingCompletedNotifier;
 import ee.carlrobert.codegpt.indexes.CodebaseIndexingTask;
 import ee.carlrobert.codegpt.indexes.FolderStructureTreePanel;
 import ee.carlrobert.codegpt.settings.SettingsConfigurable;
-import ee.carlrobert.codegpt.toolwindow.chat.ResponsePanel;
+import ee.carlrobert.codegpt.toolwindow.chat.components.ResponsePanel;
 import ee.carlrobert.codegpt.user.UserManager;
 import ee.carlrobert.codegpt.user.auth.AuthenticationNotifier;
 import ee.carlrobert.codegpt.user.auth.SignedOutNotifier;

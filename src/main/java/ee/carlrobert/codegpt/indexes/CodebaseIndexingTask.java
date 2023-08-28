@@ -36,7 +36,7 @@ public class CodebaseIndexingTask extends Task.Backgroundable {
     this.checkedFiles = checkedFiles;
     this.embeddingsService = new EmbeddingsService(
         CompletionClientProvider.getEmbeddingsClient(),
-        CompletionClientProvider.getChatCompletionClient(SettingsState.getInstance()),
+        CompletionClientProvider.getChatCompletionClient(),
         CodeGPTPlugin.getPluginBasePath());
   }
 

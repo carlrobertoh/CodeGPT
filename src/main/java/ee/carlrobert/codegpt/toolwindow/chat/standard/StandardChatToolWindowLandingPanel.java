@@ -5,7 +5,7 @@ import static javax.swing.event.HyperlinkEvent.EventType.ACTIVATED;
 
 import com.intellij.openapi.diagnostic.Logger;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
-import ee.carlrobert.codegpt.toolwindow.chat.ResponsePanel;
+import ee.carlrobert.codegpt.toolwindow.chat.components.ResponsePanel;
 import ee.carlrobert.codegpt.util.SwingUtils;
 import java.awt.event.MouseEvent;
 import javax.swing.JTextPane;

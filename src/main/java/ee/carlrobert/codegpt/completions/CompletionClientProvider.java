@@ -27,16 +27,20 @@ public class CompletionClientProvider {
     return null;
   }
 
-  public static CompletionClient getChatCompletionClient(SettingsState settings) {
-    return getClientBuilder(settings).buildChatCompletionClient();
+  public static CompletionClient getChatCompletionClient() {
+    return getClientBuilder().buildChatCompletionClient();
   }
 
   @Deprecated
-  public static CompletionClient getTextCompletionClient(SettingsState settings) {
-    return getClientBuilder(settings).buildTextCompletionClient();
+  public static CompletionClient getTextCompletionClient() {
+    return getClientBuilder().buildTextCompletionClient();
   }
 
-  public static Client.Builder getClientBuilder(SettingsState settings) {
+  public static Client.Builder getClientBuilder() {
+    var settings = SettingsState.getInstance();
+    if (settings.isUseCustomService()) {
+      return addDefaultClientParams(new Client.Builder(""));
+    }
     return settings.isUseAzureService() ? getAzureClientBuilder() : getOpenAIClientBuilder();
   }
 

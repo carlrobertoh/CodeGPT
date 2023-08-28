@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.toolwindow.chat;
+package ee.carlrobert.codegpt.toolwindow.chat.components;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.editor.ex.util.EditorUtil;
@@ -33,7 +33,7 @@ import javax.swing.event.DocumentListener;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class UserTextArea extends JPanel {
+public class UserPromptTextArea extends JPanel {
 
   private static final String TEXT_SUBMIT = "text-submit";
   private static final String INSERT_BREAK = "insert-break";
@@ -47,7 +47,7 @@ public class UserTextArea extends JPanel {
   private JPanel iconsPanel;
   private boolean submitEnabled = true;
 
-  public UserTextArea(Consumer<String> onSubmit) {
+  public UserPromptTextArea(Consumer<String> onSubmit) {
     this.onSubmit = onSubmit;
 
     textArea = new JBTextArea();
@@ -68,12 +68,12 @@ public class UserTextArea extends JPanel {
     textArea.addFocusListener(new FocusListener() {
       @Override
       public void focusGained(FocusEvent e) {
-        UserTextArea.super.paintBorder(UserTextArea.super.getGraphics());
+        UserPromptTextArea.super.paintBorder(UserPromptTextArea.super.getGraphics());
       }
 
       @Override
       public void focusLost(FocusEvent e) {
-        UserTextArea.super.paintBorder(UserTextArea.super.getGraphics());
+        UserPromptTextArea.super.paintBorder(UserPromptTextArea.super.getGraphics());
       }
     });
     textArea.getDocument().addDocumentListener(new DocumentListener() {

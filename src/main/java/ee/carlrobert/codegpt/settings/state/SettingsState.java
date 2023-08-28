@@ -18,6 +18,7 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
   private boolean previouslySignedIn;
   private boolean useOpenAIService = true;
   private boolean useAzureService;
+  private boolean useCustomService;
 
   public SettingsState() {
   }
@@ -81,5 +82,13 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
 
   public void setUseAzureService(boolean useAzureService) {
     this.useAzureService = useAzureService;
+  }
+
+  public boolean isUseCustomService() {
+    return useCustomService;
+  }
+
+  public void setUseCustomService(boolean useCustomService) {
+    this.useCustomService = useCustomService;
   }
 }

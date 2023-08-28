@@ -2,7 +2,6 @@ package ee.carlrobert.codegpt.toolwindow.chat;
 
 import static ee.carlrobert.codegpt.util.FileUtils.findFileNameExtensionMapping;
 
-import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.ActionGroup;
@@ -11,7 +10,6 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.application.PathManager;
-import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.EditorFactory;
 import com.intellij.openapi.editor.EditorKind;
@@ -21,7 +19,6 @@ import com.intellij.openapi.editor.impl.ContextMenuPopupHandler;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
-import com.intellij.psi.PsiDocumentManager;
 import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBLabel;
@@ -46,12 +43,10 @@ import org.jetbrains.annotations.NotNull;
 
 public class ChatToolWindowTabPanelEditor implements Disposable {
 
-  private final Project project;
   private final Editor editor;
   private final Map.Entry<String, String> fileNameExtensionMapping;
 
   public ChatToolWindowTabPanelEditor(Project project, String code, String language, Disposable disposableParent) {
-    this.project = project;
     this.fileNameExtensionMapping = findFileNameExtensionMapping(language);
 
     var fileName = "temp_" + DateTimeFormatter.ofPattern("yyyyMMddHHmmss").format(LocalDateTime.now()) + fileNameExtensionMapping.getValue();
@@ -60,7 +55,7 @@ public class ChatToolWindowTabPanelEditor implements Disposable {
     if (document == null) {
       document = EditorFactory.getInstance().createDocument(code);
     }
-    disableHighlighting(document);
+    EditorUtils.disableHighlighting(project, document);
     editor = EditorFactory.getInstance().createEditor(document, project, lightVirtualFile, true, EditorKind.UNTYPED);
     String originalGroupId = ((EditorEx) editor).getContextMenuGroupId();
     AnAction originalGroup = originalGroupId == null ? null : ActionManager.getInstance().getAction(originalGroupId);
@@ -93,13 +88,6 @@ public class ChatToolWindowTabPanelEditor implements Disposable {
 
   public Editor getEditor() {
     return editor;
-  }
-
-  private void disableHighlighting(Document document) {
-    var psiFile = PsiDocumentManager.getInstance(project).getPsiFile(document);
-    if (psiFile != null) {
-      DaemonCodeAnalyzer.getInstance(project).setHighlightingEnabled(psiFile, false);
-    }
   }
 
   private JPanel createHeaderComponent(String language) {

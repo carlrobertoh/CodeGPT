@@ -55,6 +55,8 @@ public class SettingsConfigurable implements Configurable, Disposable {
 
         serviceSelectionForm.isOpenAIServiceSelected() != settings.isUseOpenAIService() ||
         serviceSelectionForm.isAzureServiceSelected() != settings.isUseAzureService() ||
+        serviceSelectionForm.isCustomServiceSelected() != settings.isUseCustomService() ||
+
         !serviceSelectionForm.getOpenAIApiKey().equals(OpenAICredentialsManager.getInstance().getApiKey()) ||
         !serviceSelectionForm.getOpenAIOrganization().equals(openAISettings.getOrganization()) ||
         !serviceSelectionForm.getOpenAIBaseHost().equals(openAISettings.getBaseHost()) ||
@@ -104,7 +106,7 @@ public class SettingsConfigurable implements Configurable, Disposable {
     }
 
     var serviceSelectionForm = settingsComponent.getServiceSelectionForm();
-    var modelSelectionForm = settingsComponent.getModelSelectionForm();
+    var modelSelectionForm = serviceSelectionForm.getModelSelectionForm();
 
     UserCredentialsManager.getInstance().setAccountPassword(settingsComponent.getPassword());
     OpenAICredentialsManager.getInstance().setApiKey(serviceSelectionForm.getOpenAIApiKey());
@@ -113,8 +115,10 @@ public class SettingsConfigurable implements Configurable, Disposable {
 
     settings.setEmail(settingsComponent.getEmail());
     settings.setDisplayName(settingsComponent.getDisplayName());
+
     settings.setUseOpenAIService(serviceSelectionForm.isOpenAIServiceSelected());
-    settings.setUseOpenAIService(serviceSelectionForm.isAzureServiceSelected());
+    settings.setUseAzureService(serviceSelectionForm.isAzureServiceSelected());
+    settings.setUseCustomService(serviceSelectionForm.isCustomServiceSelected());
 
     openAISettings.setOrganization(serviceSelectionForm.getOpenAIOrganization());
     openAISettings.setBaseHost(serviceSelectionForm.getOpenAIBaseHost());
@@ -139,13 +143,14 @@ public class SettingsConfigurable implements Configurable, Disposable {
     var azureSettings = AzureSettingsState.getInstance();
     var modelSettings = ModelSettingsState.getInstance();
     var serviceSelectionForm = settingsComponent.getServiceSelectionForm();
-    var modelSelectionForm = settingsComponent.getModelSelectionForm();
+    var modelSelectionForm = serviceSelectionForm.getModelSelectionForm();
 
     settingsComponent.setEmail(settings.getEmail());
     settingsComponent.setDisplayName(settings.getDisplayName());
 
     serviceSelectionForm.setOpenAIServiceSelected(settings.isUseOpenAIService());
     serviceSelectionForm.setAzureServiceSelected(settings.isUseAzureService());
+    serviceSelectionForm.setCustomServiceSelected(settings.isUseCustomService());
 
     serviceSelectionForm.setOpenAIApiKey(OpenAICredentialsManager.getInstance().getApiKey());
     serviceSelectionForm.setOpenAIOrganization(openAISettings.getOrganization());
@@ -172,13 +177,13 @@ public class SettingsConfigurable implements Configurable, Disposable {
   }
 
   private boolean isCompletionOptionChanged(ModelSettingsState settings) {
-    var modelSelectionForm = settingsComponent.getModelSelectionForm();
+    var modelSelectionForm = settingsComponent.getServiceSelectionForm().getModelSelectionForm();
     return modelSelectionForm.isChatCompletionOptionSelected() != settings.isUseChatCompletion() ||
         modelSelectionForm.isTextCompletionOptionSelected() != settings.isUseTextCompletion();
   }
 
   private boolean isModelChanged(ModelSettingsState settings) {
-    var modelSelectionForm = settingsComponent.getModelSelectionForm();
+    var modelSelectionForm = settingsComponent.getServiceSelectionForm().getModelSelectionForm();
     return !modelSelectionForm.getChatCompletionBaseModel().getCode().equals(settings.getChatCompletionModel()) ||
         !modelSelectionForm.getTextCompletionBaseModel().getCode().equals(settings.getTextCompletionModel());
   }

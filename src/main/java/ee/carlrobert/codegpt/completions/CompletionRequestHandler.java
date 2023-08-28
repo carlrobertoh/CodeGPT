@@ -103,15 +103,14 @@ public class CompletionRequestHandler {
       @NotNull Message message,
       boolean isRetry,
       CompletionEventListener eventListener) {
-    var settings = SettingsState.getInstance();
     var modelSettings = ModelSettingsState.getInstance();
     var requestProvider = new CompletionRequestProvider(conversation);
 
     if (modelSettings.isUseChatCompletion()) {
-      return CompletionClientProvider.getChatCompletionClient(settings).stream(
+      return CompletionClientProvider.getChatCompletionClient().stream(
           requestProvider.buildChatCompletionRequest(modelSettings.getChatCompletionModel(), message, isRetry, useContextualSearch), eventListener);
     }
-    return CompletionClientProvider.getTextCompletionClient(settings).stream(
+    return CompletionClientProvider.getTextCompletionClient().stream(
         requestProvider.buildTextCompletionRequest(modelSettings.getTextCompletionModel(), message, isRetry), eventListener);
   }
 }

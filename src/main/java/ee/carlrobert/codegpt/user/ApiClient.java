@@ -31,17 +31,18 @@ public final class ApiClient {
 
   public @Nullable Subscription getSubscription(String accessToken) {
     try {
-      var body = httpClient.newCall(new Request.Builder()
-              .url(API_BASE_URL + "/subscriptions")
+      try (var call = httpClient.newCall(new Request.Builder()
+              .url(API_BASE_URL + "/v1/subscriptions")
               .header("Authorization", accessToken)
               .get()
               .build())
-          .execute()
-          .body();
-      if (body == null) {
-        return null;
+          .execute()) {
+        var body = call.body();
+        if (body == null) {
+          return null;
+        }
+        return new ObjectMapper().readValue(body.string(), new TypeReference<>() {});
       }
-      return new ObjectMapper().readValue(body.string(), new TypeReference<>() {});
     } catch (IOException e) {
       throw new RuntimeException("Unable to obtain subscriptions", e);
     }
@@ -50,7 +51,7 @@ public final class ApiClient {
   public void authenticate(String email, String password, Callback callback) {
     try {
       httpClient.newCall(new Request.Builder()
-              .url(API_BASE_URL + "/auth")
+              .url(API_BASE_URL + "/v1/auth")
               .post(RequestBody.create(
                   new ObjectMapper()
                       .writerWithDefaultPrettyPrinter()
@@ -68,7 +69,7 @@ public final class ApiClient {
   public void refreshToken(String refreshToken, Callback callback) {
     try {
       httpClient.newCall(new Request.Builder()
-              .url(API_BASE_URL + "/refresh-token")
+              .url(API_BASE_URL + "/v1/refresh-token")
               .patch(RequestBody.create(
                   new ObjectMapper()
                       .writerWithDefaultPrettyPrinter()

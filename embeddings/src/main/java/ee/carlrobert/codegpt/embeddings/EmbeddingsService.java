@@ -65,6 +65,28 @@ public class EmbeddingsService {
     }
   }
 
+  public String buildPromptWithContext(String prompt) {
+    try {
+      var inputEmbedding = embeddingsClient.getEmbedding(getSearchQuery(prompt));
+      var sortedResult = vectorStore.loadIndex()
+          .findNearest(normalize(inputEmbedding), 10)
+          .stream()
+          .map(SearchResult::item)
+          .sorted(Comparator.comparing(Word::getMeta))
+          .collect(toList());
+
+      var context = sortedResult.stream().map(Word::id).collect(Collectors.joining());
+      var fileNames = sortedResult.stream().map(Word::getMeta).collect(Collectors.toSet());
+
+      return getResourceContent("/prompts/prompt-with-context.txt")
+          .replace("{prompt}", prompt)
+          .replace("{context}", new GeneratedContextDetails(context, fileNames).getContext());
+    } catch (IOException e) {
+      LOG.error("Unable to load vector index", e);
+      return prompt;
+    }
+  }
+
   public List<Item<Object, double[]>> createEmbeddings(List<CheckedFile> checkedFiles, @Nullable ProgressIndicator indicator) {
     var words = new ArrayList<Item<Object, double[]>>();
     for (int i = 0; i < checkedFiles.size(); i++) {

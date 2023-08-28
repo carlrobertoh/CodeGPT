@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.toolwindow.chat;
+package ee.carlrobert.codegpt.toolwindow.chat.components;
 
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.project.Project;

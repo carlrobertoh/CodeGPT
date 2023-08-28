@@ -1,10 +1,13 @@
 package ee.carlrobert.codegpt.util;
 
+import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.WriteCommandAction;
+import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.psi.PsiDocumentManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,5 +38,12 @@ public final class EditorUtils {
             selectionModel.removeSelection();
           }
         })));
+  }
+
+  public static void disableHighlighting(@NotNull Project project, Document document) {
+    var psiFile = PsiDocumentManager.getInstance(project).getPsiFile(document);
+    if (psiFile != null) {
+      DaemonCodeAnalyzer.getInstance(project).setHighlightingEnabled(psiFile, false);
+    }
   }
 }
