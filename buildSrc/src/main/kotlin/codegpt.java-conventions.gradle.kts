@@ -44,4 +44,16 @@ tasks {
   runPluginVerifier {
     enabled = false
   }
+
+  patchPluginXml {
+    enabled = false
+  }
+
+  publishPlugin {
+    enabled = false
+  }
+
+  signPlugin {
+    enabled = false
+  }
 }

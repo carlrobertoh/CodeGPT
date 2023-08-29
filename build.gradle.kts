@@ -57,10 +57,6 @@ tasks {
     gradleVersion = properties("gradleVersion").get()
   }
 
-  runIde {
-    enabled = true
-  }
-
   verifyPlugin {
     enabled = true
   }
@@ -70,6 +66,7 @@ tasks {
   }
 
   patchPluginXml {
+    enabled = true
     version.set(properties("pluginVersion"))
     sinceBuild.set(properties("pluginSinceBuild"))
     untilBuild.set(properties("pluginUntilBuild"))
@@ -101,18 +98,21 @@ tasks {
   }
 
   signPlugin {
+    enabled = true
     certificateChain.set(System.getenv("CERTIFICATE_CHAIN"))
     privateKey.set(System.getenv("PRIVATE_KEY"))
     password.set(System.getenv("PRIVATE_KEY_PASSWORD"))
   }
 
   publishPlugin {
+    enabled = true
     dependsOn("patchChangelog")
     token.set(System.getenv("PUBLISH_TOKEN"))
     channels.set(listOf("stable"))
   }
 
   runIde {
+    enabled = true
     environment("ENVIRONMENT", "LOCAL")
   }
 
