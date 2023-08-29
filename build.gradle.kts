@@ -7,7 +7,7 @@ fun environment(key: String) = providers.environmentVariable(key)
 
 plugins {
   id("codegpt.java-conventions")
-  id("org.jetbrains.changelog") version "2.1.2"
+  id("org.jetbrains.changelog") version "2.2.0"
 }
 
 group = properties("pluginGroup").get()
