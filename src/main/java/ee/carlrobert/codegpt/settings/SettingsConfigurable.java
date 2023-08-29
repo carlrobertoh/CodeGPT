@@ -113,8 +113,9 @@ public class SettingsConfigurable implements Configurable, Disposable {
 
     settings.setEmail(settingsComponent.getEmail());
     settings.setDisplayName(settingsComponent.getDisplayName());
+
     settings.setUseOpenAIService(serviceSelectionForm.isOpenAIServiceSelected());
-    settings.setUseOpenAIService(serviceSelectionForm.isAzureServiceSelected());
+    settings.setUseAzureService(serviceSelectionForm.isAzureServiceSelected());
 
     openAISettings.setOrganization(serviceSelectionForm.getOpenAIOrganization());
     openAISettings.setBaseHost(serviceSelectionForm.getOpenAIBaseHost());

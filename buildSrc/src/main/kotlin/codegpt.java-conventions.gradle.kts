@@ -18,7 +18,7 @@ intellij {
 }
 
 dependencies {
-  implementation("ee.carlrobert:openai-client:1.2.0")
+  implementation("ee.carlrobert:openai-client:1.2.1")
 }
 
 tasks {
