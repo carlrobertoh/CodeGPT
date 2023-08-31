@@ -7,7 +7,7 @@ fun environment(key: String) = providers.environmentVariable(key)
 
 plugins {
   id("codegpt.java-conventions")
-  id("org.jetbrains.changelog") version "2.1.2"
+  id("org.jetbrains.changelog") version "2.2.0"
 }
 
 group = properties("pluginGroup").get()
@@ -34,7 +34,7 @@ dependencies {
   implementation(project("embeddings", "instrumentedJar"))
   implementation(project(mapOf("path" to ":embeddings")))
 
-  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.14.2")
+  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.15.2")
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2")
   implementation("com.vladsch.flexmark:flexmark-all:0.64.8") {
     // vulnerable transitive dependency
@@ -47,18 +47,14 @@ dependencies {
 
   testImplementation("org.assertj:assertj-core:3.24.2")
   testImplementation("org.awaitility:awaitility:4.2.0")
-  testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.6.1")
+  testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.0")
   testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
-  testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.6.1")
+  testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.10.0")
 }
 
 tasks {
   wrapper {
     gradleVersion = properties("gradleVersion").get()
-  }
-
-  runIde {
-    enabled = true
   }
 
   verifyPlugin {
@@ -70,6 +66,7 @@ tasks {
   }
 
   patchPluginXml {
+    enabled = true
     version.set(properties("pluginVersion"))
     sinceBuild.set(properties("pluginSinceBuild"))
     untilBuild.set(properties("pluginUntilBuild"))
@@ -101,18 +98,21 @@ tasks {
   }
 
   signPlugin {
+    enabled = true
     certificateChain.set(System.getenv("CERTIFICATE_CHAIN"))
     privateKey.set(System.getenv("PRIVATE_KEY"))
     password.set(System.getenv("PRIVATE_KEY_PASSWORD"))
   }
 
   publishPlugin {
+    enabled = true
     dependsOn("patchChangelog")
     token.set(System.getenv("PUBLISH_TOKEN"))
     channels.set(listOf("stable"))
   }
 
   runIde {
+    enabled = true
     environment("ENVIRONMENT", "LOCAL")
   }
 

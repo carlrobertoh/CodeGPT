@@ -5,6 +5,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.6] - 2023-08-29
+
+### Removed
+- Functionality to fetch/use OpenAI account name
+
+### Fixed
+- Rendering user input's newlines
+
+### Added
+- Support for closing other tabs (#172)
+- Support for configuring custom hosts for OpenAI and Azure services
+
 ## [2.0.5] - 2023-06-12
 
 ### Fixed
@@ -82,7 +94,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Secured
 - `OPENAI_API_KEY` persistence, key is saved in the OS password safe from now on
 
-[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.0.5...HEAD
+[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.0.6...HEAD
+[2.0.6]: https://github.com/carlrobertoh/CodeGPT/compare/v2.0.5...v2.0.6
 [2.0.5]: https://github.com/carlrobertoh/CodeGPT/compare/v2.0.4...v2.0.5
 [2.0.4]: https://github.com/carlrobertoh/CodeGPT/compare/v2.0.3...v2.0.4
 [2.0.3]: https://github.com/carlrobertoh/CodeGPT/compare/v2.0.2...v2.0.3
