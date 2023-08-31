@@ -13,12 +13,12 @@ import com.intellij.openapi.util.io.FileUtil;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.completions.CompletionClientProvider;
-import ee.carlrobert.codegpt.embeddings.EmbeddingsService;
-import ee.carlrobert.codegpt.embeddings.VectorStore;
-import ee.carlrobert.codegpt.embeddings.CheckedFile;
-import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.util.FileUtils;
 import ee.carlrobert.codegpt.util.OverlayUtils;
+import ee.carlrobert.embedding.CheckedFile;
+import ee.carlrobert.embedding.EmbeddingsService;
+import com.github.jelmerk.knn.Item;
+import ee.carlrobert.vector.VectorStore;
 import java.util.List;
 import java.util.Map;
 import org.jetbrains.annotations.NotNull;
@@ -63,7 +63,7 @@ public class CodebaseIndexingTask extends Task.Backgroundable {
 
     try {
       indicator.setFraction(0);
-      var embeddings = embeddingsService.createEmbeddings(checkedFiles, indicator);
+      List<Item<Object, double[]>> embeddings = embeddingsService.createEmbeddings(checkedFiles, indicator);
       VectorStore.getInstance(CodeGPTPlugin.getPluginBasePath()).save(embeddings);
       OverlayUtils.showNotification("Indexing completed", NotificationType.INFORMATION);
 

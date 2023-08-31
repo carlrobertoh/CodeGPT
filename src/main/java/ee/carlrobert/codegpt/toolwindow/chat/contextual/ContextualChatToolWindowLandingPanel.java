@@ -19,7 +19,7 @@ import ee.carlrobert.codegpt.user.auth.AuthenticationNotifier;
 import ee.carlrobert.codegpt.user.auth.SignedOutNotifier;
 import ee.carlrobert.codegpt.util.OverlayUtils;
 import ee.carlrobert.codegpt.util.SwingUtils;
-import ee.carlrobert.codegpt.embeddings.VectorStore;
+import ee.carlrobert.vector.VectorStore;
 import javax.swing.JTextPane;
 import javax.swing.event.HyperlinkEvent;
 

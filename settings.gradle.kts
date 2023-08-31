@@ -1,3 +1,3 @@
 rootProject.name = "CodeGPT"
-include(":embeddings")
-project(":embeddings").projectDir = File("embeddings")
+include("codegpt-core")
+project(":codegpt-core").projectDir = File("codegpt-core")

@@ -32,6 +32,7 @@ import ee.carlrobert.codegpt.util.EditorUtils;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.event.ItemEvent;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -59,6 +60,7 @@ public class CustomServiceSelectionForm {
   private final JBTable queryParamsTable;
   private final EditorEx requestBodyEditor;
   private final EditorEx responseBodyEditor;
+  private final JBCheckBox useStringTypeResponseCheckBox;
 
   public CustomServiceSelectionForm() {
     this(true);
@@ -75,7 +77,12 @@ public class CustomServiceSelectionForm {
         EditorActionsUtil.toArray(CustomSettingsState.getInstance().getQueryParams()),
         new String[] {"Key", "Value"}));
     requestBodyEditor = createEditor("JSON", CustomSettingsState.getInstance().getBodyJson(), "request_body");
-    responseBodyEditor = createEditor("JSON", CustomSettingsState.getInstance().getBodyJson(), "response_body");
+    responseBodyEditor = createEditor("JSON", CustomSettingsState.getInstance().getResponseJson(), "response_body");
+    useStringTypeResponseCheckBox = new JBCheckBox("Use string type response", true);
+    useStringTypeResponseCheckBox.addItemListener(e -> {
+      responseBodyEditor.getContentComponent().setEnabled(e.getStateChange() != ItemEvent.SELECTED);
+      responseBodyEditor.setViewer(e.getStateChange() == ItemEvent.SELECTED);
+    });
     rootPanel = createForm();
   }
 
@@ -94,7 +101,9 @@ public class CustomServiceSelectionForm {
         .addComponent(withEmptyLeftBorder(createTabbedPane()))
         .addComponent(new TitledSeparator("Response Configuration"))
         .addComponent(withEmptyLeftBorder(JBUI.Panels.simplePanel(responseBodyEditor.getComponent())))
-        .addComponent(JBUI.Panels.simplePanel().addToRight(createTestConnectionButton()))
+        .addComponent(withEmptyLeftBorder(JBUI.Panels.simplePanel()
+            .addToLeft(useStringTypeResponseCheckBox)
+            .addToRight(createTestConnectionButton())))
         .getPanel();
   }
 

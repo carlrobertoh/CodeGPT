@@ -10,7 +10,6 @@ version = properties("pluginVersion")
 
 repositories {
   mavenCentral()
-  mavenLocal()
 }
 
 intellij {

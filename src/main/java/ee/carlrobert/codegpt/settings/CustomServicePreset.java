@@ -5,7 +5,7 @@ import java.util.Map;
 public enum CustomServicePreset {
 
   ANTHROPIC(new CustomServicePresetDetails(
-      "Anthropic Completion",
+      "Anthropic",
       "https://api.anthropic.com/v1/complete",
       "POST",
       Map.of(
@@ -23,9 +23,22 @@ public enum CustomServicePreset {
       "{\n" +
           "  \"completion\": {{COMPLETION}}\n" +
           "}")),
-  HUGGINGFACE(new CustomServicePresetDetails("Huggingface Completion", "", "POST", Map.of(), Map.of(), "", "")),
-  LLAMA_2(new CustomServicePresetDetails("Llama 2 Completion", "", "POST", Map.of(), Map.of(), "", "")),
-  OPENAI(new CustomServicePresetDetails("OpenAI Completion",
+  HUGGINGFACE(new CustomServicePresetDetails("Huggingface", "", "POST", Map.of(), Map.of(), "", "")),
+  LLAMA_2(new CustomServicePresetDetails(
+      "Replicate - Llama 2",
+      "https://api.replicate.com/v1/predictions",
+      "POST",
+      Map.of("Authorization", "Token $REPLICATE_API_TOKEN"),
+      Map.of(),
+      "{\n" +
+          "  \"version\": \"2796ee9483c3fd7aa2e171d38f4ca12251a30609463dcfd4cd76703f22e96cdf\",\n" +
+          "  \"input\": {\n" +
+          "    \"prompt\": {{PROMPT}}\n" +
+          "  },\n" +
+          "  \"stream\": true\n" +
+          "}",
+      "data: Once upon a time...")),
+  OPENAI(new CustomServicePresetDetails("OpenAI",
       "https://api.openai.com/v1/chat/completions",
       "POST",
       Map.of(
@@ -37,11 +50,11 @@ public enum CustomServicePreset {
           "  \"messages\": [\n" +
           "    {\n" +
           "      \"role\": \"system\",\n" +
-          "      \"content\": \"You are a helpful assistant.\"\n" +
+          "      \"content\": {{SYSTEM_PROMPT}}\n" +
           "    },\n" +
           "    {\n" +
           "      \"role\": \"user\",\n" +
-          "      \"content\": \"Hello!\"\n" +
+          "      \"content\": {{PROMPT_WITH_HISTORY}}\n" +
           "    }\n" +
           "  ]\n" +
           "}",
@@ -50,11 +63,11 @@ public enum CustomServicePreset {
           "    \"index\": 0,\n" +
           "    \"message\": {\n" +
           "      \"role\": \"assistant\",\n" +
-          "      \"content\": \"\\n\\nHello there, how may I assist you today?\",\n" +
+          "      \"content\": {{COMPLETION}},\n" +
           "    }\n" +
           "  }]\n" +
           "}")),
-  AZURE_OPENAI(new CustomServicePresetDetails("Azure OpenAI Completion", "", "POST", Map.of(), Map.of(), "", ""));
+  AZURE_OPENAI(new CustomServicePresetDetails("Azure OpenAI", "", "POST", Map.of(), Map.of(), "", ""));
 
   private final CustomServicePresetDetails presetDetails;
 
