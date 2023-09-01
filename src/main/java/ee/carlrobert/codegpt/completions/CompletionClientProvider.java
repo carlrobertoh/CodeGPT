@@ -2,10 +2,11 @@ package ee.carlrobert.codegpt.completions;
 
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
+import ee.carlrobert.codegpt.settings.advanced.AdvancedSettingsState;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
+import ee.carlrobert.codegpt.settings.state.CustomSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
-import ee.carlrobert.codegpt.settings.advanced.AdvancedSettingsState;
 import ee.carlrobert.openai.client.AzureClient;
 import ee.carlrobert.openai.client.Client;
 import ee.carlrobert.openai.client.OpenAIClient;
@@ -16,6 +17,10 @@ import ee.carlrobert.openai.client.embeddings.EmbeddingsClient;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.concurrent.TimeUnit;
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
+import okhttp3.sse.EventSources;
 
 public class CompletionClientProvider {
 
@@ -25,6 +30,16 @@ public class CompletionClientProvider {
     }
     // TODO
     return null;
+  }
+
+  public static OkHttpClient getCustomChatCompletionClient() {
+    HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
+    loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
+
+    return addDefaultClientParams(new Client.Builder(""))
+        .setHost(CustomSettingsState.getInstance().getUrl())
+        .setInterceptor(loggingInterceptor)
+        .buildHttpClient();
   }
 
   public static CompletionClient getChatCompletionClient() {
@@ -37,11 +52,7 @@ public class CompletionClientProvider {
   }
 
   public static Client.Builder getClientBuilder() {
-    var settings = SettingsState.getInstance();
-    if (settings.isUseCustomService()) {
-      return addDefaultClientParams(new Client.Builder(""));
-    }
-    return settings.isUseAzureService() ? getAzureClientBuilder() : getOpenAIClientBuilder();
+    return SettingsState.getInstance().isUseAzureService() ? getAzureClientBuilder() : getOpenAIClientBuilder();
   }
 
   private static OpenAIClient.Builder getOpenAIClientBuilder() {

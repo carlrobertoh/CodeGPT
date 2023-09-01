@@ -86,6 +86,14 @@ public class URLTextArea extends JPanel {
     textArea.setText(text);
   }
 
+  public String getText() {
+    return textArea.getText();
+  }
+
+  public String getHttpMethod() {
+    return "POST";
+  }
+
   private void init(boolean enabled) {
     setOpaque(false);
     setLayout(new BorderLayout());

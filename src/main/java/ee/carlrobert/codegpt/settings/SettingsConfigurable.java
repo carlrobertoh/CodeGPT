@@ -9,6 +9,7 @@ import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.credentials.UserCredentialsManager;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
+import ee.carlrobert.codegpt.settings.state.CustomSettingsState;
 import ee.carlrobert.codegpt.settings.state.ModelSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
@@ -47,9 +48,11 @@ public class SettingsConfigurable implements Configurable, Disposable {
     var settings = SettingsState.getInstance();
     var openAISettings = OpenAISettingsState.getInstance();
     var azureSettings = AzureSettingsState.getInstance();
+    var customServiceSettings = CustomSettingsState.getInstance();
     var modelSettings = ModelSettingsState.getInstance();
 
     var serviceSelectionForm = settingsComponent.getServiceSelectionForm();
+    var customServiceSelectionForm = serviceSelectionForm.getCustomServiceSelectionForm();
     return !settingsComponent.getEmail().equals(settings.getEmail()) ||
         !settingsComponent.getDisplayName().equals(settings.getDisplayName()) ||
 
@@ -70,12 +73,20 @@ public class SettingsConfigurable implements Configurable, Disposable {
         !serviceSelectionForm.getAzureApiVersion().equals(azureSettings.getApiVersion()) ||
         !serviceSelectionForm.getAzureBaseHost().equals(azureSettings.getBaseHost()) ||
 
+        customServiceSelectionForm.getUrl().equals(customServiceSettings.getUrl()) ||
+        customServiceSelectionForm.getHttpMethod().equals(customServiceSettings.getHttpMethod()) ||
+        customServiceSelectionForm.getHeaders().equals(customServiceSettings.getHeaders()) ||
+        customServiceSelectionForm.getQueryParams().equals(customServiceSettings.getQueryParams()) ||
+        customServiceSelectionForm.getBodyJson().equals(customServiceSettings.getBodyJson()) ||
+        customServiceSelectionForm.getResponseJson().equals(customServiceSettings.getResponseJson()) ||
+
         isModelChanged(modelSettings) ||
         isCompletionOptionChanged(modelSettings);
   }
 
   @Override
   public void apply() {
+    var serviceSelectionForm = settingsComponent.getServiceSelectionForm();
     var settings = SettingsState.getInstance();
     var openAISettings = OpenAISettingsState.getInstance();
     var azureSettings = AzureSettingsState.getInstance();
@@ -105,7 +116,6 @@ public class SettingsConfigurable implements Configurable, Disposable {
           });
     }
 
-    var serviceSelectionForm = settingsComponent.getServiceSelectionForm();
     var modelSelectionForm = serviceSelectionForm.getModelSelectionForm();
 
     UserCredentialsManager.getInstance().setAccountPassword(settingsComponent.getPassword());

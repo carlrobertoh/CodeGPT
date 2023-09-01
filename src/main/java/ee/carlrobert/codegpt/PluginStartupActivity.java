@@ -31,8 +31,7 @@ public class PluginStartupActivity implements StartupActivity {
   public void runActivity(@NotNull Project project) {
     EditorActionsUtil.refreshActions();
 
-    var userManager = UserManager.getInstance();
-    var session = userManager.getSession();
+    var session = UserManager.getInstance().getSession();
     if (session == null || session.isExpired()) {
       handleAuthentication();
     } else {
@@ -78,7 +77,7 @@ public class PluginStartupActivity implements StartupActivity {
 
   private void handleAuthentication() {
     var settings = SettingsState.getInstance();
-    if (settings == null || !settings.isPreviouslySignedIn()) {
+    if (!settings.isPreviouslySignedIn()) {
       return;
     }
 

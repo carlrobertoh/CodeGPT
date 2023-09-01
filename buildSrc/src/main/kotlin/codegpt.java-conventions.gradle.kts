@@ -10,6 +10,7 @@ version = properties("pluginVersion")
 
 repositories {
   mavenCentral()
+  mavenLocal()
 }
 
 intellij {
@@ -18,7 +19,7 @@ intellij {
 }
 
 dependencies {
-  implementation("ee.carlrobert:openai-client:1.2.1")
+  implementation("ee.carlrobert:openai-client:1.2.3")
 }
 
 tasks {

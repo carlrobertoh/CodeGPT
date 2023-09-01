@@ -49,7 +49,7 @@ public class ServiceSelectionForm {
   private final ModelSelectionForm azureModelSelectionForm;
 
   private final JBRadioButton useCustomServiceRadioButton;
-  private final JPanel customServiceSectionPanel;
+  private final CustomServiceSelectionForm customServiceSelectionForm;
 
   public ServiceSelectionForm(SettingsState settings) {
     var openAISettings = OpenAISettingsState.getInstance();
@@ -102,7 +102,7 @@ public class ServiceSelectionForm {
 
     openAIServiceSectionPanel = createOpenAIServiceSectionPanel();
     azureServiceSectionPanel = createAzureServiceSectionPanel();
-    customServiceSectionPanel = new CustomServiceSelectionForm().getForm();
+    customServiceSelectionForm = new CustomServiceSelectionForm();
 
     registerPanelsVisibility(settings, azureSettings);
     registerRadioButtons();
@@ -121,7 +121,7 @@ public class ServiceSelectionForm {
         .addComponent(withEmptyLeftBorder(panel))
         .addComponent(openAIServiceSectionPanel)
         .addComponent(azureServiceSectionPanel)
-        .addComponent(customServiceSectionPanel)
+        .addComponent(customServiceSelectionForm.getForm())
         .getPanel();
   }
 
@@ -208,7 +208,7 @@ public class ServiceSelectionForm {
   private void registerPanelsVisibility(SettingsState settings, AzureSettingsState azureSettings) {
     openAIServiceSectionPanel.setVisible(settings.isUseOpenAIService());
     azureServiceSectionPanel.setVisible(settings.isUseAzureService());
-    customServiceSectionPanel.setVisible(settings.isUseCustomService());
+    customServiceSelectionForm.getForm().setVisible(settings.isUseCustomService());
     azureApiKeyFieldPanel.setVisible(azureSettings.isUseAzureApiKeyAuthentication());
     azureActiveDirectoryTokenFieldPanel.setVisible(azureSettings.isUseAzureActiveDirectoryAuthentication());
   }
@@ -218,7 +218,7 @@ public class ServiceSelectionForm {
         List.of(
             Map.entry(useOpenAIServiceRadioButton, openAIServiceSectionPanel),
             Map.entry(useAzureServiceRadioButton, azureServiceSectionPanel),
-            Map.entry(useCustomServiceRadioButton, customServiceSectionPanel)));
+            Map.entry(useCustomServiceRadioButton, customServiceSelectionForm.getForm())));
     registerRadioButtons(
         List.of(
             Map.entry(useAzureApiKeyAuthenticationRadioButton, azureApiKeyFieldPanel),
@@ -350,5 +350,9 @@ public class ServiceSelectionForm {
 
   public String getAzureBaseHost() {
     return azureBaseHostField.getText();
+  }
+
+  public CustomServiceSelectionForm getCustomServiceSelectionForm() {
+    return customServiceSelectionForm;
   }
 }

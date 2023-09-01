@@ -36,8 +36,12 @@ import java.awt.event.ItemEvent;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Vector;
+import java.util.stream.Collectors;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -294,5 +298,44 @@ public class CustomServiceSelectionForm {
   private JComponent withEmptyLeftBorder(JComponent component) {
     component.setBorder(JBUI.Borders.emptyLeft(16));
     return component;
+  }
+
+  public String getUrl() {
+    return urlTextArea.getText();
+  }
+
+  public String getHttpMethod() {
+    return urlTextArea.getHttpMethod();
+  }
+
+  public Map<String, String> getHeaders() {
+    return ((DefaultTableModel) headersTable.getModel()).getDataVector()
+        .stream()
+        .collect(Collectors.toMap(
+            header -> (String) header.get(0),
+            header -> (String) header.get(1)
+        ));
+    /*
+
+    var headers = ((DefaultTableModel) headersTable.getModel()).getDataVector();
+
+    var map = new HashMap<String, String>();
+    for (int i = 0; i < headers.size(); i++) {
+      var header = headers.get(i);
+      map.put((String) header.get(0), (String) header.get(1));
+    }
+    return map;*/
+  }
+
+  public Object getQueryParams() {
+    return null;
+  }
+
+  public Object getBodyJson() {
+    return null;
+  }
+
+  public Object getResponseJson() {
+    return null;
   }
 }

@@ -9,14 +9,15 @@ public enum CustomServicePreset {
       "https://api.anthropic.com/v1/complete",
       "POST",
       Map.of(
-          "anthropic-version", "2023-06-01",
-          "content-type", "application/json",
-          "x-api-key", "MY_SECRET_KEY"
+          "Accept", "text/event-stream",
+          "Anthropic-Version", "2023-06-01",
+          "Content-Type", "application/json",
+          "X-Api-Key", "MY_SECRET_KEY"
       ),
       Map.of(),
       "{\n" +
           "  \"model\": \"claude-2\",\n" +
-          "  \"prompt\": {{PROMPT}}\n" +
+          "  \"prompt\": {{PROMPT}},\n" +
           "  \"max_tokens_to_sample\": 256,\n" +
           "  \"stream\": true\n" +
           "}",
@@ -25,10 +26,12 @@ public enum CustomServicePreset {
           "}")),
   HUGGINGFACE(new CustomServicePresetDetails("Huggingface", "", "POST", Map.of(), Map.of(), "", "")),
   LLAMA_2(new CustomServicePresetDetails(
-      "Replicate - Llama 2",
+      "Replicate",
       "https://api.replicate.com/v1/predictions",
       "POST",
-      Map.of("Authorization", "Token $REPLICATE_API_TOKEN"),
+      Map.of(
+          "Accept", "text/event-stream",
+          "Authorization", "Token $REPLICATE_API_TOKEN"),
       Map.of(),
       "{\n" +
           "  \"version\": \"2796ee9483c3fd7aa2e171d38f4ca12251a30609463dcfd4cd76703f22e96cdf\",\n" +
@@ -42,6 +45,7 @@ public enum CustomServicePreset {
       "https://api.openai.com/v1/chat/completions",
       "POST",
       Map.of(
+          "Accept", "text/event-stream",
           "Content-Type", "application/json",
           "Authorization", "Bearer MY_SECRET_KEY"),
       Map.of(),
@@ -67,7 +71,14 @@ public enum CustomServicePreset {
           "    }\n" +
           "  }]\n" +
           "}")),
-  AZURE_OPENAI(new CustomServicePresetDetails("Azure OpenAI", "", "POST", Map.of(), Map.of(), "", ""));
+  AZURE_OPENAI(new CustomServicePresetDetails(
+      "Azure OpenAI",
+      "",
+      "POST",
+      Map.of("Accept", "text/event-stream"),
+      Map.of(),
+      "",
+      ""));
 
   private final CustomServicePresetDetails presetDetails;
 
