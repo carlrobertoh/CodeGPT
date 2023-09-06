@@ -5,8 +5,6 @@ import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.advanced.AdvancedSettingsState;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
-import ee.carlrobert.codegpt.settings.state.SettingsState;
-import ee.carlrobert.codegpt.user.UserManager;
 import ee.carlrobert.llm.client.Client;
 import ee.carlrobert.llm.client.ProxyAuthenticator;
 import ee.carlrobert.llm.client.azure.AzureClient;
@@ -29,14 +27,6 @@ public class CompletionClientProvider {
 
   public static YouClient getYouClient(String sessionId, String accessToken) {
     return new YouClient.Builder(sessionId, accessToken).build();
-  }
-
-  public static Client.Builder getClientBuilder() {
-    if (SettingsState.getInstance().isUseYouService()) {
-      var authenticationDetails = UserManager.getInstance().getAuthenticationResponse().getData();
-      return new YouClient.Builder(authenticationDetails.getSession().getSessionId(), authenticationDetails.getSessionJwt());
-    }
-    return SettingsState.getInstance().isUseAzureService() ? getAzureClientBuilder() : getOpenAIClientBuilder();
   }
 
   private static OpenAIClient.Builder getOpenAIClientBuilder() {

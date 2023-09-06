@@ -16,11 +16,11 @@ public class ProjectToolWindowFactory implements ToolWindowFactory, DumbAware {
 
   public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
     var chatToolWindowPanel = new StandardChatToolWindowPanel(project, toolWindow.getDisposable());
-    var contextualChatToolWindowPanel = new ContextualChatToolWindowPanel(project, toolWindow.getDisposable());
+    // var contextualChatToolWindowPanel = new ContextualChatToolWindowPanel(project, toolWindow.getDisposable());
     var conversationsToolWindow = new ConversationsToolWindow(project);
 
     addContent(toolWindow, chatToolWindowPanel, "Chat");
-    addContent(toolWindow, contextualChatToolWindowPanel, "Contextual Chat");
+    // addContent(toolWindow, contextualChatToolWindowPanel, "Contextual Chat");
     addContent(toolWindow, conversationsToolWindow.getContent(), "Chat History");
     toolWindow.addContentManagerListener(new ContentManagerListener() {
       public void selectionChanged(@NotNull ContentManagerEvent event) {

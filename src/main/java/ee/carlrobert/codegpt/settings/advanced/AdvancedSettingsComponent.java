@@ -63,7 +63,6 @@ public class AdvancedSettingsComponent {
 
   private JPanel createConnectionSettingsForm() {
     var panel = FormBuilder.createFormBuilder()
-        .addVerticalGap(4)
         .addLabeledComponent("Connection timeout (s):", connectionTimeoutField)
         .addLabeledComponent("Read timeout (s):", readTimeoutField)
         .getPanel();

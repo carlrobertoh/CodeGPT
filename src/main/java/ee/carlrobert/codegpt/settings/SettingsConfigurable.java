@@ -84,8 +84,6 @@ public class SettingsConfigurable implements Configurable, Disposable {
     var modelSettings = ModelSettingsState.getInstance();
 
     if (isModelChanged(modelSettings)) {
-      EncodingManager.getInstance().setEncoding(modelSettings.getChatCompletionModel());
-
       ConversationsState.getInstance().setCurrentConversation(null);
       var project = ApplicationUtils.findCurrentProject();
       if (project == null) {

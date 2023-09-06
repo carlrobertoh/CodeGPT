@@ -9,6 +9,7 @@ import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
+import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.embedding.EmbeddingsService;
 import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionModel;
 import ee.carlrobert.llm.client.openai.completion.chat.request.OpenAIChatCompletionMessage;
@@ -17,6 +18,7 @@ import ee.carlrobert.llm.client.you.completion.YouCompletionRequest;
 import ee.carlrobert.llm.client.you.completion.YouCompletionRequestMessage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 
 public class CompletionRequestProvider {
@@ -91,15 +93,23 @@ public class CompletionRequestProvider {
       messages.add(new OpenAIChatCompletionMessage("user", message.getPrompt()));
     }
 
-    int totalUsage = messages.parallelStream()
-        .mapToInt(encodingManager::countMessageTokens)
-        .sum() + ConfigurationState.getInstance().getMaxTokens();
-    int modelMaxTokens = OpenAIChatCompletionModel.findByCode(model).getMaxTokens();
-
-    if (totalUsage <= modelMaxTokens) {
+    if (SettingsState.getInstance().isUseYouService()) {
       return messages;
     }
 
+    int totalUsage = messages.parallelStream()
+        .mapToInt(encodingManager::countMessageTokens)
+        .sum() + ConfigurationState.getInstance().getMaxTokens();
+    int modelMaxTokens;
+    try {
+      modelMaxTokens = OpenAIChatCompletionModel.findByCode(model).getMaxTokens();
+
+      if (totalUsage <= modelMaxTokens) {
+        return messages;
+      }
+    } catch (NoSuchElementException ex) {
+      return messages;
+    }
     return tryReducingMessagesOrThrow(messages, totalUsage, modelMaxTokens);
   }
 

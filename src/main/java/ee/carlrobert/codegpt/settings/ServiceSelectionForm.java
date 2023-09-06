@@ -106,15 +106,15 @@ public class ServiceSelectionForm {
 
     openAIBaseHostField = new JBTextField(openAISettings.getBaseHost(), 30);
     openAIOrganizationField = new JBTextField(openAISettings.getOrganization(), 30);
-    openAICompletionModelComboBox = new ComboBox<>(DEFAULT_OPENAI_MODELS);
-    openAICompletionModelComboBox.setSelectedItem(OpenAIChatCompletionModel.GPT_4);
+    openAICompletionModelComboBox = new ModelComboBox(DEFAULT_OPENAI_MODELS, OpenAIChatCompletionModel.GPT_4);
 
     azureBaseHostField = new JBTextField(azureSettings.getBaseHost(), 30);
     azureResourceNameField = new JBTextField(azureSettings.getResourceName(), 30);
     azureDeploymentIdField = new JBTextField(azureSettings.getDeploymentId(), 30);
     azureApiVersionField = new JBTextField(azureSettings.getApiVersion(), 30);
-    azureCompletionModelComboBox = new ComboBox<>(DEFAULT_OPENAI_MODELS);
-    azureCompletionModelComboBox.setSelectedItem(OpenAIChatCompletionModel.GPT_4);
+    azureCompletionModelComboBox = new ModelComboBox(DEFAULT_OPENAI_MODELS, OpenAIChatCompletionModel.GPT_3_5);
+    azureCompletionModelComboBox.getEditor().getEditorComponent().setMaximumSize(azureBaseHostField.getPreferredSize());
+
     displayWebSearchResultsCheckBox = new JBCheckBox("Display web search results", settings.isDisplayWebSearchResults());
     displayWebSearchResultsCheckBox.setEnabled(UserManager.getInstance().isAuthenticated());
 
