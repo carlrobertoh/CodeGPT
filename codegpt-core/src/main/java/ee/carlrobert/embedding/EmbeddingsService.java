@@ -9,15 +9,16 @@ import com.github.jelmerk.knn.Item;
 import com.github.jelmerk.knn.SearchResult;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProgressIndicator;
-import ee.carlrobert.openai.client.completion.CompletionClient;
-import ee.carlrobert.openai.client.completion.chat.ChatCompletionModel;
-import ee.carlrobert.openai.client.completion.chat.request.ChatCompletionMessage;
-import ee.carlrobert.openai.client.completion.chat.request.ChatCompletionRequest;
-import ee.carlrobert.openai.client.completion.chat.response.ChatCompletionResponse;
-import ee.carlrobert.openai.client.embeddings.EmbeddingsClient;
+import ee.carlrobert.llm.client.openai.completion.OpenAICompletionClient;
+import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionModel;
+import ee.carlrobert.llm.client.openai.completion.chat.request.OpenAIChatCompletionMessage;
+import ee.carlrobert.llm.client.openai.completion.chat.request.OpenAIChatCompletionRequest;
+import ee.carlrobert.llm.client.openai.completion.chat.response.OpenAIChatCompletionResponse;
+import ee.carlrobert.llm.client.openai.embeddings.EmbeddingsClient;
+import ee.carlrobert.llm.completion.CompletionClient;
 import ee.carlrobert.splitter.SplitterFactory;
-import ee.carlrobert.vector.Word;
 import ee.carlrobert.vector.VectorStore;
+import ee.carlrobert.vector.Word;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -107,16 +108,17 @@ public class EmbeddingsService {
   }
 
   private String getSearchQuery(String userPrompt) throws JsonProcessingException {
-    var message = new ChatCompletionMessage("user", getResourceContent("/prompts/text-generator.txt").replace("{prompt}", userPrompt));
-    var request = new ChatCompletionRequest.Builder(List.of(message))
-        .setModel(ChatCompletionModel.GPT_4)
+    var message = new OpenAIChatCompletionMessage("user", getResourceContent("/prompts/text-generator.txt").replace("{prompt}", userPrompt));
+    var request = new OpenAIChatCompletionRequest.Builder(List.of(message))
+        .setModel(OpenAIChatCompletionModel.GPT_4)
         .setMaxTokens(400)
         .setTemperature(0.1)
         .setStream(false)
         .build();
 
     return new ObjectMapper()
-        .readValue(completionClient.call(request), ChatCompletionResponse.class)
+        // .readValue(completionClient.call(request), OpenAIChatCompletionResponse.class)
+        .readValue(completionClient.call(null), OpenAIChatCompletionResponse.class)
         .getChoices()
         .get(0)
         .getMessage()

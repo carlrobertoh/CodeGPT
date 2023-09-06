@@ -139,7 +139,7 @@ public class UserPromptTextArea extends JPanel {
   }
 
   private void handleSubmit() {
-    if (submitEnabled && textArea.getText().length() > 0) {
+    if (submitEnabled && !textArea.getText().isEmpty()) {
       // Replacing each newline with two newlines to ensure proper Markdown formatting
       var text = textArea.getText().replace("\n", "\n\n");
       onSubmit.accept(text);

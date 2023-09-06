@@ -2,21 +2,17 @@ package ee.carlrobert.codegpt.completions;
 
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.message.Message;
-import ee.carlrobert.codegpt.settings.state.CustomSettingsState;
 import ee.carlrobert.codegpt.settings.state.ModelSettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
-import ee.carlrobert.openai.client.completion.CompletionEventListener;
-import ee.carlrobert.openai.client.completion.ErrorDetails;
+import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
+import ee.carlrobert.llm.client.you.completion.YouCompletionEventListener;
+import ee.carlrobert.llm.client.you.completion.YouSerpResult;
+import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import javax.swing.SwingWorker;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
 import okhttp3.sse.EventSource;
-import okhttp3.sse.EventSourceListener;
-import okhttp3.sse.EventSources;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,6 +24,7 @@ public class CompletionRequestHandler {
   private @Nullable Consumer<String> messageListener;
   private @Nullable BiConsumer<ErrorDetails, Throwable> errorListener;
   private @Nullable Consumer<String> completedListener;
+  private @Nullable Consumer<List<YouSerpResult>> serpResultsListener;
   private @Nullable Runnable tokensExceededListener;
   private boolean useContextualSearch;
 
@@ -52,6 +49,10 @@ public class CompletionRequestHandler {
     this.tokensExceededListener = tokensExceededListener;
   }
 
+  public void addSerpResultsListener(Consumer<List<YouSerpResult>> serpResultsListener) {
+    this.serpResultsListener = serpResultsListener;
+  }
+
   public void call(Conversation conversation, Message message, boolean isRetry) {
     swingWorker = new CompletionRequestWorker(conversation, message, isRetry);
     swingWorker.execute();
@@ -69,60 +70,24 @@ public class CompletionRequestHandler {
       @NotNull Message message,
       boolean isRetry,
       CompletionEventListener eventListener) {
+    var settings = SettingsState.getInstance();
     var modelSettings = ModelSettingsState.getInstance();
-    var customServiceSettings = CustomSettingsState.getInstance();
     var requestProvider = new CompletionRequestProvider(conversation);
 
     try {
-      if (SettingsState.getInstance().isUseCustomService()) {
-        var requestBuilder = new Request.Builder();
-        requestBuilder.url(customServiceSettings.getUrl());
-        requestBuilder.addHeader("Accept", "text/event-stream");
-        for (var entry : customServiceSettings.getHeaders().entrySet()) {
-          requestBuilder.addHeader(entry.getKey(), entry.getValue());
-        }
-
-        if ("POST".equals(customServiceSettings.getHttpMethod())) {
-          var body = customServiceSettings.getBodyJson().replace("{{PROMPT}}", message.getPrompt());
-          requestBuilder.post(RequestBody.create(body.getBytes()));
-        } else {
-          requestBuilder.get();
-        }
-
-        CompletionClientProvider.getCustomChatCompletionClient().newCall(requestBuilder.build());
-
-        return EventSources.createFactory(CompletionClientProvider.getCustomChatCompletionClient())
-            .newEventSource(requestBuilder.build(), new EventSourceListener() {
-              @Override
-              public void onClosed(@NotNull EventSource eventSource) {
-                super.onClosed(eventSource);
-              }
-
-              @Override
-              public void onEvent(@NotNull EventSource eventSource, @Nullable String id, @Nullable String type, @NotNull String data) {
-                super.onEvent(eventSource, id, type, data);
-              }
-
-              @Override
-              public void onFailure(@NotNull EventSource eventSource, @Nullable Throwable t, @Nullable Response response) {
-                if (errorListener != null) {
-                  errorListener.accept(new ErrorDetails("Something went wrong. " + response), t);
-                }
-              }
-
-              @Override
-              public void onOpen(@NotNull EventSource eventSource, @NotNull Response response) {
-                super.onOpen(eventSource, response);
-              }
-            });
+      var chatCompletionClient = CompletionClientProvider.getChatCompletionClient();
+      if (settings.isUseYouService()) {
+        return chatCompletionClient.stream(requestProvider.buildYouCompletionRequest(message), eventListener);
       }
 
       if (modelSettings.isUseChatCompletion()) {
-        return CompletionClientProvider.getChatCompletionClient().stream(
-            requestProvider.buildChatCompletionRequest(modelSettings.getChatCompletionModel(), message, isRetry, useContextualSearch), eventListener);
+        return chatCompletionClient.stream(
+            requestProvider.buildOpenAIChatCompletionRequest(modelSettings.getChatCompletionModel(), message, isRetry, useContextualSearch),
+            eventListener);
       }
       return CompletionClientProvider.getTextCompletionClient().stream(
-          requestProvider.buildTextCompletionRequest(modelSettings.getTextCompletionModel(), message, isRetry), eventListener);
+          requestProvider.buildOpenAITextCompletionRequest(modelSettings.getTextCompletionModel(), message, isRetry),
+          eventListener);
     } catch (Throwable t) {
       if (errorListener != null) {
         errorListener.accept(new ErrorDetails("Something went wrong"), t);
@@ -145,26 +110,11 @@ public class CompletionRequestHandler {
 
     protected Void doInBackground() {
       try {
-        eventSource = startCall(conversation, message, isRetry, new CompletionEventListener() {
-          @Override
-          public void onMessage(String message) {
-            publish(message);
-          }
-
-          @Override
-          public void onComplete(StringBuilder messageBuilder) {
-            if (completedListener != null) {
-              completedListener.accept(messageBuilder.toString());
-            }
-          }
-
-          @Override
-          public void onError(ErrorDetails error, Throwable ex) {
-            if (errorListener != null) {
-              errorListener.accept(error, ex);
-            }
-          }
-        });
+        eventSource = startCall(
+            conversation,
+            message,
+            isRetry,
+            SettingsState.getInstance().isUseYouService() ? getYouCompletionEventListener() : getCompletionEventListener());
       } catch (TotalUsageExceededException e) {
         if (tokensExceededListener != null) {
           tokensExceededListener.run();
@@ -181,6 +131,60 @@ public class CompletionRequestHandler {
           messageListener.accept(text);
         }
       }
+    }
+
+    private CompletionEventListener getCompletionEventListener() {
+      return new CompletionEventListener() {
+        @Override
+        public void onMessage(String message) {
+          publish(message);
+        }
+
+        @Override
+        public void onComplete(StringBuilder messageBuilder) {
+          if (completedListener != null) {
+            completedListener.accept(messageBuilder.toString());
+          }
+        }
+
+        @Override
+        public void onError(ErrorDetails error, Throwable ex) {
+          if (errorListener != null) {
+            errorListener.accept(error, ex);
+          }
+        }
+      };
+    }
+
+    // TODO: Refactor
+    private YouCompletionEventListener getYouCompletionEventListener() {
+      return new YouCompletionEventListener() {
+        @Override
+        public void onMessage(String message) {
+          publish(message);
+        }
+
+        @Override
+        public void onComplete(StringBuilder messageBuilder) {
+          if (completedListener != null) {
+            completedListener.accept(messageBuilder.toString());
+          }
+        }
+
+        @Override
+        public void onError(ErrorDetails error, Throwable ex) {
+          if (errorListener != null) {
+            errorListener.accept(error, ex);
+          }
+        }
+
+        @Override
+        public void onSerpResults(List<YouSerpResult> results) {
+          if (serpResultsListener != null) {
+            serpResultsListener.accept(results);
+          }
+        }
+      };
     }
   }
 }

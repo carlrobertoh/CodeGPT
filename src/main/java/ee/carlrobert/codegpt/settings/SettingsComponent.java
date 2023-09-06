@@ -20,9 +20,8 @@ public class SettingsComponent {
   public SettingsComponent(Disposable parentDisposable, SettingsState settings) {
     serviceSelectionForm = new ServiceSelectionForm(settings);
     displayNameField = new JBTextField(settings.getDisplayName(), 20);
-    userDetailsSettingsPanel = new UserDetailsSettingsPanel(parentDisposable, settings);
+    userDetailsSettingsPanel = new UserDetailsSettingsPanel(parentDisposable);
     mainPanel = FormBuilder.createFormBuilder()
-        // .addComponent(userDetailsSettingsPanel)
         .addComponent(UI.PanelFactory.panel(displayNameField)
             .withLabel(CodeGPTBundle.get("settingsConfigurable.section.integration.displayNameFieldLabel"))
             .resizeX(false)

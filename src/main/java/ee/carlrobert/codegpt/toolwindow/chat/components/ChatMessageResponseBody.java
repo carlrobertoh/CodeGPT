@@ -19,7 +19,9 @@ import com.vladsch.flexmark.ast.FencedCodeBlock;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.data.MutableDataSet;
+import ee.carlrobert.codegpt.completions.SerpResult;
 import ee.carlrobert.codegpt.settings.SettingsConfigurable;
+import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowTabPanelEditor;
 import ee.carlrobert.codegpt.toolwindow.chat.ResponseNodeRenderer;
 import ee.carlrobert.codegpt.toolwindow.chat.StreamParser;
@@ -28,7 +30,9 @@ import ee.carlrobert.codegpt.util.MarkdownUtils;
 import ee.carlrobert.codegpt.util.SwingUtils;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.JTextPane;
@@ -88,8 +92,10 @@ public class ChatMessageResponseBody extends JPanel {
   }
 
   public void displayMissingCredential() {
-    currentlyProcessedTextPane.setText(
-        "<html><p style=\"margin-top: 4px; margin-bottom: 8px;\">API key not provided. Open <a href=\"#\">Settings</a> to set one.</p></html>");
+    var message = SettingsState.getInstance().isUseYouService() ?
+        "Please <a href=\"#\">log in</a> to access the chat feature." :
+        "API key not provided. Open <a href=\"#\">Settings</a> to set one.";
+    currentlyProcessedTextPane.setText(String.format("<html><p style=\"margin-top: 4px; margin-bottom: 8px;\">%s</p></html>", message));
     currentlyProcessedTextPane.addHyperlinkListener(e -> {
       if (e.getEventType() == ACTIVATED) {
         ShowSettingsUtil.getInstance().showSettingsDialog(project, SettingsConfigurable.class);
@@ -108,7 +114,6 @@ public class ChatMessageResponseBody extends JPanel {
     }
   }
 
-
   public void displayError(String message) {
     var errorText = format("<html><p style=\"margin-top: 4px; margin-bottom: 8px;\">%s</p></html>", message);
     if (responseReceived) {
@@ -122,6 +127,24 @@ public class ChatMessageResponseBody extends JPanel {
 
   public void displayDefaultError() {
     displayError("Something went wrong.");
+  }
+
+  public void displaySerpResults(List<SerpResult> serpResults) {
+    var titles = serpResults.stream()
+        .map(result -> format("<li style=\"margin-bottom: 4px;\"><a href=\"%s\">%s</a></li>", result.getUrl(), result.getName()))
+        .collect(Collectors.joining());
+    var html = format(
+        "<html>" +
+            "<p><strong>Search results:</strong></p>" +
+            "<ol>%s</ol>" +
+            "</html>", titles);
+    if (responseReceived) {
+      var textPane = createTextPane();
+      textPane.setText(html);
+      add(new ResponseWrapper().add(textPane));
+    } else {
+      currentlyProcessedTextPane.setText(html);
+    }
   }
 
   public void clear() {

@@ -7,10 +7,7 @@ import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import org.jetbrains.annotations.NotNull;
 
-@State(
-    name = "ee.carlrobert.codegpt.state.settings.SettingsState",
-    storages = @Storage("CodeGPTSettings_210.xml")
-)
+@State(name = "CodeGPT_GeneralSettings", storages = @Storage("CodeGPT_GeneralSettings.xml"))
 public class SettingsState implements PersistentStateComponent<SettingsState> {
 
   private String email = "";
@@ -18,7 +15,8 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
   private boolean previouslySignedIn;
   private boolean useOpenAIService = true;
   private boolean useAzureService;
-  private boolean useCustomService;
+  private boolean useYouService;
+  private boolean displayWebSearchResults = true;
 
   public SettingsState() {
   }
@@ -84,11 +82,19 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
     this.useAzureService = useAzureService;
   }
 
-  public boolean isUseCustomService() {
-    return useCustomService;
+  public boolean isUseYouService() {
+    return useYouService;
   }
 
-  public void setUseCustomService(boolean useCustomService) {
-    this.useCustomService = useCustomService;
+  public void setUseYouService(boolean useYouService) {
+    this.useYouService = useYouService;
+  }
+
+  public boolean isDisplayWebSearchResults() {
+    return displayWebSearchResults;
+  }
+
+  public void setDisplayWebSearchResults(boolean displayWebSearchResults) {
+    this.displayWebSearchResults = displayWebSearchResults;
   }
 }

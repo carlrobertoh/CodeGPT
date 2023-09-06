@@ -1,7 +1,7 @@
 package ee.carlrobert.codegpt.settings;
 
 import com.intellij.openapi.ui.ComboBox;
-import ee.carlrobert.openai.client.completion.CompletionModel;
+import ee.carlrobert.llm.completion.CompletionModel;
 import java.awt.Component;
 import javax.swing.JList;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;

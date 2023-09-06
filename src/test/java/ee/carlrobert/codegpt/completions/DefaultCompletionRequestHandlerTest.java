@@ -1,9 +1,9 @@
 package ee.carlrobert.codegpt.completions;
 
 import static ee.carlrobert.codegpt.completions.CompletionRequestProvider.COMPLETION_SYSTEM_PROMPT;
-import static ee.carlrobert.openai.util.JSONUtil.jsonArray;
-import static ee.carlrobert.openai.util.JSONUtil.jsonMap;
-import static ee.carlrobert.openai.util.JSONUtil.jsonMapResponse;
+import static ee.carlrobert.llm.client.util.JSONUtil.jsonArray;
+import static ee.carlrobert.llm.client.util.JSONUtil.jsonMap;
+import static ee.carlrobert.llm.client.util.JSONUtil.jsonMapResponse;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -14,16 +14,16 @@ import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
+import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.ModelSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
-import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
-import ee.carlrobert.openai.client.completion.chat.ChatCompletionModel;
-import ee.carlrobert.openai.client.completion.text.TextCompletionModel;
-import ee.carlrobert.openai.http.LocalCallbackServer;
-import ee.carlrobert.openai.http.exchange.StreamHttpExchange;
-import ee.carlrobert.openai.http.expectation.StreamExpectation;
+import ee.carlrobert.llm.client.http.LocalCallbackServer;
+import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange;
+import ee.carlrobert.llm.client.http.expectation.StreamExpectation;
+import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionModel;
+import ee.carlrobert.llm.client.openai.completion.text.OpenAITextCompletionModel;
 import java.util.List;
 import java.util.Map;
 
@@ -93,7 +93,7 @@ public class DefaultCompletionRequestHandlerTest extends BasePlatformTestCase {
     var modelSettings = ModelSettingsState.getInstance();
     modelSettings.setUseTextCompletion(true);
     modelSettings.setUseChatCompletion(false);
-    modelSettings.setTextCompletionModel(TextCompletionModel.CURIE.getCode());
+    modelSettings.setTextCompletionModel(OpenAITextCompletionModel.CURIE.getCode());
     settings.setUseOpenAIService(true);
     settings.setUseAzureService(false);
     OpenAISettingsState.getInstance().setOrganization("TEST_ORGANIZATION");
@@ -129,7 +129,7 @@ public class DefaultCompletionRequestHandlerTest extends BasePlatformTestCase {
     var azureSettings = AzureSettingsState.getInstance();
     modelSettings.setUseTextCompletion(false);
     modelSettings.setUseChatCompletion(true);
-    modelSettings.setChatCompletionModel(ChatCompletionModel.GPT_3_5.getCode());
+    modelSettings.setChatCompletionModel(OpenAIChatCompletionModel.GPT_3_5.getCode());
     settings.setUseOpenAIService(false);
     settings.setUseAzureService(true);
     azureSettings.setResourceName("TEST_RESOURCE_NAME");

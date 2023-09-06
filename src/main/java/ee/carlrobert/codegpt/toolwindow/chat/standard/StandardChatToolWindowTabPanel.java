@@ -6,6 +6,7 @@ import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.project.Project;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.message.Message;
+import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.toolwindow.chat.BaseChatToolWindowTabPanel;
 import ee.carlrobert.codegpt.toolwindow.chat.components.ChatMessageResponseBody;
 import ee.carlrobert.codegpt.toolwindow.chat.components.ResponsePanel;
@@ -51,12 +52,17 @@ public class StandardChatToolWindowTabPanel extends BaseChatToolWindowTabPanel {
   public void displayConversation(@NotNull Conversation conversation) {
     clearWindow();
     conversation.getMessages().forEach(message -> {
+      var messageResponseBody = new ChatMessageResponseBody(project, this).withResponse(message.getResponse());
+      if (SettingsState.getInstance().isDisplayWebSearchResults() && message.getSerpResults() != null && !message.getSerpResults().isEmpty()) {
+        messageResponseBody.displaySerpResults(message.getSerpResults());
+      }
+
       var messageWrapper = createNewMessageWrapper(message.getId());
       messageWrapper.add(new UserMessagePanel(project, message, false, this));
       messageWrapper.add(new ResponsePanel()
           .withReloadAction(() -> reloadMessage(message, conversation))
           .withDeleteAction(() -> deleteMessage(message.getId(), messageWrapper, conversation))
-          .addContent(new ChatMessageResponseBody(project, this).withResponse(message.getResponse())));
+          .addContent(messageResponseBody));
     });
     setConversation(conversation);
   }

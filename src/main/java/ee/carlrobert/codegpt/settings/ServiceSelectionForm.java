@@ -1,10 +1,12 @@
 package ee.carlrobert.codegpt.settings;
 
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.util.Disposer;
 import com.intellij.ui.TitledSeparator;
+import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBPasswordField;
 import com.intellij.ui.components.JBRadioButton;
 import com.intellij.ui.components.JBTextField;
-import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
@@ -14,6 +16,8 @@ import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
+import ee.carlrobert.codegpt.user.UserManager;
+import ee.carlrobert.codegpt.user.auth.AuthenticationNotifier;
 import ee.carlrobert.codegpt.util.SwingUtils;
 import java.awt.FlowLayout;
 import java.util.List;
@@ -22,7 +26,6 @@ import javax.swing.Box;
 import javax.swing.ButtonGroup;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
-import javax.swing.table.DefaultTableModel;
 
 public class ServiceSelectionForm {
 
@@ -48,8 +51,9 @@ public class ServiceSelectionForm {
   private final JPanel azureServiceSectionPanel;
   private final ModelSelectionForm azureModelSelectionForm;
 
-  private final JBRadioButton useCustomServiceRadioButton;
-  private final CustomServiceSelectionForm customServiceSelectionForm;
+  private final JBRadioButton useYouServiceRadioButton;
+  private final JPanel youServiceSectionPanel;
+  private final JBCheckBox displayWebSearchResultsCheckBox;
 
   public ServiceSelectionForm(SettingsState settings) {
     var openAISettings = OpenAISettingsState.getInstance();
@@ -87,8 +91,8 @@ public class ServiceSelectionForm {
         CodeGPTBundle.get("settingsConfigurable.section.service.useOpenAIServiceRadioButtonLabel"), settings.isUseOpenAIService());
     useAzureServiceRadioButton = new JBRadioButton(
         CodeGPTBundle.get("settingsConfigurable.section.service.useAzureServiceRadioButtonLabel"), settings.isUseAzureService());
-    useCustomServiceRadioButton = new JBRadioButton(
-        CodeGPTBundle.get("settingsConfigurable.section.service.useCustomServiceRadioButtonLabel"), settings.isUseCustomService());
+    useYouServiceRadioButton = new JBRadioButton(
+        CodeGPTBundle.get("settingsConfigurable.section.service.useYouServiceRadioButtonLabel"), settings.isUseYouService());
 
     openAIBaseHostField = new JBTextField(openAISettings.getBaseHost(), 30);
     openAIOrganizationField = new JBTextField(openAISettings.getOrganization(), 30);
@@ -100,12 +104,20 @@ public class ServiceSelectionForm {
     azureApiVersionField = new JBTextField(azureSettings.getApiVersion(), 30);
     azureModelSelectionForm = new ModelSelectionForm();
 
+    displayWebSearchResultsCheckBox = new JBCheckBox("Display web search results", settings.isDisplayWebSearchResults());
+    displayWebSearchResultsCheckBox.setEnabled(UserManager.getInstance().isAuthenticated());
+
     openAIServiceSectionPanel = createOpenAIServiceSectionPanel();
     azureServiceSectionPanel = createAzureServiceSectionPanel();
-    customServiceSelectionForm = new CustomServiceSelectionForm();
+    youServiceSectionPanel = createYouServiceSectionPanel();
 
     registerPanelsVisibility(settings, azureSettings);
     registerRadioButtons();
+
+    ApplicationManager.getApplication()
+        .getMessageBus()
+        .connect()
+        .subscribe(AuthenticationNotifier.AUTHENTICATION_TOPIC, (AuthenticationNotifier) () -> displayWebSearchResultsCheckBox.setEnabled(true));
   }
 
   public JPanel getForm() {
@@ -115,13 +127,13 @@ public class ServiceSelectionForm {
     panel.add(Box.createHorizontalStrut(16));
     panel.add(useAzureServiceRadioButton);
     panel.add(Box.createHorizontalStrut(16));
-    panel.add(useCustomServiceRadioButton);
+    panel.add(useYouServiceRadioButton);
 
     return FormBuilder.createFormBuilder()
         .addComponent(withEmptyLeftBorder(panel))
         .addComponent(openAIServiceSectionPanel)
         .addComponent(azureServiceSectionPanel)
-        .addComponent(customServiceSelectionForm.getForm())
+        .addComponent(youServiceSectionPanel)
         .getPanel();
   }
 
@@ -196,8 +208,12 @@ public class ServiceSelectionForm {
         .getPanel();
   }
 
-  private DefaultTableModel getModel(JBTable table) {
-    return (DefaultTableModel) table.getModel();
+  private JPanel createYouServiceSectionPanel() {
+    return FormBuilder.createFormBuilder()
+        .addComponent(new UserDetailsSettingsPanel(Disposer.newDisposable()))
+        .addComponent(new TitledSeparator("Chat Preferences"))
+        .addComponent(withEmptyLeftBorder(displayWebSearchResultsCheckBox))
+        .getPanel();
   }
 
   private JComponent withEmptyLeftBorder(JComponent component) {
@@ -208,9 +224,9 @@ public class ServiceSelectionForm {
   private void registerPanelsVisibility(SettingsState settings, AzureSettingsState azureSettings) {
     openAIServiceSectionPanel.setVisible(settings.isUseOpenAIService());
     azureServiceSectionPanel.setVisible(settings.isUseAzureService());
-    customServiceSelectionForm.getForm().setVisible(settings.isUseCustomService());
     azureApiKeyFieldPanel.setVisible(azureSettings.isUseAzureApiKeyAuthentication());
     azureActiveDirectoryTokenFieldPanel.setVisible(azureSettings.isUseAzureActiveDirectoryAuthentication());
+    youServiceSectionPanel.setVisible(settings.isUseYouService());
   }
 
   private void registerRadioButtons() {
@@ -218,7 +234,7 @@ public class ServiceSelectionForm {
         List.of(
             Map.entry(useOpenAIServiceRadioButton, openAIServiceSectionPanel),
             Map.entry(useAzureServiceRadioButton, azureServiceSectionPanel),
-            Map.entry(useCustomServiceRadioButton, customServiceSelectionForm.getForm())));
+            Map.entry(useYouServiceRadioButton, youServiceSectionPanel)));
     registerRadioButtons(
         List.of(
             Map.entry(useAzureApiKeyAuthenticationRadioButton, azureApiKeyFieldPanel),
@@ -257,11 +273,11 @@ public class ServiceSelectionForm {
   }
 
   public boolean isCustomServiceSelected() {
-    return useCustomServiceRadioButton.isSelected();
+    return useYouServiceRadioButton.isSelected();
   }
 
   public void setCustomServiceSelected(boolean selected) {
-    useCustomServiceRadioButton.setSelected(selected);
+    useYouServiceRadioButton.setSelected(selected);
   }
 
   public void setOpenAIApiKey(String apiKey) {
@@ -352,7 +368,11 @@ public class ServiceSelectionForm {
     return azureBaseHostField.getText();
   }
 
-  public CustomServiceSelectionForm getCustomServiceSelectionForm() {
-    return customServiceSelectionForm;
+  public void setDisplayWebSearchResults(boolean displayWebSearchResults) {
+    displayWebSearchResultsCheckBox.setSelected(displayWebSearchResults);
+  }
+
+  public boolean isDisplayWebSearchResults() {
+    return displayWebSearchResultsCheckBox.isSelected();
   }
 }

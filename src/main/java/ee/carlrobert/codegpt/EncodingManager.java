@@ -6,7 +6,7 @@ import com.knuddels.jtokkit.Encodings;
 import com.knuddels.jtokkit.api.Encoding;
 import com.knuddels.jtokkit.api.EncodingRegistry;
 import ee.carlrobert.codegpt.settings.state.ModelSettingsState;
-import ee.carlrobert.openai.client.completion.chat.request.ChatCompletionMessage;
+import ee.carlrobert.llm.client.openai.completion.chat.request.OpenAIChatCompletionMessage;
 
 @Service
 public final class EncodingManager {
@@ -23,10 +23,10 @@ public final class EncodingManager {
   }
 
   public void setEncoding(String modelName) {
-    this.encoding = registry.getEncodingForModel(modelName).orElseThrow();
+    this.encoding = registry.getEncodingForModel(modelName).orElse(null);
   }
 
-  public int countMessageTokens(ChatCompletionMessage message) {
+  public int countMessageTokens(OpenAIChatCompletionMessage message) {
     var tokensPerMessage = 4; // every message follows <|start|>{role/name}\n{content}<|end|>\n
     return encoding.countTokens(message.getRole() + message.getContent()) + tokensPerMessage;
   }

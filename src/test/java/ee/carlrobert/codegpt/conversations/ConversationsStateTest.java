@@ -5,8 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.state.ModelSettingsState;
-import ee.carlrobert.openai.client.ClientCode;
-import ee.carlrobert.openai.client.completion.chat.ChatCompletionModel;
+import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionModel;
 
 public class ConversationsStateTest extends BasePlatformTestCase {
 
@@ -14,19 +13,19 @@ public class ConversationsStateTest extends BasePlatformTestCase {
     var modelSettings = ModelSettingsState.getInstance();
     modelSettings.setUseChatCompletion(true);
     modelSettings.setUseTextCompletion(false);
-    modelSettings.setChatCompletionModel(ChatCompletionModel.GPT_3_5.getCode());
+    modelSettings.setChatCompletionModel(OpenAIChatCompletionModel.GPT_3_5.getCode());
 
     var conversation = ConversationService.getInstance().startConversation();
 
     assertThat(conversation).isEqualTo(ConversationsState.getCurrentConversation());
     assertThat(conversation)
         .extracting("clientCode", "model")
-        .containsExactly(ClientCode.CHAT_COMPLETION, "gpt-3.5-turbo");
+        .containsExactly("chat.completion", "gpt-3.5-turbo");
   }
 
   public void testSaveConversation() {
     var service = ConversationService.getInstance();
-    var conversation = service.createConversation(ClientCode.CHAT_COMPLETION);
+    var conversation = service.createConversation("chat.completion");
     service.addConversation(conversation);
     var message = new Message("TEST_PROMPT");
     message.setResponse("TEST_RESPONSE");

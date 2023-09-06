@@ -8,13 +8,15 @@ import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.conversations.message.Message;
-import ee.carlrobert.embedding.EmbeddingsService;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
-import ee.carlrobert.openai.client.completion.chat.ChatCompletionModel;
-import ee.carlrobert.openai.client.completion.chat.request.ChatCompletionMessage;
-import ee.carlrobert.openai.client.completion.chat.request.ChatCompletionRequest;
-import ee.carlrobert.openai.client.completion.text.TextCompletionModel;
-import ee.carlrobert.openai.client.completion.text.request.TextCompletionRequest;
+import ee.carlrobert.embedding.EmbeddingsService;
+import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionModel;
+import ee.carlrobert.llm.client.openai.completion.chat.request.OpenAIChatCompletionMessage;
+import ee.carlrobert.llm.client.openai.completion.chat.request.OpenAIChatCompletionRequest;
+import ee.carlrobert.llm.client.openai.completion.text.OpenAITextCompletionModel;
+import ee.carlrobert.llm.client.openai.completion.text.request.OpenAITextCompletionRequest;
+import ee.carlrobert.llm.client.you.completion.YouCompletionRequest;
+import ee.carlrobert.llm.client.you.completion.YouCompletionRequestMessage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -53,20 +55,28 @@ public class CompletionRequestProvider {
     this.conversation = conversation;
   }
 
-  public ChatCompletionRequest buildChatCompletionRequest(String model, Message message, boolean isRetry) {
-    return buildChatCompletionRequest(model, message, isRetry, false);
+  public YouCompletionRequest buildYouCompletionRequest(Message message) {
+    return new YouCompletionRequest.Builder(message.getPrompt())
+        .setChatHistory(conversation.getMessages().stream()
+            .map(prevMessage -> new YouCompletionRequestMessage(prevMessage.getPrompt(), prevMessage.getResponse()))
+            .collect(toList()))
+        .build();
   }
 
-  public ChatCompletionRequest buildChatCompletionRequest(String model, Message message, boolean isRetry, boolean useContextualSearch) {
-    return (ChatCompletionRequest) new ChatCompletionRequest.Builder(buildMessages(model, message, isRetry, useContextualSearch))
+  public OpenAIChatCompletionRequest buildOpenAIChatCompletionRequest(String model, Message message, boolean isRetry) {
+    return buildOpenAIChatCompletionRequest(model, message, isRetry, false);
+  }
+
+  public OpenAIChatCompletionRequest buildOpenAIChatCompletionRequest(String model, Message message, boolean isRetry, boolean useContextualSearch) {
+    return (OpenAIChatCompletionRequest) new OpenAIChatCompletionRequest.Builder(buildMessages(model, message, isRetry, useContextualSearch))
         .setModel(model)
         .setMaxTokens(ConfigurationState.getInstance().getMaxTokens())
         .setTemperature(ConfigurationState.getInstance().getTemperature())
         .build();
   }
 
-  public TextCompletionRequest buildTextCompletionRequest(String model, Message message, boolean isRetry) {
-    return (TextCompletionRequest) new TextCompletionRequest.Builder(buildPrompt(model, message, isRetry))
+  public OpenAITextCompletionRequest buildOpenAITextCompletionRequest(String model, Message message, boolean isRetry) {
+    return (OpenAITextCompletionRequest) new OpenAITextCompletionRequest.Builder(buildPrompt(model, message, isRetry))
         .setStop(List.of(" Human:", " AI:"))
         .setModel(model)
         .setMaxTokens(ConfigurationState.getInstance().getMaxTokens())
@@ -74,31 +84,31 @@ public class CompletionRequestProvider {
         .build();
   }
 
-  private List<ChatCompletionMessage> buildMessages(String model, Message message, boolean isRetry, boolean useContextualSearch) {
-    var messages = new ArrayList<ChatCompletionMessage>();
+  private List<OpenAIChatCompletionMessage> buildMessages(String model, Message message, boolean isRetry, boolean useContextualSearch) {
+    var messages = new ArrayList<OpenAIChatCompletionMessage>();
     if (useContextualSearch) {
       var prompt = embeddingsService.buildPromptWithContext(message.getPrompt());
       LOG.info("Retrieved context:\n" + prompt);
-      messages.add(new ChatCompletionMessage("user", prompt));
+      messages.add(new OpenAIChatCompletionMessage("user", prompt));
     } else {
       var systemPrompt = ConfigurationState.getInstance().getSystemPrompt();
-      messages.add(new ChatCompletionMessage("system",
+      messages.add(new OpenAIChatCompletionMessage("system",
           systemPrompt.isEmpty() ? COMPLETION_SYSTEM_PROMPT : systemPrompt));
 
       for (var prevMessage : conversation.getMessages()) {
         if (isRetry && prevMessage.getId().equals(message.getId())) {
           break;
         }
-        messages.add(new ChatCompletionMessage("user", prevMessage.getPrompt()));
-        messages.add(new ChatCompletionMessage("assistant", prevMessage.getResponse()));
+        messages.add(new OpenAIChatCompletionMessage("user", prevMessage.getPrompt()));
+        messages.add(new OpenAIChatCompletionMessage("assistant", prevMessage.getResponse()));
       }
-      messages.add(new ChatCompletionMessage("user", message.getPrompt()));
+      messages.add(new OpenAIChatCompletionMessage("user", message.getPrompt()));
     }
 
     int totalUsage = messages.parallelStream()
         .mapToInt(encodingManager::countMessageTokens)
         .sum() + ConfigurationState.getInstance().getMaxTokens();
-    int modelMaxTokens = ChatCompletionModel.findByCode(model).getMaxTokens();
+    int modelMaxTokens = OpenAIChatCompletionModel.findByCode(model).getMaxTokens();
 
     if (totalUsage <= modelMaxTokens) {
       return messages;
@@ -107,7 +117,10 @@ public class CompletionRequestProvider {
     return tryReducingMessagesOrThrow(messages, totalUsage, modelMaxTokens);
   }
 
-  private List<ChatCompletionMessage> tryReducingMessagesOrThrow(List<ChatCompletionMessage> messages, int totalUsage, int modelMaxTokens) {
+  private List<OpenAIChatCompletionMessage> tryReducingMessagesOrThrow(
+      List<OpenAIChatCompletionMessage> messages,
+      int totalUsage,
+      int modelMaxTokens) {
     if (!ConversationsState.getInstance().discardAllTokenLimits) {
       if (!conversation.isDiscardTokenLimit()) {
         throw new TotalUsageExceededException();
@@ -128,7 +141,7 @@ public class CompletionRequestProvider {
   }
 
   private StringBuilder getBasePrompt(String model) {
-    var isDavinciModel = TextCompletionModel.DAVINCI.getCode().equals(model);
+    var isDavinciModel = OpenAITextCompletionModel.DAVINCI.getCode().equals(model);
     if (isDavinciModel) {
       return new StringBuilder(
           "You are ChatGPT, a large language model trained by OpenAI.\n" +

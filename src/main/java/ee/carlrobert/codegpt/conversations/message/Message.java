@@ -2,6 +2,8 @@ package ee.carlrobert.codegpt.conversations.message;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import ee.carlrobert.codegpt.completions.SerpResult;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -11,6 +13,7 @@ public class Message {
   private final String prompt;
   private String response;
   private String userMessage;
+  private List<SerpResult> serpResults;
 
   public Message(String prompt, String response) {
     this(prompt);
@@ -45,6 +48,14 @@ public class Message {
 
   public void setUserMessage(String userMessage) {
     this.userMessage = userMessage;
+  }
+
+  public List<SerpResult> getSerpResults() {
+    return serpResults;
+  }
+
+  public void setSerpResults(List<SerpResult> serpResults) {
+    this.serpResults = serpResults;
   }
 
   @Override

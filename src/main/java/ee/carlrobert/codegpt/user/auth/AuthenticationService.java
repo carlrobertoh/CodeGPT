@@ -9,6 +9,7 @@ import ee.carlrobert.codegpt.credentials.UserCredentialsManager;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.user.ApiClient;
 import ee.carlrobert.codegpt.user.UserManager;
+import ee.carlrobert.codegpt.user.auth.response.AuthenticationResponse;
 import ee.carlrobert.codegpt.util.OverlayUtils;
 import java.io.IOException;
 import okhttp3.Call;
@@ -33,56 +34,7 @@ public final class AuthenticationService {
     client.authenticate(email, password, new AuthenticationCallback(authenticationHandler, email, password));
   }
 
-  public void refreshToken() {
-    var userManager = UserManager.getInstance();
-    var session = userManager.getSession();
-
-    if (session == null) {
-      throw new IllegalStateException("Tried to revalidate unauthenticated user");
-    }
-
-    client.refreshToken(session.getRefreshToken(), new Callback() {
-      @Override
-      public void onFailure(@NotNull Call call, @NotNull IOException e) {
-        userManager.clearSession();
-      }
-
-      @Override
-      public void onResponse(@NotNull Call call, @NotNull Response response) {
-        if (response.code() == 200) {
-          var body = response.body();
-          if (body != null) {
-            try {
-              handleSuccessfulAuthentication(new ObjectMapper().readValue(body.string(), Session.class));
-              return;
-            } catch (IOException e) {
-              throw new RuntimeException("Unable to deserialize session", e);
-            }
-          }
-        }
-
-        userManager.clearSession();
-        throw new RuntimeException("Internal server error. " + response.message());
-      }
-    });
-  }
-
-  private void handleSuccessfulAuthentication(Session session) {
-    SettingsState.getInstance().setPreviouslySignedIn(true);
-
-    var userManager = UserManager.getInstance();
-    userManager.setSession(session);
-
-    var subscription = client.getSubscription(session.getAccessToken());
-    if (subscription != null) {
-      userManager.setSubscription(subscription);
-    }
-    ApplicationManager.getApplication().getMessageBus()
-        .syncPublisher(AuthenticationNotifier.AUTHENTICATION_TOPIC)
-        .authenticationSuccessful();
-  }
-
-  class AuthenticationCallback implements Callback {
+  static class AuthenticationCallback implements Callback {
 
     private final AuthenticationHandler authenticationHandler;
     private final String email;
@@ -102,27 +54,36 @@ public final class AuthenticationService {
 
     @Override
     public void onResponse(@NotNull Call call, @NotNull Response response) {
-      if (response.code() == 401) {
-        authenticationHandler.handleInvalidCredentials();
+      var body = response.body();
+      if (body == null) {
+        authenticationHandler.handleGenericError();
+        return;
       }
+
       if (response.code() == 200) {
-        var body = response.body();
-        if (body != null) {
-          try {
-            var session = new ObjectMapper().readValue(body.string(), Session.class);
-            handleSuccessfulAuthentication(session);
-            SettingsState.getInstance().setEmail(email);
-            UserCredentialsManager.getInstance().setAccountPassword(password);
-            authenticationHandler.handleAuthenticated();
-            return;
-          } catch (IOException e) {
-            throw new RuntimeException("Unable to deserialize session", e);
-          }
+        try {
+          SettingsState.getInstance().setEmail(email);
+          UserCredentialsManager.getInstance().setAccountPassword(password);
+
+          var authenticationResponse = new ObjectMapper().readValue(body.string(), AuthenticationResponse.class);
+          UserManager.getInstance().setAuthenticationResponse(authenticationResponse);
+          authenticationHandler.handleAuthenticated(authenticationResponse);
+
+          ApplicationManager.getApplication().getMessageBus()
+              .syncPublisher(AuthenticationNotifier.AUTHENTICATION_TOPIC)
+              .authenticationSuccessful();
+          return;
+        } catch (IOException e) {
+          throw new RuntimeException("Unable to deserialize session", e);
         }
       }
 
-      authenticationHandler.handleGenericError();
-      throw new RuntimeException("Internal server error. " + response.message());
+      try {
+        authenticationHandler.handleError(new ObjectMapper().readValue(body.string(), AuthenticationError.class));
+      } catch (Throwable ex) {
+        authenticationHandler.handleGenericError();
+        throw new RuntimeException(ex);
+      }
     }
   }
 }

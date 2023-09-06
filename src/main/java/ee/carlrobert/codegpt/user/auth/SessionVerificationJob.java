@@ -13,10 +13,5 @@ public class SessionVerificationJob implements Job {
   @Override
   public void execute(JobExecutionContext context) {
     LOG.info("Refreshing token: " + LocalDateTime.now());
-
-    var session = UserManager.getInstance().getSession();
-    if (session != null && session.isExpired()) {
-      AuthenticationService.getInstance().refreshToken();
-    }
   }
 }

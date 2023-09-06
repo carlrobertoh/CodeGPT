@@ -8,7 +8,6 @@ import com.intellij.util.xmlb.XmlSerializerUtil;
 import com.intellij.util.xmlb.annotations.OptionTag;
 import ee.carlrobert.codegpt.conversations.converter.ConversationConverter;
 import ee.carlrobert.codegpt.conversations.converter.ConversationsConverter;
-import ee.carlrobert.openai.client.ClientCode;
 import java.util.List;
 import java.util.Map;
 import org.jetbrains.annotations.NotNull;
@@ -55,7 +54,7 @@ public class ConversationsState implements PersistentStateComponent<Conversation
     return getInstance().currentConversation;
   }
 
-  public Map<ClientCode, List<Conversation>> getConversationsMapping() {
+  public Map<String, List<Conversation>> getConversationsMapping() {
     return conversationsContainer.getConversationsMapping();
   }
 }

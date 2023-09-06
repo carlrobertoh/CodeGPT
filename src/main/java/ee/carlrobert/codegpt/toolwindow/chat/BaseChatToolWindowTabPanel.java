@@ -3,6 +3,7 @@ package ee.carlrobert.codegpt.toolwindow.chat;
 import static com.intellij.openapi.ui.Messages.OK;
 import static ee.carlrobert.codegpt.util.ThemeUtils.getPanelBackgroundColor;
 import static java.lang.String.format;
+import static java.util.stream.Collectors.toList;
 
 import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.project.Project;
@@ -11,6 +12,7 @@ import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.completions.CompletionRequestHandler;
+import ee.carlrobert.codegpt.completions.SerpResult;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
@@ -21,6 +23,7 @@ import ee.carlrobert.codegpt.toolwindow.chat.components.ChatMessageResponseBody;
 import ee.carlrobert.codegpt.toolwindow.chat.components.ResponsePanel;
 import ee.carlrobert.codegpt.toolwindow.chat.components.UserMessagePanel;
 import ee.carlrobert.codegpt.toolwindow.chat.components.UserPromptTextArea;
+import ee.carlrobert.codegpt.user.UserManager;
 import ee.carlrobert.codegpt.util.EditorUtils;
 import ee.carlrobert.codegpt.util.FileUtils;
 import ee.carlrobert.codegpt.util.OverlayUtils;
@@ -29,6 +32,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import javax.swing.BoxLayout;
@@ -45,6 +49,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
   private final JPanel rootPanel;
   private final ScrollablePanel scrollablePanel;
   private final Map<UUID, JPanel> visibleMessagePanels = new HashMap<>();
+  private final Map<UUID, List<SerpResult>> serpResultsMapping = new HashMap<>();
 
   protected final Project project;
   protected final UserPromptTextArea userPromptTextArea;
@@ -117,6 +122,9 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
   }
 
   private boolean isCredentialSet() {
+    if (SettingsState.getInstance().isUseYouService()) {
+      return UserManager.getInstance().isAuthenticated();
+    }
     if (SettingsState.getInstance().isUseAzureService()) {
       return AzureCredentialsManager.getInstance().isCredentialSet();
     }
@@ -145,6 +153,20 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
       responsePanel.enableActions();
       conversationService.saveMessage(completeMessage, message, conversation, isRetry);
       stopStreaming(responseContainer);
+
+      var serpResults = serpResultsMapping.get(message.getId());
+      var containsResults = serpResults != null && !serpResults.isEmpty();
+      if (SettingsState.getInstance().isDisplayWebSearchResults()) {
+        if (containsResults) {
+          responseContainer.displaySerpResults(serpResults);
+        }
+      }
+
+      if (containsResults) {
+        message.setSerpResults(serpResults.stream()
+            .map(result -> new SerpResult(result.getUrl(), result.getName(), result.getSnippet(), result.getSnippetSource()))
+            .collect(toList()));
+      }
     });
     requestHandler.addTokensExceededListener(() -> SwingUtilities.invokeLater(() -> {
       var answer = OverlayUtils.showTokenLimitExceededDialog();
@@ -160,6 +182,9 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
       responseContainer.displayError(error.getMessage());
       stopStreaming(responseContainer);
     });
+    requestHandler.addSerpResultsListener(serpResults -> serpResultsMapping.put(message.getId(), serpResults.stream()
+        .map(result -> new SerpResult(result.getUrl(), result.getName(), result.getSnippet(), result.getSnippetSource()))
+        .collect(toList())));
     userPromptTextArea.setRequestHandler(requestHandler);
     userPromptTextArea.setSubmitEnabled(false);
     requestHandler.call(conversation, message, isRetry);

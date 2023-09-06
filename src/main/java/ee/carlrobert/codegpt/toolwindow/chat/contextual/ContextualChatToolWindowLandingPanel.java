@@ -53,7 +53,7 @@ class ContextualChatToolWindowLandingPanel extends ResponsePanel {
     var description = createTextPane();
     var userManager = UserManager.getInstance();
 
-    if (userManager.getSession() == null) {
+    if (userManager.getAuthenticationResponse() == null) {
       description.setText("<html>" +
           "<p style=\"margin-top: 4px; margin-bottom: 4px;\">It looks like you haven't logged in. Please <a href=\"LOGIN\">log in</a> to use the feature.</p>" +
           "</html>");

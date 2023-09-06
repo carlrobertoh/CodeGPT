@@ -2,16 +2,13 @@ package ee.carlrobert.codegpt.user;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
-import ee.carlrobert.codegpt.user.auth.Session;
 import ee.carlrobert.codegpt.user.auth.SignedOutNotifier;
-import ee.carlrobert.codegpt.user.subscription.Subscription;
-import org.jetbrains.annotations.Nullable;
+import ee.carlrobert.codegpt.user.auth.response.AuthenticationResponse;
 
 @Service
 public final class UserManager {
 
-  private Session session;
-  private Subscription subscription;
+  private AuthenticationResponse authenticationResponse;
 
   private UserManager() {
   }
@@ -20,32 +17,27 @@ public final class UserManager {
     return ApplicationManager.getApplication().getService(UserManager.class);
   }
 
-  public @Nullable Session getSession() {
-    return session;
+  public AuthenticationResponse getAuthenticationResponse() {
+    return authenticationResponse;
   }
 
-  public void setSession(@Nullable Session session) {
-    this.session = session;
+  public void setAuthenticationResponse(AuthenticationResponse authenticationResponse) {
+    this.authenticationResponse = authenticationResponse;
   }
 
   public void clearSession() {
-    session = null;
-    subscription = null;
+    authenticationResponse = null;
 
     ApplicationManager.getApplication().getMessageBus()
         .syncPublisher(SignedOutNotifier.SIGNED_OUT_TOPIC)
         .signedOut();
   }
 
-  public @Nullable Subscription getSubscription() {
-    return subscription;
-  }
-
-  public void setSubscription(@Nullable Subscription subscription) {
-    this.subscription = subscription;
-  }
-
   public boolean isSubscribed() {
-    return session != null && subscription != null;
+    return true; // TODO
+  }
+
+  public boolean isAuthenticated() {
+    return authenticationResponse != null;
   }
 }
