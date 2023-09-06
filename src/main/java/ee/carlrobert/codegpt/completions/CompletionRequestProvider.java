@@ -13,8 +13,6 @@ import ee.carlrobert.embedding.EmbeddingsService;
 import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionModel;
 import ee.carlrobert.llm.client.openai.completion.chat.request.OpenAIChatCompletionMessage;
 import ee.carlrobert.llm.client.openai.completion.chat.request.OpenAIChatCompletionRequest;
-import ee.carlrobert.llm.client.openai.completion.text.OpenAITextCompletionModel;
-import ee.carlrobert.llm.client.openai.completion.text.request.OpenAITextCompletionRequest;
 import ee.carlrobert.llm.client.you.completion.YouCompletionRequest;
 import ee.carlrobert.llm.client.you.completion.YouCompletionRequestMessage;
 import java.util.ArrayList;
@@ -48,10 +46,7 @@ public class CompletionRequestProvider {
   private final Conversation conversation;
 
   public CompletionRequestProvider(Conversation conversation) {
-    this.embeddingsService = new EmbeddingsService(
-        CompletionClientProvider.getEmbeddingsClient(),
-        CompletionClientProvider.getChatCompletionClient(),
-        CodeGPTPlugin.getPluginBasePath());
+    this.embeddingsService = new EmbeddingsService(CompletionClientProvider.getOpenAIClient(), CodeGPTPlugin.getPluginBasePath());
     this.conversation = conversation;
   }
 
@@ -69,15 +64,6 @@ public class CompletionRequestProvider {
 
   public OpenAIChatCompletionRequest buildOpenAIChatCompletionRequest(String model, Message message, boolean isRetry, boolean useContextualSearch) {
     return (OpenAIChatCompletionRequest) new OpenAIChatCompletionRequest.Builder(buildMessages(model, message, isRetry, useContextualSearch))
-        .setModel(model)
-        .setMaxTokens(ConfigurationState.getInstance().getMaxTokens())
-        .setTemperature(ConfigurationState.getInstance().getTemperature())
-        .build();
-  }
-
-  public OpenAITextCompletionRequest buildOpenAITextCompletionRequest(String model, Message message, boolean isRetry) {
-    return (OpenAITextCompletionRequest) new OpenAITextCompletionRequest.Builder(buildPrompt(model, message, isRetry))
-        .setStop(List.of(" Human:", " AI:"))
         .setModel(model)
         .setMaxTokens(ConfigurationState.getInstance().getMaxTokens())
         .setTemperature(ConfigurationState.getInstance().getTemperature())
@@ -138,34 +124,5 @@ public class CompletionRequestProvider {
     }
 
     return messages.stream().filter(Objects::nonNull).collect(toList());
-  }
-
-  private StringBuilder getBasePrompt(String model) {
-    var isDavinciModel = OpenAITextCompletionModel.DAVINCI.getCode().equals(model);
-    if (isDavinciModel) {
-      return new StringBuilder(
-          "You are ChatGPT, a large language model trained by OpenAI.\n" +
-              "Answer in a markdown language, code blocks should contain language whenever possible.\n");
-    }
-    return new StringBuilder(
-        "The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly.\n\n");
-  }
-
-  private String buildPrompt(String model, Message message, boolean isRetry) {
-    var systemPrompt = ConfigurationState.getInstance().getSystemPrompt();
-    var basePrompt = systemPrompt.isEmpty() ? getBasePrompt(model) : new StringBuilder(systemPrompt + "\n");
-    conversation.getMessages().forEach(prevMessage ->
-        basePrompt.append("Human: ")
-            .append(prevMessage.getPrompt())
-            .append("\n")
-            .append("AI: ")
-            .append(prevMessage.getResponse())
-            .append("\n"));
-    basePrompt.append("Human: ")
-        .append(message.getPrompt())
-        .append("\n")
-        .append("AI: ")
-        .append("\n");
-    return basePrompt.toString();
   }
 }

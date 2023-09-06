@@ -71,23 +71,20 @@ public class CompletionRequestHandler {
       boolean isRetry,
       CompletionEventListener eventListener) {
     var settings = SettingsState.getInstance();
-    var modelSettings = ModelSettingsState.getInstance();
     var requestProvider = new CompletionRequestProvider(conversation);
 
     try {
-      var chatCompletionClient = CompletionClientProvider.getChatCompletionClient();
       if (settings.isUseYouService()) {
-        return chatCompletionClient.stream(requestProvider.buildYouCompletionRequest(message), eventListener);
+        return CompletionClientProvider.getYouClient("", "")
+            .getChatCompletion(requestProvider.buildYouCompletionRequest(message), eventListener);
       }
 
-      if (modelSettings.isUseChatCompletion()) {
-        return chatCompletionClient.stream(
-            requestProvider.buildOpenAIChatCompletionRequest(modelSettings.getChatCompletionModel(), message, isRetry, useContextualSearch),
-            eventListener);
+      var openAICompletionRequest = requestProvider.buildOpenAIChatCompletionRequest(
+          ModelSettingsState.getInstance().getChatCompletionModel(), message, isRetry, useContextualSearch);
+      if (settings.isUseAzureService()) {
+        return CompletionClientProvider.getAzureClient().getChatCompletion(openAICompletionRequest, eventListener);
       }
-      return CompletionClientProvider.getTextCompletionClient().stream(
-          requestProvider.buildOpenAITextCompletionRequest(modelSettings.getTextCompletionModel(), message, isRetry),
-          eventListener);
+      return CompletionClientProvider.getOpenAIClient().getChatCompletion(openAICompletionRequest, eventListener);
     } catch (Throwable t) {
       if (errorListener != null) {
         errorListener.accept(new ErrorDetails("Something went wrong"), t);

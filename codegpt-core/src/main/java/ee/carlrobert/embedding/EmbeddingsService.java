@@ -4,18 +4,14 @@ import static com.github.jelmerk.knn.util.VectorUtils.normalize;
 import static java.util.stream.Collectors.toList;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.jelmerk.knn.Item;
 import com.github.jelmerk.knn.SearchResult;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProgressIndicator;
-import ee.carlrobert.llm.client.openai.completion.OpenAICompletionClient;
+import ee.carlrobert.llm.client.openai.OpenAIClient;
 import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionModel;
 import ee.carlrobert.llm.client.openai.completion.chat.request.OpenAIChatCompletionMessage;
 import ee.carlrobert.llm.client.openai.completion.chat.request.OpenAIChatCompletionRequest;
-import ee.carlrobert.llm.client.openai.completion.chat.response.OpenAIChatCompletionResponse;
-import ee.carlrobert.llm.client.openai.embeddings.EmbeddingsClient;
-import ee.carlrobert.llm.completion.CompletionClient;
 import ee.carlrobert.splitter.SplitterFactory;
 import ee.carlrobert.vector.VectorStore;
 import ee.carlrobert.vector.Word;
@@ -23,7 +19,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -35,42 +30,20 @@ public class EmbeddingsService {
   private static final Logger LOG = Logger.getInstance(EmbeddingsService.class);
 
   private final VectorStore vectorStore;
-  private final EmbeddingsClient embeddingsClient;
-  private final CompletionClient completionClient;
+  private final OpenAIClient openAIClient;
 
-  public EmbeddingsService(EmbeddingsClient embeddingsClient, CompletionClient completionClient, Path pluginBasePath) {
-    this.embeddingsClient = embeddingsClient;
-    this.completionClient = completionClient;
+  public EmbeddingsService(OpenAIClient openAIClient, Path pluginBasePath) {
+    this.openAIClient = openAIClient;
     this.vectorStore = VectorStore.getInstance(pluginBasePath);
   }
 
   public List<double[]> getEmbeddings(List<String> chunks) {
-    return embeddingsClient.getEmbeddings(chunks);
+    return openAIClient.getEmbeddings(chunks);
   }
-
-  public GeneratedContextDetails buildRelevantContext(String prompt) {
-    try {
-      var inputEmbedding = embeddingsClient.getEmbedding(getSearchQuery(prompt));
-      var sortedResult = vectorStore.loadIndex()
-          .findNearest(normalize(inputEmbedding), 10)
-          .stream()
-          .map(SearchResult::item)
-          .sorted(Comparator.comparing(Word::getMeta))
-          .collect(toList());
-
-      var context = sortedResult.stream().map(Word::id).collect(Collectors.joining());
-      var fileNames = sortedResult.stream().map(Word::getMeta).collect(Collectors.toSet());
-
-      return new GeneratedContextDetails(context, fileNames);
-    } catch (IOException e) {
-      LOG.error("Unable to load vector index", e);
-      return new GeneratedContextDetails(prompt, Collections.emptySet());
-    }
-  }
-
+  
   public String buildPromptWithContext(String prompt) {
     try {
-      var inputEmbedding = embeddingsClient.getEmbedding(getSearchQuery(prompt));
+      var inputEmbedding = openAIClient.getEmbedding(getSearchQuery(prompt));
       var sortedResult = vectorStore.loadIndex()
           .findNearest(normalize(inputEmbedding), 10)
           .stream()
@@ -116,9 +89,7 @@ public class EmbeddingsService {
         .setStream(false)
         .build();
 
-    return new ObjectMapper()
-        // .readValue(completionClient.call(request), OpenAIChatCompletionResponse.class)
-        .readValue(completionClient.call(null), OpenAIChatCompletionResponse.class)
+    return openAIClient.getChatCompletion(request)
         .getChoices()
         .get(0)
         .getMessage()
@@ -130,7 +101,7 @@ public class EmbeddingsService {
     var codeSplitter = SplitterFactory.getCodeSplitter(fileExtension);
     if (codeSplitter != null) {
       var chunks = codeSplitter.split(checkedFile.getFileName(), checkedFile.getFileContent());
-      var embeddings = embeddingsClient.getEmbeddings(chunks);
+      var embeddings = openAIClient.getEmbeddings(chunks);
       for (int i = 0; i < chunks.size(); i++) {
         prevEmbeddings.add(new Word(chunks.get(i), checkedFile.getFileName(), normalize(embeddings.get(i))));
       }

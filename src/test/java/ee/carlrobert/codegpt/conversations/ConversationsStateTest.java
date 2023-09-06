@@ -10,10 +10,7 @@ import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionModel
 public class ConversationsStateTest extends BasePlatformTestCase {
 
   public void testStartNewDefaultConversation() {
-    var modelSettings = ModelSettingsState.getInstance();
-    modelSettings.setUseChatCompletion(true);
-    modelSettings.setUseTextCompletion(false);
-    modelSettings.setChatCompletionModel(OpenAIChatCompletionModel.GPT_3_5.getCode());
+    ModelSettingsState.getInstance().setChatCompletionModel(OpenAIChatCompletionModel.GPT_3_5.getCode());
 
     var conversation = ConversationService.getInstance().startConversation();
 

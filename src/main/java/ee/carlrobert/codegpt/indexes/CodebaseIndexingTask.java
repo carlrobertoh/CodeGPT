@@ -2,6 +2,7 @@ package ee.carlrobert.codegpt.indexes;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.jelmerk.knn.Item;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProgressIndicator;
@@ -17,7 +18,6 @@ import ee.carlrobert.codegpt.util.FileUtils;
 import ee.carlrobert.codegpt.util.OverlayUtils;
 import ee.carlrobert.embedding.CheckedFile;
 import ee.carlrobert.embedding.EmbeddingsService;
-import com.github.jelmerk.knn.Item;
 import ee.carlrobert.vector.VectorStore;
 import java.util.List;
 import java.util.Map;
@@ -34,10 +34,7 @@ public class CodebaseIndexingTask extends Task.Backgroundable {
     super(project, CodeGPTBundle.get("codebaseIndexing.task.title"), true);
     this.project = project;
     this.checkedFiles = checkedFiles;
-    this.embeddingsService = new EmbeddingsService(
-        CompletionClientProvider.getEmbeddingsClient(),
-        CompletionClientProvider.getChatCompletionClient(),
-        CodeGPTPlugin.getPluginBasePath());
+    this.embeddingsService = new EmbeddingsService(CompletionClientProvider.getOpenAIClient(), CodeGPTPlugin.getPluginBasePath());
   }
 
   public void run() {

@@ -10,12 +10,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.groups.Tuple.tuple;
 
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
-import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
-import ee.carlrobert.codegpt.settings.state.ModelSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.llm.client.http.LocalCallbackServer;
@@ -23,11 +21,8 @@ import ee.carlrobert.llm.client.http.ResponseEntity;
 import ee.carlrobert.llm.client.http.exchange.BasicHttpExchange;
 import ee.carlrobert.llm.client.http.expectation.BasicExpectation;
 import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionModel;
-import ee.carlrobert.llm.client.openai.completion.text.OpenAITextCompletionModel;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 public class CompletionRequestProviderTest extends BasePlatformTestCase {
 
@@ -46,46 +41,6 @@ public class CompletionRequestProviderTest extends BasePlatformTestCase {
   protected void tearDown() throws Exception {
     server.stop();
     super.tearDown();
-  }
-
-  public void testTextCompletionRequestWithSystemPromptOverride() {
-    ConfigurationState.getInstance().setSystemPrompt("TEST_SYSTEM_PROMPT");
-    var conversation = createConversation("text.completion");
-    var firstMsg = new Message("TEST_PROMPT", "TEST_RESPONSE");
-    conversation.addMessage(firstMsg);
-    conversation.addMessage(new Message("TEST_PROMPT_2", "TEST_RESPONSE_2"));
-
-    var request = new CompletionRequestProvider(conversation)
-        .buildOpenAITextCompletionRequest(OpenAITextCompletionModel.DAVINCI.getCode(), new Message("TEST_TEXT_COMPLETION_PROMPT"), false);
-
-    assertThat(request.getPrompt())
-        .isEqualTo("TEST_SYSTEM_PROMPT\n"
-            + "Human: TEST_PROMPT\n"
-            + "AI: TEST_RESPONSE\n"
-            + "Human: TEST_PROMPT_2\n"
-            + "AI: TEST_RESPONSE_2\n"
-            + "Human: TEST_TEXT_COMPLETION_PROMPT\n"
-            + "AI: \n");
-  }
-
-  public void testTextCompletionRequestWithoutSystemPromptOverride() {
-    var conversation = createConversation("text.completion");
-    var firstMsg = new Message("TEST_PROMPT", "TEST_RESPONSE");
-    conversation.addMessage(firstMsg);
-    conversation.addMessage(new Message("TEST_PROMPT_2", "TEST_RESPONSE_2"));
-
-    var request = new CompletionRequestProvider(conversation)
-        .buildOpenAITextCompletionRequest(OpenAITextCompletionModel.DAVINCI.getCode(), new Message("TEST_TEXT_COMPLETION_PROMPT"), false);
-
-    assertThat(request.getPrompt())
-        .isEqualTo("You are ChatGPT, a large language model trained by OpenAI.\n"
-            + "Answer in a markdown language, code blocks should contain language whenever possible.\n"
-            + "Human: TEST_PROMPT\n"
-            + "AI: TEST_RESPONSE\n"
-            + "Human: TEST_PROMPT_2\n"
-            + "AI: TEST_RESPONSE_2\n"
-            + "Human: TEST_TEXT_COMPLETION_PROMPT\n"
-            + "AI: \n");
   }
 
   public void testChatCompletionRequestWithSystemPromptOverride() {
@@ -186,9 +141,6 @@ public class CompletionRequestProviderTest extends BasePlatformTestCase {
   public void testContextualSearch() {
     var conversation = ConversationService.getInstance().startConversation();
     var settings = SettingsState.getInstance();
-    var modelSettings = ModelSettingsState.getInstance();
-    modelSettings.setUseTextCompletion(false);
-    modelSettings.setUseChatCompletion(true);
     settings.setUseOpenAIService(true);
     settings.setUseAzureService(false);
     expectRequest("/v1/chat/completions", request -> {
@@ -198,10 +150,8 @@ public class CompletionRequestProviderTest extends BasePlatformTestCase {
           .extracting("model", "messages")
           .containsExactly("gpt-4",
               List.of(Map.of(
-                  "role",
-                  "user",
-                  "content",
-                  "You are Text Generator, a helpful expert of generating natural language into semantically comparable search query.\n" +
+                  "role", "user",
+                  "content", "You are Text Generator, a helpful expert of generating natural language into semantically comparable search query.\n" +
                       "\n" +
                       "Text: List all the dependencies that the project uses\n" +
                       "AI: project dependencies, development dependencies, versions, libraries, frameworks, packages\n" +
@@ -241,19 +191,6 @@ public class CompletionRequestProviderTest extends BasePlatformTestCase {
             "Question: TEST_CHAT_COMPLETION_PROMPT\n" +
             "\n" +
             "Helpful answer in Markdown format:");
-  }
-
-  private Conversation createConversation(String clientCode) {
-    var modelSettings = ModelSettingsState.getInstance();
-    var conversation = new Conversation();
-    conversation.setId(UUID.randomUUID());
-    conversation.setClientCode(clientCode);
-    conversation.setModel(modelSettings.isUseChatCompletion() ?
-        modelSettings.getChatCompletionModel() :
-        modelSettings.getTextCompletionModel());
-    conversation.setCreatedOn(LocalDateTime.now());
-    conversation.setUpdatedOn(LocalDateTime.now());
-    return conversation;
   }
 
   private Message createDummyMessage(int tokenSize) {

@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt.settings;
 
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.ui.TitledSeparator;
 import com.intellij.ui.components.JBCheckBox;
@@ -19,6 +20,8 @@ import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.user.UserManager;
 import ee.carlrobert.codegpt.user.auth.AuthenticationNotifier;
 import ee.carlrobert.codegpt.util.SwingUtils;
+import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionModel;
+import ee.carlrobert.llm.completion.CompletionModel;
 import java.awt.FlowLayout;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +32,13 @@ import javax.swing.JPanel;
 
 public class ServiceSelectionForm {
 
+  private static final OpenAIChatCompletionModel[] DEFAULT_OPENAI_MODELS = new OpenAIChatCompletionModel[] {
+      OpenAIChatCompletionModel.GPT_3_5,
+      OpenAIChatCompletionModel.GPT_3_5_16k,
+      OpenAIChatCompletionModel.GPT_4,
+      OpenAIChatCompletionModel.GPT_4_32k
+  };
+
   private final JBRadioButton useOpenAIServiceRadioButton;
   private final JBRadioButton useAzureServiceRadioButton;
 
@@ -36,7 +46,7 @@ public class ServiceSelectionForm {
   private final JBTextField openAIBaseHostField;
   private final JBTextField openAIOrganizationField;
   private final JPanel openAIServiceSectionPanel;
-  private final ModelSelectionForm openAIModelSelectionForm;
+  private final ComboBox<CompletionModel> openAICompletionModelComboBox;
 
   private final JBRadioButton useAzureApiKeyAuthenticationRadioButton;
   private final JBPasswordField azureApiKeyField;
@@ -49,7 +59,7 @@ public class ServiceSelectionForm {
   private final JBTextField azureDeploymentIdField;
   private final JBTextField azureApiVersionField;
   private final JPanel azureServiceSectionPanel;
-  private final ModelSelectionForm azureModelSelectionForm;
+  private final ComboBox<CompletionModel> azureCompletionModelComboBox;
 
   private final JBRadioButton useYouServiceRadioButton;
   private final JPanel youServiceSectionPanel;
@@ -96,14 +106,15 @@ public class ServiceSelectionForm {
 
     openAIBaseHostField = new JBTextField(openAISettings.getBaseHost(), 30);
     openAIOrganizationField = new JBTextField(openAISettings.getOrganization(), 30);
-    openAIModelSelectionForm = new ModelSelectionForm();
+    openAICompletionModelComboBox = new ComboBox<>(DEFAULT_OPENAI_MODELS);
+    openAICompletionModelComboBox.setSelectedItem(OpenAIChatCompletionModel.GPT_4);
 
     azureBaseHostField = new JBTextField(azureSettings.getBaseHost(), 30);
     azureResourceNameField = new JBTextField(azureSettings.getResourceName(), 30);
     azureDeploymentIdField = new JBTextField(azureSettings.getDeploymentId(), 30);
     azureApiVersionField = new JBTextField(azureSettings.getApiVersion(), 30);
-    azureModelSelectionForm = new ModelSelectionForm();
-
+    azureCompletionModelComboBox = new ComboBox<>(DEFAULT_OPENAI_MODELS);
+    azureCompletionModelComboBox.setSelectedItem(OpenAIChatCompletionModel.GPT_4);
     displayWebSearchResultsCheckBox = new JBCheckBox("Display web search results", settings.isDisplayWebSearchResults());
     displayWebSearchResultsCheckBox.setEnabled(UserManager.getInstance().isAuthenticated());
 
@@ -146,6 +157,9 @@ public class ServiceSelectionForm {
         .add(UI.PanelFactory.panel(openAIBaseHostField)
             .withLabel("Base host:")
             .resizeX(false))
+        .add(UI.PanelFactory.panel(openAICompletionModelComboBox)
+            .withLabel("Model:")
+            .resizeX(false))
         .createPanel();
 
     var apiKeyFieldPanel = UI.PanelFactory.panel(openAIApiKeyField)
@@ -160,8 +174,6 @@ public class ServiceSelectionForm {
         .addComponent(withEmptyLeftBorder(apiKeyFieldPanel))
         .addComponent(new TitledSeparator("Request Configuration"))
         .addComponent(withEmptyLeftBorder(requestConfigurationPanel))
-        .addComponent(new TitledSeparator(CodeGPTBundle.get("settingsConfigurable.section.model.title")))
-        .addComponent(withEmptyLeftBorder(openAIModelSelectionForm.getForm()))
         .addComponentFillVertically(new JPanel(), 0)
         .getPanel();
   }
@@ -196,6 +208,9 @@ public class ServiceSelectionForm {
         .add(UI.PanelFactory.panel(azureBaseHostField)
             .withLabel("Base host:")
             .resizeX(false))
+        .add(UI.PanelFactory.panel(azureCompletionModelComboBox)
+            .withLabel("Model:")
+            .resizeX(false))
         .createPanel());
 
     return FormBuilder.createFormBuilder()
@@ -203,8 +218,6 @@ public class ServiceSelectionForm {
         .addComponent(authPanel)
         .addComponent(new TitledSeparator("Request Configuration"))
         .addComponent(configPanel)
-        .addComponent(new TitledSeparator(CodeGPTBundle.get("settingsConfigurable.section.model.title")))
-        .addComponent(withEmptyLeftBorder(azureModelSelectionForm.getForm()))
         .getPanel();
   }
 
@@ -252,8 +265,16 @@ public class ServiceSelectionForm {
     }));
   }
 
-  public ModelSelectionForm getModelSelectionForm() {
-    return isOpenAIServiceSelected() ? openAIModelSelectionForm : azureModelSelectionForm;
+  public OpenAIChatCompletionModel getSelectedCompletionModel() {
+    return (OpenAIChatCompletionModel) (isOpenAIServiceSelected() ?
+        openAICompletionModelComboBox.getSelectedItem() :
+        azureCompletionModelComboBox.getSelectedItem());
+  }
+
+  public void setSelectedChatCompletionModel(OpenAIChatCompletionModel chatCompletionModel) {
+    if (isOpenAIServiceSelected()) {
+      openAICompletionModelComboBox.setSelectedItem(chatCompletionModel);
+    }
   }
 
   public void setOpenAIServiceSelected(boolean selected) {

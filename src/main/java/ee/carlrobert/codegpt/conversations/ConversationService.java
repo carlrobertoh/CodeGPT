@@ -112,7 +112,7 @@ public class ConversationService {
   }
 
   public Conversation startConversation() {
-    var currentClientCode = ModelSettingsState.getInstance().isUseChatCompletion() ? "chat.completion" : "text.completion";
+    var currentClientCode = "chat.completion";
     var conversation = createConversation(currentClientCode);
     conversationState.setCurrentConversation(conversation);
     addConversation(conversation);

@@ -10,32 +10,25 @@ import ee.carlrobert.codegpt.user.UserManager;
 import ee.carlrobert.llm.client.Client;
 import ee.carlrobert.llm.client.ProxyAuthenticator;
 import ee.carlrobert.llm.client.azure.AzureClient;
-import ee.carlrobert.llm.client.azure.completion.AzureCompletionRequestParams;
+import ee.carlrobert.llm.client.azure.AzureCompletionRequestParams;
 import ee.carlrobert.llm.client.openai.OpenAIClient;
-import ee.carlrobert.llm.client.openai.embeddings.EmbeddingsClient;
 import ee.carlrobert.llm.client.you.YouClient;
-import ee.carlrobert.llm.completion.CompletionClient;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.concurrent.TimeUnit;
 
 public class CompletionClientProvider {
 
-  public static EmbeddingsClient getEmbeddingsClient() {
-    if (SettingsState.getInstance().isUseOpenAIService()) {
-      return getOpenAIClientBuilder().buildEmbeddingsClient();
-    }
-    // TODO
-    return null;
+  public static OpenAIClient getOpenAIClient() {
+    return getOpenAIClientBuilder().build();
   }
 
-  public static CompletionClient getChatCompletionClient() {
-    return getClientBuilder().buildChatCompletionClient();
+  public static AzureClient getAzureClient() {
+    return getAzureClientBuilder().build();
   }
 
-  @Deprecated
-  public static CompletionClient getTextCompletionClient() {
-    return getClientBuilder().buildTextCompletionClient();
+  public static YouClient getYouClient(String sessionId, String accessToken) {
+    return new YouClient.Builder(sessionId, accessToken).build();
   }
 
   public static Client.Builder getClientBuilder() {
@@ -60,6 +53,14 @@ public class CompletionClientProvider {
     var builder = new AzureClient.Builder(AzureCredentialsManager.getInstance().getSecret(), params)
         .setActiveDirectoryAuthentication(settings.isUseAzureActiveDirectoryAuthentication());
     return (AzureClient.Builder) addDefaultClientParams(builder).setHost(settings.getBaseHost());
+  }
+
+  private static YouClient.Builder getYouClientBuilder() {
+    var settings = OpenAISettingsState.getInstance();
+    var builder = new OpenAIClient
+        .Builder(OpenAICredentialsManager.getInstance().getApiKey())
+        .setOrganization(settings.getOrganization());
+    return (YouClient.Builder) addDefaultClientParams(builder).setHost(settings.getBaseHost());
   }
 
   private static Client.Builder addDefaultClientParams(Client.Builder builder) {

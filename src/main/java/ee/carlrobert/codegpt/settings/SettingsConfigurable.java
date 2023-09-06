@@ -14,6 +14,7 @@ import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowTabPanel;
 import ee.carlrobert.codegpt.util.ApplicationUtils;
+import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionModel;
 import javax.swing.JComponent;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
@@ -71,8 +72,7 @@ public class SettingsConfigurable implements Configurable, Disposable {
 
         serviceSelectionForm.isDisplayWebSearchResults() != settings.isDisplayWebSearchResults() ||
 
-        isModelChanged(modelSettings) ||
-        isCompletionOptionChanged(modelSettings);
+        isModelChanged(modelSettings);
   }
 
   @Override
@@ -82,15 +82,10 @@ public class SettingsConfigurable implements Configurable, Disposable {
     var openAISettings = OpenAISettingsState.getInstance();
     var azureSettings = AzureSettingsState.getInstance();
     var modelSettings = ModelSettingsState.getInstance();
-    var isModelChanged = isModelChanged(modelSettings);
 
-    if (isModelChanged) {
-      EncodingManager.getInstance().setEncoding(modelSettings.isUseChatCompletion() ?
-          modelSettings.getChatCompletionModel() :
-          modelSettings.getTextCompletionModel());
-    }
+    if (isModelChanged(modelSettings)) {
+      EncodingManager.getInstance().setEncoding(modelSettings.getChatCompletionModel());
 
-    if (isCompletionOptionChanged(modelSettings) || isModelChanged) {
       ConversationsState.getInstance().setCurrentConversation(null);
       var project = ApplicationUtils.findCurrentProject();
       if (project == null) {
@@ -107,7 +102,7 @@ public class SettingsConfigurable implements Configurable, Disposable {
           });
     }
 
-    var modelSelectionForm = serviceSelectionForm.getModelSelectionForm();
+    var selectedCompletionModel = serviceSelectionForm.getSelectedCompletionModel();
 
     OpenAICredentialsManager.getInstance().setApiKey(serviceSelectionForm.getOpenAIApiKey());
     AzureCredentialsManager.getInstance().setApiKey(serviceSelectionForm.getAzureOpenAIApiKey());
@@ -132,10 +127,7 @@ public class SettingsConfigurable implements Configurable, Disposable {
     azureSettings.setApiVersion(serviceSelectionForm.getAzureApiVersion());
     azureSettings.setBaseHost(serviceSelectionForm.getAzureBaseHost());
 
-    modelSettings.setUseChatCompletion(modelSelectionForm.isChatCompletionOptionSelected());
-    modelSettings.setUseTextCompletion(modelSelectionForm.isTextCompletionOptionSelected());
-    modelSettings.setChatCompletionModel(modelSelectionForm.getChatCompletionBaseModel().getCode());
-    modelSettings.setTextCompletionModel(modelSelectionForm.getTextCompletionBaseModel().getCode());
+    modelSettings.setChatCompletionModel(selectedCompletionModel.getCode());
   }
 
   @Override
@@ -143,9 +135,7 @@ public class SettingsConfigurable implements Configurable, Disposable {
     var settings = SettingsState.getInstance();
     var openAISettings = OpenAISettingsState.getInstance();
     var azureSettings = AzureSettingsState.getInstance();
-    var modelSettings = ModelSettingsState.getInstance();
     var serviceSelectionForm = settingsComponent.getServiceSelectionForm();
-    var modelSelectionForm = serviceSelectionForm.getModelSelectionForm();
 
     settingsComponent.setEmail(settings.getEmail());
     settingsComponent.setDisplayName(settings.getDisplayName());
@@ -169,11 +159,9 @@ public class SettingsConfigurable implements Configurable, Disposable {
 
     serviceSelectionForm.setDisplayWebSearchResults(settings.isDisplayWebSearchResults());
 
-    modelSelectionForm.setUseChatCompletionSelected(modelSettings.isUseChatCompletion());
-    modelSelectionForm.setUseTextCompletionSelected(modelSettings.isUseTextCompletion());
     if (!settings.isUseYouService()) {
-      modelSelectionForm.setChatCompletionBaseModel(modelSettings.getChatCompletionModel());
-      modelSelectionForm.setTextCompletionBaseModel(modelSettings.getTextCompletionModel());
+      serviceSelectionForm.setSelectedChatCompletionModel(
+          OpenAIChatCompletionModel.findByCode(ModelSettingsState.getInstance().getChatCompletionModel()));
     }
   }
 
@@ -182,16 +170,8 @@ public class SettingsConfigurable implements Configurable, Disposable {
     settingsComponent = null;
   }
 
-  private boolean isCompletionOptionChanged(ModelSettingsState settings) {
-    var modelSelectionForm = settingsComponent.getServiceSelectionForm().getModelSelectionForm();
-    return modelSelectionForm.isChatCompletionOptionSelected() != settings.isUseChatCompletion() ||
-        modelSelectionForm.isTextCompletionOptionSelected() != settings.isUseTextCompletion();
-  }
-
   private boolean isModelChanged(ModelSettingsState settings) {
-    var modelSelectionForm = settingsComponent.getServiceSelectionForm().getModelSelectionForm();
-    return !modelSelectionForm.getChatCompletionBaseModel().getCode().equals(settings.getChatCompletionModel()) ||
-        !modelSelectionForm.getTextCompletionBaseModel().getCode().equals(settings.getTextCompletionModel());
+    return !settingsComponent.getServiceSelectionForm().getSelectedCompletionModel().getCode().equals(settings.getChatCompletionModel());
   }
 
   @Override
