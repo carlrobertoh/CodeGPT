@@ -1,9 +1,9 @@
-embeddings/src/main/java/grammar/*
-!embeddings/src/main/java/grammar/PythonLexerBase.java
-!embeddings/src/main/java/grammar/PythonParserBase.java
-!embeddings/src/main/java/grammar/PythonVersion.java
-!embeddings/src/main/java/grammar/TypeScriptLexerBase.java
-!embeddings/src/main/java/grammar/TypeScriptParserBase.java
+codegpt-core/src/main/java/grammar/*
+!codegpt-core/src/main/java/grammar/PythonLexerBase.java
+!codegpt-core/src/main/java/grammar/PythonParserBase.java
+!codegpt-core/src/main/java/grammar/PythonVersion.java
+!codegpt-core/src/main/java/grammar/TypeScriptLexerBase.java
+!codegpt-core/src/main/java/grammar/TypeScriptParserBase.java
 
 .gradle
 build/
