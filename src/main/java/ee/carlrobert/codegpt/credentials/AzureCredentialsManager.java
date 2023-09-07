@@ -1,16 +1,18 @@
 package ee.carlrobert.codegpt.credentials;
 
 import com.intellij.credentialStore.CredentialAttributes;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.components.Service;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import org.jetbrains.annotations.Nullable;
 
-public class AzureCredentialsManager {
+@Service
+public final class AzureCredentialsManager {
 
   private static final CredentialAttributes azureOpenAIApiKeyCredentialAttributes =
       CredentialsUtil.createCredentialAttributes("AZURE_OPENAI_API_KEY");
   private static final CredentialAttributes azureActiveDirectoryTokenCredentialAttributes =
       CredentialsUtil.createCredentialAttributes("AZURE_ACTIVE_DIRECTORY_TOKEN");
-  private static AzureCredentialsManager instance;
 
   private String azureOpenAIApiKey;
   private String azureActiveDirectoryToken;
@@ -21,10 +23,7 @@ public class AzureCredentialsManager {
   }
 
   public static AzureCredentialsManager getInstance() {
-    if (instance == null) {
-      instance = new AzureCredentialsManager();
-    }
-    return instance;
+    return ApplicationManager.getApplication().getService(AzureCredentialsManager.class);
   }
 
   public String getSecret() {

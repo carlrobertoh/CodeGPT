@@ -2,6 +2,8 @@ package ee.carlrobert.codegpt.conversations;
 
 import static java.util.stream.Collectors.toList;
 
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.components.Service;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.state.ModelSettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
@@ -13,19 +15,16 @@ import java.util.Optional;
 import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 
-public class ConversationService {
+@Service
+public final class ConversationService {
 
-  private static ConversationService instance;
   private final ConversationsState conversationState = ConversationsState.getInstance();
 
   private ConversationService() {
   }
 
   public static ConversationService getInstance() {
-    if (instance == null) {
-      instance = new ConversationService();
-    }
-    return instance;
+    return ApplicationManager.getApplication().getService(ConversationService.class);
   }
 
   public List<Conversation> getSortedConversations() {

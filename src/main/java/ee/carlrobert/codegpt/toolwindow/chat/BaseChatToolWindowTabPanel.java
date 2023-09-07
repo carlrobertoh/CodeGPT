@@ -112,7 +112,8 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     var responsePanel = new ResponsePanel()
         .withReloadAction(() -> reloadMessage(message, conversation))
         .withDeleteAction(() -> deleteMessage(message.getId(), messageWrapper, conversation))
-        .addContent(new ChatMessageResponseBody(project, true, this));
+        .addContent(new ChatMessageResponseBody(project, true, this))
+        .withModel(conversation.getClientCode(), conversation.getModel());
     messageWrapper.add(responsePanel);
     call(conversation, message, responsePanel, false);
   }

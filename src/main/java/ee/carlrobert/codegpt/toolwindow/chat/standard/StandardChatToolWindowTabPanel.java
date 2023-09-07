@@ -4,6 +4,7 @@ import static java.lang.String.format;
 
 import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.project.Project;
+import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
@@ -14,6 +15,9 @@ import ee.carlrobert.codegpt.toolwindow.chat.components.UserMessagePanel;
 import ee.carlrobert.codegpt.util.EditorUtils;
 import ee.carlrobert.codegpt.util.FileUtils;
 import ee.carlrobert.codegpt.util.OverlayUtils;
+import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionModel;
+import java.util.NoSuchElementException;
+import javax.swing.Icon;
 import javax.swing.JComponent;
 import org.jetbrains.annotations.NotNull;
 
@@ -57,12 +61,15 @@ public class StandardChatToolWindowTabPanel extends BaseChatToolWindowTabPanel {
         messageResponseBody.displaySerpResults(message.getSerpResults());
       }
 
+
+
       var messageWrapper = createNewMessageWrapper(message.getId());
       messageWrapper.add(new UserMessagePanel(project, message, false, this));
       messageWrapper.add(new ResponsePanel()
           .withReloadAction(() -> reloadMessage(message, conversation))
           .withDeleteAction(() -> deleteMessage(message.getId(), messageWrapper, conversation))
-          .addContent(messageResponseBody));
+          .addContent(messageResponseBody)
+          .withModel(conversation.getClientCode(), conversation.getModel()));
     });
     setConversation(conversation);
   }

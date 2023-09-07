@@ -1,13 +1,14 @@
 package ee.carlrobert.codegpt.credentials;
 
 import com.intellij.credentialStore.CredentialAttributes;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.components.Service;
 import org.jetbrains.annotations.Nullable;
 
-public class UserCredentialsManager {
+@Service
+public final class UserCredentialsManager {
 
   private static final CredentialAttributes accountPasswordCredentialAttributes = CredentialsUtil.createCredentialAttributes("ACCOUNT_PASSWORD");
-
-  private static UserCredentialsManager instance;
 
   private String accountPassword;
 
@@ -16,10 +17,7 @@ public class UserCredentialsManager {
   }
 
   public static UserCredentialsManager getInstance() {
-    if (instance == null) {
-      instance = new UserCredentialsManager();
-    }
-    return instance;
+    return ApplicationManager.getApplication().getService(UserCredentialsManager.class);
   }
 
   public @Nullable String getAccountPassword() {

@@ -10,6 +10,9 @@ public final class Icons {
   public static final Icon DefaultIcon = IconLoader.getIcon("/icons/codegpt.svg", Icons.class);
   public static final Icon DefaultSmallIcon = IconLoader.getIcon("/icons/codegpt-small.svg", Icons.class);
   public static final Icon SendIcon = IconLoader.getIcon("/icons/send.svg", Icons.class);
+  public static final Icon OpenAIIcon = IconLoader.getIcon("/icons/openai.svg", Icons.class);
+  public static final Icon AzureIcon = IconLoader.getIcon("/icons/azure.svg", Icons.class);
+  public static final Icon YouIcon = IconLoader.getIcon("/icons/you.svg", Icons.class);
   public static final ImageIcon DefaultImageIcon = getImageIcon("/icons/chatgpt.png");
 
   private static ImageIcon getImageIcon(String path) {
