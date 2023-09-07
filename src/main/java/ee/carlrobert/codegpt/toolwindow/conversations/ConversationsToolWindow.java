@@ -25,23 +25,30 @@ import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import org.jetbrains.annotations.NotNull;
 
-public class ConversationsToolWindow {
+public class ConversationsToolWindow extends JPanel {
 
   private final Project project;
   private final ConversationService conversationService;
-  private JPanel conversationsToolWindowContent;
-  private JScrollPane scrollPane;
-  private ScrollablePanel scrollablePanel;
+  private final ScrollablePanel scrollablePanel;
+  private final JScrollPane scrollPane;
 
   public ConversationsToolWindow(@NotNull Project project) {
     this.project = project;
     this.conversationService = ConversationService.getInstance();
+    scrollablePanel = new ScrollablePanel();
+    scrollablePanel.setLayout(new BoxLayout(scrollablePanel, BoxLayout.Y_AXIS));
+
+    scrollPane = new JBScrollPane();
+    scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+    scrollPane.setViewportView(scrollablePanel);
+    scrollPane.setBorder(null);
+    scrollPane.setViewportBorder(null);
     refresh();
   }
 
   public JPanel getContent() {
     SimpleToolWindowPanel panel = new SimpleToolWindowPanel(true);
-    panel.setContent(conversationsToolWindowContent);
+    panel.setContent(scrollPane);
 
     var actionGroup = new DefaultActionGroup("TOOLBAR_ACTION_GROUP", false);
     actionGroup.add(new MoveDownAction(this::refresh));
@@ -92,21 +99,8 @@ public class ConversationsToolWindow {
     });
 
     var currentConversation = ConversationsState.getCurrentConversation();
-    var isSelected =
-        currentConversation != null && currentConversation.getId().equals(conversation.getId());
+    var isSelected = currentConversation != null && currentConversation.getId().equals(conversation.getId());
     mainPanel.add(new ConversationPanel(conversation, isSelected));
-    mainPanel.setBackground(conversationsToolWindowContent.getBackground());
     scrollablePanel.add(mainPanel);
-  }
-
-  private void createUIComponents() {
-    scrollablePanel = new ScrollablePanel();
-    scrollablePanel.setLayout(new BoxLayout(scrollablePanel, BoxLayout.Y_AXIS));
-
-    scrollPane = new JBScrollPane();
-    scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-    scrollPane.setViewportView(scrollablePanel);
-    scrollPane.setBorder(null);
-    scrollPane.setViewportBorder(null);
   }
 }

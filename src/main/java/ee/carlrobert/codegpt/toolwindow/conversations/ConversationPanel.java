@@ -1,17 +1,18 @@
 package ee.carlrobert.codegpt.toolwindow.conversations;
 
-import static ee.carlrobert.codegpt.util.SwingUtils.justifyLeft;
+import static ee.carlrobert.codegpt.util.ThemeUtils.getPanelBackgroundColor;
 
-import com.intellij.icons.AllIcons;
 import com.intellij.ui.JBColor;
+import com.intellij.ui.components.JBLabel;
+import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.conversations.Conversation;
+import ee.carlrobert.codegpt.toolwindow.ModelIconLabel;
+import java.awt.BorderLayout;
 import java.awt.Cursor;
-import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.time.format.DateTimeFormatter;
-import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
@@ -25,35 +26,22 @@ class ConversationPanel extends JPanel {
     this.conversation = conversation;
     addStyles(isSelected);
 
-    var constraints = new GridBagConstraints();
-    constraints.insets = JBUI.insets(0, 10);
-    addChatIcon(constraints);
-    addTextPanel(constraints);
+    addTextPanel();
     setCursor(new Cursor(Cursor.HAND_CURSOR));
   }
 
   private void addStyles(boolean isSelected) {
-    setBackground(JBColor.background().darker());
-    if (isSelected) {
-      setBorder(BorderFactory.createCompoundBorder(
-          BorderFactory.createMatteBorder(4, 4, 4, 4, JBColor.green),
-          JBUI.Borders.empty(10)));
-    } else {
-      setBorder(JBUI.Borders.empty(10));
-    }
+    var borderColor = isSelected ? JBUI.CurrentTheme.ActionButton.focusedBorder() : JBColor.border();
+    setBackground(getPanelBackgroundColor());
+    setBorder(JBUI.Borders.compound(
+        JBUI.Borders.customLine(borderColor, 2, 2, 2, 2),
+        JBUI.Borders.empty(8)));
     setLayout(new GridBagLayout());
     setCursor(new Cursor(Cursor.HAND_CURSOR));
   }
 
-  private void addChatIcon(GridBagConstraints constraints) {
-    constraints.gridx = 0;
-    constraints.gridy = 0;
-    constraints.weightx = 0.0;
-    constraints.fill = GridBagConstraints.NONE;
-    add(new JLabel(AllIcons.Actions.Annotate), constraints);
-  }
-
-  private void addTextPanel(GridBagConstraints constraints) {
+  private void addTextPanel() {
+    var constraints = new GridBagConstraints();
     constraints.gridx = 1;
     constraints.weightx = 1.0;
     constraints.fill = GridBagConstraints.HORIZONTAL;
@@ -61,25 +49,24 @@ class ConversationPanel extends JPanel {
   }
 
   private JPanel createTextPanel() {
-    var title = new JLabel(getFirstPrompt());
-    title.setBorder(JBUI.Borders.emptyBottom(8));
-    title.setFont(title.getFont().deriveFont(title.getFont().getStyle() | Font.BOLD));
-
-    var textPanel = new JPanel();
-    textPanel.setBackground(getBackground());
-    textPanel.setLayout(new BoxLayout(textPanel, BoxLayout.PAGE_AXIS));
-    textPanel.add(justifyLeft(title));
+    var title = new JBLabel(getFirstPrompt())
+        .withBorder(JBUI.Borders.emptyBottom(12))
+        .withFont(JBFont.label().asBold());
 
     var bottomPanel = new JPanel();
-    bottomPanel.setBackground(getBackground());
+    bottomPanel.setBackground(getPanelBackgroundColor());
     bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.X_AXIS));
     bottomPanel.add(new JLabel(conversation.getUpdatedOn()
         .format(DateTimeFormatter.ofPattern("M/d/yyyy, h:mm:ss a"))));
     bottomPanel.add(Box.createHorizontalGlue());
     if (conversation.getModel() != null) {
-      bottomPanel.add(new JLabel(conversation.getModel()));
+      bottomPanel.add(new ModelIconLabel(conversation.getClientCode(), conversation.getModel()));
     }
-    textPanel.add(bottomPanel);
+
+    var textPanel = new JPanel(new BorderLayout());
+    textPanel.setBackground(getPanelBackgroundColor());
+    textPanel.add(title, BorderLayout.NORTH);
+    textPanel.add(bottomPanel, BorderLayout.SOUTH);
     return textPanel;
   }
 

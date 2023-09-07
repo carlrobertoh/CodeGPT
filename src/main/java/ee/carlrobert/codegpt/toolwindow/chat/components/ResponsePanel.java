@@ -11,10 +11,9 @@ import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.toolwindow.IconActionButton;
-import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionModel;
+import ee.carlrobert.codegpt.toolwindow.ModelIconLabel;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-import java.util.NoSuchElementException;
 import javax.swing.Box;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -53,24 +52,8 @@ public class ResponsePanel extends JPanel {
   }
 
   public ResponsePanel withModel(String clientCode, String modelCode) {
-    if ("YouCode".equals(modelCode)) {
-      footer.addContent(new JBLabel(Icons.YouIcon));
-      return this;
-    }
-
-    var icon = "chat.completion".equals(clientCode) ? Icons.OpenAIIcon : Icons.AzureIcon;
-    var modelLabel = new JBLabel(formatModelName(modelCode), icon, SwingConstants.LEADING)
-        .withFont(JBFont.small().asBold());
-    footer.addContent(modelLabel);
+    footer.addContent(new ModelIconLabel(clientCode, modelCode));
     return this;
-  }
-
-  private String formatModelName(String modelCode) {
-    try {
-      return OpenAIChatCompletionModel.findByCode(modelCode).getDescription();
-    } catch (NoSuchElementException e) {
-      return modelCode;
-    }
   }
 
   public ResponsePanel addContent(JComponent content) {

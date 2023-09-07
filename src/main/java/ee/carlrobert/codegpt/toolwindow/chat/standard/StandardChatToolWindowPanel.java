@@ -23,7 +23,6 @@ public class StandardChatToolWindowPanel extends SimpleToolWindowPanel {
     initialize(project, parentDisposable);
   }
 
-
   private void initialize(Project project, Disposable parentDisposable) {
     var tabPanel = new StandardChatToolWindowTabPanel(project);
     var conversation = ConversationsState.getCurrentConversation();
