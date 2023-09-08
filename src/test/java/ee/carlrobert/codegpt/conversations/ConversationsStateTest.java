@@ -5,11 +5,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.state.ModelSettingsState;
+import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionModel;
 
 public class ConversationsStateTest extends BasePlatformTestCase {
 
   public void testStartNewDefaultConversation() {
+    var settings = SettingsState.getInstance();
+    settings.setUseOpenAIService(true);
+    settings.setUseAzureService(false);
+    settings.setUseYouService(false);
     ModelSettingsState.getInstance().setChatCompletionModel(OpenAIChatCompletionModel.GPT_3_5.getCode());
 
     var conversation = ConversationService.getInstance().startConversation();

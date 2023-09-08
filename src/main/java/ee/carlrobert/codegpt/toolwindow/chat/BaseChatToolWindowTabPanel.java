@@ -18,7 +18,9 @@ import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
+import ee.carlrobert.codegpt.settings.state.ModelSettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
+import ee.carlrobert.codegpt.toolwindow.ModelIconLabel;
 import ee.carlrobert.codegpt.toolwindow.chat.components.ChatMessageResponseBody;
 import ee.carlrobert.codegpt.toolwindow.chat.components.ResponsePanel;
 import ee.carlrobert.codegpt.toolwindow.chat.components.UserMessagePanel;
@@ -298,8 +300,23 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
         JBUI.Borders.empty(8)));
     chatTextAreaWrapper.setBackground(getPanelBackgroundColor());
     chatTextAreaWrapper.add(userPromptTextArea, BorderLayout.SOUTH);
+    chatTextAreaWrapper.add(new ModelIconLabel(getClientCode(), ModelSettingsState.getInstance().getChatCompletionModel()), BorderLayout.LINE_END);
     rootPanel.add(chatTextAreaWrapper, gbc);
     userPromptTextArea.requestFocusInWindow();
     userPromptTextArea.requestFocus();
+  }
+
+  private String getClientCode() {
+    var settings = SettingsState.getInstance();
+    if (settings.isUseOpenAIService()) {
+      return "chat.completion";
+    }
+    if (settings.isUseAzureService()) {
+      return "azure.chat.completion";
+    }
+    if (settings.isUseYouService()) {
+      return "you.chat.completion";
+    }
+    return "custom.chat.completion";
   }
 }

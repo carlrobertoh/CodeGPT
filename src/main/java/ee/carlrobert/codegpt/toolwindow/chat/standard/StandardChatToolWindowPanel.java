@@ -24,18 +24,12 @@ public class StandardChatToolWindowPanel extends SimpleToolWindowPanel {
   }
 
   private void initialize(Project project, Disposable parentDisposable) {
-    var tabPanel = new StandardChatToolWindowTabPanel(project);
     var conversation = ConversationsState.getCurrentConversation();
-    if (conversation == null) {
-      tabPanel.displayLandingView();
-    } else {
-      tabPanel.displayConversation(conversation);
-    }
-
+    var tabPanel = new StandardChatToolWindowTabPanel(project, conversation);
     var tabbedPane = createTabbedPane(tabPanel, parentDisposable);
-
     var toolbarComponent = createActionToolbar(project, tabbedPane).getComponent();
     toolbarComponent.setLayout(new FlowLayout());
+
     setToolbar(toolbarComponent);
     setContent(tabbedPane);
 
@@ -45,9 +39,7 @@ public class StandardChatToolWindowPanel extends SimpleToolWindowPanel {
   private ActionToolbar createActionToolbar(Project project, StandardChatToolWindowTabbedPane tabbedPane) {
     var actionGroup = new DefaultCompactActionGroup("TOOLBAR_ACTION_GROUP", false);
     actionGroup.add(new CreateNewConversationAction(() -> {
-      var panel = new StandardChatToolWindowTabPanel(project);
-      panel.displayLandingView();
-      tabbedPane.addNewTab(panel);
+      tabbedPane.addNewTab(new StandardChatToolWindowTabPanel(project));
       repaint();
       revalidate();
     }));

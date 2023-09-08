@@ -7,8 +7,10 @@ import com.intellij.openapi.util.Disposer;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBTabbedPane;
 import com.intellij.util.ui.JBUI;
+import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.settings.state.ModelSettingsState;
+import ee.carlrobert.codegpt.settings.state.SettingsState;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -36,7 +38,6 @@ public class StandardChatToolWindowTabbedPane extends JBTabbedPane {
     this.parentDisposable = parentDisposable;
     setTabComponentInsets(null);
     setComponentPopupMenu(new TabPopupMenu());
-
     addChangeListener(e -> refreshTabState());
   }
 
@@ -104,7 +105,7 @@ public class StandardChatToolWindowTabbedPane extends JBTabbedPane {
       var conversation = toolWindowPanel.getConversation();
       if (conversation != null) {
         ConversationsState.getInstance().setCurrentConversation(conversation);
-        ModelSettingsState.getInstance().sync(conversation);
+        SettingsState.getInstance().sync(conversation);
       }
     }
   }

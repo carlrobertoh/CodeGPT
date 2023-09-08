@@ -43,7 +43,7 @@ public final class ConversationService {
     if (SettingsState.getInstance().isUseYouService()) {
       conversation.setModel("YouCode");
     } else {
-      conversation.setModel(ModelSettingsState.getInstance().getCompletionModel());
+      conversation.setModel(ModelSettingsState.getInstance().getChatCompletionModel());
     }
     conversation.setCreatedOn(LocalDateTime.now());
     conversation.setUpdatedOn(LocalDateTime.now());

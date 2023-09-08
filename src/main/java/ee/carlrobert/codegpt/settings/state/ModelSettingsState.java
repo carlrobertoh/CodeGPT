@@ -5,7 +5,6 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
-import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionModel;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,21 +25,6 @@ public class ModelSettingsState implements PersistentStateComponent<ModelSetting
   @Override
   public void loadState(@NotNull ModelSettingsState state) {
     XmlSerializerUtil.copyBean(state, this);
-  }
-
-  public void sync(Conversation conversation) {
-    var settings = SettingsState.getInstance();
-    var clientCode = conversation.getClientCode();
-
-    settings.setUseOpenAIService("chat.completion".equals(clientCode));
-    settings.setUseAzureService("azure.chat.completion".equals(clientCode));
-    settings.setUseYouService("you.chat.completion".equals(clientCode));
-
-    chatCompletionModel = conversation.getModel();
-  }
-
-  public String getCompletionModel() {
-    return chatCompletionModel;
   }
 
   public String getChatCompletionModel() {

@@ -5,6 +5,7 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
+import ee.carlrobert.codegpt.conversations.Conversation;
 import org.jetbrains.annotations.NotNull;
 
 @State(name = "CodeGPT_GeneralSettings_210", storages = @Storage("CodeGPT_GeneralSettings_210.xml"))
@@ -33,6 +34,15 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
   @Override
   public void loadState(@NotNull SettingsState state) {
     XmlSerializerUtil.copyBean(state, this);
+  }
+
+  public void sync(Conversation conversation) {
+    var clientCode = conversation.getClientCode();
+    setUseOpenAIService("chat.completion".equals(clientCode));
+    setUseAzureService("azure.chat.completion".equals(clientCode));
+    setUseYouService("you.chat.completion".equals(clientCode));
+
+    ModelSettingsState.getInstance().setChatCompletionModel(conversation.getModel());
   }
 
   public String getEmail() {

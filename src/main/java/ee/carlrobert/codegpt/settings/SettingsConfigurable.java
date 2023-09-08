@@ -45,12 +45,12 @@ public class SettingsConfigurable implements Configurable, Disposable {
     var settings = SettingsState.getInstance();
     var openAISettings = OpenAISettingsState.getInstance();
     var azureSettings = AzureSettingsState.getInstance();
-    var modelSettings = ModelSettingsState.getInstance();
 
     var serviceSelectionForm = settingsComponent.getServiceSelectionForm();
     return !settingsComponent.getDisplayName().equals(settings.getDisplayName()) ||
-
         isServiceChanged(serviceSelectionForm, settings) ||
+
+        isModelChanged(ModelSettingsState.getInstance()) ||
 
         !serviceSelectionForm.getOpenAIApiKey().equals(OpenAICredentialsManager.getInstance().getApiKey()) ||
         !serviceSelectionForm.getOpenAIOrganization().equals(openAISettings.getOrganization()) ||
@@ -58,6 +58,7 @@ public class SettingsConfigurable implements Configurable, Disposable {
 
         serviceSelectionForm.isAzureActiveDirectoryAuthenticationSelected() != azureSettings.isUseAzureActiveDirectoryAuthentication() ||
         serviceSelectionForm.isAzureApiKeyAuthenticationSelected() != azureSettings.isUseAzureApiKeyAuthentication() ||
+
         !serviceSelectionForm.getAzureActiveDirectoryToken().equals(AzureCredentialsManager.getInstance().getAzureActiveDirectoryToken()) ||
         !serviceSelectionForm.getAzureOpenAIApiKey().equals(AzureCredentialsManager.getInstance().getAzureOpenAIApiKey()) ||
         !serviceSelectionForm.getAzureResourceName().equals(azureSettings.getResourceName()) ||
@@ -65,9 +66,7 @@ public class SettingsConfigurable implements Configurable, Disposable {
         !serviceSelectionForm.getAzureApiVersion().equals(azureSettings.getApiVersion()) ||
         !serviceSelectionForm.getAzureBaseHost().equals(azureSettings.getBaseHost()) ||
 
-        serviceSelectionForm.isDisplayWebSearchResults() != settings.isDisplayWebSearchResults() ||
-
-        isModelChanged(modelSettings);
+        serviceSelectionForm.isDisplayWebSearchResults() != settings.isDisplayWebSearchResults();
   }
 
   @Override
@@ -77,11 +76,6 @@ public class SettingsConfigurable implements Configurable, Disposable {
     var openAISettings = OpenAISettingsState.getInstance();
     var azureSettings = AzureSettingsState.getInstance();
     var modelSettings = ModelSettingsState.getInstance();
-
-    if (isModelChanged(modelSettings) || isServiceChanged(serviceSelectionForm, settings)) {
-      resetActiveTab();
-    }
-
     var selectedCompletionModel = serviceSelectionForm.getSelectedCompletionModel();
 
     OpenAICredentialsManager.getInstance().setApiKey(serviceSelectionForm.getOpenAIApiKey());
@@ -107,6 +101,10 @@ public class SettingsConfigurable implements Configurable, Disposable {
     azureSettings.setBaseHost(serviceSelectionForm.getAzureBaseHost());
 
     modelSettings.setChatCompletionModel(selectedCompletionModel.getCode());
+
+    if (isModelChanged(modelSettings) || isServiceChanged(serviceSelectionForm, settings)) {
+      resetActiveTab();
+    }
   }
 
   @Override
@@ -170,6 +168,6 @@ public class SettingsConfigurable implements Configurable, Disposable {
       throw new RuntimeException("Could not find current project.");
     }
 
-    StandardChatToolWindowContentManager.getInstance(project).resetTabbedPane();
+    StandardChatToolWindowContentManager.getInstance(project).resetActiveTab();
   }
 }

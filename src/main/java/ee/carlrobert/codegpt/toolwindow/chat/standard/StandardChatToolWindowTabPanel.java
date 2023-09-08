@@ -4,7 +4,6 @@ import static java.lang.String.format;
 
 import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.project.Project;
-import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
@@ -15,16 +14,23 @@ import ee.carlrobert.codegpt.toolwindow.chat.components.UserMessagePanel;
 import ee.carlrobert.codegpt.util.EditorUtils;
 import ee.carlrobert.codegpt.util.FileUtils;
 import ee.carlrobert.codegpt.util.OverlayUtils;
-import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionModel;
-import java.util.NoSuchElementException;
-import javax.swing.Icon;
 import javax.swing.JComponent;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class StandardChatToolWindowTabPanel extends BaseChatToolWindowTabPanel {
 
   public StandardChatToolWindowTabPanel(@NotNull Project project) {
+    this(project, null);
+  }
+
+  public StandardChatToolWindowTabPanel(@NotNull Project project, @Nullable Conversation conversation) {
     super(project, false);
+    if (conversation == null) {
+      displayLandingView();
+    } else {
+      displayConversation(conversation);
+    }
   }
 
   @Override
@@ -57,8 +63,10 @@ public class StandardChatToolWindowTabPanel extends BaseChatToolWindowTabPanel {
     clearWindow();
     conversation.getMessages().forEach(message -> {
       var messageResponseBody = new ChatMessageResponseBody(project, this).withResponse(message.getResponse());
-      if (SettingsState.getInstance().isDisplayWebSearchResults() && message.getSerpResults() != null && !message.getSerpResults().isEmpty()) {
-        messageResponseBody.displaySerpResults(message.getSerpResults());
+
+      var serpResults = message.getSerpResults();
+      if (SettingsState.getInstance().isDisplayWebSearchResults() && serpResults != null && !serpResults.isEmpty()) {
+        messageResponseBody.displaySerpResults(serpResults);
       }
 
       var messageWrapper = createNewMessageWrapper(message.getId());
