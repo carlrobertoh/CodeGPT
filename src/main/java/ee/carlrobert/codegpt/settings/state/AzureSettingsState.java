@@ -7,7 +7,7 @@ import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import org.jetbrains.annotations.NotNull;
 
-@State(name = "CodeGPT_AzureSettings", storages = @Storage("CodeGPT_AzureSettings.xml"))
+@State(name = "CodeGPT_AzureSettings_210", storages = @Storage("CodeGPT_AzureSettings_210.xml"))
 public class AzureSettingsState implements PersistentStateComponent<AzureSettingsState> {
 
   private String resourceName = "";

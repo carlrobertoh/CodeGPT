@@ -9,7 +9,7 @@ import java.net.Proxy;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-@State(name = "CodeGPT_AdvancedSettings", storages = @Storage("CodeGPT_AdvancedSettings.xml"))
+@State(name = "CodeGPT_AdvancedSettings_210", storages = @Storage("CodeGPT_AdvancedSettings_210.xml"))
 public class AdvancedSettingsState implements PersistentStateComponent<AdvancedSettingsState> {
 
   private String proxyHost = "";

@@ -7,7 +7,7 @@ import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import org.jetbrains.annotations.NotNull;
 
-@State(name = "CodeGPT_OpenAISettings", storages = @Storage("CodeGPT_OpenAISettings.xml"))
+@State(name = "CodeGPT_OpenAISettings_210", storages = @Storage("CodeGPT_OpenAISettings_210.xml"))
 public class OpenAISettingsState implements PersistentStateComponent<OpenAISettingsState> {
 
   private String organization = "";

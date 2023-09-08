@@ -9,7 +9,7 @@ import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionModel;
 import org.jetbrains.annotations.NotNull;
 
-@State(name = "CodeGPT_ModelSettings", storages = @Storage("CodeGPT_ModelSettings.xml"))
+@State(name = "CodeGPT_ModelSettings_210", storages = @Storage("CodeGPT_ModelSettings_210.xml"))
 public class ModelSettingsState implements PersistentStateComponent<ModelSettingsState> {
 
   private String chatCompletionModel = OpenAIChatCompletionModel.GPT_3_5.getCode();

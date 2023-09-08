@@ -13,10 +13,7 @@ import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-@State(
-    name = "ee.carlrobert.codegpt.state.conversations.ConversationsState",
-    storages = @Storage("ChatGPTConversations_170.xml")
-)
+@State(name = "CodeGPT_Conversations_210", storages = @Storage("CodeGPT_Conversations_210.xml"))
 public class ConversationsState implements PersistentStateComponent<ConversationsState> {
 
   @OptionTag(converter = ConversationsConverter.class)

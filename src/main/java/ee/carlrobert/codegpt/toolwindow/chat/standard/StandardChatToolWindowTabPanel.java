@@ -61,8 +61,6 @@ public class StandardChatToolWindowTabPanel extends BaseChatToolWindowTabPanel {
         messageResponseBody.displaySerpResults(message.getSerpResults());
       }
 
-
-
       var messageWrapper = createNewMessageWrapper(message.getId());
       messageWrapper.add(new UserMessagePanel(project, message, false, this));
       messageWrapper.add(new ResponsePanel()

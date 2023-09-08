@@ -7,7 +7,7 @@ import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import org.jetbrains.annotations.NotNull;
 
-@State(name = "CodeGPT_GeneralSettings", storages = @Storage("CodeGPT_GeneralSettings.xml"))
+@State(name = "CodeGPT_GeneralSettings_210", storages = @Storage("CodeGPT_GeneralSettings_210.xml"))
 public class SettingsState implements PersistentStateComponent<SettingsState> {
 
   private String email = "";
