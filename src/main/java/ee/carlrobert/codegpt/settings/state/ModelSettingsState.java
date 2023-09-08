@@ -29,10 +29,14 @@ public class ModelSettingsState implements PersistentStateComponent<ModelSetting
   }
 
   public void sync(Conversation conversation) {
-    var isChatCompletion = "chat.completion".equals(conversation.getClientCode());
-    if (isChatCompletion) {
-      chatCompletionModel = conversation.getModel();
-    }
+    var settings = SettingsState.getInstance();
+    var clientCode = conversation.getClientCode();
+
+    settings.setUseOpenAIService("chat.completion".equals(clientCode));
+    settings.setUseAzureService("azure.chat.completion".equals(clientCode));
+    settings.setUseYouService("you.chat.completion".equals(clientCode));
+
+    chatCompletionModel = conversation.getModel();
   }
 
   public String getCompletionModel() {

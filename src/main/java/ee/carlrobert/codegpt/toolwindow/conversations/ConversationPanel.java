@@ -31,11 +31,11 @@ class ConversationPanel extends JPanel {
   }
 
   private void addStyles(boolean isSelected) {
-    var borderColor = isSelected ? JBUI.CurrentTheme.ActionButton.focusedBorder() : JBColor.border();
+    var border = isSelected ?
+        JBUI.Borders.customLine(JBUI.CurrentTheme.ActionButton.focusedBorder(), 2, 2, 2, 2) :
+        JBUI.Borders.customLine(JBColor.border(), 1, 1, 1, 1);
     setBackground(getPanelBackgroundColor());
-    setBorder(JBUI.Borders.compound(
-        JBUI.Borders.customLine(borderColor, 2, 2, 2, 2),
-        JBUI.Borders.empty(8)));
+    setBorder(JBUI.Borders.compound(border, JBUI.Borders.empty(8)));
     setLayout(new GridBagLayout());
     setCursor(new Cursor(Cursor.HAND_CURSOR));
   }

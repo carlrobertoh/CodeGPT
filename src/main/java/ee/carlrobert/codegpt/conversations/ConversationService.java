@@ -110,9 +110,19 @@ public final class ConversationService {
     conversationState.setCurrentConversation(conversation);
   }
 
+  private String getClientCode() {
+    var settings = SettingsState.getInstance();
+    if (settings.isUseOpenAIService()) {
+      return "chat.completion";
+    }
+    if (settings.isUseAzureService()) {
+      return "azure.chat.completion";
+    }
+    return "you.chat.completion";
+  }
+
   public Conversation startConversation() {
-    var currentClientCode = "chat.completion";
-    var conversation = createConversation(currentClientCode);
+    var conversation = createConversation(getClientCode());
     conversationState.setCurrentConversation(conversation);
     addConversation(conversation);
     return conversation;

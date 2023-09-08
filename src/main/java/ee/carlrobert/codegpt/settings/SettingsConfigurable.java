@@ -3,7 +3,6 @@ package ee.carlrobert.codegpt.settings;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.options.Configurable;
 import ee.carlrobert.codegpt.CodeGPTBundle;
-import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
@@ -12,7 +11,6 @@ import ee.carlrobert.codegpt.settings.state.ModelSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
-import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowTabPanel;
 import ee.carlrobert.codegpt.util.ApplicationUtils;
 import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionModel;
 import javax.swing.JComponent;
@@ -50,12 +48,9 @@ public class SettingsConfigurable implements Configurable, Disposable {
     var modelSettings = ModelSettingsState.getInstance();
 
     var serviceSelectionForm = settingsComponent.getServiceSelectionForm();
-    return !settingsComponent.getEmail().equals(settings.getEmail()) ||
-        !settingsComponent.getDisplayName().equals(settings.getDisplayName()) ||
+    return !settingsComponent.getDisplayName().equals(settings.getDisplayName()) ||
 
-        serviceSelectionForm.isOpenAIServiceSelected() != settings.isUseOpenAIService() ||
-        serviceSelectionForm.isAzureServiceSelected() != settings.isUseAzureService() ||
-        serviceSelectionForm.isCustomServiceSelected() != settings.isUseYouService() ||
+        isServiceChanged(serviceSelectionForm, settings) ||
 
         !serviceSelectionForm.getOpenAIApiKey().equals(OpenAICredentialsManager.getInstance().getApiKey()) ||
         !serviceSelectionForm.getOpenAIOrganization().equals(openAISettings.getOrganization()) ||
@@ -83,21 +78,8 @@ public class SettingsConfigurable implements Configurable, Disposable {
     var azureSettings = AzureSettingsState.getInstance();
     var modelSettings = ModelSettingsState.getInstance();
 
-    if (isModelChanged(modelSettings)) {
-      ConversationsState.getInstance().setCurrentConversation(null);
-      var project = ApplicationUtils.findCurrentProject();
-      if (project == null) {
-        throw new RuntimeException("Could not find current project.");
-      }
-
-      StandardChatToolWindowContentManager.getInstance(project)
-          .tryFindChatTabbedPane()
-          .ifPresent(tabbedPane -> {
-            tabbedPane.clearAll();
-            var tabPanel = new StandardChatToolWindowTabPanel(project);
-            tabPanel.displayLandingView();
-            tabbedPane.addNewTab(tabPanel);
-          });
+    if (isModelChanged(modelSettings) || isServiceChanged(serviceSelectionForm, settings)) {
+      resetActiveTab();
     }
 
     var selectedCompletionModel = serviceSelectionForm.getSelectedCompletionModel();
@@ -106,7 +88,6 @@ public class SettingsConfigurable implements Configurable, Disposable {
     AzureCredentialsManager.getInstance().setApiKey(serviceSelectionForm.getAzureOpenAIApiKey());
     AzureCredentialsManager.getInstance().setAzureActiveDirectoryToken(serviceSelectionForm.getAzureActiveDirectoryToken());
 
-    settings.setEmail(settingsComponent.getEmail());
     settings.setDisplayName(settingsComponent.getDisplayName());
 
     settings.setUseOpenAIService(serviceSelectionForm.isOpenAIServiceSelected());
@@ -168,11 +149,27 @@ public class SettingsConfigurable implements Configurable, Disposable {
     settingsComponent = null;
   }
 
+  @Override
+  public void dispose() {
+  }
+
   private boolean isModelChanged(ModelSettingsState settings) {
     return !settingsComponent.getServiceSelectionForm().getSelectedCompletionModel().getCode().equals(settings.getChatCompletionModel());
   }
 
-  @Override
-  public void dispose() {
+  private boolean isServiceChanged(ServiceSelectionForm serviceSelectionForm, SettingsState settings) {
+    return serviceSelectionForm.isOpenAIServiceSelected() != settings.isUseOpenAIService() ||
+        serviceSelectionForm.isAzureServiceSelected() != settings.isUseAzureService() ||
+        serviceSelectionForm.isCustomServiceSelected() != settings.isUseYouService();
+  }
+
+  private void resetActiveTab() {
+    ConversationsState.getInstance().setCurrentConversation(null);
+    var project = ApplicationUtils.findCurrentProject();
+    if (project == null) {
+      throw new RuntimeException("Could not find current project.");
+    }
+
+    StandardChatToolWindowContentManager.getInstance(project).resetTabbedPane();
   }
 }

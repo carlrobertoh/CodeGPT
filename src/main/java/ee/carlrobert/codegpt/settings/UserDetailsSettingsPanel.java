@@ -202,9 +202,9 @@ public class UserDetailsSettingsPanel extends JPanel {
       SwingUtilities.invokeLater(() -> {
         var email = emailField.getText();
         var password = passwordField.getPassword();
+        SettingsState.getInstance().setEmail(email);
+        UserCredentialsManager.getInstance().setAccountPassword(new String(password));
         refreshView(createUserInformationPanel(authenticationResponse.getData().getUser()));
-        emailField.setText(email);
-        passwordField.setText(new String(password));
       });
     }
 

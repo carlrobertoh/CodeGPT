@@ -5,6 +5,7 @@ import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
+import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
@@ -18,6 +19,9 @@ import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.settings.state.ModelSettingsState;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowTabPanel;
+import java.awt.BorderLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -82,25 +86,31 @@ public class ConversationsToolWindow extends JPanel {
   }
 
   private void addContent(Conversation conversation) {
-    var mainPanel = new RootConversationPanel(() -> {
-      ModelSettingsState.getInstance().sync(conversation);
+    var rootPanel = new JPanel(new BorderLayout());
+    rootPanel.setBorder(JBUI.Borders.empty(10, 20));
+    rootPanel.setBackground(JBColor.background());
+    rootPanel.addMouseListener(new MouseAdapter() {
+      @Override
+      public void mouseClicked(MouseEvent e) {
+        ModelSettingsState.getInstance().sync(conversation);
 
-      var toolWindowContentManager = StandardChatToolWindowContentManager.getInstance(project);
-      toolWindowContentManager.displayChatTab();
-      toolWindowContentManager.tryFindChatTabbedPane()
-          .ifPresent(tabbedPane -> tabbedPane.tryFindActiveConversationTitle(conversation.getId())
-              .ifPresentOrElse(
-                  title -> tabbedPane.setSelectedIndex(tabbedPane.indexOfTab(title)),
-                  () -> {
-                    var panel = new StandardChatToolWindowTabPanel(project);
-                    panel.displayConversation(conversation);
-                    tabbedPane.addNewTab(panel);
-                  }));
+        var toolWindowContentManager = StandardChatToolWindowContentManager.getInstance(project);
+        toolWindowContentManager.displayChatTab();
+        toolWindowContentManager.tryFindChatTabbedPane()
+            .ifPresent(tabbedPane -> tabbedPane.tryFindActiveConversationTitle(conversation.getId())
+                .ifPresentOrElse(
+                    title -> tabbedPane.setSelectedIndex(tabbedPane.indexOfTab(title)),
+                    () -> {
+                      var panel = new StandardChatToolWindowTabPanel(project);
+                      panel.displayConversation(conversation);
+                      tabbedPane.addNewTab(panel);
+                    }));
+      }
     });
 
     var currentConversation = ConversationsState.getCurrentConversation();
     var isSelected = currentConversation != null && currentConversation.getId().equals(conversation.getId());
-    mainPanel.add(new ConversationPanel(conversation, isSelected));
-    scrollablePanel.add(mainPanel);
+    rootPanel.add(new ConversationPanel(conversation, isSelected));
+    scrollablePanel.add(rootPanel);
   }
 }

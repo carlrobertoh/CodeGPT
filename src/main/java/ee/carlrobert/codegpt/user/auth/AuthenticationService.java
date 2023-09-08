@@ -5,8 +5,6 @@ import com.intellij.notification.NotificationType;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.diagnostic.Logger;
-import ee.carlrobert.codegpt.credentials.UserCredentialsManager;
-import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.user.ApiClient;
 import ee.carlrobert.codegpt.user.UserManager;
 import ee.carlrobert.codegpt.user.auth.response.AuthenticationResponse;
@@ -62,9 +60,6 @@ public final class AuthenticationService {
 
       if (response.code() == 200) {
         try {
-          SettingsState.getInstance().setEmail(email);
-          UserCredentialsManager.getInstance().setAccountPassword(password);
-
           var authenticationResponse = new ObjectMapper().readValue(body.string(), AuthenticationResponse.class);
           UserManager.getInstance().setAuthenticationResponse(authenticationResponse);
           authenticationHandler.handleAuthenticated(authenticationResponse);

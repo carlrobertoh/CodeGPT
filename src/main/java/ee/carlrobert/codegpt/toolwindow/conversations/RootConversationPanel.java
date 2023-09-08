@@ -2,8 +2,8 @@ package ee.carlrobert.codegpt.toolwindow.conversations;
 
 import com.intellij.ui.JBColor;
 import com.intellij.util.ui.JBUI;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 
@@ -13,31 +13,11 @@ class RootConversationPanel extends JPanel {
     setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
     setBorder(JBUI.Borders.empty(10, 20));
     setBackground(JBColor.background());
-    addMouseListener(getMouseListener(onClick));
-  }
-
-  private MouseListener getMouseListener(Runnable onClick) {
-    return new MouseListener() {
+    addMouseListener(new MouseAdapter() {
       @Override
-      public void mouseClicked(MouseEvent mouseEvent) {
+      public void mouseClicked(MouseEvent e) {
         onClick.run();
       }
-
-      @Override
-      public void mousePressed(MouseEvent mouseEvent) {
-      }
-
-      @Override
-      public void mouseReleased(MouseEvent mouseEvent) {
-      }
-
-      @Override
-      public void mouseEntered(MouseEvent mouseEvent) {
-      }
-
-      @Override
-      public void mouseExited(MouseEvent mouseEvent) {
-      }
-    };
+    });
   }
 }
