@@ -11,7 +11,6 @@ import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.toolwindow.IconActionButton;
-import ee.carlrobert.codegpt.toolwindow.ModelIconLabel;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import javax.swing.Box;
@@ -25,16 +24,13 @@ public class ResponsePanel extends JPanel {
 
   private final Header header;
   private final Body body;
-  private final Footer footer;
 
   public ResponsePanel() {
     super(new BorderLayout());
     header = new Header();
     body = new Body();
-    footer = new Footer();
     add(header, BorderLayout.NORTH);
     add(body, BorderLayout.CENTER);
-    add(footer, BorderLayout.SOUTH);
   }
 
   public void enableActions() {
@@ -48,11 +44,6 @@ public class ResponsePanel extends JPanel {
 
   public ResponsePanel withDeleteAction(Runnable onDelete) {
     header.addDeleteAction(onDelete);
-    return this;
-  }
-
-  public ResponsePanel withModel(String clientCode, String modelCode) {
-    footer.addContent(new ModelIconLabel(clientCode, modelCode));
     return this;
   }
 
@@ -130,7 +121,9 @@ public class ResponsePanel extends JPanel {
     Body() {
       super(new BorderLayout());
       setBackground(getPanelBackgroundColor());
-      setBorder(JBUI.Borders.empty(4, 8, 0, 8));
+      setBorder(JBUI.Borders.compound(
+          JBUI.Borders.customLine(JBColor.border(), 0, 0, 1, 0),
+          JBUI.Borders.empty(4, 8, 8, 8)));
     }
 
     public void addContent(JComponent content) {
@@ -147,28 +140,6 @@ public class ResponsePanel extends JPanel {
 
     public @Nullable JComponent getContent() {
       return content;
-    }
-  }
-
-  static class Footer extends JPanel {
-
-    Footer() {
-      super(new BorderLayout());
-      setBackground(getPanelBackgroundColor());
-      setBorder(JBUI.Borders.compound(
-          JBUI.Borders.customLine(JBColor.border(), 0, 0, 1, 0),
-          JBUI.Borders.empty(4, 8, 8, 10)));
-    }
-
-    public void addContent(JComponent content) {
-      add(content, BorderLayout.EAST);
-    }
-
-    public void updateContent(JComponent content) {
-      removeAll();
-      addContent(content);
-      revalidate();
-      repaint();
     }
   }
 }

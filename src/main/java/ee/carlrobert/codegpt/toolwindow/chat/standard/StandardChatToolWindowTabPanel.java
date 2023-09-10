@@ -62,7 +62,8 @@ public class StandardChatToolWindowTabPanel extends BaseChatToolWindowTabPanel {
   public void displayConversation(@NotNull Conversation conversation) {
     clearWindow();
     conversation.getMessages().forEach(message -> {
-      var messageResponseBody = new ChatMessageResponseBody(project, this).withResponse(message.getResponse());
+      var messageResponseBody = new ChatMessageResponseBody(project, this)
+          .withResponse(message.getResponse());
 
       var serpResults = message.getSerpResults();
       if (SettingsState.getInstance().isDisplayWebSearchResults() && serpResults != null && !serpResults.isEmpty()) {
@@ -74,8 +75,7 @@ public class StandardChatToolWindowTabPanel extends BaseChatToolWindowTabPanel {
       messageWrapper.add(new ResponsePanel()
           .withReloadAction(() -> reloadMessage(message, conversation))
           .withDeleteAction(() -> deleteMessage(message.getId(), messageWrapper, conversation))
-          .addContent(messageResponseBody)
-          .withModel(conversation.getClientCode(), conversation.getModel()));
+          .addContent(messageResponseBody));
     });
     setConversation(conversation);
   }

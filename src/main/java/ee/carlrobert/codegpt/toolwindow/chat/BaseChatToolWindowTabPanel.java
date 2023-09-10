@@ -114,8 +114,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     var responsePanel = new ResponsePanel()
         .withReloadAction(() -> reloadMessage(message, conversation))
         .withDeleteAction(() -> deleteMessage(message.getId(), messageWrapper, conversation))
-        .addContent(new ChatMessageResponseBody(project, true, this))
-        .withModel(conversation.getClientCode(), conversation.getModel());
+        .addContent(new ChatMessageResponseBody(project, true, this));
     messageWrapper.add(responsePanel);
     call(conversation, message, responsePanel, false);
   }
@@ -293,15 +292,18 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.gridy = 1;
 
-    // JBUI.Panels.simplePanel(8, 0).add();
-    JPanel chatTextAreaWrapper = new JPanel(new BorderLayout());
-    chatTextAreaWrapper.setBorder(JBUI.Borders.compound(
+    var modelIconWrapper = JBUI.Panels.simplePanel(new ModelIconLabel(getClientCode(), ModelSettingsState.getInstance().getChatCompletionModel()))
+        .withBorder(JBUI.Borders.empty(0, 0, 8, 4));
+    modelIconWrapper.setBackground(getPanelBackgroundColor());
+
+    var wrapper = new JPanel(new BorderLayout());
+    wrapper.setBorder(JBUI.Borders.compound(
         JBUI.Borders.customLine(JBColor.border(), 1, 0, 0, 0),
         JBUI.Borders.empty(8)));
-    chatTextAreaWrapper.setBackground(getPanelBackgroundColor());
-    chatTextAreaWrapper.add(userPromptTextArea, BorderLayout.SOUTH);
-    chatTextAreaWrapper.add(new ModelIconLabel(getClientCode(), ModelSettingsState.getInstance().getChatCompletionModel()), BorderLayout.LINE_END);
-    rootPanel.add(chatTextAreaWrapper, gbc);
+    wrapper.setBackground(getPanelBackgroundColor());
+    wrapper.add(userPromptTextArea, BorderLayout.SOUTH);
+    wrapper.add(modelIconWrapper, BorderLayout.LINE_END);
+    rootPanel.add(wrapper, gbc);
     userPromptTextArea.requestFocusInWindow();
     userPromptTextArea.requestFocus();
   }

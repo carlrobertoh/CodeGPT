@@ -10,7 +10,7 @@ import javax.swing.SwingConstants;
 public class ModelIconLabel extends JBLabel {
 
   public ModelIconLabel(String clientCode, String modelCode) {
-    if ("YouCode".equals(modelCode)) {
+    if ("you.chat.completion".equals(clientCode)) {
       setIcon(Icons.YouIcon);
       return;
     }

@@ -9,10 +9,10 @@ import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.actions.toolwindow.DeleteAllConversationsAction;
-import ee.carlrobert.codegpt.actions.toolwindow.DeleteConversationAction;
 import ee.carlrobert.codegpt.actions.toolwindow.MoveDownAction;
 import ee.carlrobert.codegpt.actions.toolwindow.MoveUpAction;
 import ee.carlrobert.codegpt.conversations.ConversationService;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -49,7 +49,6 @@ public class ConversationsToolWindow extends JPanel {
     actionGroup.add(new MoveDownAction(this::refresh));
     actionGroup.add(new MoveUpAction(this::refresh));
     actionGroup.addSeparator();
-    actionGroup.add(new DeleteConversationAction(this::refresh));
     actionGroup.add(new DeleteAllConversationsAction(this::refresh));
 
     var toolbar = ActionManager.getInstance()
@@ -69,7 +68,10 @@ public class ConversationsToolWindow extends JPanel {
       emptyLabel.setBorder(JBUI.Borders.empty(8));
       scrollablePanel.add(emptyLabel);
     } else {
-      sortedConversations.forEach(conversation -> scrollablePanel.add(new ConversationPanel(project, conversation)));
+      sortedConversations.forEach(conversation -> {
+        scrollablePanel.add(Box.createVerticalStrut(8));
+        scrollablePanel.add(new ConversationPanel(project, conversation, this::refresh));
+      });
     }
 
     scrollablePanel.revalidate();
