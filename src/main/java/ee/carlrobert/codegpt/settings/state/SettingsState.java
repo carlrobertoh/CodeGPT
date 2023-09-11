@@ -38,11 +38,16 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
 
   public void sync(Conversation conversation) {
     var clientCode = conversation.getClientCode();
+    if ("chat.completion".equals(clientCode)) {
+      OpenAISettingsState.getInstance().setModel(conversation.getModel());
+    }
+    if ("azure.chat.completion".equals(clientCode)) {
+      AzureSettingsState.getInstance().setModel(conversation.getModel());
+    }
+
     setUseOpenAIService("chat.completion".equals(clientCode));
     setUseAzureService("azure.chat.completion".equals(clientCode));
     setUseYouService("you.chat.completion".equals(clientCode));
-
-    ModelSettingsState.getInstance().setChatCompletionModel(conversation.getModel());
   }
 
   public String getEmail() {

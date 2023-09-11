@@ -2,7 +2,8 @@ package ee.carlrobert.codegpt.completions;
 
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.message.Message;
-import ee.carlrobert.codegpt.settings.state.ModelSettingsState;
+import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
+import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.client.you.completion.YouCompletionEventListener;
@@ -78,13 +79,12 @@ public class CompletionRequestHandler {
         return CompletionClientProvider.getYouClient("", "")
             .getChatCompletion(requestProvider.buildYouCompletionRequest(message), eventListener);
       }
-
-      var openAICompletionRequest = requestProvider.buildOpenAIChatCompletionRequest(
-          ModelSettingsState.getInstance().getChatCompletionModel(), message, isRetry, useContextualSearch);
       if (settings.isUseAzureService()) {
-        return CompletionClientProvider.getAzureClient().getChatCompletion(openAICompletionRequest, eventListener);
+        return CompletionClientProvider.getAzureClient().getChatCompletion(requestProvider.buildOpenAIChatCompletionRequest(
+            AzureSettingsState.getInstance().getModel(), message, isRetry, useContextualSearch), eventListener);
       }
-      return CompletionClientProvider.getOpenAIClient().getChatCompletion(openAICompletionRequest, eventListener);
+      return CompletionClientProvider.getOpenAIClient().getChatCompletion(requestProvider.buildOpenAIChatCompletionRequest(
+          OpenAISettingsState.getInstance().getModel(), message, isRetry, useContextualSearch), eventListener);
     } catch (Throwable t) {
       if (errorListener != null) {
         errorListener.accept(new ErrorDetails("Something went wrong"), t);

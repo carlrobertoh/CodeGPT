@@ -5,6 +5,9 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
+import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
+import ee.carlrobert.codegpt.settings.ServiceSelectionForm;
+import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionModel;
 import org.jetbrains.annotations.NotNull;
 
 @State(name = "CodeGPT_AzureSettings_210", storages = @Storage("CodeGPT_AzureSettings_210.xml"))
@@ -14,6 +17,7 @@ public class AzureSettingsState implements PersistentStateComponent<AzureSetting
   private String deploymentId = "";
   private String apiVersion = "";
   private String baseHost = "https://%s.openai.azure.com";
+  private String model = OpenAIChatCompletionModel.GPT_3_5.getCode();
   private boolean useAzureApiKeyAuthentication = true;
   private boolean useAzureActiveDirectoryAuthentication;
 
@@ -29,6 +33,41 @@ public class AzureSettingsState implements PersistentStateComponent<AzureSetting
   @Override
   public void loadState(@NotNull AzureSettingsState state) {
     XmlSerializerUtil.copyBean(state, this);
+  }
+
+  public boolean isModified(ServiceSelectionForm serviceSelectionForm) {
+    return serviceSelectionForm.isAzureActiveDirectoryAuthenticationSelected() != isUseAzureActiveDirectoryAuthentication() ||
+        serviceSelectionForm.isAzureApiKeyAuthenticationSelected() != isUseAzureApiKeyAuthentication() ||
+        !serviceSelectionForm.getAzureActiveDirectoryToken().equals(AzureCredentialsManager.getInstance().getAzureActiveDirectoryToken()) ||
+        !serviceSelectionForm.getAzureOpenAIApiKey().equals(AzureCredentialsManager.getInstance().getAzureOpenAIApiKey()) ||
+        !serviceSelectionForm.getAzureResourceName().equals(resourceName) ||
+        !serviceSelectionForm.getAzureDeploymentId().equals(deploymentId) ||
+        !serviceSelectionForm.getAzureApiVersion().equals(apiVersion) ||
+        !serviceSelectionForm.getAzureBaseHost().equals(baseHost) ||
+        !serviceSelectionForm.getAzureModel().equals(model);
+  }
+
+  public void apply(ServiceSelectionForm serviceSelectionForm) {
+    useAzureActiveDirectoryAuthentication = serviceSelectionForm.isAzureActiveDirectoryAuthenticationSelected();
+    useAzureApiKeyAuthentication = serviceSelectionForm.isAzureApiKeyAuthenticationSelected();
+
+    resourceName = serviceSelectionForm.getAzureResourceName();
+    deploymentId = serviceSelectionForm.getAzureDeploymentId();
+    apiVersion = serviceSelectionForm.getAzureApiVersion();
+    baseHost = serviceSelectionForm.getAzureBaseHost();
+    model = serviceSelectionForm.getAzureModel();
+  }
+
+  public void reset(ServiceSelectionForm serviceSelectionForm) {
+    serviceSelectionForm.setAzureApiKey(AzureCredentialsManager.getInstance().getAzureOpenAIApiKey());
+    serviceSelectionForm.setAzureActiveDirectoryToken(AzureCredentialsManager.getInstance().getAzureActiveDirectoryToken());
+    serviceSelectionForm.setAzureApiKeyAuthenticationSelected(useAzureApiKeyAuthentication);
+    serviceSelectionForm.setAzureActiveDirectoryAuthenticationSelected(useAzureActiveDirectoryAuthentication);
+    serviceSelectionForm.setAzureResourceName(resourceName);
+    serviceSelectionForm.setAzureDeploymentId(deploymentId);
+    serviceSelectionForm.setAzureApiVersion(apiVersion);
+    serviceSelectionForm.setAzureBaseHost(baseHost);
+    serviceSelectionForm.setAzureModel(serviceSelectionForm.getAzureModel());
   }
 
   public String getResourceName() {
@@ -61,6 +100,14 @@ public class AzureSettingsState implements PersistentStateComponent<AzureSetting
 
   public void setBaseHost(String baseHost) {
     this.baseHost = baseHost;
+  }
+
+  public String getModel() {
+    return model;
+  }
+
+  public void setModel(String model) {
+    this.model = model;
   }
 
   public boolean isUseAzureApiKeyAuthentication() {

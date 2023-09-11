@@ -10,6 +10,8 @@ public class SettingsStateTest extends BasePlatformTestCase {
 
   public void testOpenAISettingsSync() {
     var settings = SettingsState.getInstance();
+    var openAISettings = OpenAISettingsState.getInstance();
+    openAISettings.setModel("gpt-3.5-turbo");
     var conversation = new Conversation();
     conversation.setModel("gpt-4");
     conversation.setClientCode("chat.completion");
@@ -19,11 +21,13 @@ public class SettingsStateTest extends BasePlatformTestCase {
     assertThat(settings)
         .extracting("useOpenAIService", "useAzureService", "useYouService")
         .containsExactly(true, false, false);
-    assertThat(ModelSettingsState.getInstance().getChatCompletionModel()).isEqualTo("gpt-4");
+    assertThat(openAISettings.getModel()).isEqualTo("gpt-4");
   }
 
   public void testAzureSettingsSync() {
     var settings = SettingsState.getInstance();
+    var azureSettings = AzureSettingsState.getInstance();
+    azureSettings.setModel("gpt-3.5-turbo");
     var conversation = new Conversation();
     conversation.setModel("gpt-4");
     conversation.setClientCode("azure.chat.completion");
@@ -33,7 +37,7 @@ public class SettingsStateTest extends BasePlatformTestCase {
     assertThat(settings)
         .extracting("useOpenAIService", "useAzureService", "useYouService")
         .containsExactly(false, true, false);
-    assertThat(ModelSettingsState.getInstance().getChatCompletionModel()).isEqualTo("gpt-4");
+    assertThat(azureSettings.getModel()).isEqualTo("gpt-4");
   }
 
   public void testYouSettingsSync() {
@@ -47,6 +51,5 @@ public class SettingsStateTest extends BasePlatformTestCase {
     assertThat(settings)
         .extracting("useOpenAIService", "useAzureService", "useYouService")
         .containsExactly(false, false, true);
-    assertThat(ModelSettingsState.getInstance().getChatCompletionModel()).isEqualTo("YouCode");
   }
 }

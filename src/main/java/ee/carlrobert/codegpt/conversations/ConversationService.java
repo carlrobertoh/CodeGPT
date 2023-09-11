@@ -5,7 +5,8 @@ import static java.util.stream.Collectors.toList;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
 import ee.carlrobert.codegpt.conversations.message.Message;
-import ee.carlrobert.codegpt.settings.state.ModelSettingsState;
+import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
+import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -37,13 +38,16 @@ public final class ConversationService {
   }
 
   public Conversation createConversation(String clientCode) {
+    var settings = SettingsState.getInstance();
     var conversation = new Conversation();
     conversation.setId(UUID.randomUUID());
     conversation.setClientCode(clientCode);
-    if (SettingsState.getInstance().isUseYouService()) {
+    if (settings.isUseYouService()) {
       conversation.setModel("YouCode");
+    } else if (settings.isUseAzureService()) {
+      conversation.setModel(AzureSettingsState.getInstance().getModel());
     } else {
-      conversation.setModel(ModelSettingsState.getInstance().getChatCompletionModel());
+      conversation.setModel(OpenAISettingsState.getInstance().getModel());
     }
     conversation.setCreatedOn(LocalDateTime.now());
     conversation.setUpdatedOn(LocalDateTime.now());

@@ -18,7 +18,8 @@ import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
-import ee.carlrobert.codegpt.settings.state.ModelSettingsState;
+import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
+import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.toolwindow.ModelIconLabel;
 import ee.carlrobert.codegpt.toolwindow.chat.components.ChatMessageResponseBody;
@@ -292,8 +293,9 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.gridy = 1;
 
-    var modelIconWrapper = JBUI.Panels.simplePanel(new ModelIconLabel(getClientCode(), ModelSettingsState.getInstance().getChatCompletionModel()))
-        .withBorder(JBUI.Borders.empty(0, 0, 8, 4));
+
+    var modelIconWrapper = JBUI.Panels.simplePanel(
+        new ModelIconLabel(getClientCode(), getModel())).withBorder(JBUI.Borders.empty(0, 0, 8, 4));
     modelIconWrapper.setBackground(getPanelBackgroundColor());
 
     var wrapper = new JPanel(new BorderLayout());
@@ -318,6 +320,20 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     }
     if (settings.isUseYouService()) {
       return "you.chat.completion";
+    }
+    return "custom.chat.completion";
+  }
+
+  private String getModel() {
+    var settings = SettingsState.getInstance();
+    if (settings.isUseOpenAIService()) {
+      return OpenAISettingsState.getInstance().getModel();
+    }
+    if (settings.isUseAzureService()) {
+      return AzureSettingsState.getInstance().getModel();
+    }
+    if (settings.isUseYouService()) {
+      return "YouCode";
     }
     return "custom.chat.completion";
   }
