@@ -13,8 +13,11 @@ import org.jetbrains.annotations.NotNull;
 @State(name = "CodeGPT_OpenAISettings_210", storages = @Storage("CodeGPT_OpenAISettings_210.xml"))
 public class OpenAISettingsState implements PersistentStateComponent<OpenAISettingsState> {
 
+  private final String BASE_PATH = "/v1/chat/completions";
+
   private String organization = "";
   private String baseHost = "https://api.openai.com";
+  private String path = BASE_PATH;
   private String model = OpenAIChatCompletionModel.GPT_3_5.getCode();
 
   public static OpenAISettingsState getInstance() {
@@ -35,12 +38,14 @@ public class OpenAISettingsState implements PersistentStateComponent<OpenAISetti
     return !serviceSelectionForm.getOpenAIApiKey().equals(OpenAICredentialsManager.getInstance().getApiKey()) ||
         !serviceSelectionForm.getOpenAIOrganization().equals(organization) ||
         !serviceSelectionForm.getOpenAIBaseHost().equals(baseHost) ||
+        !serviceSelectionForm.getOpenAIPath().equals(path) ||
         !serviceSelectionForm.getOpenAIModel().equals(model);
   }
 
   public void apply(ServiceSelectionForm serviceSelectionForm) {
     organization = serviceSelectionForm.getOpenAIOrganization();
     baseHost = serviceSelectionForm.getOpenAIBaseHost();
+    path = serviceSelectionForm.getOpenAIPath();
     model = serviceSelectionForm.getOpenAIModel();
   }
 
@@ -48,7 +53,12 @@ public class OpenAISettingsState implements PersistentStateComponent<OpenAISetti
     serviceSelectionForm.setOpenAIApiKey(OpenAICredentialsManager.getInstance().getApiKey());
     serviceSelectionForm.setOpenAIOrganization(organization);
     serviceSelectionForm.setOpenAIBaseHost(baseHost);
+    serviceSelectionForm.setOpenAIPath(path);
     serviceSelectionForm.setOpenAIModel(model);
+  }
+
+  public boolean isUsingCustomPath() {
+    return !BASE_PATH.equals(path);
   }
 
   public String getOrganization() {
@@ -73,5 +83,13 @@ public class OpenAISettingsState implements PersistentStateComponent<OpenAISetti
 
   public void setModel(String model) {
     this.model = model;
+  }
+
+  public String getPath() {
+    return path;
+  }
+
+  public void setPath(String path) {
+    this.path = path;
   }
 }

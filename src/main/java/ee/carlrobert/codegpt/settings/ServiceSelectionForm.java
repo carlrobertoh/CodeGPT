@@ -44,6 +44,7 @@ public class ServiceSelectionForm {
 
   private final JBPasswordField openAIApiKeyField;
   private final JBTextField openAIBaseHostField;
+  private final JBTextField openAIPathField;
   private final JBTextField openAIOrganizationField;
   private final JPanel openAIServiceSectionPanel;
   private final ComboBox<CompletionModel> openAICompletionModelComboBox;
@@ -55,6 +56,7 @@ public class ServiceSelectionForm {
   private final JBPasswordField azureActiveDirectoryTokenField;
   private final JPanel azureActiveDirectoryTokenFieldPanel;
   private final JBTextField azureBaseHostField;
+  private final JBTextField azurePathField;
   private final JBTextField azureResourceNameField;
   private final JBTextField azureDeploymentIdField;
   private final JBTextField azureApiVersionField;
@@ -105,13 +107,15 @@ public class ServiceSelectionForm {
         CodeGPTBundle.get("settingsConfigurable.section.service.useYouServiceRadioButtonLabel"), settings.isUseYouService());
 
     openAIBaseHostField = new JBTextField(openAISettings.getBaseHost(), 30);
+    openAIPathField = new JBTextField(openAISettings.getPath(), 30);
     openAIOrganizationField = new JBTextField(openAISettings.getOrganization(), 30);
     openAICompletionModelComboBox = new ModelComboBox(DEFAULT_OPENAI_MODELS, OpenAIChatCompletionModel.findByCode(openAISettings.getModel()));
 
-    azureBaseHostField = new JBTextField(azureSettings.getBaseHost(), 30);
-    azureResourceNameField = new JBTextField(azureSettings.getResourceName(), 30);
-    azureDeploymentIdField = new JBTextField(azureSettings.getDeploymentId(), 30);
-    azureApiVersionField = new JBTextField(azureSettings.getApiVersion(), 30);
+    azureBaseHostField = new JBTextField(azureSettings.getBaseHost(), 35);
+    azurePathField = new JBTextField(azureSettings.getPath(), 35);
+    azureResourceNameField = new JBTextField(azureSettings.getResourceName(), 35);
+    azureDeploymentIdField = new JBTextField(azureSettings.getDeploymentId(), 35);
+    azureApiVersionField = new JBTextField(azureSettings.getApiVersion(), 35);
     azureCompletionModelComboBox = new ModelComboBox(DEFAULT_OPENAI_MODELS, OpenAIChatCompletionModel.findByCode(azureSettings.getModel()));
     azureCompletionModelComboBox.getEditor().getEditorComponent().setMaximumSize(azureBaseHostField.getPreferredSize());
 
@@ -156,6 +160,9 @@ public class ServiceSelectionForm {
             .withComment(CodeGPTBundle.get("settingsConfigurable.section.service.openai.organizationField.comment")))
         .add(UI.PanelFactory.panel(openAIBaseHostField)
             .withLabel("Base host:")
+            .resizeX(false))
+        .add(UI.PanelFactory.panel(openAIPathField)
+            .withLabel("Path:")
             .resizeX(false))
         .add(UI.PanelFactory.panel(openAICompletionModelComboBox)
             .withLabel("Model:")
@@ -207,6 +214,9 @@ public class ServiceSelectionForm {
             .withComment(CodeGPTBundle.get("settingsConfigurable.section.service.azure.apiVersionField.comment")))
         .add(UI.PanelFactory.panel(azureBaseHostField)
             .withLabel("Base host:")
+            .resizeX(false))
+        .add(UI.PanelFactory.panel(azurePathField)
+            .withLabel("Path:")
             .resizeX(false))
         .add(UI.PanelFactory.panel(azureCompletionModelComboBox)
             .withLabel("Model:")
@@ -293,11 +303,11 @@ public class ServiceSelectionForm {
     return useAzureServiceRadioButton.isSelected();
   }
 
-  public boolean isCustomServiceSelected() {
+  public boolean isYouServiceSelected() {
     return useYouServiceRadioButton.isSelected();
   }
 
-  public void setCustomServiceSelected(boolean selected) {
+  public void setYouServiceSelected(boolean selected) {
     useYouServiceRadioButton.setSelected(selected);
   }
 
@@ -411,5 +421,21 @@ public class ServiceSelectionForm {
 
   public boolean isDisplayWebSearchResults() {
     return displayWebSearchResultsCheckBox.isSelected();
+  }
+
+  public void setOpenAIPath(String path) {
+    openAIPathField.setText(path);
+  }
+
+  public String getOpenAIPath() {
+    return openAIPathField.getText();
+  }
+
+  public void setAzurePath(String path) {
+    azurePathField.setText(path);
+  }
+
+  public String getAzurePath() {
+    return azurePathField.getText();
   }
 }

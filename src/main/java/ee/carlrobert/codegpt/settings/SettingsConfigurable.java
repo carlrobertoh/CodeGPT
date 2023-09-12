@@ -58,6 +58,9 @@ public class SettingsConfigurable implements Configurable, Disposable {
     var settings = SettingsState.getInstance();
     var openAISettings = OpenAISettingsState.getInstance();
     var azureSettings = AzureSettingsState.getInstance();
+    var serviceChanged = isServiceChanged(serviceSelectionForm, settings);
+    var modelChanged = openAISettings.getModel().equals(serviceSelectionForm.getOpenAIModel()) ||
+        azureSettings.getModel().equals(serviceSelectionForm.getAzureModel());
 
     OpenAICredentialsManager.getInstance().setApiKey(serviceSelectionForm.getOpenAIApiKey());
     AzureCredentialsManager.getInstance().setApiKey(serviceSelectionForm.getAzureOpenAIApiKey());
@@ -66,13 +69,13 @@ public class SettingsConfigurable implements Configurable, Disposable {
     settings.setDisplayName(settingsComponent.getDisplayName());
     settings.setUseOpenAIService(serviceSelectionForm.isOpenAIServiceSelected());
     settings.setUseAzureService(serviceSelectionForm.isAzureServiceSelected());
-    settings.setUseYouService(serviceSelectionForm.isCustomServiceSelected());
+    settings.setUseYouService(serviceSelectionForm.isYouServiceSelected());
     settings.setDisplayWebSearchResults(serviceSelectionForm.isDisplayWebSearchResults());
 
     openAISettings.apply(serviceSelectionForm);
     azureSettings.apply(serviceSelectionForm);
 
-    if (isServiceChanged(serviceSelectionForm, settings)) {
+    if (serviceChanged || modelChanged) {
       resetActiveTab();
     }
   }
@@ -89,7 +92,7 @@ public class SettingsConfigurable implements Configurable, Disposable {
 
     serviceSelectionForm.setOpenAIServiceSelected(settings.isUseOpenAIService());
     serviceSelectionForm.setAzureServiceSelected(settings.isUseAzureService());
-    serviceSelectionForm.setCustomServiceSelected(settings.isUseYouService());
+    serviceSelectionForm.setYouServiceSelected(settings.isUseYouService());
 
     openAISettings.reset(serviceSelectionForm);
     azureSettings.reset(serviceSelectionForm);
@@ -109,7 +112,7 @@ public class SettingsConfigurable implements Configurable, Disposable {
   private boolean isServiceChanged(ServiceSelectionForm serviceSelectionForm, SettingsState settings) {
     return serviceSelectionForm.isOpenAIServiceSelected() != settings.isUseOpenAIService() ||
         serviceSelectionForm.isAzureServiceSelected() != settings.isUseAzureService() ||
-        serviceSelectionForm.isCustomServiceSelected() != settings.isUseYouService();
+        serviceSelectionForm.isYouServiceSelected() != settings.isUseYouService();
   }
 
   private void resetActiveTab() {

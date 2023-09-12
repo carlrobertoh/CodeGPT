@@ -52,7 +52,11 @@ public class CompletionRequestProviderTest extends BasePlatformTestCase {
     conversation.addMessage(secondMessage);
 
     var request = new CompletionRequestProvider(conversation)
-        .buildOpenAIChatCompletionRequest(OpenAIChatCompletionModel.GPT_3_5.getCode(), new Message("TEST_CHAT_COMPLETION_PROMPT"), false, false);
+        .buildOpenAIChatCompletionRequest(OpenAIChatCompletionModel.GPT_3_5.getCode(),
+            new Message("TEST_CHAT_COMPLETION_PROMPT"),
+            false,
+            false,
+            null);
 
     assertThat(request.getMessages())
         .extracting("role", "content")
@@ -175,7 +179,7 @@ public class CompletionRequestProviderTest extends BasePlatformTestCase {
     });
 
     var request = new CompletionRequestProvider(conversation)
-        .buildOpenAIChatCompletionRequest(OpenAIChatCompletionModel.GPT_3_5.getCode(), new Message("TEST_CHAT_COMPLETION_PROMPT"), false, true);
+        .buildOpenAIChatCompletionRequest(OpenAIChatCompletionModel.GPT_3_5.getCode(), new Message("TEST_CHAT_COMPLETION_PROMPT"), false, true, null);
 
     assertThat(request.getModel()).isEqualTo("gpt-3.5-turbo");
     assertThat(request.getMessages().size()).isEqualTo(1);

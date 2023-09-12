@@ -13,10 +13,13 @@ import org.jetbrains.annotations.NotNull;
 @State(name = "CodeGPT_AzureSettings_210", storages = @Storage("CodeGPT_AzureSettings_210.xml"))
 public class AzureSettingsState implements PersistentStateComponent<AzureSettingsState> {
 
+  private final String BASE_PATH = "/openai/deployments/%s/chat/completions?api-version=%s";
+
   private String resourceName = "";
   private String deploymentId = "";
   private String apiVersion = "";
   private String baseHost = "https://%s.openai.azure.com";
+  private String path = BASE_PATH;
   private String model = OpenAIChatCompletionModel.GPT_3_5.getCode();
   private boolean useAzureApiKeyAuthentication = true;
   private boolean useAzureActiveDirectoryAuthentication;
@@ -44,6 +47,7 @@ public class AzureSettingsState implements PersistentStateComponent<AzureSetting
         !serviceSelectionForm.getAzureDeploymentId().equals(deploymentId) ||
         !serviceSelectionForm.getAzureApiVersion().equals(apiVersion) ||
         !serviceSelectionForm.getAzureBaseHost().equals(baseHost) ||
+        !serviceSelectionForm.getAzurePath().equals(path) ||
         !serviceSelectionForm.getAzureModel().equals(model);
   }
 
@@ -55,6 +59,7 @@ public class AzureSettingsState implements PersistentStateComponent<AzureSetting
     deploymentId = serviceSelectionForm.getAzureDeploymentId();
     apiVersion = serviceSelectionForm.getAzureApiVersion();
     baseHost = serviceSelectionForm.getAzureBaseHost();
+    path = serviceSelectionForm.getAzurePath();
     model = serviceSelectionForm.getAzureModel();
   }
 
@@ -67,7 +72,12 @@ public class AzureSettingsState implements PersistentStateComponent<AzureSetting
     serviceSelectionForm.setAzureDeploymentId(deploymentId);
     serviceSelectionForm.setAzureApiVersion(apiVersion);
     serviceSelectionForm.setAzureBaseHost(baseHost);
+    serviceSelectionForm.setAzurePath(path);
     serviceSelectionForm.setAzureModel(serviceSelectionForm.getAzureModel());
+  }
+
+  public boolean isUsingCustomPath() {
+    return !BASE_PATH.equals(path);
   }
 
   public String getResourceName() {
@@ -100,6 +110,14 @@ public class AzureSettingsState implements PersistentStateComponent<AzureSetting
 
   public void setBaseHost(String baseHost) {
     this.baseHost = baseHost;
+  }
+
+  public String getPath() {
+    return path;
+  }
+
+  public void setPath(String path) {
+    this.path = path;
   }
 
   public String getModel() {

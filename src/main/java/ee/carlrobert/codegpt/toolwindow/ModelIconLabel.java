@@ -15,9 +15,14 @@ public class ModelIconLabel extends JBLabel {
       return;
     }
 
+    if ("chat.completion".equals(clientCode)) {
+      setIcon(Icons.OpenAIIcon);
+    }
+    if ("azure.chat.completion".equals(clientCode)) {
+      setIcon(Icons.AzureIcon);
+    }
     setText(formatModelName(modelCode));
     setFont(JBFont.small().asBold());
-    setIcon("chat.completion".equals(clientCode) ? Icons.OpenAIIcon : Icons.AzureIcon);
     setHorizontalAlignment(SwingConstants.LEADING);
   }
 

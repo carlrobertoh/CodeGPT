@@ -79,12 +79,28 @@ public class CompletionRequestHandler {
         return CompletionClientProvider.getYouClient("", "")
             .getChatCompletion(requestProvider.buildYouCompletionRequest(message), eventListener);
       }
+
       if (settings.isUseAzureService()) {
-        return CompletionClientProvider.getAzureClient().getChatCompletion(requestProvider.buildOpenAIChatCompletionRequest(
-            AzureSettingsState.getInstance().getModel(), message, isRetry, useContextualSearch), eventListener);
+        var azureSettings = AzureSettingsState.getInstance();
+        return CompletionClientProvider.getAzureClient().getChatCompletion(
+            requestProvider.buildOpenAIChatCompletionRequest(
+                azureSettings.getModel(),
+                message,
+                isRetry,
+                useContextualSearch,
+                azureSettings.isUsingCustomPath() ? azureSettings.getPath() : null),
+            eventListener);
       }
-      return CompletionClientProvider.getOpenAIClient().getChatCompletion(requestProvider.buildOpenAIChatCompletionRequest(
-          OpenAISettingsState.getInstance().getModel(), message, isRetry, useContextualSearch), eventListener);
+
+      var openAISettings = OpenAISettingsState.getInstance();
+      return CompletionClientProvider.getOpenAIClient().getChatCompletion(
+          requestProvider.buildOpenAIChatCompletionRequest(
+              openAISettings.getModel(),
+              message,
+              isRetry,
+              useContextualSearch,
+              openAISettings.isUsingCustomPath() ? openAISettings.getPath() : null),
+          eventListener);
     } catch (Throwable t) {
       if (errorListener != null) {
         errorListener.accept(new ErrorDetails("Something went wrong"), t);

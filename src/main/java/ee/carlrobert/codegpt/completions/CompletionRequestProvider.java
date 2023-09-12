@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import org.jetbrains.annotations.Nullable;
 
 public class CompletionRequestProvider {
 
@@ -61,15 +62,25 @@ public class CompletionRequestProvider {
   }
 
   public OpenAIChatCompletionRequest buildOpenAIChatCompletionRequest(String model, Message message, boolean isRetry) {
-    return buildOpenAIChatCompletionRequest(model, message, isRetry, false);
+    return buildOpenAIChatCompletionRequest(model, message, isRetry, false, null);
   }
 
-  public OpenAIChatCompletionRequest buildOpenAIChatCompletionRequest(String model, Message message, boolean isRetry, boolean useContextualSearch) {
-    return (OpenAIChatCompletionRequest) new OpenAIChatCompletionRequest.Builder(buildMessages(model, message, isRetry, useContextualSearch))
+  public OpenAIChatCompletionRequest buildOpenAIChatCompletionRequest(
+      String model,
+      Message message,
+      boolean isRetry,
+      boolean useContextualSearch,
+      @Nullable String overriddenPath) {
+    var builder = new OpenAIChatCompletionRequest.Builder(buildMessages(model, message, isRetry, useContextualSearch))
         .setModel(model)
         .setMaxTokens(ConfigurationState.getInstance().getMaxTokens())
-        .setTemperature(ConfigurationState.getInstance().getTemperature())
-        .build();
+        .setTemperature(ConfigurationState.getInstance().getTemperature());
+
+    if (overriddenPath != null) {
+      builder.setOverriddenPath(overriddenPath);
+    }
+
+    return (OpenAIChatCompletionRequest) builder.build();
   }
 
   private List<OpenAIChatCompletionMessage> buildMessages(String model, Message message, boolean isRetry, boolean useContextualSearch) {

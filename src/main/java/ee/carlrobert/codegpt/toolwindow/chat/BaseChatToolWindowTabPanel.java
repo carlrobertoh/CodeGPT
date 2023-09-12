@@ -294,8 +294,9 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     gbc.gridy = 1;
 
 
+    var model = getModel();
     var modelIconWrapper = JBUI.Panels.simplePanel(
-        new ModelIconLabel(getClientCode(), getModel())).withBorder(JBUI.Borders.empty(0, 0, 8, 4));
+        new ModelIconLabel(getClientCode(), model)).withBorder(JBUI.Borders.empty(0, 0, 8, 4));
     modelIconWrapper.setBackground(getPanelBackgroundColor());
 
     var wrapper = new JPanel(new BorderLayout());
@@ -304,7 +305,9 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
         JBUI.Borders.empty(8)));
     wrapper.setBackground(getPanelBackgroundColor());
     wrapper.add(userPromptTextArea, BorderLayout.SOUTH);
-    wrapper.add(modelIconWrapper, BorderLayout.LINE_END);
+    if (model != null) {
+      wrapper.add(modelIconWrapper, BorderLayout.LINE_END);
+    }
     rootPanel.add(wrapper, gbc);
     userPromptTextArea.requestFocusInWindow();
     userPromptTextArea.requestFocus();
@@ -321,10 +324,10 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     if (settings.isUseYouService()) {
       return "you.chat.completion";
     }
-    return "custom.chat.completion";
+    return null;
   }
 
-  private String getModel() {
+  private @Nullable String getModel() {
     var settings = SettingsState.getInstance();
     if (settings.isUseOpenAIService()) {
       return OpenAISettingsState.getInstance().getModel();
@@ -335,6 +338,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     if (settings.isUseYouService()) {
       return "YouCode";
     }
-    return "custom.chat.completion";
+
+    return null;
   }
 }
