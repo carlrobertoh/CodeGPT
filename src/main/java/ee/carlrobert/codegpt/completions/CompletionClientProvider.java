@@ -2,42 +2,31 @@ package ee.carlrobert.codegpt.completions;
 
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
+import ee.carlrobert.codegpt.settings.advanced.AdvancedSettingsState;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
-import ee.carlrobert.codegpt.settings.state.SettingsState;
-import ee.carlrobert.codegpt.settings.advanced.AdvancedSettingsState;
-import ee.carlrobert.openai.client.AzureClient;
-import ee.carlrobert.openai.client.Client;
-import ee.carlrobert.openai.client.OpenAIClient;
-import ee.carlrobert.openai.client.ProxyAuthenticator;
-import ee.carlrobert.openai.client.azure.AzureClientRequestParams;
-import ee.carlrobert.openai.client.completion.CompletionClient;
-import ee.carlrobert.openai.client.embeddings.EmbeddingsClient;
+import ee.carlrobert.llm.client.Client;
+import ee.carlrobert.llm.client.ProxyAuthenticator;
+import ee.carlrobert.llm.client.azure.AzureClient;
+import ee.carlrobert.llm.client.azure.AzureCompletionRequestParams;
+import ee.carlrobert.llm.client.openai.OpenAIClient;
+import ee.carlrobert.llm.client.you.YouClient;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.concurrent.TimeUnit;
 
 public class CompletionClientProvider {
 
-  public static EmbeddingsClient getEmbeddingsClient() {
-    if (SettingsState.getInstance().isUseOpenAIService()) {
-      return getOpenAIClientBuilder().buildEmbeddingsClient();
-    }
-    // TODO
-    return null;
+  public static OpenAIClient getOpenAIClient() {
+    return getOpenAIClientBuilder().build();
   }
 
-  public static CompletionClient getChatCompletionClient(SettingsState settings) {
-    return getClientBuilder(settings).buildChatCompletionClient();
+  public static AzureClient getAzureClient() {
+    return getAzureClientBuilder().build();
   }
 
-  @Deprecated
-  public static CompletionClient getTextCompletionClient(SettingsState settings) {
-    return getClientBuilder(settings).buildTextCompletionClient();
-  }
-
-  public static Client.Builder getClientBuilder(SettingsState settings) {
-    return settings.isUseAzureService() ? getAzureClientBuilder() : getOpenAIClientBuilder();
+  public static YouClient getYouClient(String sessionId, String accessToken) {
+    return new YouClient.Builder(sessionId, accessToken).build();
   }
 
   private static OpenAIClient.Builder getOpenAIClientBuilder() {
@@ -50,10 +39,18 @@ public class CompletionClientProvider {
 
   private static AzureClient.Builder getAzureClientBuilder() {
     var settings = AzureSettingsState.getInstance();
-    var params = new AzureClientRequestParams(settings.getResourceName(), settings.getDeploymentId(), settings.getApiVersion());
+    var params = new AzureCompletionRequestParams(settings.getResourceName(), settings.getDeploymentId(), settings.getApiVersion());
     var builder = new AzureClient.Builder(AzureCredentialsManager.getInstance().getSecret(), params)
         .setActiveDirectoryAuthentication(settings.isUseAzureActiveDirectoryAuthentication());
     return (AzureClient.Builder) addDefaultClientParams(builder).setHost(settings.getBaseHost());
+  }
+
+  private static YouClient.Builder getYouClientBuilder() {
+    var settings = OpenAISettingsState.getInstance();
+    var builder = new OpenAIClient
+        .Builder(OpenAICredentialsManager.getInstance().getApiKey())
+        .setOrganization(settings.getOrganization());
+    return (YouClient.Builder) addDefaultClientParams(builder).setHost(settings.getBaseHost());
   }
 
   private static Client.Builder addDefaultClientParams(Client.Builder builder) {

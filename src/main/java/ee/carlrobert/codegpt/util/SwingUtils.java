@@ -2,6 +2,7 @@ package ee.carlrobert.codegpt.util;
 
 import static javax.swing.event.HyperlinkEvent.EventType.ACTIVATED;
 
+import com.intellij.ide.BrowserUtil;
 import com.intellij.util.ui.UI;
 import java.awt.Component;
 import java.awt.Desktop;
@@ -59,12 +60,10 @@ public class SwingUtils {
 
   public static void handleHyperlinkClicked(HyperlinkEvent event) {
     if (ACTIVATED.equals(event.getEventType()) && event.getURL() != null) {
-      if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-        try {
-          Desktop.getDesktop().browse(event.getURL().toURI());
-        } catch (IOException | URISyntaxException e) {
-          throw new RuntimeException("Couldn't open the browser.", e);
-        }
+      try {
+        BrowserUtil.browse(event.getURL().toURI());
+      } catch (URISyntaxException e) {
+        throw new RuntimeException(e);
       }
     }
   }

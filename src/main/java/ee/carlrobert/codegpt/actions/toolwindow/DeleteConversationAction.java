@@ -12,11 +12,11 @@ import org.jetbrains.annotations.NotNull;
 
 public class DeleteConversationAction extends AnAction {
 
-  private final Runnable onRefresh;
+  private final Runnable onDelete;
 
-  public DeleteConversationAction(Runnable onRefresh) {
+  public DeleteConversationAction(Runnable onDelete) {
     super("Delete Conversation", "Delete single conversation", AllIcons.General.Remove);
-    this.onRefresh = onRefresh;
+    this.onDelete = onDelete;
     EditorActionsUtil.registerOrReplaceAction(this);
   }
 
@@ -31,7 +31,7 @@ public class DeleteConversationAction extends AnAction {
       var project = event.getProject();
       if (project != null) {
         ConversationService.getInstance().deleteSelectedConversation();
-        onRefresh.run();
+        onDelete.run();
       }
     }
   }

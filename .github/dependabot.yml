@@ -16,6 +16,6 @@ updates:
       interval: "daily"
 
   - package-ecosystem: "gradle"
-    directory: "/embeddings"
+    directory: "/codegpt-core"
     schedule:
       interval: "daily"

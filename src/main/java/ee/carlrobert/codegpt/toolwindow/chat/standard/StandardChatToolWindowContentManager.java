@@ -6,6 +6,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.content.Content;
+import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
@@ -55,6 +56,15 @@ public class StandardChatToolWindowContentManager {
     }
   }
 
+  public void displayConversation(Conversation conversation) {
+    displayChatTab();
+    tryFindChatTabbedPane()
+        .ifPresent(tabbedPane -> tabbedPane.tryFindActiveConversationTitle(conversation.getId())
+            .ifPresentOrElse(
+                title -> tabbedPane.setSelectedIndex(tabbedPane.indexOfTab(title)),
+                () -> tabbedPane.addNewTab(new StandardChatToolWindowTabPanel(project, conversation))));
+  }
+
   public StandardChatToolWindowTabPanel createNewTabPanel() {
     displayChatTab();
     var tabbedPane = tryFindChatTabbedPane();
@@ -90,12 +100,10 @@ public class StandardChatToolWindowContentManager {
     return Optional.empty();
   }
 
-  public void resetTabbedPane() {
+  public void resetActiveTab() {
     tryFindChatTabbedPane().ifPresent(tabbedPane -> {
       tabbedPane.clearAll();
-      var tabPanel = new StandardChatToolWindowTabPanel(project);
-      tabPanel.displayLandingView();
-      tabbedPane.addNewTab(tabPanel);
+      tabbedPane.addNewTab(new StandardChatToolWindowTabPanel(project));
     });
   }
 

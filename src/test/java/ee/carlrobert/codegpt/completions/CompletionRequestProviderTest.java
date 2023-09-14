@@ -1,34 +1,28 @@
 package ee.carlrobert.codegpt.completions;
 
 import static ee.carlrobert.codegpt.completions.CompletionRequestProvider.COMPLETION_SYSTEM_PROMPT;
-import static ee.carlrobert.openai.util.JSONUtil.e;
-import static ee.carlrobert.openai.util.JSONUtil.jsonArray;
-import static ee.carlrobert.openai.util.JSONUtil.jsonMap;
-import static ee.carlrobert.openai.util.JSONUtil.jsonMapResponse;
+import static ee.carlrobert.llm.client.util.JSONUtil.e;
+import static ee.carlrobert.llm.client.util.JSONUtil.jsonArray;
+import static ee.carlrobert.llm.client.util.JSONUtil.jsonMap;
+import static ee.carlrobert.llm.client.util.JSONUtil.jsonMapResponse;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.groups.Tuple.tuple;
 
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
-import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
-import ee.carlrobert.codegpt.settings.state.ModelSettingsState;
+import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
-import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
-import ee.carlrobert.openai.client.ClientCode;
-import ee.carlrobert.openai.client.completion.chat.ChatCompletionModel;
-import ee.carlrobert.openai.client.completion.text.TextCompletionModel;
-import ee.carlrobert.openai.http.LocalCallbackServer;
-import ee.carlrobert.openai.http.ResponseEntity;
-import ee.carlrobert.openai.http.exchange.BasicHttpExchange;
-import ee.carlrobert.openai.http.expectation.BasicExpectation;
-import java.time.LocalDateTime;
+import ee.carlrobert.llm.client.http.LocalCallbackServer;
+import ee.carlrobert.llm.client.http.ResponseEntity;
+import ee.carlrobert.llm.client.http.exchange.BasicHttpExchange;
+import ee.carlrobert.llm.client.http.expectation.BasicExpectation;
+import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionModel;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 public class CompletionRequestProviderTest extends BasePlatformTestCase {
 
@@ -49,46 +43,6 @@ public class CompletionRequestProviderTest extends BasePlatformTestCase {
     super.tearDown();
   }
 
-  public void testTextCompletionRequestWithSystemPromptOverride() {
-    ConfigurationState.getInstance().setSystemPrompt("TEST_SYSTEM_PROMPT");
-    var conversation = createConversation(ClientCode.TEXT_COMPLETION);
-    var firstMsg = new Message("TEST_PROMPT", "TEST_RESPONSE");
-    conversation.addMessage(firstMsg);
-    conversation.addMessage(new Message("TEST_PROMPT_2", "TEST_RESPONSE_2"));
-
-    var request = new CompletionRequestProvider(conversation)
-        .buildTextCompletionRequest(TextCompletionModel.DAVINCI.getCode(), new Message("TEST_TEXT_COMPLETION_PROMPT"), false);
-
-    assertThat(request.getPrompt())
-        .isEqualTo("TEST_SYSTEM_PROMPT\n"
-            + "Human: TEST_PROMPT\n"
-            + "AI: TEST_RESPONSE\n"
-            + "Human: TEST_PROMPT_2\n"
-            + "AI: TEST_RESPONSE_2\n"
-            + "Human: TEST_TEXT_COMPLETION_PROMPT\n"
-            + "AI: \n");
-  }
-
-  public void testTextCompletionRequestWithoutSystemPromptOverride() {
-    var conversation = createConversation(ClientCode.TEXT_COMPLETION);
-    var firstMsg = new Message("TEST_PROMPT", "TEST_RESPONSE");
-    conversation.addMessage(firstMsg);
-    conversation.addMessage(new Message("TEST_PROMPT_2", "TEST_RESPONSE_2"));
-
-    var request = new CompletionRequestProvider(conversation)
-        .buildTextCompletionRequest(TextCompletionModel.DAVINCI.getCode(), new Message("TEST_TEXT_COMPLETION_PROMPT"), false);
-
-    assertThat(request.getPrompt())
-        .isEqualTo("You are ChatGPT, a large language model trained by OpenAI.\n"
-            + "Answer in a markdown language, code blocks should contain language whenever possible.\n"
-            + "Human: TEST_PROMPT\n"
-            + "AI: TEST_RESPONSE\n"
-            + "Human: TEST_PROMPT_2\n"
-            + "AI: TEST_RESPONSE_2\n"
-            + "Human: TEST_TEXT_COMPLETION_PROMPT\n"
-            + "AI: \n");
-  }
-
   public void testChatCompletionRequestWithSystemPromptOverride() {
     ConfigurationState.getInstance().setSystemPrompt("TEST_SYSTEM_PROMPT");
     var conversation = ConversationService.getInstance().startConversation();
@@ -98,7 +52,11 @@ public class CompletionRequestProviderTest extends BasePlatformTestCase {
     conversation.addMessage(secondMessage);
 
     var request = new CompletionRequestProvider(conversation)
-        .buildChatCompletionRequest(ChatCompletionModel.GPT_3_5.getCode(), new Message("TEST_CHAT_COMPLETION_PROMPT"), false, false);
+        .buildOpenAIChatCompletionRequest(OpenAIChatCompletionModel.GPT_3_5.getCode(),
+            new Message("TEST_CHAT_COMPLETION_PROMPT"),
+            false,
+            false,
+            null);
 
     assertThat(request.getMessages())
         .extracting("role", "content")
@@ -119,7 +77,7 @@ public class CompletionRequestProviderTest extends BasePlatformTestCase {
     conversation.addMessage(secondMessage);
 
     var request = new CompletionRequestProvider(conversation)
-        .buildChatCompletionRequest(ChatCompletionModel.GPT_3_5.getCode(), new Message("TEST_CHAT_COMPLETION_PROMPT"), false);
+        .buildOpenAIChatCompletionRequest(OpenAIChatCompletionModel.GPT_3_5.getCode(), new Message("TEST_CHAT_COMPLETION_PROMPT"), false);
 
     assertThat(request.getMessages())
         .extracting("role", "content")
@@ -140,7 +98,7 @@ public class CompletionRequestProviderTest extends BasePlatformTestCase {
     conversation.addMessage(secondMessage);
 
     var request = new CompletionRequestProvider(conversation)
-        .buildChatCompletionRequest(ChatCompletionModel.GPT_3_5.getCode(), secondMessage, true);
+        .buildOpenAIChatCompletionRequest(OpenAIChatCompletionModel.GPT_3_5.getCode(), secondMessage, true);
 
     assertThat(request.getMessages())
         .extracting("role", "content")
@@ -162,7 +120,7 @@ public class CompletionRequestProviderTest extends BasePlatformTestCase {
     conversation.discardTokenLimits();
 
     var request = new CompletionRequestProvider(conversation)
-        .buildChatCompletionRequest(ChatCompletionModel.GPT_3_5.getCode(), new Message("TEST_CHAT_COMPLETION_PROMPT"), false);
+        .buildOpenAIChatCompletionRequest(OpenAIChatCompletionModel.GPT_3_5.getCode(), new Message("TEST_CHAT_COMPLETION_PROMPT"), false);
 
     assertThat(request.getMessages())
         .extracting("role", "content")
@@ -181,15 +139,12 @@ public class CompletionRequestProviderTest extends BasePlatformTestCase {
 
     assertThrows(TotalUsageExceededException.class,
         () -> new CompletionRequestProvider(conversation)
-            .buildChatCompletionRequest(ChatCompletionModel.GPT_3_5.getCode(), createDummyMessage(100), false));
+            .buildOpenAIChatCompletionRequest(OpenAIChatCompletionModel.GPT_3_5.getCode(), createDummyMessage(100), false));
   }
 
   public void testContextualSearch() {
     var conversation = ConversationService.getInstance().startConversation();
     var settings = SettingsState.getInstance();
-    var modelSettings = ModelSettingsState.getInstance();
-    modelSettings.setUseTextCompletion(false);
-    modelSettings.setUseChatCompletion(true);
     settings.setUseOpenAIService(true);
     settings.setUseAzureService(false);
     expectRequest("/v1/chat/completions", request -> {
@@ -199,10 +154,8 @@ public class CompletionRequestProviderTest extends BasePlatformTestCase {
           .extracting("model", "messages")
           .containsExactly("gpt-4",
               List.of(Map.of(
-                  "role",
-                  "user",
-                  "content",
-                  "You are Text Generator, a helpful expert of generating natural language into semantically comparable search query.\n" +
+                  "role", "user",
+                  "content", "You are Text Generator, a helpful expert of generating natural language into semantically comparable search query.\n" +
                       "\n" +
                       "Text: List all the dependencies that the project uses\n" +
                       "AI: project dependencies, development dependencies, versions, libraries, frameworks, packages\n" +
@@ -226,7 +179,7 @@ public class CompletionRequestProviderTest extends BasePlatformTestCase {
     });
 
     var request = new CompletionRequestProvider(conversation)
-        .buildChatCompletionRequest(ChatCompletionModel.GPT_3_5.getCode(), new Message("TEST_CHAT_COMPLETION_PROMPT"), false, true);
+        .buildOpenAIChatCompletionRequest(OpenAIChatCompletionModel.GPT_3_5.getCode(), new Message("TEST_CHAT_COMPLETION_PROMPT"), false, true, null);
 
     assertThat(request.getModel()).isEqualTo("gpt-3.5-turbo");
     assertThat(request.getMessages().size()).isEqualTo(1);
@@ -242,19 +195,6 @@ public class CompletionRequestProviderTest extends BasePlatformTestCase {
             "Question: TEST_CHAT_COMPLETION_PROMPT\n" +
             "\n" +
             "Helpful answer in Markdown format:");
-  }
-
-  private Conversation createConversation(ClientCode clientCode) {
-    var modelSettings = ModelSettingsState.getInstance();
-    var conversation = new Conversation();
-    conversation.setId(UUID.randomUUID());
-    conversation.setClientCode(clientCode);
-    conversation.setModel(modelSettings.isUseChatCompletion() ?
-        modelSettings.getChatCompletionModel() :
-        modelSettings.getTextCompletionModel());
-    conversation.setCreatedOn(LocalDateTime.now());
-    conversation.setUpdatedOn(LocalDateTime.now());
-    return conversation;
   }
 
   private Message createDummyMessage(int tokenSize) {

@@ -6,6 +6,7 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.ui.content.ContentManagerEvent;
 import com.intellij.ui.content.ContentManagerListener;
+import ee.carlrobert.codegpt.toolwindow.chat.contextual.ContextualChatToolWindowPanel;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowPanel;
 import ee.carlrobert.codegpt.toolwindow.conversations.ConversationsToolWindow;
 import javax.swing.JComponent;

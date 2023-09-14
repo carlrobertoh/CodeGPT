@@ -3,17 +3,13 @@ package ee.carlrobert.codegpt.settings;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.options.Configurable;
 import ee.carlrobert.codegpt.CodeGPTBundle;
-import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
-import ee.carlrobert.codegpt.credentials.UserCredentialsManager;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
-import ee.carlrobert.codegpt.settings.state.ModelSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
-import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowTabPanel;
 import ee.carlrobert.codegpt.util.ApplicationUtils;
 import javax.swing.JComponent;
 import org.jetbrains.annotations.Nls;
@@ -47,90 +43,41 @@ public class SettingsConfigurable implements Configurable, Disposable {
     var settings = SettingsState.getInstance();
     var openAISettings = OpenAISettingsState.getInstance();
     var azureSettings = AzureSettingsState.getInstance();
-    var modelSettings = ModelSettingsState.getInstance();
 
     var serviceSelectionForm = settingsComponent.getServiceSelectionForm();
-    return !settingsComponent.getEmail().equals(settings.getEmail()) ||
-        !settingsComponent.getDisplayName().equals(settings.getDisplayName()) ||
-
-        serviceSelectionForm.isOpenAIServiceSelected() != settings.isUseOpenAIService() ||
-        serviceSelectionForm.isAzureServiceSelected() != settings.isUseAzureService() ||
-        !serviceSelectionForm.getOpenAIApiKey().equals(OpenAICredentialsManager.getInstance().getApiKey()) ||
-        !serviceSelectionForm.getOpenAIOrganization().equals(openAISettings.getOrganization()) ||
-        !serviceSelectionForm.getOpenAIBaseHost().equals(openAISettings.getBaseHost()) ||
-
-        serviceSelectionForm.isAzureActiveDirectoryAuthenticationSelected() != azureSettings.isUseAzureActiveDirectoryAuthentication() ||
-        serviceSelectionForm.isAzureApiKeyAuthenticationSelected() != azureSettings.isUseAzureApiKeyAuthentication() ||
-        !serviceSelectionForm.getAzureActiveDirectoryToken().equals(AzureCredentialsManager.getInstance().getAzureActiveDirectoryToken()) ||
-        !serviceSelectionForm.getAzureOpenAIApiKey().equals(AzureCredentialsManager.getInstance().getAzureOpenAIApiKey()) ||
-        !serviceSelectionForm.getAzureResourceName().equals(azureSettings.getResourceName()) ||
-        !serviceSelectionForm.getAzureDeploymentId().equals(azureSettings.getDeploymentId()) ||
-        !serviceSelectionForm.getAzureApiVersion().equals(azureSettings.getApiVersion()) ||
-        !serviceSelectionForm.getAzureBaseHost().equals(azureSettings.getBaseHost()) ||
-
-        isModelChanged(modelSettings) ||
-        isCompletionOptionChanged(modelSettings);
+    return !settingsComponent.getDisplayName().equals(settings.getDisplayName()) ||
+        isServiceChanged(serviceSelectionForm, settings) ||
+        openAISettings.isModified(serviceSelectionForm) ||
+        azureSettings.isModified(serviceSelectionForm) ||
+        serviceSelectionForm.isDisplayWebSearchResults() != settings.isDisplayWebSearchResults();
   }
 
   @Override
   public void apply() {
+    var serviceSelectionForm = settingsComponent.getServiceSelectionForm();
     var settings = SettingsState.getInstance();
     var openAISettings = OpenAISettingsState.getInstance();
     var azureSettings = AzureSettingsState.getInstance();
-    var modelSettings = ModelSettingsState.getInstance();
-    var isModelChanged = isModelChanged(modelSettings);
+    var serviceChanged = isServiceChanged(serviceSelectionForm, settings);
+    var modelChanged = openAISettings.getModel().equals(serviceSelectionForm.getOpenAIModel()) ||
+        azureSettings.getModel().equals(serviceSelectionForm.getAzureModel());
 
-    if (isModelChanged) {
-      EncodingManager.getInstance().setEncoding(modelSettings.isUseChatCompletion() ?
-          modelSettings.getChatCompletionModel() :
-          modelSettings.getTextCompletionModel());
-    }
-
-    if (isCompletionOptionChanged(modelSettings) || isModelChanged) {
-      ConversationsState.getInstance().setCurrentConversation(null);
-      var project = ApplicationUtils.findCurrentProject();
-      if (project == null) {
-        throw new RuntimeException("Could not find current project.");
-      }
-
-      StandardChatToolWindowContentManager.getInstance(project)
-          .tryFindChatTabbedPane()
-          .ifPresent(tabbedPane -> {
-            tabbedPane.clearAll();
-            var tabPanel = new StandardChatToolWindowTabPanel(project);
-            tabPanel.displayLandingView();
-            tabbedPane.addNewTab(tabPanel);
-          });
-    }
-
-    var serviceSelectionForm = settingsComponent.getServiceSelectionForm();
-    var modelSelectionForm = settingsComponent.getModelSelectionForm();
-
-    UserCredentialsManager.getInstance().setAccountPassword(settingsComponent.getPassword());
     OpenAICredentialsManager.getInstance().setApiKey(serviceSelectionForm.getOpenAIApiKey());
     AzureCredentialsManager.getInstance().setApiKey(serviceSelectionForm.getAzureOpenAIApiKey());
     AzureCredentialsManager.getInstance().setAzureActiveDirectoryToken(serviceSelectionForm.getAzureActiveDirectoryToken());
 
-    settings.setEmail(settingsComponent.getEmail());
     settings.setDisplayName(settingsComponent.getDisplayName());
-
     settings.setUseOpenAIService(serviceSelectionForm.isOpenAIServiceSelected());
     settings.setUseAzureService(serviceSelectionForm.isAzureServiceSelected());
+    settings.setUseYouService(serviceSelectionForm.isYouServiceSelected());
+    settings.setDisplayWebSearchResults(serviceSelectionForm.isDisplayWebSearchResults());
 
-    openAISettings.setOrganization(serviceSelectionForm.getOpenAIOrganization());
-    openAISettings.setBaseHost(serviceSelectionForm.getOpenAIBaseHost());
+    openAISettings.apply(serviceSelectionForm);
+    azureSettings.apply(serviceSelectionForm);
 
-    azureSettings.setUseAzureActiveDirectoryAuthentication(serviceSelectionForm.isAzureActiveDirectoryAuthenticationSelected());
-    azureSettings.setUseAzureApiKeyAuthentication(serviceSelectionForm.isAzureApiKeyAuthenticationSelected());
-    azureSettings.setResourceName(serviceSelectionForm.getAzureResourceName());
-    azureSettings.setDeploymentId(serviceSelectionForm.getAzureDeploymentId());
-    azureSettings.setApiVersion(serviceSelectionForm.getAzureApiVersion());
-    azureSettings.setBaseHost(serviceSelectionForm.getAzureBaseHost());
-
-    modelSettings.setUseChatCompletion(modelSelectionForm.isChatCompletionOptionSelected());
-    modelSettings.setUseTextCompletion(modelSelectionForm.isTextCompletionOptionSelected());
-    modelSettings.setChatCompletionModel(modelSelectionForm.getChatCompletionBaseModel().getCode());
-    modelSettings.setTextCompletionModel(modelSelectionForm.getTextCompletionBaseModel().getCode());
+    if (serviceChanged || modelChanged) {
+      resetActiveTab();
+    }
   }
 
   @Override
@@ -138,33 +85,19 @@ public class SettingsConfigurable implements Configurable, Disposable {
     var settings = SettingsState.getInstance();
     var openAISettings = OpenAISettingsState.getInstance();
     var azureSettings = AzureSettingsState.getInstance();
-    var modelSettings = ModelSettingsState.getInstance();
     var serviceSelectionForm = settingsComponent.getServiceSelectionForm();
-    var modelSelectionForm = settingsComponent.getModelSelectionForm();
 
     settingsComponent.setEmail(settings.getEmail());
     settingsComponent.setDisplayName(settings.getDisplayName());
 
     serviceSelectionForm.setOpenAIServiceSelected(settings.isUseOpenAIService());
     serviceSelectionForm.setAzureServiceSelected(settings.isUseAzureService());
+    serviceSelectionForm.setYouServiceSelected(settings.isUseYouService());
 
-    serviceSelectionForm.setOpenAIApiKey(OpenAICredentialsManager.getInstance().getApiKey());
-    serviceSelectionForm.setOpenAIOrganization(openAISettings.getOrganization());
-    serviceSelectionForm.setOpenAIBaseHost(openAISettings.getBaseHost());
+    openAISettings.reset(serviceSelectionForm);
+    azureSettings.reset(serviceSelectionForm);
 
-    serviceSelectionForm.setAzureApiKeyAuthenticationSelected(azureSettings.isUseAzureApiKeyAuthentication());
-    serviceSelectionForm.setAzureApiKey(AzureCredentialsManager.getInstance().getAzureOpenAIApiKey());
-    serviceSelectionForm.setAzureActiveDirectoryAuthenticationSelected(azureSettings.isUseAzureActiveDirectoryAuthentication());
-    serviceSelectionForm.setAzureActiveDirectoryToken(AzureCredentialsManager.getInstance().getAzureActiveDirectoryToken());
-    serviceSelectionForm.setAzureResourceName(azureSettings.getResourceName());
-    serviceSelectionForm.setAzureDeploymentId(azureSettings.getDeploymentId());
-    serviceSelectionForm.setAzureApiVersion(azureSettings.getApiVersion());
-    serviceSelectionForm.setAzureBaseHost(azureSettings.getBaseHost());
-
-    modelSelectionForm.setUseChatCompletionSelected(modelSettings.isUseChatCompletion());
-    modelSelectionForm.setUseTextCompletionSelected(modelSettings.isUseTextCompletion());
-    modelSelectionForm.setChatCompletionBaseModel(modelSettings.getChatCompletionModel());
-    modelSelectionForm.setTextCompletionBaseModel(modelSettings.getTextCompletionModel());
+    serviceSelectionForm.setDisplayWebSearchResults(settings.isDisplayWebSearchResults());
   }
 
   @Override
@@ -172,19 +105,23 @@ public class SettingsConfigurable implements Configurable, Disposable {
     settingsComponent = null;
   }
 
-  private boolean isCompletionOptionChanged(ModelSettingsState settings) {
-    var modelSelectionForm = settingsComponent.getModelSelectionForm();
-    return modelSelectionForm.isChatCompletionOptionSelected() != settings.isUseChatCompletion() ||
-        modelSelectionForm.isTextCompletionOptionSelected() != settings.isUseTextCompletion();
-  }
-
-  private boolean isModelChanged(ModelSettingsState settings) {
-    var modelSelectionForm = settingsComponent.getModelSelectionForm();
-    return !modelSelectionForm.getChatCompletionBaseModel().getCode().equals(settings.getChatCompletionModel()) ||
-        !modelSelectionForm.getTextCompletionBaseModel().getCode().equals(settings.getTextCompletionModel());
-  }
-
   @Override
   public void dispose() {
+  }
+
+  private boolean isServiceChanged(ServiceSelectionForm serviceSelectionForm, SettingsState settings) {
+    return serviceSelectionForm.isOpenAIServiceSelected() != settings.isUseOpenAIService() ||
+        serviceSelectionForm.isAzureServiceSelected() != settings.isUseAzureService() ||
+        serviceSelectionForm.isYouServiceSelected() != settings.isUseYouService();
+  }
+
+  private void resetActiveTab() {
+    ConversationsState.getInstance().setCurrentConversation(null);
+    var project = ApplicationUtils.findCurrentProject();
+    if (project == null) {
+      throw new RuntimeException("Could not find current project.");
+    }
+
+    StandardChatToolWindowContentManager.getInstance(project).resetActiveTab();
   }
 }

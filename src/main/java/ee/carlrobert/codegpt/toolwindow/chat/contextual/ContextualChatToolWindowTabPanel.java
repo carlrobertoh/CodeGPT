@@ -17,17 +17,17 @@ public class ContextualChatToolWindowTabPanel extends BaseChatToolWindowTabPanel
   public ContextualChatToolWindowTabPanel(@NotNull Project project) {
     super(project, true);
     displayLandingView();
-    userTextArea.setTextAreaEnabled(UserManager.getInstance().isSubscribed());
+    userPromptTextArea.setTextAreaEnabled(UserManager.getInstance().isSubscribed());
 
     project.getMessageBus()
         .connect()
         .subscribe(CodebaseIndexingCompletedNotifier.INDEXING_COMPLETED_TOPIC,
-            (CodebaseIndexingCompletedNotifier) () -> userTextArea.setTextAreaEnabled(UserManager.getInstance().isSubscribed()));
+            (CodebaseIndexingCompletedNotifier) () -> userPromptTextArea.setTextAreaEnabled(UserManager.getInstance().isSubscribed()));
 
     var messageBusConnection = ApplicationManager.getApplication().getMessageBus().connect();
     messageBusConnection.subscribe(AuthenticationNotifier.AUTHENTICATION_TOPIC,
-        (AuthenticationNotifier) () -> userTextArea.setTextAreaEnabled(UserManager.getInstance().isSubscribed()));
-    messageBusConnection.subscribe(SignedOutNotifier.SIGNED_OUT_TOPIC, (SignedOutNotifier) () -> userTextArea.setTextAreaEnabled(false));
+        (AuthenticationNotifier) () -> userPromptTextArea.setTextAreaEnabled(UserManager.getInstance().isSubscribed()));
+    messageBusConnection.subscribe(SignedOutNotifier.SIGNED_OUT_TOPIC, (SignedOutNotifier) () -> userPromptTextArea.setTextAreaEnabled(false));
   }
 
   @Override

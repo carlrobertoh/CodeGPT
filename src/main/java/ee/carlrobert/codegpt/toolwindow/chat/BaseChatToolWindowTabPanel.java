@@ -3,6 +3,7 @@ package ee.carlrobert.codegpt.toolwindow.chat;
 import static com.intellij.openapi.ui.Messages.OK;
 import static ee.carlrobert.codegpt.util.ThemeUtils.getPanelBackgroundColor;
 import static java.lang.String.format;
+import static java.util.stream.Collectors.toList;
 
 import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.project.Project;
@@ -11,12 +12,21 @@ import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.completions.CompletionRequestHandler;
+import ee.carlrobert.codegpt.completions.SerpResult;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
+import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
+import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
+import ee.carlrobert.codegpt.toolwindow.ModelIconLabel;
+import ee.carlrobert.codegpt.toolwindow.chat.components.ChatMessageResponseBody;
+import ee.carlrobert.codegpt.toolwindow.chat.components.ResponsePanel;
+import ee.carlrobert.codegpt.toolwindow.chat.components.UserMessagePanel;
+import ee.carlrobert.codegpt.toolwindow.chat.components.UserPromptTextArea;
+import ee.carlrobert.codegpt.user.UserManager;
 import ee.carlrobert.codegpt.util.EditorUtils;
 import ee.carlrobert.codegpt.util.FileUtils;
 import ee.carlrobert.codegpt.util.OverlayUtils;
@@ -25,6 +35,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import javax.swing.BoxLayout;
@@ -41,9 +52,10 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
   private final JPanel rootPanel;
   private final ScrollablePanel scrollablePanel;
   private final Map<UUID, JPanel> visibleMessagePanels = new HashMap<>();
+  private final Map<UUID, List<SerpResult>> serpResultsMapping = new HashMap<>();
 
   protected final Project project;
-  protected final UserTextArea userTextArea;
+  protected final UserPromptTextArea userPromptTextArea;
   protected final ConversationService conversationService;
   protected @Nullable Conversation conversation;
 
@@ -55,12 +67,12 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     this.conversationService = ConversationService.getInstance();
     this.rootPanel = new JPanel(new GridBagLayout());
     this.scrollablePanel = new ScrollablePanel();
-    this.userTextArea = new UserTextArea(this::handleSubmit);
+    this.userPromptTextArea = new UserPromptTextArea(this::handleSubmit);
     init();
   }
 
   public void requestFocusForTextArea() {
-    userTextArea.focus();
+    userPromptTextArea.focus();
   }
 
   @Override
@@ -113,6 +125,9 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
   }
 
   private boolean isCredentialSet() {
+    if (SettingsState.getInstance().isUseYouService()) {
+      return UserManager.getInstance().isAuthenticated();
+    }
     if (SettingsState.getInstance().isUseAzureService()) {
       return AzureCredentialsManager.getInstance().isCredentialSet();
     }
@@ -141,6 +156,20 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
       responsePanel.enableActions();
       conversationService.saveMessage(completeMessage, message, conversation, isRetry);
       stopStreaming(responseContainer);
+
+      var serpResults = serpResultsMapping.get(message.getId());
+      var containsResults = serpResults != null && !serpResults.isEmpty();
+      if (SettingsState.getInstance().isDisplayWebSearchResults()) {
+        if (containsResults) {
+          responseContainer.displaySerpResults(serpResults);
+        }
+      }
+
+      if (containsResults) {
+        message.setSerpResults(serpResults.stream()
+            .map(result -> new SerpResult(result.getUrl(), result.getName(), result.getSnippet(), result.getSnippetSource()))
+            .collect(toList()));
+      }
     });
     requestHandler.addTokensExceededListener(() -> SwingUtilities.invokeLater(() -> {
       var answer = OverlayUtils.showTokenLimitExceededDialog();
@@ -156,8 +185,11 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
       responseContainer.displayError(error.getMessage());
       stopStreaming(responseContainer);
     });
-    userTextArea.setRequestHandler(requestHandler);
-    userTextArea.setSubmitEnabled(false);
+    requestHandler.addSerpResultsListener(serpResults -> serpResultsMapping.put(message.getId(), serpResults.stream()
+        .map(result -> new SerpResult(result.getUrl(), result.getName(), result.getSnippet(), result.getSnippetSource()))
+        .collect(toList())));
+    userPromptTextArea.setRequestHandler(requestHandler);
+    userPromptTextArea.setSubmitEnabled(false);
     requestHandler.call(conversation, message, isRetry);
   }
 
@@ -215,7 +247,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
 
   private void stopStreaming(ChatMessageResponseBody responseContainer) {
     SwingUtilities.invokeLater(() -> {
-      userTextArea.setSubmitEnabled(true);
+      userPromptTextArea.setSubmitEnabled(true);
       responseContainer.hideCarets();
     });
   }
@@ -261,15 +293,52 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.gridy = 1;
 
-    // JBUI.Panels.simplePanel(8, 0).add();
-    JPanel chatTextAreaWrapper = new JPanel(new BorderLayout());
-    chatTextAreaWrapper.setBorder(JBUI.Borders.compound(
+
+    var model = getModel();
+    var modelIconWrapper = JBUI.Panels.simplePanel(
+        new ModelIconLabel(getClientCode(), model)).withBorder(JBUI.Borders.empty(0, 0, 8, 4));
+    modelIconWrapper.setBackground(getPanelBackgroundColor());
+
+    var wrapper = new JPanel(new BorderLayout());
+    wrapper.setBorder(JBUI.Borders.compound(
         JBUI.Borders.customLine(JBColor.border(), 1, 0, 0, 0),
         JBUI.Borders.empty(8)));
-    chatTextAreaWrapper.setBackground(getPanelBackgroundColor());
-    chatTextAreaWrapper.add(userTextArea, BorderLayout.SOUTH);
-    rootPanel.add(chatTextAreaWrapper, gbc);
-    userTextArea.requestFocusInWindow();
-    userTextArea.requestFocus();
+    wrapper.setBackground(getPanelBackgroundColor());
+    wrapper.add(userPromptTextArea, BorderLayout.SOUTH);
+    if (model != null) {
+      wrapper.add(modelIconWrapper, BorderLayout.LINE_END);
+    }
+    rootPanel.add(wrapper, gbc);
+    userPromptTextArea.requestFocusInWindow();
+    userPromptTextArea.requestFocus();
+  }
+
+  private String getClientCode() {
+    var settings = SettingsState.getInstance();
+    if (settings.isUseOpenAIService()) {
+      return "chat.completion";
+    }
+    if (settings.isUseAzureService()) {
+      return "azure.chat.completion";
+    }
+    if (settings.isUseYouService()) {
+      return "you.chat.completion";
+    }
+    return null;
+  }
+
+  private @Nullable String getModel() {
+    var settings = SettingsState.getInstance();
+    if (settings.isUseOpenAIService()) {
+      return OpenAISettingsState.getInstance().getModel();
+    }
+    if (settings.isUseAzureService()) {
+      return AzureSettingsState.getInstance().getModel();
+    }
+    if (settings.isUseYouService()) {
+      return "YouCode";
+    }
+
+    return null;
   }
 }

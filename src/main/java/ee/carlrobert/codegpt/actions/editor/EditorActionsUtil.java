@@ -21,7 +21,7 @@ import org.apache.commons.text.CaseUtils;
 public class EditorActionsUtil {
 
   public static Map<String, String> DEFAULT_ACTIONS = new LinkedHashMap<>(Map.of(
-      "Find Bugs", "Find bugs in the selected code {{selectedCode}}",
+      "Find Bugs", "Find bugs and output code with bugs fixed in the following code: {{selectedCode}}",
       "Write Tests", "Write Tests for the selected code {{selectedCode}}",
       "Explain", "Explain the selected code {{selectedCode}}",
       "Refactor", "Refactor the selected code {{selectedCode}}",

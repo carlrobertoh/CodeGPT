@@ -37,7 +37,7 @@ public class DeleteAllConversationsAction extends AnAction {
       var project = event.getProject();
       if (project != null) {
         ConversationService.getInstance().clearAll();
-        StandardChatToolWindowContentManager.getInstance(project).resetTabbedPane();
+        StandardChatToolWindowContentManager.getInstance(project).resetActiveTab();
       }
       this.onRefresh.run();
     }

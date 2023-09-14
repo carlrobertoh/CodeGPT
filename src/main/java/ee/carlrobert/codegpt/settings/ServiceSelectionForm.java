@@ -1,6 +1,10 @@
 package ee.carlrobert.codegpt.settings;
 
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.ui.ComboBox;
+import com.intellij.openapi.util.Disposer;
 import com.intellij.ui.TitledSeparator;
+import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBPasswordField;
 import com.intellij.ui.components.JBRadioButton;
 import com.intellij.ui.components.JBTextField;
@@ -13,20 +17,37 @@ import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
+import ee.carlrobert.codegpt.user.UserManager;
+import ee.carlrobert.codegpt.user.auth.AuthenticationNotifier;
 import ee.carlrobert.codegpt.util.SwingUtils;
+import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionModel;
+import ee.carlrobert.llm.completion.CompletionModel;
+import java.awt.FlowLayout;
+import java.util.List;
 import java.util.Map;
+import javax.swing.Box;
 import javax.swing.ButtonGroup;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 
 public class ServiceSelectionForm {
 
+  private static final OpenAIChatCompletionModel[] DEFAULT_OPENAI_MODELS = new OpenAIChatCompletionModel[] {
+      OpenAIChatCompletionModel.GPT_3_5,
+      OpenAIChatCompletionModel.GPT_3_5_16k,
+      OpenAIChatCompletionModel.GPT_4,
+      OpenAIChatCompletionModel.GPT_4_32k
+  };
+
   private final JBRadioButton useOpenAIServiceRadioButton;
   private final JBRadioButton useAzureServiceRadioButton;
 
-  private final JBPasswordField openAIApiKey;
+  private final JBPasswordField openAIApiKeyField;
   private final JBTextField openAIBaseHostField;
+  private final JBTextField openAIPathField;
   private final JBTextField openAIOrganizationField;
   private final JPanel openAIServiceSectionPanel;
+  private final ComboBox<CompletionModel> openAICompletionModelComboBox;
 
   private final JBRadioButton useAzureApiKeyAuthenticationRadioButton;
   private final JBPasswordField azureApiKeyField;
@@ -35,17 +56,23 @@ public class ServiceSelectionForm {
   private final JBPasswordField azureActiveDirectoryTokenField;
   private final JPanel azureActiveDirectoryTokenFieldPanel;
   private final JBTextField azureBaseHostField;
+  private final JBTextField azurePathField;
   private final JBTextField azureResourceNameField;
   private final JBTextField azureDeploymentIdField;
   private final JBTextField azureApiVersionField;
   private final JPanel azureServiceSectionPanel;
+  private final ComboBox<CompletionModel> azureCompletionModelComboBox;
+
+  private final JBRadioButton useYouServiceRadioButton;
+  private final JPanel youServiceSectionPanel;
+  private final JBCheckBox displayWebSearchResultsCheckBox;
 
   public ServiceSelectionForm(SettingsState settings) {
     var openAISettings = OpenAISettingsState.getInstance();
     var azureSettings = AzureSettingsState.getInstance();
-    openAIApiKey = new JBPasswordField();
-    openAIApiKey.setColumns(30);
-    openAIApiKey.setText(OpenAICredentialsManager.getInstance().getApiKey());
+    openAIApiKeyField = new JBPasswordField();
+    openAIApiKeyField.setColumns(30);
+    openAIApiKeyField.setText(OpenAICredentialsManager.getInstance().getApiKey());
 
     azureApiKeyField = new JBPasswordField();
     azureApiKeyField.setColumns(30);
@@ -76,31 +103,188 @@ public class ServiceSelectionForm {
         CodeGPTBundle.get("settingsConfigurable.section.service.useOpenAIServiceRadioButtonLabel"), settings.isUseOpenAIService());
     useAzureServiceRadioButton = new JBRadioButton(
         CodeGPTBundle.get("settingsConfigurable.section.service.useAzureServiceRadioButtonLabel"), settings.isUseAzureService());
+    useYouServiceRadioButton = new JBRadioButton(
+        CodeGPTBundle.get("settingsConfigurable.section.service.useYouServiceRadioButtonLabel"), settings.isUseYouService());
 
     openAIBaseHostField = new JBTextField(openAISettings.getBaseHost(), 30);
+    openAIPathField = new JBTextField(openAISettings.getPath(), 30);
     openAIOrganizationField = new JBTextField(openAISettings.getOrganization(), 30);
+    openAICompletionModelComboBox = new ModelComboBox(DEFAULT_OPENAI_MODELS, OpenAIChatCompletionModel.findByCode(openAISettings.getModel()));
 
-    azureBaseHostField = new JBTextField(azureSettings.getBaseHost(), 30);
-    azureResourceNameField = new JBTextField(azureSettings.getResourceName(), 30);
-    azureDeploymentIdField = new JBTextField(azureSettings.getDeploymentId(), 30);
-    azureApiVersionField = new JBTextField(azureSettings.getApiVersion(), 30);
+    azureBaseHostField = new JBTextField(azureSettings.getBaseHost(), 35);
+    azurePathField = new JBTextField(azureSettings.getPath(), 35);
+    azureResourceNameField = new JBTextField(azureSettings.getResourceName(), 35);
+    azureDeploymentIdField = new JBTextField(azureSettings.getDeploymentId(), 35);
+    azureApiVersionField = new JBTextField(azureSettings.getApiVersion(), 35);
+    azureCompletionModelComboBox = new ModelComboBox(DEFAULT_OPENAI_MODELS, OpenAIChatCompletionModel.findByCode(azureSettings.getModel()));
+    azureCompletionModelComboBox.getEditor().getEditorComponent().setMaximumSize(azureBaseHostField.getPreferredSize());
+
+    displayWebSearchResultsCheckBox = new JBCheckBox("Display web search results", settings.isDisplayWebSearchResults());
+    displayWebSearchResultsCheckBox.setEnabled(UserManager.getInstance().isAuthenticated());
 
     openAIServiceSectionPanel = createOpenAIServiceSectionPanel();
     azureServiceSectionPanel = createAzureServiceSectionPanel();
+    youServiceSectionPanel = createYouServiceSectionPanel();
 
     registerPanelsVisibility(settings, azureSettings);
     registerRadioButtons();
+
+    ApplicationManager.getApplication()
+        .getMessageBus()
+        .connect()
+        .subscribe(AuthenticationNotifier.AUTHENTICATION_TOPIC, (AuthenticationNotifier) () -> displayWebSearchResultsCheckBox.setEnabled(true));
   }
 
   public JPanel getForm() {
-    var form = FormBuilder.createFormBuilder()
-        .addComponent(useOpenAIServiceRadioButton)
+    var panel = new JPanel(new FlowLayout(FlowLayout.LEADING, 0, 0));
+    panel.add(useOpenAIServiceRadioButton);
+    // flow layout's horizontal gap adds annoying horizontal padding on each sides
+    panel.add(Box.createHorizontalStrut(16));
+    panel.add(useAzureServiceRadioButton);
+    panel.add(Box.createHorizontalStrut(16));
+    panel.add(useYouServiceRadioButton);
+
+    return FormBuilder.createFormBuilder()
+        .addComponent(withEmptyLeftBorder(panel))
         .addComponent(openAIServiceSectionPanel)
-        .addComponent(useAzureServiceRadioButton)
         .addComponent(azureServiceSectionPanel)
+        .addComponent(youServiceSectionPanel)
         .getPanel();
-    form.setBorder(JBUI.Borders.emptyLeft(16));
-    return form;
+  }
+
+  private JPanel createOpenAIServiceSectionPanel() {
+    var requestConfigurationPanel = UI.PanelFactory.grid()
+        .add(UI.PanelFactory.panel(openAIOrganizationField)
+            .withLabel(CodeGPTBundle.get("settingsConfigurable.section.service.openai.organizationField.label"))
+            .resizeX(false)
+            .withComment(CodeGPTBundle.get("settingsConfigurable.section.service.openai.organizationField.comment")))
+        .add(UI.PanelFactory.panel(openAIBaseHostField)
+            .withLabel("Base host:")
+            .resizeX(false))
+        .add(UI.PanelFactory.panel(openAIPathField)
+            .withLabel("Path:")
+            .resizeX(false))
+        .add(UI.PanelFactory.panel(openAICompletionModelComboBox)
+            .withLabel("Model:")
+            .resizeX(false))
+        .createPanel();
+
+    var apiKeyFieldPanel = UI.PanelFactory.panel(openAIApiKeyField)
+        .withLabel(CodeGPTBundle.get("settingsConfigurable.section.integration.apiKeyField.label"))
+        .resizeX(false)
+        .withComment(CodeGPTBundle.get("settingsConfigurable.section.integration.apiKeyField.comment"))
+        .withCommentHyperlinkListener(SwingUtils::handleHyperlinkClicked)
+        .createPanel();
+
+    return FormBuilder.createFormBuilder()
+        .addComponent(new TitledSeparator("Authentication"))
+        .addComponent(withEmptyLeftBorder(apiKeyFieldPanel))
+        .addComponent(new TitledSeparator("Request Configuration"))
+        .addComponent(withEmptyLeftBorder(requestConfigurationPanel))
+        .addComponentFillVertically(new JPanel(), 0)
+        .getPanel();
+  }
+
+  private JPanel createAzureServiceSectionPanel() {
+    var authPanel = withEmptyLeftBorder(FormBuilder.createFormBuilder()
+        .addComponent(UI.PanelFactory
+            .panel(useAzureApiKeyAuthenticationRadioButton)
+            .resizeX(false)
+            .createPanel())
+        .addComponent(withEmptyLeftBorder(azureApiKeyFieldPanel))
+        .addComponent(UI.PanelFactory
+            .panel(useAzureActiveDirectoryAuthenticationRadioButton)
+            .resizeX(false)
+            .createPanel())
+        .addComponent(withEmptyLeftBorder(azureActiveDirectoryTokenFieldPanel))
+        .getPanel());
+
+    var configPanel = withEmptyLeftBorder(UI.PanelFactory.grid()
+        .add(UI.PanelFactory.panel(azureResourceNameField)
+            .withLabel(CodeGPTBundle.get("settingsConfigurable.section.service.azure.resourceNameField.label"))
+            .resizeX(false)
+            .withComment(CodeGPTBundle.get("settingsConfigurable.section.service.azure.resourceNameField.comment")))
+        .add(UI.PanelFactory.panel(azureDeploymentIdField)
+            .withLabel(CodeGPTBundle.get("settingsConfigurable.section.service.azure.deploymentIdField.label"))
+            .resizeX(false)
+            .withComment(CodeGPTBundle.get("settingsConfigurable.section.service.azure.deploymentIdField.comment")))
+        .add(UI.PanelFactory.panel(azureApiVersionField)
+            .withLabel(CodeGPTBundle.get("settingsConfigurable.section.service.azure.apiVersionField.label"))
+            .resizeX(false)
+            .withComment(CodeGPTBundle.get("settingsConfigurable.section.service.azure.apiVersionField.comment")))
+        .add(UI.PanelFactory.panel(azureBaseHostField)
+            .withLabel("Base host:")
+            .resizeX(false))
+        .add(UI.PanelFactory.panel(azurePathField)
+            .withLabel("Path:")
+            .resizeX(false))
+        .add(UI.PanelFactory.panel(azureCompletionModelComboBox)
+            .withLabel("Model:")
+            .resizeX(false))
+        .createPanel());
+
+    return FormBuilder.createFormBuilder()
+        .addComponent(new TitledSeparator("Authentication"))
+        .addComponent(authPanel)
+        .addComponent(new TitledSeparator("Request Configuration"))
+        .addComponent(configPanel)
+        .getPanel();
+  }
+
+  private JPanel createYouServiceSectionPanel() {
+    return FormBuilder.createFormBuilder()
+        .addComponent(new UserDetailsSettingsPanel(Disposer.newDisposable()))
+        .addComponent(new TitledSeparator("Chat Preferences"))
+        .addComponent(withEmptyLeftBorder(displayWebSearchResultsCheckBox))
+        .getPanel();
+  }
+
+  private JComponent withEmptyLeftBorder(JComponent component) {
+    component.setBorder(JBUI.Borders.emptyLeft(16));
+    return component;
+  }
+
+  private void registerPanelsVisibility(SettingsState settings, AzureSettingsState azureSettings) {
+    openAIServiceSectionPanel.setVisible(settings.isUseOpenAIService());
+    azureServiceSectionPanel.setVisible(settings.isUseAzureService());
+    azureApiKeyFieldPanel.setVisible(azureSettings.isUseAzureApiKeyAuthentication());
+    azureActiveDirectoryTokenFieldPanel.setVisible(azureSettings.isUseAzureActiveDirectoryAuthentication());
+    youServiceSectionPanel.setVisible(settings.isUseYouService());
+  }
+
+  private void registerRadioButtons() {
+    registerRadioButtons(
+        List.of(
+            Map.entry(useOpenAIServiceRadioButton, openAIServiceSectionPanel),
+            Map.entry(useAzureServiceRadioButton, azureServiceSectionPanel),
+            Map.entry(useYouServiceRadioButton, youServiceSectionPanel)));
+    registerRadioButtons(
+        List.of(
+            Map.entry(useAzureApiKeyAuthenticationRadioButton, azureApiKeyFieldPanel),
+            Map.entry(useAzureActiveDirectoryAuthenticationRadioButton, azureActiveDirectoryTokenFieldPanel)));
+  }
+
+  private void registerRadioButtons(List<Map.Entry<JBRadioButton, JPanel>> entries) {
+    var buttonGroup = new ButtonGroup();
+    entries.forEach(entry -> buttonGroup.add(entry.getKey()));
+
+    entries.forEach(entry -> entry.getKey().addActionListener((e) -> {
+      for (Map.Entry<JBRadioButton, JPanel> innerEntry : entries) {
+        innerEntry.getValue().setVisible(innerEntry.equals(entry));
+      }
+    }));
+  }
+
+  public OpenAIChatCompletionModel getSelectedCompletionModel() {
+    return (OpenAIChatCompletionModel) (isOpenAIServiceSelected() ?
+        openAICompletionModelComboBox.getSelectedItem() :
+        azureCompletionModelComboBox.getSelectedItem());
+  }
+
+  public void setSelectedChatCompletionModel(OpenAIChatCompletionModel chatCompletionModel) {
+    if (isOpenAIServiceSelected()) {
+      openAICompletionModelComboBox.setSelectedItem(chatCompletionModel);
+    }
   }
 
   public void setOpenAIServiceSelected(boolean selected) {
@@ -119,12 +303,20 @@ public class ServiceSelectionForm {
     return useAzureServiceRadioButton.isSelected();
   }
 
+  public boolean isYouServiceSelected() {
+    return useYouServiceRadioButton.isSelected();
+  }
+
+  public void setYouServiceSelected(boolean selected) {
+    useYouServiceRadioButton.setSelected(selected);
+  }
+
   public void setOpenAIApiKey(String apiKey) {
-    openAIApiKey.setText(apiKey);
+    openAIApiKeyField.setText(apiKey);
   }
 
   public String getOpenAIApiKey() {
-    return new String(openAIApiKey.getPassword());
+    return new String(openAIApiKeyField.getPassword());
   }
 
   public void setOpenAIBaseHost(String baseHost) {
@@ -141,6 +333,14 @@ public class ServiceSelectionForm {
 
   public String getOpenAIOrganization() {
     return openAIOrganizationField.getText();
+  }
+
+  public void setOpenAIModel(String model) {
+    openAICompletionModelComboBox.setSelectedItem(OpenAIChatCompletionModel.findByCode(model));
+  }
+
+  public String getOpenAIModel() {
+    return ((OpenAIChatCompletionModel) (openAICompletionModelComboBox.getModel().getSelectedItem())).getCode();
   }
 
   public void setAzureActiveDirectoryAuthenticationSelected(boolean selected) {
@@ -207,94 +407,35 @@ public class ServiceSelectionForm {
     return azureBaseHostField.getText();
   }
 
-  private JPanel createOpenAIServiceSectionPanel() {
-    var panel = UI.PanelFactory.grid()
-        .add(UI.PanelFactory.panel(openAIApiKey)
-            .withLabel(CodeGPTBundle.get("settingsConfigurable.section.integration.apiKeyField.label"))
-            .resizeX(false)
-            .withComment(CodeGPTBundle.get("settingsConfigurable.section.integration.apiKeyField.comment"))
-            .withCommentHyperlinkListener(SwingUtils::handleHyperlinkClicked))
-        .add(UI.PanelFactory.panel(openAIOrganizationField)
-            .withLabel(CodeGPTBundle.get("settingsConfigurable.section.service.openai.organizationField.label"))
-            .resizeX(false)
-            .withComment(CodeGPTBundle.get("settingsConfigurable.section.service.openai.organizationField.comment")))
-        .add(UI.PanelFactory.panel(openAIBaseHostField)
-            .withLabel("Base host:")
-            .resizeX(false))
-        .createPanel();
-    panel.setBorder(JBUI.Borders.emptyLeft(16));
-    return panel;
+  public void setAzureModel(String model) {
+    azureCompletionModelComboBox.setSelectedItem(OpenAIChatCompletionModel.findByCode(model));
   }
 
-  private JPanel createAzureServiceSectionPanel() {
-    var gridPanel = UI.PanelFactory.grid()
-        .add(UI.PanelFactory.panel(azureResourceNameField)
-            .withLabel(CodeGPTBundle.get("settingsConfigurable.section.service.azure.resourceNameField.label"))
-            .resizeX(false)
-            .withComment(CodeGPTBundle.get("settingsConfigurable.section.service.azure.resourceNameField.comment")))
-        .add(UI.PanelFactory.panel(azureDeploymentIdField)
-            .withLabel(CodeGPTBundle.get("settingsConfigurable.section.service.azure.deploymentIdField.label"))
-            .resizeX(false)
-            .withComment(CodeGPTBundle.get("settingsConfigurable.section.service.azure.deploymentIdField.comment")))
-        .add(UI.PanelFactory.panel(azureApiVersionField)
-            .withLabel(CodeGPTBundle.get("settingsConfigurable.section.service.azure.apiVersionField.label"))
-            .resizeX(false)
-            .withComment(CodeGPTBundle.get("settingsConfigurable.section.service.azure.apiVersionField.comment")))
-        .add(UI.PanelFactory.panel(azureBaseHostField)
-            .withLabel("Base host:")
-            .resizeX(false))
-        .createPanel();
-    gridPanel.setBorder(JBUI.Borders.emptyLeft(16));
-
-    azureApiKeyFieldPanel.setBorder(JBUI.Borders.emptyLeft(16));
-    azureActiveDirectoryTokenFieldPanel.setBorder(JBUI.Borders.emptyLeft(16));
-
-    var authenticationPanel = FormBuilder.createFormBuilder()
-        .addComponent(UI.PanelFactory.panel(useAzureApiKeyAuthenticationRadioButton).resizeX(false).createPanel())
-        .addComponent(azureApiKeyFieldPanel)
-        .addComponent(UI.PanelFactory.panel(useAzureActiveDirectoryAuthenticationRadioButton).resizeX(false).createPanel())
-        .addComponent(azureActiveDirectoryTokenFieldPanel)
-        .getPanel();
-    authenticationPanel.setBorder(JBUI.Borders.emptyLeft(16));
-
-    var form = FormBuilder.createFormBuilder()
-        .addComponent(new TitledSeparator("Authentication"))
-        .addComponent(authenticationPanel)
-        .addComponent(new TitledSeparator("Request Configuration"))
-        .addComponent(gridPanel)
-        .getPanel();
-    form.setBorder(JBUI.Borders.emptyLeft(16));
-    return form;
+  public String getAzureModel() {
+    return ((OpenAIChatCompletionModel) (azureCompletionModelComboBox.getModel().getSelectedItem())).getCode();
   }
 
-  private void registerPanelsVisibility(SettingsState settings, AzureSettingsState azureSettings) {
-    openAIServiceSectionPanel.setVisible(settings.isUseOpenAIService());
-    azureServiceSectionPanel.setVisible(settings.isUseAzureService());
-    azureApiKeyFieldPanel.setVisible(azureSettings.isUseAzureApiKeyAuthentication());
-    azureActiveDirectoryTokenFieldPanel.setVisible(azureSettings.isUseAzureActiveDirectoryAuthentication());
+  public void setDisplayWebSearchResults(boolean displayWebSearchResults) {
+    displayWebSearchResultsCheckBox.setSelected(displayWebSearchResults);
   }
 
-  private void registerRadioButtons() {
-    registerRadioButtons(
-        Map.entry(useOpenAIServiceRadioButton, openAIServiceSectionPanel),
-        Map.entry(useAzureServiceRadioButton, azureServiceSectionPanel));
-    registerRadioButtons(
-        Map.entry(useAzureApiKeyAuthenticationRadioButton, azureApiKeyFieldPanel),
-        Map.entry(useAzureActiveDirectoryAuthenticationRadioButton, azureActiveDirectoryTokenFieldPanel));
+  public boolean isDisplayWebSearchResults() {
+    return displayWebSearchResultsCheckBox.isSelected();
   }
 
-  private void registerRadioButtons(Map.Entry<JBRadioButton, JPanel> firstEntry, Map.Entry<JBRadioButton, JPanel> secondEntry) {
-    var buttonGroup = new ButtonGroup();
-    buttonGroup.add(firstEntry.getKey());
-    buttonGroup.add(secondEntry.getKey());
+  public void setOpenAIPath(String path) {
+    openAIPathField.setText(path);
+  }
 
-    firstEntry.getKey().addActionListener(e -> {
-      firstEntry.getValue().setVisible(true);
-      secondEntry.getValue().setVisible(false);
-    });
-    secondEntry.getKey().addActionListener(e -> {
-      firstEntry.getValue().setVisible(false);
-      secondEntry.getValue().setVisible(true);
-    });
+  public String getOpenAIPath() {
+    return openAIPathField.getText();
+  }
+
+  public void setAzurePath(String path) {
+    azurePathField.setText(path);
+  }
+
+  public String getAzurePath() {
+    return azurePathField.getText();
   }
 }

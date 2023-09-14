@@ -32,8 +32,4 @@ public final class CodeGPTPlugin {
   public static @NotNull String getProjectIndexStorePath(@NotNull Project project) {
     return getIndexStorePath() + File.separator + project.getName();
   }
-
-  public static @NotNull String getProjectIndexPath(@NotNull Project project) {
-    return getProjectIndexStorePath(project) + File.separator + "hnsw.index";
-  }
 }

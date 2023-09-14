@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.settings;
 
+import com.intellij.notification.NotificationType;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.ui.ComponentValidator;
 import com.intellij.openapi.ui.ValidationInfo;
@@ -17,17 +18,23 @@ import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.credentials.UserCredentialsManager;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.user.UserManager;
+import ee.carlrobert.codegpt.user.auth.AuthenticationError;
 import ee.carlrobert.codegpt.user.auth.AuthenticationHandler;
 import ee.carlrobert.codegpt.user.auth.AuthenticationService;
+import ee.carlrobert.codegpt.user.auth.response.AuthenticationResponse;
+import ee.carlrobert.codegpt.user.auth.response.User;
+import ee.carlrobert.codegpt.util.OverlayUtils;
 import ee.carlrobert.codegpt.util.SwingUtils;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.util.regex.Pattern;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
+import org.jetbrains.annotations.Nullable;
 
 public class UserDetailsSettingsPanel extends JPanel {
 
@@ -37,8 +44,9 @@ public class UserDetailsSettingsPanel extends JPanel {
   private final JTextPane signUpTextPane;
   private final AsyncProcessIcon loadingSpinner;
 
-  public UserDetailsSettingsPanel(Disposable parentDisposable, SettingsState settings) {
+  public UserDetailsSettingsPanel(Disposable parentDisposable) {
     super(new BorderLayout());
+    var settings = SettingsState.getInstance();
     emailField = new JBTextField(settings.getEmail(), 25);
     passwordField = new JBPasswordField();
     passwordField.setColumns(25);
@@ -65,10 +73,10 @@ public class UserDetailsSettingsPanel extends JPanel {
       }
     });
 
-    if (UserManager.getInstance().getSession() == null) {
-      add(createUserAuthenticationPanel(emailField, passwordField, false));
+    if (UserManager.getInstance().getAuthenticationResponse() == null) {
+      add(createUserAuthenticationPanel(emailField, passwordField, null));
     } else {
-      add(createUserInformationPanel());
+      add(createUserInformationPanel(UserManager.getInstance().getAuthenticationResponse().getData().getUser()));
     }
   }
 
@@ -90,6 +98,9 @@ public class UserDetailsSettingsPanel extends JPanel {
           String value;
           if (component instanceof JBTextField) {
             value = ((JBTextField) component).getText();
+            if (!isValidEmail(value)) {
+              return new ValidationInfo("The email you entered is invalid.", component).withOKEnabled();
+            }
           } else {
             value = new String(((JPasswordField) component).getPassword());
           }
@@ -106,9 +117,15 @@ public class UserDetailsSettingsPanel extends JPanel {
     return validator;
   }
 
+  private boolean isValidEmail(String email) {
+    // RFC 5322
+    return Pattern.compile("^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$")
+        .matcher(email)
+        .matches();
+  }
+
   private JTextPane createSignUpTextPane() {
-    var textPane = createTextPane(
-        "<html><a href=\"https://subscription-starter-etdkim4m3-carlrobertoh-gmailcom.vercel.app/signin#auth-sign-up\">Don't have an account? Sign up</a></html>");
+    var textPane = createTextPane("<html><a href=\"https://you.com/code\">Don't have an account? Sign up</a></html>");
     textPane.setBorder(JBUI.Borders.emptyLeft(4));
     return textPane;
   }
@@ -132,17 +149,16 @@ public class UserDetailsSettingsPanel extends JPanel {
     return panel;
   }
 
-  private JPanel createUserAuthenticationPanel(JBTextField emailAddressField, JBPasswordField passwordField, boolean withInvalidCredentials) {
+  private JPanel createUserAuthenticationPanel(JBTextField emailAddressField, JBPasswordField passwordField, @Nullable AuthenticationError error) {
     var contentPanelBuilder = FormBuilder.createFormBuilder()
-        .addVerticalGap(8)
         .addLabeledComponent("Email address:", emailAddressField)
         .addLabeledComponent("Password:", passwordField)
         .addVerticalGap(4)
         .addComponentToRightColumn(createFooterPanel())
         .addVerticalGap(4);
 
-    if (withInvalidCredentials) {
-      var invalidCredentialsLabel = new JBLabel("Invalid login credentials");
+    if (error != null) {
+      var invalidCredentialsLabel = new JBLabel(error.getErrorMessage());
       invalidCredentialsLabel.setForeground(JBColor.red);
       invalidCredentialsLabel.setBorder(JBUI.Borders.emptyLeft(4));
 
@@ -157,29 +173,15 @@ public class UserDetailsSettingsPanel extends JPanel {
         .getPanel();
   }
 
-  private JPanel createUserInformationPanel() {
+  private JPanel createUserInformationPanel(User user) {
     var userManager = UserManager.getInstance();
     var contentPanelBuilder = FormBuilder.createFormBuilder()
-        .addLabeledComponent("Email address:",
-            new JBLabel(userManager.getSession()
-                .getUser()
-                .getEmail()).withFont(JBFont.label().asBold()));
-
-    if (userManager.isSubscribed()) {
-      contentPanelBuilder.addLabeledComponent("Subscription:",
-          new JBLabel(userManager.getSubscription()
-              .getPrices()
-              .getProducts()
-              .getName()).withFont(JBFont.label().asBold()));
-    } else {
-      contentPanelBuilder.addComponent(createTextPane(
-          "<html>You haven't subscribed to any plan yet. Subscribe <a href=\"https://codegpt-starter.vercel.app\">now</a>.</html>"));
-    }
+        .addLabeledComponent("Email address:", new JBLabel(user.getEmails().get(0).getEmail()).withFont(JBFont.label().asBold()));
 
     var signOutButton = new JButton("Sign Out");
     signOutButton.addActionListener(e -> {
       userManager.clearSession();
-      refreshView(createUserAuthenticationPanel(emailField, passwordField, false));
+      refreshView(createUserAuthenticationPanel(emailField, passwordField, null));
     });
 
     return FormBuilder.createFormBuilder()
@@ -196,18 +198,25 @@ public class UserDetailsSettingsPanel extends JPanel {
   class UserAuthenticationHandler implements AuthenticationHandler {
 
     @Override
-    public void handleAuthenticated() {
-      SwingUtilities.invokeLater(() -> refreshView(createUserInformationPanel()));
-    }
-
-    @Override
-    public void handleInvalidCredentials() {
-      SwingUtilities.invokeLater(() -> refreshView(createUserAuthenticationPanel(emailField, passwordField, true)));
+    public void handleAuthenticated(AuthenticationResponse authenticationResponse) {
+      SwingUtilities.invokeLater(() -> {
+        var email = emailField.getText();
+        var password = passwordField.getPassword();
+        SettingsState.getInstance().setEmail(email);
+        UserCredentialsManager.getInstance().setAccountPassword(new String(password));
+        refreshView(createUserInformationPanel(authenticationResponse.getData().getUser()));
+      });
     }
 
     @Override
     public void handleGenericError() {
-      // TODO
+      SwingUtilities.invokeLater(() -> refreshView(
+          createUserAuthenticationPanel(emailField, passwordField, new AuthenticationError("unknown", "Something went wrong."))));
+    }
+
+    @Override
+    public void handleError(AuthenticationError error) {
+      SwingUtilities.invokeLater(() -> refreshView(createUserAuthenticationPanel(emailField, passwordField, error)));
     }
   }
 

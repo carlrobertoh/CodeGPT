@@ -15,19 +15,13 @@ public class SettingsComponent {
   private final JPanel mainPanel;
   private final JBTextField displayNameField;
   private final ServiceSelectionForm serviceSelectionForm;
-  private final ModelSelectionForm modelSelectionForm;
   private final UserDetailsSettingsPanel userDetailsSettingsPanel;
 
   public SettingsComponent(Disposable parentDisposable, SettingsState settings) {
-    modelSelectionForm = new ModelSelectionForm();
     serviceSelectionForm = new ServiceSelectionForm(settings);
-
     displayNameField = new JBTextField(settings.getDisplayName(), 20);
-
-    userDetailsSettingsPanel = new UserDetailsSettingsPanel(parentDisposable, settings);
-
+    userDetailsSettingsPanel = new UserDetailsSettingsPanel(parentDisposable);
     mainPanel = FormBuilder.createFormBuilder()
-        // .addComponent(userDetailsSettingsPanel)
         .addComponent(UI.PanelFactory.panel(displayNameField)
             .withLabel(CodeGPTBundle.get("settingsConfigurable.section.integration.displayNameFieldLabel"))
             .resizeX(false)
@@ -35,8 +29,6 @@ public class SettingsComponent {
         .addComponent(new TitledSeparator(CodeGPTBundle.get("settingsConfigurable.section.service.title")))
         .addComponent(serviceSelectionForm.getForm())
         .addVerticalGap(8)
-        .addComponent(new TitledSeparator(CodeGPTBundle.get("settingsConfigurable.section.model.title")))
-        .addComponent(modelSelectionForm.getForm())
         .addComponentFillVertically(new JPanel(), 0)
         .getPanel();
   }
@@ -63,10 +55,6 @@ public class SettingsComponent {
 
   public ServiceSelectionForm getServiceSelectionForm() {
     return serviceSelectionForm;
-  }
-
-  public ModelSelectionForm getModelSelectionForm() {
-    return modelSelectionForm;
   }
 
   public String getDisplayName() {

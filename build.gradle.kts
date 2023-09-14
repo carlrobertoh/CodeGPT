@@ -31,8 +31,7 @@ changelog {
 }
 
 dependencies {
-  implementation(project("embeddings", "instrumentedJar"))
-  implementation(project(mapOf("path" to ":embeddings")))
+  implementation(project(":codegpt-core"))
 
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.15.2")
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2")
@@ -47,6 +46,7 @@ dependencies {
 
   testImplementation("org.assertj:assertj-core:3.24.2")
   testImplementation("org.awaitility:awaitility:4.2.0")
+  testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.2")
   testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.0")
   testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
   testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.10.0")

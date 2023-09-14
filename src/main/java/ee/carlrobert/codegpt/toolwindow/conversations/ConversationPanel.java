@@ -1,94 +1,111 @@
 package ee.carlrobert.codegpt.toolwindow.conversations;
 
-import static ee.carlrobert.codegpt.util.SwingUtils.justifyLeft;
+import static ee.carlrobert.codegpt.util.ThemeUtils.getPanelBackgroundColor;
 
 import com.intellij.icons.AllIcons;
+import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
+import com.intellij.ui.components.JBLabel;
+import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
+import ee.carlrobert.codegpt.actions.toolwindow.DeleteConversationAction;
 import ee.carlrobert.codegpt.conversations.Conversation;
+import ee.carlrobert.codegpt.conversations.ConversationsState;
+import ee.carlrobert.codegpt.settings.state.SettingsState;
+import ee.carlrobert.codegpt.toolwindow.IconActionButton;
+import ee.carlrobert.codegpt.toolwindow.ModelIconLabel;
+import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
+import java.awt.BorderLayout;
 import java.awt.Cursor;
-import java.awt.Font;
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.time.format.DateTimeFormatter;
-import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import org.jetbrains.annotations.NotNull;
 
 class ConversationPanel extends JPanel {
 
-  private final Conversation conversation;
-
-  ConversationPanel(Conversation conversation, boolean isSelected) {
-    this.conversation = conversation;
-    addStyles(isSelected);
-
-    var constraints = new GridBagConstraints();
-    constraints.insets = JBUI.insets(0, 10);
-    addChatIcon(constraints);
-    addTextPanel(constraints);
+  ConversationPanel(@NotNull Project project, @NotNull Conversation conversation, @NotNull Runnable onDelete) {
+    super(new BorderLayout());
+    setBackground(JBColor.background());
+    addMouseListener(new MouseAdapter() {
+      @Override
+      public void mouseClicked(MouseEvent e) {
+        SettingsState.getInstance().sync(conversation);
+        StandardChatToolWindowContentManager.getInstance(project).displayConversation(conversation);
+      }
+    });
+    addStyles(isSelected(conversation));
+    addTextPanel(conversation, onDelete);
     setCursor(new Cursor(Cursor.HAND_CURSOR));
   }
 
+  private boolean isSelected(Conversation conversation) {
+    var currentConversation = ConversationsState.getCurrentConversation();
+    return currentConversation != null && currentConversation.getId().equals(conversation.getId());
+  }
+
   private void addStyles(boolean isSelected) {
-    setBackground(JBColor.background().darker());
-    if (isSelected) {
-      setBorder(BorderFactory.createCompoundBorder(
-          BorderFactory.createMatteBorder(4, 4, 4, 4, JBColor.green),
-          JBUI.Borders.empty(10)));
-    } else {
-      setBorder(JBUI.Borders.empty(10));
-    }
+    var border = isSelected ?
+        JBUI.Borders.customLine(JBUI.CurrentTheme.ActionButton.focusedBorder(), 2, 2, 2, 2) :
+        JBUI.Borders.customLine(JBColor.border(), 1, 0, 1, 0);
+    setBackground(getPanelBackgroundColor());
+    setBorder(JBUI.Borders.compound(border, JBUI.Borders.empty(8)));
     setLayout(new GridBagLayout());
     setCursor(new Cursor(Cursor.HAND_CURSOR));
   }
 
-  private void addChatIcon(GridBagConstraints constraints) {
-    constraints.gridx = 0;
-    constraints.gridy = 0;
-    constraints.weightx = 0.0;
-    constraints.fill = GridBagConstraints.NONE;
-    add(new JLabel(AllIcons.Actions.Annotate), constraints);
-  }
-
-  private void addTextPanel(GridBagConstraints constraints) {
+  private void addTextPanel(Conversation conversation, Runnable onDelete) {
+    var constraints = new GridBagConstraints();
     constraints.gridx = 1;
     constraints.weightx = 1.0;
     constraints.fill = GridBagConstraints.HORIZONTAL;
-    add(createTextPanel(), constraints);
+    add(createTextPanel(conversation, onDelete), constraints);
   }
 
-  private JPanel createTextPanel() {
-    var title = new JLabel(getFirstPrompt());
-    title.setBorder(JBUI.Borders.emptyBottom(8));
-    title.setFont(title.getFont().deriveFont(title.getFont().getStyle() | Font.BOLD));
+  private JPanel createTextPanel(Conversation conversation, Runnable onDelete) {
+    var headerPanel = new JPanel(new GridBagLayout());
+    headerPanel.setBorder(JBUI.Borders.emptyBottom(12));
 
-    var textPanel = new JPanel();
-    textPanel.setBackground(getBackground());
-    textPanel.setLayout(new BoxLayout(textPanel, BoxLayout.PAGE_AXIS));
-    textPanel.add(justifyLeft(title));
+    var gbc = new GridBagConstraints();
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    gbc.weightx = 1.0;
+    gbc.gridx = 0;
 
-    var bottomPanel = new JPanel();
-    bottomPanel.setBackground(getBackground());
-    bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.X_AXIS));
+    headerPanel.setBackground(getPanelBackgroundColor());
+    headerPanel.add(new JBLabel(getFirstPrompt(conversation))
+        .withFont(JBFont.label().asBold()), gbc);
+
+    gbc.gridx = 1;
+    gbc.weightx = 0;
+    headerPanel.add(new IconActionButton("Delete conversation", AllIcons.Actions.GC, new DeleteConversationAction(onDelete)), gbc);
+
+    var bottomPanel = new JPanel(new BorderLayout());
+    bottomPanel.setBackground(getPanelBackgroundColor());
     bottomPanel.add(new JLabel(conversation.getUpdatedOn()
-        .format(DateTimeFormatter.ofPattern("M/d/yyyy, h:mm:ss a"))));
-    bottomPanel.add(Box.createHorizontalGlue());
+        .format(DateTimeFormatter.ofPattern("M/d/yyyy, h:mm:ss a"))), BorderLayout.WEST);
     if (conversation.getModel() != null) {
-      bottomPanel.add(new JLabel(conversation.getModel()));
+      bottomPanel.add(new ModelIconLabel(conversation.getClientCode(), conversation.getModel()), BorderLayout.EAST);
     }
-    textPanel.add(bottomPanel);
+
+    var textPanel = new JPanel(new BorderLayout());
+    textPanel.setBackground(getPanelBackgroundColor());
+    textPanel.add(headerPanel, BorderLayout.NORTH);
+    textPanel.add(bottomPanel, BorderLayout.SOUTH);
     return textPanel;
   }
 
-  private String getFirstPrompt() {
+  private String getFirstPrompt(Conversation conversation) {
     var messages = conversation.getMessages();
-    var prompt = "";
-    if (!messages.isEmpty()) {
-      prompt = conversation.getMessages().get(0).getPrompt();
+    if (messages.isEmpty()) {
+      return "";
     }
-    return prompt;
+    return messages.get(0).getPrompt();
   }
 }

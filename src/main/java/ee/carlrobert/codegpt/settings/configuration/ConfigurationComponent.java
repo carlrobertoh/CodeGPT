@@ -100,7 +100,6 @@ public class ConfigurationComponent {
         .addComponent(openNewTabCheckBox)
         .addVerticalGap(4)
         .addComponent(new TitledSeparator(CodeGPTBundle.get("configurationConfigurable.section.assistant.title")))
-        .addVerticalGap(4)
         .addComponent(createAssistantConfigurationForm())
         .addComponentFillVertically(new JPanel(), 0)
         .getPanel();

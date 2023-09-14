@@ -5,12 +5,10 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
+import ee.carlrobert.codegpt.conversations.Conversation;
 import org.jetbrains.annotations.NotNull;
 
-@State(
-    name = "ee.carlrobert.codegpt.state.settings.SettingsState",
-    storages = @Storage("CodeGPTSettings_210.xml")
-)
+@State(name = "CodeGPT_GeneralSettings_210", storages = @Storage("CodeGPT_GeneralSettings_210.xml"))
 public class SettingsState implements PersistentStateComponent<SettingsState> {
 
   private String email = "";
@@ -18,6 +16,8 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
   private boolean previouslySignedIn;
   private boolean useOpenAIService = true;
   private boolean useAzureService;
+  private boolean useYouService;
+  private boolean displayWebSearchResults = true;
 
   public SettingsState() {
   }
@@ -34,6 +34,20 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
   @Override
   public void loadState(@NotNull SettingsState state) {
     XmlSerializerUtil.copyBean(state, this);
+  }
+
+  public void sync(Conversation conversation) {
+    var clientCode = conversation.getClientCode();
+    if ("chat.completion".equals(clientCode)) {
+      OpenAISettingsState.getInstance().setModel(conversation.getModel());
+    }
+    if ("azure.chat.completion".equals(clientCode)) {
+      AzureSettingsState.getInstance().setModel(conversation.getModel());
+    }
+
+    setUseOpenAIService("chat.completion".equals(clientCode));
+    setUseAzureService("azure.chat.completion".equals(clientCode));
+    setUseYouService("you.chat.completion".equals(clientCode));
   }
 
   public String getEmail() {
@@ -81,5 +95,21 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
 
   public void setUseAzureService(boolean useAzureService) {
     this.useAzureService = useAzureService;
+  }
+
+  public boolean isUseYouService() {
+    return useYouService;
+  }
+
+  public void setUseYouService(boolean useYouService) {
+    this.useYouService = useYouService;
+  }
+
+  public boolean isDisplayWebSearchResults() {
+    return displayWebSearchResults;
+  }
+
+  public void setDisplayWebSearchResults(boolean displayWebSearchResults) {
+    this.displayWebSearchResults = displayWebSearchResults;
   }
 }

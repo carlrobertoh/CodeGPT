@@ -13,13 +13,13 @@ import ee.carlrobert.codegpt.indexes.CodebaseIndexingCompletedNotifier;
 import ee.carlrobert.codegpt.indexes.CodebaseIndexingTask;
 import ee.carlrobert.codegpt.indexes.FolderStructureTreePanel;
 import ee.carlrobert.codegpt.settings.SettingsConfigurable;
-import ee.carlrobert.codegpt.toolwindow.chat.ResponsePanel;
+import ee.carlrobert.codegpt.toolwindow.chat.components.ResponsePanel;
 import ee.carlrobert.codegpt.user.UserManager;
 import ee.carlrobert.codegpt.user.auth.AuthenticationNotifier;
 import ee.carlrobert.codegpt.user.auth.SignedOutNotifier;
 import ee.carlrobert.codegpt.util.OverlayUtils;
 import ee.carlrobert.codegpt.util.SwingUtils;
-import ee.carlrobert.codegpt.embeddings.VectorStore;
+import ee.carlrobert.vector.VectorStore;
 import javax.swing.JTextPane;
 import javax.swing.event.HyperlinkEvent;
 
@@ -53,7 +53,7 @@ class ContextualChatToolWindowLandingPanel extends ResponsePanel {
     var description = createTextPane();
     var userManager = UserManager.getInstance();
 
-    if (userManager.getSession() == null) {
+    if (userManager.getAuthenticationResponse() == null) {
       description.setText("<html>" +
           "<p style=\"margin-top: 4px; margin-bottom: 4px;\">It looks like you haven't logged in. Please <a href=\"LOGIN\">log in</a> to use the feature.</p>" +
           "</html>");

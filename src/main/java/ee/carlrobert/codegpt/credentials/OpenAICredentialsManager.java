@@ -1,12 +1,14 @@
 package ee.carlrobert.codegpt.credentials;
 
 import com.intellij.credentialStore.CredentialAttributes;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.components.Service;
 import org.jetbrains.annotations.Nullable;
 
-public class OpenAICredentialsManager {
+@Service
+public final class OpenAICredentialsManager {
 
   private static final CredentialAttributes openAIApiKeyCredentialAttributes = CredentialsUtil.createCredentialAttributes("OPENAI_API_KEY");
-  private static OpenAICredentialsManager instance;
 
   private String openAIApiKey;
 
@@ -15,10 +17,7 @@ public class OpenAICredentialsManager {
   }
 
   public static OpenAICredentialsManager getInstance() {
-    if (instance == null) {
-      instance = new OpenAICredentialsManager();
-    }
-    return instance;
+    return ApplicationManager.getApplication().getService(OpenAICredentialsManager.class);
   }
 
   public boolean isApiKeySet() {

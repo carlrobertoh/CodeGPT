@@ -2,10 +2,13 @@ package ee.carlrobert.codegpt.completions;
 
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.message.Message;
-import ee.carlrobert.codegpt.settings.state.ModelSettingsState;
+import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
+import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
-import ee.carlrobert.openai.client.completion.CompletionEventListener;
-import ee.carlrobert.openai.client.completion.ErrorDetails;
+import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
+import ee.carlrobert.llm.client.you.completion.YouCompletionEventListener;
+import ee.carlrobert.llm.client.you.completion.YouSerpResult;
+import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -22,6 +25,7 @@ public class CompletionRequestHandler {
   private @Nullable Consumer<String> messageListener;
   private @Nullable BiConsumer<ErrorDetails, Throwable> errorListener;
   private @Nullable Consumer<String> completedListener;
+  private @Nullable Consumer<List<YouSerpResult>> serpResultsListener;
   private @Nullable Runnable tokensExceededListener;
   private boolean useContextualSearch;
 
@@ -46,48 +50,12 @@ public class CompletionRequestHandler {
     this.tokensExceededListener = tokensExceededListener;
   }
 
+  public void addSerpResultsListener(Consumer<List<YouSerpResult>> serpResultsListener) {
+    this.serpResultsListener = serpResultsListener;
+  }
+
   public void call(Conversation conversation, Message message, boolean isRetry) {
-    swingWorker = new SwingWorker<>() {
-      protected Void doInBackground() {
-        try {
-          eventSource = startCall(conversation, message, isRetry, new CompletionEventListener() {
-            @Override
-            public void onMessage(String message) {
-              publish(message);
-            }
-
-            @Override
-            public void onComplete(StringBuilder messageBuilder) {
-              if (completedListener != null) {
-                completedListener.accept(messageBuilder.toString());
-              }
-            }
-
-            @Override
-            public void onError(ErrorDetails error, Throwable ex) {
-              if (errorListener != null) {
-                errorListener.accept(error, ex);
-              }
-            }
-          });
-        } catch (TotalUsageExceededException e) {
-          if (tokensExceededListener != null) {
-            tokensExceededListener.run();
-          }
-        }
-        return null;
-      }
-
-      protected void process(List<String> chunks) {
-        message.setResponse(messageBuilder.toString());
-        for (String text : chunks) {
-          messageBuilder.append(text);
-          if (messageListener != null) {
-            messageListener.accept(text);
-          }
-        }
-      }
-    };
+    swingWorker = new CompletionRequestWorker(conversation, message, isRetry);
     swingWorker.execute();
   }
 
@@ -104,14 +72,132 @@ public class CompletionRequestHandler {
       boolean isRetry,
       CompletionEventListener eventListener) {
     var settings = SettingsState.getInstance();
-    var modelSettings = ModelSettingsState.getInstance();
     var requestProvider = new CompletionRequestProvider(conversation);
 
-    if (modelSettings.isUseChatCompletion()) {
-      return CompletionClientProvider.getChatCompletionClient(settings).stream(
-          requestProvider.buildChatCompletionRequest(modelSettings.getChatCompletionModel(), message, isRetry, useContextualSearch), eventListener);
+    try {
+      if (settings.isUseYouService()) {
+        return CompletionClientProvider.getYouClient("", "")
+            .getChatCompletion(requestProvider.buildYouCompletionRequest(message), eventListener);
+      }
+
+      if (settings.isUseAzureService()) {
+        var azureSettings = AzureSettingsState.getInstance();
+        return CompletionClientProvider.getAzureClient().getChatCompletion(
+            requestProvider.buildOpenAIChatCompletionRequest(
+                azureSettings.getModel(),
+                message,
+                isRetry,
+                useContextualSearch,
+                azureSettings.isUsingCustomPath() ? azureSettings.getPath() : null),
+            eventListener);
+      }
+
+      var openAISettings = OpenAISettingsState.getInstance();
+      return CompletionClientProvider.getOpenAIClient().getChatCompletion(
+          requestProvider.buildOpenAIChatCompletionRequest(
+              openAISettings.getModel(),
+              message,
+              isRetry,
+              useContextualSearch,
+              openAISettings.isUsingCustomPath() ? openAISettings.getPath() : null),
+          eventListener);
+    } catch (Throwable t) {
+      if (errorListener != null) {
+        errorListener.accept(new ErrorDetails("Something went wrong"), t);
+      }
+      throw t;
     }
-    return CompletionClientProvider.getTextCompletionClient(settings).stream(
-        requestProvider.buildTextCompletionRequest(modelSettings.getTextCompletionModel(), message, isRetry), eventListener);
+  }
+
+  private class CompletionRequestWorker extends SwingWorker<Void, String> {
+
+    private final Conversation conversation;
+    private final Message message;
+    private final boolean isRetry;
+
+    public CompletionRequestWorker(Conversation conversation, Message message, boolean isRetry) {
+      this.conversation = conversation;
+      this.message = message;
+      this.isRetry = isRetry;
+    }
+
+    protected Void doInBackground() {
+      try {
+        eventSource = startCall(
+            conversation,
+            message,
+            isRetry,
+            SettingsState.getInstance().isUseYouService() ? getYouCompletionEventListener() : getCompletionEventListener());
+      } catch (TotalUsageExceededException e) {
+        if (tokensExceededListener != null) {
+          tokensExceededListener.run();
+        }
+      }
+      return null;
+    }
+
+    protected void process(List<String> chunks) {
+      message.setResponse(messageBuilder.toString());
+      for (String text : chunks) {
+        messageBuilder.append(text);
+        if (messageListener != null) {
+          messageListener.accept(text);
+        }
+      }
+    }
+
+    private CompletionEventListener getCompletionEventListener() {
+      return new CompletionEventListener() {
+        @Override
+        public void onMessage(String message) {
+          publish(message);
+        }
+
+        @Override
+        public void onComplete(StringBuilder messageBuilder) {
+          if (completedListener != null) {
+            completedListener.accept(messageBuilder.toString());
+          }
+        }
+
+        @Override
+        public void onError(ErrorDetails error, Throwable ex) {
+          if (errorListener != null) {
+            errorListener.accept(error, ex);
+          }
+        }
+      };
+    }
+
+    // TODO: Refactor
+    private YouCompletionEventListener getYouCompletionEventListener() {
+      return new YouCompletionEventListener() {
+        @Override
+        public void onMessage(String message) {
+          publish(message);
+        }
+
+        @Override
+        public void onComplete(StringBuilder messageBuilder) {
+          if (completedListener != null) {
+            completedListener.accept(messageBuilder.toString());
+          }
+        }
+
+        @Override
+        public void onError(ErrorDetails error, Throwable ex) {
+          if (errorListener != null) {
+            errorListener.accept(error, ex);
+          }
+        }
+
+        @Override
+        public void onSerpResults(List<YouSerpResult> results) {
+          if (serpResultsListener != null) {
+            serpResultsListener.accept(results);
+          }
+        }
+      };
+    }
   }
 }

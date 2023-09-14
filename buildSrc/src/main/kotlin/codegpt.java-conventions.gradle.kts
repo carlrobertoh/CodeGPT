@@ -18,7 +18,7 @@ intellij {
 }
 
 dependencies {
-  implementation("ee.carlrobert:openai-client:1.2.1")
+  implementation("ee.carlrobert:llm-client:0.0.3")
 }
 
 tasks {
