@@ -43,6 +43,8 @@ dependencies {
   implementation("org.apache.commons:commons-text:1.10.0")
   implementation("com.knuddels:jtokkit:0.6.1")
   implementation("org.quartz-scheduler:quartz:2.3.2")
+  implementation("com.segment.analytics.java:analytics:2.1.1")
+  implementation("com.squareup.okhttp3:okhttp:4.9.3")
 
   testImplementation("org.assertj:assertj-core:3.24.2")
   testImplementation("org.awaitility:awaitility:4.2.0")

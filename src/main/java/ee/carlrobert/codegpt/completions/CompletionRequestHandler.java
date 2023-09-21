@@ -1,10 +1,12 @@
 package ee.carlrobert.codegpt.completions;
 
+import ee.carlrobert.codegpt.TelemetryService;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
+import ee.carlrobert.codegpt.telemetry.core.service.TelemetryMessageBuilder.ActionMessage;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.client.you.completion.YouCompletionEventListener;
 import ee.carlrobert.llm.client.you.completion.YouSerpResult;
@@ -128,6 +130,11 @@ public class CompletionRequestHandler {
             message,
             isRetry,
             SettingsState.getInstance().isUseYouService() ? getYouCompletionEventListener() : getCompletionEventListener());
+        ActionMessage telemetry = TelemetryService.instance().action("CodeGPT-search");
+        telemetry
+                .property("model", conversation.getModel())
+                .property("message",message.getUserMessage())
+                .send();
       } catch (TotalUsageExceededException e) {
         if (tokensExceededListener != null) {
           tokensExceededListener.run();

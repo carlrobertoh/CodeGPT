@@ -23,6 +23,23 @@
         <toolWindow id="CodeGPT" icon="ee.carlrobert.codegpt.Icons.DefaultSmallIcon" anchor="right"
             factoryClass="ee.carlrobert.codegpt.toolwindow.ProjectToolWindowFactory"/>
         <notificationGroup id="CodeGPT Notification Group" displayType="BALLOON" key="notification.group.name"/>
+
+    </extensions>
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationService
+                serviceImplementation="ee.carlrobert.codegpt.telemetry.core.service.TelemetryServiceFactory"/>
+        <!-- projectService serviceImplementation="ee.carlrobert.codegpt.services.MyProjectService" / -->
+        <!-- applicationService serviceImplementation="ee.carlrobert.codegpt.services.Preferences"/ -->
+    </extensions>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationConfigurable
+                parentId="tools"
+                instance="ee.carlrobert.codegpt.telemetry.ui.preferences.TelemetryConfigurable"
+                id="tools.preferences.codegpt.telemetry"
+                displayName="CodeGPT Telemetry"/>
+        <toolWindow id="CodeGPT" secondary="true" icon="ee.carlrobert.codegpt.Icons.DefaultSmallIcon" anchor="right"
+                    factoryClass="ee.carlrobert.codegpt.toolwindow.ProjectToolWindowFactory"/>
     </extensions>
 
     <resource-bundle>messages.codegpt</resource-bundle>
