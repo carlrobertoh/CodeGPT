@@ -38,8 +38,6 @@
                 instance="ee.carlrobert.codegpt.telemetry.ui.preferences.TelemetryConfigurable"
                 id="tools.preferences.codegpt.telemetry"
                 displayName="CodeGPT Telemetry"/>
-        <toolWindow id="CodeGPT" secondary="true" icon="ee.carlrobert.codegpt.Icons.DefaultSmallIcon" anchor="right"
-                    factoryClass="ee.carlrobert.codegpt.toolwindow.ProjectToolWindowFactory"/>
     </extensions>
 
     <resource-bundle>messages.codegpt</resource-bundle>
