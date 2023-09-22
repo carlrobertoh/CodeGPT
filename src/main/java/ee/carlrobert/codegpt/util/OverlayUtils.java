@@ -2,7 +2,7 @@ package ee.carlrobert.codegpt.util;
 
 import static com.intellij.openapi.ui.Messages.CANCEL;
 import static com.intellij.openapi.ui.Messages.OK;
-import static ee.carlrobert.codegpt.Icons.DefaultImageIcon;
+import static ee.carlrobert.codegpt.Icons.DefaultIcon;
 
 import com.intellij.execution.ExecutionBundle;
 import com.intellij.notification.Notification;
@@ -56,7 +56,7 @@ public class OverlayUtils {
     return Messages.showYesNoDialog(
         CodeGPTBundle.get("dialog.deleteConversation.description"),
         CodeGPTBundle.get("dialog.deleteConversation.title"),
-        DefaultImageIcon);
+        DefaultIcon);
   }
 
   public static int showTokenLimitExceededDialog() {
@@ -65,7 +65,7 @@ public class OverlayUtils {
             CodeGPTBundle.get("dialog.tokenLimitExceeded.description"))
         .yesText(CodeGPTBundle.get("dialog.tokenLimitExceeded.continue"))
         .noText(CodeGPTBundle.get("dialog.tokenLimitExceeded.cancel"))
-        .icon(DefaultImageIcon)
+        .icon(DefaultIcon)
         .doNotAsk(new DoNotAskOption.Adapter() {
           @Override
           public void rememberChoice(boolean isSelected, int exitCode) {

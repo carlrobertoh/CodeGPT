@@ -11,6 +11,7 @@ import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.JBUI;
+import ee.carlrobert.codegpt.TelemetryService;
 import ee.carlrobert.codegpt.completions.CompletionRequestHandler;
 import ee.carlrobert.codegpt.completions.SerpResult;
 import ee.carlrobert.codegpt.conversations.Conversation;
@@ -174,6 +175,11 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     requestHandler.addTokensExceededListener(() -> SwingUtilities.invokeLater(() -> {
       var answer = OverlayUtils.showTokenLimitExceededDialog();
       if (answer == OK) {
+        TelemetryService.instance().action("CodeGPT-Action")
+            .property("action", "DISCARD_TOKEN_LIMIT")
+            .property("model", conversation.getModel())
+            .send();
+
         conversationService.discardTokenLimits(conversation);
         requestHandler.call(conversation, message, true);
       } else {

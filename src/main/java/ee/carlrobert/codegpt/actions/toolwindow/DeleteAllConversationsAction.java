@@ -1,11 +1,12 @@
 package ee.carlrobert.codegpt.actions.toolwindow;
 
-import static ee.carlrobert.codegpt.Icons.DefaultImageIcon;
+import static ee.carlrobert.codegpt.Icons.DefaultIcon;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
+import ee.carlrobert.codegpt.TelemetryService;
 import ee.carlrobert.codegpt.actions.editor.EditorActionsUtil;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
@@ -32,12 +33,21 @@ public class DeleteAllConversationsAction extends AnAction {
 
   @Override
   public void actionPerformed(@NotNull AnActionEvent event) {
-    int answer = Messages.showYesNoDialog("Are you sure you want to delete all conversations?", "Clear History", DefaultImageIcon);
+    int answer = Messages.showYesNoDialog(
+        "Are you sure you want to delete all conversations?",
+        "Clear History",
+        DefaultIcon);
     if (answer == Messages.YES) {
       var project = event.getProject();
       if (project != null) {
-        ConversationService.getInstance().clearAll();
-        StandardChatToolWindowContentManager.getInstance(project).resetActiveTab();
+        try {
+          ConversationService.getInstance().clearAll();
+          StandardChatToolWindowContentManager.getInstance(project).resetActiveTab();
+        } finally {
+          TelemetryService.instance().action("CodeGPT-Action")
+              .property("action", "DELETE_ALL_CONVERSATIONS")
+              .send();
+        }
       }
       this.onRefresh.run();
     }

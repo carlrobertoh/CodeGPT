@@ -32,6 +32,7 @@ changelog {
 
 dependencies {
   implementation(project(":codegpt-core"))
+  implementation(project(":codegpt-telemetry"))
 
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.15.2")
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2")
@@ -43,8 +44,6 @@ dependencies {
   implementation("org.apache.commons:commons-text:1.10.0")
   implementation("com.knuddels:jtokkit:0.6.1")
   implementation("org.quartz-scheduler:quartz:2.3.2")
-  implementation("com.segment.analytics.java:analytics:3.4.0")
-  implementation("com.squareup.okhttp3:okhttp:4.11.0")
 
   testImplementation("org.assertj:assertj-core:3.24.2")
   testImplementation("org.awaitility:awaitility:4.2.0")

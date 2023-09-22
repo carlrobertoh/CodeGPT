@@ -6,7 +6,6 @@ import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
-import ee.carlrobert.codegpt.telemetry.core.service.TelemetryMessageBuilder.ActionMessage;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.client.you.completion.YouCompletionEventListener;
 import ee.carlrobert.llm.client.you.completion.YouSerpResult;
@@ -124,21 +123,21 @@ public class CompletionRequestHandler {
     }
 
     protected Void doInBackground() {
+      var settings = SettingsState.getInstance();
       try {
         eventSource = startCall(
             conversation,
             message,
             isRetry,
-            SettingsState.getInstance().isUseYouService() ? getYouCompletionEventListener() : getCompletionEventListener());
-        ActionMessage telemetry = TelemetryService.instance().action("CodeGPT-search");
-        telemetry
-                .property("model", conversation.getModel())
-                .property("message",message.getUserMessage())
-                .send();
+            settings.isUseYouService() ?
+                getYouCompletionEventListener() :
+                getCompletionEventListener());
       } catch (TotalUsageExceededException e) {
         if (tokensExceededListener != null) {
           tokensExceededListener.run();
         }
+      } finally {
+        sendInfo(settings);
       }
       return null;
     }
@@ -169,8 +168,12 @@ public class CompletionRequestHandler {
 
         @Override
         public void onError(ErrorDetails error, Throwable ex) {
-          if (errorListener != null) {
-            errorListener.accept(error, ex);
+          try {
+            if (errorListener != null) {
+              errorListener.accept(error, ex);
+            }
+          } finally {
+            sendError(error, ex);
           }
         }
       };
@@ -193,8 +196,12 @@ public class CompletionRequestHandler {
 
         @Override
         public void onError(ErrorDetails error, Throwable ex) {
-          if (errorListener != null) {
-            errorListener.accept(error, ex);
+          try {
+            if (errorListener != null) {
+              errorListener.accept(error, ex);
+            }
+          } finally {
+            sendError(error, ex);
           }
         }
 
@@ -205,6 +212,28 @@ public class CompletionRequestHandler {
           }
         }
       };
+    }
+
+    private void sendInfo(SettingsState settings) {
+      var service = "openai";
+      if (settings.isUseAzureService()) {
+        service = "azure";
+      }
+      if (settings.isUseYouService()) {
+        service = "you";
+      }
+      TelemetryService.instance().action("CodeGPT-Completion")
+          .property("conversationId", conversation.getId().toString())
+          .property("model", conversation.getModel())
+          .property("service", service)
+          .send();
+    }
+
+    private void sendError(ErrorDetails error, Throwable ex) {
+      TelemetryService.instance().action("CodeGPT-Completion")
+          .property("conversationId", conversation.getId().toString())
+          .error(new RuntimeException("Received an error during completion.\n" + error, ex))
+          .send();
     }
   }
 }
