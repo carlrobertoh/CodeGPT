@@ -2,6 +2,7 @@ package ee.carlrobert.codegpt.toolwindow.chat.standard;
 
 import static java.util.Objects.requireNonNull;
 
+import com.intellij.openapi.components.Service;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
@@ -14,21 +15,13 @@ import ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowTabPanel;
 import java.util.Arrays;
 import java.util.Optional;
 
-public class StandardChatToolWindowContentManager {
-
-  private static StandardChatToolWindowContentManager instance;
+@Service(Service.Level.PROJECT)
+public final class StandardChatToolWindowContentManager {
 
   private final Project project;
 
-  private StandardChatToolWindowContentManager(Project project) {
+  public StandardChatToolWindowContentManager(Project project) {
     this.project = project;
-  }
-
-  public static StandardChatToolWindowContentManager getInstance(Project project) {
-    if (instance == null) {
-      instance = new StandardChatToolWindowContentManager(project);
-    }
-    return instance;
   }
 
   public void sendMessage(Message message) {
