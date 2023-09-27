@@ -38,7 +38,7 @@ class ConversationPanel extends JPanel {
       @Override
       public void mouseClicked(MouseEvent e) {
         SettingsState.getInstance().sync(conversation);
-        StandardChatToolWindowContentManager.getInstance(project).displayConversation(conversation);
+        project.getService(StandardChatToolWindowContentManager.class).displayConversation(conversation);
       }
     });
     addStyles(isSelected(conversation));

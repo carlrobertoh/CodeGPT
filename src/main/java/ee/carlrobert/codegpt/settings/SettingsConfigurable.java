@@ -122,6 +122,6 @@ public class SettingsConfigurable implements Configurable, Disposable {
       throw new RuntimeException("Could not find current project.");
     }
 
-    StandardChatToolWindowContentManager.getInstance(project).resetActiveTab();
+    project.getService(StandardChatToolWindowContentManager.class).resetActiveTab();
   }
 }
