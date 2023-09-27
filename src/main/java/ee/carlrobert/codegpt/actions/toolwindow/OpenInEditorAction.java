@@ -9,6 +9,7 @@ import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.testFramework.LightVirtualFile;
+import ee.carlrobert.codegpt.TelemetryService;
 import ee.carlrobert.codegpt.actions.editor.EditorActionsUtil;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import java.time.format.DateTimeFormatter;

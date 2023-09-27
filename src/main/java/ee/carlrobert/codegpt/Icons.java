@@ -1,9 +1,7 @@
 package ee.carlrobert.codegpt;
 
 import com.intellij.openapi.util.IconLoader;
-import java.util.Objects;
 import javax.swing.Icon;
-import javax.swing.ImageIcon;
 
 public final class Icons {
 
@@ -13,9 +11,4 @@ public final class Icons {
   public static final Icon OpenAIIcon = IconLoader.getIcon("/icons/openai.svg", Icons.class);
   public static final Icon AzureIcon = IconLoader.getIcon("/icons/azure.svg", Icons.class);
   public static final Icon YouIcon = IconLoader.getIcon("/icons/you.svg", Icons.class);
-  public static final ImageIcon DefaultImageIcon = getImageIcon("/icons/chatgpt.png");
-
-  private static ImageIcon getImageIcon(String path) {
-    return new ImageIcon(Objects.requireNonNull(Icons.class.getResource(path)));
-  }
 }
