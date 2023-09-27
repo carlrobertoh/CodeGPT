@@ -6,8 +6,8 @@ import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
-import ee.carlrobert.codegpt.TelemetryService;
 import ee.carlrobert.codegpt.actions.editor.EditorActionsUtil;
+import ee.carlrobert.codegpt.completions.TelemetryAction;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
 import org.jetbrains.annotations.NotNull;
@@ -44,7 +44,7 @@ public class DeleteAllConversationsAction extends AnAction {
           ConversationService.getInstance().clearAll();
           StandardChatToolWindowContentManager.getInstance(project).resetActiveTab();
         } finally {
-          TelemetryService.instance().action("CodeGPT-Action")
+          TelemetryAction.createActionMessage(TelemetryAction.IDE_ACTION)
               .property("action", "DELETE_ALL_CONVERSATIONS")
               .send();
         }

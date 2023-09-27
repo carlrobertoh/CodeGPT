@@ -222,7 +222,7 @@ public class CompletionRequestHandler {
       if (settings.isUseYouService()) {
         service = "you";
       }
-      TelemetryService.instance().action("CodeGPT-Completion")
+      TelemetryAction.createActionMessage(TelemetryAction.COMPLETION)
           .property("conversationId", conversation.getId().toString())
           .property("model", conversation.getModel())
           .property("service", service)
@@ -230,7 +230,7 @@ public class CompletionRequestHandler {
     }
 
     private void sendError(ErrorDetails error, Throwable ex) {
-      TelemetryService.instance().action("CodeGPT-Completion")
+      TelemetryAction.createActionMessage(TelemetryAction.COMPLETION)
           .property("conversationId", conversation.getId().toString())
           .error(new RuntimeException("Received an error during completion.\n" + error, ex))
           .send();
