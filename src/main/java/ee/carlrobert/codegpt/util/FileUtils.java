@@ -191,6 +191,9 @@ public class FileUtils {
         if (StringUtils.isBlank(str)) {
             continue;
         }
+        if (!str.startsWith(" ")) {
+            break;
+        }
         for (char c : str.toCharArray()) {
             if (Character.isWhitespace(c)) {
                 leadingSpaceCount++;
