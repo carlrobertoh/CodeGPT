@@ -1,11 +1,11 @@
-package ee.carlrobert.codegpt.completions;
+package ee.carlrobert.codegpt;
 
-import ee.carlrobert.codegpt.TelemetryService;
 import ee.carlrobert.codegpt.telemetry.core.service.TelemetryMessageBuilder.ActionMessage;
 
 public enum TelemetryAction {
 
   COMPLETION("CodeGPT-Completion"),
+  COMPLETION_ERROR("CodeGPT-Completion-Error"),
   IDE_ACTION("CodeGPT-Action");
 
   private final String code;

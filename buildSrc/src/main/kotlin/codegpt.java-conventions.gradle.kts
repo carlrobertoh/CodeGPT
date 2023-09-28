@@ -18,7 +18,7 @@ intellij {
 }
 
 dependencies {
-  implementation("ee.carlrobert:llm-client:0.0.3")
+  implementation("ee.carlrobert:llm-client:0.0.4")
 }
 
 tasks {

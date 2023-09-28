@@ -11,10 +11,11 @@ import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.JBUI;
+import ee.carlrobert.codegpt.actions.ActionType;
 import ee.carlrobert.codegpt.TelemetryService;
 import ee.carlrobert.codegpt.completions.CompletionRequestHandler;
 import ee.carlrobert.codegpt.completions.SerpResult;
-import ee.carlrobert.codegpt.completions.TelemetryAction;
+import ee.carlrobert.codegpt.TelemetryAction;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
@@ -235,6 +236,10 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
         conversationService.saveMessage(conversation, message);
         call(conversation, message, responsePanel, true);
       }
+
+      TelemetryAction.createActionMessage(TelemetryAction.IDE_ACTION)
+          .property("action", ActionType.RELOAD_MESSAGE.name())
+          .send();
     }
   }
 

@@ -1,6 +1,6 @@
 package ee.carlrobert.codegpt.completions;
 
-import ee.carlrobert.codegpt.TelemetryService;
+import ee.carlrobert.codegpt.TelemetryAction;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
@@ -230,9 +230,10 @@ public class CompletionRequestHandler {
     }
 
     private void sendError(ErrorDetails error, Throwable ex) {
-      TelemetryAction.createActionMessage(TelemetryAction.COMPLETION)
+      TelemetryAction.createActionMessage(TelemetryAction.COMPLETION_ERROR)
           .property("conversationId", conversation.getId().toString())
-          .error(new RuntimeException("Received an error during completion.\n" + error, ex))
+          .property("model", conversation.getModel())
+          .error(new RuntimeException(error.toString(), ex))
           .send();
     }
   }

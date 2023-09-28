@@ -1,0 +1,11 @@
+package ee.carlrobert.codegpt.actions;
+
+public enum ActionType {
+
+  CLEAR_CHAT_WINDOW,
+  CREATE_NEW_CHAT,
+  DELETE_ALL_CONVERSATIONS,
+  DELETE_CONVERSATION,
+  OPEN_CONVERSATION_IN_EDITOR,
+  RELOAD_MESSAGE
+}
