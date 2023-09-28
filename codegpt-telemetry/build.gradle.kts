@@ -3,5 +3,5 @@ plugins {
 }
 
 dependencies {
-    implementation("com.segment.analytics.java:analytics:3.4.0")
+    implementation("com.segment.analytics.java:analytics:3.5.0")
 }
