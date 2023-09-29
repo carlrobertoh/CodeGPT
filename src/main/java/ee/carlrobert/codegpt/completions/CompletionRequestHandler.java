@@ -1,6 +1,6 @@
 package ee.carlrobert.codegpt.completions;
 
-import ee.carlrobert.codegpt.TelemetryAction;
+import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
@@ -222,7 +222,7 @@ public class CompletionRequestHandler {
       if (settings.isUseYouService()) {
         service = "you";
       }
-      TelemetryAction.createActionMessage(TelemetryAction.COMPLETION)
+      TelemetryAction.COMPLETION.createActionMessage()
           .property("conversationId", conversation.getId().toString())
           .property("model", conversation.getModel())
           .property("service", service)
@@ -230,7 +230,7 @@ public class CompletionRequestHandler {
     }
 
     private void sendError(ErrorDetails error, Throwable ex) {
-      TelemetryAction.createActionMessage(TelemetryAction.COMPLETION_ERROR)
+      TelemetryAction.COMPLETION_ERROR.createActionMessage()
           .property("conversationId", conversation.getId().toString())
           .property("model", conversation.getModel())
           .error(new RuntimeException(error.toString(), ex))

@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt;
+package ee.carlrobert.codegpt.telemetry;
 
 import ee.carlrobert.codegpt.telemetry.core.service.TelemetryMessageBuilder.ActionMessage;
 
@@ -18,7 +18,7 @@ public enum TelemetryAction {
     return code;
   }
 
-  public static ActionMessage createActionMessage(TelemetryAction action) {
-    return TelemetryService.instance().action(action.getCode());
+  public ActionMessage createActionMessage() {
+    return TelemetryMessageProvider.builder().action(getCode());
   }
 }

@@ -5,7 +5,7 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import ee.carlrobert.codegpt.actions.ActionType;
 import ee.carlrobert.codegpt.actions.editor.EditorActionsUtil;
-import ee.carlrobert.codegpt.TelemetryAction;
+import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import org.jetbrains.annotations.NotNull;
 
@@ -32,7 +32,7 @@ public class ClearChatWindowAction extends AnAction {
     try {
       onActionPerformed.run();
     } finally {
-      TelemetryAction.createActionMessage(TelemetryAction.IDE_ACTION)
+      TelemetryAction.IDE_ACTION.createActionMessage()
           .property("action", ActionType.CLEAR_CHAT_WINDOW.name())
           .send();
     }

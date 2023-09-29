@@ -6,7 +6,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
 import ee.carlrobert.codegpt.actions.ActionType;
 import ee.carlrobert.codegpt.actions.editor.EditorActionsUtil;
-import ee.carlrobert.codegpt.TelemetryAction;
+import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.util.OverlayUtils;
@@ -32,7 +32,7 @@ public class DeleteConversationAction extends AnAction {
     if (OverlayUtils.showDeleteConversationDialog() == Messages.YES) {
       var project = event.getProject();
       if (project != null) {
-        TelemetryAction.createActionMessage(TelemetryAction.IDE_ACTION)
+        TelemetryAction.IDE_ACTION.createActionMessage()
             .property("action", ActionType.DELETE_CONVERSATION.name())
             .send();
 

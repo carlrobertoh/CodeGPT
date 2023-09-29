@@ -11,7 +11,7 @@ import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.testFramework.LightVirtualFile;
 import ee.carlrobert.codegpt.actions.ActionType;
 import ee.carlrobert.codegpt.actions.editor.EditorActionsUtil;
-import ee.carlrobert.codegpt.TelemetryAction;
+import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import java.time.format.DateTimeFormatter;
 import java.util.stream.Collectors;
@@ -54,7 +54,7 @@ public class OpenInEditorAction extends AnAction {
         toolWindow.hide();
       }
     } finally {
-      TelemetryAction.createActionMessage(TelemetryAction.IDE_ACTION)
+      TelemetryAction.IDE_ACTION.createActionMessage()
           .property("action", ActionType.OPEN_CONVERSATION_IN_EDITOR.name())
           .send();
     }

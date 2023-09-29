@@ -12,10 +12,8 @@ import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.actions.ActionType;
-import ee.carlrobert.codegpt.TelemetryService;
 import ee.carlrobert.codegpt.completions.CompletionRequestHandler;
 import ee.carlrobert.codegpt.completions.SerpResult;
-import ee.carlrobert.codegpt.TelemetryAction;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
@@ -24,6 +22,7 @@ import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
+import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.toolwindow.ModelIconLabel;
 import ee.carlrobert.codegpt.toolwindow.chat.components.ChatMessageResponseBody;
 import ee.carlrobert.codegpt.toolwindow.chat.components.ResponsePanel;
@@ -189,7 +188,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     requestHandler.addTokensExceededListener(() -> SwingUtilities.invokeLater(() -> {
       var answer = OverlayUtils.showTokenLimitExceededDialog();
       if (answer == OK) {
-        TelemetryService.instance().action(TelemetryAction.IDE_ACTION.getCode())
+        TelemetryAction.IDE_ACTION.createActionMessage()
             .property("action", "DISCARD_TOKEN_LIMIT")
             .property("model", conversation.getModel())
             .send();
@@ -237,7 +236,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
         call(conversation, message, responsePanel, true);
       }
 
-      TelemetryAction.createActionMessage(TelemetryAction.IDE_ACTION)
+      TelemetryAction.IDE_ACTION.createActionMessage()
           .property("action", ActionType.RELOAD_MESSAGE.name())
           .send();
     }
