@@ -165,7 +165,7 @@ public class ChatToolWindowTabPanelEditor implements Disposable {
       settings.setCaretRowShown(!viewer);
 
       event.getPresentation().setIcon(viewer ? Actions.EditSource : Actions.Show);
-      event.getPresentation().setText(viewer ? "Edit Source" : "View Source");
+      event.getPresentation().setText(viewer ? "Edit Source" : "Disable Editing");
 
       var locationOnScreen = ((MouseEvent) event.getInputEvent()).getLocationOnScreen();
       locationOnScreen.y = locationOnScreen.y - 16;
