@@ -17,7 +17,7 @@ public class DeleteConversationAction extends AnAction {
   private final Runnable onDelete;
 
   public DeleteConversationAction(Runnable onDelete) {
-    super("Delete Conversation", "Delete single conversation", AllIcons.General.Remove);
+    super("Delete Conversation", "Delete single conversation", AllIcons.Actions.GC);
     this.onDelete = onDelete;
     EditorActionsUtil.registerOrReplaceAction(this);
   }

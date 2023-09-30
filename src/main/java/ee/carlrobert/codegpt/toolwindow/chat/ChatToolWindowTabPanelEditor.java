@@ -3,7 +3,6 @@ package ee.carlrobert.codegpt.toolwindow.chat;
 import static ee.carlrobert.codegpt.util.FileUtils.findFileNameExtensionMapping;
 import static java.lang.String.format;
 
-import com.intellij.icons.AllIcons;
 import com.intellij.icons.AllIcons.Actions;
 import com.intellij.ide.util.EditorHelper;
 import com.intellij.openapi.Disposable;
@@ -131,16 +130,13 @@ public class ChatToolWindowTabPanelEditor implements Disposable {
 
   private JPanel createHeaderActions() {
     var wrapper = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-    wrapper.add(new IconActionButton("Edit", Actions.Edit, new EditAction()));
+    wrapper.add(new IconActionButton(new EditAction()));
     wrapper.add(Box.createHorizontalStrut(8));
-    wrapper.add(new IconActionButton("New File", Actions.AddFile, new NewFileAction()));
+    wrapper.add(new IconActionButton(new NewFileAction()));
     wrapper.add(Box.createHorizontalStrut(8));
-    wrapper.add(new IconActionButton("Copy", AllIcons.Actions.Copy, new CopyAction()));
+    wrapper.add(new IconActionButton(new CopyAction()));
     wrapper.add(Box.createHorizontalStrut(8));
-    wrapper.add(new IconActionButton(
-        "Replace in Main Editor",
-        AllIcons.Actions.Replace,
-        new ReplaceInMainEditorAction()));
+    wrapper.add(new IconActionButton(new ReplaceInMainEditorAction()));
     return wrapper;
   }
 
@@ -151,24 +147,27 @@ public class ChatToolWindowTabPanelEditor implements Disposable {
 
   class EditAction extends AnAction {
 
+    EditAction() {
+      super("Edit Source", "Edit Source description", Actions.EditSource);
+    }
+
     @Override
     public void actionPerformed(@NotNull AnActionEvent event) {
       var editorEx = ((EditorEx) editor);
       editorEx.setViewer(!editorEx.isViewer());
 
-      var isViewer = editorEx.isViewer();
-      editorEx.setCaretVisible(!isViewer);
-      editorEx.setCaretEnabled(!isViewer);
+      var viewer = editorEx.isViewer();
+      editorEx.setCaretVisible(!viewer);
+      editorEx.setCaretEnabled(!viewer);
 
       var settings = editorEx.getSettings();
-      settings.setCaretRowShown(!isViewer);
+      settings.setCaretRowShown(!viewer);
+
+      event.getPresentation().setIcon(viewer ? Actions.EditSource : Actions.Show);
+      event.getPresentation().setText(viewer ? "Edit Source" : "View Source");
 
       var locationOnScreen = ((MouseEvent) event.getInputEvent()).getLocationOnScreen();
       locationOnScreen.y = locationOnScreen.y - 16;
-
-      OverlayUtils.showInfoBalloon(
-          "Editing " + (isViewer ? "Disabled" : "Enabled"),
-          locationOnScreen);
     }
   }
 
@@ -178,6 +177,7 @@ public class ChatToolWindowTabPanelEditor implements Disposable {
     private final JBTextField fileNameTextField;
 
     NewFileAction() {
+      super("New File", "New File description", Actions.AddFile);
       var fileChooserDescriptor = FileChooserDescriptorFactory.createSingleFolderDescriptor();
       fileChooserDescriptor.setForcedToUseIdeaFileChooser(true);
 
@@ -223,6 +223,10 @@ public class ChatToolWindowTabPanelEditor implements Disposable {
 
   class CopyAction extends AnAction {
 
+    CopyAction() {
+      super("Copy", "Copy description", Actions.Copy);
+    }
+
     @Override
     public void actionPerformed(@NotNull AnActionEvent event) {
       StringSelection stringSelection = new StringSelection(editor.getDocument().getText());
@@ -237,6 +241,10 @@ public class ChatToolWindowTabPanelEditor implements Disposable {
   }
 
   class ReplaceInMainEditorAction extends AnAction {
+
+    ReplaceInMainEditorAction() {
+      super("Replace in Main Editor", "Replace in Main Editor description", Actions.Replace);
+    }
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent event) {

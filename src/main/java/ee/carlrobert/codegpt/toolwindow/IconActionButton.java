@@ -5,20 +5,20 @@ import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.actionSystem.impl.ActionButton;
-import javax.swing.Icon;
 
 public class IconActionButton extends ActionButton {
 
-  public IconActionButton(String tooltipText, Icon icon, AnAction onAction) {
-    super(onAction,
-        getPresentation(tooltipText, icon),
+  public IconActionButton(AnAction action) {
+    super(action,
+        getPresentation(action),
         ActionPlaces.TOOLWINDOW_CONTENT,
         ActionToolbar.DEFAULT_MINIMUM_BUTTON_SIZE);
   }
 
-  private static Presentation getPresentation(String tooltipText, Icon icon) {
-    var presentation = new Presentation(tooltipText);
-    presentation.setIcon(icon);
+  private static Presentation getPresentation(AnAction action) {
+    var actionPresentation = action.getTemplatePresentation();
+    var presentation = new Presentation(actionPresentation.getText());
+    presentation.setIcon(actionPresentation.getIcon());
     return presentation;
   }
 }
