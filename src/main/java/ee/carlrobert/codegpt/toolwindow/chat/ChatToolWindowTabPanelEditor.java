@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt.toolwindow.chat;
 
 import static ee.carlrobert.codegpt.util.FileUtils.findFileNameExtensionMapping;
+import static java.lang.String.format;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.icons.AllIcons.Actions;
@@ -69,7 +70,7 @@ public class ChatToolWindowTabPanelEditor implements Disposable {
     var timestamp = DateTimeFormatter.ofPattern("yyyyMMddHHmmss").format(LocalDateTime.now());
     var fileName = "temp_" + timestamp + fileNameExtensionMapping.getValue();
     var lightVirtualFile = new LightVirtualFile(
-        String.format("%s/%s", PathManager.getTempPath(), fileName), code);
+        format("%s/%s", PathManager.getTempPath(), fileName), code);
     var document = FileDocumentManager.getInstance().getDocument(lightVirtualFile);
     if (document == null) {
       document = EditorFactory.getInstance().createDocument(code);
@@ -87,7 +88,7 @@ public class ChatToolWindowTabPanelEditor implements Disposable {
 
     String originalGroupId = ((EditorEx) editor).getContextMenuGroupId();
     if (originalGroupId != null) {
-    AnAction originalGroup = ActionManager.getInstance().getAction(originalGroupId);
+      AnAction originalGroup = ActionManager.getInstance().getAction(originalGroupId);
       if (originalGroup instanceof ActionGroup) {
         group.addAll(((ActionGroup) originalGroup).getChildren(null));
       }
@@ -130,6 +131,8 @@ public class ChatToolWindowTabPanelEditor implements Disposable {
 
   private JPanel createHeaderActions() {
     var wrapper = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+    wrapper.add(new IconActionButton("Edit", Actions.Edit, new EditAction()));
+    wrapper.add(Box.createHorizontalStrut(8));
     wrapper.add(new IconActionButton("New File", Actions.AddFile, new NewFileAction()));
     wrapper.add(Box.createHorizontalStrut(8));
     wrapper.add(new IconActionButton("Copy", AllIcons.Actions.Copy, new CopyAction()));
@@ -144,6 +147,29 @@ public class ChatToolWindowTabPanelEditor implements Disposable {
   @Override
   public void dispose() {
     EditorFactory.getInstance().releaseEditor(editor);
+  }
+
+  class EditAction extends AnAction {
+
+    @Override
+    public void actionPerformed(@NotNull AnActionEvent event) {
+      var editorEx = ((EditorEx) editor);
+      editorEx.setViewer(!editorEx.isViewer());
+
+      var isViewer = editorEx.isViewer();
+      editorEx.setCaretVisible(!isViewer);
+      editorEx.setCaretEnabled(!isViewer);
+
+      var settings = editorEx.getSettings();
+      settings.setCaretRowShown(!isViewer);
+
+      var locationOnScreen = ((MouseEvent) event.getInputEvent()).getLocationOnScreen();
+      locationOnScreen.y = locationOnScreen.y - 16;
+
+      OverlayUtils.showInfoBalloon(
+          "Editing " + (isViewer ? "Disabled" : "Enabled"),
+          locationOnScreen);
+    }
   }
 
   class NewFileAction extends AnAction {
