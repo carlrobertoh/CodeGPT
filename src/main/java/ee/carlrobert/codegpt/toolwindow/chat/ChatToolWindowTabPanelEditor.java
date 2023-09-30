@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.toolwindow.chat;
 
+import static com.intellij.openapi.ui.DialogWrapper.OK_EXIT_CODE;
 import static ee.carlrobert.codegpt.util.FileUtils.findFileNameExtensionMapping;
 import static java.lang.String.format;
 
@@ -173,24 +174,21 @@ public class ChatToolWindowTabPanelEditor implements Disposable {
 
   class NewFileAction extends AnAction {
 
-    private final TextFieldWithBrowseButton textFieldWithBrowseButton;
-    private final JBTextField fileNameTextField;
-
     NewFileAction() {
       super("New File", "New File description", Actions.AddFile);
-      var fileChooserDescriptor = FileChooserDescriptorFactory.createSingleFolderDescriptor();
-      fileChooserDescriptor.setForcedToUseIdeaFileChooser(true);
-
-      textFieldWithBrowseButton = new TextFieldWithBrowseButton();
-      textFieldWithBrowseButton.addBrowseFolderListener(
-          new TextBrowseFolderListener(fileChooserDescriptor, project));
-      fileNameTextField = new JBTextField("Untitled" + fileNameExtensionMapping.getValue());
-      fileNameTextField.setColumns(30);
     }
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-      if (getDialogBuilder().show() == 0) {
+      var fileChooserDescriptor = FileChooserDescriptorFactory.createSingleFolderDescriptor();
+      fileChooserDescriptor.setForcedToUseIdeaFileChooser(true);
+      var textFieldWithBrowseButton = new TextFieldWithBrowseButton();
+      textFieldWithBrowseButton.addBrowseFolderListener(
+          new TextBrowseFolderListener(fileChooserDescriptor, project));
+      var fileNameTextField = new JBTextField("Untitled" + fileNameExtensionMapping.getValue());
+      fileNameTextField.setColumns(30);
+
+      if (showDialog(textFieldWithBrowseButton, fileNameTextField) == OK_EXIT_CODE) {
         var file = FileUtils.createFile(
             textFieldWithBrowseButton.getText(),
             fileNameTextField.getText(),
@@ -208,16 +206,18 @@ public class ChatToolWindowTabPanelEditor implements Disposable {
       }
     }
 
-    private DialogBuilder getDialogBuilder() {
-      var dialogBuilder = new DialogBuilder(project);
-      dialogBuilder.setTitle("New File");
-      dialogBuilder.setCenterPanel(FormBuilder.createFormBuilder()
-          .addLabeledComponent("File name:", fileNameTextField)
-          .addLabeledComponent("Destination:", textFieldWithBrowseButton)
-          .getPanel());
+    private int showDialog(
+        TextFieldWithBrowseButton textFieldWithBrowseButton,
+        JBTextField fileNameTextField) {
+      var dialogBuilder = new DialogBuilder(project)
+          .title("New File")
+          .centerPanel(FormBuilder.createFormBuilder()
+              .addLabeledComponent("File name:", fileNameTextField)
+              .addLabeledComponent("Destination:", textFieldWithBrowseButton)
+              .getPanel());
       dialogBuilder.addOkAction();
       dialogBuilder.addCancelAction();
-      return dialogBuilder;
+      return dialogBuilder.show();
     }
   }
 

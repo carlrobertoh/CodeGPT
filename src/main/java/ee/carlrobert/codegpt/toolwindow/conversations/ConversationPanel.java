@@ -27,7 +27,9 @@ import org.jetbrains.annotations.NotNull;
 
 class ConversationPanel extends JPanel {
 
-  ConversationPanel(@NotNull Project project, @NotNull Conversation conversation,
+  ConversationPanel(
+      @NotNull Project project,
+      @NotNull Conversation conversation,
       @NotNull Runnable onDelete) {
     super(new BorderLayout());
     setBackground(JBColor.background());
@@ -89,7 +91,8 @@ class ConversationPanel extends JPanel {
     bottomPanel.add(new JLabel(conversation.getUpdatedOn()
         .format(DateTimeFormatter.ofPattern("M/d/yyyy, h:mm:ss a"))), BorderLayout.WEST);
     if (conversation.getModel() != null) {
-      bottomPanel.add(new ModelIconLabel(conversation.getClientCode(), conversation.getModel()),
+      bottomPanel.add(
+          new ModelIconLabel(conversation.getClientCode(), conversation.getModel()),
           BorderLayout.EAST);
     }
 
