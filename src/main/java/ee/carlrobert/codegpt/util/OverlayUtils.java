@@ -3,11 +3,13 @@ package ee.carlrobert.codegpt.util;
 import static com.intellij.openapi.ui.Messages.CANCEL;
 import static com.intellij.openapi.ui.Messages.OK;
 import static ee.carlrobert.codegpt.Icons.DefaultIcon;
+import static java.util.Objects.requireNonNull;
 
 import com.intellij.execution.ExecutionBundle;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
+import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogBuilder;
 import com.intellij.openapi.ui.DoNotAskOption;
@@ -24,6 +26,7 @@ import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.indexes.FolderStructureTreePanel;
 import java.awt.Point;
+import java.awt.event.MouseEvent;
 import org.jetbrains.annotations.NotNull;
 
 public class OverlayUtils {
@@ -86,6 +89,17 @@ public class OverlayUtils {
           }
         })
         .guessWindowAndAsk() ? OK : CANCEL;
+  }
+
+  public static void showSelectedEditorSelectionWarning(AnActionEvent event) {
+    var locationOnScreen = ((MouseEvent) event.getInputEvent()).getLocationOnScreen();
+    locationOnScreen.y = locationOnScreen.y - 16;
+
+    showWarningBalloon(
+        EditorUtils.getSelectedEditor(requireNonNull(event.getProject())) == null
+            ? "Unable to locate a selected editor"
+            : "Please select a target code before proceeding",
+        locationOnScreen);
   }
 
   public static void showWarningBalloon(String content, Point locationOnScreen) {
