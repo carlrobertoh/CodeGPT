@@ -6,6 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.4] - 2023-10-01
+
+### Added
+
+- Support for modifying generated code within the chat toolwindow
+- Support for creating new files directly from the chat toolwindow 
+
+### Fixed
+
+- Privacy policy url in the settings
+
 ## [2.1.3] - 2023-09-28
 
 ### Added
@@ -151,7 +162,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `OPENAI_API_KEY` persistence, key is saved in the OS password safe from now on
 
-[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.1.3...HEAD
+[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.1.4...HEAD
+[2.1.4]: https://github.com/carlrobertoh/CodeGPT/compare/v2.1.3...v2.1.4
 [2.1.3]: https://github.com/carlrobertoh/CodeGPT/compare/v2.1.2...v2.1.3
 [2.1.2]: https://github.com/carlrobertoh/CodeGPT/compare/v2.1.1...v2.1.2
 [2.1.1]: https://github.com/carlrobertoh/CodeGPT/compare/v2.1.0...v2.1.1
