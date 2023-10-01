@@ -82,22 +82,24 @@ public class ResponsePanel extends JPanel {
     }
 
     public void addReloadAction(Runnable onReload) {
-      addIconActionButton(new IconActionButton("Reload response", Actions.Refresh, new AnAction() {
-        @Override
-        public void actionPerformed(@NotNull AnActionEvent e) {
-          enableActions(false);
-          onReload.run();
-        }
-      }));
+      addIconActionButton(new IconActionButton(
+          new AnAction("Reload Response", "Reload response description", Actions.Refresh) {
+            @Override
+            public void actionPerformed(@NotNull AnActionEvent e) {
+              enableActions(false);
+              onReload.run();
+            }
+          }));
     }
 
     public void addDeleteAction(Runnable onDelete) {
-      addIconActionButton(new IconActionButton("Delete response", Actions.GC, new AnAction() {
-        @Override
-        public void actionPerformed(@NotNull AnActionEvent e) {
-          onDelete.run();
-        }
-      }));
+      addIconActionButton(new IconActionButton(
+          new AnAction("Delete Response", "Delete response description", Actions.GC) {
+            @Override
+            public void actionPerformed(@NotNull AnActionEvent e) {
+              onDelete.run();
+            }
+          }));
     }
 
     private void addIconActionButton(IconActionButton iconActionButton) {

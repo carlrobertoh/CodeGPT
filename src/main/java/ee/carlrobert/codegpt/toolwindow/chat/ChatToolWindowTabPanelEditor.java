@@ -1,8 +1,9 @@
 package ee.carlrobert.codegpt.toolwindow.chat;
 
+import static com.intellij.openapi.ui.DialogWrapper.OK_EXIT_CODE;
 import static ee.carlrobert.codegpt.util.FileUtils.findFileNameExtensionMapping;
+import static java.lang.String.format;
 
-import com.intellij.icons.AllIcons;
 import com.intellij.icons.AllIcons.Actions;
 import com.intellij.ide.util.EditorHelper;
 import com.intellij.openapi.Disposable;
@@ -69,7 +70,7 @@ public class ChatToolWindowTabPanelEditor implements Disposable {
     var timestamp = DateTimeFormatter.ofPattern("yyyyMMddHHmmss").format(LocalDateTime.now());
     var fileName = "temp_" + timestamp + fileNameExtensionMapping.getValue();
     var lightVirtualFile = new LightVirtualFile(
-        String.format("%s/%s", PathManager.getTempPath(), fileName), code);
+        format("%s/%s", PathManager.getTempPath(), fileName), code);
     var document = FileDocumentManager.getInstance().getDocument(lightVirtualFile);
     if (document == null) {
       document = EditorFactory.getInstance().createDocument(code);
@@ -87,7 +88,7 @@ public class ChatToolWindowTabPanelEditor implements Disposable {
 
     String originalGroupId = ((EditorEx) editor).getContextMenuGroupId();
     if (originalGroupId != null) {
-    AnAction originalGroup = ActionManager.getInstance().getAction(originalGroupId);
+      AnAction originalGroup = ActionManager.getInstance().getAction(originalGroupId);
       if (originalGroup instanceof ActionGroup) {
         group.addAll(((ActionGroup) originalGroup).getChildren(null));
       }
@@ -130,14 +131,13 @@ public class ChatToolWindowTabPanelEditor implements Disposable {
 
   private JPanel createHeaderActions() {
     var wrapper = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-    wrapper.add(new IconActionButton("New File", Actions.AddFile, new NewFileAction()));
+    wrapper.add(new IconActionButton(new EditAction()));
     wrapper.add(Box.createHorizontalStrut(8));
-    wrapper.add(new IconActionButton("Copy", AllIcons.Actions.Copy, new CopyAction()));
+    wrapper.add(new IconActionButton(new NewFileAction()));
     wrapper.add(Box.createHorizontalStrut(8));
-    wrapper.add(new IconActionButton(
-        "Replace in Main Editor",
-        AllIcons.Actions.Replace,
-        new ReplaceInMainEditorAction()));
+    wrapper.add(new IconActionButton(new CopyAction()));
+    wrapper.add(Box.createHorizontalStrut(8));
+    wrapper.add(new IconActionButton(new ReplaceInMainEditorAction()));
     return wrapper;
   }
 
@@ -146,25 +146,49 @@ public class ChatToolWindowTabPanelEditor implements Disposable {
     EditorFactory.getInstance().releaseEditor(editor);
   }
 
+  class EditAction extends AnAction {
+
+    EditAction() {
+      super("Edit Source", "Edit Source description", Actions.EditSource);
+    }
+
+    @Override
+    public void actionPerformed(@NotNull AnActionEvent event) {
+      var editorEx = ((EditorEx) editor);
+      editorEx.setViewer(!editorEx.isViewer());
+
+      var viewer = editorEx.isViewer();
+      editorEx.setCaretVisible(!viewer);
+      editorEx.setCaretEnabled(!viewer);
+
+      var settings = editorEx.getSettings();
+      settings.setCaretRowShown(!viewer);
+
+      event.getPresentation().setIcon(viewer ? Actions.EditSource : Actions.Show);
+      event.getPresentation().setText(viewer ? "Edit Source" : "Disable Editing");
+
+      var locationOnScreen = ((MouseEvent) event.getInputEvent()).getLocationOnScreen();
+      locationOnScreen.y = locationOnScreen.y - 16;
+    }
+  }
+
   class NewFileAction extends AnAction {
 
-    private final TextFieldWithBrowseButton textFieldWithBrowseButton;
-    private final JBTextField fileNameTextField;
-
     NewFileAction() {
-      var fileChooserDescriptor = FileChooserDescriptorFactory.createSingleFolderDescriptor();
-      fileChooserDescriptor.setForcedToUseIdeaFileChooser(true);
-
-      textFieldWithBrowseButton = new TextFieldWithBrowseButton();
-      textFieldWithBrowseButton.addBrowseFolderListener(
-          new TextBrowseFolderListener(fileChooserDescriptor, project));
-      fileNameTextField = new JBTextField("Untitled" + fileNameExtensionMapping.getValue());
-      fileNameTextField.setColumns(30);
+      super("New File", "New File description", Actions.AddFile);
     }
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-      if (getDialogBuilder().show() == 0) {
+      var fileChooserDescriptor = FileChooserDescriptorFactory.createSingleFolderDescriptor();
+      fileChooserDescriptor.setForcedToUseIdeaFileChooser(true);
+      var textFieldWithBrowseButton = new TextFieldWithBrowseButton();
+      textFieldWithBrowseButton.addBrowseFolderListener(
+          new TextBrowseFolderListener(fileChooserDescriptor, project));
+      var fileNameTextField = new JBTextField("Untitled" + fileNameExtensionMapping.getValue());
+      fileNameTextField.setColumns(30);
+
+      if (showDialog(textFieldWithBrowseButton, fileNameTextField) == OK_EXIT_CODE) {
         var file = FileUtils.createFile(
             textFieldWithBrowseButton.getText(),
             fileNameTextField.getText(),
@@ -182,20 +206,26 @@ public class ChatToolWindowTabPanelEditor implements Disposable {
       }
     }
 
-    private DialogBuilder getDialogBuilder() {
-      var dialogBuilder = new DialogBuilder(project);
-      dialogBuilder.setTitle("New File");
-      dialogBuilder.setCenterPanel(FormBuilder.createFormBuilder()
-          .addLabeledComponent("File name:", fileNameTextField)
-          .addLabeledComponent("Destination:", textFieldWithBrowseButton)
-          .getPanel());
+    private int showDialog(
+        TextFieldWithBrowseButton textFieldWithBrowseButton,
+        JBTextField fileNameTextField) {
+      var dialogBuilder = new DialogBuilder(project)
+          .title("New File")
+          .centerPanel(FormBuilder.createFormBuilder()
+              .addLabeledComponent("File name:", fileNameTextField)
+              .addLabeledComponent("Destination:", textFieldWithBrowseButton)
+              .getPanel());
       dialogBuilder.addOkAction();
       dialogBuilder.addCancelAction();
-      return dialogBuilder;
+      return dialogBuilder.show();
     }
   }
 
   class CopyAction extends AnAction {
+
+    CopyAction() {
+      super("Copy", "Copy description", Actions.Copy);
+    }
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent event) {
@@ -211,6 +241,10 @@ public class ChatToolWindowTabPanelEditor implements Disposable {
   }
 
   class ReplaceInMainEditorAction extends AnAction {
+
+    ReplaceInMainEditorAction() {
+      super("Replace in Main Editor", "Replace in Main Editor description", Actions.Replace);
+    }
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent event) {
