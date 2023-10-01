@@ -2,7 +2,6 @@ package ee.carlrobert.codegpt.toolwindow.conversations;
 
 import static ee.carlrobert.codegpt.util.ThemeUtils.getPanelBackgroundColor;
 
-import com.intellij.icons.AllIcons;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBLabel;
@@ -17,28 +16,29 @@ import ee.carlrobert.codegpt.toolwindow.ModelIconLabel;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
 import java.awt.BorderLayout;
 import java.awt.Cursor;
-import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.format.DateTimeFormatter;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import org.jetbrains.annotations.NotNull;
 
 class ConversationPanel extends JPanel {
 
-  ConversationPanel(@NotNull Project project, @NotNull Conversation conversation, @NotNull Runnable onDelete) {
+  ConversationPanel(
+      @NotNull Project project,
+      @NotNull Conversation conversation,
+      @NotNull Runnable onDelete) {
     super(new BorderLayout());
     setBackground(JBColor.background());
     addMouseListener(new MouseAdapter() {
       @Override
       public void mouseClicked(MouseEvent e) {
         SettingsState.getInstance().sync(conversation);
-        StandardChatToolWindowContentManager.getInstance(project).displayConversation(conversation);
+        project.getService(StandardChatToolWindowContentManager.class)
+            .displayConversation(conversation);
       }
     });
     addStyles(isSelected(conversation));
@@ -84,14 +84,16 @@ class ConversationPanel extends JPanel {
 
     gbc.gridx = 1;
     gbc.weightx = 0;
-    headerPanel.add(new IconActionButton("Delete conversation", AllIcons.Actions.GC, new DeleteConversationAction(onDelete)), gbc);
+    headerPanel.add(new IconActionButton(new DeleteConversationAction(onDelete)), gbc);
 
     var bottomPanel = new JPanel(new BorderLayout());
     bottomPanel.setBackground(getPanelBackgroundColor());
     bottomPanel.add(new JLabel(conversation.getUpdatedOn()
         .format(DateTimeFormatter.ofPattern("M/d/yyyy, h:mm:ss a"))), BorderLayout.WEST);
     if (conversation.getModel() != null) {
-      bottomPanel.add(new ModelIconLabel(conversation.getClientCode(), conversation.getModel()), BorderLayout.EAST);
+      bottomPanel.add(
+          new ModelIconLabel(conversation.getClientCode(), conversation.getModel()),
+          BorderLayout.EAST);
     }
 
     var textPanel = new JPanel(new BorderLayout());

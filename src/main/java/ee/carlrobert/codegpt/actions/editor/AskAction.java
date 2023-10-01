@@ -24,7 +24,7 @@ public class AskAction extends AnAction {
     var project = event.getProject();
     if (project != null) {
       ConversationsState.getInstance().setCurrentConversation(null);
-      var tabPanel = StandardChatToolWindowContentManager.getInstance(project).createNewTabPanel();
+      var tabPanel = project.getService(StandardChatToolWindowContentManager.class).createNewTabPanel();
       if (tabPanel != null) {
         tabPanel.displayLandingView();
       }

@@ -9,7 +9,9 @@ import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.testFramework.LightVirtualFile;
+import ee.carlrobert.codegpt.actions.ActionType;
 import ee.carlrobert.codegpt.actions.editor.EditorActionsUtil;
+import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import java.time.format.DateTimeFormatter;
 import java.util.stream.Collectors;
@@ -32,20 +34,29 @@ public class OpenInEditorAction extends AnAction {
 
   @Override
   public void actionPerformed(@NotNull AnActionEvent e) {
-    var project = e.getProject();
-    var currentConversation = ConversationsState.getCurrentConversation();
-    if (project != null && currentConversation != null) {
-      var dateTimeStamp = currentConversation.getUpdatedOn().format(DateTimeFormatter.ofPattern("yyyyMMddHHmm"));
-      var fileName = String.format("%s_%s.md", currentConversation.getModel(), dateTimeStamp);
-      var fileContent = currentConversation
-          .getMessages()
-          .stream()
-          .map(it -> String.format("### User:\n%s\n### ChatGPT:\n%s\n", it.getPrompt(), it.getResponse()))
-          .collect(Collectors.joining());
-      VirtualFile file = new LightVirtualFile(fileName, fileContent);
-      FileEditorManager.getInstance(project).openFile(file, true);
-      var toolWindow = requireNonNull(ToolWindowManager.getInstance(project).getToolWindow("CodeGPT"));
-      toolWindow.hide();
+    try {
+      var project = e.getProject();
+      var currentConversation = ConversationsState.getCurrentConversation();
+      if (project != null && currentConversation != null) {
+        var dateTimeStamp = currentConversation.getUpdatedOn()
+            .format(DateTimeFormatter.ofPattern("yyyyMMddHHmm"));
+        var fileName = String.format("%s_%s.md", currentConversation.getModel(), dateTimeStamp);
+        var fileContent = currentConversation
+            .getMessages()
+            .stream()
+            .map(it -> String.format("### User:\n%s\n### ChatGPT:\n%s\n", it.getPrompt(),
+                it.getResponse()))
+            .collect(Collectors.joining());
+        VirtualFile file = new LightVirtualFile(fileName, fileContent);
+        FileEditorManager.getInstance(project).openFile(file, true);
+        var toolWindow = requireNonNull(
+            ToolWindowManager.getInstance(project).getToolWindow("CodeGPT"));
+        toolWindow.hide();
+      }
+    } finally {
+      TelemetryAction.IDE_ACTION.createActionMessage()
+          .property("action", ActionType.OPEN_CONVERSATION_IN_EDITOR.name())
+          .send();
     }
   }
 }

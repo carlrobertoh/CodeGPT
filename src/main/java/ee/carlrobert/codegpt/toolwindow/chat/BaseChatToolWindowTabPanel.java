@@ -11,6 +11,7 @@ import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.JBUI;
+import ee.carlrobert.codegpt.actions.ActionType;
 import ee.carlrobert.codegpt.completions.CompletionRequestHandler;
 import ee.carlrobert.codegpt.completions.SerpResult;
 import ee.carlrobert.codegpt.conversations.Conversation;
@@ -21,6 +22,7 @@ import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
+import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.toolwindow.ModelIconLabel;
 import ee.carlrobert.codegpt.toolwindow.chat.components.ChatMessageResponseBody;
 import ee.carlrobert.codegpt.toolwindow.chat.components.ResponsePanel;
@@ -111,7 +113,11 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     }
 
     var messageWrapper = createNewMessageWrapper(message.getId());
-    messageWrapper.add(new UserMessagePanel(project, message, message.getUserMessage() != null, this));
+    messageWrapper.add(new UserMessagePanel(
+        project,
+        message,
+        message.getUserMessage() != null,
+        this));
     var responsePanel = new ResponsePanel()
         .withReloadAction(() -> reloadMessage(message, conversation))
         .withDeleteAction(() -> deleteMessage(message.getId(), messageWrapper, conversation))
@@ -134,7 +140,11 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     return OpenAICredentialsManager.getInstance().isApiKeySet();
   }
 
-  private void call(Conversation conversation, Message message, ResponsePanel responsePanel, boolean isRetry) {
+  private void call(
+      Conversation conversation,
+      Message message,
+      ResponsePanel responsePanel,
+      boolean isRetry) {
     ChatMessageResponseBody responseContainer = (ChatMessageResponseBody) responsePanel.getContent();
 
     if (!isCredentialSet()) {
@@ -167,13 +177,22 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
 
       if (containsResults) {
         message.setSerpResults(serpResults.stream()
-            .map(result -> new SerpResult(result.getUrl(), result.getName(), result.getSnippet(), result.getSnippetSource()))
+            .map(result -> new SerpResult(
+                result.getUrl(),
+                result.getName(),
+                result.getSnippet(),
+                result.getSnippetSource()))
             .collect(toList()));
       }
     });
     requestHandler.addTokensExceededListener(() -> SwingUtilities.invokeLater(() -> {
       var answer = OverlayUtils.showTokenLimitExceededDialog();
       if (answer == OK) {
+        TelemetryAction.IDE_ACTION.createActionMessage()
+            .property("action", "DISCARD_TOKEN_LIMIT")
+            .property("model", conversation.getModel())
+            .send();
+
         conversationService.discardTokenLimits(conversation);
         requestHandler.call(conversation, message, true);
       } else {
@@ -185,9 +204,14 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
       responseContainer.displayError(error.getMessage());
       stopStreaming(responseContainer);
     });
-    requestHandler.addSerpResultsListener(serpResults -> serpResultsMapping.put(message.getId(), serpResults.stream()
-        .map(result -> new SerpResult(result.getUrl(), result.getName(), result.getSnippet(), result.getSnippetSource()))
-        .collect(toList())));
+    requestHandler.addSerpResultsListener(
+        serpResults -> serpResultsMapping.put(message.getId(), serpResults.stream()
+            .map(result -> new SerpResult(
+                result.getUrl(),
+                result.getName(),
+                result.getSnippet(),
+                result.getSnippetSource()))
+            .collect(toList())));
     userPromptTextArea.setRequestHandler(requestHandler);
     userPromptTextArea.setSubmitEnabled(false);
     requestHandler.call(conversation, message, isRetry);
@@ -196,7 +220,8 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
   protected void reloadMessage(Message message, Conversation conversation) {
     ResponsePanel responsePanel = null;
     try {
-      responsePanel = (ResponsePanel) Arrays.stream(visibleMessagePanels.get(message.getId()).getComponents())
+      responsePanel = (ResponsePanel) Arrays.stream(
+              visibleMessagePanels.get(message.getId()).getComponents())
           .filter(component -> component instanceof ResponsePanel)
           .findFirst().orElseThrow();
       ((ChatMessageResponseBody) responsePanel.getContent()).clear();
@@ -210,6 +235,10 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
         conversationService.saveMessage(conversation, message);
         call(conversation, message, responsePanel, true);
       }
+
+      TelemetryAction.IDE_ACTION.createActionMessage()
+          .property("action", ActionType.RELOAD_MESSAGE.name())
+          .send();
     }
   }
 
@@ -259,7 +288,8 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
       var selectionModel = editor.getSelectionModel();
       var selectedText = selectionModel.getSelectedText();
       if (selectedText != null && !selectedText.isEmpty()) {
-        var fileExtension = FileUtils.getFileExtension(((EditorImpl) editor).getVirtualFile().getName());
+        var fileExtension = FileUtils.getFileExtension(
+            ((EditorImpl) editor).getVirtualFile().getName());
         message = new Message(text + format("\n```%s\n%s\n```", fileExtension, selectedText));
         message.setUserMessage(text);
         selectionModel.removeSelection();
@@ -292,7 +322,6 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     gbc.weighty = 0;
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.gridy = 1;
-
 
     var model = getModel();
     var modelIconWrapper = JBUI.Panels.simplePanel(

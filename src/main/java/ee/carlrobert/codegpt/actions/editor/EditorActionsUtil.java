@@ -56,7 +56,7 @@ public class EditorActionsUtil {
             var fileExtension = FileUtils.getFileExtension(((EditorImpl) editor).getVirtualFile().getName());
             var message = new Message(prompt.replace("{{selectedCode}}", format("\n```%s\n%s\n```", fileExtension, selectedText)));
             message.setUserMessage(prompt.replace("{{selectedCode}}", ""));
-            var toolWindowContentManager = StandardChatToolWindowContentManager.getInstance(project);
+            var toolWindowContentManager = project.getService(StandardChatToolWindowContentManager.class);
             var toolWindow = toolWindowContentManager.getToolWindow();
             if (toolWindow != null) {
               toolWindow.show();

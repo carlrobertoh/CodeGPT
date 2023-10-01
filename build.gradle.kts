@@ -32,6 +32,7 @@ changelog {
 
 dependencies {
   implementation(project(":codegpt-core"))
+  implementation(project(":codegpt-telemetry"))
 
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.15.2")
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2")

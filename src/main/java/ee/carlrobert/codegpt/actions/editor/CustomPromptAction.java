@@ -37,7 +37,7 @@ class CustomPromptAction extends BaseEditorAction {
         previousUserPrompt = dialog.getUserPrompt();
         var message = new Message(format("%s\n```%s\n%s\n```", previousUserPrompt, fileExtension, selectedText));
         message.setUserMessage(previousUserPrompt);
-        SwingUtilities.invokeLater(() -> StandardChatToolWindowContentManager.getInstance(project).sendMessage(message));
+        SwingUtilities.invokeLater(() -> project.getService(StandardChatToolWindowContentManager.class).sendMessage(message));
       }
     }
   }
