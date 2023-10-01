@@ -26,7 +26,7 @@ public class TelemetryComponent {
                     + "hardware and software configuration.<br/>"
                     + "<br/>"
                     + "Please note that this will not include personal data or any sensitive Information.<br/>"
-                    + "The data sent complies with the <a href=\"https://codegpt.com/legal/privacy\">Privacy Policy</a>.";
+                    + "The data sent complies with the <a href=\"https://codegpt.carlrobert.ee/privacy\">Privacy Policy</a>.";
 
     private final JPanel panel;
     private final JBCheckBox enabled = new JBCheckBox("Send usage statistics");
