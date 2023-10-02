@@ -14,9 +14,9 @@ import ee.carlrobert.codegpt.indexes.CodebaseIndexingTask;
 import ee.carlrobert.codegpt.indexes.FolderStructureTreePanel;
 import ee.carlrobert.codegpt.settings.SettingsConfigurable;
 import ee.carlrobert.codegpt.toolwindow.chat.components.ResponsePanel;
-import ee.carlrobert.codegpt.user.UserManager;
-import ee.carlrobert.codegpt.user.auth.AuthenticationNotifier;
-import ee.carlrobert.codegpt.user.auth.SignedOutNotifier;
+import ee.carlrobert.codegpt.completions.you.YouUserManager;
+import ee.carlrobert.codegpt.completions.you.auth.AuthenticationNotifier;
+import ee.carlrobert.codegpt.completions.you.auth.SignedOutNotifier;
 import ee.carlrobert.codegpt.util.OverlayUtils;
 import ee.carlrobert.codegpt.util.SwingUtils;
 import ee.carlrobert.vector.VectorStore;
@@ -51,7 +51,7 @@ class ContextualChatToolWindowLandingPanel extends ResponsePanel {
 
   private JTextPane createContent() {
     var description = createTextPane();
-    var userManager = UserManager.getInstance();
+    var userManager = YouUserManager.getInstance();
 
     if (userManager.getAuthenticationResponse() == null) {
       description.setText("<html>" +

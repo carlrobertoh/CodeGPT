@@ -13,7 +13,7 @@ import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.actions.ActionType;
 import ee.carlrobert.codegpt.completions.CompletionRequestHandler;
-import ee.carlrobert.codegpt.completions.SerpResult;
+import ee.carlrobert.codegpt.completions.you.YouSerpResult;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
@@ -28,9 +28,9 @@ import ee.carlrobert.codegpt.toolwindow.chat.components.ChatMessageResponseBody;
 import ee.carlrobert.codegpt.toolwindow.chat.components.ResponsePanel;
 import ee.carlrobert.codegpt.toolwindow.chat.components.UserMessagePanel;
 import ee.carlrobert.codegpt.toolwindow.chat.components.UserPromptTextArea;
-import ee.carlrobert.codegpt.user.UserManager;
+import ee.carlrobert.codegpt.completions.you.YouUserManager;
 import ee.carlrobert.codegpt.util.EditorUtils;
-import ee.carlrobert.codegpt.util.FileUtils;
+import ee.carlrobert.codegpt.util.file.FileUtils;
 import ee.carlrobert.codegpt.util.OverlayUtils;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
@@ -54,7 +54,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
   private final JPanel rootPanel;
   private final ScrollablePanel scrollablePanel;
   private final Map<UUID, JPanel> visibleMessagePanels = new HashMap<>();
-  private final Map<UUID, List<SerpResult>> serpResultsMapping = new HashMap<>();
+  private final Map<UUID, List<YouSerpResult>> serpResultsMapping = new HashMap<>();
 
   protected final Project project;
   protected final UserPromptTextArea userPromptTextArea;
@@ -132,7 +132,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
 
   private boolean isCredentialSet() {
     if (SettingsState.getInstance().isUseYouService()) {
-      return UserManager.getInstance().isAuthenticated();
+      return YouUserManager.getInstance().isAuthenticated();
     }
     if (SettingsState.getInstance().isUseAzureService()) {
       return AzureCredentialsManager.getInstance().isCredentialSet();
@@ -177,7 +177,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
 
       if (containsResults) {
         message.setSerpResults(serpResults.stream()
-            .map(result -> new SerpResult(
+            .map(result -> new YouSerpResult(
                 result.getUrl(),
                 result.getName(),
                 result.getSnippet(),
@@ -206,7 +206,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     });
     requestHandler.addSerpResultsListener(
         serpResults -> serpResultsMapping.put(message.getId(), serpResults.stream()
-            .map(result -> new SerpResult(
+            .map(result -> new YouSerpResult(
                 result.getUrl(),
                 result.getName(),
                 result.getSnippet(),

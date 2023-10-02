@@ -20,7 +20,7 @@ import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.AsyncProcessIcon;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.embedding.CheckedFile;
-import ee.carlrobert.codegpt.util.FileUtils;
+import ee.carlrobert.codegpt.util.file.FileUtils;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.MouseAdapter;

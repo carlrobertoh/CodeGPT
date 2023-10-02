@@ -14,7 +14,7 @@ import com.intellij.openapi.util.io.FileUtil;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.completions.CompletionClientProvider;
-import ee.carlrobert.codegpt.util.FileUtils;
+import ee.carlrobert.codegpt.util.file.FileUtils;
 import ee.carlrobert.codegpt.util.OverlayUtils;
 import ee.carlrobert.embedding.CheckedFile;
 import ee.carlrobert.embedding.EmbeddingsService;

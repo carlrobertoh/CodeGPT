@@ -19,10 +19,10 @@ import com.vladsch.flexmark.ast.FencedCodeBlock;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.data.MutableDataSet;
-import ee.carlrobert.codegpt.completions.SerpResult;
+import ee.carlrobert.codegpt.completions.you.YouSerpResult;
 import ee.carlrobert.codegpt.settings.SettingsConfigurable;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
-import ee.carlrobert.codegpt.toolwindow.chat.editor.ChatToolWindowTabPanelEditor;
+import ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowTabPanelEditor;
 import ee.carlrobert.codegpt.toolwindow.chat.ResponseNodeRenderer;
 import ee.carlrobert.codegpt.toolwindow.chat.StreamParser;
 import ee.carlrobert.codegpt.toolwindow.chat.StreamResponseType;
@@ -129,7 +129,7 @@ public class ChatMessageResponseBody extends JPanel {
     displayError("Something went wrong.");
   }
 
-  public void displaySerpResults(List<SerpResult> serpResults) {
+  public void displaySerpResults(List<YouSerpResult> serpResults) {
     var titles = serpResults.stream()
         .map(result -> format("<li style=\"margin-bottom: 4px;\"><a href=\"%s\">%s</a></li>", result.getUrl(), result.getName()))
         .collect(Collectors.joining());

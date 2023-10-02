@@ -12,7 +12,7 @@ import ee.carlrobert.codegpt.toolwindow.chat.components.ChatMessageResponseBody;
 import ee.carlrobert.codegpt.toolwindow.chat.components.ResponsePanel;
 import ee.carlrobert.codegpt.toolwindow.chat.components.UserMessagePanel;
 import ee.carlrobert.codegpt.util.EditorUtils;
-import ee.carlrobert.codegpt.util.FileUtils;
+import ee.carlrobert.codegpt.util.file.FileUtils;
 import ee.carlrobert.codegpt.util.OverlayUtils;
 import javax.swing.JComponent;
 import org.jetbrains.annotations.NotNull;

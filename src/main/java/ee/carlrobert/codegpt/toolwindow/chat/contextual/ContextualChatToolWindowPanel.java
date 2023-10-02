@@ -7,7 +7,7 @@ import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.util.Disposer;
-import ee.carlrobert.codegpt.actions.CodebaseIndexingAction;
+import ee.carlrobert.codegpt.indexes.CodebaseIndexingAction;
 import ee.carlrobert.codegpt.actions.toolwindow.ClearChatWindowAction;
 import org.jetbrains.annotations.NotNull;
 
