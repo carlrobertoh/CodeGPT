@@ -6,7 +6,8 @@ public enum TelemetryAction {
 
   COMPLETION("CodeGPT-Completion"),
   COMPLETION_ERROR("CodeGPT-Completion-Error"),
-  IDE_ACTION("CodeGPT-Action");
+  IDE_ACTION("CodeGPT-Action"),
+  IDE_ACTION_ERROR("CodeGPT-Action-Error");
 
   private final String code;
 

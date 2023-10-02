@@ -4,7 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.util.io.FileUtil;
+import com.intellij.openapi.vfs.VirtualFile;
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
@@ -19,6 +22,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.jetbrains.annotations.NotNull;
 
 public class FileUtils {
 
@@ -27,10 +31,17 @@ public class FileUtils {
   public static File createFile(String directoryPath, String fileName, String fileContent) {
     try {
       tryCreateDirectory(directoryPath);
-      return Files.writeString(Path.of(directoryPath, fileName), fileContent, StandardOpenOption.CREATE).toFile();
+      return Files.writeString(
+          Path.of(directoryPath, fileName),
+          fileContent,
+          StandardOpenOption.CREATE).toFile();
     } catch (IOException e) {
       throw new RuntimeException("Failed to create file", e);
     }
+  }
+
+  public static VirtualFile getEditorFile(@NotNull Editor editor) {
+    return FileDocumentManager.getInstance().getFile(editor.getDocument());
   }
 
   public static void tryCreateDirectory(String directoryPath) {
@@ -63,8 +74,12 @@ public class FileUtils {
     List<FileExtensionLanguageDetails> fileExtensionLanguageMappings;
     List<LanguageFileExtensionDetails> languageFileExtensionMappings;
     try {
-      fileExtensionLanguageMappings = mapper.readValue(getResourceContent("/fileExtensionLanguageMappings.json"), new TypeReference<>() {});
-      languageFileExtensionMappings = mapper.readValue(getResourceContent("/languageFileExtensionMappings.json"), new TypeReference<>() {});
+      fileExtensionLanguageMappings = mapper.readValue(
+          getResourceContent("/fileExtensionLanguageMappings.json"), new TypeReference<>() {
+          });
+      languageFileExtensionMappings = mapper.readValue(
+          getResourceContent("/languageFileExtensionMappings.json"), new TypeReference<>() {
+          });
     } catch (JsonProcessingException e) {
       LOG.error("Unable to extract file extension", e);
       return defaultValue;
@@ -74,7 +89,8 @@ public class FileUtils {
         .orElseGet(() -> fileExtensionLanguageMappings.stream()
             .filter(it -> it.getExtension().equalsIgnoreCase(language))
             .findFirst()
-            .map(it -> findFirstExtension(languageFileExtensionMappings, it.getValue()).orElse(defaultValue))
+            .map(it -> findFirstExtension(languageFileExtensionMappings, it.getValue())
+                .orElse(defaultValue))
             .orElse(defaultValue));
   }
 

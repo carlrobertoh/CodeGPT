@@ -22,7 +22,7 @@ import com.vladsch.flexmark.util.data.MutableDataSet;
 import ee.carlrobert.codegpt.completions.SerpResult;
 import ee.carlrobert.codegpt.settings.SettingsConfigurable;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
-import ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowTabPanelEditor;
+import ee.carlrobert.codegpt.toolwindow.chat.editor.ChatToolWindowTabPanelEditor;
 import ee.carlrobert.codegpt.toolwindow.chat.ResponseNodeRenderer;
 import ee.carlrobert.codegpt.toolwindow.chat.StreamParser;
 import ee.carlrobert.codegpt.toolwindow.chat.StreamResponseType;
