@@ -103,6 +103,20 @@ public class ChatMessageResponseBody extends JPanel {
     });
     currentlyProcessedTextPane.getCaret().setVisible(false);
   }
+  public void displayQuotaExceeded() {
+    var message = SettingsState.getInstance().isUseYouService() ?
+            "You.com credit is out. <a href=\"#\">Change</a> to a different provider, or sign up to premium account on you.com. ovaauzpu code gives you free month." :
+            "OpenAI credit is out. <a href=\"#\">Change</a> to a different provider, or add credit card on openai.com.";
+    currentlyProcessedTextPane.setText(String.format("<html><p style=\"margin-top: 4px; margin-bottom: 8px;\">%s</p></html>", message));
+    currentlyProcessedTextPane.addHyperlinkListener(e -> {
+      if (e.getEventType() == ACTIVATED) {
+        ShowSettingsUtil.getInstance().showSettingsDialog(project, SettingsConfigurable.class);
+      }
+    });
+    currentlyProcessedTextPane.getCaret().setVisible(false);
+  }
+
+
 
   public void hideCarets() {
     if (currentlyProcessedEditor != null) {

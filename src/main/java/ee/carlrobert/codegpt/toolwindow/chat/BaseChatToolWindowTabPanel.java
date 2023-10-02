@@ -201,7 +201,11 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     }));
     requestHandler.addErrorListener((error, ex) -> {
       responsePanel.enableActions();
-      responseContainer.displayError(error.getMessage());
+      if (error.getMessage().startsWith("You exceeded")) {
+        responseContainer.displayQuotaExceeded();
+      } else {
+        responseContainer.displayError(error.getMessage());
+      }
       stopStreaming(responseContainer);
     });
     requestHandler.addSerpResultsListener(
