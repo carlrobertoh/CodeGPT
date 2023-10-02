@@ -72,7 +72,7 @@ public class StandardChatToolWindowTabbedPane extends JBTabbedPane {
     return activeTabMapping.entrySet().stream()
         .filter(entry -> {
           var panelConversation = entry.getValue().getConversation();
-          return panelConversation != null && conversationId.equals(panelConversation.getId());
+          return panelConversation != null && conversationId.equals(panelConversation.getLocalId());
         })
         .findFirst()
         .map(Map.Entry::getKey);

@@ -10,7 +10,7 @@ import java.util.UUID;
 
 public class Conversation {
 
-  private UUID id;
+  private UUID localId;
   private List<Message> messages = new ArrayList<>();
   private String clientCode;
   private String model;
@@ -18,12 +18,12 @@ public class Conversation {
   private LocalDateTime updatedOn;
   private boolean discardTokenLimit;
 
-  public UUID getId() {
-    return id;
+  public UUID getLocalId() {
+    return localId;
   }
 
-  public void setId(UUID id) {
-    this.id = id;
+  public void setLocalId(UUID localId) {
+    this.localId = localId;
   }
 
   public List<Message> getMessages() {

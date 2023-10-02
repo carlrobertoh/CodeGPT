@@ -52,7 +52,7 @@ public final class StandardChatToolWindowContentManager {
   public void displayConversation(Conversation conversation) {
     displayChatTab();
     tryFindChatTabbedPane()
-        .ifPresent(tabbedPane -> tabbedPane.tryFindActiveConversationTitle(conversation.getId())
+        .ifPresent(tabbedPane -> tabbedPane.tryFindActiveConversationTitle(conversation.getLocalId())
             .ifPresentOrElse(
                 title -> tabbedPane.setSelectedIndex(tabbedPane.indexOfTab(title)),
                 () -> tabbedPane.addNewTab(new StandardChatToolWindowTabPanel(project, conversation))));

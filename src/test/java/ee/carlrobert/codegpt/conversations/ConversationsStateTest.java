@@ -75,8 +75,8 @@ public class ConversationsStateTest extends BasePlatformTestCase {
     assertThat(ConversationsState.getCurrentConversation()).isEqualTo(firstConversation);
     assertThat(service.getSortedConversations().size()).isEqualTo(1);
     assertThat(service.getSortedConversations())
-        .extracting("id")
-        .containsExactly(firstConversation.getId());
+        .extracting("localId")
+        .containsExactly(firstConversation.getLocalId());
   }
 
   public void testClearAllConversations() {

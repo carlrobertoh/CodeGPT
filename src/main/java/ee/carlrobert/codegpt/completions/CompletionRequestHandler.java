@@ -223,7 +223,7 @@ public class CompletionRequestHandler {
         service = "you";
       }
       TelemetryAction.COMPLETION.createActionMessage()
-          .property("conversationId", conversation.getId().toString())
+          .property("conversationId", conversation.getLocalId().toString())
           .property("model", conversation.getModel())
           .property("service", service)
           .send();
@@ -231,7 +231,7 @@ public class CompletionRequestHandler {
 
     private void sendError(ErrorDetails error, Throwable ex) {
       TelemetryAction.COMPLETION_ERROR.createActionMessage()
-          .property("conversationId", conversation.getId().toString())
+          .property("conversationId", conversation.getLocalId().toString())
           .property("model", conversation.getModel())
           .error(new RuntimeException(error.toString(), ex))
           .send();

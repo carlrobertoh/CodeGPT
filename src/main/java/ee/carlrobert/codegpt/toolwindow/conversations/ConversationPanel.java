@@ -48,7 +48,7 @@ class ConversationPanel extends JPanel {
 
   private boolean isSelected(Conversation conversation) {
     var currentConversation = ConversationsState.getCurrentConversation();
-    return currentConversation != null && currentConversation.getId().equals(conversation.getId());
+    return currentConversation != null && currentConversation.getLocalId().equals(conversation.getLocalId());
   }
 
   private void addStyles(boolean isSelected) {

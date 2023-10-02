@@ -40,7 +40,7 @@ public final class ConversationService {
   public Conversation createConversation(String clientCode) {
     var settings = SettingsState.getInstance();
     var conversation = new Conversation();
-    conversation.setId(UUID.randomUUID());
+    conversation.setLocalId(UUID.randomUUID());
     conversation.setClientCode(clientCode);
     if (settings.isUseYouService()) {
       conversation.setModel("YouCode");
@@ -94,7 +94,7 @@ public final class ConversationService {
             }
             return item;
           }).collect(toList()));
-      if (next.getId().equals(conversation.getId())) {
+      if (next.getLocalId().equals(conversation.getLocalId())) {
         iterator.set(conversation);
       }
     }
@@ -107,7 +107,7 @@ public final class ConversationService {
         .listIterator();
     while (iterator.hasNext()) {
       var next = iterator.next();
-      if (next.getId().equals(conversation.getId())) {
+      if (next.getLocalId().equals(conversation.getLocalId())) {
         iterator.set(conversation);
       }
     }
@@ -151,7 +151,7 @@ public final class ConversationService {
       var sortedConversations = getSortedConversations();
       for (int i = 0; i < sortedConversations.size(); i++) {
         var conversation = sortedConversations.get(i);
-        if (conversation != null && conversation.getId().equals(currentConversation.getId())) {
+        if (conversation != null && conversation.getLocalId().equals(currentConversation.getLocalId())) {
           // higher index indicates older conversation
           var previousIndex = isPrevious ? i + 1 : i - 1;
           if (isPrevious ? previousIndex < sortedConversations.size() : previousIndex != -1) {
@@ -169,7 +169,7 @@ public final class ConversationService {
         .listIterator();
     while (iterator.hasNext()) {
       var next = iterator.next();
-      if (next.getId().equals(conversation.getId())) {
+      if (next.getLocalId().equals(conversation.getLocalId())) {
         iterator.remove();
         break;
       }
