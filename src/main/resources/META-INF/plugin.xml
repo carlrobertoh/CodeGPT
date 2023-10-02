@@ -13,10 +13,10 @@
         <applicationConfigurable id="settings.codegpt.advanced" parentId="settings.codegpt" displayName="Advanced Settings"
             instance="ee.carlrobert.codegpt.settings.advanced.AdvancedSettingsConfigurable"/>
         <applicationConfigurable
-          parentId="tools"
+          parentId="settings.codegpt"
           instance="ee.carlrobert.codegpt.telemetry.ui.preferences.TelemetryConfigurable"
           id="tools.preferences.codegpt.telemetry"
-          displayName="CodeGPT Telemetry"/>
+          displayName="Telemetry"/>
         <applicationService
           serviceImplementation="ee.carlrobert.codegpt.telemetry.core.service.TelemetryServiceFactory"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.SettingsState"/>
