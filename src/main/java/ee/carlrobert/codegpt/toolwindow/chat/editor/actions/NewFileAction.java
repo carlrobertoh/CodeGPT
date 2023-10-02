@@ -8,6 +8,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.ui.DialogBuilder;
 import com.intellij.openapi.ui.TextBrowseFolderListener;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
@@ -17,6 +18,7 @@ import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.actions.ActionType;
+import ee.carlrobert.codegpt.util.ApplicationUtils;
 import ee.carlrobert.codegpt.util.FileUtils;
 import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
@@ -41,6 +43,7 @@ public class NewFileAction extends TrackableAction {
     var fileChooserDescriptor = FileChooserDescriptorFactory.createSingleFolderDescriptor();
     fileChooserDescriptor.setForcedToUseIdeaFileChooser(true);
     var textFieldWithBrowseButton = new TextFieldWithBrowseButton();
+    textFieldWithBrowseButton.setText(project.getBasePath());
     textFieldWithBrowseButton.addBrowseFolderListener(
         new TextBrowseFolderListener(fileChooserDescriptor, project));
     var fileNameTextField = new JBTextField("Untitled" + fileExtension);

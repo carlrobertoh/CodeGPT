@@ -1,6 +1,5 @@
 package ee.carlrobert.codegpt.settings;
 
-import com.intellij.notification.NotificationType;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.ui.ComponentValidator;
 import com.intellij.openapi.ui.ValidationInfo;
@@ -23,7 +22,6 @@ import ee.carlrobert.codegpt.user.auth.AuthenticationHandler;
 import ee.carlrobert.codegpt.user.auth.AuthenticationService;
 import ee.carlrobert.codegpt.user.auth.response.AuthenticationResponse;
 import ee.carlrobert.codegpt.user.auth.response.User;
-import ee.carlrobert.codegpt.util.OverlayUtils;
 import ee.carlrobert.codegpt.util.SwingUtils;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
