@@ -19,9 +19,11 @@ import com.vladsch.flexmark.ast.FencedCodeBlock;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.data.MutableDataSet;
+import ee.carlrobert.codegpt.actions.ActionType;
 import ee.carlrobert.codegpt.completions.SerpResult;
 import ee.carlrobert.codegpt.settings.SettingsConfigurable;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
+import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.toolwindow.chat.editor.ChatToolWindowTabPanelEditor;
 import ee.carlrobert.codegpt.toolwindow.chat.ResponseNodeRenderer;
 import ee.carlrobert.codegpt.toolwindow.chat.StreamParser;
@@ -52,11 +54,18 @@ public class ChatMessageResponseBody extends JPanel {
     this(project, getPanelBackgroundColor(), false, parentDisposable);
   }
 
-  public ChatMessageResponseBody(Project project, boolean withGhostText, Disposable parentDisposable) {
+  public ChatMessageResponseBody(
+      Project project,
+      boolean withGhostText,
+      Disposable parentDisposable) {
     this(project, getPanelBackgroundColor(), withGhostText, parentDisposable);
   }
 
-  public ChatMessageResponseBody(Project project, Color backgroundColor, boolean withGhostText, Disposable parentDisposable) {
+  public ChatMessageResponseBody(
+      Project project,
+      Color backgroundColor,
+      boolean withGhostText,
+      Disposable parentDisposable) {
     super(new BorderLayout());
     this.project = project;
     this.parentDisposable = parentDisposable;
@@ -66,7 +75,8 @@ public class ChatMessageResponseBody extends JPanel {
 
     if (withGhostText) {
       prepareProcessingTextResponse();
-      currentlyProcessedTextPane.setText("<html><p style=\"margin-top: 4px; margin-bottom: 8px;\">&#8205;</p></html>");
+      currentlyProcessedTextPane.setText(
+          "<html><p style=\"margin-top: 4px; margin-bottom: 8px;\">&#8205;</p></html>");
     }
 
     UIManager.addPropertyChangeListener(propertyChangeEvent -> setBackground(backgroundColor));
@@ -95,7 +105,8 @@ public class ChatMessageResponseBody extends JPanel {
     var message = SettingsState.getInstance().isUseYouService() ?
         "Please <a href=\"#\">log in</a> to access the chat feature." :
         "API key not provided. Open <a href=\"#\">Settings</a> to set one.";
-    currentlyProcessedTextPane.setText(String.format("<html><p style=\"margin-top: 4px; margin-bottom: 8px;\">%s</p></html>", message));
+    currentlyProcessedTextPane.setText(
+        format("<html><p style=\"margin-top: 4px; margin-bottom: 8px;\">%s</p></html>", message));
     currentlyProcessedTextPane.addHyperlinkListener(e -> {
       if (e.getEventType() == ACTIVATED) {
         ShowSettingsUtil.getInstance().showSettingsDialog(project, SettingsConfigurable.class);
@@ -103,20 +114,23 @@ public class ChatMessageResponseBody extends JPanel {
     });
     currentlyProcessedTextPane.getCaret().setVisible(false);
   }
+
   public void displayQuotaExceeded() {
-    var message = SettingsState.getInstance().isUseYouService() ?
-            "You.com credit is out. <a href=\"#\">Change</a> to a different provider, or sign up to premium account on you.com. ovaauzpu code gives you free month." :
-            "OpenAI credit is out. <a href=\"#\">Change</a> to a different provider, or add credit card on openai.com.";
-    currentlyProcessedTextPane.setText(String.format("<html><p style=\"margin-top: 4px; margin-bottom: 8px;\">%s</p></html>", message));
+    currentlyProcessedTextPane.setText("<html>"
+        + "<p style=\"margin-top: 4px; margin-bottom: 8px;\">"
+        + "You exceeded your current quota, please check your plan and billing details, "
+        + "or <a href=\"#CHANGE_PROVIDER\">change</a> to a different LLM provider.</p>"
+        + "</html>");
     currentlyProcessedTextPane.addHyperlinkListener(e -> {
       if (e.getEventType() == ACTIVATED) {
         ShowSettingsUtil.getInstance().showSettingsDialog(project, SettingsConfigurable.class);
+        TelemetryAction.IDE_ACTION.createActionMessage()
+            .property("action", ActionType.CHANGE_PROVIDER.name())
+            .send();
       }
     });
     currentlyProcessedTextPane.getCaret().setVisible(false);
   }
-
-
 
   public void hideCarets() {
     if (currentlyProcessedEditor != null) {
@@ -129,7 +143,9 @@ public class ChatMessageResponseBody extends JPanel {
   }
 
   public void displayError(String message) {
-    var errorText = format("<html><p style=\"margin-top: 4px; margin-bottom: 8px;\">%s</p></html>", message);
+    var errorText = format(
+        "<html><p style=\"margin-top: 4px; margin-bottom: 8px;\">%s</p></html>",
+        message);
     if (responseReceived) {
       var errorPane = createTextPane();
       errorPane.setText(errorText);
@@ -145,7 +161,8 @@ public class ChatMessageResponseBody extends JPanel {
 
   public void displaySerpResults(List<SerpResult> serpResults) {
     var titles = serpResults.stream()
-        .map(result -> format("<li style=\"margin-bottom: 4px;\"><a href=\"%s\">%s</a></li>", result.getUrl(), result.getName()))
+        .map(result -> format("<li style=\"margin-bottom: 4px;\"><a href=\"%s\">%s</a></li>",
+            result.getUrl(), result.getName()))
         .collect(Collectors.joining());
     var html = format(
         "<html>" +
@@ -167,7 +184,8 @@ public class ChatMessageResponseBody extends JPanel {
     streamParser.clear();
     // TODO: First message might be code block
     prepareProcessingTextResponse();
-    currentlyProcessedTextPane.setText("<html><p style=\"margin-top: 4px; margin-bottom: 8px;\">&#8205;</p></html>");
+    currentlyProcessedTextPane.setText(
+        "<html><p style=\"margin-top: 4px; margin-bottom: 8px;\">&#8205;</p></html>");
 
     repaint();
     revalidate();
@@ -217,7 +235,11 @@ public class ChatMessageResponseBody extends JPanel {
   private void prepareProcessingCodeResponse(String code, String language) {
     hideCarets();
     currentlyProcessedTextPane = null;
-    currentlyProcessedEditor = new ChatToolWindowTabPanelEditor(project, code, language, parentDisposable);
+    currentlyProcessedEditor = new ChatToolWindowTabPanelEditor(
+        project,
+        code,
+        language,
+        parentDisposable);
     currentlyProcessedElement = new ResponseWrapper();
 
     currentlyProcessedElement.add(currentlyProcessedEditor.getComponent());

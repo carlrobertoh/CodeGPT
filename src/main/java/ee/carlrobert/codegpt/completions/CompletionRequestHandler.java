@@ -1,11 +1,11 @@
 package ee.carlrobert.codegpt.completions;
 
-import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
+import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.client.you.completion.YouCompletionEventListener;
 import ee.carlrobert.llm.client.you.completion.YouSerpResult;
@@ -230,11 +230,18 @@ public class CompletionRequestHandler {
     }
 
     private void sendError(ErrorDetails error, Throwable ex) {
-      TelemetryAction.COMPLETION_ERROR.createActionMessage()
-          .property("conversationId", conversation.getId().toString())
-          .property("model", conversation.getModel())
-          .error(new RuntimeException(error.toString(), ex))
-          .send();
+      var telemetryMessage = TelemetryAction.COMPLETION_ERROR.createActionMessage();
+      if ("insufficient_quota".equals(error.getCode())) {
+        telemetryMessage
+            .property("type", "USER")
+            .property("code", "INSUFFICIENT_QUOTA");
+      } else {
+        telemetryMessage
+            .property("conversationId", conversation.getId().toString())
+            .property("model", conversation.getModel())
+            .error(new RuntimeException(error.toString(), ex));
+      }
+      telemetryMessage.send();
     }
   }
 }

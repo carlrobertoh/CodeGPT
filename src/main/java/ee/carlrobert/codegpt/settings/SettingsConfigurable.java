@@ -9,6 +9,7 @@ import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
+import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
 import ee.carlrobert.codegpt.util.ApplicationUtils;
 import javax.swing.JComponent;
@@ -64,7 +65,8 @@ public class SettingsConfigurable implements Configurable, Disposable {
 
     OpenAICredentialsManager.getInstance().setApiKey(serviceSelectionForm.getOpenAIApiKey());
     AzureCredentialsManager.getInstance().setApiKey(serviceSelectionForm.getAzureOpenAIApiKey());
-    AzureCredentialsManager.getInstance().setAzureActiveDirectoryToken(serviceSelectionForm.getAzureActiveDirectoryToken());
+    AzureCredentialsManager.getInstance()
+        .setAzureActiveDirectoryToken(serviceSelectionForm.getAzureActiveDirectoryToken());
 
     settings.setDisplayName(settingsComponent.getDisplayName());
     settings.setUseOpenAIService(serviceSelectionForm.isOpenAIServiceSelected());
@@ -77,6 +79,11 @@ public class SettingsConfigurable implements Configurable, Disposable {
 
     if (serviceChanged || modelChanged) {
       resetActiveTab();
+      if (serviceChanged) {
+        TelemetryAction.SETTINGS_CHANGED.createActionMessage()
+            .property("service", getServiceCode(serviceSelectionForm))
+            .send();
+      }
     }
   }
 
@@ -109,7 +116,9 @@ public class SettingsConfigurable implements Configurable, Disposable {
   public void dispose() {
   }
 
-  private boolean isServiceChanged(ServiceSelectionForm serviceSelectionForm, SettingsState settings) {
+  private boolean isServiceChanged(
+      ServiceSelectionForm serviceSelectionForm,
+      SettingsState settings) {
     return serviceSelectionForm.isOpenAIServiceSelected() != settings.isUseOpenAIService() ||
         serviceSelectionForm.isAzureServiceSelected() != settings.isUseAzureService() ||
         serviceSelectionForm.isYouServiceSelected() != settings.isUseYouService();
@@ -123,5 +132,18 @@ public class SettingsConfigurable implements Configurable, Disposable {
     }
 
     project.getService(StandardChatToolWindowContentManager.class).resetActiveTab();
+  }
+
+  private String getServiceCode(ServiceSelectionForm serviceSelectionForm) {
+    if (serviceSelectionForm.isOpenAIServiceSelected()) {
+      return "openai";
+    }
+    if (serviceSelectionForm.isAzureServiceSelected()) {
+      return "azure";
+    }
+    if (serviceSelectionForm.isYouServiceSelected()) {
+      return "you";
+    }
+    return null;
   }
 }
