@@ -1,6 +1,6 @@
 package ee.carlrobert.codegpt.toolwindow.chat.editor;
 
-import static ee.carlrobert.codegpt.util.FileUtils.findFileNameExtensionMapping;
+import static ee.carlrobert.codegpt.util.file.FileUtils.findFileNameExtensionMapping;
 import static java.lang.String.format;
 
 import com.intellij.openapi.Disposable;
@@ -23,7 +23,7 @@ import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.actions.toolwindow.ReplaceCodeInMainEditorAction;
-import ee.carlrobert.codegpt.toolwindow.IconActionButton;
+import ee.carlrobert.codegpt.toolwindow.chat.components.IconActionButton;
 import ee.carlrobert.codegpt.toolwindow.chat.editor.actions.CopyAction;
 import ee.carlrobert.codegpt.toolwindow.chat.editor.actions.DiffAction;
 import ee.carlrobert.codegpt.toolwindow.chat.editor.actions.EditAction;
@@ -35,20 +35,21 @@ import java.awt.FlowLayout;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import javax.swing.Box;
-import javax.swing.JComponent;
 import javax.swing.JPanel;
 
-public class ChatToolWindowTabPanelEditor implements Disposable {
+public class ResponseEditor extends JPanel implements Disposable {
 
   private final Editor editor;
   private final String fileName;
   private final String fileExtension;
 
-  public ChatToolWindowTabPanelEditor(
+  public ResponseEditor(
       Project project,
       String code,
       String language,
       Disposable disposableParent) {
+    super(new BorderLayout());
+
     var fileNameExtensionMapping = findFileNameExtensionMapping(language);
     this.fileName = fileNameExtensionMapping.getKey();
     this.fileExtension = fileNameExtensionMapping.getValue();
@@ -91,19 +92,15 @@ public class ChatToolWindowTabPanelEditor implements Disposable {
     settings.setVirtualSpace(false);
     settings.setUseSoftWraps(false);
 
+    add(createHeaderComponent(), BorderLayout.NORTH);
+    add(editor.getComponent(), BorderLayout.SOUTH);
+
     Disposer.register(disposableParent, this);
   }
 
   @Override
   public void dispose() {
     EditorFactory.getInstance().releaseEditor(editor);
-  }
-
-  public JComponent getComponent() {
-    var wrapper = new JPanel(new BorderLayout());
-    wrapper.add(createHeaderComponent(), BorderLayout.NORTH);
-    wrapper.add(editor.getComponent(), BorderLayout.SOUTH);
-    return wrapper;
   }
 
   public Editor getEditor() {

@@ -7,14 +7,14 @@ import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.project.ProjectManagerListener;
 import com.intellij.openapi.startup.StartupActivity;
 import ee.carlrobert.codegpt.actions.editor.EditorActionsUtil;
-import ee.carlrobert.codegpt.credentials.UserCredentialsManager;
+import ee.carlrobert.codegpt.completions.you.YouUserManager;
+import ee.carlrobert.codegpt.credentials.YouCredentialsManager;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
-import ee.carlrobert.codegpt.user.UserManager;
-import ee.carlrobert.codegpt.user.auth.AuthenticationError;
-import ee.carlrobert.codegpt.user.auth.AuthenticationHandler;
-import ee.carlrobert.codegpt.user.auth.AuthenticationService;
-import ee.carlrobert.codegpt.user.auth.SessionVerificationJob;
-import ee.carlrobert.codegpt.user.auth.response.AuthenticationResponse;
+import ee.carlrobert.codegpt.completions.you.auth.YouAuthenticationError;
+import ee.carlrobert.codegpt.completions.you.auth.AuthenticationHandler;
+import ee.carlrobert.codegpt.completions.you.auth.YouAuthenticationService;
+import ee.carlrobert.codegpt.completions.you.auth.SessionVerificationJob;
+import ee.carlrobert.codegpt.completions.you.auth.response.YouAuthenticationResponse;
 import ee.carlrobert.codegpt.util.OverlayUtils;
 import org.jetbrains.annotations.NotNull;
 import org.quartz.JobBuilder;
@@ -33,9 +33,9 @@ public class PluginStartupActivity implements StartupActivity {
   public void runActivity(@NotNull Project project) {
     EditorActionsUtil.refreshActions();
 
-    var authenticationResponse = UserManager.getInstance().getAuthenticationResponse();
+    var authenticationResponse = YouUserManager.getInstance().getAuthenticationResponse();
     if (authenticationResponse == null) {
-      handleAuthentication();
+      handleYouServiceAuthentication();
     } else {
       startSessionVerificationJob();
     }
@@ -77,18 +77,18 @@ public class PluginStartupActivity implements StartupActivity {
     }
   }
 
-  private void handleAuthentication() {
+  private void handleYouServiceAuthentication() {
     var settings = SettingsState.getInstance();
     if (!settings.isPreviouslySignedIn()) {
       return;
     }
 
-    var password = UserCredentialsManager.getInstance().getAccountPassword();
+    var password = YouCredentialsManager.getInstance().getAccountPassword();
     if (!settings.getEmail().isEmpty() && password != null && !password.isEmpty()) {
-      AuthenticationService.getInstance()
+      YouAuthenticationService.getInstance()
           .signInAsync(settings.getEmail(), password, new AuthenticationHandler() {
             @Override
-            public void handleAuthenticated(AuthenticationResponse authenticationResponse) {
+            public void handleAuthenticated(YouAuthenticationResponse authenticationResponse) {
               OverlayUtils.showNotification("Authentication successful.", NotificationType.INFORMATION);
               startSessionVerificationJob();
             }
@@ -99,8 +99,8 @@ public class PluginStartupActivity implements StartupActivity {
             }
 
             @Override
-            public void handleError(AuthenticationError authenticationError) {
-              OverlayUtils.showNotification(authenticationError.getErrorMessage(), NotificationType.ERROR);
+            public void handleError(YouAuthenticationError youAuthenticationError) {
+              OverlayUtils.showNotification(youAuthenticationError.getErrorMessage(), NotificationType.ERROR);
             }
           });
     }

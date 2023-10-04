@@ -12,7 +12,7 @@ import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
-import ee.carlrobert.codegpt.util.FileUtils;
+import ee.carlrobert.codegpt.util.file.FileUtils;
 import ee.carlrobert.codegpt.util.SwingUtils;
 import javax.swing.JComponent;
 import javax.swing.JTextArea;

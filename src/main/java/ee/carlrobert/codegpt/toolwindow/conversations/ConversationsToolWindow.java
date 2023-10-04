@@ -70,7 +70,10 @@ public class ConversationsToolWindow extends JPanel {
     } else {
       sortedConversations.forEach(conversation -> {
         scrollablePanel.add(Box.createVerticalStrut(8));
-        scrollablePanel.add(new ConversationPanel(project, conversation, this::refresh));
+        scrollablePanel.add(new ConversationPanel(project, conversation, () -> {
+          ConversationService.getInstance().deleteConversation(conversation);
+          refresh();
+        }));
       });
     }
 

@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.util;
+package ee.carlrobert.codegpt.util.file;
 
 import java.util.List;
 

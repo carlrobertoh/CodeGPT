@@ -6,9 +6,8 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
 import ee.carlrobert.codegpt.actions.ActionType;
 import ee.carlrobert.codegpt.actions.editor.EditorActionsUtil;
-import ee.carlrobert.codegpt.telemetry.TelemetryAction;
-import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
+import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.util.OverlayUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -35,8 +34,6 @@ public class DeleteConversationAction extends AnAction {
         TelemetryAction.IDE_ACTION.createActionMessage()
             .property("action", ActionType.DELETE_CONVERSATION.name())
             .send();
-
-        ConversationService.getInstance().deleteSelectedConversation();
         onDelete.run();
       }
     }

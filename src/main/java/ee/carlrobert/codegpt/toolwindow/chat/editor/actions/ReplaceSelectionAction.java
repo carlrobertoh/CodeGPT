@@ -7,6 +7,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.editor.Editor;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.actions.ActionType;
+import ee.carlrobert.codegpt.actions.TrackableAction;
 import ee.carlrobert.codegpt.util.EditorUtils;
 import ee.carlrobert.codegpt.util.OverlayUtils;
 import org.jetbrains.annotations.NotNull;

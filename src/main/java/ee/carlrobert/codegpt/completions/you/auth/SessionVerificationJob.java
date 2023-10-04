@@ -1,7 +1,6 @@
-package ee.carlrobert.codegpt.user.auth;
+package ee.carlrobert.codegpt.completions.you.auth;
 
 import com.intellij.openapi.diagnostic.Logger;
-import ee.carlrobert.codegpt.user.UserManager;
 import java.time.LocalDateTime;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -13,5 +12,6 @@ public class SessionVerificationJob implements Job {
   @Override
   public void execute(JobExecutionContext context) {
     LOG.info("Refreshing token: " + LocalDateTime.now());
+    // TODO: Not implemented
   }
 }

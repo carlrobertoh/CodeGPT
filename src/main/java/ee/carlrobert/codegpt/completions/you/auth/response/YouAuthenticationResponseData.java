@@ -1,28 +1,28 @@
-package ee.carlrobert.codegpt.user.auth.response;
+package ee.carlrobert.codegpt.completions.you.auth.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AuthenticationResponseData {
+public class YouAuthenticationResponseData {
 
-  private final Session session;
+  private final YouSession session;
   private final String sessionJwt;
   private final String sessionToken;
-  private final User user;
+  private final YouUser user;
 
-  public AuthenticationResponseData(
-      @JsonProperty("session") Session session,
+  public YouAuthenticationResponseData(
+      @JsonProperty("session") YouSession session,
       @JsonProperty("session_jwt") String sessionJwt,
       @JsonProperty("session_token") String sessionToken,
-      @JsonProperty("user") User user) {
+      @JsonProperty("user") YouUser user) {
     this.session = session;
     this.sessionJwt = sessionJwt;
     this.sessionToken = sessionToken;
     this.user = user;
   }
 
-  public Session getSession() {
+  public YouSession getSession() {
     return session;
   }
 
@@ -34,7 +34,7 @@ public class AuthenticationResponseData {
     return sessionToken;
   }
 
-  public User getUser() {
+  public YouUser getUser() {
     return user;
   }
 }

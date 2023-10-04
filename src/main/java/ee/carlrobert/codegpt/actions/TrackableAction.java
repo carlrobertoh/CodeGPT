@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.toolwindow.chat.editor.actions;
+package ee.carlrobert.codegpt.actions;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -24,7 +24,7 @@ public abstract class TrackableAction extends AnAction {
     this.actionType = actionType;
   }
 
-  abstract void handleAction(@NotNull AnActionEvent e);
+  public abstract void handleAction(@NotNull AnActionEvent e);
 
   @Override
   public void actionPerformed(@NotNull AnActionEvent e) {

@@ -1,9 +1,9 @@
-package ee.carlrobert.codegpt.completions;
+package ee.carlrobert.codegpt.completions.you;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class SerpResult {
+public class YouSerpResult {
 
   private final String url;
   private final String name;
@@ -11,7 +11,7 @@ public class SerpResult {
   private final String snippetSource;
 
   @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-  public SerpResult(
+  public YouSerpResult(
       @JsonProperty("url") String url,
       @JsonProperty("name") String name,
       @JsonProperty("snippet") String snippet,

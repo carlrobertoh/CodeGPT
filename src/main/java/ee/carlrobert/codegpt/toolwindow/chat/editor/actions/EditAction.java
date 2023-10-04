@@ -6,6 +6,7 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.ex.EditorEx;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.actions.ActionType;
+import ee.carlrobert.codegpt.actions.TrackableAction;
 import java.awt.event.MouseEvent;
 import org.jetbrains.annotations.NotNull;
 

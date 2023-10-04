@@ -1,10 +1,10 @@
-package ee.carlrobert.codegpt.user.auth.response;
+package ee.carlrobert.codegpt.completions.you.auth.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Session {
+public class YouSession {
 
   private final String expiresAt;
   private final String lastAccessedAt;
@@ -12,7 +12,7 @@ public class Session {
   private final String startedAt;
   private final String userId;
 
-  public Session(
+  public YouSession(
       @JsonProperty("expires_at") String expiresAt,
       @JsonProperty("last_accessed_at") String lastAccessedAt,
       @JsonProperty("session_id") String sessionId,

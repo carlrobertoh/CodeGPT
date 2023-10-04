@@ -1,16 +1,16 @@
-package ee.carlrobert.codegpt.user.auth.response;
+package ee.carlrobert.codegpt.completions.you.auth.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Email {
+public class YouEmail {
 
   private final String email;
   private final String emailId;
   private final boolean verified;
 
-  public Email(
+  public YouEmail(
       @JsonProperty("email") String email,
       @JsonProperty("email_id") String emailId,
       @JsonProperty("verified") boolean verified) {

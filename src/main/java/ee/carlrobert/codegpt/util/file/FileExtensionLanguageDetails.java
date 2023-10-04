@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.util;
+package ee.carlrobert.codegpt.util.file;
 
 public class FileExtensionLanguageDetails {
 

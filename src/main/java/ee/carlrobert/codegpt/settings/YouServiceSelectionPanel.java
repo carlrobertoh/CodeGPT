@@ -14,14 +14,14 @@ import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
-import ee.carlrobert.codegpt.credentials.UserCredentialsManager;
+import ee.carlrobert.codegpt.completions.you.YouUserManager;
+import ee.carlrobert.codegpt.completions.you.auth.AuthenticationHandler;
+import ee.carlrobert.codegpt.completions.you.auth.YouAuthenticationError;
+import ee.carlrobert.codegpt.completions.you.auth.YouAuthenticationService;
+import ee.carlrobert.codegpt.completions.you.auth.response.YouAuthenticationResponse;
+import ee.carlrobert.codegpt.completions.you.auth.response.YouUser;
+import ee.carlrobert.codegpt.credentials.YouCredentialsManager;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
-import ee.carlrobert.codegpt.user.UserManager;
-import ee.carlrobert.codegpt.user.auth.AuthenticationError;
-import ee.carlrobert.codegpt.user.auth.AuthenticationHandler;
-import ee.carlrobert.codegpt.user.auth.AuthenticationService;
-import ee.carlrobert.codegpt.user.auth.response.AuthenticationResponse;
-import ee.carlrobert.codegpt.user.auth.response.User;
 import ee.carlrobert.codegpt.util.SwingUtils;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -34,7 +34,7 @@ import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 import org.jetbrains.annotations.Nullable;
 
-public class UserDetailsSettingsPanel extends JPanel {
+public class YouServiceSelectionPanel extends JPanel {
 
   private final JBTextField emailField;
   private final JBPasswordField passwordField;
@@ -42,14 +42,14 @@ public class UserDetailsSettingsPanel extends JPanel {
   private final JTextPane signUpTextPane;
   private final AsyncProcessIcon loadingSpinner;
 
-  public UserDetailsSettingsPanel(Disposable parentDisposable) {
+  public YouServiceSelectionPanel(Disposable parentDisposable) {
     super(new BorderLayout());
     var settings = SettingsState.getInstance();
     emailField = new JBTextField(settings.getEmail(), 25);
     passwordField = new JBPasswordField();
     passwordField.setColumns(25);
     if (!settings.getEmail().isEmpty()) {
-      passwordField.setText(UserCredentialsManager.getInstance().getAccountPassword());
+      passwordField.setText(YouCredentialsManager.getInstance().getAccountPassword());
     }
     signInButton = new JButton(CodeGPTBundle.get("settingsConfigurable.section.userAuthentication.signIn.label"));
     signUpTextPane = createSignUpTextPane();
@@ -66,15 +66,16 @@ public class UserDetailsSettingsPanel extends JPanel {
       if (emailValidator.getValidationInfo() == null && passwordValidator.getValidationInfo() == null) {
         loadingSpinner.resume();
         loadingSpinner.setVisible(true);
-        AuthenticationService.getInstance()
+        YouAuthenticationService.getInstance()
             .signInAsync(emailField.getText(), new String(passwordField.getPassword()), new UserAuthenticationHandler());
       }
     });
 
-    if (UserManager.getInstance().getAuthenticationResponse() == null) {
+    if (YouUserManager.getInstance().getAuthenticationResponse() == null) {
       add(createUserAuthenticationPanel(emailField, passwordField, null));
     } else {
-      add(createUserInformationPanel(UserManager.getInstance().getAuthenticationResponse().getData().getUser()));
+      add(createUserInformationPanel(
+          YouUserManager.getInstance().getAuthenticationResponse().getData().getUser()));
     }
   }
 
@@ -147,7 +148,7 @@ public class UserDetailsSettingsPanel extends JPanel {
     return panel;
   }
 
-  private JPanel createUserAuthenticationPanel(JBTextField emailAddressField, JBPasswordField passwordField, @Nullable AuthenticationError error) {
+  private JPanel createUserAuthenticationPanel(JBTextField emailAddressField, JBPasswordField passwordField, @Nullable YouAuthenticationError error) {
     var contentPanelBuilder = FormBuilder.createFormBuilder()
         .addLabeledComponent("Email address:", emailAddressField)
         .addLabeledComponent("Password:", passwordField)
@@ -171,8 +172,8 @@ public class UserDetailsSettingsPanel extends JPanel {
         .getPanel();
   }
 
-  private JPanel createUserInformationPanel(User user) {
-    var userManager = UserManager.getInstance();
+  private JPanel createUserInformationPanel(YouUser user) {
+    var userManager = YouUserManager.getInstance();
     var contentPanelBuilder = FormBuilder.createFormBuilder()
         .addLabeledComponent("Email address:", new JBLabel(user.getEmails().get(0).getEmail()).withFont(JBFont.label().asBold()));
 
@@ -196,12 +197,12 @@ public class UserDetailsSettingsPanel extends JPanel {
   class UserAuthenticationHandler implements AuthenticationHandler {
 
     @Override
-    public void handleAuthenticated(AuthenticationResponse authenticationResponse) {
+    public void handleAuthenticated(YouAuthenticationResponse authenticationResponse) {
       SwingUtilities.invokeLater(() -> {
         var email = emailField.getText();
         var password = passwordField.getPassword();
         SettingsState.getInstance().setEmail(email);
-        UserCredentialsManager.getInstance().setAccountPassword(new String(password));
+        YouCredentialsManager.getInstance().setAccountPassword(new String(password));
         refreshView(createUserInformationPanel(authenticationResponse.getData().getUser()));
       });
     }
@@ -209,11 +210,11 @@ public class UserDetailsSettingsPanel extends JPanel {
     @Override
     public void handleGenericError() {
       SwingUtilities.invokeLater(() -> refreshView(
-          createUserAuthenticationPanel(emailField, passwordField, new AuthenticationError("unknown", "Something went wrong."))));
+          createUserAuthenticationPanel(emailField, passwordField, new YouAuthenticationError("unknown", "Something went wrong."))));
     }
 
     @Override
-    public void handleError(AuthenticationError error) {
+    public void handleError(YouAuthenticationError error) {
       SwingUtilities.invokeLater(() -> refreshView(createUserAuthenticationPanel(emailField, passwordField, error)));
     }
   }

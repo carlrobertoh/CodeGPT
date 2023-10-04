@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.user.auth;
+package ee.carlrobert.codegpt.completions.you.auth;
 
 import com.intellij.util.messages.Topic;
 

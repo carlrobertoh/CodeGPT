@@ -17,8 +17,8 @@ import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
-import ee.carlrobert.codegpt.user.UserManager;
-import ee.carlrobert.codegpt.user.auth.AuthenticationNotifier;
+import ee.carlrobert.codegpt.completions.you.YouUserManager;
+import ee.carlrobert.codegpt.completions.you.auth.AuthenticationNotifier;
 import ee.carlrobert.codegpt.util.SwingUtils;
 import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionModel;
 import ee.carlrobert.llm.completion.CompletionModel;
@@ -120,7 +120,7 @@ public class ServiceSelectionForm {
     azureCompletionModelComboBox.getEditor().getEditorComponent().setMaximumSize(azureBaseHostField.getPreferredSize());
 
     displayWebSearchResultsCheckBox = new JBCheckBox("Display web search results", settings.isDisplayWebSearchResults());
-    displayWebSearchResultsCheckBox.setEnabled(UserManager.getInstance().isAuthenticated());
+    displayWebSearchResultsCheckBox.setEnabled(YouUserManager.getInstance().isAuthenticated());
 
     openAIServiceSectionPanel = createOpenAIServiceSectionPanel();
     azureServiceSectionPanel = createAzureServiceSectionPanel();
@@ -233,7 +233,7 @@ public class ServiceSelectionForm {
 
   private JPanel createYouServiceSectionPanel() {
     return FormBuilder.createFormBuilder()
-        .addComponent(new UserDetailsSettingsPanel(Disposer.newDisposable()))
+        .addComponent(new YouServiceSelectionPanel(Disposer.newDisposable()))
         .addComponent(new TitledSeparator("Chat Preferences"))
         .addComponent(withEmptyLeftBorder(displayWebSearchResultsCheckBox))
         .getPanel();

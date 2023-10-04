@@ -6,18 +6,18 @@ import com.intellij.openapi.components.Service;
 import org.jetbrains.annotations.Nullable;
 
 @Service
-public final class UserCredentialsManager {
+public final class YouCredentialsManager {
 
   private static final CredentialAttributes accountPasswordCredentialAttributes = CredentialsUtil.createCredentialAttributes("ACCOUNT_PASSWORD");
 
   private String accountPassword;
 
-  private UserCredentialsManager() {
+  private YouCredentialsManager() {
     accountPassword = CredentialsUtil.getPassword(accountPasswordCredentialAttributes);
   }
 
-  public static UserCredentialsManager getInstance() {
-    return ApplicationManager.getApplication().getService(UserCredentialsManager.class);
+  public static YouCredentialsManager getInstance() {
+    return ApplicationManager.getApplication().getService(YouCredentialsManager.class);
   }
 
   public @Nullable String getAccountPassword() {

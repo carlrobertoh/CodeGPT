@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.user;
+package ee.carlrobert.codegpt.completions.you;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,13 +14,13 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 
 @Service
-public final class ApiClient {
+public final class YouApiClient {
 
   private static final String API_BASE_URL = "https://web.stytch.com/sdk";
   private static final String publicToken = "public-token-live-507a52ad-7e69-496b-aee0-1c9863c7c819";
 
-  public static ApiClient getInstance() {
-    return ApplicationManager.getApplication().getService(ApiClient.class);
+  public static YouApiClient getInstance() {
+    return ApplicationManager.getApplication().getService(YouApiClient.class);
   }
 
   public void authenticate(String email, String password, Callback callback) {
