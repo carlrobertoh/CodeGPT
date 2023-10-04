@@ -200,9 +200,16 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
       }
     }));
     requestHandler.addErrorListener((error, ex) -> {
-      responsePanel.enableActions();
-      responseContainer.displayError(error.getMessage());
-      stopStreaming(responseContainer);
+      try {
+        if ("insufficient_quota".equals(error.getCode())) {
+          responseContainer.displayQuotaExceeded();
+        } else {
+          responseContainer.displayError(error.getMessage());
+        }
+      } finally {
+        responsePanel.enableActions();
+        stopStreaming(responseContainer);
+      }
     });
     requestHandler.addSerpResultsListener(
         serpResults -> serpResultsMapping.put(message.getId(), serpResults.stream()
