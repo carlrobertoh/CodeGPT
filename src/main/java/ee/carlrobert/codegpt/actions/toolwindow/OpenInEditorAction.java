@@ -44,7 +44,7 @@ public class OpenInEditorAction extends AnAction {
         var fileContent = currentConversation
             .getMessages()
             .stream()
-            .map(it -> String.format("### User:\n%s\n### ChatGPT:\n%s\n", it.getPrompt(),
+            .map(it -> String.format("### User:\n%s\n### CodeGPT:\n%s\n", it.getPrompt(),
                 it.getResponse()))
             .collect(Collectors.joining());
         VirtualFile file = new LightVirtualFile(fileName, fileContent);
