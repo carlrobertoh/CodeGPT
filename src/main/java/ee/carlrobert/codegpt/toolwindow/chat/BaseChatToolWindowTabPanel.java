@@ -26,6 +26,7 @@ import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.toolwindow.ModelIconLabel;
 import ee.carlrobert.codegpt.toolwindow.chat.components.ChatMessageResponseBody;
 import ee.carlrobert.codegpt.toolwindow.chat.components.ResponsePanel;
+import ee.carlrobert.codegpt.toolwindow.chat.components.SmartScroller;
 import ee.carlrobert.codegpt.toolwindow.chat.components.UserMessagePanel;
 import ee.carlrobert.codegpt.toolwindow.chat.components.UserPromptTextArea;
 import ee.carlrobert.codegpt.completions.you.YouUserManager;

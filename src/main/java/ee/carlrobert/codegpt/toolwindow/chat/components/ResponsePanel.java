@@ -10,7 +10,6 @@ import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.Icons;
-import ee.carlrobert.codegpt.toolwindow.IconActionButton;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import javax.swing.Box;

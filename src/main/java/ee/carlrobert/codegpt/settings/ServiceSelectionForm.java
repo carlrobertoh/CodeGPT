@@ -233,7 +233,7 @@ public class ServiceSelectionForm {
 
   private JPanel createYouServiceSectionPanel() {
     return FormBuilder.createFormBuilder()
-        .addComponent(new UserDetailsSettingsPanel(Disposer.newDisposable()))
+        .addComponent(new YouServiceSelectionPanel(Disposer.newDisposable()))
         .addComponent(new TitledSeparator("Chat Preferences"))
         .addComponent(withEmptyLeftBorder(displayWebSearchResultsCheckBox))
         .getPanel();

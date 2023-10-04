@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.actions.toolwindow.editor;
+package ee.carlrobert.codegpt.toolwindow.chat.editor.actions;
 
 import static java.util.Objects.requireNonNull;
 

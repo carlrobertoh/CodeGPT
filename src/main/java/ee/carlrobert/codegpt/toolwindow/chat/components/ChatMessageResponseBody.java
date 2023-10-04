@@ -24,10 +24,10 @@ import ee.carlrobert.codegpt.completions.you.YouSerpResult;
 import ee.carlrobert.codegpt.settings.SettingsConfigurable;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
-import ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowTabPanelEditor;
 import ee.carlrobert.codegpt.toolwindow.chat.ResponseNodeRenderer;
 import ee.carlrobert.codegpt.toolwindow.chat.StreamParser;
 import ee.carlrobert.codegpt.toolwindow.chat.StreamResponseType;
+import ee.carlrobert.codegpt.toolwindow.chat.editor.ResponseEditor;
 import ee.carlrobert.codegpt.util.MarkdownUtils;
 import ee.carlrobert.codegpt.util.SwingUtils;
 import java.awt.BorderLayout;
@@ -46,7 +46,7 @@ public class ChatMessageResponseBody extends JPanel {
   private final Disposable parentDisposable;
   private final StreamParser streamParser;
   private JPanel currentlyProcessedElement;
-  private ChatToolWindowTabPanelEditor currentlyProcessedEditor;
+  private ResponseEditor currentlyProcessedEditor;
   private JTextPane currentlyProcessedTextPane;
   private boolean responseReceived;
 
@@ -235,14 +235,14 @@ public class ChatMessageResponseBody extends JPanel {
   private void prepareProcessingCodeResponse(String code, String language) {
     hideCarets();
     currentlyProcessedTextPane = null;
-    currentlyProcessedEditor = new ChatToolWindowTabPanelEditor(
+    currentlyProcessedEditor = new ResponseEditor(
         project,
         code,
         language,
         parentDisposable);
     currentlyProcessedElement = new ResponseWrapper();
 
-    currentlyProcessedElement.add(currentlyProcessedEditor.getComponent());
+    currentlyProcessedElement.add(currentlyProcessedEditor);
     add(currentlyProcessedElement);
   }
 

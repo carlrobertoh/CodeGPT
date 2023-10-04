@@ -34,7 +34,7 @@ import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 import org.jetbrains.annotations.Nullable;
 
-public class UserDetailsSettingsPanel extends JPanel {
+public class YouServiceSelectionPanel extends JPanel {
 
   private final JBTextField emailField;
   private final JBPasswordField passwordField;
@@ -42,7 +42,7 @@ public class UserDetailsSettingsPanel extends JPanel {
   private final JTextPane signUpTextPane;
   private final AsyncProcessIcon loadingSpinner;
 
-  public UserDetailsSettingsPanel(Disposable parentDisposable) {
+  public YouServiceSelectionPanel(Disposable parentDisposable) {
     super(new BorderLayout());
     var settings = SettingsState.getInstance();
     emailField = new JBTextField(settings.getEmail(), 25);
