@@ -1,24 +1,37 @@
 package ee.carlrobert.codegpt.settings;
 
+import static java.lang.String.format;
+
+import com.intellij.icons.AllIcons.Actions;
+import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.ui.ComboBox;
+import com.intellij.openapi.ui.TextBrowseFolderListener;
+import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.util.Disposer;
+import com.intellij.ui.PortField;
 import com.intellij.ui.TitledSeparator;
+import com.intellij.ui.components.AnActionLink;
 import com.intellij.ui.components.JBCheckBox;
+import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPasswordField;
 import com.intellij.ui.components.JBRadioButton;
 import com.intellij.ui.components.JBTextField;
+import com.intellij.util.ui.AsyncProcessIcon;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
+import ee.carlrobert.codegpt.completions.llama.LlamaServerAgent;
+import ee.carlrobert.codegpt.completions.you.YouUserManager;
+import ee.carlrobert.codegpt.completions.you.auth.AuthenticationNotifier;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
-import ee.carlrobert.codegpt.completions.you.YouUserManager;
-import ee.carlrobert.codegpt.completions.you.auth.AuthenticationNotifier;
 import ee.carlrobert.codegpt.util.SwingUtils;
 import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionModel;
 import ee.carlrobert.llm.completion.CompletionModel;
@@ -29,10 +42,11 @@ import javax.swing.Box;
 import javax.swing.ButtonGroup;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+import org.jetbrains.annotations.NotNull;
 
 public class ServiceSelectionForm {
 
-  private static final OpenAIChatCompletionModel[] DEFAULT_OPENAI_MODELS = new OpenAIChatCompletionModel[] {
+  private static final OpenAIChatCompletionModel[] DEFAULT_OPENAI_MODELS = new OpenAIChatCompletionModel[]{
       OpenAIChatCompletionModel.GPT_3_5,
       OpenAIChatCompletionModel.GPT_3_5_16k,
       OpenAIChatCompletionModel.GPT_4,
@@ -67,6 +81,10 @@ public class ServiceSelectionForm {
   private final JPanel youServiceSectionPanel;
   private final JBCheckBox displayWebSearchResultsCheckBox;
 
+  private final JBRadioButton useLlamaServiceRadioButton;
+  private final JPanel llamaServiceSectionPanel;
+  private final TextFieldWithBrowseButton textFieldWithBrowseButton;
+
   public ServiceSelectionForm(SettingsState settings) {
     var openAISettings = OpenAISettingsState.getInstance();
     var azureSettings = AzureSettingsState.getInstance();
@@ -85,7 +103,8 @@ public class ServiceSelectionForm {
 
     azureActiveDirectoryTokenField = new JBPasswordField();
     azureActiveDirectoryTokenField.setColumns(30);
-    azureActiveDirectoryTokenField.setText(AzureCredentialsManager.getInstance().getAzureActiveDirectoryToken());
+    azureActiveDirectoryTokenField.setText(
+        AzureCredentialsManager.getInstance().getAzureActiveDirectoryToken());
 
     azureActiveDirectoryTokenFieldPanel = UI.PanelFactory.panel(azureActiveDirectoryTokenField)
         .withLabel("Bearer token:")
@@ -100,31 +119,48 @@ public class ServiceSelectionForm {
         azureSettings.isUseAzureActiveDirectoryAuthentication());
 
     useOpenAIServiceRadioButton = new JBRadioButton(
-        CodeGPTBundle.get("settingsConfigurable.section.service.useOpenAIServiceRadioButtonLabel"), settings.isUseOpenAIService());
+        CodeGPTBundle.get("settingsConfigurable.section.service.useOpenAIServiceRadioButtonLabel"),
+        settings.isUseOpenAIService());
     useAzureServiceRadioButton = new JBRadioButton(
-        CodeGPTBundle.get("settingsConfigurable.section.service.useAzureServiceRadioButtonLabel"), settings.isUseAzureService());
+        CodeGPTBundle.get("settingsConfigurable.section.service.useAzureServiceRadioButtonLabel"),
+        settings.isUseAzureService());
     useYouServiceRadioButton = new JBRadioButton(
-        CodeGPTBundle.get("settingsConfigurable.section.service.useYouServiceRadioButtonLabel"), settings.isUseYouService());
+        CodeGPTBundle.get("settingsConfigurable.section.service.useYouServiceRadioButtonLabel"),
+        settings.isUseYouService());
+    useLlamaServiceRadioButton = new JBRadioButton(
+        "Use Llama.cpp API", settings.isUseLlamaService());
 
     openAIBaseHostField = new JBTextField(openAISettings.getBaseHost(), 30);
     openAIPathField = new JBTextField(openAISettings.getPath(), 30);
     openAIOrganizationField = new JBTextField(openAISettings.getOrganization(), 30);
-    openAICompletionModelComboBox = new ModelComboBox(DEFAULT_OPENAI_MODELS, OpenAIChatCompletionModel.findByCode(openAISettings.getModel()));
+    openAICompletionModelComboBox = new ModelComboBox(DEFAULT_OPENAI_MODELS,
+        OpenAIChatCompletionModel.findByCode(openAISettings.getModel()));
 
     azureBaseHostField = new JBTextField(azureSettings.getBaseHost(), 35);
     azurePathField = new JBTextField(azureSettings.getPath(), 35);
     azureResourceNameField = new JBTextField(azureSettings.getResourceName(), 35);
     azureDeploymentIdField = new JBTextField(azureSettings.getDeploymentId(), 35);
     azureApiVersionField = new JBTextField(azureSettings.getApiVersion(), 35);
-    azureCompletionModelComboBox = new ModelComboBox(DEFAULT_OPENAI_MODELS, OpenAIChatCompletionModel.findByCode(azureSettings.getModel()));
-    azureCompletionModelComboBox.getEditor().getEditorComponent().setMaximumSize(azureBaseHostField.getPreferredSize());
+    azureCompletionModelComboBox = new ModelComboBox(DEFAULT_OPENAI_MODELS,
+        OpenAIChatCompletionModel.findByCode(azureSettings.getModel()));
+    azureCompletionModelComboBox.getEditor().getEditorComponent()
+        .setMaximumSize(azureBaseHostField.getPreferredSize());
 
-    displayWebSearchResultsCheckBox = new JBCheckBox("Display web search results", settings.isDisplayWebSearchResults());
+    displayWebSearchResultsCheckBox = new JBCheckBox(
+        "Display web search results",
+        settings.isDisplayWebSearchResults());
     displayWebSearchResultsCheckBox.setEnabled(YouUserManager.getInstance().isAuthenticated());
+
+    var fileChooserDescriptor = FileChooserDescriptorFactory.createSingleFileDescriptor("gguf");
+    fileChooserDescriptor.setForcedToUseIdeaFileChooser(true);
+    textFieldWithBrowseButton = new TextFieldWithBrowseButton();
+    textFieldWithBrowseButton.addBrowseFolderListener(
+        new TextBrowseFolderListener(fileChooserDescriptor));
 
     openAIServiceSectionPanel = createOpenAIServiceSectionPanel();
     azureServiceSectionPanel = createAzureServiceSectionPanel();
     youServiceSectionPanel = createYouServiceSectionPanel();
+    llamaServiceSectionPanel = createLlamaServiceSectionPanel();
 
     registerPanelsVisibility(settings, azureSettings);
     registerRadioButtons();
@@ -132,32 +168,37 @@ public class ServiceSelectionForm {
     ApplicationManager.getApplication()
         .getMessageBus()
         .connect()
-        .subscribe(AuthenticationNotifier.AUTHENTICATION_TOPIC, (AuthenticationNotifier) () -> displayWebSearchResultsCheckBox.setEnabled(true));
+        .subscribe(AuthenticationNotifier.AUTHENTICATION_TOPIC,
+            (AuthenticationNotifier) () -> displayWebSearchResultsCheckBox.setEnabled(true));
   }
 
   public JPanel getForm() {
     var panel = new JPanel(new FlowLayout(FlowLayout.LEADING, 0, 0));
     panel.add(useOpenAIServiceRadioButton);
-    // flow layout's horizontal gap adds annoying horizontal padding on each sides
     panel.add(Box.createHorizontalStrut(16));
     panel.add(useAzureServiceRadioButton);
     panel.add(Box.createHorizontalStrut(16));
     panel.add(useYouServiceRadioButton);
+    panel.add(Box.createHorizontalStrut(16));
+    panel.add(useLlamaServiceRadioButton);
 
     return FormBuilder.createFormBuilder()
         .addComponent(withEmptyLeftBorder(panel))
         .addComponent(openAIServiceSectionPanel)
         .addComponent(azureServiceSectionPanel)
         .addComponent(youServiceSectionPanel)
+        .addComponent(llamaServiceSectionPanel)
         .getPanel();
   }
 
   private JPanel createOpenAIServiceSectionPanel() {
     var requestConfigurationPanel = UI.PanelFactory.grid()
         .add(UI.PanelFactory.panel(openAIOrganizationField)
-            .withLabel(CodeGPTBundle.get("settingsConfigurable.section.service.openai.organizationField.label"))
+            .withLabel(CodeGPTBundle.get(
+                "settingsConfigurable.section.service.openai.organizationField.label"))
             .resizeX(false)
-            .withComment(CodeGPTBundle.get("settingsConfigurable.section.service.openai.organizationField.comment")))
+            .withComment(CodeGPTBundle.get(
+                "settingsConfigurable.section.service.openai.organizationField.comment")))
         .add(UI.PanelFactory.panel(openAIBaseHostField)
             .withLabel("Base host:")
             .resizeX(false))
@@ -172,7 +213,8 @@ public class ServiceSelectionForm {
     var apiKeyFieldPanel = UI.PanelFactory.panel(openAIApiKeyField)
         .withLabel(CodeGPTBundle.get("settingsConfigurable.section.integration.apiKeyField.label"))
         .resizeX(false)
-        .withComment(CodeGPTBundle.get("settingsConfigurable.section.integration.apiKeyField.comment"))
+        .withComment(
+            CodeGPTBundle.get("settingsConfigurable.section.integration.apiKeyField.comment"))
         .withCommentHyperlinkListener(SwingUtils::handleHyperlinkClicked)
         .createPanel();
 
@@ -201,17 +243,23 @@ public class ServiceSelectionForm {
 
     var configPanel = withEmptyLeftBorder(UI.PanelFactory.grid()
         .add(UI.PanelFactory.panel(azureResourceNameField)
-            .withLabel(CodeGPTBundle.get("settingsConfigurable.section.service.azure.resourceNameField.label"))
+            .withLabel(CodeGPTBundle.get(
+                "settingsConfigurable.section.service.azure.resourceNameField.label"))
             .resizeX(false)
-            .withComment(CodeGPTBundle.get("settingsConfigurable.section.service.azure.resourceNameField.comment")))
+            .withComment(CodeGPTBundle.get(
+                "settingsConfigurable.section.service.azure.resourceNameField.comment")))
         .add(UI.PanelFactory.panel(azureDeploymentIdField)
-            .withLabel(CodeGPTBundle.get("settingsConfigurable.section.service.azure.deploymentIdField.label"))
+            .withLabel(CodeGPTBundle.get(
+                "settingsConfigurable.section.service.azure.deploymentIdField.label"))
             .resizeX(false)
-            .withComment(CodeGPTBundle.get("settingsConfigurable.section.service.azure.deploymentIdField.comment")))
+            .withComment(CodeGPTBundle.get(
+                "settingsConfigurable.section.service.azure.deploymentIdField.comment")))
         .add(UI.PanelFactory.panel(azureApiVersionField)
-            .withLabel(CodeGPTBundle.get("settingsConfigurable.section.service.azure.apiVersionField.label"))
+            .withLabel(CodeGPTBundle.get(
+                "settingsConfigurable.section.service.azure.apiVersionField.label"))
             .resizeX(false)
-            .withComment(CodeGPTBundle.get("settingsConfigurable.section.service.azure.apiVersionField.comment")))
+            .withComment(CodeGPTBundle.get(
+                "settingsConfigurable.section.service.azure.apiVersionField.comment")))
         .add(UI.PanelFactory.panel(azureBaseHostField)
             .withLabel("Base host:")
             .resizeX(false))
@@ -239,6 +287,51 @@ public class ServiceSelectionForm {
         .getPanel();
   }
 
+  private JPanel createLlamaServiceSectionPanel() {
+    var actionLinkWrapper = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 16));
+    var loadingSpinner = new AsyncProcessIcon("sign_in_spinner");
+    loadingSpinner.setVisible(false);
+    var successIcon = new JBLabel(Actions.Commit);
+    successIcon.setVisible(false);
+
+    var startServerLink = new AnActionLink("Start Server", new AnAction() {
+      @Override
+      public void actionPerformed(@NotNull AnActionEvent e) {
+        loadingSpinner.setVisible(true);
+        new LlamaServerAgent(textFieldWithBrowseButton.getText())
+            .startAgent(() -> {
+              loadingSpinner.setVisible(false);
+              successIcon.setVisible(true);
+            });
+      }
+    });
+
+    actionLinkWrapper.add(startServerLink);
+    actionLinkWrapper.add(Box.createHorizontalStrut(8));
+    actionLinkWrapper.add(loadingSpinner);
+    actionLinkWrapper.add(successIcon);
+
+    var hostField = new JBTextField("http://localhost:8080/completions");
+    hostField.setEnabled(false);
+    var portField = new PortField(8080);
+    portField.addChangeListener(changeEvent -> {
+      var port = (int) ((PortField) changeEvent.getSource()).getValue();
+      hostField.setText(format("http://localhost:%d/completions", port));
+    });
+
+    var serverSettingsForm = FormBuilder.createFormBuilder()
+        .addLabeledComponent("Model path:", textFieldWithBrowseButton)
+        .addLabeledComponent("Host:", hostField)
+        .addLabeledComponent("Port:", portField)
+        .addComponent(JBUI.Panels.simplePanel().addToLeft(actionLinkWrapper))
+        .getPanel();
+
+    return FormBuilder.createFormBuilder()
+        .addComponent(new TitledSeparator("Model Preferences"))
+        .addComponent(withEmptyLeftBorder(serverSettingsForm))
+        .getPanel();
+  }
+
   private JComponent withEmptyLeftBorder(JComponent component) {
     component.setBorder(JBUI.Borders.emptyLeft(16));
     return component;
@@ -248,7 +341,8 @@ public class ServiceSelectionForm {
     openAIServiceSectionPanel.setVisible(settings.isUseOpenAIService());
     azureServiceSectionPanel.setVisible(settings.isUseAzureService());
     azureApiKeyFieldPanel.setVisible(azureSettings.isUseAzureApiKeyAuthentication());
-    azureActiveDirectoryTokenFieldPanel.setVisible(azureSettings.isUseAzureActiveDirectoryAuthentication());
+    azureActiveDirectoryTokenFieldPanel.setVisible(
+        azureSettings.isUseAzureActiveDirectoryAuthentication());
     youServiceSectionPanel.setVisible(settings.isUseYouService());
   }
 
@@ -257,17 +351,18 @@ public class ServiceSelectionForm {
         List.of(
             Map.entry(useOpenAIServiceRadioButton, openAIServiceSectionPanel),
             Map.entry(useAzureServiceRadioButton, azureServiceSectionPanel),
-            Map.entry(useYouServiceRadioButton, youServiceSectionPanel)));
+            Map.entry(useYouServiceRadioButton, youServiceSectionPanel),
+            Map.entry(useLlamaServiceRadioButton, llamaServiceSectionPanel)));
     registerRadioButtons(
         List.of(
             Map.entry(useAzureApiKeyAuthenticationRadioButton, azureApiKeyFieldPanel),
-            Map.entry(useAzureActiveDirectoryAuthenticationRadioButton, azureActiveDirectoryTokenFieldPanel)));
+            Map.entry(useAzureActiveDirectoryAuthenticationRadioButton,
+                azureActiveDirectoryTokenFieldPanel)));
   }
 
   private void registerRadioButtons(List<Map.Entry<JBRadioButton, JPanel>> entries) {
     var buttonGroup = new ButtonGroup();
     entries.forEach(entry -> buttonGroup.add(entry.getKey()));
-
     entries.forEach(entry -> entry.getKey().addActionListener((e) -> {
       for (Map.Entry<JBRadioButton, JPanel> innerEntry : entries) {
         innerEntry.getValue().setVisible(innerEntry.equals(entry));
@@ -311,6 +406,14 @@ public class ServiceSelectionForm {
     useYouServiceRadioButton.setSelected(selected);
   }
 
+  public boolean isLlamaServiceSelected() {
+    return useLlamaServiceRadioButton.isSelected();
+  }
+
+  public void setLlamaServiceSelected(boolean selected) {
+    useLlamaServiceRadioButton.setSelected(selected);
+  }
+
   public void setOpenAIApiKey(String apiKey) {
     openAIApiKeyField.setText(apiKey);
   }
@@ -340,7 +443,8 @@ public class ServiceSelectionForm {
   }
 
   public String getOpenAIModel() {
-    return ((OpenAIChatCompletionModel) (openAICompletionModelComboBox.getModel().getSelectedItem())).getCode();
+    return ((OpenAIChatCompletionModel) (openAICompletionModelComboBox.getModel()
+        .getSelectedItem())).getCode();
   }
 
   public void setAzureActiveDirectoryAuthenticationSelected(boolean selected) {
@@ -412,7 +516,8 @@ public class ServiceSelectionForm {
   }
 
   public String getAzureModel() {
-    return ((OpenAIChatCompletionModel) (azureCompletionModelComboBox.getModel().getSelectedItem())).getCode();
+    return ((OpenAIChatCompletionModel) (azureCompletionModelComboBox.getModel().getSelectedItem()))
+        .getCode();
   }
 
   public void setDisplayWebSearchResults(boolean displayWebSearchResults) {
@@ -421,6 +526,14 @@ public class ServiceSelectionForm {
 
   public boolean isDisplayWebSearchResults() {
     return displayWebSearchResultsCheckBox.isSelected();
+  }
+
+  public void setLlamaModelPath(String modelPath) {
+    textFieldWithBrowseButton.setText(modelPath);
+  }
+
+  public String getLlamaModelPath() {
+    return textFieldWithBrowseButton.getText();
   }
 
   public void setOpenAIPath(String path) {

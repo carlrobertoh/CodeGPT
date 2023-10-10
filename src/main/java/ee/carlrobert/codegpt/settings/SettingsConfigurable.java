@@ -50,7 +50,8 @@ public class SettingsConfigurable implements Configurable, Disposable {
         isServiceChanged(serviceSelectionForm, settings) ||
         openAISettings.isModified(serviceSelectionForm) ||
         azureSettings.isModified(serviceSelectionForm) ||
-        serviceSelectionForm.isDisplayWebSearchResults() != settings.isDisplayWebSearchResults();
+        serviceSelectionForm.isDisplayWebSearchResults() != settings.isDisplayWebSearchResults() ||
+        settings.getLlamaModelPath().equals(serviceSelectionForm.getLlamaModelPath());
   }
 
   @Override
@@ -72,7 +73,9 @@ public class SettingsConfigurable implements Configurable, Disposable {
     settings.setUseOpenAIService(serviceSelectionForm.isOpenAIServiceSelected());
     settings.setUseAzureService(serviceSelectionForm.isAzureServiceSelected());
     settings.setUseYouService(serviceSelectionForm.isYouServiceSelected());
+    settings.setUseLlamaService(serviceSelectionForm.isLlamaServiceSelected());
     settings.setDisplayWebSearchResults(serviceSelectionForm.isDisplayWebSearchResults());
+    settings.setLlamaModelPath(serviceSelectionForm.getLlamaModelPath());
 
     openAISettings.apply(serviceSelectionForm);
     azureSettings.apply(serviceSelectionForm);
@@ -100,6 +103,9 @@ public class SettingsConfigurable implements Configurable, Disposable {
     serviceSelectionForm.setOpenAIServiceSelected(settings.isUseOpenAIService());
     serviceSelectionForm.setAzureServiceSelected(settings.isUseAzureService());
     serviceSelectionForm.setYouServiceSelected(settings.isUseYouService());
+    serviceSelectionForm.setLlamaServiceSelected(settings.isUseLlamaService());
+
+    serviceSelectionForm.setLlamaModelPath(settings.getLlamaModelPath());
 
     openAISettings.reset(serviceSelectionForm);
     azureSettings.reset(serviceSelectionForm);
@@ -121,7 +127,8 @@ public class SettingsConfigurable implements Configurable, Disposable {
       SettingsState settings) {
     return serviceSelectionForm.isOpenAIServiceSelected() != settings.isUseOpenAIService() ||
         serviceSelectionForm.isAzureServiceSelected() != settings.isUseAzureService() ||
-        serviceSelectionForm.isYouServiceSelected() != settings.isUseYouService();
+        serviceSelectionForm.isYouServiceSelected() != settings.isUseYouService() ||
+        serviceSelectionForm.isLlamaServiceSelected() != settings.isUseLlamaService();
   }
 
   private void resetActiveTab() {
@@ -143,6 +150,9 @@ public class SettingsConfigurable implements Configurable, Disposable {
     }
     if (serviceSelectionForm.isYouServiceSelected()) {
       return "you";
+    }
+    if (serviceSelectionForm.isLlamaServiceSelected()) {
+      return "llama.cpp";
     }
     return null;
   }

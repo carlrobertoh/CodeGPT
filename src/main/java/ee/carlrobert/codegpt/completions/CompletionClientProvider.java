@@ -9,6 +9,7 @@ import ee.carlrobert.llm.client.Client;
 import ee.carlrobert.llm.client.ProxyAuthenticator;
 import ee.carlrobert.llm.client.azure.AzureClient;
 import ee.carlrobert.llm.client.azure.AzureCompletionRequestParams;
+import ee.carlrobert.llm.client.llama.LlamaClient;
 import ee.carlrobert.llm.client.openai.OpenAIClient;
 import ee.carlrobert.llm.client.you.YouClient;
 import java.net.InetSocketAddress;
@@ -29,6 +30,10 @@ public class CompletionClientProvider {
     return new YouClient.Builder(sessionId, accessToken).build();
   }
 
+  public static LlamaClient getLlamaClient() {
+    return new LlamaClient.Builder().build();
+  }
+
   private static OpenAIClient.Builder getOpenAIClientBuilder() {
     var settings = OpenAISettingsState.getInstance();
     var builder = new OpenAIClient
@@ -39,18 +44,13 @@ public class CompletionClientProvider {
 
   private static AzureClient.Builder getAzureClientBuilder() {
     var settings = AzureSettingsState.getInstance();
-    var params = new AzureCompletionRequestParams(settings.getResourceName(), settings.getDeploymentId(), settings.getApiVersion());
+    var params = new AzureCompletionRequestParams(
+        settings.getResourceName(),
+        settings.getDeploymentId(),
+        settings.getApiVersion());
     var builder = new AzureClient.Builder(AzureCredentialsManager.getInstance().getSecret(), params)
         .setActiveDirectoryAuthentication(settings.isUseAzureActiveDirectoryAuthentication());
     return (AzureClient.Builder) addDefaultClientParams(builder).setHost(settings.getBaseHost());
-  }
-
-  private static YouClient.Builder getYouClientBuilder() {
-    var settings = OpenAISettingsState.getInstance();
-    var builder = new OpenAIClient
-        .Builder(OpenAICredentialsManager.getInstance().getApiKey())
-        .setOrganization(settings.getOrganization());
-    return (YouClient.Builder) addDefaultClientParams(builder).setHost(settings.getBaseHost());
   }
 
   private static Client.Builder addDefaultClientParams(Client.Builder builder) {
@@ -61,8 +61,9 @@ public class CompletionClientProvider {
       builder.setProxy(
           new Proxy(advancedSettings.getProxyType(), new InetSocketAddress(proxyHost, proxyPort)));
       if (advancedSettings.isProxyAuthSelected()) {
-        builder.setProxyAuthenticator(
-            new ProxyAuthenticator(advancedSettings.getProxyUsername(), advancedSettings.getProxyPassword()));
+        builder.setProxyAuthenticator(new ProxyAuthenticator(
+            advancedSettings.getProxyUsername(),
+            advancedSettings.getProxyPassword()));
       }
     }
 

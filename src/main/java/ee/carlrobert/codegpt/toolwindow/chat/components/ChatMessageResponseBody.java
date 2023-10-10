@@ -232,13 +232,13 @@ public class ChatMessageResponseBody extends JPanel {
     add(currentlyProcessedElement);
   }
 
-  private void prepareProcessingCodeResponse(String code, String language) {
+  private void prepareProcessingCodeResponse(String code, String markdownLanguage) {
     hideCarets();
     currentlyProcessedTextPane = null;
     currentlyProcessedEditor = new ResponseEditor(
         project,
         code,
-        language,
+        markdownLanguage,
         parentDisposable);
     currentlyProcessedElement = new ResponseWrapper();
 

@@ -5,6 +5,7 @@ import static ee.carlrobert.codegpt.util.ThemeUtils.getPanelBackgroundColor;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
@@ -30,6 +31,7 @@ import ee.carlrobert.codegpt.toolwindow.chat.components.SmartScroller;
 import ee.carlrobert.codegpt.toolwindow.chat.components.UserMessagePanel;
 import ee.carlrobert.codegpt.toolwindow.chat.components.UserPromptTextArea;
 import ee.carlrobert.codegpt.completions.you.YouUserManager;
+import ee.carlrobert.codegpt.util.ApplicationUtils;
 import ee.carlrobert.codegpt.util.EditorUtils;
 import ee.carlrobert.codegpt.util.file.FileUtils;
 import ee.carlrobert.codegpt.util.OverlayUtils;
@@ -157,7 +159,8 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     requestHandler.withContextualSearch(useContextualSearch);
     requestHandler.addMessageListener(partialMessage -> {
       try {
-        responseContainer.update(partialMessage);
+        ApplicationManager.getApplication()
+            .invokeLater(() -> responseContainer.update(partialMessage));
       } catch (Exception e) {
         responseContainer.displayDefaultError();
         throw new RuntimeException("Error while updating the content", e);
@@ -361,6 +364,9 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     if (settings.isUseYouService()) {
       return "you.chat.completion";
     }
+    if (settings.isUseLlamaService()) {
+      return "llama.chat.completion";
+    }
     return null;
   }
 
@@ -375,7 +381,10 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     if (settings.isUseYouService()) {
       return "YouCode";
     }
+    if (settings.isUseLlamaService()) {
+      return "llama.cpp";
+    }
 
-    return null;
+    return "Unknown";
   }
 }

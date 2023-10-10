@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.completions;
 
+import com.intellij.openapi.application.ApplicationManager;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
@@ -13,6 +14,7 @@ import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import okhttp3.sse.EventSource;
 import org.jetbrains.annotations.NotNull;
@@ -76,6 +78,11 @@ public class CompletionRequestHandler {
     var requestProvider = new CompletionRequestProvider(conversation);
 
     try {
+      if (settings.isUseLlamaService()) {
+        return CompletionClientProvider.getLlamaClient()
+            .getChatCompletion(requestProvider.buildLlamaCompletionRequest(message), eventListener);
+      }
+
       if (settings.isUseYouService()) {
         return CompletionClientProvider.getYouClient("", "")
             .getChatCompletion(requestProvider.buildYouCompletionRequest(message), eventListener);

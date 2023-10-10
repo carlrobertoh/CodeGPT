@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.completions;
 
+import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 
 import com.intellij.openapi.diagnostic.Logger;
@@ -11,6 +12,7 @@ import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.embedding.EmbeddingsService;
+import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionModel;
 import ee.carlrobert.llm.client.openai.completion.chat.request.OpenAIChatCompletionMessage;
 import ee.carlrobert.llm.client.openai.completion.chat.request.OpenAIChatCompletionRequest;
@@ -51,6 +53,16 @@ public class CompletionRequestProvider {
   public CompletionRequestProvider(Conversation conversation) {
     this.embeddingsService = new EmbeddingsService(CompletionClientProvider.getOpenAIClient(), CodeGPTPlugin.getPluginBasePath());
     this.conversation = conversation;
+  }
+
+  public LlamaCompletionRequest buildLlamaCompletionRequest(Message message) {
+    return new LlamaCompletionRequest.Builder(format("[INST]\n"
+        + COMPLETION_SYSTEM_PROMPT
+        + "\nHere is your task: \n%s\n"
+        + "[/INST]", message.getPrompt()))
+        // add chat history
+        .setN_predict(512)
+        .build();
   }
 
   public YouCompletionRequest buildYouCompletionRequest(Message message) {
