@@ -58,6 +58,10 @@ tasks {
     gradleVersion = properties("gradleVersion").get()
   }
 
+  buildPlugin {
+    dependsOn("initSubmodules")
+  }
+
   verifyPlugin {
     enabled = true
   }
@@ -125,4 +129,10 @@ tasks {
       showStandardStreams = true
     }
   }
+}
+
+tasks.register<Exec>("initSubmodules") {
+  // commandLine("git", "submodule", "add", "git@github.com:ggerganov/llama.cpp", "src/main/cpp/llama.cpp")
+  // commandLine("git", "submodule", "update")
+  commandLine("git", "submodule", "init")
 }

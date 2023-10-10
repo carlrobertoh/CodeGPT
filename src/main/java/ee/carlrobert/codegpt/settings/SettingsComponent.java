@@ -18,7 +18,7 @@ public class SettingsComponent {
   private final YouServiceSelectionPanel youServiceSelectionPanel;
 
   public SettingsComponent(Disposable parentDisposable, SettingsState settings) {
-    serviceSelectionForm = new ServiceSelectionForm(settings);
+    serviceSelectionForm = new ServiceSelectionForm(parentDisposable, settings);
     displayNameField = new JBTextField(settings.getDisplayName(), 20);
     youServiceSelectionPanel = new YouServiceSelectionPanel(parentDisposable);
     mainPanel = FormBuilder.createFormBuilder()

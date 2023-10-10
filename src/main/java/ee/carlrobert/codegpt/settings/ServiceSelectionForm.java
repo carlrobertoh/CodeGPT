@@ -3,6 +3,7 @@ package ee.carlrobert.codegpt.settings;
 import static java.lang.String.format;
 
 import com.intellij.icons.AllIcons.Actions;
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
@@ -10,7 +11,6 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.TextBrowseFolderListener;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
-import com.intellij.openapi.util.Disposer;
 import com.intellij.ui.PortField;
 import com.intellij.ui.TitledSeparator;
 import com.intellij.ui.components.AnActionLink;
@@ -45,6 +45,8 @@ import javax.swing.JPanel;
 import org.jetbrains.annotations.NotNull;
 
 public class ServiceSelectionForm {
+
+  private final Disposable parentDisposable;
 
   private static final OpenAIChatCompletionModel[] DEFAULT_OPENAI_MODELS = new OpenAIChatCompletionModel[]{
       OpenAIChatCompletionModel.GPT_3_5,
@@ -85,7 +87,8 @@ public class ServiceSelectionForm {
   private final JPanel llamaServiceSectionPanel;
   private final TextFieldWithBrowseButton textFieldWithBrowseButton;
 
-  public ServiceSelectionForm(SettingsState settings) {
+  public ServiceSelectionForm(Disposable parentDisposable, SettingsState settings) {
+    this.parentDisposable = parentDisposable;
     var openAISettings = OpenAISettingsState.getInstance();
     var azureSettings = AzureSettingsState.getInstance();
     openAIApiKeyField = new JBPasswordField();
@@ -281,7 +284,7 @@ public class ServiceSelectionForm {
 
   private JPanel createYouServiceSectionPanel() {
     return FormBuilder.createFormBuilder()
-        .addComponent(new YouServiceSelectionPanel(Disposer.newDisposable()))
+        .addComponent(new YouServiceSelectionPanel(parentDisposable))
         .addComponent(new TitledSeparator("Chat Preferences"))
         .addComponent(withEmptyLeftBorder(displayWebSearchResultsCheckBox))
         .getPanel();

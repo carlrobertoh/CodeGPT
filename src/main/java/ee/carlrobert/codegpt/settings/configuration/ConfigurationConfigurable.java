@@ -2,13 +2,16 @@ package ee.carlrobert.codegpt.settings.configuration;
 
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.options.Configurable;
+import com.intellij.openapi.util.Disposer;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.actions.editor.EditorActionsUtil;
 import javax.swing.JComponent;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
 
-public class ConfigurationConfigurable implements Configurable, Disposable {
+public class ConfigurationConfigurable implements Configurable {
+
+  private Disposable parentDisposable;
 
   private ConfigurationComponent configurationComponent;
 
@@ -22,7 +25,8 @@ public class ConfigurationConfigurable implements Configurable, Disposable {
   @Override
   public JComponent createComponent() {
     var configuration = ConfigurationState.getInstance();
-    configurationComponent = new ConfigurationComponent(this, configuration);
+    parentDisposable = Disposer.newDisposable();
+    configurationComponent = new ConfigurationComponent(parentDisposable, configuration);
     return configurationComponent.getPanel();
   }
 
@@ -60,10 +64,9 @@ public class ConfigurationConfigurable implements Configurable, Disposable {
 
   @Override
   public void disposeUIResources() {
+    if (parentDisposable != null) {
+      Disposer.dispose(parentDisposable);
+    }
     configurationComponent = null;
-  }
-
-  @Override
-  public void dispose() {
   }
 }

@@ -10,11 +10,15 @@ import com.intellij.execution.process.ProcessHandler;
 import com.intellij.execution.process.ProcessListener;
 import com.intellij.execution.process.ProcessOutputType;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.Key;
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 import org.jetbrains.annotations.NotNull;
 
 public class LlamaServerAgent {
+
+  private static final Logger LOG = Logger.getInstance(LlamaServerAgent.class);
 
   private final String modelPath;
 
@@ -28,7 +32,7 @@ public class LlamaServerAgent {
         var process = new OSProcessHandler(getMakeCommandLinde());
         process.addProcessListener(getMakeProcessListener(onSuccess));
 
-        System.out.println("Building llama.cpp");
+        LOG.info("Building llama.cpp");
         process.startNotify();
       } catch (ExecutionException e) {
         throw new RuntimeException(e);
@@ -40,7 +44,7 @@ public class LlamaServerAgent {
     return new ProcessAdapter() {
       @Override
       public void onTextAvailable(@NotNull ProcessEvent event, @NotNull Key outputType) {
-        System.out.println(event.getText());
+        LOG.info(event.getText());
       }
 
       @Override
@@ -53,7 +57,7 @@ public class LlamaServerAgent {
         }
         processHandler.addProcessListener(getProcessListener(onSuccess));
 
-        System.out.println("Starting server");
+        LOG.info("Starting server");
         processHandler.startNotify();
       }
     };
@@ -84,7 +88,7 @@ public class LlamaServerAgent {
     GeneralCommandLine commandLine = new GeneralCommandLine().withCharset(StandardCharsets.UTF_8);
     commandLine.setExePath("make");
     // FIXME
-    commandLine.withWorkDirectory("/Users/carlrobertoh/Developer/llama.cpp");
+    commandLine.withWorkDirectory("");
     commandLine.addParameters("-j");
     commandLine.setRedirectErrorStream(false);
     return commandLine;
@@ -93,7 +97,7 @@ public class LlamaServerAgent {
   private GeneralCommandLine getServerCommandLine() {
     GeneralCommandLine commandLine = new GeneralCommandLine().withCharset(StandardCharsets.UTF_8);
     commandLine.setExePath("./server");
-    commandLine.withWorkDirectory("/Users/carlrobertoh/Developer/llama.cpp");
+    commandLine.withWorkDirectory(new File("").getAbsolutePath());
     commandLine.addParameters(
         "-m", modelPath,
         "-c", "2048");
