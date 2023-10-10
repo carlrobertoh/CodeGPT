@@ -2,6 +2,7 @@ package ee.carlrobert.codegpt.settings;
 
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.options.Configurable;
+import com.intellij.openapi.util.Disposer;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
@@ -16,7 +17,9 @@ import javax.swing.JComponent;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
 
-public class SettingsConfigurable implements Configurable, Disposable {
+public class SettingsConfigurable implements Configurable {
+
+  private Disposable parentDisposable;
 
   private SettingsComponent settingsComponent;
 
@@ -35,7 +38,8 @@ public class SettingsConfigurable implements Configurable, Disposable {
   @Override
   public JComponent createComponent() {
     var settings = SettingsState.getInstance();
-    settingsComponent = new SettingsComponent(this, settings);
+    parentDisposable = Disposer.newDisposable();
+    settingsComponent = new SettingsComponent(parentDisposable, settings);
     return settingsComponent.getPanel();
   }
 
@@ -115,11 +119,10 @@ public class SettingsConfigurable implements Configurable, Disposable {
 
   @Override
   public void disposeUIResources() {
+    if (parentDisposable != null) {
+      Disposer.dispose(parentDisposable);
+    }
     settingsComponent = null;
-  }
-
-  @Override
-  public void dispose() {
   }
 
   private boolean isServiceChanged(
