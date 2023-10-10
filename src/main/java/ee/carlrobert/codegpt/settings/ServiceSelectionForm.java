@@ -1,8 +1,8 @@
 package ee.carlrobert.codegpt.settings;
 
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.ui.ComboBox;
-import com.intellij.openapi.util.Disposer;
 import com.intellij.ui.TitledSeparator;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBPasswordField;
@@ -31,6 +31,8 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 
 public class ServiceSelectionForm {
+
+  private final Disposable parentDisposable;
 
   private static final OpenAIChatCompletionModel[] DEFAULT_OPENAI_MODELS = new OpenAIChatCompletionModel[] {
       OpenAIChatCompletionModel.GPT_3_5,
@@ -67,7 +69,8 @@ public class ServiceSelectionForm {
   private final JPanel youServiceSectionPanel;
   private final JBCheckBox displayWebSearchResultsCheckBox;
 
-  public ServiceSelectionForm(SettingsState settings) {
+  public ServiceSelectionForm(Disposable parentDisposable, SettingsState settings) {
+    this.parentDisposable = parentDisposable;
     var openAISettings = OpenAISettingsState.getInstance();
     var azureSettings = AzureSettingsState.getInstance();
     openAIApiKeyField = new JBPasswordField();
@@ -233,7 +236,7 @@ public class ServiceSelectionForm {
 
   private JPanel createYouServiceSectionPanel() {
     return FormBuilder.createFormBuilder()
-        .addComponent(new YouServiceSelectionPanel(Disposer.newDisposable()))
+        .addComponent(new YouServiceSelectionPanel(parentDisposable))
         .addComponent(new TitledSeparator("Chat Preferences"))
         .addComponent(withEmptyLeftBorder(displayWebSearchResultsCheckBox))
         .getPanel();
