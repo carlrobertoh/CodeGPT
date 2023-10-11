@@ -67,17 +67,17 @@ public class FileUtils {
     return "";
   }
 
-  public static Map.Entry<String, String> findFileNameExtensionMapping(String language) {
+  public static Map.Entry<String, String> findLanguageExtensionMapping(String language) {
     var defaultValue = Map.entry("Text", ".txt");
     var mapper = new ObjectMapper();
 
-    List<FileExtensionLanguageDetails> fileExtensionLanguageMappings;
-    List<LanguageFileExtensionDetails> languageFileExtensionMappings;
+    List<FileExtensionLanguageDetails> extensionToLanguageMappings;
+    List<LanguageFileExtensionDetails> languageToExtensionMappings;
     try {
-      fileExtensionLanguageMappings = mapper.readValue(
+      extensionToLanguageMappings = mapper.readValue(
           getResourceContent("/fileExtensionLanguageMappings.json"), new TypeReference<>() {
           });
-      languageFileExtensionMappings = mapper.readValue(
+      languageToExtensionMappings = mapper.readValue(
           getResourceContent("/languageFileExtensionMappings.json"), new TypeReference<>() {
           });
     } catch (JsonProcessingException e) {
@@ -85,11 +85,11 @@ public class FileUtils {
       return defaultValue;
     }
 
-    return findFirstExtension(languageFileExtensionMappings, language)
-        .orElseGet(() -> fileExtensionLanguageMappings.stream()
+    return findFirstExtension(languageToExtensionMappings, language)
+        .orElseGet(() -> extensionToLanguageMappings.stream()
             .filter(it -> it.getExtension().equalsIgnoreCase(language))
             .findFirst()
-            .map(it -> findFirstExtension(languageFileExtensionMappings, it.getValue())
+            .map(it -> findFirstExtension(languageToExtensionMappings, it.getValue())
                 .orElse(defaultValue))
             .orElse(defaultValue));
   }

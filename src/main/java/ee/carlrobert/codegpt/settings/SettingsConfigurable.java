@@ -10,6 +10,7 @@ import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
+import ee.carlrobert.codegpt.settings.state.YouSettingsState;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
 import ee.carlrobert.codegpt.util.ApplicationUtils;
@@ -54,7 +55,8 @@ public class SettingsConfigurable implements Configurable {
         isServiceChanged(serviceSelectionForm, settings) ||
         openAISettings.isModified(serviceSelectionForm) ||
         azureSettings.isModified(serviceSelectionForm) ||
-        serviceSelectionForm.isDisplayWebSearchResults() != settings.isDisplayWebSearchResults();
+        serviceSelectionForm.isDisplayWebSearchResults() !=
+            YouSettingsState.getInstance().isDisplayWebSearchResults();
   }
 
   @Override
@@ -76,7 +78,8 @@ public class SettingsConfigurable implements Configurable {
     settings.setUseOpenAIService(serviceSelectionForm.isOpenAIServiceSelected());
     settings.setUseAzureService(serviceSelectionForm.isAzureServiceSelected());
     settings.setUseYouService(serviceSelectionForm.isYouServiceSelected());
-    settings.setDisplayWebSearchResults(serviceSelectionForm.isDisplayWebSearchResults());
+    YouSettingsState.getInstance()
+        .setDisplayWebSearchResults(serviceSelectionForm.isDisplayWebSearchResults());
 
     openAISettings.apply(serviceSelectionForm);
     azureSettings.apply(serviceSelectionForm);
@@ -108,7 +111,8 @@ public class SettingsConfigurable implements Configurable {
     openAISettings.reset(serviceSelectionForm);
     azureSettings.reset(serviceSelectionForm);
 
-    serviceSelectionForm.setDisplayWebSearchResults(settings.isDisplayWebSearchResults());
+    serviceSelectionForm.setDisplayWebSearchResults(
+        YouSettingsState.getInstance().isDisplayWebSearchResults());
   }
 
   @Override

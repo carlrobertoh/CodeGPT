@@ -9,6 +9,7 @@ import com.intellij.ui.TitledSeparator;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPasswordField;
 import com.intellij.ui.components.JBTextField;
+import com.intellij.ui.components.OnOffButton;
 import com.intellij.util.ui.AsyncProcessIcon;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBFont;
@@ -51,7 +52,8 @@ public class YouServiceSelectionPanel extends JPanel {
     if (!settings.getEmail().isEmpty()) {
       passwordField.setText(YouCredentialsManager.getInstance().getAccountPassword());
     }
-    signInButton = new JButton(CodeGPTBundle.get("settingsConfigurable.section.userAuthentication.signIn.label"));
+    signInButton = new JButton(
+        CodeGPTBundle.get("settingsConfigurable.section.userAuthentication.signIn.label"));
     signUpTextPane = createSignUpTextPane();
     loadingSpinner = new AsyncProcessIcon("sign_in_spinner");
     loadingSpinner.setBorder(JBUI.Borders.emptyLeft(8));
@@ -63,11 +65,15 @@ public class YouServiceSelectionPanel extends JPanel {
     signInButton.addActionListener(e -> {
       emailValidator.revalidate();
       passwordValidator.revalidate();
-      if (emailValidator.getValidationInfo() == null && passwordValidator.getValidationInfo() == null) {
+      if (emailValidator.getValidationInfo() == null
+          && passwordValidator.getValidationInfo() == null) {
         loadingSpinner.resume();
         loadingSpinner.setVisible(true);
         YouAuthenticationService.getInstance()
-            .signInAsync(emailField.getText(), new String(passwordField.getPassword()), new UserAuthenticationHandler());
+            .signInAsync(
+                emailField.getText(),
+                new String(passwordField.getPassword()),
+                new UserAuthenticationHandler());
       }
     });
 
@@ -91,14 +97,17 @@ public class YouServiceSelectionPanel extends JPanel {
     return new String(passwordField.getPassword());
   }
 
-  private ComponentValidator createInputValidator(Disposable parentDisposable, JComponent component) {
+  private ComponentValidator createInputValidator(
+      Disposable parentDisposable,
+      JComponent component) {
     var validator = new ComponentValidator(parentDisposable)
         .withValidator(() -> {
           String value;
           if (component instanceof JBTextField) {
             value = ((JBTextField) component).getText();
             if (!isValidEmail(value)) {
-              return new ValidationInfo("The email you entered is invalid.", component).withOKEnabled();
+              return new ValidationInfo("The email you entered is invalid.", component)
+                  .withOKEnabled();
             }
           } else {
             value = new String(((JPasswordField) component).getPassword());
@@ -124,7 +133,8 @@ public class YouServiceSelectionPanel extends JPanel {
   }
 
   private JTextPane createSignUpTextPane() {
-    var textPane = createTextPane("<html><a href=\"https://you.com/code\">Don't have an account? Sign up</a></html>");
+    var textPane = createTextPane(
+        "<html><a href=\"https://you.com/code\">Don't have an account? Sign up</a></html>");
     textPane.setBorder(JBUI.Borders.emptyLeft(4));
     return textPane;
   }
@@ -148,7 +158,10 @@ public class YouServiceSelectionPanel extends JPanel {
     return panel;
   }
 
-  private JPanel createUserAuthenticationPanel(JBTextField emailAddressField, JBPasswordField passwordField, @Nullable YouAuthenticationError error) {
+  private JPanel createUserAuthenticationPanel(
+      JBTextField emailAddressField,
+      JBPasswordField passwordField,
+      @Nullable YouAuthenticationError error) {
     var contentPanelBuilder = FormBuilder.createFormBuilder()
         .addLabeledComponent("Email address:", emailAddressField)
         .addLabeledComponent("Password:", passwordField)
@@ -160,12 +173,12 @@ public class YouServiceSelectionPanel extends JPanel {
       var invalidCredentialsLabel = new JBLabel(error.getErrorMessage());
       invalidCredentialsLabel.setForeground(JBColor.red);
       invalidCredentialsLabel.setBorder(JBUI.Borders.emptyLeft(4));
-
       contentPanelBuilder.addComponentToRightColumn(invalidCredentialsLabel);
     }
 
     return FormBuilder.createFormBuilder()
-        .addComponent(new TitledSeparator(CodeGPTBundle.get("settingsConfigurable.section.userAuthentication.title")))
+        .addComponent(new TitledSeparator(
+            CodeGPTBundle.get("settingsConfigurable.section.userAuthentication.title")))
         .addComponent(JBUI.Panels
             .simplePanel(contentPanelBuilder.getPanel())
             .withBorder(JBUI.Borders.emptyLeft(16)))
@@ -175,7 +188,8 @@ public class YouServiceSelectionPanel extends JPanel {
   private JPanel createUserInformationPanel(YouUser user) {
     var userManager = YouUserManager.getInstance();
     var contentPanelBuilder = FormBuilder.createFormBuilder()
-        .addLabeledComponent("Email address:", new JBLabel(user.getEmails().get(0).getEmail()).withFont(JBFont.label().asBold()));
+        .addLabeledComponent("Email address:",
+            new JBLabel(user.getEmails().get(0).getEmail()).withFont(JBFont.label().asBold()));
 
     var signOutButton = new JButton("Sign Out");
     signOutButton.addActionListener(e -> {
@@ -184,7 +198,8 @@ public class YouServiceSelectionPanel extends JPanel {
     });
 
     return FormBuilder.createFormBuilder()
-        .addComponent(new TitledSeparator(CodeGPTBundle.get("settingsConfigurable.section.userInformation.title")))
+        .addComponent(new TitledSeparator(
+            CodeGPTBundle.get("settingsConfigurable.section.userInformation.title")))
         .addVerticalGap(8)
         .addComponent(JBUI.Panels
             .simplePanel(contentPanelBuilder.addVerticalGap(4)
@@ -209,13 +224,18 @@ public class YouServiceSelectionPanel extends JPanel {
 
     @Override
     public void handleGenericError() {
-      SwingUtilities.invokeLater(() -> refreshView(
-          createUserAuthenticationPanel(emailField, passwordField, new YouAuthenticationError("unknown", "Something went wrong."))));
+      SwingUtilities.invokeLater(() -> refreshView(createUserAuthenticationPanel(
+          emailField,
+          passwordField,
+          new YouAuthenticationError("unknown", "Something went wrong."))));
     }
 
     @Override
     public void handleError(YouAuthenticationError error) {
-      SwingUtilities.invokeLater(() -> refreshView(createUserAuthenticationPanel(emailField, passwordField, error)));
+      SwingUtilities.invokeLater(() -> refreshView(createUserAuthenticationPanel(
+          emailField,
+          passwordField,
+          error)));
     }
   }
 

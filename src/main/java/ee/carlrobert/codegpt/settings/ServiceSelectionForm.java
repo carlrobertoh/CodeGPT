@@ -19,6 +19,7 @@ import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.completions.you.YouUserManager;
 import ee.carlrobert.codegpt.completions.you.auth.AuthenticationNotifier;
+import ee.carlrobert.codegpt.settings.state.YouSettingsState;
 import ee.carlrobert.codegpt.util.SwingUtils;
 import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionModel;
 import ee.carlrobert.llm.completion.CompletionModel;
@@ -34,7 +35,7 @@ public class ServiceSelectionForm {
 
   private final Disposable parentDisposable;
 
-  private static final OpenAIChatCompletionModel[] DEFAULT_OPENAI_MODELS = new OpenAIChatCompletionModel[] {
+  private static final OpenAIChatCompletionModel[] DEFAULT_OPENAI_MODELS = new OpenAIChatCompletionModel[]{
       OpenAIChatCompletionModel.GPT_3_5,
       OpenAIChatCompletionModel.GPT_3_5_16k,
       OpenAIChatCompletionModel.GPT_4,
@@ -88,7 +89,8 @@ public class ServiceSelectionForm {
 
     azureActiveDirectoryTokenField = new JBPasswordField();
     azureActiveDirectoryTokenField.setColumns(30);
-    azureActiveDirectoryTokenField.setText(AzureCredentialsManager.getInstance().getAzureActiveDirectoryToken());
+    azureActiveDirectoryTokenField.setText(
+        AzureCredentialsManager.getInstance().getAzureActiveDirectoryToken());
 
     azureActiveDirectoryTokenFieldPanel = UI.PanelFactory.panel(azureActiveDirectoryTokenField)
         .withLabel("Bearer token:")
@@ -103,26 +105,37 @@ public class ServiceSelectionForm {
         azureSettings.isUseAzureActiveDirectoryAuthentication());
 
     useOpenAIServiceRadioButton = new JBRadioButton(
-        CodeGPTBundle.get("settingsConfigurable.section.service.useOpenAIServiceRadioButtonLabel"), settings.isUseOpenAIService());
+        CodeGPTBundle.get("settingsConfigurable.section.service.useOpenAIServiceRadioButtonLabel"),
+        settings.isUseOpenAIService());
     useAzureServiceRadioButton = new JBRadioButton(
-        CodeGPTBundle.get("settingsConfigurable.section.service.useAzureServiceRadioButtonLabel"), settings.isUseAzureService());
+        CodeGPTBundle.get("settingsConfigurable.section.service.useAzureServiceRadioButtonLabel"),
+        settings.isUseAzureService());
     useYouServiceRadioButton = new JBRadioButton(
-        CodeGPTBundle.get("settingsConfigurable.section.service.useYouServiceRadioButtonLabel"), settings.isUseYouService());
+        CodeGPTBundle.get("settingsConfigurable.section.service.useYouServiceRadioButtonLabel"),
+        settings.isUseYouService());
 
     openAIBaseHostField = new JBTextField(openAISettings.getBaseHost(), 30);
     openAIPathField = new JBTextField(openAISettings.getPath(), 30);
     openAIOrganizationField = new JBTextField(openAISettings.getOrganization(), 30);
-    openAICompletionModelComboBox = new ModelComboBox(DEFAULT_OPENAI_MODELS, OpenAIChatCompletionModel.findByCode(openAISettings.getModel()));
+    openAICompletionModelComboBox = new ModelComboBox(
+        DEFAULT_OPENAI_MODELS,
+        OpenAIChatCompletionModel.findByCode(openAISettings.getModel()));
 
     azureBaseHostField = new JBTextField(azureSettings.getBaseHost(), 35);
     azurePathField = new JBTextField(azureSettings.getPath(), 35);
     azureResourceNameField = new JBTextField(azureSettings.getResourceName(), 35);
     azureDeploymentIdField = new JBTextField(azureSettings.getDeploymentId(), 35);
     azureApiVersionField = new JBTextField(azureSettings.getApiVersion(), 35);
-    azureCompletionModelComboBox = new ModelComboBox(DEFAULT_OPENAI_MODELS, OpenAIChatCompletionModel.findByCode(azureSettings.getModel()));
-    azureCompletionModelComboBox.getEditor().getEditorComponent().setMaximumSize(azureBaseHostField.getPreferredSize());
+    azureCompletionModelComboBox = new ModelComboBox(
+        DEFAULT_OPENAI_MODELS,
+        OpenAIChatCompletionModel.findByCode(azureSettings.getModel()));
+    azureCompletionModelComboBox.getEditor()
+        .getEditorComponent()
+        .setMaximumSize(azureBaseHostField.getPreferredSize());
 
-    displayWebSearchResultsCheckBox = new JBCheckBox("Display web search results", settings.isDisplayWebSearchResults());
+    displayWebSearchResultsCheckBox = new JBCheckBox(
+        "Display web search results",
+        YouSettingsState.getInstance().isDisplayWebSearchResults());
     displayWebSearchResultsCheckBox.setEnabled(YouUserManager.getInstance().isAuthenticated());
 
     openAIServiceSectionPanel = createOpenAIServiceSectionPanel();
@@ -135,7 +148,8 @@ public class ServiceSelectionForm {
     ApplicationManager.getApplication()
         .getMessageBus()
         .connect()
-        .subscribe(AuthenticationNotifier.AUTHENTICATION_TOPIC, (AuthenticationNotifier) () -> displayWebSearchResultsCheckBox.setEnabled(true));
+        .subscribe(AuthenticationNotifier.AUTHENTICATION_TOPIC,
+            (AuthenticationNotifier) () -> displayWebSearchResultsCheckBox.setEnabled(true));
   }
 
   public JPanel getForm() {
@@ -158,9 +172,11 @@ public class ServiceSelectionForm {
   private JPanel createOpenAIServiceSectionPanel() {
     var requestConfigurationPanel = UI.PanelFactory.grid()
         .add(UI.PanelFactory.panel(openAIOrganizationField)
-            .withLabel(CodeGPTBundle.get("settingsConfigurable.section.service.openai.organizationField.label"))
+            .withLabel(CodeGPTBundle.get(
+                "settingsConfigurable.section.service.openai.organizationField.label"))
             .resizeX(false)
-            .withComment(CodeGPTBundle.get("settingsConfigurable.section.service.openai.organizationField.comment")))
+            .withComment(CodeGPTBundle.get(
+                "settingsConfigurable.section.service.openai.organizationField.comment")))
         .add(UI.PanelFactory.panel(openAIBaseHostField)
             .withLabel("Base host:")
             .resizeX(false))
@@ -175,7 +191,8 @@ public class ServiceSelectionForm {
     var apiKeyFieldPanel = UI.PanelFactory.panel(openAIApiKeyField)
         .withLabel(CodeGPTBundle.get("settingsConfigurable.section.integration.apiKeyField.label"))
         .resizeX(false)
-        .withComment(CodeGPTBundle.get("settingsConfigurable.section.integration.apiKeyField.comment"))
+        .withComment(
+            CodeGPTBundle.get("settingsConfigurable.section.integration.apiKeyField.comment"))
         .withCommentHyperlinkListener(SwingUtils::handleHyperlinkClicked)
         .createPanel();
 
@@ -204,17 +221,23 @@ public class ServiceSelectionForm {
 
     var configPanel = withEmptyLeftBorder(UI.PanelFactory.grid()
         .add(UI.PanelFactory.panel(azureResourceNameField)
-            .withLabel(CodeGPTBundle.get("settingsConfigurable.section.service.azure.resourceNameField.label"))
+            .withLabel(CodeGPTBundle.get(
+                "settingsConfigurable.section.service.azure.resourceNameField.label"))
             .resizeX(false)
-            .withComment(CodeGPTBundle.get("settingsConfigurable.section.service.azure.resourceNameField.comment")))
+            .withComment(CodeGPTBundle.get(
+                "settingsConfigurable.section.service.azure.resourceNameField.comment")))
         .add(UI.PanelFactory.panel(azureDeploymentIdField)
-            .withLabel(CodeGPTBundle.get("settingsConfigurable.section.service.azure.deploymentIdField.label"))
+            .withLabel(CodeGPTBundle.get(
+                "settingsConfigurable.section.service.azure.deploymentIdField.label"))
             .resizeX(false)
-            .withComment(CodeGPTBundle.get("settingsConfigurable.section.service.azure.deploymentIdField.comment")))
+            .withComment(CodeGPTBundle.get(
+                "settingsConfigurable.section.service.azure.deploymentIdField.comment")))
         .add(UI.PanelFactory.panel(azureApiVersionField)
-            .withLabel(CodeGPTBundle.get("settingsConfigurable.section.service.azure.apiVersionField.label"))
+            .withLabel(CodeGPTBundle.get(
+                "settingsConfigurable.section.service.azure.apiVersionField.label"))
             .resizeX(false)
-            .withComment(CodeGPTBundle.get("settingsConfigurable.section.service.azure.apiVersionField.comment")))
+            .withComment(CodeGPTBundle.get(
+                "settingsConfigurable.section.service.azure.apiVersionField.comment")))
         .add(UI.PanelFactory.panel(azureBaseHostField)
             .withLabel("Base host:")
             .resizeX(false))
@@ -251,7 +274,8 @@ public class ServiceSelectionForm {
     openAIServiceSectionPanel.setVisible(settings.isUseOpenAIService());
     azureServiceSectionPanel.setVisible(settings.isUseAzureService());
     azureApiKeyFieldPanel.setVisible(azureSettings.isUseAzureApiKeyAuthentication());
-    azureActiveDirectoryTokenFieldPanel.setVisible(azureSettings.isUseAzureActiveDirectoryAuthentication());
+    azureActiveDirectoryTokenFieldPanel.setVisible(
+        azureSettings.isUseAzureActiveDirectoryAuthentication());
     youServiceSectionPanel.setVisible(settings.isUseYouService());
   }
 
@@ -264,7 +288,8 @@ public class ServiceSelectionForm {
     registerRadioButtons(
         List.of(
             Map.entry(useAzureApiKeyAuthenticationRadioButton, azureApiKeyFieldPanel),
-            Map.entry(useAzureActiveDirectoryAuthenticationRadioButton, azureActiveDirectoryTokenFieldPanel)));
+            Map.entry(useAzureActiveDirectoryAuthenticationRadioButton,
+                azureActiveDirectoryTokenFieldPanel)));
   }
 
   private void registerRadioButtons(List<Map.Entry<JBRadioButton, JPanel>> entries) {
@@ -343,7 +368,9 @@ public class ServiceSelectionForm {
   }
 
   public String getOpenAIModel() {
-    return ((OpenAIChatCompletionModel) (openAICompletionModelComboBox.getModel().getSelectedItem())).getCode();
+    return ((OpenAIChatCompletionModel) (openAICompletionModelComboBox.getModel()
+        .getSelectedItem()))
+        .getCode();
   }
 
   public void setAzureActiveDirectoryAuthenticationSelected(boolean selected) {
@@ -415,7 +442,9 @@ public class ServiceSelectionForm {
   }
 
   public String getAzureModel() {
-    return ((OpenAIChatCompletionModel) (azureCompletionModelComboBox.getModel().getSelectedItem())).getCode();
+    return ((OpenAIChatCompletionModel) (azureCompletionModelComboBox.getModel()
+        .getSelectedItem()))
+        .getCode();
   }
 
   public void setDisplayWebSearchResults(boolean displayWebSearchResults) {

@@ -21,5 +21,6 @@ public interface ChatToolWindowTabPanel extends Disposable {
   void startNewConversation(Message message);
 
   void sendMessage(Message message);
+
   void requestFocusForTextArea();
 }
