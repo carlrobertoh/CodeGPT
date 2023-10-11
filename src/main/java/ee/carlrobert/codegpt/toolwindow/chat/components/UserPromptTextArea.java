@@ -54,6 +54,7 @@ public class UserPromptTextArea extends JPanel {
     textArea.setOpaque(false);
     textArea.setBackground(BACKGROUND_COLOR);
     textArea.setLineWrap(true);
+    textArea.setWrapStyleWord(true);
     textArea.getEmptyText().setText("Ask me anything");
     textArea.setBorder(JBUI.Borders.empty(8, 4));
     var input = textArea.getInputMap();
