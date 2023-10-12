@@ -91,7 +91,7 @@ public class CompletionRequestHandler {
           accessToken = authenticationResponse.getSessionJwt();
         }
         var request = requestProvider.buildYouCompletionRequest(message);
-        LOG.info("Initiating completion request using model: GPT-4" +
+        LOG.info("Initiating completion request using model: " +
             (request.isUseGPT4Model() ? "GPT-4" : "YouBot"));
 
         return CompletionClientProvider.getYouClient(sessionId, accessToken)
