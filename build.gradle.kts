@@ -58,10 +58,6 @@ tasks {
     gradleVersion = properties("gradleVersion").get()
   }
 
-  buildPlugin {
-    dependsOn("initSubmodules")
-  }
-
   verifyPlugin {
     enabled = true
   }
@@ -131,8 +127,13 @@ tasks {
   }
 }
 
-tasks.register<Exec>("initSubmodules") {
-  // commandLine("git", "submodule", "add", "git@github.com:ggerganov/llama.cpp", "src/main/cpp/llama.cpp")
-  // commandLine("git", "submodule", "update")
-  commandLine("git", "submodule", "init")
+tasks.register<Task>("copyLlamaSubmodule") {
+  copy {
+    from("$rootDir/src/main/cpp/llama.cpp")
+    into("$rootDir/build/idea-sandbox/plugins/CodeGPT/llama.cpp")
+  }
+}
+
+tasks.named("compileJava") {
+  dependsOn("copyLlamaSubmodule")
 }

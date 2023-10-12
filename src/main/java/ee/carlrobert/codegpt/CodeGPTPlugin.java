@@ -29,6 +29,10 @@ public final class CodeGPTPlugin {
     return getPluginOptionsPath() + File.separator + "indexes";
   }
 
+  public static @NotNull String getLlamaSourcePath() {
+    return getPluginBasePath() + File.separator + "llama.cpp";
+  }
+
   public static @NotNull String getProjectIndexStorePath(@NotNull Project project) {
     return getIndexStorePath() + File.separator + project.getName();
   }
