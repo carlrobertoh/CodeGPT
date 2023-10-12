@@ -7,6 +7,7 @@ import com.intellij.openapi.project.Project;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
+import ee.carlrobert.codegpt.settings.state.YouSettingsState;
 import ee.carlrobert.codegpt.toolwindow.chat.BaseChatToolWindowTabPanel;
 import ee.carlrobert.codegpt.toolwindow.chat.components.ChatMessageResponseBody;
 import ee.carlrobert.codegpt.toolwindow.chat.components.ResponsePanel;
@@ -24,7 +25,8 @@ public class StandardChatToolWindowTabPanel extends BaseChatToolWindowTabPanel {
     this(project, null);
   }
 
-  public StandardChatToolWindowTabPanel(@NotNull Project project, @Nullable Conversation conversation) {
+  public StandardChatToolWindowTabPanel(@NotNull Project project,
+      @Nullable Conversation conversation) {
     super(project, false);
     if (conversation == null) {
       displayLandingView();
@@ -39,12 +41,14 @@ public class StandardChatToolWindowTabPanel extends BaseChatToolWindowTabPanel {
       var editor = EditorUtils.getSelectedEditor(project);
       if (editor == null || !editor.getSelectionModel().hasSelection()) {
         OverlayUtils.showWarningBalloon(
-            editor == null ? "Unable to locate a selected editor" : "Please select a target code before proceeding",
+            editor == null ? "Unable to locate a selected editor"
+                : "Please select a target code before proceeding",
             locationOnScreen);
         return;
       }
 
-      var fileExtension = FileUtils.getFileExtension(((EditorImpl) editor).getVirtualFile().getName());
+      var fileExtension = FileUtils.getFileExtension(
+          ((EditorImpl) editor).getVirtualFile().getName());
       var message = new Message(action.getPrompt().replace(
           "{{selectedCode}}",
           format("\n```%s\n%s\n```", fileExtension, editor.getSelectionModel().getSelectedText())));
@@ -66,7 +70,8 @@ public class StandardChatToolWindowTabPanel extends BaseChatToolWindowTabPanel {
           .withResponse(message.getResponse());
 
       var serpResults = message.getSerpResults();
-      if (SettingsState.getInstance().isDisplayWebSearchResults() && serpResults != null && !serpResults.isEmpty()) {
+      if (YouSettingsState.getInstance().isDisplayWebSearchResults() &&
+          serpResults != null && !serpResults.isEmpty()) {
         messageResponseBody.displaySerpResults(serpResults);
       }
 

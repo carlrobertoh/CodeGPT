@@ -102,9 +102,7 @@ public class ChatMessageResponseBody extends JPanel {
   }
 
   public void displayMissingCredential() {
-    var message = SettingsState.getInstance().isUseYouService() ?
-        "Please <a href=\"#\">log in</a> to access the chat feature." :
-        "API key not provided. Open <a href=\"#\">Settings</a> to set one.";
+    var message = "API key not provided. Open <a href=\"#\">Settings</a> to set one.";
     currentlyProcessedTextPane.setText(
         format("<html><p style=\"margin-top: 4px; margin-bottom: 8px;\">%s</p></html>", message));
     currentlyProcessedTextPane.addHyperlinkListener(e -> {

@@ -17,7 +17,6 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
   private boolean useOpenAIService = true;
   private boolean useAzureService;
   private boolean useYouService;
-  private boolean displayWebSearchResults = true;
 
   public SettingsState() {
   }
@@ -103,13 +102,5 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
 
   public void setUseYouService(boolean useYouService) {
     this.useYouService = useYouService;
-  }
-
-  public boolean isDisplayWebSearchResults() {
-    return displayWebSearchResults;
-  }
-
-  public void setDisplayWebSearchResults(boolean displayWebSearchResults) {
-    this.displayWebSearchResults = displayWebSearchResults;
   }
 }
