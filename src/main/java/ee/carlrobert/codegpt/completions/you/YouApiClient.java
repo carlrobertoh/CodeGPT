@@ -31,6 +31,7 @@ public final class YouApiClient {
               .headers(Headers.of(
                   "content-type", "application/json",
                   "authority", "web.stytch.com",
+                  "user-agent", "youide CodeGPT",
                   "authorization", "Basic " + Base64.getEncoder().encodeToString((publicToken + ":" + publicToken).getBytes()),
                   "x-sdk-client", "eyJldmVudF9pZCI6ImV2ZW50LWlkLWY5YmU4YWU5LWE3MjctNGFlYy1hNzY0LTk4NDg1NDFkZjcwYSIsImFwcF9zZXNzaW9uX2lkIjoiYXBwLXNlc3Npb24taWQtYjY1NzcwZjMtMWFkMy00YjlhLWFjYzctMzJjNWQyMGMxNGU0IiwicGVyc2lzdGVudF9pZCI6InBlcnNpc3RlbnQtaWQtYzY0M2M0YTMtZDg5MC00ZGJkLTk3YjQtMjY0MmFlODdkMTZhIiwiY2xpZW50X3NlbnRfYXQiOiIyMDIzLTA5LTAxVDIyOjMwOjU1LjIzNFoiLCJ0aW1lem9uZSI6IkV1cm9wZS9UYWxsaW5uIiwiYXBwIjp7ImlkZW50aWZpZXIiOiJ5b3UuY29tIn0sInNkayI6eyJpZGVudGlmaWVyIjoiU3R5dGNoLmpzIEphdmFzY3JpcHQgU0RLIC0gWU9VLkNPTSBERUJVRyBCVUlMRCIsInZlcnNpb24iOiI0LjAuMCJ9fQ==",
                   "x-sdk-parent-host", "https://you.com"
