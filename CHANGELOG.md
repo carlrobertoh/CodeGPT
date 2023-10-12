@@ -6,6 +6,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.6] - 2023-10-12
+
+### Added
+
+- Default destination value for toolwindow editor save file action
+- Suggestion to switch to different LLM provider on quota exceeded error
+- Support for You.com GPT-4 model
+
+### Fixed
+
+- The style of wrapping used if the text area is wrapping lines
+- Memory leaks (correct disposals for Configurable classes)
+
 ## [2.1.5] - 2023-10-02
 
 ### Added
@@ -168,7 +181,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `OPENAI_API_KEY` persistence, key is saved in the OS password safe from now on
 
-[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.1.5...HEAD
+[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.1.6...HEAD
+[2.1.6]: https://github.com/carlrobertoh/CodeGPT/compare/v2.1.5...v2.1.6
 [2.1.5]: https://github.com/carlrobertoh/CodeGPT/compare/v2.1.4...v2.1.5
 [2.1.4]: https://github.com/carlrobertoh/CodeGPT/compare/v2.1.3...v2.1.4
 [2.1.3]: https://github.com/carlrobertoh/CodeGPT/compare/v2.1.2...v2.1.3

@@ -10,6 +10,7 @@ import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
+import ee.carlrobert.codegpt.settings.state.YouSettingsState;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
 import ee.carlrobert.codegpt.util.ApplicationUtils;
@@ -54,7 +55,8 @@ public class SettingsConfigurable implements Configurable {
         isServiceChanged(serviceSelectionForm, settings) ||
         openAISettings.isModified(serviceSelectionForm) ||
         azureSettings.isModified(serviceSelectionForm) ||
-        serviceSelectionForm.isDisplayWebSearchResults() != settings.isDisplayWebSearchResults() ||
+        serviceSelectionForm.isDisplayWebSearchResults() !=
+            YouSettingsState.getInstance().isDisplayWebSearchResults() ||
         settings.getLlamaModelPath().equals(serviceSelectionForm.getLlamaModelPath());
   }
 
@@ -77,8 +79,9 @@ public class SettingsConfigurable implements Configurable {
     settings.setUseOpenAIService(serviceSelectionForm.isOpenAIServiceSelected());
     settings.setUseAzureService(serviceSelectionForm.isAzureServiceSelected());
     settings.setUseYouService(serviceSelectionForm.isYouServiceSelected());
+    YouSettingsState.getInstance()
+        .setDisplayWebSearchResults(serviceSelectionForm.isDisplayWebSearchResults());
     settings.setUseLlamaService(serviceSelectionForm.isLlamaServiceSelected());
-    settings.setDisplayWebSearchResults(serviceSelectionForm.isDisplayWebSearchResults());
     settings.setLlamaModelPath(serviceSelectionForm.getLlamaModelPath());
 
     openAISettings.apply(serviceSelectionForm);
@@ -114,7 +117,8 @@ public class SettingsConfigurable implements Configurable {
     openAISettings.reset(serviceSelectionForm);
     azureSettings.reset(serviceSelectionForm);
 
-    serviceSelectionForm.setDisplayWebSearchResults(settings.isDisplayWebSearchResults());
+    serviceSelectionForm.setDisplayWebSearchResults(
+        YouSettingsState.getInstance().isDisplayWebSearchResults());
   }
 
   @Override

@@ -11,6 +11,7 @@ import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
+import ee.carlrobert.codegpt.settings.state.YouSettingsState;
 import ee.carlrobert.embedding.EmbeddingsService;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionModel;
@@ -67,6 +68,7 @@ public class CompletionRequestProvider {
 
   public YouCompletionRequest buildYouCompletionRequest(Message message) {
     return new YouCompletionRequest.Builder(message.getPrompt())
+        .setUseGPT4Model(YouSettingsState.getInstance().isUseGPT4Model())
         .setChatHistory(conversation.getMessages().stream()
             .map(prevMessage -> new YouCompletionRequestMessage(prevMessage.getPrompt(), prevMessage.getResponse()))
             .collect(toList()))

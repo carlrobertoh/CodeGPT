@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt.completions;
 
-import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.diagnostic.Logger;
+import ee.carlrobert.codegpt.completions.you.YouUserManager;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
@@ -14,13 +15,14 @@ import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import okhttp3.sse.EventSource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class CompletionRequestHandler {
+
+  private static final Logger LOG = Logger.getInstance(CompletionRequestHandler.class);
 
   private final StringBuilder messageBuilder = new StringBuilder();
   private SwingWorker<Void, String> swingWorker;
@@ -84,8 +86,21 @@ public class CompletionRequestHandler {
       }
 
       if (settings.isUseYouService()) {
-        return CompletionClientProvider.getYouClient("", "")
-            .getChatCompletion(requestProvider.buildYouCompletionRequest(message), eventListener);
+        var sessionId = "";
+        var accessToken = "";
+        var youUserManager = YouUserManager.getInstance();
+        if (youUserManager.isAuthenticated()) {
+          var authenticationResponse =
+              youUserManager.getAuthenticationResponse().getData();
+          sessionId = authenticationResponse.getSession().getSessionId();
+          accessToken = authenticationResponse.getSessionJwt();
+        }
+        var request = requestProvider.buildYouCompletionRequest(message);
+        LOG.info("Initiating completion request using model: " +
+            (request.isUseGPT4Model() ? "GPT-4" : "YouBot"));
+
+        return CompletionClientProvider.getYouClient(sessionId, accessToken)
+            .getChatCompletion(request, eventListener);
       }
 
       if (settings.isUseAzureService()) {
@@ -137,8 +152,8 @@ public class CompletionRequestHandler {
             message,
             isRetry,
             settings.isUseYouService() ?
-                getYouCompletionEventListener() :
-                getCompletionEventListener());
+                new BaseCompletionEventListener() :
+                new YouRequestCompletionEventListener());
       } catch (TotalUsageExceededException e) {
         if (tokensExceededListener != null) {
           tokensExceededListener.run();
@@ -159,66 +174,41 @@ public class CompletionRequestHandler {
       }
     }
 
-    private CompletionEventListener getCompletionEventListener() {
-      return new CompletionEventListener() {
-        @Override
-        public void onMessage(String message) {
-          publish(message);
-        }
+    class BaseCompletionEventListener implements CompletionEventListener {
 
-        @Override
-        public void onComplete(StringBuilder messageBuilder) {
-          if (completedListener != null) {
-            completedListener.accept(messageBuilder.toString());
-          }
-        }
+      @Override
+      public void onMessage(String message) {
+        publish(message);
+      }
 
-        @Override
-        public void onError(ErrorDetails error, Throwable ex) {
-          try {
-            if (errorListener != null) {
-              errorListener.accept(error, ex);
-            }
-          } finally {
-            sendError(error, ex);
-          }
+      @Override
+      public void onComplete(StringBuilder messageBuilder) {
+        if (completedListener != null) {
+          completedListener.accept(messageBuilder.toString());
         }
-      };
+      }
+
+      @Override
+      public void onError(ErrorDetails error, Throwable ex) {
+        try {
+          if (errorListener != null) {
+            errorListener.accept(error, ex);
+          }
+        } finally {
+          sendError(error, ex);
+        }
+      }
     }
 
-    // TODO: Refactor
-    private YouCompletionEventListener getYouCompletionEventListener() {
-      return new YouCompletionEventListener() {
-        @Override
-        public void onMessage(String message) {
-          publish(message);
-        }
+    class YouRequestCompletionEventListener extends BaseCompletionEventListener
+        implements YouCompletionEventListener {
 
-        @Override
-        public void onComplete(StringBuilder messageBuilder) {
-          if (completedListener != null) {
-            completedListener.accept(messageBuilder.toString());
-          }
+      @Override
+      public void onSerpResults(List<YouSerpResult> results) {
+        if (serpResultsListener != null) {
+          serpResultsListener.accept(results);
         }
-
-        @Override
-        public void onError(ErrorDetails error, Throwable ex) {
-          try {
-            if (errorListener != null) {
-              errorListener.accept(error, ex);
-            }
-          } finally {
-            sendError(error, ex);
-          }
-        }
-
-        @Override
-        public void onSerpResults(List<YouSerpResult> results) {
-          if (serpResultsListener != null) {
-            serpResultsListener.accept(results);
-          }
-        }
-      };
+      }
     }
 
     private void sendInfo(SettingsState settings) {

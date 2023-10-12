@@ -18,7 +18,6 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
   private boolean useAzureService;
   private boolean useYouService;
   private boolean useLlamaService;
-  private boolean displayWebSearchResults = true;
   private String llamaModelPath = "";
 
   public SettingsState() {
@@ -113,14 +112,6 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
 
   public void setUseLlamaService(boolean useLlamaService) {
     this.useLlamaService = useLlamaService;
-  }
-
-  public boolean isDisplayWebSearchResults() {
-    return displayWebSearchResults;
-  }
-
-  public void setDisplayWebSearchResults(boolean displayWebSearchResults) {
-    this.displayWebSearchResults = displayWebSearchResults;
   }
 
   public String getLlamaModelPath() {

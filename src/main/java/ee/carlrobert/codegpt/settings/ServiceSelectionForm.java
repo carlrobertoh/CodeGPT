@@ -32,6 +32,7 @@ import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
+import ee.carlrobert.codegpt.settings.state.YouSettingsState;
 import ee.carlrobert.codegpt.util.SwingUtils;
 import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionModel;
 import ee.carlrobert.llm.completion.CompletionModel;
@@ -136,7 +137,8 @@ public class ServiceSelectionForm {
     openAIBaseHostField = new JBTextField(openAISettings.getBaseHost(), 30);
     openAIPathField = new JBTextField(openAISettings.getPath(), 30);
     openAIOrganizationField = new JBTextField(openAISettings.getOrganization(), 30);
-    openAICompletionModelComboBox = new ModelComboBox(DEFAULT_OPENAI_MODELS,
+    openAICompletionModelComboBox = new ModelComboBox(
+        DEFAULT_OPENAI_MODELS,
         OpenAIChatCompletionModel.findByCode(openAISettings.getModel()));
 
     azureBaseHostField = new JBTextField(azureSettings.getBaseHost(), 35);
@@ -144,14 +146,16 @@ public class ServiceSelectionForm {
     azureResourceNameField = new JBTextField(azureSettings.getResourceName(), 35);
     azureDeploymentIdField = new JBTextField(azureSettings.getDeploymentId(), 35);
     azureApiVersionField = new JBTextField(azureSettings.getApiVersion(), 35);
-    azureCompletionModelComboBox = new ModelComboBox(DEFAULT_OPENAI_MODELS,
+    azureCompletionModelComboBox = new ModelComboBox(
+        DEFAULT_OPENAI_MODELS,
         OpenAIChatCompletionModel.findByCode(azureSettings.getModel()));
-    azureCompletionModelComboBox.getEditor().getEditorComponent()
+    azureCompletionModelComboBox.getEditor()
+        .getEditorComponent()
         .setMaximumSize(azureBaseHostField.getPreferredSize());
 
     displayWebSearchResultsCheckBox = new JBCheckBox(
         "Display web search results",
-        settings.isDisplayWebSearchResults());
+        YouSettingsState.getInstance().isDisplayWebSearchResults());
     displayWebSearchResultsCheckBox.setEnabled(YouUserManager.getInstance().isAuthenticated());
 
     var fileChooserDescriptor = FileChooserDescriptorFactory.createSingleFileDescriptor("gguf");
@@ -447,7 +451,8 @@ public class ServiceSelectionForm {
 
   public String getOpenAIModel() {
     return ((OpenAIChatCompletionModel) (openAICompletionModelComboBox.getModel()
-        .getSelectedItem())).getCode();
+        .getSelectedItem()))
+        .getCode();
   }
 
   public void setAzureActiveDirectoryAuthenticationSelected(boolean selected) {
@@ -519,7 +524,8 @@ public class ServiceSelectionForm {
   }
 
   public String getAzureModel() {
-    return ((OpenAIChatCompletionModel) (azureCompletionModelComboBox.getModel().getSelectedItem()))
+    return ((OpenAIChatCompletionModel) (azureCompletionModelComboBox.getModel()
+        .getSelectedItem()))
         .getCode();
   }
 

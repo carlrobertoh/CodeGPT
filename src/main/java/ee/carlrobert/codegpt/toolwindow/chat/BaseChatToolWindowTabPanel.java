@@ -5,13 +5,16 @@ import static ee.carlrobert.codegpt.util.ThemeUtils.getPanelBackgroundColor;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 
+import com.intellij.ide.HelpTooltip;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBScrollPane;
+import com.intellij.ui.components.OnOffButton;
 import com.intellij.util.ui.JBUI;
+import com.intellij.util.ui.JBUI.Borders;
 import ee.carlrobert.codegpt.actions.ActionType;
 import ee.carlrobert.codegpt.completions.CompletionRequestHandler;
 import ee.carlrobert.codegpt.completions.you.YouSerpResult;
@@ -23,6 +26,7 @@ import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
+import ee.carlrobert.codegpt.settings.state.YouSettingsState;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.toolwindow.ModelIconLabel;
 import ee.carlrobert.codegpt.toolwindow.chat.components.ChatMessageResponseBody;
@@ -30,11 +34,9 @@ import ee.carlrobert.codegpt.toolwindow.chat.components.ResponsePanel;
 import ee.carlrobert.codegpt.toolwindow.chat.components.SmartScroller;
 import ee.carlrobert.codegpt.toolwindow.chat.components.UserMessagePanel;
 import ee.carlrobert.codegpt.toolwindow.chat.components.UserPromptTextArea;
-import ee.carlrobert.codegpt.completions.you.YouUserManager;
-import ee.carlrobert.codegpt.util.ApplicationUtils;
 import ee.carlrobert.codegpt.util.EditorUtils;
-import ee.carlrobert.codegpt.util.file.FileUtils;
 import ee.carlrobert.codegpt.util.OverlayUtils;
+import ee.carlrobert.codegpt.util.file.FileUtils;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -133,10 +135,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
   public void dispose() {
   }
 
-  private boolean isCredentialSet() {
-    if (SettingsState.getInstance().isUseYouService()) {
-      return YouUserManager.getInstance().isAuthenticated();
-    }
+  private boolean isRequestAllowed() {
     if (SettingsState.getInstance().isUseAzureService()) {
       return AzureCredentialsManager.getInstance().isCredentialSet();
     }
@@ -150,7 +149,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
       boolean isRetry) {
     ChatMessageResponseBody responseContainer = (ChatMessageResponseBody) responsePanel.getContent();
 
-    if (!isCredentialSet()) {
+    if (!isRequestAllowed()) {
       responseContainer.displayMissingCredential();
       return;
     }
@@ -173,7 +172,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
 
       var serpResults = serpResultsMapping.get(message.getId());
       var containsResults = serpResults != null && !serpResults.isEmpty();
-      if (SettingsState.getInstance().isDisplayWebSearchResults()) {
+      if (YouSettingsState.getInstance().isDisplayWebSearchResults()) {
         if (containsResults) {
           responseContainer.displaySerpResults(serpResults);
         }
@@ -335,9 +334,10 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     gbc.gridy = 1;
 
     var model = getModel();
-    var modelIconWrapper = JBUI.Panels.simplePanel(
-        new ModelIconLabel(getClientCode(), model)).withBorder(JBUI.Borders.empty(0, 0, 8, 4));
-    modelIconWrapper.setBackground(getPanelBackgroundColor());
+    var modelIconWrapper = JBUI.Panels
+        .simplePanel(new ModelIconLabel(getClientCode(), model))
+        .withBorder(Borders.emptyRight(4))
+        .withBackground(getPanelBackgroundColor());
 
     var wrapper = new JPanel(new BorderLayout());
     wrapper.setBorder(JBUI.Borders.compound(
@@ -346,11 +346,44 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     wrapper.setBackground(getPanelBackgroundColor());
     wrapper.add(userPromptTextArea, BorderLayout.SOUTH);
     if (model != null) {
-      wrapper.add(modelIconWrapper, BorderLayout.LINE_END);
+      var header = new JPanel(new BorderLayout());
+      header.setBackground(getPanelBackgroundColor());
+      header.setBorder(JBUI.Borders.emptyBottom(8));
+      if ("YouCode".equals(model)) {
+        var gpt4ToggleButton = new OnOffButton();
+        var useGPT4Model = YouSettingsState.getInstance().isUseGPT4Model();
+        gpt4ToggleButton.setSelected(useGPT4Model);
+        gpt4ToggleButton.setOnText("GPT-4");
+        gpt4ToggleButton.setOffText("GPT-4");
+        gpt4ToggleButton.addActionListener(
+            actionEvent -> {
+              project.getMessageBus()
+                  .syncPublisher(YouModelChangeNotifier.YOU_MODEL_CHANGE_NOTIFIER_TOPIC)
+                  .modelChanged(gpt4ToggleButton.isSelected());
+              YouSettingsState.getInstance().setUseGPT4Model(gpt4ToggleButton.isSelected());
+              installHelpTooltip(gpt4ToggleButton.isSelected(), gpt4ToggleButton);
+            });
+        project.getMessageBus()
+            .connect()
+            .subscribe(
+                YouModelChangeNotifier.YOU_MODEL_CHANGE_NOTIFIER_TOPIC,
+                (YouModelChangeNotifier) gpt4ToggleButton::setSelected);
+
+        installHelpTooltip(useGPT4Model, gpt4ToggleButton);
+        header.add(gpt4ToggleButton, BorderLayout.LINE_START);
+      }
+      header.add(modelIconWrapper, BorderLayout.LINE_END);
+      wrapper.add(header);
     }
     rootPanel.add(wrapper, gbc);
     userPromptTextArea.requestFocusInWindow();
     userPromptTextArea.requestFocus();
+  }
+
+  private void installHelpTooltip(boolean selected, JComponent component) {
+    new HelpTooltip()
+        .setDescription(selected ? "Turn off for faster responses" : "Turn on for complex queries")
+        .installOn(component);
   }
 
   private String getClientCode() {
