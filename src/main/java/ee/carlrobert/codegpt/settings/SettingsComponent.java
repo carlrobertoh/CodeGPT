@@ -15,12 +15,12 @@ public class SettingsComponent {
   private final JPanel mainPanel;
   private final JBTextField displayNameField;
   private final ServiceSelectionForm serviceSelectionForm;
-  private final YouServiceSelectionPanel youServiceSelectionPanel;
+  private final YouServiceSelectionForm youServiceSelectionForm;
 
   public SettingsComponent(Disposable parentDisposable, SettingsState settings) {
     serviceSelectionForm = new ServiceSelectionForm(parentDisposable, settings);
     displayNameField = new JBTextField(settings.getDisplayName(), 20);
-    youServiceSelectionPanel = new YouServiceSelectionPanel(parentDisposable);
+    youServiceSelectionForm = new YouServiceSelectionForm(parentDisposable);
     mainPanel = FormBuilder.createFormBuilder()
         .addComponent(UI.PanelFactory.panel(displayNameField)
             .withLabel(CodeGPTBundle.get("settingsConfigurable.section.integration.displayNameFieldLabel"))
@@ -42,15 +42,15 @@ public class SettingsComponent {
   }
 
   public String getEmail() {
-    return youServiceSelectionPanel.getEmail();
+    return youServiceSelectionForm.getEmail();
   }
 
   public void setEmail(String email) {
-    youServiceSelectionPanel.setEmail(email);
+    youServiceSelectionForm.setEmail(email);
   }
 
   public String getPassword() {
-    return youServiceSelectionPanel.getPassword();
+    return youServiceSelectionForm.getPassword();
   }
 
   public ServiceSelectionForm getServiceSelectionForm() {

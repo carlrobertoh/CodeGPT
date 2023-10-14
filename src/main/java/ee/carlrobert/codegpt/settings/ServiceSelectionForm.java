@@ -1,30 +1,18 @@
 package ee.carlrobert.codegpt.settings;
 
-import static java.lang.String.format;
-
-import com.intellij.icons.AllIcons.Actions;
 import com.intellij.openapi.Disposable;
-import com.intellij.openapi.actionSystem.AnAction;
-import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.ui.ComboBox;
-import com.intellij.openapi.ui.TextBrowseFolderListener;
-import com.intellij.openapi.ui.TextFieldWithBrowseButton;
-import com.intellij.ui.PortField;
 import com.intellij.ui.TitledSeparator;
-import com.intellij.ui.components.AnActionLink;
 import com.intellij.ui.components.JBCheckBox;
-import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPasswordField;
 import com.intellij.ui.components.JBRadioButton;
 import com.intellij.ui.components.JBTextField;
-import com.intellij.util.ui.AsyncProcessIcon;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
-import ee.carlrobert.codegpt.completions.llama.LlamaServerAgent;
 import ee.carlrobert.codegpt.completions.you.YouUserManager;
 import ee.carlrobert.codegpt.completions.you.auth.AuthenticationNotifier;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
@@ -43,11 +31,10 @@ import javax.swing.Box;
 import javax.swing.ButtonGroup;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
-import org.jetbrains.annotations.NotNull;
 
 public class ServiceSelectionForm {
 
-  private final Disposable parentDisposable;
+  private static final Logger LOG = Logger.getInstance(ServiceSelectionForm.class);
 
   private static final OpenAIChatCompletionModel[] DEFAULT_OPENAI_MODELS = new OpenAIChatCompletionModel[]{
       OpenAIChatCompletionModel.GPT_3_5,
@@ -55,6 +42,8 @@ public class ServiceSelectionForm {
       OpenAIChatCompletionModel.GPT_4,
       OpenAIChatCompletionModel.GPT_4_32k
   };
+
+  private final Disposable parentDisposable;
 
   private final JBRadioButton useOpenAIServiceRadioButton;
   private final JBRadioButton useAzureServiceRadioButton;
@@ -85,8 +74,7 @@ public class ServiceSelectionForm {
   private final JBCheckBox displayWebSearchResultsCheckBox;
 
   private final JBRadioButton useLlamaServiceRadioButton;
-  private final JPanel llamaServiceSectionPanel;
-  private final TextFieldWithBrowseButton textFieldWithBrowseButton;
+  private final LlamaServiceSelectionForm llamaServiceSectionPanel;
 
   public ServiceSelectionForm(Disposable parentDisposable, SettingsState settings) {
     this.parentDisposable = parentDisposable;
@@ -158,16 +146,10 @@ public class ServiceSelectionForm {
         YouSettingsState.getInstance().isDisplayWebSearchResults());
     displayWebSearchResultsCheckBox.setEnabled(YouUserManager.getInstance().isAuthenticated());
 
-    var fileChooserDescriptor = FileChooserDescriptorFactory.createSingleFileDescriptor("gguf");
-    fileChooserDescriptor.setForcedToUseIdeaFileChooser(true);
-    textFieldWithBrowseButton = new TextFieldWithBrowseButton();
-    textFieldWithBrowseButton.addBrowseFolderListener(
-        new TextBrowseFolderListener(fileChooserDescriptor));
-
     openAIServiceSectionPanel = createOpenAIServiceSectionPanel();
     azureServiceSectionPanel = createAzureServiceSectionPanel();
     youServiceSectionPanel = createYouServiceSectionPanel();
-    llamaServiceSectionPanel = createLlamaServiceSectionPanel();
+    llamaServiceSectionPanel = new LlamaServiceSelectionForm();
 
     registerPanelsVisibility(settings, azureSettings);
     registerRadioButtons();
@@ -288,54 +270,9 @@ public class ServiceSelectionForm {
 
   private JPanel createYouServiceSectionPanel() {
     return FormBuilder.createFormBuilder()
-        .addComponent(new YouServiceSelectionPanel(parentDisposable))
+        .addComponent(new YouServiceSelectionForm(parentDisposable))
         .addComponent(new TitledSeparator("Chat Preferences"))
         .addComponent(withEmptyLeftBorder(displayWebSearchResultsCheckBox))
-        .getPanel();
-  }
-
-  private JPanel createLlamaServiceSectionPanel() {
-    var actionLinkWrapper = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 16));
-    var loadingSpinner = new AsyncProcessIcon("sign_in_spinner");
-    loadingSpinner.setVisible(false);
-    var successIcon = new JBLabel(Actions.Commit);
-    successIcon.setVisible(false);
-
-    var startServerLink = new AnActionLink("Start Server", new AnAction() {
-      @Override
-      public void actionPerformed(@NotNull AnActionEvent e) {
-        loadingSpinner.setVisible(true);
-        new LlamaServerAgent(textFieldWithBrowseButton.getText())
-            .startAgent(() -> {
-              loadingSpinner.setVisible(false);
-              successIcon.setVisible(true);
-            });
-      }
-    });
-
-    actionLinkWrapper.add(startServerLink);
-    actionLinkWrapper.add(Box.createHorizontalStrut(8));
-    actionLinkWrapper.add(loadingSpinner);
-    actionLinkWrapper.add(successIcon);
-
-    var hostField = new JBTextField("http://localhost:8080/completions");
-    hostField.setEnabled(false);
-    var portField = new PortField(8080);
-    portField.addChangeListener(changeEvent -> {
-      var port = (int) ((PortField) changeEvent.getSource()).getValue();
-      hostField.setText(format("http://localhost:%d/completions", port));
-    });
-
-    var serverSettingsForm = FormBuilder.createFormBuilder()
-        .addLabeledComponent("Model path:", textFieldWithBrowseButton)
-        .addLabeledComponent("Host:", hostField)
-        .addLabeledComponent("Port:", portField)
-        .addComponent(JBUI.Panels.simplePanel().addToLeft(actionLinkWrapper))
-        .getPanel();
-
-    return FormBuilder.createFormBuilder()
-        .addComponent(new TitledSeparator("Model Preferences"))
-        .addComponent(withEmptyLeftBorder(serverSettingsForm))
         .getPanel();
   }
 
@@ -351,6 +288,7 @@ public class ServiceSelectionForm {
     azureActiveDirectoryTokenFieldPanel.setVisible(
         azureSettings.isUseAzureActiveDirectoryAuthentication());
     youServiceSectionPanel.setVisible(settings.isUseYouService());
+    llamaServiceSectionPanel.setVisible(settings.isUseLlamaService());
   }
 
   private void registerRadioButtons() {
@@ -538,11 +476,11 @@ public class ServiceSelectionForm {
   }
 
   public void setLlamaModelPath(String modelPath) {
-    textFieldWithBrowseButton.setText(modelPath);
+    llamaServiceSectionPanel.setModelDestinationPath(modelPath);
   }
 
   public String getLlamaModelPath() {
-    return textFieldWithBrowseButton.getText();
+    return llamaServiceSectionPanel.getModelDestinationPath();
   }
 
   public void setOpenAIPath(String path) {

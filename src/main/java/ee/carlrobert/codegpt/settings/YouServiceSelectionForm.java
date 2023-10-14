@@ -9,7 +9,6 @@ import com.intellij.ui.TitledSeparator;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPasswordField;
 import com.intellij.ui.components.JBTextField;
-import com.intellij.ui.components.OnOffButton;
 import com.intellij.util.ui.AsyncProcessIcon;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBFont;
@@ -35,7 +34,7 @@ import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 import org.jetbrains.annotations.Nullable;
 
-public class YouServiceSelectionPanel extends JPanel {
+public class YouServiceSelectionForm extends JPanel {
 
   private final JBTextField emailField;
   private final JBPasswordField passwordField;
@@ -43,7 +42,7 @@ public class YouServiceSelectionPanel extends JPanel {
   private final JTextPane signUpTextPane;
   private final AsyncProcessIcon loadingSpinner;
 
-  public YouServiceSelectionPanel(Disposable parentDisposable) {
+  public YouServiceSelectionForm(Disposable parentDisposable) {
     super(new BorderLayout());
     var settings = SettingsState.getInstance();
     emailField = new JBTextField(settings.getEmail(), 25);

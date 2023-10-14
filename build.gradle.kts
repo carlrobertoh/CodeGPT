@@ -53,6 +53,13 @@ dependencies {
   testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.10.0")
 }
 
+tasks.create<Task>("copyLlamaSubmodule") {
+  copy {
+    from("$rootDir/src/main/cpp/llama.cpp")
+    into("$rootDir/build/idea-sandbox/plugins/CodeGPT/llama.cpp")
+  }
+}
+
 tasks {
   wrapper {
     gradleVersion = properties("gradleVersion").get()
@@ -125,15 +132,4 @@ tasks {
       showStandardStreams = true
     }
   }
-}
-
-tasks.register<Task>("copyLlamaSubmodule") {
-  copy {
-    from("$rootDir/src/main/cpp/llama.cpp")
-    into("$rootDir/build/idea-sandbox/plugins/CodeGPT/llama.cpp")
-  }
-}
-
-tasks.named("compileJava") {
-  dependsOn("copyLlamaSubmodule")
 }
