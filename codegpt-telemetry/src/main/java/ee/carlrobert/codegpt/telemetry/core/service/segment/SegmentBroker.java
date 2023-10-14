@@ -204,7 +204,6 @@ public class SegmentBroker implements IMessageBroker {
                     .pair(PROP_VERSION, environment.getIde().getVersion())
                     .pairs(environment.getIde().getProperties())
                     .build()
-                .pair(PROP_IP, VALUE_NULL_IP)
                 .pair(PROP_LOCALE, environment.getLocale())
                 .mapPair(PROP_LOCATION)
                     .pair(PROP_COUNTRY, environment.getCountry())
