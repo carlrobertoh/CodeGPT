@@ -119,8 +119,12 @@ public class ChatMessageResponseBody extends JPanel {
         + "You exceeded your current quota, please check your plan and billing details, "
         + "or <a href=\"#CHANGE_PROVIDER\">change</a> to a different LLM provider.</p>"
         + "</html>");
+
     currentlyProcessedTextPane.addHyperlinkListener(e -> {
       if (e.getEventType() == ACTIVATED) {
+        var settings = SettingsState.getInstance();
+        settings.setUseYouService(true);
+        settings.setOpenAIQuotaExceeded(true);
         ShowSettingsUtil.getInstance().showSettingsDialog(project, SettingsConfigurable.class);
         TelemetryAction.IDE_ACTION.createActionMessage()
             .property("action", ActionType.CHANGE_PROVIDER.name())

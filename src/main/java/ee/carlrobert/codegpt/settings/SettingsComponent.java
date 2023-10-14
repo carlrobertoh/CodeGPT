@@ -27,7 +27,7 @@ public class SettingsComponent {
             .resizeX(false)
             .createPanel())
         .addComponent(new TitledSeparator(CodeGPTBundle.get("settingsConfigurable.section.service.title")))
-        .addComponent(serviceSelectionForm.getForm())
+        .addComponent(serviceSelectionForm.getForm(settings))
         .addVerticalGap(8)
         .addComponentFillVertically(new JPanel(), 0)
         .getPanel();

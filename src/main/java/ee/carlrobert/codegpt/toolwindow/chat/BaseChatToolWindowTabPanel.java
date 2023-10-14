@@ -138,6 +138,9 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     if (SettingsState.getInstance().isUseAzureService()) {
       return AzureCredentialsManager.getInstance().isCredentialSet();
     }
+    if (SettingsState.getInstance().isUseYouService()) {
+      return true;
+    }
     return OpenAICredentialsManager.getInstance().isApiKeySet();
   }
 
