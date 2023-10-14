@@ -3,5 +3,5 @@ plugins {
 }
 
 dependencies {
-    implementation("com.segment.analytics.java:analytics:3.5.0")
+    implementation("com.rudderstack.sdk.java.analytics:analytics:3.0.0")
 }

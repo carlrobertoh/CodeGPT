@@ -11,11 +11,11 @@
 package ee.carlrobert.codegpt.telemetry.core.service.segment;
 
 import com.intellij.openapi.diagnostic.Logger;
-import com.segment.analytics.Analytics;
-import com.segment.analytics.messages.IdentifyMessage;
-import com.segment.analytics.messages.MessageBuilder;
-import com.segment.analytics.messages.PageMessage;
-import com.segment.analytics.messages.TrackMessage;
+import com.rudderstack.sdk.java.analytics.RudderAnalytics;
+import com.rudderstack.sdk.java.analytics.messages.IdentifyMessage;
+import com.rudderstack.sdk.java.analytics.messages.MessageBuilder;
+import com.rudderstack.sdk.java.analytics.messages.PageMessage;
+import com.rudderstack.sdk.java.analytics.messages.TrackMessage;
 import ee.carlrobert.codegpt.telemetry.core.IMessageBroker;
 import ee.carlrobert.codegpt.telemetry.core.service.Application;
 import ee.carlrobert.codegpt.telemetry.core.service.Environment;
@@ -86,13 +86,13 @@ public class SegmentBroker implements IMessageBroker {
     private final String userId;
     private final IdentifyTraitsPersistence identifyTraitsPersistence;
     private final Environment environment;
-    private Lazy<Analytics> analytics;
+    private Lazy<RudderAnalytics> analytics;
 
     public SegmentBroker(boolean isDebug, String userId, Environment environment, ISegmentConfiguration configuration) {
         this(isDebug, userId, IdentifyTraitsPersistence.INSTANCE, environment, configuration, new AnalyticsFactory());
     }
 
-    public SegmentBroker(boolean isDebug, String userId, IdentifyTraitsPersistence identifyTraitsPersistence, Environment environment, ISegmentConfiguration configuration, Function<String, Analytics> analyticsFactory) {
+    public SegmentBroker(boolean isDebug, String userId, IdentifyTraitsPersistence identifyTraitsPersistence, Environment environment, ISegmentConfiguration configuration, Function<String, RudderAnalytics> analyticsFactory) {
         this.userId = userId;
         this.identifyTraitsPersistence = identifyTraitsPersistence;
         this.environment = environment;
@@ -231,19 +231,19 @@ public class SegmentBroker implements IMessageBroker {
         }
     }
 
-    private static class AnalyticsFactory implements Function<String, Analytics> {
+    private static class AnalyticsFactory implements Function<String, RudderAnalytics> {
 
         private static final int FLUSH_INTERVAL = 10000;
         private static final int FLUSH_QUEUE_SIZE = 10;
 
         @Override
-        public Analytics apply(String writeKey) {
+        public RudderAnalytics apply(String writeKey) {
             if (writeKey == null) {
                 LOGGER.warn("Could not create Segment Analytics instance, missing writeKey.");
                 return null;
             }
             LOGGER.debug("Creating Segment Analytics instance using " + writeKey + " writeKey.");
-            return Analytics.builder(writeKey)
+            return RudderAnalytics.builder(writeKey)
                     .flushQueueSize(FLUSH_QUEUE_SIZE)
                     .flushInterval(FLUSH_INTERVAL, TimeUnit.MILLISECONDS)
                     .build();
