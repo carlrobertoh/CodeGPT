@@ -8,6 +8,7 @@ import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
+import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.settings.state.YouSettingsState;
@@ -57,7 +58,8 @@ public class SettingsConfigurable implements Configurable {
         azureSettings.isModified(serviceSelectionForm) ||
         serviceSelectionForm.isDisplayWebSearchResults() !=
             YouSettingsState.getInstance().isDisplayWebSearchResults() ||
-        settings.getLlamaModelPath().equals(serviceSelectionForm.getLlamaModelPath());
+        LlamaSettingsState.getInstance().getLlamaModelPath()
+            .equals(serviceSelectionForm.getLlamaModelPath());
   }
 
   @Override
@@ -66,6 +68,7 @@ public class SettingsConfigurable implements Configurable {
     var settings = SettingsState.getInstance();
     var openAISettings = OpenAISettingsState.getInstance();
     var azureSettings = AzureSettingsState.getInstance();
+    var llamaSettings = LlamaSettingsState.getInstance();
     var serviceChanged = isServiceChanged(serviceSelectionForm, settings);
     var modelChanged = openAISettings.getModel().equals(serviceSelectionForm.getOpenAIModel()) ||
         azureSettings.getModel().equals(serviceSelectionForm.getAzureModel());
@@ -82,7 +85,8 @@ public class SettingsConfigurable implements Configurable {
     YouSettingsState.getInstance()
         .setDisplayWebSearchResults(serviceSelectionForm.isDisplayWebSearchResults());
     settings.setUseLlamaService(serviceSelectionForm.isLlamaServiceSelected());
-    settings.setLlamaModelPath(serviceSelectionForm.getLlamaModelPath());
+    llamaSettings.setLlamaModelPath(serviceSelectionForm.getLlamaModelPath());
+    llamaSettings.setLlamaModel(serviceSelectionForm.getLlamaModel());
 
     openAISettings.apply(serviceSelectionForm);
     azureSettings.apply(serviceSelectionForm);
@@ -102,6 +106,7 @@ public class SettingsConfigurable implements Configurable {
     var settings = SettingsState.getInstance();
     var openAISettings = OpenAISettingsState.getInstance();
     var azureSettings = AzureSettingsState.getInstance();
+    var llamaSettings = LlamaSettingsState.getInstance();
     var serviceSelectionForm = settingsComponent.getServiceSelectionForm();
 
     settingsComponent.setEmail(settings.getEmail());
@@ -112,7 +117,8 @@ public class SettingsConfigurable implements Configurable {
     serviceSelectionForm.setYouServiceSelected(settings.isUseYouService());
     serviceSelectionForm.setLlamaServiceSelected(settings.isUseLlamaService());
 
-    serviceSelectionForm.setLlamaModelPath(settings.getLlamaModelPath());
+    serviceSelectionForm.setLlamaModel(llamaSettings.getLlamaModel());
+    serviceSelectionForm.setLlamaModelPath(llamaSettings.getLlamaModelPath());
 
     openAISettings.reset(serviceSelectionForm);
     azureSettings.reset(serviceSelectionForm);

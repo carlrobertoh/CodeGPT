@@ -1,6 +1,7 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
+import java.nio.file.Files
 
 fun properties(key: String) = providers.gradleProperty(key)
 fun environment(key: String) = providers.environmentVariable(key)
@@ -53,10 +54,13 @@ dependencies {
   testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.10.0")
 }
 
-tasks.create<Task>("copyLlamaSubmodule") {
-  copy {
-    from("$rootDir/src/main/cpp/llama.cpp")
-    into("$rootDir/build/idea-sandbox/plugins/CodeGPT/llama.cpp")
+tasks.create<Task>("copySubmodule") {
+  val submoduleExists = file("$rootDir/build/idea-sandbox/plugins/CodeGPT/llama.cpp").exists()
+  if (!submoduleExists) {
+    copy {
+      from("$rootDir/src/main/cpp/llama.cpp")
+      into("$rootDir/build/idea-sandbox/plugins/CodeGPT/llama.cpp")
+    }
   }
 }
 

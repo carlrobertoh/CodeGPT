@@ -10,11 +10,10 @@ import com.intellij.execution.process.ProcessHandler;
 import com.intellij.execution.process.ProcessListener;
 import com.intellij.execution.process.ProcessOutputType;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.Key;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
-import java.io.File;
+import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import java.nio.charset.StandardCharsets;
 import org.jetbrains.annotations.NotNull;
 
@@ -99,7 +98,11 @@ public class LlamaServerAgent {
     GeneralCommandLine commandLine = new GeneralCommandLine().withCharset(StandardCharsets.UTF_8);
     commandLine.setExePath("./server");
     commandLine.withWorkDirectory(CodeGPTPlugin.getLlamaSourcePath());
-    commandLine.addParameters("-m", modelPath, "-c", "2048");
+
+    var path = (modelPath == null || modelPath.isEmpty()) ?
+        "models/" + LlamaSettingsState.getInstance().getLlamaModel().getFileName() :
+        modelPath;
+    commandLine.addParameters("-m", path, "-c", "2048");
     commandLine.setRedirectErrorStream(false);
     return commandLine;
   }
