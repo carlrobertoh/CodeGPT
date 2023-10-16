@@ -19,6 +19,7 @@ public class OpenAISettingsState implements PersistentStateComponent<OpenAISetti
   private String baseHost = "https://api.openai.com";
   private String path = BASE_PATH;
   private String model = OpenAIChatCompletionModel.GPT_3_5.getCode();
+  private boolean openAIQuotaExceeded;
 
   public static OpenAISettingsState getInstance() {
     return ApplicationManager.getApplication().getService(OpenAISettingsState.class);
@@ -91,5 +92,13 @@ public class OpenAISettingsState implements PersistentStateComponent<OpenAISetti
 
   public void setPath(String path) {
     this.path = path;
+  }
+
+  public boolean isOpenAIQuotaExceeded() {
+    return openAIQuotaExceeded;
+  }
+
+  public void setOpenAIQuotaExceeded(boolean openAIQuotaExceeded) {
+    this.openAIQuotaExceeded = openAIQuotaExceeded;
   }
 }

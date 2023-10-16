@@ -18,8 +18,6 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
   private boolean useAzureService;
   private boolean useYouService;
 
-  private boolean openAIQuotaExceeded;
-
   public SettingsState() {
   }
 
@@ -101,14 +99,8 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
   public boolean isUseYouService() {
     return useYouService;
   }
+
   public void setUseYouService(boolean useYouService) {
     this.useYouService = useYouService;
   }
-  public boolean isOpenAIQuotaExceeded() {
-    return openAIQuotaExceeded;
-  }
-  public void setOpenAIQuotaExceeded(boolean openAIQuotaExceeded) {
-    this.openAIQuotaExceeded = openAIQuotaExceeded;
-  }
-
 }

@@ -122,9 +122,6 @@ public class ChatMessageResponseBody extends JPanel {
 
     currentlyProcessedTextPane.addHyperlinkListener(e -> {
       if (e.getEventType() == ACTIVATED) {
-        var settings = SettingsState.getInstance();
-        settings.setUseYouService(true);
-        settings.setOpenAIQuotaExceeded(true);
         ShowSettingsUtil.getInstance().showSettingsDialog(project, SettingsConfigurable.class);
         TelemetryAction.IDE_ACTION.createActionMessage()
             .property("action", ActionType.CHANGE_PROVIDER.name())

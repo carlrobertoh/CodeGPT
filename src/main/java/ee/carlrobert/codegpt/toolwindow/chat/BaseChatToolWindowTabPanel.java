@@ -206,6 +206,9 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     requestHandler.addErrorListener((error, ex) -> {
       try {
         if ("insufficient_quota".equals(error.getCode())) {
+          if (SettingsState.getInstance().isUseOpenAIService()) {
+            OpenAISettingsState.getInstance().setOpenAIQuotaExceeded(true);
+          }
           responseContainer.displayQuotaExceeded();
         } else {
           responseContainer.displayError(error.getMessage());

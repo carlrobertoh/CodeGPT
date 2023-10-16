@@ -178,7 +178,7 @@ public class YouServiceSelectionPanel extends JPanel {
 
     return FormBuilder.createFormBuilder()
         .addComponent(new TitledSeparator(
-            CodeGPTBundle.get("settingsConfigurable.section.userAuthentication.title") + " (Optional)"))
+            CodeGPTBundle.get("settingsConfigurable.section.userAuthentication.title")))
         .addComponent(JBUI.Panels
             .simplePanel(contentPanelBuilder.getPanel())
             .withBorder(JBUI.Borders.emptyLeft(16)))
