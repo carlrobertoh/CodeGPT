@@ -119,6 +119,7 @@ public class ChatMessageResponseBody extends JPanel {
         + "You exceeded your current quota, please check your plan and billing details, "
         + "or <a href=\"#CHANGE_PROVIDER\">change</a> to a different LLM provider.</p>"
         + "</html>");
+
     currentlyProcessedTextPane.addHyperlinkListener(e -> {
       if (e.getEventType() == ACTIVATED) {
         ShowSettingsUtil.getInstance().showSettingsDialog(project, SettingsConfigurable.class);

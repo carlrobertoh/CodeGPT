@@ -2,15 +2,15 @@ package ee.carlrobert.codegpt.settings;
 
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.ui.ComboBox;
+import com.intellij.ui.JBColor;
 import com.intellij.ui.TitledSeparator;
-import com.intellij.ui.components.JBCheckBox;
-import com.intellij.ui.components.JBPasswordField;
-import com.intellij.ui.components.JBRadioButton;
-import com.intellij.ui.components.JBTextField;
+import com.intellij.ui.components.*;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
+import com.intellij.util.ui.UIUtil;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
@@ -20,10 +20,12 @@ import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.completions.you.YouUserManager;
 import ee.carlrobert.codegpt.completions.you.auth.AuthenticationNotifier;
 import ee.carlrobert.codegpt.settings.state.YouSettingsState;
+import ee.carlrobert.codegpt.telemetry.ui.utils.JBLabelUtils;
 import ee.carlrobert.codegpt.util.SwingUtils;
 import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionModel;
 import ee.carlrobert.llm.completion.CompletionModel;
-import java.awt.FlowLayout;
+
+import java.awt.*;
 import java.util.List;
 import java.util.Map;
 import javax.swing.Box;
@@ -155,6 +157,10 @@ public class ServiceSelectionForm {
   public JPanel getForm() {
     var panel = new JPanel(new FlowLayout(FlowLayout.LEADING, 0, 0));
     panel.add(useOpenAIServiceRadioButton);
+    if (OpenAISettingsState.getInstance().isOpenAIQuotaExceeded()) {
+      panel.add(Box.createHorizontalStrut(4));
+      panel.add(new JBLabel("<html><sup style=\"color: #cc3300;\">quota exceeded</sup></html>"));
+    }
     // flow layout's horizontal gap adds annoying horizontal padding on each sides
     panel.add(Box.createHorizontalStrut(16));
     panel.add(useAzureServiceRadioButton);

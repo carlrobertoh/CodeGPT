@@ -138,6 +138,9 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     if (SettingsState.getInstance().isUseAzureService()) {
       return AzureCredentialsManager.getInstance().isCredentialSet();
     }
+    if (SettingsState.getInstance().isUseYouService()) {
+      return true;
+    }
     return OpenAICredentialsManager.getInstance().isApiKeySet();
   }
 
@@ -203,6 +206,9 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     requestHandler.addErrorListener((error, ex) -> {
       try {
         if ("insufficient_quota".equals(error.getCode())) {
+          if (SettingsState.getInstance().isUseOpenAIService()) {
+            OpenAISettingsState.getInstance().setOpenAIQuotaExceeded(true);
+          }
           responseContainer.displayQuotaExceeded();
         } else {
           responseContainer.displayError(error.getMessage());
