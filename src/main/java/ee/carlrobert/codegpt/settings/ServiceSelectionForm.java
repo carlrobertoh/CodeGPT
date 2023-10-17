@@ -6,6 +6,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.TitledSeparator;
 import com.intellij.ui.components.JBCheckBox;
+import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPasswordField;
 import com.intellij.ui.components.JBRadioButton;
 import com.intellij.ui.components.JBTextField;
@@ -165,6 +166,11 @@ public class ServiceSelectionForm {
   public JPanel getForm() {
     var panel = new JPanel(new FlowLayout(FlowLayout.LEADING, 0, 0));
     panel.add(useOpenAIServiceRadioButton);
+    if (OpenAISettingsState.getInstance().isOpenAIQuotaExceeded()) {
+      panel.add(Box.createHorizontalStrut(4));
+      panel.add(new JBLabel("<html><sup style=\"color: #cc3300;\">quota exceeded</sup></html>"));
+    }
+    // flow layout's horizontal gap adds annoying horizontal padding on each sides
     panel.add(Box.createHorizontalStrut(16));
     panel.add(useAzureServiceRadioButton);
     panel.add(Box.createHorizontalStrut(16));

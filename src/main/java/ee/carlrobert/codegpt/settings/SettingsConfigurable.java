@@ -73,6 +73,11 @@ public class SettingsConfigurable implements Configurable {
     var modelChanged = openAISettings.getModel().equals(serviceSelectionForm.getOpenAIModel()) ||
         azureSettings.getModel().equals(serviceSelectionForm.getAzureModel());
 
+    var prevKey = OpenAICredentialsManager.getInstance().getApiKey();
+    if (prevKey != null && !prevKey.equals(serviceSelectionForm.getOpenAIApiKey())) {
+      OpenAISettingsState.getInstance().setOpenAIQuotaExceeded(false);
+    }
+
     OpenAICredentialsManager.getInstance().setApiKey(serviceSelectionForm.getOpenAIApiKey());
     AzureCredentialsManager.getInstance().setApiKey(serviceSelectionForm.getAzureOpenAIApiKey());
     AzureCredentialsManager.getInstance()
