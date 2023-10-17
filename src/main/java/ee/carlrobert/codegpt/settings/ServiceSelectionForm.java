@@ -513,4 +513,12 @@ public class ServiceSelectionForm {
   public String getAzurePath() {
     return azurePathField.getText();
   }
+
+  public void setLlamaServerPort(int serverPort) {
+    llamaServiceSectionPanel.setServerPort(serverPort);
+  }
+
+  public int getLlamaServerPort() {
+    return llamaServiceSectionPanel.getServerPort();
+  }
 }

@@ -6,9 +6,6 @@ import com.intellij.icons.AllIcons.Actions;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
-import com.intellij.openapi.progress.ProgressIndicator;
-import com.intellij.openapi.progress.ProgressManager;
-import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.TextBrowseFolderListener;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
@@ -27,25 +24,15 @@ import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaServerAgent;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
-import ee.carlrobert.codegpt.util.ApplicationUtils;
-import ee.carlrobert.codegpt.util.DownloadingUtils;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.FlowLayout;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 import javax.swing.Box;
 import javax.swing.JComponent;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
 import org.jetbrains.annotations.NotNull;
 
@@ -55,6 +42,8 @@ public class LlamaServiceSelectionForm extends JPanel {
   private final ComboBox<LlamaModel> modelComboBox;
   private final BorderLayoutPanel downloadModelLinkWrapper;
   private final JBLabel modelExistsIcon;
+  private final JBTextField hostField;
+  private final PortField portField;
 
   public LlamaServiceSelectionForm() {
     var llamaSettings = LlamaSettingsState.getInstance();
@@ -68,10 +57,16 @@ public class LlamaServiceSelectionForm extends JPanel {
     modelExistsIcon = new JBLabel(Actions.Commit);
     modelExistsIcon.setVisible(isModelExists(llamaSettings.getLlamaModel()));
     modelComboBox.addItemListener(e -> {
-
       var modelExists = isModelExists((LlamaModel) e.getItem());
       modelExistsIcon.setVisible(modelExists);
       downloadModelLinkWrapper.setVisible(!modelExists);
+    });
+    hostField = new JBTextField(getHost(llamaSettings.getServerPort()));
+    hostField.setEnabled(false);
+    portField = new PortField(llamaSettings.getServerPort());
+    portField.addChangeListener(changeEvent -> {
+      var port = (int) ((PortField) changeEvent.getSource()).getValue();
+      hostField.setText(getHost(port));
     });
 
     setLayout(new BorderLayout());
@@ -79,67 +74,6 @@ public class LlamaServiceSelectionForm extends JPanel {
         .addComponent(new TitledSeparator("Model Preferences"))
         .addComponent(withEmptyLeftBorder(createServerSettingsForm()))
         .getPanel());
-  }
-
-  private boolean isModelExists(LlamaModel model) {
-    return FileUtil.exists(
-        CodeGPTPlugin.getLlamaModelsPath() + File.separator + model.getFileName());
-  }
-
-  private JPanel createServerSettingsForm() {
-    var loadingSpinner = new AsyncProcessIcon("sign_in_spinner");
-    loadingSpinner.setVisible(false);
-
-    var progressLabel = new JBLabel("");
-
-    var downloadModelLink = new AnActionLink(
-        "Download model",
-        new DownloadModelAction(
-            () -> {
-              downloadModelLinkWrapper.setVisible(false);
-              modelExistsIcon.setVisible(true);
-            },
-            progressLabel,
-            downloadModelLinkWrapper));
-    downloadModelLinkWrapper.addToLeft(downloadModelLink);
-    var startServerLink = new AnActionLink("Start Server", new StartServerAction(
-        () -> {
-          // TODO
-        },
-        () -> {
-          // TODO
-        }));
-
-    var actionLinkWrapper = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 16));
-    actionLinkWrapper.add(startServerLink);
-    actionLinkWrapper.add(Box.createHorizontalStrut(8));
-    actionLinkWrapper.add(loadingSpinner);
-
-    var hostField = new JBTextField("http://localhost:8080/completions");
-    hostField.setEnabled(false);
-    var portField = new PortField(8080);
-    portField.addChangeListener(changeEvent -> {
-      var port = (int) ((PortField) changeEvent.getSource()).getValue();
-      hostField.setText(format("http://localhost:%d/completions", port));
-    });
-
-    var modelComboBoxWrapper = new JPanel(new FlowLayout(FlowLayout.LEADING, 0, 0));
-    modelComboBoxWrapper.add(modelComboBox);
-    modelComboBoxWrapper.add(Box.createHorizontalStrut(4));
-    modelComboBoxWrapper.add(modelExistsIcon);
-
-    return FormBuilder.createFormBuilder()
-        .addLabeledComponent("Model:", modelComboBoxWrapper)
-        .addComponentToRightColumn(downloadModelLinkWrapper)
-        .addLabeledComponent("Model path:", UI.PanelFactory.panel(textFieldWithBrowseButton)
-            .withComment("Only .gguf files are supported")
-            .createPanel())
-        .addLabeledComponent("Host:", hostField)
-        .addLabeledComponent("Port:", JBUI.Panels.simplePanel()
-            .addToLeft(portField)
-            .addToRight(startServerLink))
-        .addComponent(JBUI.Panels.simplePanel().addToLeft(actionLinkWrapper))
-        .getPanel();
   }
 
   public void setSelectedModel(LlamaModel model) {
@@ -150,86 +84,20 @@ public class LlamaServiceSelectionForm extends JPanel {
     return (LlamaModel) modelComboBox.getSelectedItem();
   }
 
-  class DownloadModelAction extends AnAction {
+  public void setModelDestinationPath(String modelPath) {
+    textFieldWithBrowseButton.setText(modelPath);
+  }
 
-    private final Runnable onDownloaded;
-    private final JBLabel progressLabel;
-    private final BorderLayoutPanel downloadModelLinkWrapper;
+  public String getModelDestinationPath() {
+    return textFieldWithBrowseButton.getText();
+  }
 
-    DownloadModelAction(
-        Runnable onDownloaded,
-        JBLabel progressLabel,
-        BorderLayoutPanel downloadModelLinkWrapper) {
-      this.onDownloaded = onDownloaded;
-      this.progressLabel = progressLabel;
-      this.downloadModelLinkWrapper = downloadModelLinkWrapper;
-    }
+  public void setServerPort(int serverPort) {
+    portField.setNumber(serverPort);
+  }
 
-    @Override
-    public void actionPerformed(@NotNull AnActionEvent e) {
-      ProgressManager.getInstance().run(new Task.Backgroundable(
-          ApplicationUtils.findCurrentProject(),
-          "Downloading Model",
-          true) {
-        @Override
-        public void run(@NotNull ProgressIndicator indicator) {
-          var model = (LlamaModel) modelComboBox.getModel().getSelectedItem();
-
-          URL url;
-          try {
-            url = new URL(model.getFilePath());
-          } catch (MalformedURLException ex) {
-            throw new RuntimeException(ex);
-          }
-
-          ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-          ScheduledFuture<?> future = null;
-
-          try (
-              var readableByteChannel = Channels.newChannel(url.openStream());
-              var fileOutputStream = new FileOutputStream(
-                  CodeGPTPlugin.getLlamaModelsPath() + File.separator + model.getFileName())) {
-
-            downloadModelLinkWrapper.removeAll();
-            downloadModelLinkWrapper.add(progressLabel);
-            downloadModelLinkWrapper.repaint();
-            downloadModelLinkWrapper.revalidate();
-
-            indicator.setIndeterminate(false);
-            indicator.setText(format("Downloading %s...", model.getLabel()));
-
-            long fileSize = url.openConnection().getContentLengthLong();
-            long[] bytesRead = {0};
-            ByteBuffer buffer = ByteBuffer.allocateDirect(1024 * 10);
-
-            long startTime = System.currentTimeMillis();
-            future = executorService.scheduleAtFixedRate(() -> progressLabel.setText(
-                    DownloadingUtils.getFormattedDownloadProgress(startTime, fileSize, bytesRead[0])),
-                0, 1, TimeUnit.SECONDS);
-
-            while (readableByteChannel.read(buffer) != -1) {
-              if (indicator.isCanceled()) {
-                readableByteChannel.close();
-                break;
-              }
-              buffer.flip();
-              bytesRead[0] += fileOutputStream.getChannel().write(buffer);
-              buffer.clear();
-              indicator.setFraction((double) bytesRead[0] / fileSize);
-            }
-
-            onDownloaded.run();
-          } catch (Exception e) {
-            throw new RuntimeException(e);
-          } finally {
-            if (future != null) {
-              future.cancel(true);
-            }
-            executorService.shutdown();
-          }
-        }
-      });
-    }
+  public int getServerPort() {
+    return portField.getNumber();
   }
 
   class StartServerAction extends AnAction {
@@ -278,11 +146,63 @@ public class LlamaServiceSelectionForm extends JPanel {
     return component;
   }
 
-  public void setModelDestinationPath(String modelPath) {
-    textFieldWithBrowseButton.setText(modelPath);
+  private String getHost(int port) {
+    return format("http://localhost:%d/completions", port);
   }
 
-  public String getModelDestinationPath() {
-    return textFieldWithBrowseButton.getText();
+  private boolean isModelExists(LlamaModel model) {
+    return FileUtil.exists(
+        CodeGPTPlugin.getLlamaModelsPath() + File.separator + model.getFileName());
+  }
+
+  private JPanel createServerSettingsForm() {
+    var downloadModelLink = new AnActionLink(
+        "Download model",
+        new DownloadModelAction(
+            () -> {
+              downloadModelLinkWrapper.setVisible(false);
+              modelExistsIcon.setVisible(true);
+            },
+            (error) -> {
+              throw new RuntimeException(error);
+            },
+            (LlamaModel) modelComboBox.getSelectedItem(),
+            downloadModelLinkWrapper));
+    downloadModelLinkWrapper.addToLeft(downloadModelLink);
+
+    var startServerLinkWrapper = JBUI.Panels.simplePanel();
+    var startServerLink = new AnActionLink("Start Server", new StartServerAction(
+        () -> {
+          startServerLinkWrapper.removeAll();
+          startServerLinkWrapper.add(new JBLabel("Starting a server"));
+          startServerLinkWrapper.add(new AsyncProcessIcon("sign_in_spinner"));
+          startServerLinkWrapper.repaint();
+          startServerLinkWrapper.revalidate();
+        },
+        () -> {
+          startServerLinkWrapper.removeAll();
+          startServerLinkWrapper.add(
+              new JBLabel("Server running", Actions.Commit, SwingConstants.RIGHT));
+          startServerLinkWrapper.repaint();
+          startServerLinkWrapper.revalidate();
+        }));
+    startServerLinkWrapper.add(startServerLink);
+
+    var modelComboBoxWrapper = new JPanel(new FlowLayout(FlowLayout.LEADING, 0, 0));
+    modelComboBoxWrapper.add(modelComboBox);
+    modelComboBoxWrapper.add(Box.createHorizontalStrut(4));
+    modelComboBoxWrapper.add(modelExistsIcon);
+
+    return FormBuilder.createFormBuilder()
+        .addLabeledComponent("Model:", modelComboBoxWrapper)
+        .addComponentToRightColumn(downloadModelLinkWrapper)
+        .addLabeledComponent("Model path:", UI.PanelFactory.panel(textFieldWithBrowseButton)
+            .withComment("Only .gguf files are supported")
+            .createPanel())
+        .addLabeledComponent("Host:", hostField)
+        .addLabeledComponent("Port:", JBUI.Panels.simplePanel()
+            .addToLeft(portField)
+            .addToRight(startServerLinkWrapper))
+        .getPanel();
   }
 }

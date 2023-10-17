@@ -90,8 +90,10 @@ public class SettingsConfigurable implements Configurable {
     YouSettingsState.getInstance()
         .setDisplayWebSearchResults(serviceSelectionForm.isDisplayWebSearchResults());
     settings.setUseLlamaService(serviceSelectionForm.isLlamaServiceSelected());
+
     llamaSettings.setLlamaModelPath(serviceSelectionForm.getLlamaModelPath());
     llamaSettings.setLlamaModel(serviceSelectionForm.getLlamaModel());
+    llamaSettings.setServerPort(serviceSelectionForm.getLlamaServerPort());
 
     openAISettings.apply(serviceSelectionForm);
     azureSettings.apply(serviceSelectionForm);
@@ -124,6 +126,7 @@ public class SettingsConfigurable implements Configurable {
 
     serviceSelectionForm.setLlamaModel(llamaSettings.getLlamaModel());
     serviceSelectionForm.setLlamaModelPath(llamaSettings.getLlamaModelPath());
+    serviceSelectionForm.setLlamaServerPort(llamaSettings.getServerPort());
 
     openAISettings.reset(serviceSelectionForm);
     azureSettings.reset(serviceSelectionForm);

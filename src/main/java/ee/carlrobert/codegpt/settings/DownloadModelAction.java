@@ -1,4 +1,3 @@
-/*
 package ee.carlrobert.codegpt.settings;
 
 import static java.lang.String.format;
@@ -9,6 +8,7 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.ui.components.JBLabel;
+import com.intellij.util.Consumer;
 import com.intellij.util.ui.components.BorderLayoutPanel;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
@@ -29,15 +29,18 @@ import org.jetbrains.annotations.NotNull;
 public class DownloadModelAction extends AnAction {
 
   private final Runnable onDownloaded;
-  private final JBLabel progressLabel;
+  private final Consumer<Exception> onFailed;
+  private final LlamaModel model;
   private final BorderLayoutPanel downloadModelLinkWrapper;
 
   DownloadModelAction(
       Runnable onDownloaded,
-      JBLabel progressLabel,
+      Consumer<Exception> onFailed,
+      LlamaModel model,
       BorderLayoutPanel downloadModelLinkWrapper) {
     this.onDownloaded = onDownloaded;
-    this.progressLabel = progressLabel;
+    this.onFailed = onFailed;
+    this.model = model;
     this.downloadModelLinkWrapper = downloadModelLinkWrapper;
   }
 
@@ -49,8 +52,6 @@ public class DownloadModelAction extends AnAction {
         true) {
       @Override
       public void run(@NotNull ProgressIndicator indicator) {
-        var model = (LlamaModel) modelComboBox.getModel().getSelectedItem();
-
         URL url;
         try {
           url = new URL(model.getFilePath());
@@ -66,6 +67,7 @@ public class DownloadModelAction extends AnAction {
             var fileOutputStream = new FileOutputStream(
                 CodeGPTPlugin.getLlamaModelsPath() + File.separator + model.getFileName())) {
 
+          var progressLabel = new JBLabel("");
           downloadModelLinkWrapper.removeAll();
           downloadModelLinkWrapper.add(progressLabel);
           downloadModelLinkWrapper.repaint();
@@ -95,8 +97,8 @@ public class DownloadModelAction extends AnAction {
           }
 
           onDownloaded.run();
-        } catch (Exception e) {
-          throw new RuntimeException(e);
+        } catch (Exception ex) {
+          onFailed.consume(ex);
         } finally {
           if (future != null) {
             future.cancel(true);
@@ -107,4 +109,3 @@ public class DownloadModelAction extends AnAction {
     });
   }
 }
-*/

@@ -21,10 +21,10 @@ public class LlamaServerAgent {
 
   private static final Logger LOG = Logger.getInstance(LlamaServerAgent.class);
 
-  private final String modelPath;
+  private final String customModelPath;
 
-  public LlamaServerAgent(String modelPath) {
-    this.modelPath = modelPath;
+  public LlamaServerAgent(String customModelPath) {
+    this.customModelPath = customModelPath;
   }
 
   public void startAgent(Runnable onSuccess) {
@@ -32,8 +32,6 @@ public class LlamaServerAgent {
       try {
         var process = new OSProcessHandler(getMakeCommandLinde());
         process.addProcessListener(getMakeProcessListener(onSuccess));
-
-        LOG.info("Building llama.cpp");
         process.startNotify();
       } catch (ExecutionException e) {
         throw new RuntimeException(e);
@@ -57,8 +55,6 @@ public class LlamaServerAgent {
           throw new RuntimeException(e);
         }
         processHandler.addProcessListener(getProcessListener(onSuccess));
-
-        LOG.info("Starting server");
         processHandler.startNotify();
       }
     };
@@ -70,8 +66,6 @@ public class LlamaServerAgent {
 
       @Override
       public void onTextAvailable(@NotNull ProcessEvent event, @NotNull Key outputType) {
-        System.out.println(event.getText());
-
         if (outputType == ProcessOutputType.STDOUT) {
           try {
             var serverMessage = objectMapper.readValue(event.getText(), LlamaServerMessage.class);
@@ -99,9 +93,9 @@ public class LlamaServerAgent {
     commandLine.setExePath("./server");
     commandLine.withWorkDirectory(CodeGPTPlugin.getLlamaSourcePath());
 
-    var path = (modelPath == null || modelPath.isEmpty()) ?
+    var path = (customModelPath == null || customModelPath.isEmpty()) ?
         "models/" + LlamaSettingsState.getInstance().getLlamaModel().getFileName() :
-        modelPath;
+        customModelPath;
     commandLine.addParameters("-m", path, "-c", "2048");
     commandLine.setRedirectErrorStream(false);
     return commandLine;

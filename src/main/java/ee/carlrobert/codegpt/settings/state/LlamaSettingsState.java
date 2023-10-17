@@ -13,6 +13,7 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
 
   private String llamaModelPath = "";
   private LlamaModel llamaModel = LlamaModel.CODE_LLAMA_7B;
+  private int serverPort = 8080;
 
   public LlamaSettingsState() {
   }
@@ -45,5 +46,13 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
 
   public void setLlamaModel(LlamaModel llamaModel) {
     this.llamaModel = llamaModel;
+  }
+
+  public int getServerPort() {
+    return serverPort;
+  }
+
+  public void setServerPort(int serverPort) {
+    this.serverPort = serverPort;
   }
 }
