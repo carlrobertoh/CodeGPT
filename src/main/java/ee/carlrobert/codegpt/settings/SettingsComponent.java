@@ -1,12 +1,16 @@
 package ee.carlrobert.codegpt.settings;
 
 import com.intellij.openapi.Disposable;
-import com.intellij.ui.TitledSeparator;
+import com.intellij.openapi.ui.ComboBox;
+import com.intellij.openapi.ui.ComponentValidator;
+import com.intellij.openapi.ui.ValidationInfo;
+import com.intellij.ui.EnumComboBoxModel;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
-import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
+import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
+import java.awt.CardLayout;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
@@ -14,23 +18,45 @@ public class SettingsComponent {
 
   private final JPanel mainPanel;
   private final JBTextField displayNameField;
+  private final ComboBox<ServiceType> serviceComboBox;
   private final ServiceSelectionForm serviceSelectionForm;
-  private final YouServiceSelectionForm youServiceSelectionForm;
 
   public SettingsComponent(Disposable parentDisposable, SettingsState settings) {
-    serviceSelectionForm = new ServiceSelectionForm(parentDisposable, settings);
     displayNameField = new JBTextField(settings.getDisplayName(), 20);
-    youServiceSelectionForm = new YouServiceSelectionForm(parentDisposable);
+
+    serviceSelectionForm = new ServiceSelectionForm(parentDisposable, settings);
+    var cardLayout = new CardLayout();
+    var cards = new JPanel(cardLayout);
+    cards.add(serviceSelectionForm.getOpenAIServiceSectionPanel(), ServiceType.OPENAI.getCode());
+    cards.add(serviceSelectionForm.getAzureServiceSectionPanel(), ServiceType.AZURE.getCode());
+    cards.add(serviceSelectionForm.getYouServiceSectionPanel(), ServiceType.YOU.getCode());
+    cards.add(serviceSelectionForm.getLlamaServiceSectionPanel(), ServiceType.LLAMA_CPP.getCode());
+    serviceComboBox = new ComboBox<>(new EnumComboBoxModel<>(ServiceType.class));
+    serviceComboBox.setSelectedItem(ServiceType.OPENAI);
+    serviceComboBox.setPreferredSize(displayNameField.getPreferredSize());
+    var serviceInputValidator = createInputValidator(parentDisposable, serviceComboBox);
+    serviceInputValidator.revalidate();
+    serviceComboBox.addItemListener(e -> {
+      serviceInputValidator.revalidate();
+      cardLayout.show(cards, ((ServiceType) e.getItem()).getCode());
+    });
+
     mainPanel = FormBuilder.createFormBuilder()
-        .addComponent(UI.PanelFactory.panel(displayNameField)
-            .withLabel(CodeGPTBundle.get("settingsConfigurable.section.integration.displayNameFieldLabel"))
-            .resizeX(false)
-            .createPanel())
-        .addComponent(new TitledSeparator(CodeGPTBundle.get("settingsConfigurable.section.service.title")))
-        .addComponent(serviceSelectionForm.getForm())
-        .addVerticalGap(8)
+        .addLabeledComponent(
+            CodeGPTBundle.get("settingsConfigurable.section.integration.displayNameFieldLabel"),
+            displayNameField)
+        .addLabeledComponent("Service:", serviceComboBox)
+        .addComponent(cards)
         .addComponentFillVertically(new JPanel(), 0)
         .getPanel();
+  }
+
+  public ServiceType getSelectedService() {
+    return serviceComboBox.getItem();
+  }
+
+  public void setSelectedService(ServiceType serviceType) {
+    serviceComboBox.setSelectedItem(serviceType);
   }
 
   public JPanel getPanel() {
@@ -39,18 +65,6 @@ public class SettingsComponent {
 
   public JComponent getPreferredFocusedComponent() {
     return displayNameField;
-  }
-
-  public String getEmail() {
-    return youServiceSelectionForm.getEmail();
-  }
-
-  public void setEmail(String email) {
-    youServiceSelectionForm.setEmail(email);
-  }
-
-  public String getPassword() {
-    return youServiceSelectionForm.getPassword();
   }
 
   public ServiceSelectionForm getServiceSelectionForm() {
@@ -63,5 +77,26 @@ public class SettingsComponent {
 
   public void setDisplayName(String displayName) {
     displayNameField.setText(displayName);
+  }
+
+  private ComponentValidator createInputValidator(
+      Disposable parentDisposable,
+      JComponent component) {
+    var validator = new ComponentValidator(parentDisposable)
+        .withValidator(() -> {
+          if (component instanceof ComboBox) {
+            var selectedItem = ((ComboBox<?>) component).getSelectedItem();
+            if (selectedItem == ServiceType.OPENAI &&
+                !OpenAISettingsState.getInstance().isOpenAIQuotaExceeded()) {
+              return new ValidationInfo("OpenAI quota exceeded.", component);
+            }
+          }
+
+          return null;
+        })
+        .andStartOnFocusLost()
+        .installOn(component);
+    validator.enableValidation();
+    return validator;
   }
 }

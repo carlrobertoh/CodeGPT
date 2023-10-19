@@ -1,5 +1,10 @@
 package ee.carlrobert.codegpt.settings;
 
+import static ee.carlrobert.codegpt.settings.ServiceType.AZURE;
+import static ee.carlrobert.codegpt.settings.ServiceType.LLAMA_CPP;
+import static ee.carlrobert.codegpt.settings.ServiceType.OPENAI;
+import static ee.carlrobert.codegpt.settings.ServiceType.YOU;
+
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.util.Disposer;
@@ -53,7 +58,7 @@ public class SettingsConfigurable implements Configurable {
 
     var serviceSelectionForm = settingsComponent.getServiceSelectionForm();
     return !settingsComponent.getDisplayName().equals(settings.getDisplayName()) ||
-        isServiceChanged(serviceSelectionForm, settings) ||
+        isServiceChanged(settings) ||
         openAISettings.isModified(serviceSelectionForm) ||
         azureSettings.isModified(serviceSelectionForm) ||
         serviceSelectionForm.isDisplayWebSearchResults() !=
@@ -69,7 +74,7 @@ public class SettingsConfigurable implements Configurable {
     var openAISettings = OpenAISettingsState.getInstance();
     var azureSettings = AzureSettingsState.getInstance();
     var llamaSettings = LlamaSettingsState.getInstance();
-    var serviceChanged = isServiceChanged(serviceSelectionForm, settings);
+    var serviceChanged = isServiceChanged(settings);
     var modelChanged = openAISettings.getModel().equals(serviceSelectionForm.getOpenAIModel()) ||
         azureSettings.getModel().equals(serviceSelectionForm.getAzureModel());
 
@@ -84,12 +89,13 @@ public class SettingsConfigurable implements Configurable {
         .setAzureActiveDirectoryToken(serviceSelectionForm.getAzureActiveDirectoryToken());
 
     settings.setDisplayName(settingsComponent.getDisplayName());
-    settings.setUseOpenAIService(serviceSelectionForm.isOpenAIServiceSelected());
-    settings.setUseAzureService(serviceSelectionForm.isAzureServiceSelected());
-    settings.setUseYouService(serviceSelectionForm.isYouServiceSelected());
+    // TODO: Store as single enum value
+    settings.setUseOpenAIService(settingsComponent.getSelectedService() == OPENAI);
+    settings.setUseAzureService(settingsComponent.getSelectedService() == ServiceType.AZURE);
+    settings.setUseYouService(settingsComponent.getSelectedService() == ServiceType.YOU);
     YouSettingsState.getInstance()
         .setDisplayWebSearchResults(serviceSelectionForm.isDisplayWebSearchResults());
-    settings.setUseLlamaService(serviceSelectionForm.isLlamaServiceSelected());
+    settings.setUseLlamaService(settingsComponent.getSelectedService() == ServiceType.LLAMA_CPP);
 
     llamaSettings.setLlamaModelPath(serviceSelectionForm.getLlamaModelPath());
     llamaSettings.setLlamaModel(serviceSelectionForm.getLlamaModel());
@@ -102,7 +108,7 @@ public class SettingsConfigurable implements Configurable {
       resetActiveTab();
       if (serviceChanged) {
         TelemetryAction.SETTINGS_CHANGED.createActionMessage()
-            .property("service", getServiceCode(serviceSelectionForm))
+            .property("service", getServiceCode())
             .send();
       }
     }
@@ -116,13 +122,22 @@ public class SettingsConfigurable implements Configurable {
     var llamaSettings = LlamaSettingsState.getInstance();
     var serviceSelectionForm = settingsComponent.getServiceSelectionForm();
 
-    settingsComponent.setEmail(settings.getEmail());
+    // settingsComponent.setEmail(settings.getEmail());
     settingsComponent.setDisplayName(settings.getDisplayName());
 
-    serviceSelectionForm.setOpenAIServiceSelected(settings.isUseOpenAIService());
-    serviceSelectionForm.setAzureServiceSelected(settings.isUseAzureService());
-    serviceSelectionForm.setYouServiceSelected(settings.isUseYouService());
-    serviceSelectionForm.setLlamaServiceSelected(settings.isUseLlamaService());
+    // TODO
+    if (settings.isUseOpenAIService()) {
+      settingsComponent.setSelectedService(OPENAI);
+    }
+    if (settings.isUseAzureService()) {
+      settingsComponent.setSelectedService(ServiceType.AZURE);
+    }
+    if (settings.isUseYouService()) {
+      settingsComponent.setSelectedService(ServiceType.YOU);
+    }
+    if (settings.isUseLlamaService()) {
+      settingsComponent.setSelectedService(ServiceType.LLAMA_CPP);
+    }
 
     serviceSelectionForm.setLlamaModel(llamaSettings.getLlamaModel());
     serviceSelectionForm.setLlamaModelPath(llamaSettings.getLlamaModelPath());
@@ -143,13 +158,11 @@ public class SettingsConfigurable implements Configurable {
     settingsComponent = null;
   }
 
-  private boolean isServiceChanged(
-      ServiceSelectionForm serviceSelectionForm,
-      SettingsState settings) {
-    return serviceSelectionForm.isOpenAIServiceSelected() != settings.isUseOpenAIService() ||
-        serviceSelectionForm.isAzureServiceSelected() != settings.isUseAzureService() ||
-        serviceSelectionForm.isYouServiceSelected() != settings.isUseYouService() ||
-        serviceSelectionForm.isLlamaServiceSelected() != settings.isUseLlamaService();
+  private boolean isServiceChanged(SettingsState settings) {
+    return (settingsComponent.getSelectedService() == OPENAI) != settings.isUseOpenAIService() ||
+        (settingsComponent.getSelectedService() == AZURE) != settings.isUseAzureService() ||
+        (settingsComponent.getSelectedService() == YOU) != settings.isUseYouService() ||
+        (settingsComponent.getSelectedService() == LLAMA_CPP) != settings.isUseLlamaService();
   }
 
   private void resetActiveTab() {
@@ -162,17 +175,17 @@ public class SettingsConfigurable implements Configurable {
     project.getService(StandardChatToolWindowContentManager.class).resetActiveTab();
   }
 
-  private String getServiceCode(ServiceSelectionForm serviceSelectionForm) {
-    if (serviceSelectionForm.isOpenAIServiceSelected()) {
+  private String getServiceCode() {
+    if (settingsComponent.getSelectedService() == OPENAI) {
       return "openai";
     }
-    if (serviceSelectionForm.isAzureServiceSelected()) {
+    if (settingsComponent.getSelectedService() == AZURE) {
       return "azure";
     }
-    if (serviceSelectionForm.isYouServiceSelected()) {
+    if (settingsComponent.getSelectedService() == YOU) {
       return "you";
     }
-    if (serviceSelectionForm.isLlamaServiceSelected()) {
+    if (settingsComponent.getSelectedService() == LLAMA_CPP) {
       return "llama.cpp";
     }
     return null;

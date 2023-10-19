@@ -36,4 +36,9 @@ public enum LlamaModel {
   public String getFilePath() {
     return filePath;
   }
+
+  @Override
+  public String toString() {
+    return label;
+  }
 }

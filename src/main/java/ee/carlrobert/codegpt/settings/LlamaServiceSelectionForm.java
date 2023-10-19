@@ -9,7 +9,9 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.TextBrowseFolderListener;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
+import com.intellij.openapi.ui.panel.ComponentPanelBuilder;
 import com.intellij.openapi.util.io.FileUtil;
+import com.intellij.ui.EnumComboBoxModel;
 import com.intellij.ui.PortField;
 import com.intellij.ui.TitledSeparator;
 import com.intellij.ui.components.AnActionLink;
@@ -17,23 +19,23 @@ import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.AsyncProcessIcon;
 import com.intellij.util.ui.FormBuilder;
+import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
 import com.intellij.util.ui.components.BorderLayoutPanel;
+import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaServerAgent;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
 import java.io.File;
 import javax.swing.Box;
 import javax.swing.JComponent;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
-import javax.swing.plaf.basic.BasicComboBoxRenderer;
 import org.jetbrains.annotations.NotNull;
 
 public class LlamaServiceSelectionForm extends JPanel {
@@ -52,8 +54,10 @@ public class LlamaServiceSelectionForm extends JPanel {
     textFieldWithBrowseButton = new TextFieldWithBrowseButton();
     textFieldWithBrowseButton.addBrowseFolderListener(
         new TextBrowseFolderListener(fileChooserDescriptor));
-    modelComboBox = new LlamaModelComboBox(LlamaModel.values(), llamaSettings.getLlamaModel());
-    downloadModelLinkWrapper = JBUI.Panels.simplePanel();
+
+    modelComboBox = new ComboBox<>(new EnumComboBoxModel<>(LlamaModel.class));
+    modelComboBox.setSelectedItem(LlamaModel.CODE_LLAMA_7B);
+    downloadModelLinkWrapper = JBUI.Panels.simplePanel().withBorder(JBUI.Borders.emptyLeft(2));
     modelExistsIcon = new JBLabel(Actions.Commit);
     modelExistsIcon.setVisible(isModelExists(llamaSettings.getLlamaModel()));
     modelComboBox.addItemListener(e -> {
@@ -73,6 +77,7 @@ public class LlamaServiceSelectionForm extends JPanel {
     add(FormBuilder.createFormBuilder()
         .addComponent(new TitledSeparator("Model Preferences"))
         .addComponent(withEmptyLeftBorder(createServerSettingsForm()))
+        .addComponentFillVertically(new JPanel(), 0)
         .getPanel());
   }
 
@@ -114,30 +119,6 @@ public class LlamaServiceSelectionForm extends JPanel {
     public void actionPerformed(@NotNull AnActionEvent e) {
       onStart.run();
       new LlamaServerAgent(textFieldWithBrowseButton.getText()).startAgent(onSuccess);
-    }
-  }
-
-  static class LlamaModelComboBox extends ComboBox<LlamaModel> {
-
-    public LlamaModelComboBox(LlamaModel[] options, LlamaModel selectedModel) {
-      super(options);
-      setSelectedItem(selectedModel);
-      setRenderer(getBasicComboBoxRenderer());
-    }
-
-    private BasicComboBoxRenderer getBasicComboBoxRenderer() {
-      return new BasicComboBoxRenderer() {
-        public Component getListCellRendererComponent(JList list, Object value, int index,
-            boolean isSelected, boolean cellHasFocus) {
-          super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-
-          if (value != null) {
-            LlamaModel model = (LlamaModel) value;
-            setText(model.getLabel());
-          }
-          return this;
-        }
-      };
     }
   }
 
@@ -193,12 +174,14 @@ public class LlamaServiceSelectionForm extends JPanel {
     modelComboBoxWrapper.add(Box.createHorizontalStrut(4));
     modelComboBoxWrapper.add(modelExistsIcon);
 
+    var helpText = ComponentPanelBuilder.createCommentComponent("Only .gguf files are supported", true);
+    helpText.setBorder(JBUI.Borders.empty(0, 4));
+
     return FormBuilder.createFormBuilder()
         .addLabeledComponent("Model:", modelComboBoxWrapper)
         .addComponentToRightColumn(downloadModelLinkWrapper)
-        .addLabeledComponent("Model path:", UI.PanelFactory.panel(textFieldWithBrowseButton)
-            .withComment("Only .gguf files are supported")
-            .createPanel())
+        .addLabeledComponent("Model path:", textFieldWithBrowseButton)
+        .addComponentToRightColumn(helpText)
         .addLabeledComponent("Host:", hostField)
         .addLabeledComponent("Port:", JBUI.Panels.simplePanel()
             .addToLeft(portField)
