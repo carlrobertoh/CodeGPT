@@ -433,4 +433,12 @@ public class ServiceSelectionForm {
   public JPanel getLlamaServiceSectionPanel() {
     return llamaServiceSectionPanel;
   }
+
+  public boolean isOverrideLamaServerHost() {
+    return llamaServiceSectionPanel.isOverrideLamaServerHost();
+  }
+
+  public String getLlamaServerHost() {
+    return llamaServiceSectionPanel.getLlamaServerHost();
+  }
 }

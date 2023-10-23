@@ -32,9 +32,16 @@ public class CompletionClientProvider {
   }
 
   public static LlamaClient getLlamaClient() {
-    return new LlamaClient.Builder()
-        .setPort(LlamaSettingsState.getInstance().getServerPort())
-        .build();
+    var settings = LlamaSettingsState.getInstance();
+    var clientBuilder = new LlamaClient.Builder();
+
+    if (settings.isOverrideHost()) {
+      clientBuilder.setHost(settings.getHost());
+    } else {
+      clientBuilder.setPort(settings.getServerPort());
+    }
+
+    return clientBuilder.build();
   }
 
   private static OpenAIClient.Builder getOpenAIClientBuilder() {

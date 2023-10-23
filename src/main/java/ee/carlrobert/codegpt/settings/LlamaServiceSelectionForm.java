@@ -17,6 +17,7 @@ import com.intellij.ui.EnumComboBoxModel;
 import com.intellij.ui.PortField;
 import com.intellij.ui.TitledSeparator;
 import com.intellij.ui.components.AnActionLink;
+import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.AsyncProcessIcon;
@@ -53,6 +54,7 @@ public class LlamaServiceSelectionForm extends JPanel {
   private final JBTextField hostField;
   private final PortField portField;
   private final DefaultComboBoxModel<HuggingFaceModel> huggingFaceComboBoxModel;
+  private final JBCheckBox overrideHostCheckBox;
 
   public LlamaServiceSelectionForm() {
     var llamaSettings = LlamaSettingsState.getInstance();
@@ -114,8 +116,10 @@ public class LlamaServiceSelectionForm extends JPanel {
       huggingFaceComboBoxModel.setSelectedItem(models.get(0));
     });
 
-    hostField = new JBTextField(getHost(llamaSettings.getServerPort()));
+    hostField = new JBTextField(llamaSettings.getHost());
     hostField.setEnabled(false);
+    overrideHostCheckBox = new JBCheckBox("Override host", llamaSettings.isOverrideHost());
+    overrideHostCheckBox.addChangeListener(e -> hostField.setEnabled(!hostField.isEnabled()));
     portField = new PortField(llamaSettings.getServerPort());
     portField.addChangeListener(changeEvent -> {
       var port = (int) ((PortField) changeEvent.getSource()).getValue();
@@ -153,6 +157,14 @@ public class LlamaServiceSelectionForm extends JPanel {
 
   public int getServerPort() {
     return portField.getNumber();
+  }
+
+  public boolean isOverrideLamaServerHost() {
+    return overrideHostCheckBox.isSelected();
+  }
+
+  public String getLlamaServerHost() {
+    return hostField.getText();
   }
 
   class StartServerAction extends AnAction {
@@ -246,6 +258,8 @@ public class LlamaServiceSelectionForm extends JPanel {
         .addLabeledComponent("Model path:", textFieldWithBrowseButton)
         .addComponentToRightColumn(helpText)
         .addLabeledComponent("Host:", hostField)
+        .addComponentToRightColumn(overrideHostCheckBox)
+        .addVerticalGap(4)
         .addLabeledComponent("Port:", JBUI.Panels.simplePanel()
             .addToLeft(portField)
             .addToRight(startServerLinkWrapper))

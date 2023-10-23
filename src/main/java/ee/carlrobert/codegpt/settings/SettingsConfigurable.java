@@ -4,6 +4,7 @@ import static ee.carlrobert.codegpt.settings.ServiceType.AZURE;
 import static ee.carlrobert.codegpt.settings.ServiceType.LLAMA_CPP;
 import static ee.carlrobert.codegpt.settings.ServiceType.OPENAI;
 import static ee.carlrobert.codegpt.settings.ServiceType.YOU;
+import static java.lang.String.format;
 
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.options.Configurable;
@@ -100,6 +101,15 @@ public class SettingsConfigurable implements Configurable {
     llamaSettings.setLlamaModelPath(serviceSelectionForm.getLlamaModelPath());
     llamaSettings.setHuggingFaceModel(serviceSelectionForm.getHuggingFaceModel());
     llamaSettings.setServerPort(serviceSelectionForm.getLlamaServerPort());
+
+    if (serviceSelectionForm.isOverrideLamaServerHost()) {
+      llamaSettings.setHost(serviceSelectionForm.getLlamaServerHost());
+    } else {
+      llamaSettings.setHost(format(
+          "http://localhost:%d/completions",
+          serviceSelectionForm.getLlamaServerPort()));
+    }
+    llamaSettings.setOverrideHost(serviceSelectionForm.isOverrideLamaServerHost());
 
     openAISettings.apply(serviceSelectionForm);
     azureSettings.apply(serviceSelectionForm);
