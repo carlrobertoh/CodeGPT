@@ -118,14 +118,17 @@ public class LlamaServiceSelectionForm extends JPanel {
 
     hostField = new JBTextField(llamaSettings.getHost());
     hostField.setEnabled(llamaSettings.isOverrideHost());
-    overrideHostCheckBox = new JBCheckBox("Override host", llamaSettings.isOverrideHost());
-    overrideHostCheckBox.addChangeListener(e -> {
-      hostField.setEnabled(((JBCheckBox)e.getSource()).isSelected());
-    });
     portField = new PortField(llamaSettings.getServerPort());
+    portField.setEnabled(!llamaSettings.isOverrideHost());
     portField.addChangeListener(changeEvent -> {
       var port = (int) ((PortField) changeEvent.getSource()).getValue();
       hostField.setText(getHost(port));
+    });
+    overrideHostCheckBox = new JBCheckBox("Override host", llamaSettings.isOverrideHost());
+    overrideHostCheckBox.addChangeListener(e -> {
+      var isSelected = ((JBCheckBox) e.getSource()).isSelected();
+      hostField.setEnabled(isSelected);
+      portField.setEnabled(!isSelected);
     });
 
     setLayout(new BorderLayout());
