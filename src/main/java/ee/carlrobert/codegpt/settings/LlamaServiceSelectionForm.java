@@ -117,9 +117,11 @@ public class LlamaServiceSelectionForm extends JPanel {
     });
 
     hostField = new JBTextField(llamaSettings.getHost());
-    hostField.setEnabled(false);
+    hostField.setEnabled(llamaSettings.isOverrideHost());
     overrideHostCheckBox = new JBCheckBox("Override host", llamaSettings.isOverrideHost());
-    overrideHostCheckBox.addChangeListener(e -> hostField.setEnabled(!hostField.isEnabled()));
+    overrideHostCheckBox.addChangeListener(e -> {
+      hostField.setEnabled(((JBCheckBox)e.getSource()).isSelected());
+    });
     portField = new PortField(llamaSettings.getServerPort());
     portField.addChangeListener(changeEvent -> {
       var port = (int) ((PortField) changeEvent.getSource()).getValue();
