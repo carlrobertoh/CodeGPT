@@ -1,0 +1,6 @@
+<idea-plugin>
+  <depends>com.intellij.modules.lang</depends>
+  <extensions defaultExtensionNs="com.intellij">
+    <jvm.exceptionFilter implementation="ee.carlrobert.codegpt.filter.CodeGPTJvmExceptionFilter"/>
+  </extensions>
+</idea-plugin>

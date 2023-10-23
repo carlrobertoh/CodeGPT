@@ -3,6 +3,7 @@
     <name>CodeGPT</name>
     <vendor email="carlrobertoh@gmail.com" url="https://carlrobert.ee">Carl-Robert Linnupuu</vendor>
     <depends>com.intellij.modules.platform</depends>
+    <depends optional="true" config-file="plugin-java.xml">com.intellij.modules.java</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <postStartupActivity implementation="ee.carlrobert.codegpt.PluginStartupActivity"/>
