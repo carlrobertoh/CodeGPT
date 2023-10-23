@@ -55,4 +55,22 @@ Expected a different answer? Re-generate any response of your choosing.
 - **Seamless conversations** - Chat with the AI regardless of the maximum token limitations
 - **Predefined Actions** - Create your own editor actions or override the existing ones, saving time rewriting the same prompt repeatedly
 
+## Local LLama models
+
+Local llama models are in beta. They should run by just changing settings for Mac
+For windows
+1. Install WSL/Ubuntu (for arm64 windows on Parallels enable wsl-1)
+2. Install llama.cpp server on wsl into /home not /mnt to speed up loading:
+```
+cd ~
+git clone https://github.com/ggerganov/llama.cpp
+cd llama.cpp
+sudo apt update
+sudo apt install python3-pip
+python3 -m pip install -r requirements.txt
+make -j
+cp /mnt/c/Users/keithsiilats/Downloads/codellama-7b.Q4_0.gguf models
+./server -m models/codellama-7b.Q4_0.gguf -c 2048
+```
+
 <!-- Plugin description end -->
