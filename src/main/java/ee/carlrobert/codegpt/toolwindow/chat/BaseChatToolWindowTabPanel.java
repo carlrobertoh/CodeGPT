@@ -142,6 +142,9 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     if (SettingsState.getInstance().isUseYouService()) {
       return true;
     }
+    if (SettingsState.getInstance().isUseLlamaService()) {
+      return true;
+    }
     return OpenAICredentialsManager.getInstance().isApiKeySet();
   }
 
