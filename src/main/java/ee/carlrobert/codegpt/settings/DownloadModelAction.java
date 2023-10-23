@@ -11,7 +11,7 @@ import com.intellij.ui.components.JBLabel;
 import com.intellij.util.Consumer;
 import com.intellij.util.ui.components.BorderLayoutPanel;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
-import ee.carlrobert.codegpt.completions.llama.LlamaModel;
+import ee.carlrobert.codegpt.completions.HuggingFaceModel;
 import ee.carlrobert.codegpt.util.ApplicationUtils;
 import ee.carlrobert.codegpt.util.DownloadingUtils;
 import java.io.File;
@@ -24,23 +24,24 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import javax.swing.DefaultComboBoxModel;
 import org.jetbrains.annotations.NotNull;
 
 public class DownloadModelAction extends AnAction {
 
   private final Runnable onDownloaded;
   private final Consumer<Exception> onFailed;
-  private final LlamaModel model;
+  private final DefaultComboBoxModel<HuggingFaceModel> huggingFaceModelComboBoxModel;
   private final BorderLayoutPanel downloadModelLinkWrapper;
 
   DownloadModelAction(
       Runnable onDownloaded,
       Consumer<Exception> onFailed,
-      LlamaModel model,
+      DefaultComboBoxModel<HuggingFaceModel> huggingFaceModelComboBoxModel,
       BorderLayoutPanel downloadModelLinkWrapper) {
     this.onDownloaded = onDownloaded;
     this.onFailed = onFailed;
-    this.model = model;
+    this.huggingFaceModelComboBoxModel = huggingFaceModelComboBoxModel;
     this.downloadModelLinkWrapper = downloadModelLinkWrapper;
   }
 
@@ -52,6 +53,8 @@ public class DownloadModelAction extends AnAction {
         true) {
       @Override
       public void run(@NotNull ProgressIndicator indicator) {
+        var model = (HuggingFaceModel) huggingFaceModelComboBoxModel.getSelectedItem();
+
         URL url;
         try {
           url = new URL(model.getFilePath());
@@ -74,7 +77,7 @@ public class DownloadModelAction extends AnAction {
           downloadModelLinkWrapper.revalidate();
 
           indicator.setIndeterminate(false);
-          indicator.setText(format("Downloading %s...", model.getLabel()));
+          indicator.setText(format("Downloading %s...", model.getFileName()));
 
           long fileSize = url.openConnection().getContentLengthLong();
           long[] bytesRead = {0};

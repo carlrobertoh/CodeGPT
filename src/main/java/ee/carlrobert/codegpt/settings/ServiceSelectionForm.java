@@ -14,6 +14,7 @@ import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
+import ee.carlrobert.codegpt.completions.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.completions.you.YouUserManager;
 import ee.carlrobert.codegpt.completions.you.auth.AuthenticationNotifier;
@@ -377,11 +378,11 @@ public class ServiceSelectionForm {
     return displayWebSearchResultsCheckBox.isSelected();
   }
 
-  public void setLlamaModel(LlamaModel model) {
+  public void setHuggingFaceModel(HuggingFaceModel model) {
     llamaServiceSectionPanel.setSelectedModel(model);
   }
 
-  public LlamaModel getLlamaModel() {
+  public HuggingFaceModel getHuggingFaceModel() {
     return llamaServiceSectionPanel.getSelectedModel();
   }
 

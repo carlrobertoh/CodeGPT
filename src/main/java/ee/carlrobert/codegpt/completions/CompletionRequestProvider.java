@@ -1,15 +1,16 @@
 package ee.carlrobert.codegpt.completions;
 
-import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 
 import com.intellij.openapi.diagnostic.Logger;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.EncodingManager;
+import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
+import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.settings.state.YouSettingsState;
 import ee.carlrobert.embedding.EmbeddingsService;
@@ -52,15 +53,18 @@ public class CompletionRequestProvider {
   private final Conversation conversation;
 
   public CompletionRequestProvider(Conversation conversation) {
-    this.embeddingsService = new EmbeddingsService(CompletionClientProvider.getOpenAIClient(), CodeGPTPlugin.getPluginBasePath());
+    this.embeddingsService = new EmbeddingsService(
+        CompletionClientProvider.getOpenAIClient(),
+        CodeGPTPlugin.getPluginBasePath());
     this.conversation = conversation;
   }
 
   public LlamaCompletionRequest buildLlamaCompletionRequest(Message message) {
-    return new LlamaCompletionRequest.Builder(format("[INST]\n"
-        + COMPLETION_SYSTEM_PROMPT
-        + "\nHere is your task: \n%s\n"
-        + "[/INST]", message.getPrompt()))
+    var prompt = LlamaModel.findByHuggingFaceModel(
+            LlamaSettingsState.getInstance().getHuggingFaceModel())
+        .getPromptTemplate()
+        .buildPrompt(COMPLETION_SYSTEM_PROMPT, message.getPrompt());
+    return new LlamaCompletionRequest.Builder(prompt)
         // add chat history
         .setN_predict(512)
         .build();
@@ -70,12 +74,14 @@ public class CompletionRequestProvider {
     return new YouCompletionRequest.Builder(message.getPrompt())
         .setUseGPT4Model(YouSettingsState.getInstance().isUseGPT4Model())
         .setChatHistory(conversation.getMessages().stream()
-            .map(prevMessage -> new YouCompletionRequestMessage(prevMessage.getPrompt(), prevMessage.getResponse()))
+            .map(prevMessage -> new YouCompletionRequestMessage(prevMessage.getPrompt(),
+                prevMessage.getResponse()))
             .collect(toList()))
         .build();
   }
 
-  public OpenAIChatCompletionRequest buildOpenAIChatCompletionRequest(String model, Message message, boolean isRetry) {
+  public OpenAIChatCompletionRequest buildOpenAIChatCompletionRequest(String model, Message message,
+      boolean isRetry) {
     return buildOpenAIChatCompletionRequest(model, message, isRetry, false, null);
   }
 
@@ -85,7 +91,8 @@ public class CompletionRequestProvider {
       boolean isRetry,
       boolean useContextualSearch,
       @Nullable String overriddenPath) {
-    var builder = new OpenAIChatCompletionRequest.Builder(buildMessages(model, message, isRetry, useContextualSearch))
+    var builder = new OpenAIChatCompletionRequest.Builder(
+        buildMessages(model, message, isRetry, useContextualSearch))
         .setModel(model)
         .setMaxTokens(ConfigurationState.getInstance().getMaxTokens())
         .setTemperature(ConfigurationState.getInstance().getTemperature());
@@ -97,7 +104,8 @@ public class CompletionRequestProvider {
     return (OpenAIChatCompletionRequest) builder.build();
   }
 
-  private List<OpenAIChatCompletionMessage> buildMessages(String model, Message message, boolean isRetry, boolean useContextualSearch) {
+  private List<OpenAIChatCompletionMessage> buildMessages(String model, Message message,
+      boolean isRetry, boolean useContextualSearch) {
     var messages = new ArrayList<OpenAIChatCompletionMessage>();
     if (useContextualSearch) {
       var prompt = embeddingsService.buildPromptWithContext(message.getPrompt());

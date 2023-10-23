@@ -5,6 +5,7 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
+import ee.carlrobert.codegpt.completions.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import org.jetbrains.annotations.NotNull;
 
@@ -12,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 public class LlamaSettingsState implements PersistentStateComponent<LlamaSettingsState> {
 
   private String llamaModelPath = "";
-  private LlamaModel llamaModel = LlamaModel.CODE_LLAMA_7B;
+  private HuggingFaceModel huggingFaceModel = HuggingFaceModel.CODE_LLAMA_7B_Q4_K_M;
   private int serverPort = 8080;
 
   public LlamaSettingsState() {
@@ -40,12 +41,12 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
     this.llamaModelPath = llamaModelPath;
   }
 
-  public LlamaModel getLlamaModel() {
-    return llamaModel;
+  public HuggingFaceModel getHuggingFaceModel() {
+    return huggingFaceModel;
   }
 
-  public void setLlamaModel(LlamaModel llamaModel) {
-    this.llamaModel = llamaModel;
+  public void setHuggingFaceModel(HuggingFaceModel huggingFaceModel) {
+    this.huggingFaceModel = huggingFaceModel;
   }
 
   public int getServerPort() {

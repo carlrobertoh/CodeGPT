@@ -1,7 +1,7 @@
+import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
-import java.nio.file.Files
 
 fun properties(key: String) = providers.gradleProperty(key)
 fun environment(key: String) = providers.environmentVariable(key)
@@ -54,7 +54,12 @@ dependencies {
   testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.10.0")
 }
 
-tasks.create<Task>("copySubmodule") {
+tasks.register<Exec>("initSubmodule") {
+  workingDir(rootDir)
+  commandLine("git", "submodule", "update", "--init", "--recursive")
+}
+
+tasks.register<Task>("updateSubmodule") {
   val submoduleExists = file("$rootDir/build/idea-sandbox/plugins/CodeGPT/llama.cpp").exists()
   if (!submoduleExists) {
     copy {
@@ -116,6 +121,11 @@ tasks {
     password.set(System.getenv("PRIVATE_KEY_PASSWORD"))
   }
 
+  buildPlugin {
+    enabled = true
+    dependsOn("updateSubmodule")
+  }
+
   publishPlugin {
     enabled = true
     dependsOn("patchChangelog")
@@ -125,6 +135,7 @@ tasks {
 
   runIde {
     enabled = true
+    dependsOn("updateSubmodule")
     environment("ENVIRONMENT", "LOCAL")
   }
 

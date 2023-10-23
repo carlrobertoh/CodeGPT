@@ -98,7 +98,7 @@ public class SettingsConfigurable implements Configurable {
     settings.setUseLlamaService(settingsComponent.getSelectedService() == ServiceType.LLAMA_CPP);
 
     llamaSettings.setLlamaModelPath(serviceSelectionForm.getLlamaModelPath());
-    llamaSettings.setLlamaModel(serviceSelectionForm.getLlamaModel());
+    llamaSettings.setHuggingFaceModel(serviceSelectionForm.getHuggingFaceModel());
     llamaSettings.setServerPort(serviceSelectionForm.getLlamaServerPort());
 
     openAISettings.apply(serviceSelectionForm);
@@ -139,7 +139,7 @@ public class SettingsConfigurable implements Configurable {
       settingsComponent.setSelectedService(ServiceType.LLAMA_CPP);
     }
 
-    serviceSelectionForm.setLlamaModel(llamaSettings.getLlamaModel());
+    serviceSelectionForm.setHuggingFaceModel(llamaSettings.getHuggingFaceModel());
     serviceSelectionForm.setLlamaModelPath(llamaSettings.getLlamaModelPath());
     serviceSelectionForm.setLlamaServerPort(llamaSettings.getServerPort());
 

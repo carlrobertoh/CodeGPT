@@ -4,6 +4,7 @@ import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.advanced.AdvancedSettingsState;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
+import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.llm.client.Client;
 import ee.carlrobert.llm.client.ProxyAuthenticator;
@@ -31,7 +32,9 @@ public class CompletionClientProvider {
   }
 
   public static LlamaClient getLlamaClient() {
-    return new LlamaClient.Builder().build();
+    return new LlamaClient.Builder()
+        .setPort(LlamaSettingsState.getInstance().getServerPort())
+        .build();
   }
 
   private static OpenAIClient.Builder getOpenAIClientBuilder() {

@@ -1,6 +1,8 @@
 package ee.carlrobert.codegpt.settings;
 
 import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 
 import com.intellij.icons.AllIcons.Actions;
 import com.intellij.openapi.actionSystem.AnAction;
@@ -19,20 +21,22 @@ import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.AsyncProcessIcon;
 import com.intellij.util.ui.FormBuilder;
-import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
-import com.intellij.util.ui.UI;
 import com.intellij.util.ui.components.BorderLayoutPanel;
-import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
+import ee.carlrobert.codegpt.completions.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaServerAgent;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-import java.awt.GridBagConstraints;
 import java.io.File;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import javax.swing.Box;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
@@ -42,29 +46,74 @@ public class LlamaServiceSelectionForm extends JPanel {
 
   private final TextFieldWithBrowseButton textFieldWithBrowseButton;
   private final ComboBox<LlamaModel> modelComboBox;
+  private final ComboBox<Integer> modelSizeComboBox;
+  private final ComboBox<HuggingFaceModel> huggingFaceModelComboBox;
   private final BorderLayoutPanel downloadModelLinkWrapper;
   private final JBLabel modelExistsIcon;
   private final JBTextField hostField;
   private final PortField portField;
+  private final DefaultComboBoxModel<HuggingFaceModel> huggingFaceComboBoxModel;
 
   public LlamaServiceSelectionForm() {
     var llamaSettings = LlamaSettingsState.getInstance();
+    var llm = llamaSettings.getHuggingFaceModel();
     var fileChooserDescriptor = FileChooserDescriptorFactory.createSingleFileDescriptor("gguf");
     fileChooserDescriptor.setForcedToUseIdeaFileChooser(true);
     textFieldWithBrowseButton = new TextFieldWithBrowseButton();
+    textFieldWithBrowseButton.setText(CodeGPTPlugin.getLlamaModelsPath());
     textFieldWithBrowseButton.addBrowseFolderListener(
         new TextBrowseFolderListener(fileChooserDescriptor));
 
-    modelComboBox = new ComboBox<>(new EnumComboBoxModel<>(LlamaModel.class));
-    modelComboBox.setSelectedItem(LlamaModel.CODE_LLAMA_7B);
     downloadModelLinkWrapper = JBUI.Panels.simplePanel().withBorder(JBUI.Borders.emptyLeft(2));
     modelExistsIcon = new JBLabel(Actions.Commit);
-    modelExistsIcon.setVisible(isModelExists(llamaSettings.getLlamaModel()));
-    modelComboBox.addItemListener(e -> {
-      var modelExists = isModelExists((LlamaModel) e.getItem());
+    modelExistsIcon.setVisible(isModelExists(llamaSettings.getHuggingFaceModel()));
+
+    huggingFaceComboBoxModel = new DefaultComboBoxModel<>();
+    var llamaModel = LlamaModel.findByHuggingFaceModel(llm);
+    var selectableModels = llamaModel.getHuggingFaceModels().stream()
+        .filter(model -> model.getParameterSize() == llm.getParameterSize())
+        .collect(toList());
+    huggingFaceComboBoxModel.addAll(selectableModels);
+    huggingFaceModelComboBox = new ComboBox<>(huggingFaceComboBoxModel);
+    huggingFaceModelComboBox.addItemListener(e -> {
+      var modelExists = isModelExists((HuggingFaceModel) e.getItem());
       modelExistsIcon.setVisible(modelExists);
       downloadModelLinkWrapper.setVisible(!modelExists);
     });
+
+    var modelSizeComboBoxModel = new DefaultComboBoxModel<Integer>();
+    var initialModelSizes = llamaModel.getHuggingFaceModels().stream()
+        .filter(distinctByKey(HuggingFaceModel::getParameterSize))
+        .map(HuggingFaceModel::getParameterSize)
+        .collect(toList());
+    modelSizeComboBoxModel.addAll(initialModelSizes);
+
+    modelComboBox = new ComboBox<>(new EnumComboBoxModel<>(LlamaModel.class));
+    modelComboBox.setSelectedItem(llamaModel);
+    modelComboBox.addItemListener(e -> {
+      // TODO
+      var models = ((LlamaModel) e.getItem()).getHuggingFaceModels().stream()
+          .filter(
+              model -> modelSizeComboBoxModel.getSelectedItem().equals(model.getParameterSize()))
+          .collect(toList());
+      huggingFaceComboBoxModel.removeAllElements();
+      huggingFaceComboBoxModel.addAll(models);
+      huggingFaceComboBoxModel.setSelectedItem(models.get(0));
+    });
+
+    modelSizeComboBox = new ComboBox<>(modelSizeComboBoxModel);
+    modelSizeComboBox.setSelectedItem(initialModelSizes.get(0));
+    modelSizeComboBox.addItemListener(size -> {
+      var selectedModel = (LlamaModel) modelComboBox.getSelectedItem();
+      var models = requireNonNull(selectedModel).getHuggingFaceModels().stream()
+          .filter(
+              model -> modelSizeComboBoxModel.getSelectedItem().equals(model.getParameterSize()))
+          .collect(toList());
+      huggingFaceComboBoxModel.removeAllElements();
+      huggingFaceComboBoxModel.addAll(models);
+      huggingFaceComboBoxModel.setSelectedItem(models.get(0));
+    });
+
     hostField = new JBTextField(getHost(llamaSettings.getServerPort()));
     hostField.setEnabled(false);
     portField = new PortField(llamaSettings.getServerPort());
@@ -75,18 +124,19 @@ public class LlamaServiceSelectionForm extends JPanel {
 
     setLayout(new BorderLayout());
     add(FormBuilder.createFormBuilder()
+        .addVerticalGap(8)
         .addComponent(new TitledSeparator("Model Preferences"))
-        .addComponent(withEmptyLeftBorder(createServerSettingsForm()))
+        .addComponent(withEmptyLeftBorder(createServerSettingsForm(huggingFaceComboBoxModel)))
         .addComponentFillVertically(new JPanel(), 0)
         .getPanel());
   }
 
-  public void setSelectedModel(LlamaModel model) {
-    modelComboBox.setSelectedItem(model);
+  public void setSelectedModel(HuggingFaceModel model) {
+    huggingFaceComboBoxModel.setSelectedItem(model);
   }
 
-  public LlamaModel getSelectedModel() {
-    return (LlamaModel) modelComboBox.getSelectedItem();
+  public HuggingFaceModel getSelectedModel() {
+    return (HuggingFaceModel) huggingFaceComboBoxModel.getSelectedItem();
   }
 
   public void setModelDestinationPath(String modelPath) {
@@ -107,18 +157,24 @@ public class LlamaServiceSelectionForm extends JPanel {
 
   class StartServerAction extends AnAction {
 
+    private final JPanel startServerLinkWrapper;
     private final Runnable onStart;
     private final Runnable onSuccess;
 
-    StartServerAction(Runnable onStart, Runnable onSuccess) {
+    StartServerAction(
+        JPanel startServerLinkWrapper,
+        Runnable onStart,
+        Runnable onSuccess) {
+      this.startServerLinkWrapper = startServerLinkWrapper;
       this.onStart = onStart;
       this.onSuccess = onSuccess;
     }
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
+      new LlamaServerAgent(textFieldWithBrowseButton.getText())
+          .startAgent("", onSuccess, startServerLinkWrapper);
       onStart.run();
-      new LlamaServerAgent(textFieldWithBrowseButton.getText()).startAgent(onSuccess);
     }
   }
 
@@ -131,12 +187,14 @@ public class LlamaServiceSelectionForm extends JPanel {
     return format("http://localhost:%d/completions", port);
   }
 
-  private boolean isModelExists(LlamaModel model) {
+  private boolean isModelExists(HuggingFaceModel model) {
     return FileUtil.exists(
         CodeGPTPlugin.getLlamaModelsPath() + File.separator + model.getFileName());
   }
 
-  private JPanel createServerSettingsForm() {
+  private JPanel createServerSettingsForm(
+      DefaultComboBoxModel<HuggingFaceModel> huggingFaceModelComboBoxModel) {
+
     var downloadModelLink = new AnActionLink(
         "Download model",
         new DownloadModelAction(
@@ -147,38 +205,43 @@ public class LlamaServiceSelectionForm extends JPanel {
             (error) -> {
               throw new RuntimeException(error);
             },
-            (LlamaModel) modelComboBox.getSelectedItem(),
+            huggingFaceModelComboBoxModel,
             downloadModelLinkWrapper));
     downloadModelLinkWrapper.addToLeft(downloadModelLink);
 
-    var startServerLinkWrapper = JBUI.Panels.simplePanel();
+    var startServerLinkWrapper = new JPanel(new FlowLayout(FlowLayout.LEADING, 4, 0));
     var startServerLink = new AnActionLink("Start Server", new StartServerAction(
+        startServerLinkWrapper,
         () -> {
           startServerLinkWrapper.removeAll();
-          startServerLinkWrapper.add(new JBLabel("Starting a server"));
-          startServerLinkWrapper.add(new AsyncProcessIcon("sign_in_spinner"));
+          startServerLinkWrapper.add(JBUI.Panels.simplePanel(4, 0)
+              .addToLeft(new JBLabel("Starting a server..."))
+              .addToRight(new AsyncProcessIcon("sign_in_spinner")));
           startServerLinkWrapper.repaint();
           startServerLinkWrapper.revalidate();
         },
         () -> {
           startServerLinkWrapper.removeAll();
           startServerLinkWrapper.add(
-              new JBLabel("Server running", Actions.Commit, SwingConstants.RIGHT));
+              new JBLabel("Server running", Actions.Commit, SwingConstants.TRAILING));
           startServerLinkWrapper.repaint();
           startServerLinkWrapper.revalidate();
         }));
     startServerLinkWrapper.add(startServerLink);
+
+    var helpText = ComponentPanelBuilder.createCommentComponent("Only .gguf files are supported",
+        true);
+    helpText.setBorder(JBUI.Borders.empty(0, 4));
 
     var modelComboBoxWrapper = new JPanel(new FlowLayout(FlowLayout.LEADING, 0, 0));
     modelComboBoxWrapper.add(modelComboBox);
     modelComboBoxWrapper.add(Box.createHorizontalStrut(4));
     modelComboBoxWrapper.add(modelExistsIcon);
 
-    var helpText = ComponentPanelBuilder.createCommentComponent("Only .gguf files are supported", true);
-    helpText.setBorder(JBUI.Borders.empty(0, 4));
-
     return FormBuilder.createFormBuilder()
         .addLabeledComponent("Model:", modelComboBoxWrapper)
+        .addLabeledComponent("Model size (B):", modelSizeComboBox)
+        .addLabeledComponent("Quantization:", huggingFaceModelComboBox)
         .addComponentToRightColumn(downloadModelLinkWrapper)
         .addLabeledComponent("Model path:", textFieldWithBrowseButton)
         .addComponentToRightColumn(helpText)
@@ -187,5 +250,10 @@ public class LlamaServiceSelectionForm extends JPanel {
             .addToLeft(portField)
             .addToRight(startServerLinkWrapper))
         .getPanel();
+  }
+
+  private static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
+    Set<Object> seen = ConcurrentHashMap.newKeySet();
+    return t -> seen.add(keyExtractor.apply(t));
   }
 }
