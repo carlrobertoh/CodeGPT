@@ -359,8 +359,8 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
         var gpt4ToggleButton = new OnOffButton();
         var useGPT4Model = YouSettingsState.getInstance().isUseGPT4Model();
         gpt4ToggleButton.setSelected(useGPT4Model);
-        gpt4ToggleButton.setOnText("GPT-4");
-        gpt4ToggleButton.setOffText("GPT-4");
+        gpt4ToggleButton.setOnText("GPT-4 Enabled");
+        gpt4ToggleButton.setOffText("GPT-4 - coupon 'CodeGPT' on you.com/plans for free month of GPT-4)");
         gpt4ToggleButton.addActionListener(
             actionEvent -> {
               project.getMessageBus()
