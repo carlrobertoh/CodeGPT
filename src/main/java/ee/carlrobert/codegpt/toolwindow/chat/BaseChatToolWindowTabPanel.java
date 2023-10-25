@@ -386,7 +386,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
 
   private void installHelpTooltip(boolean selected, JComponent component) {
     new HelpTooltip()
-        .setDescription(selected ? "Turn off for faster responses" : "Turn on for complex queries")
+        .setDescription(selected ? "Turn off for faster responses" : "Turn on for complex queries, enable by creating an account on you.com and signing in from plugin settings. Use CodeGPT coupon for free month of GPT4.")
         .installOn(component);
   }
 
