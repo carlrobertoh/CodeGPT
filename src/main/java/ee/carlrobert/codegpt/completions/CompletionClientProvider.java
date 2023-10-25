@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.completions;
 
+import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.advanced.AdvancedSettingsState;
@@ -10,6 +11,7 @@ import ee.carlrobert.llm.client.ProxyAuthenticator;
 import ee.carlrobert.llm.client.azure.AzureClient;
 import ee.carlrobert.llm.client.azure.AzureCompletionRequestParams;
 import ee.carlrobert.llm.client.openai.OpenAIClient;
+import ee.carlrobert.llm.client.you.UTMParameters;
 import ee.carlrobert.llm.client.you.YouClient;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -26,7 +28,14 @@ public class CompletionClientProvider {
   }
 
   public static YouClient getYouClient(String sessionId, String accessToken) {
-    return new YouClient.Builder(sessionId, accessToken).build();
+    var utmParameters = new UTMParameters();
+    utmParameters.setSource("ide");
+    utmParameters.setMedium("jetbrains");
+    utmParameters.setCampaign(CodeGPTPlugin.getVersion());
+    utmParameters.setContent("CodeGPT");
+    return new YouClient.Builder(sessionId, accessToken)
+        .setUTMParameters(utmParameters)
+        .build();
   }
 
   private static OpenAIClient.Builder getOpenAIClientBuilder() {
@@ -39,18 +48,13 @@ public class CompletionClientProvider {
 
   private static AzureClient.Builder getAzureClientBuilder() {
     var settings = AzureSettingsState.getInstance();
-    var params = new AzureCompletionRequestParams(settings.getResourceName(), settings.getDeploymentId(), settings.getApiVersion());
+    var params = new AzureCompletionRequestParams(
+        settings.getResourceName(),
+        settings.getDeploymentId(),
+        settings.getApiVersion());
     var builder = new AzureClient.Builder(AzureCredentialsManager.getInstance().getSecret(), params)
         .setActiveDirectoryAuthentication(settings.isUseAzureActiveDirectoryAuthentication());
     return (AzureClient.Builder) addDefaultClientParams(builder).setHost(settings.getBaseHost());
-  }
-
-  private static YouClient.Builder getYouClientBuilder() {
-    var settings = OpenAISettingsState.getInstance();
-    var builder = new OpenAIClient
-        .Builder(OpenAICredentialsManager.getInstance().getApiKey())
-        .setOrganization(settings.getOrganization());
-    return (YouClient.Builder) addDefaultClientParams(builder).setHost(settings.getBaseHost());
   }
 
   private static Client.Builder addDefaultClientParams(Client.Builder builder) {
@@ -62,7 +66,9 @@ public class CompletionClientProvider {
           new Proxy(advancedSettings.getProxyType(), new InetSocketAddress(proxyHost, proxyPort)));
       if (advancedSettings.isProxyAuthSelected()) {
         builder.setProxyAuthenticator(
-            new ProxyAuthenticator(advancedSettings.getProxyUsername(), advancedSettings.getProxyPassword()));
+            new ProxyAuthenticator(
+                advancedSettings.getProxyUsername(),
+                advancedSettings.getProxyPassword()));
       }
     }
 
