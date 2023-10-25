@@ -6,17 +6,20 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 
 import com.intellij.ide.HelpTooltip;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
 import com.intellij.ui.JBColor;
+import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBScrollPane;
-import com.intellij.ui.components.OnOffButton;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.JBUI.Borders;
 import ee.carlrobert.codegpt.actions.ActionType;
 import ee.carlrobert.codegpt.completions.CompletionRequestHandler;
 import ee.carlrobert.codegpt.completions.you.YouSerpResult;
+import ee.carlrobert.codegpt.completions.you.YouUserManager;
+import ee.carlrobert.codegpt.completions.you.auth.AuthenticationNotifier;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
@@ -59,6 +62,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
   private final ScrollablePanel scrollablePanel;
   private final Map<UUID, JPanel> visibleMessagePanels = new HashMap<>();
   private final Map<UUID, List<YouSerpResult>> serpResultsMapping = new HashMap<>();
+  private final JBCheckBox gpt4CheckBox;
 
   protected final Project project;
   protected final UserPromptTextArea userPromptTextArea;
@@ -74,6 +78,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     this.rootPanel = new JPanel(new GridBagLayout());
     this.scrollablePanel = new ScrollablePanel();
     this.userPromptTextArea = new UserPromptTextArea(this::handleSubmit);
+    this.gpt4CheckBox = createGPT4ModelCheckBox();
     init();
   }
 
@@ -354,27 +359,9 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
       header.setBackground(getPanelBackgroundColor());
       header.setBorder(JBUI.Borders.emptyBottom(8));
       if ("YouCode".equals(model)) {
-        var gpt4ToggleButton = new OnOffButton();
-        var useGPT4Model = YouSettingsState.getInstance().isUseGPT4Model();
-        gpt4ToggleButton.setSelected(useGPT4Model);
-        gpt4ToggleButton.setOnText("GPT-4 Enabled");
-        gpt4ToggleButton.setOffText("GPT-4 - 'CodeGPT' @ you.com/plans");
-        gpt4ToggleButton.addActionListener(
-            actionEvent -> {
-              project.getMessageBus()
-                  .syncPublisher(YouModelChangeNotifier.YOU_MODEL_CHANGE_NOTIFIER_TOPIC)
-                  .modelChanged(gpt4ToggleButton.isSelected());
-              YouSettingsState.getInstance().setUseGPT4Model(gpt4ToggleButton.isSelected());
-              installHelpTooltip(gpt4ToggleButton.isSelected(), gpt4ToggleButton);
-            });
-        project.getMessageBus()
-            .connect()
-            .subscribe(
-                YouModelChangeNotifier.YOU_MODEL_CHANGE_NOTIFIER_TOPIC,
-                (YouModelChangeNotifier) gpt4ToggleButton::setSelected);
-
-        installHelpTooltip(useGPT4Model, gpt4ToggleButton);
-        header.add(gpt4ToggleButton, BorderLayout.LINE_START);
+        subscribeToYouModelChangeTopic();
+        subscribeToYouAuthTopic();
+        header.add(gpt4CheckBox, BorderLayout.LINE_START);
       }
       header.add(modelIconWrapper, BorderLayout.LINE_END);
       wrapper.add(header);
@@ -384,10 +371,44 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     userPromptTextArea.requestFocus();
   }
 
-  private void installHelpTooltip(boolean selected, JComponent component) {
-    new HelpTooltip()
-        .setDescription(selected ? "Turn off for faster responses" : "Turn on for complex queries, enable by creating an account on you.com and signing in from plugin settings. Use CodeGPT coupon for free month of GPT4.")
-        .installOn(component);
+  private void subscribeToYouModelChangeTopic() {
+    project.getMessageBus()
+        .connect()
+        .subscribe(
+            YouModelChangeNotifier.YOU_MODEL_CHANGE_NOTIFIER_TOPIC,
+            (YouModelChangeNotifier) gpt4CheckBox::setSelected);
+  }
+
+  private void subscribeToYouAuthTopic() {
+    ApplicationManager.getApplication()
+        .getMessageBus()
+        .connect()
+        .subscribe(AuthenticationNotifier.AUTHENTICATION_TOPIC,
+            (AuthenticationNotifier) () -> gpt4CheckBox.setEnabled(true));
+  }
+
+  private JBCheckBox createGPT4ModelCheckBox() {
+    var gpt4CheckBox = new JBCheckBox("Use GPT-4 model");
+    gpt4CheckBox.setOpaque(false);
+    gpt4CheckBox.setEnabled(YouUserManager.getInstance().isAuthenticated());
+    gpt4CheckBox.setSelected(YouSettingsState.getInstance().isUseGPT4Model());
+    gpt4CheckBox.setToolTipText(getTooltipText(gpt4CheckBox.isSelected()));
+    gpt4CheckBox.addChangeListener(e -> {
+      var selected = ((JBCheckBox) e.getSource()).isSelected();
+      var tooltipText = getTooltipText(selected);
+      gpt4CheckBox.setToolTipText(tooltipText);
+      project.getMessageBus()
+          .syncPublisher(YouModelChangeNotifier.YOU_MODEL_CHANGE_NOTIFIER_TOPIC)
+          .modelChanged(selected);
+      YouSettingsState.getInstance().setUseGPT4Model(selected);
+    });
+    return gpt4CheckBox;
+  }
+
+  private String getTooltipText(boolean selected) {
+    return selected ?
+        "Turn off for faster responses" :
+        "<html>Turn on for complex queries, enable by creating an account on you.com<br />and signing in from plugin settings.<br />Use CodeGPT coupon for free month of GPT-4.</html>";
   }
 
   private String getClientCode() {
