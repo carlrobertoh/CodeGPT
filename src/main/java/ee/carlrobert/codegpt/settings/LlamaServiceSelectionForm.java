@@ -201,7 +201,7 @@ public class LlamaServiceSelectionForm extends JPanel {
   }
 
   private String getHost(int port) {
-    return format("http://localhost:%d/completions", port);
+    return format("http://localhost:%d/completion", port);
   }
 
   private boolean isModelExists(HuggingFaceModel model) {

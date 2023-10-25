@@ -16,7 +16,7 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
   private String llamaModelPath = "";
   private HuggingFaceModel huggingFaceModel = HuggingFaceModel.CODE_LLAMA_7B_Q4_K_M;
   private int serverPort = 8080;
-  private String host = format("http://localhost:%d/completions", serverPort);
+  private String host = format("http://localhost:%d/completion", serverPort);
   private boolean overrideHost;
 
   public LlamaSettingsState() {

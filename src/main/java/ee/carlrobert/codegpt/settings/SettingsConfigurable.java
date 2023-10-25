@@ -106,7 +106,7 @@ public class SettingsConfigurable implements Configurable {
       llamaSettings.setHost(serviceSelectionForm.getLlamaServerHost());
     } else {
       llamaSettings.setHost(format(
-          "http://localhost:%d/completions",
+          "http://localhost:%d/completion",
           serviceSelectionForm.getLlamaServerPort()));
     }
     llamaSettings.setOverrideHost(serviceSelectionForm.isOverrideLamaServerHost());
