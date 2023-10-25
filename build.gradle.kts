@@ -1,9 +1,24 @@
-import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
+import java.io.FileInputStream
+import java.util.*
 
-fun properties(key: String) = providers.gradleProperty(key)
+val env = environment("env").getOrNull()
+
+fun loadProperties(filename: String): Properties = Properties().apply {
+    load(FileInputStream(filename))
+}
+
+fun properties(key: String): Provider<String> {
+  if ("win-arm64" == env) {
+    val property = loadProperties("gradle-win-arm64.properties").getProperty(key)
+            ?: return providers.gradleProperty(key)
+    return providers.provider { property }
+  }
+  return providers.gradleProperty(key)
+}
+
 fun environment(key: String) = providers.environmentVariable(key)
 
 plugins {

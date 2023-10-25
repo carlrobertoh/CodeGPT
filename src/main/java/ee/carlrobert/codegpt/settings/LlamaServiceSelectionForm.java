@@ -1,6 +1,5 @@
 package ee.carlrobert.codegpt.settings;
 
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
@@ -19,7 +18,6 @@ import com.intellij.ui.TitledSeparator;
 import com.intellij.ui.components.AnActionLink;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBLabel;
-import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.AsyncProcessIcon;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
@@ -32,12 +30,16 @@ import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.io.File;
+import java.io.IOException;
+import java.net.DatagramSocket;
+import java.net.ServerSocket;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import javax.swing.Box;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
@@ -47,14 +49,12 @@ public class LlamaServiceSelectionForm extends JPanel {
 
   private final TextFieldWithBrowseButton textFieldWithBrowseButton;
   private final ComboBox<LlamaModel> modelComboBox;
-  private final ComboBox<Integer> modelSizeComboBox;
+  private final ComboBox<ModelSize> modelSizeComboBox;
   private final ComboBox<HuggingFaceModel> huggingFaceModelComboBox;
   private final BorderLayoutPanel downloadModelLinkWrapper;
   private final JBLabel modelExistsIcon;
-  private final JBTextField hostField;
   private final PortField portField;
   private final DefaultComboBoxModel<HuggingFaceModel> huggingFaceComboBoxModel;
-  private final JBCheckBox overrideHostCheckBox;
 
   public LlamaServiceSelectionForm() {
     var llamaSettings = LlamaSettingsState.getInstance();
@@ -83,20 +83,21 @@ public class LlamaServiceSelectionForm extends JPanel {
       downloadModelLinkWrapper.setVisible(!modelExists);
     });
 
-    var modelSizeComboBoxModel = new DefaultComboBoxModel<Integer>();
+    var modelSizeComboBoxModel = new DefaultComboBoxModel<ModelSize>();
     var initialModelSizes = llamaModel.getHuggingFaceModels().stream()
         .filter(distinctByKey(HuggingFaceModel::getParameterSize))
-        .map(HuggingFaceModel::getParameterSize)
+        .map(model -> new ModelSize(model.getParameterSize()))
         .collect(toList());
     modelSizeComboBoxModel.addAll(initialModelSizes);
 
     modelComboBox = new ComboBox<>(new EnumComboBoxModel<>(LlamaModel.class));
     modelComboBox.setSelectedItem(llamaModel);
     modelComboBox.addItemListener(e -> {
-      // TODO
       var models = ((LlamaModel) e.getItem()).getHuggingFaceModels().stream()
-          .filter(
-              model -> modelSizeComboBoxModel.getSelectedItem().equals(model.getParameterSize()))
+          .filter(model -> {
+            var size = ((ModelSize) modelSizeComboBoxModel.getSelectedItem()).getSize();
+            return size == model.getParameterSize();
+          })
           .collect(toList());
       huggingFaceComboBoxModel.removeAllElements();
       huggingFaceComboBoxModel.addAll(models);
@@ -105,30 +106,63 @@ public class LlamaServiceSelectionForm extends JPanel {
 
     modelSizeComboBox = new ComboBox<>(modelSizeComboBoxModel);
     modelSizeComboBox.setSelectedItem(initialModelSizes.get(0));
-    modelSizeComboBox.addItemListener(size -> {
+    modelSizeComboBox.addItemListener(e -> {
       var selectedModel = (LlamaModel) modelComboBox.getSelectedItem();
       var models = requireNonNull(selectedModel).getHuggingFaceModels().stream()
-          .filter(
-              model -> modelSizeComboBoxModel.getSelectedItem().equals(model.getParameterSize()))
+          .filter(model -> {
+            var size = ((ModelSize) modelSizeComboBoxModel.getSelectedItem()).getSize();
+            return size == model.getParameterSize();
+          })
           .collect(toList());
       huggingFaceComboBoxModel.removeAllElements();
       huggingFaceComboBoxModel.addAll(models);
       huggingFaceComboBoxModel.setSelectedItem(models.get(0));
     });
 
-    hostField = new JBTextField(llamaSettings.getHost());
-    hostField.setEnabled(llamaSettings.isOverrideHost());
     portField = new PortField(llamaSettings.getServerPort());
-    portField.setEnabled(!llamaSettings.isOverrideHost());
-    portField.addChangeListener(changeEvent -> {
-      var port = (int) ((PortField) changeEvent.getSource()).getValue();
-      hostField.setText(getHost(port));
-    });
-    overrideHostCheckBox = new JBCheckBox("Override host", llamaSettings.isOverrideHost());
-    overrideHostCheckBox.addChangeListener(e -> {
-      var isSelected = ((JBCheckBox) e.getSource()).isSelected();
-      hostField.setEnabled(isSelected);
-      portField.setEnabled(!isSelected);
+
+    var startServerLinkWrapper = new JPanel(new FlowLayout(FlowLayout.LEADING, 0, 0));
+    var startServerLink = new AnActionLink("Start Server", new StartServerAction(
+        startServerLinkWrapper,
+        () -> {
+          startServerLinkWrapper.removeAll();
+          startServerLinkWrapper.add(JBUI.Panels.simplePanel(0, 0)
+              .addToLeft(new JBLabel("Starting a server..."))
+              .addToRight(new AsyncProcessIcon("sign_in_spinner")));
+          startServerLinkWrapper.repaint();
+          startServerLinkWrapper.revalidate();
+        },
+        () -> {
+          startServerLinkWrapper.removeAll();
+          startServerLinkWrapper.add(
+              new JBLabel("Server running", Actions.Commit, SwingConstants.TRAILING));
+          startServerLinkWrapper.repaint();
+          startServerLinkWrapper.revalidate();
+        }));
+    startServerLinkWrapper.add(startServerLink);
+
+    var portAvailable = isPortAvailable(llamaSettings.getServerPort());
+    JButton button;
+    if (portAvailable) {
+      button = new JButton("Stop Server", Actions.Pause);
+    } else {
+      button = new JButton("Start Server", Actions.Resume);
+    }
+    button.addActionListener(e -> {
+      new LlamaServerAgent(textFieldWithBrowseButton.getText())
+          .startAgent("", () -> {
+            startServerLinkWrapper.removeAll();
+            startServerLinkWrapper.add(
+                new JBLabel("Server running", Actions.Commit, SwingConstants.TRAILING));
+            startServerLinkWrapper.repaint();
+            startServerLinkWrapper.revalidate();
+          }, startServerLinkWrapper);
+      startServerLinkWrapper.removeAll();
+      startServerLinkWrapper.add(JBUI.Panels.simplePanel(0, 0)
+          .addToLeft(new JBLabel("Starting a server..."))
+          .addToRight(new AsyncProcessIcon("sign_in_spinner")));
+      startServerLinkWrapper.repaint();
+      startServerLinkWrapper.revalidate();
     });
 
     setLayout(new BorderLayout());
@@ -136,6 +170,12 @@ public class LlamaServiceSelectionForm extends JPanel {
         .addVerticalGap(8)
         .addComponent(new TitledSeparator("Model Preferences"))
         .addComponent(withEmptyLeftBorder(createServerSettingsForm(huggingFaceComboBoxModel)))
+        .addComponent(new TitledSeparator("Server Preferences"))
+        .addComponent(withEmptyLeftBorder(FormBuilder.createFormBuilder()
+            .addLabeledComponent("Port:", JBUI.Panels.simplePanel()
+                .addToLeft(portField)
+                .addToRight(button))
+            .getPanel()))
         .addComponentFillVertically(new JPanel(), 0)
         .getPanel());
   }
@@ -164,14 +204,6 @@ public class LlamaServiceSelectionForm extends JPanel {
     return portField.getNumber();
   }
 
-  public boolean isOverrideLamaServerHost() {
-    return overrideHostCheckBox.isSelected();
-  }
-
-  public String getLlamaServerHost() {
-    return hostField.getText();
-  }
-
   class StartServerAction extends AnAction {
 
     private final JPanel startServerLinkWrapper;
@@ -182,6 +214,7 @@ public class LlamaServiceSelectionForm extends JPanel {
         JPanel startServerLinkWrapper,
         Runnable onStart,
         Runnable onSuccess) {
+      super("Start Server", "Start llama.cpp server", Actions.Resume);
       this.startServerLinkWrapper = startServerLinkWrapper;
       this.onStart = onStart;
       this.onSuccess = onSuccess;
@@ -198,10 +231,6 @@ public class LlamaServiceSelectionForm extends JPanel {
   private JComponent withEmptyLeftBorder(JComponent component) {
     component.setBorder(JBUI.Borders.emptyLeft(16));
     return component;
-  }
-
-  private String getHost(int port) {
-    return format("http://localhost:%d/completions", port);
   }
 
   private boolean isModelExists(HuggingFaceModel model) {
@@ -226,26 +255,6 @@ public class LlamaServiceSelectionForm extends JPanel {
             downloadModelLinkWrapper));
     downloadModelLinkWrapper.addToLeft(downloadModelLink);
 
-    var startServerLinkWrapper = new JPanel(new FlowLayout(FlowLayout.LEADING, 4, 0));
-    var startServerLink = new AnActionLink("Start Server", new StartServerAction(
-        startServerLinkWrapper,
-        () -> {
-          startServerLinkWrapper.removeAll();
-          startServerLinkWrapper.add(JBUI.Panels.simplePanel(4, 0)
-              .addToLeft(new JBLabel("Starting a server..."))
-              .addToRight(new AsyncProcessIcon("sign_in_spinner")));
-          startServerLinkWrapper.repaint();
-          startServerLinkWrapper.revalidate();
-        },
-        () -> {
-          startServerLinkWrapper.removeAll();
-          startServerLinkWrapper.add(
-              new JBLabel("Server running", Actions.Commit, SwingConstants.TRAILING));
-          startServerLinkWrapper.repaint();
-          startServerLinkWrapper.revalidate();
-        }));
-    startServerLinkWrapper.add(startServerLink);
-
     var helpText = ComponentPanelBuilder.createCommentComponent("Only .gguf files are supported",
         true);
     helpText.setBorder(JBUI.Borders.empty(0, 4));
@@ -255,24 +264,55 @@ public class LlamaServiceSelectionForm extends JPanel {
     modelComboBoxWrapper.add(Box.createHorizontalStrut(4));
     modelComboBoxWrapper.add(modelExistsIcon);
 
+    var useCustomModelCheckBox = new JBCheckBox("Use custom model");
+    useCustomModelCheckBox.addChangeListener(e -> {
+      var selected = ((JBCheckBox) e.getSource()).isSelected();
+      textFieldWithBrowseButton.setEnabled(selected);
+      modelComboBox.setEnabled(!selected);
+      modelSizeComboBox.setEnabled((!selected));
+      huggingFaceModelComboBox.setEnabled((!selected));
+    });
+
     return FormBuilder.createFormBuilder()
         .addLabeledComponent("Model:", modelComboBoxWrapper)
-        .addLabeledComponent("Model size (B):", modelSizeComboBox)
+        .addLabeledComponent("Model size:", modelSizeComboBox)
         .addLabeledComponent("Quantization:", huggingFaceModelComboBox)
         .addComponentToRightColumn(downloadModelLinkWrapper)
+        .addVerticalGap(16)
         .addLabeledComponent("Model path:", textFieldWithBrowseButton)
         .addComponentToRightColumn(helpText)
-        .addLabeledComponent("Host:", hostField)
-        .addComponentToRightColumn(overrideHostCheckBox)
-        .addVerticalGap(4)
-        .addLabeledComponent("Port:", JBUI.Panels.simplePanel()
-            .addToLeft(portField)
-            .addToRight(startServerLinkWrapper))
+        .addComponentToRightColumn(useCustomModelCheckBox)
         .getPanel();
   }
 
   private static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
     Set<Object> seen = ConcurrentHashMap.newKeySet();
     return t -> seen.add(keyExtractor.apply(t));
+  }
+
+  static class ModelSize {
+
+    private final int size;
+
+    ModelSize(int size) {
+      this.size = size;
+    }
+
+    int getSize() {
+      return size;
+    }
+
+    @Override
+    public String toString() {
+      return size + "B";
+    }
+  }
+
+  public static boolean isPortAvailable(int port) {
+    try (var serverSocket = new ServerSocket(port); var datagramSocket = new DatagramSocket(port)) {
+      return true;
+    } catch (IOException e) {
+      return false;
+    }
   }
 }

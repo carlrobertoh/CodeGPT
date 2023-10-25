@@ -12,12 +12,11 @@ import com.intellij.execution.process.ProcessOutputType;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.Key;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.AsyncProcessIcon;
 import com.intellij.util.ui.JBUI;
-import com.intellij.util.ui.components.BorderLayoutPanel;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import java.nio.charset.StandardCharsets;
 import javax.swing.JPanel;
 import org.jetbrains.annotations.NotNull;
@@ -43,7 +42,8 @@ public class LlamaServerAgent {
         startServerLinkWrapper.revalidate();
 
         var process = new OSProcessHandler(getMakeCommandLinde());
-        process.addProcessListener(getMakeProcessListener(modelPath, onSuccess, startServerLinkWrapper));
+        process.addProcessListener(
+            getMakeProcessListener(modelPath, onSuccess, startServerLinkWrapper));
         process.startNotify();
       } catch (ExecutionException e) {
         throw new RuntimeException(e);
@@ -88,6 +88,8 @@ public class LlamaServerAgent {
 
       @Override
       public void onTextAvailable(@NotNull ProcessEvent event, @NotNull Key outputType) {
+        System.out.println(event.getText());
+
         if (outputType == ProcessOutputType.STDOUT) {
           try {
             var serverMessage = objectMapper.readValue(event.getText(), LlamaServerMessage.class);
@@ -115,10 +117,8 @@ public class LlamaServerAgent {
     commandLine.setExePath("./server");
     commandLine.withWorkDirectory(CodeGPTPlugin.getLlamaSourcePath());
 
-    var path = (customModelPath == null || customModelPath.isEmpty()) ?
-        "models/" + fileName :
-        customModelPath;
-    commandLine.addParameters("-m", path, "-c", "2048");
+    var modelPath = StringUtil.isEmpty(customModelPath) ? "models/" + fileName : customModelPath;
+    commandLine.addParameters("-m", modelPath, "-c", "2048");
     commandLine.setRedirectErrorStream(false);
     return commandLine;
   }

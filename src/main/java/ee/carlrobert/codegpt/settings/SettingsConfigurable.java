@@ -4,7 +4,6 @@ import static ee.carlrobert.codegpt.settings.ServiceType.AZURE;
 import static ee.carlrobert.codegpt.settings.ServiceType.LLAMA_CPP;
 import static ee.carlrobert.codegpt.settings.ServiceType.OPENAI;
 import static ee.carlrobert.codegpt.settings.ServiceType.YOU;
-import static java.lang.String.format;
 
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.options.Configurable;
@@ -64,7 +63,7 @@ public class SettingsConfigurable implements Configurable {
         azureSettings.isModified(serviceSelectionForm) ||
         serviceSelectionForm.isDisplayWebSearchResults() !=
             YouSettingsState.getInstance().isDisplayWebSearchResults() ||
-        LlamaSettingsState.getInstance().getLlamaModelPath()
+        LlamaSettingsState.getInstance().getCustomLlamaModelPath()
             .equals(serviceSelectionForm.getLlamaModelPath());
   }
 
@@ -98,18 +97,9 @@ public class SettingsConfigurable implements Configurable {
         .setDisplayWebSearchResults(serviceSelectionForm.isDisplayWebSearchResults());
     settings.setUseLlamaService(settingsComponent.getSelectedService() == ServiceType.LLAMA_CPP);
 
-    llamaSettings.setLlamaModelPath(serviceSelectionForm.getLlamaModelPath());
+    llamaSettings.setCustomLlamaModelPath(serviceSelectionForm.getLlamaModelPath());
     llamaSettings.setHuggingFaceModel(serviceSelectionForm.getHuggingFaceModel());
     llamaSettings.setServerPort(serviceSelectionForm.getLlamaServerPort());
-
-    if (serviceSelectionForm.isOverrideLamaServerHost()) {
-      llamaSettings.setHost(serviceSelectionForm.getLlamaServerHost());
-    } else {
-      llamaSettings.setHost(format(
-          "http://localhost:%d/completions",
-          serviceSelectionForm.getLlamaServerPort()));
-    }
-    llamaSettings.setOverrideHost(serviceSelectionForm.isOverrideLamaServerHost());
 
     openAISettings.apply(serviceSelectionForm);
     azureSettings.apply(serviceSelectionForm);
@@ -150,7 +140,7 @@ public class SettingsConfigurable implements Configurable {
     }
 
     serviceSelectionForm.setHuggingFaceModel(llamaSettings.getHuggingFaceModel());
-    serviceSelectionForm.setLlamaModelPath(llamaSettings.getLlamaModelPath());
+    serviceSelectionForm.setLlamaModelPath(llamaSettings.getCustomLlamaModelPath());
     serviceSelectionForm.setLlamaServerPort(llamaSettings.getServerPort());
 
     openAISettings.reset(serviceSelectionForm);

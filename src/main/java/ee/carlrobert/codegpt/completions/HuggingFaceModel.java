@@ -301,6 +301,6 @@ public enum HuggingFaceModel {
 
   @Override
   public String toString() {
-    return format("Q%d_K_M (%.2f GB)", quantization, fileSize);
+    return format("%d - bits (File size: %.2f GB, Max RAM required: %.2f GB)", quantization, fileSize, maxRAMRequired);
   }
 }

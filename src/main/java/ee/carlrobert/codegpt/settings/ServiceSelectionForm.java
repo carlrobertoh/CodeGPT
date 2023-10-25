@@ -15,7 +15,6 @@ import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.completions.HuggingFaceModel;
-import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.completions.you.YouUserManager;
 import ee.carlrobert.codegpt.completions.you.auth.AuthenticationNotifier;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
@@ -432,13 +431,5 @@ public class ServiceSelectionForm {
 
   public JPanel getLlamaServiceSectionPanel() {
     return llamaServiceSectionPanel;
-  }
-
-  public boolean isOverrideLamaServerHost() {
-    return llamaServiceSectionPanel.isOverrideLamaServerHost();
-  }
-
-  public String getLlamaServerHost() {
-    return llamaServiceSectionPanel.getLlamaServerHost();
   }
 }

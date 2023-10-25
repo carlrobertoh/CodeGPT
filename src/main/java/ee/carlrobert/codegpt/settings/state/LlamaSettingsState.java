@@ -1,7 +1,5 @@
 package ee.carlrobert.codegpt.settings.state;
 
-import static java.lang.String.format;
-
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
@@ -13,11 +11,10 @@ import org.jetbrains.annotations.NotNull;
 @State(name = "CodeGPT_LlamaSettings", storages = @Storage("CodeGPT_CodeGPT_LlamaSettings.xml"))
 public class LlamaSettingsState implements PersistentStateComponent<LlamaSettingsState> {
 
-  private String llamaModelPath = "";
+  private boolean useCustomModel;
+  private String customLlamaModelPath = "";
   private HuggingFaceModel huggingFaceModel = HuggingFaceModel.CODE_LLAMA_7B_Q4_K_M;
   private int serverPort = 8080;
-  private String host = format("http://localhost:%d/completions", serverPort);
-  private boolean overrideHost;
 
   public LlamaSettingsState() {
   }
@@ -36,12 +33,20 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
     XmlSerializerUtil.copyBean(state, this);
   }
 
-  public String getLlamaModelPath() {
-    return llamaModelPath;
+  public boolean isUseCustomModel() {
+    return useCustomModel;
   }
 
-  public void setLlamaModelPath(String llamaModelPath) {
-    this.llamaModelPath = llamaModelPath;
+  public void setUseCustomModel(boolean useCustomModel) {
+    this.useCustomModel = useCustomModel;
+  }
+
+  public String getCustomLlamaModelPath() {
+    return customLlamaModelPath;
+  }
+
+  public void setCustomLlamaModelPath(String customLlamaModelPath) {
+    this.customLlamaModelPath = customLlamaModelPath;
   }
 
   public HuggingFaceModel getHuggingFaceModel() {
@@ -58,21 +63,5 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
 
   public void setServerPort(int serverPort) {
     this.serverPort = serverPort;
-  }
-
-  public void setOverrideHost(boolean overrideHost) {
-    this.overrideHost = overrideHost;
-  }
-
-  public boolean isOverrideHost() {
-    return overrideHost;
-  }
-
-  public String getHost() {
-    return host;
-  }
-
-  public void setHost(String host) {
-    this.host = host;
   }
 }
