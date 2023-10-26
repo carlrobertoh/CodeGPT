@@ -152,8 +152,8 @@ public class CompletionRequestHandler {
             message,
             isRetry,
             settings.isUseYouService() ?
-                new BaseCompletionEventListener() :
-                new YouRequestCompletionEventListener());
+                new YouRequestCompletionEventListener() :
+                new BaseCompletionEventListener());
       } catch (TotalUsageExceededException e) {
         if (tokensExceededListener != null) {
           tokensExceededListener.run();

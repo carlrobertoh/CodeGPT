@@ -17,6 +17,10 @@ public final class CodeGPTPlugin {
   private CodeGPTPlugin() {
   }
 
+  public static @NotNull String getVersion() {
+    return requireNonNull(PluginManagerCore.getPlugin(CODEGPT_ID)).getVersion();
+  }
+
   public static @NotNull Path getPluginBasePath() {
     return requireNonNull(PluginManagerCore.getPlugin(CODEGPT_ID)).getPluginPath();
   }

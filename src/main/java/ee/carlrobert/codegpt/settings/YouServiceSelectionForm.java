@@ -133,7 +133,7 @@ public class YouServiceSelectionForm extends JPanel {
 
   private JTextPane createSignUpTextPane() {
     var textPane = createTextPane(
-        "<html><a href=\"https://you.com/code\">Don't have an account? Sign up</a></html>");
+        "<html><a href=\"https://you.com/code\" style=\"padding:0;\">Don't have an account?<br/>Sign up with 'CodeGPT' coupon for free GPT-4</a></html>");
     textPane.setBorder(JBUI.Borders.emptyLeft(4));
     return textPane;
   }

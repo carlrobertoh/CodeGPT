@@ -13,6 +13,9 @@ import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.settings.state.YouSettingsState;
+import ee.carlrobert.codegpt.telemetry.core.configuration.TelemetryConfiguration;
+import ee.carlrobert.codegpt.telemetry.core.service.TelemetryService;
+import ee.carlrobert.codegpt.telemetry.core.service.UserId;
 import ee.carlrobert.embedding.EmbeddingsService;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionModel;
@@ -24,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.UUID;
 import org.jetbrains.annotations.Nullable;
 
 public class CompletionRequestProvider {
@@ -71,16 +75,22 @@ public class CompletionRequestProvider {
   }
 
   public YouCompletionRequest buildYouCompletionRequest(Message message) {
-    return new YouCompletionRequest.Builder(message.getPrompt())
+    var requestBuilder = new YouCompletionRequest.Builder(message.getPrompt())
         .setUseGPT4Model(YouSettingsState.getInstance().isUseGPT4Model())
         .setChatHistory(conversation.getMessages().stream()
-            .map(prevMessage -> new YouCompletionRequestMessage(prevMessage.getPrompt(),
+            .map(prevMessage -> new YouCompletionRequestMessage(
+                prevMessage.getPrompt(),
                 prevMessage.getResponse()))
-            .collect(toList()))
-        .build();
+            .collect(toList()));
+    if (TelemetryConfiguration.getInstance().isEnabled()) {
+      requestBuilder.setUserId(UUID.fromString(UserId.INSTANCE.get()));
+    }
+    return requestBuilder.build();
   }
 
-  public OpenAIChatCompletionRequest buildOpenAIChatCompletionRequest(String model, Message message,
+  public OpenAIChatCompletionRequest buildOpenAIChatCompletionRequest(
+      String model,
+      Message message,
       boolean isRetry) {
     return buildOpenAIChatCompletionRequest(model, message, isRetry, false, null);
   }
@@ -104,8 +114,11 @@ public class CompletionRequestProvider {
     return (OpenAIChatCompletionRequest) builder.build();
   }
 
-  private List<OpenAIChatCompletionMessage> buildMessages(String model, Message message,
-      boolean isRetry, boolean useContextualSearch) {
+  private List<OpenAIChatCompletionMessage> buildMessages(
+      String model,
+      Message message,
+      boolean isRetry,
+      boolean useContextualSearch) {
     var messages = new ArrayList<OpenAIChatCompletionMessage>();
     if (useContextualSearch) {
       var prompt = embeddingsService.buildPromptWithContext(message.getPrompt());

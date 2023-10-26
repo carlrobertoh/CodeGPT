@@ -6,6 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.7] - 2023-10-26
+
+### Replaced
+
+- You.com GPT-4 toggle component with checkbox
+- Telemetry segment service with rudderstack
+
+### Fixed
+
+- You.com web search not being displayed regardless of the flag
+
 ## [2.1.6] - 2023-10-12
 
 ### Added
@@ -181,7 +192,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `OPENAI_API_KEY` persistence, key is saved in the OS password safe from now on
 
-[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.1.6...HEAD
+[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.1.7...HEAD
+[2.1.7]: https://github.com/carlrobertoh/CodeGPT/compare/v2.1.6...v2.1.7
 [2.1.6]: https://github.com/carlrobertoh/CodeGPT/compare/v2.1.5...v2.1.6
 [2.1.5]: https://github.com/carlrobertoh/CodeGPT/compare/v2.1.4...v2.1.5
 [2.1.4]: https://github.com/carlrobertoh/CodeGPT/compare/v2.1.3...v2.1.4

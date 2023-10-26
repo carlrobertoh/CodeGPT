@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.completions;
 
+import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.advanced.AdvancedSettingsState;
@@ -12,6 +13,7 @@ import ee.carlrobert.llm.client.azure.AzureClient;
 import ee.carlrobert.llm.client.azure.AzureCompletionRequestParams;
 import ee.carlrobert.llm.client.llama.LlamaClient;
 import ee.carlrobert.llm.client.openai.OpenAIClient;
+import ee.carlrobert.llm.client.you.UTMParameters;
 import ee.carlrobert.llm.client.you.YouClient;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -28,7 +30,14 @@ public class CompletionClientProvider {
   }
 
   public static YouClient getYouClient(String sessionId, String accessToken) {
-    return new YouClient.Builder(sessionId, accessToken).build();
+    var utmParameters = new UTMParameters();
+    utmParameters.setSource("ide");
+    utmParameters.setMedium("jetbrains");
+    utmParameters.setCampaign(CodeGPTPlugin.getVersion());
+    utmParameters.setContent("CodeGPT");
+    return new YouClient.Builder(sessionId, accessToken)
+        .setUTMParameters(utmParameters)
+        .build();
   }
 
   public static LlamaClient getLlamaClient() {
