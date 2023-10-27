@@ -131,6 +131,31 @@ public enum HuggingFaceModel {
       "codellama-34b-python.Q5_K_M.gguf",
       "https://huggingface.co/TheBloke/CodeLlama-34B-Python-GGUF/resolve/main/codellama-34b-python.Q5_K_M.gguf"),
 
+  PHIND_CODE_LLAMA_34B_Q3_K_M(
+      34,
+      3,
+      18.78,
+      16.28,
+      "phind-codellama-34b-v2.Q3_K_M.gguf",
+      "https://huggingface.co/TheBloke/Phind-CodeLlama-34B-v2-GGUF/resolve/main/phind-codellama-34b-v2.Q3_K_M.gguf"
+  ),
+  PHIND_CODE_LLAMA_34B_Q4_K_M(
+      34,
+      4,
+      22.72,
+      20.22,
+      "phind-codellama-34b-v2.Q4_K_M.gguf",
+      "https://huggingface.co/TheBloke/Phind-CodeLlama-34B-v2-GGUF/resolve/main/phind-codellama-34b-v2.Q4_K_M.gguf"
+  ),
+  PHIND_CODE_LLAMA_34B_Q5_K_M(
+      34,
+      5,
+      26.34,
+      23.84,
+      "phind-codellama-34b-v2.Q5_K_M.gguf",
+      "https://huggingface.co/TheBloke/Phind-CodeLlama-34B-v2-GGUF/resolve/main/phind-codellama-34b-v2.Q5_K_M.gguf"
+  ),
+
   WIZARD_CODER_PYTHON_7B_Q3_K_M(
       7,
       3,
@@ -266,7 +291,13 @@ public enum HuggingFaceModel {
   private final String fileName;
   private final String filePath;
 
-  HuggingFaceModel(int parameterSize, int quantization, double maxRAMRequired, double fileSize, String fileName, String filePath) {
+  HuggingFaceModel(
+      int parameterSize,
+      int quantization,
+      double maxRAMRequired,
+      double fileSize,
+      String fileName,
+      String filePath) {
     this.parameterSize = parameterSize;
     this.quantization = quantization;
     this.maxRAMRequired = maxRAMRequired;
@@ -301,6 +332,10 @@ public enum HuggingFaceModel {
 
   @Override
   public String toString() {
-    return format("%d - bits (File size: %.2f GB, Max RAM required: %.2f GB)", quantization, fileSize, maxRAMRequired);
+    return format(
+        "%d - bits (File size: %.2f GB, Max RAM required: %.2f GB)",
+        quantization,
+        fileSize,
+        maxRAMRequired);
   }
 }

@@ -32,6 +32,13 @@ public enum LlamaModel {
           HuggingFaceModel.CODE_LLAMA_PYTHON_34B_Q3_K_M,
           HuggingFaceModel.CODE_LLAMA_PYTHON_34B_Q4_K_M,
           HuggingFaceModel.CODE_LLAMA_PYTHON_34B_Q5_K_M)),
+  PHIND_CODE_LLAMA(
+      "Phind Code Llama",
+      PromptTemplate.ALPACA,
+      List.of(
+          HuggingFaceModel.PHIND_CODE_LLAMA_34B_Q3_K_M,
+          HuggingFaceModel.PHIND_CODE_LLAMA_34B_Q4_K_M,
+          HuggingFaceModel.PHIND_CODE_LLAMA_34B_Q5_K_M)),
   WIZARD_CODER_PYTHON(
       "WizardCoder - Python",
       PromptTemplate.ALPACA,

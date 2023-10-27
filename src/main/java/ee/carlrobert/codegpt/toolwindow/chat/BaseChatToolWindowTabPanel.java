@@ -16,6 +16,7 @@ import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.JBUI.Borders;
 import ee.carlrobert.codegpt.actions.ActionType;
 import ee.carlrobert.codegpt.completions.CompletionRequestHandler;
+import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.completions.you.YouSerpResult;
 import ee.carlrobert.codegpt.completions.you.YouUserManager;
 import ee.carlrobert.codegpt.completions.you.auth.AuthenticationNotifier;
@@ -25,6 +26,7 @@ import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
+import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.settings.state.YouSettingsState;
@@ -467,7 +469,13 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
       return "YouCode";
     }
     if (settings.isUseLlamaService()) {
-      return "llama.cpp";
+      var huggingFaceModel = LlamaSettingsState.getInstance().getHuggingFaceModel();
+      var llamaModel = LlamaModel.findByHuggingFaceModel(huggingFaceModel);
+      return String.format(
+          "%s %dB (%d - bits)",
+          llamaModel,
+          huggingFaceModel.getParameterSize(),
+          huggingFaceModel.getQuantization());
     }
 
     return "Unknown";

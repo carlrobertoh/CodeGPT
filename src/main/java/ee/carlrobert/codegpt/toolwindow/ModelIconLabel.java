@@ -21,6 +21,9 @@ public class ModelIconLabel extends JBLabel {
     if ("azure.chat.completion".equals(clientCode)) {
       setIcon(Icons.AzureIcon);
     }
+    if ("llama.chat.completion".equals(clientCode)) {
+      setIcon(Icons.LlamaIcon);
+    }
     setText(formatModelName(modelCode));
     setFont(JBFont.small().asBold());
     setHorizontalAlignment(SwingConstants.LEADING);

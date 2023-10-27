@@ -11,4 +11,5 @@ public final class Icons {
   public static final Icon OpenAIIcon = IconLoader.getIcon("/icons/openai.svg", Icons.class);
   public static final Icon AzureIcon = IconLoader.getIcon("/icons/azure.svg", Icons.class);
   public static final Icon YouIcon = IconLoader.getIcon("/icons/you.svg", Icons.class);
+  public static final Icon LlamaIcon = IconLoader.getIcon("/icons/llama.svg", Icons.class);
 }

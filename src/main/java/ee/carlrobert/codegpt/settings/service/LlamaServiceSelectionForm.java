@@ -1,9 +1,10 @@
 package ee.carlrobert.codegpt.settings.service;
 
-import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
 import com.intellij.icons.AllIcons.Actions;
+import com.intellij.icons.AllIcons.General;
+import com.intellij.ide.HelpTooltip;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.ui.ComboBox;
@@ -31,6 +32,8 @@ import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -55,6 +58,8 @@ public class LlamaServiceSelectionForm extends JPanel {
   private final DefaultComboBoxModel<HuggingFaceModel> huggingFaceComboBoxModel;
   private final JBCheckBox useCustomModelCheckBox;
   private final JPanel serverProgressPanel;
+  private final EnumComboBoxModel<LlamaModel> modelComboBoxModel;
+  private JBLabel helpIcon;
 
   public LlamaServiceSelectionForm() {
     var llamaSettings = LlamaSettingsState.getInstance();
@@ -79,10 +84,15 @@ public class LlamaServiceSelectionForm extends JPanel {
     huggingFaceComboBoxModel.addAll(selectableModels);
     huggingFaceModelComboBox = new ComboBox<>(huggingFaceComboBoxModel);
     huggingFaceModelComboBox.addItemListener(e -> {
-      var modelExists = isModelExists((HuggingFaceModel) e.getItem());
+      var selectedModel = (HuggingFaceModel) e.getItem();
+      var modelExists = isModelExists(selectedModel);
+
+      updateModelHelpTooltip(selectedModel);
       modelExistsIcon.setVisible(modelExists);
       downloadModelLinkWrapper.setVisible(!modelExists);
     });
+
+    helpIcon = new JBLabel(General.ContextHelp);
 
     var modelSizeComboBoxModel = new DefaultComboBoxModel<ModelSize>();
     var initialModelSizes = llamaModel.getHuggingFaceModels().stream()
@@ -91,15 +101,27 @@ public class LlamaServiceSelectionForm extends JPanel {
         .collect(toList());
     modelSizeComboBoxModel.addAll(initialModelSizes);
 
-    modelComboBox = new ComboBox<>(new EnumComboBoxModel<>(LlamaModel.class));
+    modelComboBoxModel = new EnumComboBoxModel<>(LlamaModel.class);
+    modelComboBox = new ComboBox<>(modelComboBoxModel);
     modelComboBox.setSelectedItem(llamaModel);
     modelComboBox.addItemListener(e -> {
-      var models = ((LlamaModel) e.getItem()).getHuggingFaceModels().stream()
+      var selectedModel = modelComboBoxModel.getSelectedItem();
+      var modelSizes = selectedModel.getHuggingFaceModels().stream()
+          .filter(distinctByKey(HuggingFaceModel::getParameterSize))
+          .map(item -> new ModelSize(item.getParameterSize()))
+          .collect(toList());
+
+      modelSizeComboBoxModel.removeAllElements();
+      modelSizeComboBoxModel.addAll(modelSizes);
+      modelSizeComboBoxModel.setSelectedItem(modelSizes.get(0));
+
+      var models = selectedModel.getHuggingFaceModels().stream()
           .filter(model -> {
             var size = ((ModelSize) modelSizeComboBoxModel.getSelectedItem()).getSize();
             return size == model.getParameterSize();
           })
           .collect(toList());
+
       huggingFaceComboBoxModel.removeAllElements();
       huggingFaceComboBoxModel.addAll(models);
       huggingFaceComboBoxModel.setSelectedItem(models.get(0));
@@ -108,16 +130,19 @@ public class LlamaServiceSelectionForm extends JPanel {
     modelSizeComboBox = new ComboBox<>(modelSizeComboBoxModel);
     modelSizeComboBox.setSelectedItem(initialModelSizes.get(0));
     modelSizeComboBox.addItemListener(e -> {
-      var selectedModel = (LlamaModel) modelComboBox.getSelectedItem();
-      var models = requireNonNull(selectedModel).getHuggingFaceModels().stream()
+      var selectedModel = modelComboBoxModel.getSelectedItem();
+      var models = selectedModel.getHuggingFaceModels().stream()
           .filter(model -> {
-            var size = ((ModelSize) modelSizeComboBoxModel.getSelectedItem()).getSize();
-            return size == model.getParameterSize();
+            var selectedModelSize = (ModelSize) modelSizeComboBoxModel.getSelectedItem();
+            return selectedModelSize != null &&
+                selectedModelSize.getSize() == model.getParameterSize();
           })
           .collect(toList());
-      huggingFaceComboBoxModel.removeAllElements();
-      huggingFaceComboBoxModel.addAll(models);
-      huggingFaceComboBoxModel.setSelectedItem(models.get(0));
+      if (!models.isEmpty()) {
+        huggingFaceComboBoxModel.removeAllElements();
+        huggingFaceComboBoxModel.addAll(models);
+        huggingFaceComboBoxModel.setSelectedItem(models.get(0));
+      }
     });
 
     portField = new PortField(llamaSettings.getServerPort());
@@ -263,6 +288,8 @@ public class LlamaServiceSelectionForm extends JPanel {
 
     var modelComboBoxWrapper = new JPanel(new FlowLayout(FlowLayout.LEADING, 0, 0));
     modelComboBoxWrapper.add(modelComboBox);
+    modelComboBoxWrapper.add(Box.createHorizontalStrut(8));
+    modelComboBoxWrapper.add(helpIcon);
     modelComboBoxWrapper.add(Box.createHorizontalStrut(4));
     modelComboBoxWrapper.add(modelExistsIcon);
 
@@ -278,6 +305,20 @@ public class LlamaServiceSelectionForm extends JPanel {
         .addVerticalGap(4)
         .addLabeledComponent("Prompt template:", promptTemplateComboBox)
         .getPanel();
+  }
+
+  private void updateModelHelpTooltip(HuggingFaceModel model) {
+    helpIcon.setToolTipText(null);
+    var llamaModel = LlamaModel.findByHuggingFaceModel(model);
+    try {
+      new HelpTooltip()
+          .setTitle(llamaModel.getLabel())
+          .setDescription("<html><p>" + model.getFileName() + "</p></html>")
+          .setBrowserLink("Link to model", new URL(model.getFilePath()))
+          .installOn(helpIcon);
+    } catch (MalformedURLException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   private static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
