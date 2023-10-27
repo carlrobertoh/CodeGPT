@@ -6,6 +6,7 @@ import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import ee.carlrobert.codegpt.completions.HuggingFaceModel;
+import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
 import org.jetbrains.annotations.NotNull;
 
 @State(name = "CodeGPT_LlamaSettings", storages = @Storage("CodeGPT_CodeGPT_LlamaSettings.xml"))
@@ -14,6 +15,7 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
   private boolean useCustomModel;
   private String customLlamaModelPath = "";
   private HuggingFaceModel huggingFaceModel = HuggingFaceModel.CODE_LLAMA_7B_Q4_K_M;
+  private PromptTemplate promptTemplate = PromptTemplate.LLAMA;
   private int serverPort = 8080;
 
   public LlamaSettingsState() {
@@ -55,6 +57,14 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
 
   public void setHuggingFaceModel(HuggingFaceModel huggingFaceModel) {
     this.huggingFaceModel = huggingFaceModel;
+  }
+
+  public PromptTemplate getPromptTemplate() {
+    return promptTemplate;
+  }
+
+  public void setPromptTemplate(PromptTemplate promptTemplate) {
+    this.promptTemplate = promptTemplate;
   }
 
   public int getServerPort() {

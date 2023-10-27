@@ -1,9 +1,9 @@
 package ee.carlrobert.codegpt.settings;
 
-import static ee.carlrobert.codegpt.settings.ServiceType.AZURE;
-import static ee.carlrobert.codegpt.settings.ServiceType.LLAMA_CPP;
-import static ee.carlrobert.codegpt.settings.ServiceType.OPENAI;
-import static ee.carlrobert.codegpt.settings.ServiceType.YOU;
+import static ee.carlrobert.codegpt.settings.service.ServiceType.AZURE;
+import static ee.carlrobert.codegpt.settings.service.ServiceType.LLAMA_CPP;
+import static ee.carlrobert.codegpt.settings.service.ServiceType.OPENAI;
+import static ee.carlrobert.codegpt.settings.service.ServiceType.YOU;
 
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.options.Configurable;
@@ -12,6 +12,7 @@ import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
+import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
@@ -55,6 +56,7 @@ public class SettingsConfigurable implements Configurable {
     var settings = SettingsState.getInstance();
     var openAISettings = OpenAISettingsState.getInstance();
     var azureSettings = AzureSettingsState.getInstance();
+    var llamaSettings = LlamaSettingsState.getInstance();
 
     var serviceSelectionForm = settingsComponent.getServiceSelectionForm();
     return !settingsComponent.getDisplayName().equals(settings.getDisplayName()) ||
@@ -63,8 +65,12 @@ public class SettingsConfigurable implements Configurable {
         azureSettings.isModified(serviceSelectionForm) ||
         serviceSelectionForm.isDisplayWebSearchResults() !=
             YouSettingsState.getInstance().isDisplayWebSearchResults() ||
-        LlamaSettingsState.getInstance().getCustomLlamaModelPath()
-            .equals(serviceSelectionForm.getLlamaModelPath());
+
+        llamaSettings.isUseCustomModel() != serviceSelectionForm.isUseCustomLlamaModel() ||
+        llamaSettings.getServerPort() != serviceSelectionForm.getLlamaServerPort() ||
+        llamaSettings.getHuggingFaceModel() != serviceSelectionForm.getHuggingFaceModel() ||
+        !llamaSettings.getPromptTemplate().equals(serviceSelectionForm.getPromptTemplate()) ||
+        !llamaSettings.getCustomLlamaModelPath().equals(serviceSelectionForm.getLlamaModelPath());
   }
 
   @Override
@@ -100,6 +106,8 @@ public class SettingsConfigurable implements Configurable {
     llamaSettings.setCustomLlamaModelPath(serviceSelectionForm.getLlamaModelPath());
     llamaSettings.setHuggingFaceModel(serviceSelectionForm.getHuggingFaceModel());
     llamaSettings.setServerPort(serviceSelectionForm.getLlamaServerPort());
+    llamaSettings.setUseCustomModel(serviceSelectionForm.isUseCustomLlamaModel());
+    llamaSettings.setPromptTemplate(serviceSelectionForm.getPromptTemplate());
 
     openAISettings.apply(serviceSelectionForm);
     azureSettings.apply(serviceSelectionForm);
@@ -141,7 +149,9 @@ public class SettingsConfigurable implements Configurable {
 
     serviceSelectionForm.setHuggingFaceModel(llamaSettings.getHuggingFaceModel());
     serviceSelectionForm.setLlamaModelPath(llamaSettings.getCustomLlamaModelPath());
+    serviceSelectionForm.setUseCustomLlamaModel(llamaSettings.isUseCustomModel());
     serviceSelectionForm.setLlamaServerPort(llamaSettings.getServerPort());
+    serviceSelectionForm.setPromptTemplate(llamaSettings.getPromptTemplate());
 
     openAISettings.reset(serviceSelectionForm);
     azureSettings.reset(serviceSelectionForm);

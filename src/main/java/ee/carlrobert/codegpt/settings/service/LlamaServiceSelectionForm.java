@@ -1,11 +1,10 @@
-package ee.carlrobert.codegpt.settings;
+package ee.carlrobert.codegpt.settings.service;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
 import com.intellij.icons.AllIcons.Actions;
-import com.intellij.openapi.actionSystem.AnAction;
-import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.TextBrowseFolderListener;
@@ -26,13 +25,12 @@ import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.completions.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaServerAgent;
+import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
+import ee.carlrobert.codegpt.settings.DownloadModelAction;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.io.File;
-import java.io.IOException;
-import java.net.DatagramSocket;
-import java.net.ServerSocket;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -43,7 +41,6 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
-import org.jetbrains.annotations.NotNull;
 
 public class LlamaServiceSelectionForm extends JPanel {
 
@@ -51,10 +48,13 @@ public class LlamaServiceSelectionForm extends JPanel {
   private final ComboBox<LlamaModel> modelComboBox;
   private final ComboBox<ModelSize> modelSizeComboBox;
   private final ComboBox<HuggingFaceModel> huggingFaceModelComboBox;
+  private final ComboBox<PromptTemplate> promptTemplateComboBox;
   private final BorderLayoutPanel downloadModelLinkWrapper;
   private final JBLabel modelExistsIcon;
   private final PortField portField;
   private final DefaultComboBoxModel<HuggingFaceModel> huggingFaceComboBoxModel;
+  private final JBCheckBox useCustomModelCheckBox;
+  private final JPanel serverProgressPanel;
 
   public LlamaServiceSelectionForm() {
     var llamaSettings = LlamaSettingsState.getInstance();
@@ -62,6 +62,7 @@ public class LlamaServiceSelectionForm extends JPanel {
     var fileChooserDescriptor = FileChooserDescriptorFactory.createSingleFileDescriptor("gguf");
     fileChooserDescriptor.setForcedToUseIdeaFileChooser(true);
     textFieldWithBrowseButton = new TextFieldWithBrowseButton();
+    textFieldWithBrowseButton.setEnabled(llamaSettings.isUseCustomModel());
     textFieldWithBrowseButton.setText(CodeGPTPlugin.getLlamaModelsPath());
     textFieldWithBrowseButton.addBrowseFolderListener(
         new TextBrowseFolderListener(fileChooserDescriptor));
@@ -121,53 +122,70 @@ public class LlamaServiceSelectionForm extends JPanel {
 
     portField = new PortField(llamaSettings.getServerPort());
 
-    var startServerLinkWrapper = new JPanel(new FlowLayout(FlowLayout.LEADING, 0, 0));
-    var startServerLink = new AnActionLink("Start Server", new StartServerAction(
-        startServerLinkWrapper,
-        () -> {
-          startServerLinkWrapper.removeAll();
-          startServerLinkWrapper.add(JBUI.Panels.simplePanel(0, 0)
-              .addToLeft(new JBLabel("Starting a server..."))
-              .addToRight(new AsyncProcessIcon("sign_in_spinner")));
-          startServerLinkWrapper.repaint();
-          startServerLinkWrapper.revalidate();
-        },
-        () -> {
-          startServerLinkWrapper.removeAll();
-          startServerLinkWrapper.add(
-              new JBLabel("Server running", Actions.Commit, SwingConstants.TRAILING));
-          startServerLinkWrapper.repaint();
-          startServerLinkWrapper.revalidate();
-        }));
-    startServerLinkWrapper.add(startServerLink);
+    promptTemplateComboBox = new ComboBox<>(new EnumComboBoxModel<>(PromptTemplate.class));
+    promptTemplateComboBox.setEnabled(llamaSettings.isUseCustomModel());
 
-    var portAvailable = isPortAvailable(llamaSettings.getServerPort());
-    JButton button;
-    if (portAvailable) {
-      button = new JButton("Stop Server", Actions.Pause);
-    } else {
-      button = new JButton("Start Server", Actions.Resume);
-    }
+    useCustomModelCheckBox = new JBCheckBox("Use custom model");
+    useCustomModelCheckBox.addChangeListener(e -> {
+      var selected = ((JBCheckBox) e.getSource()).isSelected();
+      textFieldWithBrowseButton.setEnabled(selected);
+      promptTemplateComboBox.setEnabled(selected);
+      modelComboBox.setEnabled(!selected);
+      modelSizeComboBox.setEnabled((!selected));
+      huggingFaceModelComboBox.setEnabled((!selected));
+    });
+
+    serverProgressPanel = new JPanel(new FlowLayout(FlowLayout.LEADING, 0, 0));
+
+    var llamaServerAgent = ApplicationManager.getApplication().getService(LlamaServerAgent.class);
+    JButton button = new ServerActionButton(llamaServerAgent);
     button.addActionListener(e -> {
-      new LlamaServerAgent(textFieldWithBrowseButton.getText())
-          .startAgent("", () -> {
-            startServerLinkWrapper.removeAll();
-            startServerLinkWrapper.add(
-                new JBLabel("Server running", Actions.Commit, SwingConstants.TRAILING));
-            startServerLinkWrapper.repaint();
-            startServerLinkWrapper.revalidate();
-          }, startServerLinkWrapper);
-      startServerLinkWrapper.removeAll();
-      startServerLinkWrapper.add(JBUI.Panels.simplePanel(0, 0)
-          .addToLeft(new JBLabel("Starting a server..."))
-          .addToRight(new AsyncProcessIcon("sign_in_spinner")));
-      startServerLinkWrapper.repaint();
-      startServerLinkWrapper.revalidate();
+      if (llamaServerAgent.isServerRunning()) {
+        button.setEnabled(true);
+        updateServerProgressPanel(JBUI.Panels.simplePanel(0, 0)
+            .addToLeft(new JBLabel("Stopping a server..."))
+            .addToRight(new AsyncProcessIcon("sign_in_spinner")));
+
+        llamaServerAgent.stopAgent();
+      } else {
+        var modelPath = useCustomModelCheckBox.isSelected() ?
+            textFieldWithBrowseButton.getText() :
+            "models/"
+                + ((HuggingFaceModel) huggingFaceComboBoxModel.getSelectedItem()).getFileName();
+        llamaServerAgent.startAgent(
+            modelPath,
+            () -> {
+              button.setText("Stop Server");
+              button.setIcon(Actions.Suspend);
+              button.setEnabled(true);
+
+              updateServerProgressPanel(new JBLabel(
+                  "Server running",
+                  Actions.Commit,
+                  SwingConstants.TRAILING));
+            },
+            () -> {
+              button.setText("Start Server");
+              button.setIcon(Actions.Execute);
+              button.setEnabled(true);
+
+              updateServerProgressPanel(new JBLabel(
+                  "Server terminated",
+                  Actions.Cancel,
+                  SwingConstants.TRAILING));
+            },
+            serverProgressPanel);
+
+        button.setEnabled(false);
+        updateServerProgressPanel(
+            JBUI.Panels.simplePanel(0, 0)
+                .addToLeft(new JBLabel("Starting a server..."))
+                .addToRight(new AsyncProcessIcon("sign_in_spinner")));
+      }
     });
 
     setLayout(new BorderLayout());
     add(FormBuilder.createFormBuilder()
-        .addVerticalGap(8)
         .addComponent(new TitledSeparator("Model Preferences"))
         .addComponent(withEmptyLeftBorder(createServerSettingsForm(huggingFaceComboBoxModel)))
         .addComponent(new TitledSeparator("Server Preferences"))
@@ -176,6 +194,8 @@ public class LlamaServiceSelectionForm extends JPanel {
                 .addToLeft(portField)
                 .addToRight(button))
             .getPanel()))
+        .addVerticalGap(4)
+        .addComponent(withEmptyLeftBorder(serverProgressPanel))
         .addComponentFillVertically(new JPanel(), 0)
         .getPanel());
   }
@@ -204,30 +224,6 @@ public class LlamaServiceSelectionForm extends JPanel {
     return portField.getNumber();
   }
 
-  class StartServerAction extends AnAction {
-
-    private final JPanel startServerLinkWrapper;
-    private final Runnable onStart;
-    private final Runnable onSuccess;
-
-    StartServerAction(
-        JPanel startServerLinkWrapper,
-        Runnable onStart,
-        Runnable onSuccess) {
-      super("Start Server", "Start llama.cpp server", Actions.Resume);
-      this.startServerLinkWrapper = startServerLinkWrapper;
-      this.onStart = onStart;
-      this.onSuccess = onSuccess;
-    }
-
-    @Override
-    public void actionPerformed(@NotNull AnActionEvent e) {
-      new LlamaServerAgent(textFieldWithBrowseButton.getText())
-          .startAgent("", onSuccess, startServerLinkWrapper);
-      onStart.run();
-    }
-  }
-
   private JComponent withEmptyLeftBorder(JComponent component) {
     component.setBorder(JBUI.Borders.emptyLeft(16));
     return component;
@@ -241,6 +237,12 @@ public class LlamaServiceSelectionForm extends JPanel {
   private JPanel createServerSettingsForm(
       DefaultComboBoxModel<HuggingFaceModel> huggingFaceModelComboBoxModel) {
 
+    var progressLabel = new JBLabel("");
+    downloadModelLinkWrapper.removeAll();
+    downloadModelLinkWrapper.add(progressLabel);
+    downloadModelLinkWrapper.repaint();
+    downloadModelLinkWrapper.revalidate();
+
     var downloadModelLink = new AnActionLink(
         "Download model",
         new DownloadModelAction(
@@ -251,8 +253,8 @@ public class LlamaServiceSelectionForm extends JPanel {
             (error) -> {
               throw new RuntimeException(error);
             },
-            huggingFaceModelComboBoxModel,
-            downloadModelLinkWrapper));
+            (HuggingFaceModel) huggingFaceModelComboBoxModel.getSelectedItem(),
+            progressLabel));
     downloadModelLinkWrapper.addToLeft(downloadModelLink);
 
     var helpText = ComponentPanelBuilder.createCommentComponent("Only .gguf files are supported",
@@ -264,30 +266,96 @@ public class LlamaServiceSelectionForm extends JPanel {
     modelComboBoxWrapper.add(Box.createHorizontalStrut(4));
     modelComboBoxWrapper.add(modelExistsIcon);
 
-    var useCustomModelCheckBox = new JBCheckBox("Use custom model");
-    useCustomModelCheckBox.addChangeListener(e -> {
-      var selected = ((JBCheckBox) e.getSource()).isSelected();
-      textFieldWithBrowseButton.setEnabled(selected);
-      modelComboBox.setEnabled(!selected);
-      modelSizeComboBox.setEnabled((!selected));
-      huggingFaceModelComboBox.setEnabled((!selected));
-    });
-
     return FormBuilder.createFormBuilder()
         .addLabeledComponent("Model:", modelComboBoxWrapper)
         .addLabeledComponent("Model size:", modelSizeComboBox)
         .addLabeledComponent("Quantization:", huggingFaceModelComboBox)
         .addComponentToRightColumn(downloadModelLinkWrapper)
         .addVerticalGap(16)
-        .addLabeledComponent("Model path:", textFieldWithBrowseButton)
-        .addComponentToRightColumn(helpText)
-        .addComponentToRightColumn(useCustomModelCheckBox)
+        .addComponent(useCustomModelCheckBox)
+        .addComponent(textFieldWithBrowseButton)
+        .addComponent(helpText)
+        .addVerticalGap(4)
+        .addLabeledComponent("Prompt template:", promptTemplateComboBox)
         .getPanel();
   }
 
   private static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
     Set<Object> seen = ConcurrentHashMap.newKeySet();
     return t -> seen.add(keyExtractor.apply(t));
+  }
+
+  private void updateServerProgressPanel(JComponent component) {
+    serverProgressPanel.removeAll();
+    serverProgressPanel.add(component);
+    serverProgressPanel.repaint();
+    serverProgressPanel.revalidate();
+  }
+
+  public void setUseCustomLlamaModel(boolean useCustomLlamaModel) {
+    useCustomModelCheckBox.setSelected(useCustomLlamaModel);
+  }
+
+  public boolean isUseCustomLlamaModel() {
+    return useCustomModelCheckBox.isSelected();
+  }
+
+  public void setPromptTemplate(PromptTemplate promptTemplate) {
+    promptTemplateComboBox.setSelectedItem(promptTemplate);
+  }
+
+  public PromptTemplate getPromptTemplate() {
+    return promptTemplateComboBox.getItem();
+  }
+
+  class ServerActionButton extends JButton {
+
+    public ServerActionButton(LlamaServerAgent llamaServerAgent) {
+      updateComponent(llamaServerAgent.isServerRunning());
+      addActionListener(e -> {
+        if (llamaServerAgent.isServerRunning()) {
+          setEnabled(true);
+          updateServerProgressPanel(JBUI.Panels.simplePanel(0, 0)
+              .addToLeft(new JBLabel("Stopping a server..."))
+              .addToRight(new AsyncProcessIcon("sign_in_spinner")));
+          llamaServerAgent.stopAgent();
+        } else {
+          var modelPath = useCustomModelCheckBox.isSelected() ?
+              textFieldWithBrowseButton.getText() :
+              "models/"
+                  + ((HuggingFaceModel) huggingFaceComboBoxModel.getSelectedItem()).getFileName();
+          llamaServerAgent.startAgent(
+              modelPath,
+              () -> {
+                updateComponent(true);
+                updateServerProgressPanel(new JBLabel(
+                    "Server running",
+                    Actions.Commit,
+                    SwingConstants.TRAILING));
+              },
+              () -> {
+                updateComponent(false);
+                updateServerProgressPanel(new JBLabel(
+                    "Server terminated",
+                    Actions.Cancel,
+                    SwingConstants.TRAILING));
+              },
+              serverProgressPanel);
+
+          setEnabled(false);
+          updateServerProgressPanel(
+              JBUI.Panels.simplePanel(0, 0)
+                  .addToLeft(new JBLabel("Starting a server..."))
+                  .addToRight(new AsyncProcessIcon("sign_in_spinner")));
+        }
+      });
+    }
+
+    private void updateComponent(boolean serverRunning) {
+      setText(serverRunning ? "Stop Server" : "Start Server");
+      setIcon(serverRunning ? Actions.Suspend : Actions.Execute);
+      setEnabled(true);
+    }
   }
 
   static class ModelSize {
@@ -305,14 +373,6 @@ public class LlamaServiceSelectionForm extends JPanel {
     @Override
     public String toString() {
       return size + "B";
-    }
-  }
-
-  public static boolean isPortAvailable(int port) {
-    try (var serverSocket = new ServerSocket(port); var datagramSocket = new DatagramSocket(port)) {
-      return true;
-    } catch (IOException e) {
-      return false;
     }
   }
 }

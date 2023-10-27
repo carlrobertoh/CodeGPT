@@ -117,6 +117,15 @@ Expected a different answer? Re-generate any response of your choosing.
 - **Predefined Actions** - Create your own editor actions or override the existing ones, saving time rewriting the same prompt repeatedly
 
 ### Running locally
+
+**Linux or macOS**
+```shell
+git clone https://github.com/carlrobertoh/CodeGPT.git
+cd CodeGPT
+git submodule update
+./gradlew runIde
+```
+
 **Windows ARM64**
 ```shell
 ./gradlew runIde -Penv=win-arm64

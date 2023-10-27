@@ -6,13 +6,12 @@ import com.intellij.execution.configurations.GeneralCommandLine;
 import com.intellij.execution.process.OSProcessHandler;
 import com.intellij.execution.process.ProcessAdapter;
 import com.intellij.execution.process.ProcessEvent;
-import com.intellij.execution.process.ProcessHandler;
 import com.intellij.execution.process.ProcessListener;
 import com.intellij.execution.process.ProcessOutputType;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.components.Service;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.Key;
-import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.AsyncProcessIcon;
 import com.intellij.util.ui.JBUI;
@@ -20,18 +19,21 @@ import ee.carlrobert.codegpt.CodeGPTPlugin;
 import java.nio.charset.StandardCharsets;
 import javax.swing.JPanel;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public class LlamaServerAgent {
+@Service
+public final class LlamaServerAgent {
 
   private static final Logger LOG = Logger.getInstance(LlamaServerAgent.class);
 
-  private final String customModelPath;
+  private static @Nullable OSProcessHandler makeProcessHandler;
+  private static @Nullable OSProcessHandler startServerProcessHandler;
 
-  public LlamaServerAgent(String customModelPath) {
-    this.customModelPath = customModelPath;
-  }
-
-  public void startAgent(String modelPath, Runnable onSuccess, JPanel startServerLinkWrapper) {
+  public void startAgent(
+      String modelPath,
+      Runnable onSuccess,
+      Runnable onTerminated,
+      JPanel startServerLinkWrapper) {
     ApplicationManager.getApplication().invokeLater(() -> {
       try {
         startServerLinkWrapper.removeAll();
@@ -41,19 +43,32 @@ public class LlamaServerAgent {
         startServerLinkWrapper.repaint();
         startServerLinkWrapper.revalidate();
 
-        var process = new OSProcessHandler(getMakeCommandLinde());
-        process.addProcessListener(
-            getMakeProcessListener(modelPath, onSuccess, startServerLinkWrapper));
-        process.startNotify();
+        makeProcessHandler = new OSProcessHandler(getMakeCommandLinde());
+        makeProcessHandler.addProcessListener(
+            getMakeProcessListener(modelPath, onSuccess, onTerminated, startServerLinkWrapper));
+        makeProcessHandler.startNotify();
       } catch (ExecutionException e) {
         throw new RuntimeException(e);
       }
     });
   }
 
+  public void stopAgent() {
+    if (startServerProcessHandler != null) {
+      startServerProcessHandler.destroyProcess();
+    }
+  }
+
+  public boolean isServerRunning() {
+    return startServerProcessHandler != null &&
+        startServerProcessHandler.isStartNotified() &&
+        !startServerProcessHandler.isProcessTerminated();
+  }
+
   private ProcessListener getMakeProcessListener(
       String modelPath,
       Runnable onSuccess,
+      Runnable onTerminated,
       JPanel startServerLinkWrapper) {
     return new ProcessAdapter() {
       @Override
@@ -63,7 +78,6 @@ public class LlamaServerAgent {
 
       @Override
       public void processTerminated(@NotNull ProcessEvent event) {
-        ProcessHandler processHandler;
         try {
           startServerLinkWrapper.removeAll();
           startServerLinkWrapper.add(JBUI.Panels.simplePanel(4, 0)
@@ -72,19 +86,24 @@ public class LlamaServerAgent {
           startServerLinkWrapper.repaint();
           startServerLinkWrapper.revalidate();
 
-          processHandler = new OSProcessHandler(getServerCommandLine(modelPath));
+          startServerProcessHandler = new OSProcessHandler(getServerCommandLine(modelPath));
+          startServerProcessHandler.addProcessListener(getProcessListener(onSuccess, onTerminated));
+          startServerProcessHandler.startNotify();
         } catch (ExecutionException e) {
           throw new RuntimeException(e);
         }
-        processHandler.addProcessListener(getProcessListener(onSuccess));
-        processHandler.startNotify();
       }
     };
   }
 
-  private ProcessListener getProcessListener(Runnable onSuccess) {
+  private ProcessListener getProcessListener(Runnable onSuccess, Runnable onTerminated) {
     return new ProcessAdapter() {
       private final ObjectMapper objectMapper = new ObjectMapper();
+
+      @Override
+      public void processTerminated(@NotNull ProcessEvent event) {
+        onTerminated.run();
+      }
 
       @Override
       public void onTextAvailable(@NotNull ProcessEvent event, @NotNull Key outputType) {
@@ -112,12 +131,10 @@ public class LlamaServerAgent {
     return commandLine;
   }
 
-  private GeneralCommandLine getServerCommandLine(String fileName) {
+  private GeneralCommandLine getServerCommandLine(String modelPath) {
     GeneralCommandLine commandLine = new GeneralCommandLine().withCharset(StandardCharsets.UTF_8);
     commandLine.setExePath("./server");
     commandLine.withWorkDirectory(CodeGPTPlugin.getLlamaSourcePath());
-
-    var modelPath = StringUtil.isEmpty(customModelPath) ? "models/" + fileName : customModelPath;
     commandLine.addParameters("-m", modelPath, "-c", "2048");
     commandLine.setRedirectErrorStream(false);
     return commandLine;

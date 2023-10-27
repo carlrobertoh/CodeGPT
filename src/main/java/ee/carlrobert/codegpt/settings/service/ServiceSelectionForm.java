@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.settings;
+package ee.carlrobert.codegpt.settings.service;
 
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
@@ -15,6 +15,7 @@ import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.completions.HuggingFaceModel;
+import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
 import ee.carlrobert.codegpt.completions.you.YouUserManager;
 import ee.carlrobert.codegpt.completions.you.auth.AuthenticationNotifier;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
@@ -431,5 +432,21 @@ public class ServiceSelectionForm {
 
   public JPanel getLlamaServiceSectionPanel() {
     return llamaServiceSectionPanel;
+  }
+
+  public void setUseCustomLlamaModel(boolean useCustomLlamaModel) {
+    llamaServiceSectionPanel.setUseCustomLlamaModel(useCustomLlamaModel);
+  }
+
+  public boolean isUseCustomLlamaModel() {
+    return llamaServiceSectionPanel.isUseCustomLlamaModel();
+  }
+
+  public void setPromptTemplate(PromptTemplate promptTemplate) {
+    llamaServiceSectionPanel.setPromptTemplate(promptTemplate);
+  }
+
+  public PromptTemplate getPromptTemplate() {
+    return llamaServiceSectionPanel.getPromptTemplate();
   }
 }

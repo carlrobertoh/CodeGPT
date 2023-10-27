@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.settings;
+package ee.carlrobert.codegpt.settings.service;
 
 import ee.carlrobert.codegpt.CodeGPTBundle;
 
