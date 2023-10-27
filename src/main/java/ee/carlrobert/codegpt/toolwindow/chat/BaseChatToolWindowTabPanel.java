@@ -5,7 +5,6 @@ import static ee.carlrobert.codegpt.util.ThemeUtils.getPanelBackgroundColor;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 
-import com.intellij.ide.HelpTooltip;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.project.Project;
@@ -38,6 +37,7 @@ import ee.carlrobert.codegpt.toolwindow.chat.components.UserMessagePanel;
 import ee.carlrobert.codegpt.toolwindow.chat.components.UserPromptTextArea;
 import ee.carlrobert.codegpt.util.EditorUtils;
 import ee.carlrobert.codegpt.util.OverlayUtils;
+import ee.carlrobert.codegpt.util.SwingUtils;
 import ee.carlrobert.codegpt.util.file.FileUtils;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
@@ -50,6 +50,7 @@ import java.util.UUID;
 import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.JTextPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import org.jetbrains.annotations.NotNull;
@@ -105,8 +106,32 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
   public void displayLandingView() {
     scrollablePanel.removeAll();
     scrollablePanel.add(getLandingView());
+    if (SettingsState.getInstance().isUseYouService() &&
+        !YouUserManager.getInstance().isAuthenticated()) {
+      scrollablePanel.add(new ResponsePanel().addContent(createTextPane()));
+    }
     scrollablePanel.repaint();
     scrollablePanel.revalidate();
+  }
+
+  private JTextPane createTextPane() {
+    var textPane = new JTextPane();
+    textPane.addHyperlinkListener(SwingUtils::handleHyperlinkClicked);
+    textPane.setBackground(getPanelBackgroundColor());
+    textPane.setContentType("text/html");
+    textPane.putClientProperty(JTextPane.HONOR_DISPLAY_PROPERTIES, true);
+    textPane.setFocusable(false);
+    textPane.setEditable(false);
+    textPane.setText(
+        "<html>\n"
+            + "<body>\n"
+            + "  <p style=\"margin: 4px 0;\">Use CodeGPT coupon for free month of GPT-4.</p>\n"
+            + "  <p style=\"margin: 4px 0;\">\n"
+            + "    <a href=\"https://you.com/plans\">Sign up here</a>\n"
+            + "  </p>\n"
+            + "</body>\n"
+            + "</html>");
+    return textPane;
   }
 
   @Override
@@ -407,9 +432,10 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
   }
 
   private String getTooltipText(boolean selected) {
-    return selected ?
-        "Turn off for faster responses" :
-        "<html>Turn on for complex queries, enable by creating an account on you.com<br />and signing in from plugin settings.<br />Use CodeGPT coupon for free month of GPT-4.</html>";
+    if (YouUserManager.getInstance().isAuthenticated()) {
+      return selected ? "Turn off for faster responses" : "Turn on for complex queries";
+    }
+    return "Enable by creating an account on you.com<br />and signing in from plugin settings";
   }
 
   private String getClientCode() {

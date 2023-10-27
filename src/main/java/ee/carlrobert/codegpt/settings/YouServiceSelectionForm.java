@@ -26,6 +26,7 @@ import ee.carlrobert.codegpt.util.SwingUtils;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.util.regex.Pattern;
+import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -133,7 +134,7 @@ public class YouServiceSelectionForm extends JPanel {
 
   private JTextPane createSignUpTextPane() {
     var textPane = createTextPane(
-        "<html><a href=\"https://you.com/code\" style=\"padding:0;\">Don't have an account?<br/>Sign up with 'CodeGPT' coupon for free GPT-4</a></html>");
+        "<html><a href=\"https://you.com/code\">Don't have an account? Sign up</a></html>");
     textPane.setBorder(JBUI.Borders.emptyLeft(4));
     return textPane;
   }
@@ -175,12 +176,23 @@ public class YouServiceSelectionForm extends JPanel {
       contentPanelBuilder.addComponentToRightColumn(invalidCredentialsLabel);
     }
 
+    var wrapper = new JPanel(new FlowLayout(FlowLayout.LEFT, 16, 0));
+    wrapper.add(JBUI.Panels.simplePanel(contentPanelBuilder.getPanel()));
+    wrapper.add(Box.createHorizontalStrut(16));
+    wrapper.add(new JBLabel(
+        "<html>"
+            + "<body>"
+            + "<h1 style=\"text-align: center; padding: 0; margin: 0;\">Free GPT-4</h1>"
+            + "<p style=\"text-align: center; margin-top: 8px; margin-bottom: 8px;\">Your coupon code</p>"
+            + "<h1 style=\"text-align: center; border: 2px dotted #646464; padding: 4px 32px; margin: 0 0 12px 0; background-color: #45494a; cursor: pointer;\">CODEGPT</h1>"
+            + "</body>"
+            + "</html>")
+        .setCopyable(true));
+
     return FormBuilder.createFormBuilder()
         .addComponent(new TitledSeparator(
             CodeGPTBundle.get("settingsConfigurable.section.userAuthentication.title")))
-        .addComponent(JBUI.Panels
-            .simplePanel(contentPanelBuilder.getPanel())
-            .withBorder(JBUI.Borders.emptyLeft(16)))
+        .addComponent(wrapper)
         .getPanel();
   }
 
