@@ -9,6 +9,7 @@ import ee.carlrobert.codegpt.completions.you.auth.response.YouAuthenticationResp
 public final class YouUserManager {
 
   private YouAuthenticationResponse authenticationResponse;
+  private boolean subscribed;
 
   private YouUserManager() {
   }
@@ -27,14 +28,19 @@ public final class YouUserManager {
 
   public void clearSession() {
     authenticationResponse = null;
+    subscribed = false;
 
     ApplicationManager.getApplication().getMessageBus()
         .syncPublisher(SignedOutNotifier.SIGNED_OUT_TOPIC)
         .signedOut();
   }
 
+  public void setSubscribed(boolean subscribed) {
+    this.subscribed = subscribed;
+  }
+
   public boolean isSubscribed() {
-    return true; // TODO
+    return subscribed;
   }
 
   public boolean isAuthenticated() {

@@ -12,14 +12,16 @@ import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBScrollPane;
+import com.intellij.util.messages.MessageBusConnection;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.JBUI.Borders;
 import ee.carlrobert.codegpt.actions.ActionType;
 import ee.carlrobert.codegpt.completions.CompletionRequestHandler;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.completions.you.YouSerpResult;
+import ee.carlrobert.codegpt.completions.you.YouSubscriptionNotifier;
 import ee.carlrobert.codegpt.completions.you.YouUserManager;
-import ee.carlrobert.codegpt.completions.you.auth.AuthenticationNotifier;
+import ee.carlrobert.codegpt.completions.you.auth.SignedOutNotifier;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
@@ -108,8 +110,9 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
   public void displayLandingView() {
     scrollablePanel.removeAll();
     scrollablePanel.add(getLandingView());
+    var youUserManager = YouUserManager.getInstance();
     if (SettingsState.getInstance().isUseYouService() &&
-        !YouUserManager.getInstance().isAuthenticated()) {
+        (!youUserManager.isAuthenticated() || !youUserManager.isSubscribed())) {
       scrollablePanel.add(new ResponsePanel().addContent(createTextPane()));
     }
     scrollablePanel.repaint();
@@ -387,8 +390,10 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
       header.setBackground(getPanelBackgroundColor());
       header.setBorder(JBUI.Borders.emptyBottom(8));
       if ("YouCode".equals(model)) {
+        var messageBusConnection = ApplicationManager.getApplication().getMessageBus().connect();
         subscribeToYouModelChangeTopic();
-        subscribeToYouAuthTopic();
+        subscribeToYouSubscriptionTopic(messageBusConnection);
+        subscribeToSignedOutTopic(messageBusConnection);
         header.add(gpt4CheckBox, BorderLayout.LINE_START);
       }
       header.add(modelIconWrapper, BorderLayout.LINE_END);
@@ -399,6 +404,12 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     userPromptTextArea.requestFocus();
   }
 
+  private void subscribeToSignedOutTopic(MessageBusConnection messageBusConnection) {
+    messageBusConnection.subscribe(
+        SignedOutNotifier.SIGNED_OUT_TOPIC,
+        (SignedOutNotifier) () -> gpt4CheckBox.setEnabled(false));
+  }
+
   private void subscribeToYouModelChangeTopic() {
     project.getMessageBus()
         .connect()
@@ -407,24 +418,26 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
             (YouModelChangeNotifier) gpt4CheckBox::setSelected);
   }
 
-  private void subscribeToYouAuthTopic() {
-    ApplicationManager.getApplication()
-        .getMessageBus()
-        .connect()
-        .subscribe(AuthenticationNotifier.AUTHENTICATION_TOPIC,
-            (AuthenticationNotifier) () -> gpt4CheckBox.setEnabled(true));
+  private void subscribeToYouSubscriptionTopic(MessageBusConnection messageBusConnection) {
+    messageBusConnection.subscribe(
+        YouSubscriptionNotifier.SUBSCRIPTION_TOPIC,
+        (YouSubscriptionNotifier) () -> {
+          displayLandingView();
+          gpt4CheckBox.setEnabled(true);
+        });
   }
 
   private JBCheckBox createGPT4ModelCheckBox() {
     var gpt4CheckBox = new JBCheckBox("Use GPT-4 model");
     gpt4CheckBox.setOpaque(false);
-    gpt4CheckBox.setEnabled(YouUserManager.getInstance().isAuthenticated());
+    gpt4CheckBox.setEnabled(YouUserManager.getInstance().isSubscribed());
     gpt4CheckBox.setSelected(YouSettingsState.getInstance().isUseGPT4Model());
     gpt4CheckBox.setToolTipText(getTooltipText(gpt4CheckBox.isSelected()));
     gpt4CheckBox.addChangeListener(e -> {
       var selected = ((JBCheckBox) e.getSource()).isSelected();
       var tooltipText = getTooltipText(selected);
       gpt4CheckBox.setToolTipText(tooltipText);
+      // TODO: Remove
       project.getMessageBus()
           .syncPublisher(YouModelChangeNotifier.YOU_MODEL_CHANGE_NOTIFIER_TOPIC)
           .modelChanged(selected);
@@ -434,10 +447,10 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
   }
 
   private String getTooltipText(boolean selected) {
-    if (YouUserManager.getInstance().isAuthenticated()) {
+    if (YouUserManager.getInstance().isSubscribed()) {
       return selected ? "Turn off for faster responses" : "Turn on for complex queries";
     }
-    return "Enable by creating an account on you.com<br />and signing in from plugin settings";
+    return "Enable by subscribing to YouPro plan";
   }
 
   private String getClientCode() {

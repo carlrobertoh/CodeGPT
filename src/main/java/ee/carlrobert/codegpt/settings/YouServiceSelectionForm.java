@@ -26,7 +26,6 @@ import ee.carlrobert.codegpt.util.SwingUtils;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.util.regex.Pattern;
-import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -162,7 +161,19 @@ public class YouServiceSelectionForm extends JPanel {
       JBTextField emailAddressField,
       JBPasswordField passwordField,
       @Nullable YouAuthenticationError error) {
+    var couponLabel = new JBLabel(
+        "<html>"
+            + "<body>"
+            + "<h1 style=\"text-align: center; padding: 0; margin: 0;\">Free GPT-4</h1>"
+            + "<p style=\"text-align: center; margin-top: 8px; margin-bottom: 8px;\">Your coupon code</p>"
+            + "<h1 style=\"text-align: center; border: 2px dotted #646464; padding: 4px 32px; margin: 0 0 12px 0; background-color: #45494a; cursor: pointer;\">CODEGPT</h1>"
+            + "</body>"
+            + "</html>")
+        .withBorder(JBUI.Borders.emptyLeft(45)) // TODO
+        .setCopyable(true);
+
     var contentPanelBuilder = FormBuilder.createFormBuilder()
+        .addComponentToRightColumn(JBUI.Panels.simplePanel().addToLeft(couponLabel))
         .addLabeledComponent("Email address:", emailAddressField)
         .addLabeledComponent("Password:", passwordField)
         .addVerticalGap(4)
@@ -176,8 +187,8 @@ public class YouServiceSelectionForm extends JPanel {
       contentPanelBuilder.addComponentToRightColumn(invalidCredentialsLabel);
     }
 
-    var wrapper = new JPanel(new FlowLayout(FlowLayout.LEFT, 16, 0));
-    wrapper.add(JBUI.Panels.simplePanel(contentPanelBuilder.getPanel()));
+    /*var wrapper = new JPanel(new FlowLayout(FlowLayout.LEFT, 16, 0));
+    wrapper.add(JBUI.Panels.simplePanel());
     wrapper.add(Box.createHorizontalStrut(16));
     wrapper.add(new JBLabel(
         "<html>"
@@ -187,12 +198,15 @@ public class YouServiceSelectionForm extends JPanel {
             + "<h1 style=\"text-align: center; border: 2px dotted #646464; padding: 4px 32px; margin: 0 0 12px 0; background-color: #45494a; cursor: pointer;\">CODEGPT</h1>"
             + "</body>"
             + "</html>")
-        .setCopyable(true));
+        .setCopyable(true));*/
+
+    var contentPanel = contentPanelBuilder.getPanel();
+    contentPanel.setBorder(JBUI.Borders.emptyLeft(16));
 
     return FormBuilder.createFormBuilder()
         .addComponent(new TitledSeparator(
             CodeGPTBundle.get("settingsConfigurable.section.userAuthentication.title")))
-        .addComponent(wrapper)
+        .addComponent(contentPanel)
         .getPanel();
   }
 
