@@ -130,12 +130,32 @@ public enum HuggingFaceModel {
       23.84,
       "codellama-34b-python.Q5_K_M.gguf",
       "https://huggingface.co/TheBloke/CodeLlama-34B-Python-GGUF/resolve/main/codellama-34b-python.Q5_K_M.gguf"),
-
-  PHIND_CODE_LLAMA_34B_Q3_K_M(
+  CODE_BOOGA_34B_Q3_K_M(
       34,
       3,
       18.78,
       16.28,
+      "codebooga-34b-v0.1.Q3_K_M.gguf",
+      "https://huggingface.co/TheBloke/CodeBooga-34B-v0.1-GGUF/resolve/main/codebooga-34b-v0.1.Q3_K_M.gguf"),
+  CODE_BOOGA_34B_Q4_K_M(
+      34,
+      4,
+      22.72,
+      20.22,
+      "codebooga-34b-v0.1.Q4_K_M.gguf",
+      "https://huggingface.co/TheBloke/CodeBooga-34B-v0.1-GGUF/resolve/main/codebooga-34b-v0.1.Q4_K_M.gguf"),
+  CODE_BOOGA_34B_Q5_K_M(
+      34,
+      5,
+      26.34,
+      23.84,
+      "codebooga-34b-v0.1.Q5_K_M.gguf",
+      "https://huggingface.co/TheBloke/CodeBooga-34B-v0.1-GGUF/resolve/main/codebooga-34b-v0.1.Q5_K_M.gguf"),
+  PHIND_CODE_LLAMA_34B_Q3_K_M(
+      34,
+      5,
+      26.34,
+      23.84,
       "phind-codellama-34b-v2.Q3_K_M.gguf",
       "https://huggingface.co/TheBloke/Phind-CodeLlama-34B-v2-GGUF/resolve/main/phind-codellama-34b-v2.Q3_K_M.gguf"
   ),

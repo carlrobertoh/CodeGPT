@@ -263,24 +263,22 @@ public class LlamaServiceSelectionForm extends JPanel {
       DefaultComboBoxModel<HuggingFaceModel> huggingFaceModelComboBoxModel) {
 
     var progressLabel = new JBLabel("");
-    downloadModelLinkWrapper.removeAll();
-    downloadModelLinkWrapper.add(progressLabel);
-    downloadModelLinkWrapper.repaint();
-    downloadModelLinkWrapper.revalidate();
-
     var downloadModelLink = new AnActionLink(
         "Download model",
         new DownloadModelAction(
             () -> {
-              downloadModelLinkWrapper.setVisible(false);
-              modelExistsIcon.setVisible(true);
+              downloadModelLinkWrapper.removeAll();
+              downloadModelLinkWrapper.add(progressLabel);
+              downloadModelLinkWrapper.repaint();
+              downloadModelLinkWrapper.revalidate();
             },
+            () -> modelExistsIcon.setVisible(true),
             (error) -> {
               throw new RuntimeException(error);
             },
-            (HuggingFaceModel) huggingFaceModelComboBoxModel.getSelectedItem(),
+            huggingFaceModelComboBoxModel,
             progressLabel));
-    downloadModelLinkWrapper.addToLeft(downloadModelLink);
+    downloadModelLinkWrapper.add(downloadModelLink);
 
     var helpText = ComponentPanelBuilder.createCommentComponent("Only .gguf files are supported",
         true);

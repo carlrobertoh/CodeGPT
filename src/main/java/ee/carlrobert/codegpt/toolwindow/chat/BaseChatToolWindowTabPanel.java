@@ -485,7 +485,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
       var huggingFaceModel = LlamaSettingsState.getInstance().getHuggingFaceModel();
       var llamaModel = LlamaModel.findByHuggingFaceModel(huggingFaceModel);
       return String.format(
-          "%s %dB (%d - bits)",
+          "%s %dB (Q%d)",
           llamaModel,
           huggingFaceModel.getParameterSize(),
           huggingFaceModel.getQuantization());

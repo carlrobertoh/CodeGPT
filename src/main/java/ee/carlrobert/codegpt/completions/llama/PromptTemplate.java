@@ -8,7 +8,7 @@ public enum PromptTemplate {
           + "{system_prompt}\n"
           + "<|im_start|>user\n"
           + "{prompt}<|im_end|>\n"),
-  LLAMA("Llama", "<s>[INST] {prompt} [/INST]</s>"),
+  LLAMA("Llama", "[INST] {prompt} [/INST]"),
   TORA(
       "ToRA",
       "<|user|>\n"
@@ -25,23 +25,23 @@ public enum PromptTemplate {
           + "### Assistant");
 
   private final String label;
-  private final String promptTemplate;
+  private final String template;
 
-  PromptTemplate(String label, String promptTemplate) {
+  PromptTemplate(String label, String template) {
     this.label = label;
-    this.promptTemplate = promptTemplate;
+    this.template = template;
   }
 
   public String getLabel() {
     return label;
   }
 
-  public String getPromptTemplate() {
-    return promptTemplate;
+  public String getTemplate() {
+    return template;
   }
 
   public String buildPrompt(String systemPrompt, String userPrompt) {
-    return promptTemplate
+    return template
         .replace("{system_prompt}", systemPrompt)
         .replace("{prompt}", userPrompt);
   }

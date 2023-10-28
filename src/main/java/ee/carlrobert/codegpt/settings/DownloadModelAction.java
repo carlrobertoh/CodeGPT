@@ -25,25 +25,29 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import javax.swing.DefaultComboBoxModel;
 import org.jetbrains.annotations.NotNull;
 
 public class DownloadModelAction extends AnAction {
 
   private static final Logger LOG = Logger.getInstance(DownloadModelAction.class);
 
+  private final Runnable onDownload;
   private final Runnable onDownloaded;
   private final Consumer<Exception> onFailed;
   private final JBLabel progressLabel;
-  private final HuggingFaceModel model;
+  private final DefaultComboBoxModel<HuggingFaceModel> comboBoxModel;
 
   public DownloadModelAction(
+      Runnable onDownload,
       Runnable onDownloaded,
       Consumer<Exception> onFailed,
-      HuggingFaceModel model,
+      DefaultComboBoxModel<HuggingFaceModel> comboBoxModel,
       JBLabel progressLabel) {
+    this.onDownload = onDownload;
     this.onDownloaded = onDownloaded;
     this.onFailed = onFailed;
-    this.model = model;
+    this.comboBoxModel = comboBoxModel;
     this.progressLabel = progressLabel;
   }
 
@@ -55,6 +59,7 @@ public class DownloadModelAction extends AnAction {
         true) {
       @Override
       public void run(@NotNull ProgressIndicator indicator) {
+        var model = (HuggingFaceModel) comboBoxModel.getSelectedItem();
         URL url;
         try {
           url = new URL(model.getFilePath());
@@ -66,6 +71,8 @@ public class DownloadModelAction extends AnAction {
         ScheduledFuture<?> progressUpdateScheduler = null;
 
         try {
+          onDownload.run();
+
           indicator.setIndeterminate(false);
           indicator.setText(format("Downloading %s...", model.getFileName()));
 
@@ -77,7 +84,7 @@ public class DownloadModelAction extends AnAction {
             progressLabel.setText(
                 DownloadingUtils.getFormattedDownloadProgress(startTime, fileSize, bytesRead[0]));
           }, 0, 1, TimeUnit.SECONDS);
-          readFile(url, bytesRead, fileSize, indicator);
+          readFile(model.getFileName(), url, bytesRead, fileSize, indicator);
 
           onDownloaded.run();
         } catch (IOException ex) {
@@ -93,11 +100,16 @@ public class DownloadModelAction extends AnAction {
     });
   }
 
-  private void readFile(URL url, long[] bytesRead, long fileSize, ProgressIndicator indicator) {
+  private void readFile(
+      String fileName,
+      URL url,
+      long[] bytesRead,
+      long fileSize,
+      ProgressIndicator indicator) {
     try (
         var readableByteChannel = Channels.newChannel(url.openStream());
         var fileOutputStream = new FileOutputStream(
-            CodeGPTPlugin.getLlamaModelsPath() + File.separator + model.getFileName())) {
+            CodeGPTPlugin.getLlamaModelsPath() + File.separator + fileName)) {
       ByteBuffer buffer = ByteBuffer.allocateDirect(1024 * 10);
 
       while (readableByteChannel.read(buffer) != -1) {
