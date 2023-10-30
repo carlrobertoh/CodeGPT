@@ -8,16 +8,16 @@ import com.intellij.execution.process.ProcessAdapter;
 import com.intellij.execution.process.ProcessEvent;
 import com.intellij.execution.process.ProcessListener;
 import com.intellij.execution.process.ProcessOutputType;
+import com.intellij.icons.AllIcons.Actions;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.Key;
 import com.intellij.ui.components.JBLabel;
-import com.intellij.util.ui.AsyncProcessIcon;
-import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
+import ee.carlrobert.codegpt.settings.service.ServerProgressPanel;
 import java.nio.charset.StandardCharsets;
-import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,23 +29,13 @@ public final class LlamaServerAgent {
   private static @Nullable OSProcessHandler makeProcessHandler;
   private static @Nullable OSProcessHandler startServerProcessHandler;
 
-  public void startAgent(
-      String modelPath,
-      Runnable onSuccess,
-      Runnable onTerminated,
-      JPanel startServerLinkWrapper) {
+  public void startAgent(String modelPath, ServerProgressPanel serverProgressPanel) {
     ApplicationManager.getApplication().invokeLater(() -> {
       try {
-        startServerLinkWrapper.removeAll();
-        startServerLinkWrapper.add(JBUI.Panels.simplePanel(4, 0)
-            .addToLeft(new JBLabel("Building llama.cpp..."))
-            .addToRight(new AsyncProcessIcon("sign_in_spinner")));
-        startServerLinkWrapper.repaint();
-        startServerLinkWrapper.revalidate();
-
+        serverProgressPanel.updateText("Building llama.cpp...");
         makeProcessHandler = new OSProcessHandler(getMakeCommandLinde());
         makeProcessHandler.addProcessListener(
-            getMakeProcessListener(modelPath, onSuccess, onTerminated, startServerLinkWrapper));
+            getMakeProcessListener(modelPath, serverProgressPanel));
         makeProcessHandler.startNotify();
       } catch (ExecutionException e) {
         throw new RuntimeException(e);
@@ -67,27 +57,20 @@ public final class LlamaServerAgent {
 
   private ProcessListener getMakeProcessListener(
       String modelPath,
-      Runnable onSuccess,
-      Runnable onTerminated,
-      JPanel startServerLinkWrapper) {
+      ServerProgressPanel serverProgressPanel) {
     return new ProcessAdapter() {
       @Override
       public void onTextAvailable(@NotNull ProcessEvent event, @NotNull Key outputType) {
+        System.out.println(event.getText()); // TODO
         LOG.info(event.getText());
       }
 
       @Override
       public void processTerminated(@NotNull ProcessEvent event) {
         try {
-          startServerLinkWrapper.removeAll();
-          startServerLinkWrapper.add(JBUI.Panels.simplePanel(4, 0)
-              .addToLeft(new JBLabel("Booting up server..."))
-              .addToRight(new AsyncProcessIcon("sign_in_spinner")));
-          startServerLinkWrapper.repaint();
-          startServerLinkWrapper.revalidate();
-
+          serverProgressPanel.updateText("Booting up server...");
           startServerProcessHandler = new OSProcessHandler(getServerCommandLine(modelPath));
-          startServerProcessHandler.addProcessListener(getProcessListener(onSuccess, onTerminated));
+          startServerProcessHandler.addProcessListener(getProcessListener(serverProgressPanel));
           startServerProcessHandler.startNotify();
         } catch (ExecutionException e) {
           throw new RuntimeException(e);
@@ -96,24 +79,30 @@ public final class LlamaServerAgent {
     };
   }
 
-  private ProcessListener getProcessListener(Runnable onSuccess, Runnable onTerminated) {
+  private ProcessListener getProcessListener(ServerProgressPanel serverProgressPanel) {
     return new ProcessAdapter() {
       private final ObjectMapper objectMapper = new ObjectMapper();
 
       @Override
       public void processTerminated(@NotNull ProcessEvent event) {
-        onTerminated.run();
+        serverProgressPanel.displayComponent(new JBLabel(
+            "Server terminated",
+            Actions.Cancel,
+            SwingConstants.LEADING));
       }
 
       @Override
       public void onTextAvailable(@NotNull ProcessEvent event, @NotNull Key outputType) {
-        System.out.println(event.getText());
+        System.out.println(event.getText()); // TODO
 
         if (outputType == ProcessOutputType.STDOUT) {
           try {
             var serverMessage = objectMapper.readValue(event.getText(), LlamaServerMessage.class);
             if ("HTTP server listening".equals(serverMessage.getMessage())) {
-              onSuccess.run();
+              serverProgressPanel.displayComponent(new JBLabel(
+                  "Server running",
+                  Actions.Commit,
+                  SwingConstants.LEADING));
             }
           } catch (Exception ignore) {
           }

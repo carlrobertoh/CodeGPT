@@ -14,7 +14,7 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
 
   private boolean useCustomModel;
   private String customLlamaModelPath = "";
-  private HuggingFaceModel huggingFaceModel = HuggingFaceModel.CODE_LLAMA_7B_Q4_K_M;
+  private HuggingFaceModel huggingFaceModel = HuggingFaceModel.CODE_LLAMA_7B_Q4;
   private PromptTemplate promptTemplate = PromptTemplate.LLAMA;
   private int serverPort = 8080;
 

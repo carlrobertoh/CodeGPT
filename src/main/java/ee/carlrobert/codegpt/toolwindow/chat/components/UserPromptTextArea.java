@@ -171,6 +171,7 @@ public class UserPromptTextArea extends JPanel {
     }
   }
 
+  // TODO: IconActionButton?
   private JButton createIconButton(Icon icon, @Nullable Runnable submitListener) {
     var button = SwingUtils.createIconButton(icon);
     if (submitListener != null) {

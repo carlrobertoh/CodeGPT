@@ -14,8 +14,6 @@ import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
-import ee.carlrobert.codegpt.completions.HuggingFaceModel;
-import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
 import ee.carlrobert.codegpt.completions.you.YouUserManager;
 import ee.carlrobert.codegpt.completions.you.auth.AuthenticationNotifier;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
@@ -23,7 +21,6 @@ import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.YouServiceSelectionForm;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
-import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.settings.state.YouSettingsState;
 import ee.carlrobert.codegpt.util.SwingUtils;
 import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionModel;
@@ -65,7 +62,7 @@ public class ServiceSelectionForm {
 
   private final LlamaServiceSelectionForm llamaServiceSectionPanel;
 
-  public ServiceSelectionForm(Disposable parentDisposable, SettingsState settings) {
+  public ServiceSelectionForm(Disposable parentDisposable) {
     this.parentDisposable = parentDisposable;
     var openAISettings = OpenAISettingsState.getInstance();
     var azureSettings = AzureSettingsState.getInstance();
@@ -379,20 +376,8 @@ public class ServiceSelectionForm {
     return displayWebSearchResultsCheckBox.isSelected();
   }
 
-  public void setHuggingFaceModel(HuggingFaceModel model) {
-    llamaServiceSectionPanel.setSelectedModel(model);
-  }
-
-  public HuggingFaceModel getHuggingFaceModel() {
-    return llamaServiceSectionPanel.getSelectedModel();
-  }
-
-  public void setLlamaModelPath(String modelPath) {
-    llamaServiceSectionPanel.setModelDestinationPath(modelPath);
-  }
-
-  public String getLlamaModelPath() {
-    return llamaServiceSectionPanel.getModelDestinationPath();
+  public LlamaModelPreferencesForm getLlamaModelPreferencesForm() {
+    return llamaServiceSectionPanel.getLlamaModelPreferencesForm();
   }
 
   public void setOpenAIPath(String path) {
@@ -433,21 +418,5 @@ public class ServiceSelectionForm {
 
   public JPanel getLlamaServiceSectionPanel() {
     return llamaServiceSectionPanel;
-  }
-
-  public void setUseCustomLlamaModel(boolean useCustomLlamaModel) {
-    llamaServiceSectionPanel.setUseCustomLlamaModel(useCustomLlamaModel);
-  }
-
-  public boolean isUseCustomLlamaModel() {
-    return llamaServiceSectionPanel.isUseCustomLlamaModel();
-  }
-
-  public void setPromptTemplate(PromptTemplate promptTemplate) {
-    llamaServiceSectionPanel.setPromptTemplate(promptTemplate);
-  }
-
-  public PromptTemplate getPromptTemplate() {
-    return llamaServiceSectionPanel.getPromptTemplate();
   }
 }

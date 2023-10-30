@@ -26,7 +26,7 @@ public class SettingsComponent {
   public SettingsComponent(Disposable parentDisposable, SettingsState settings) {
     displayNameField = new JBTextField(settings.getDisplayName(), 20);
 
-    serviceSelectionForm = new ServiceSelectionForm(parentDisposable, settings);
+    serviceSelectionForm = new ServiceSelectionForm(parentDisposable);
     var cardLayout = new CardLayout();
     var cards = new JPanel(cardLayout);
     cards.add(serviceSelectionForm.getOpenAIServiceSectionPanel(), ServiceType.OPENAI.getCode());
@@ -89,7 +89,7 @@ public class SettingsComponent {
           if (component instanceof ComboBox) {
             var selectedItem = ((ComboBox<?>) component).getSelectedItem();
             if (selectedItem == ServiceType.OPENAI &&
-                !OpenAISettingsState.getInstance().isOpenAIQuotaExceeded()) {
+                OpenAISettingsState.getInstance().isOpenAIQuotaExceeded()) {
               return new ValidationInfo("OpenAI quota exceeded.", component);
             }
           }

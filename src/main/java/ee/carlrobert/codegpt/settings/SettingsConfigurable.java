@@ -59,6 +59,7 @@ public class SettingsConfigurable implements Configurable {
     var llamaSettings = LlamaSettingsState.getInstance();
 
     var serviceSelectionForm = settingsComponent.getServiceSelectionForm();
+    var llamaModelPreferencesForm = serviceSelectionForm.getLlamaModelPreferencesForm();
     return !settingsComponent.getDisplayName().equals(settings.getDisplayName()) ||
         isServiceChanged(settings) ||
         openAISettings.isModified(serviceSelectionForm) ||
@@ -66,11 +67,12 @@ public class SettingsConfigurable implements Configurable {
         serviceSelectionForm.isDisplayWebSearchResults() !=
             YouSettingsState.getInstance().isDisplayWebSearchResults() ||
 
-        llamaSettings.isUseCustomModel() != serviceSelectionForm.isUseCustomLlamaModel() ||
+        llamaSettings.isUseCustomModel() != llamaModelPreferencesForm.isUseCustomLlamaModel() ||
         llamaSettings.getServerPort() != serviceSelectionForm.getLlamaServerPort() ||
-        llamaSettings.getHuggingFaceModel() != serviceSelectionForm.getHuggingFaceModel() ||
-        !llamaSettings.getPromptTemplate().equals(serviceSelectionForm.getPromptTemplate()) ||
-        !llamaSettings.getCustomLlamaModelPath().equals(serviceSelectionForm.getLlamaModelPath());
+        llamaSettings.getHuggingFaceModel() != llamaModelPreferencesForm.getSelectedModel() ||
+        !llamaSettings.getPromptTemplate().equals(llamaModelPreferencesForm.getPromptTemplate()) ||
+        !llamaSettings.getCustomLlamaModelPath()
+            .equals(llamaModelPreferencesForm.getCustomLlamaModelPath());
   }
 
   @Override
@@ -103,11 +105,12 @@ public class SettingsConfigurable implements Configurable {
         .setDisplayWebSearchResults(serviceSelectionForm.isDisplayWebSearchResults());
     settings.setUseLlamaService(settingsComponent.getSelectedService() == ServiceType.LLAMA_CPP);
 
-    llamaSettings.setCustomLlamaModelPath(serviceSelectionForm.getLlamaModelPath());
-    llamaSettings.setHuggingFaceModel(serviceSelectionForm.getHuggingFaceModel());
+    var llamaModelPreferencesForm = serviceSelectionForm.getLlamaModelPreferencesForm();
+    llamaSettings.setCustomLlamaModelPath(llamaModelPreferencesForm.getCustomLlamaModelPath());
+    llamaSettings.setHuggingFaceModel(llamaModelPreferencesForm.getSelectedModel());
+    llamaSettings.setUseCustomModel(llamaModelPreferencesForm.isUseCustomLlamaModel());
+    llamaSettings.setPromptTemplate(llamaModelPreferencesForm.getPromptTemplate());
     llamaSettings.setServerPort(serviceSelectionForm.getLlamaServerPort());
-    llamaSettings.setUseCustomModel(serviceSelectionForm.isUseCustomLlamaModel());
-    llamaSettings.setPromptTemplate(serviceSelectionForm.getPromptTemplate());
 
     openAISettings.apply(serviceSelectionForm);
     azureSettings.apply(serviceSelectionForm);
@@ -146,12 +149,12 @@ public class SettingsConfigurable implements Configurable {
     if (settings.isUseLlamaService()) {
       settingsComponent.setSelectedService(ServiceType.LLAMA_CPP);
     }
-
-    serviceSelectionForm.setHuggingFaceModel(llamaSettings.getHuggingFaceModel());
-    serviceSelectionForm.setLlamaModelPath(llamaSettings.getCustomLlamaModelPath());
-    serviceSelectionForm.setUseCustomLlamaModel(llamaSettings.isUseCustomModel());
+    var llamaModelPreferencesForm = serviceSelectionForm.getLlamaModelPreferencesForm();
+    llamaModelPreferencesForm.setSelectedModel(llamaSettings.getHuggingFaceModel());
+    llamaModelPreferencesForm.setCustomLlamaModelPath(llamaSettings.getCustomLlamaModelPath());
+    llamaModelPreferencesForm.setUseCustomLlamaModel(llamaSettings.isUseCustomModel());
+    llamaModelPreferencesForm.setPromptTemplate(llamaSettings.getPromptTemplate());
     serviceSelectionForm.setLlamaServerPort(llamaSettings.getServerPort());
-    serviceSelectionForm.setPromptTemplate(llamaSettings.getPromptTemplate());
 
     openAISettings.reset(serviceSelectionForm);
     azureSettings.reset(serviceSelectionForm);
