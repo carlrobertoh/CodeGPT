@@ -163,7 +163,7 @@ public class LlamaServiceSelectionForm extends JPanel {
     serverProgressPanel = new JPanel(new FlowLayout(FlowLayout.LEADING, 0, 0));
 
     var llamaServerAgent = ApplicationManager.getApplication().getService(LlamaServerAgent.class);
-    JButton button = new ServerActionButton(llamaServerAgent);
+    ServerActionButton button = new ServerActionButton(llamaServerAgent);
     button.addActionListener(e -> {
       if (llamaServerAgent.isServerRunning()) {
         button.setEnabled(true);
@@ -180,20 +180,14 @@ public class LlamaServiceSelectionForm extends JPanel {
         llamaServerAgent.startAgent(
             modelPath,
             () -> {
-              button.setText("Stop Server");
-              button.setIcon(Actions.Suspend);
-              button.setEnabled(true);
-
+              button.updateComponent(true);
               updateServerProgressPanel(new JBLabel(
                   "Server running",
                   Actions.Commit,
                   SwingConstants.TRAILING));
             },
             () -> {
-              button.setText("Start Server");
-              button.setIcon(Actions.Execute);
-              button.setEnabled(true);
-
+              button.updateComponent(false);
               updateServerProgressPanel(new JBLabel(
                   "Server terminated",
                   Actions.Cancel,
@@ -272,7 +266,10 @@ public class LlamaServiceSelectionForm extends JPanel {
               downloadModelLinkWrapper.repaint();
               downloadModelLinkWrapper.revalidate();
             },
-            () -> modelExistsIcon.setVisible(true),
+            () -> {
+              downloadModelLinkWrapper.setVisible(false);
+              modelExistsIcon.setVisible(true);
+            },
             (error) -> {
               throw new RuntimeException(error);
             },

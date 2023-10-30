@@ -1,50 +1,113 @@
 package ee.carlrobert.codegpt.completions.llama;
 
+import ee.carlrobert.codegpt.conversations.message.Message;
+import java.util.List;
+
 public enum PromptTemplate {
 
-  CHAT_ML(
-      "Chat Markup Language (ChatML)",
-      "<|im_start|>system\n"
-          + "{system_prompt}\n"
-          + "<|im_start|>user\n"
-          + "{prompt}<|im_end|>\n"),
-  LLAMA("Llama", "[INST] {prompt} [/INST]"),
-  TORA(
-      "ToRA",
-      "<|user|>\n"
-          + "{prompt}\n"
-          + "<|assistant|>"),
-  ALPACA(
-      "Alpaca/Vicuna",
-      "### System Prompt\n"
-          + "{system_prompt}\n"
-          + "\n"
-          + "### User Message\n"
-          + "{prompt}\n"
-          + "\n"
-          + "### Assistant");
+  CHAT_ML("Chat Markup Language (ChatML)") {
+    @Override
+    public String buildPrompt(String systemPrompt, String userPrompt, List<Message> history) {
+      StringBuilder prompt = new StringBuilder();
+
+      if (systemPrompt != null && !systemPrompt.isEmpty()) {
+        prompt.append("<|im_start|>system\n")
+            .append(systemPrompt)
+            .append("<|im_end|>\n");
+      }
+
+      for (Message message : history) {
+        prompt.append("<|im_start|>user\n")
+            .append(message.getPrompt())
+            .append("<|im_end|>\n")
+            .append("<|im_start|>assistant\n")
+            .append(message.getResponse())
+            .append("<|im_end|>\n");
+      }
+
+      return prompt.append("<|im_start|>user\n")
+          .append(userPrompt)
+          .append("<|im_end|>")
+          .toString();
+    }
+  },
+  LLAMA("Llama") {
+    @Override
+    public String buildPrompt(String systemPrompt, String userPrompt, List<Message> history) {
+      StringBuilder prompt = new StringBuilder();
+
+      if (systemPrompt != null && !systemPrompt.isEmpty()) {
+        prompt.append("<<SYS>>")
+            .append(systemPrompt)
+            .append("<</SYS>>\n");
+      }
+
+      for (Message message : history) {
+        prompt.append("[INST]")
+            .append(message.getPrompt())
+            .append("[/INST]\n")
+            .append(message.getResponse()).append("\n");
+      }
+
+      return prompt.append("[INST]")
+          .append(userPrompt)
+          .append("[/INST]")
+          .toString();
+    }
+  },
+  TORA("ToRA") {
+    @Override
+    public String buildPrompt(String systemPrompt, String userPrompt, List<Message> history) {
+      StringBuilder prompt = new StringBuilder();
+
+      for (Message message : history) {
+        prompt.append("<|user|>\n")
+            .append(message.getPrompt())
+            .append("\n<|assistant|>\n")
+            .append(message.getResponse()).append("\n");
+      }
+
+      return prompt.append("<|user|>\n")
+          .append(userPrompt)
+          .append("\n<|assistant|>")
+          .toString();
+    }
+  },
+  ALPACA("Alpaca/Vicuna") {
+    @Override
+    public String buildPrompt(String systemPrompt, String userPrompt, List<Message> history) {
+      StringBuilder prompt = new StringBuilder();
+
+      if (systemPrompt != null && !systemPrompt.isEmpty()) {
+        prompt.append("### System Prompt\n")
+            .append(systemPrompt)
+            .append("\n\n");
+      }
+
+      for (Message message : history) {
+        prompt.append("### User Message\n")
+            .append(message.getPrompt())
+            .append("\n\n")
+            .append("### Assistant\n")
+            .append(message.getResponse())
+            .append("\n\n");
+      }
+
+      return prompt.append("### User Message\n")
+          .append(userPrompt)
+          .append("\n\n")
+          .append("### Assistant")
+          .toString();
+    }
+  };
 
   private final String label;
-  private final String template;
 
-  PromptTemplate(String label, String template) {
+  PromptTemplate(String label) {
     this.label = label;
-    this.template = template;
   }
 
-  public String getLabel() {
-    return label;
-  }
-
-  public String getTemplate() {
-    return template;
-  }
-
-  public String buildPrompt(String systemPrompt, String userPrompt) {
-    return template
-        .replace("{system_prompt}", systemPrompt)
-        .replace("{prompt}", userPrompt);
-  }
+  public abstract String buildPrompt(String systemPrompt, String userPrompt, List<Message> history);
 
   @Override
   public String toString() {

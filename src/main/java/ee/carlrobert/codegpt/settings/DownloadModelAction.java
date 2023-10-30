@@ -86,6 +86,7 @@ public class DownloadModelAction extends AnAction {
           }, 0, 1, TimeUnit.SECONDS);
           readFile(model.getFileName(), url, bytesRead, fileSize, indicator);
 
+
           onDownloaded.run();
         } catch (IOException ex) {
           LOG.error("Unable to open connection", ex);

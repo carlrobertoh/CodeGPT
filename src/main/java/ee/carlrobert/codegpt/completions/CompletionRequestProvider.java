@@ -73,7 +73,10 @@ public class CompletionRequestProvider {
     var promptTemplate = settings.isUseCustomModel() ?
         settings.getPromptTemplate() :
         LlamaModel.findByHuggingFaceModel(settings.getHuggingFaceModel()).getPromptTemplate();
-    var prompt = promptTemplate.buildPrompt(COMPLETION_SYSTEM_PROMPT, message.getPrompt());
+    var prompt = promptTemplate.buildPrompt(
+        COMPLETION_SYSTEM_PROMPT,
+        message.getPrompt(),
+        conversation.getMessages());
     return new LlamaCompletionRequest.Builder(prompt)
         // add chat history
         .setN_predict(512)
