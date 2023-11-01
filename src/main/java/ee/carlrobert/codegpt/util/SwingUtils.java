@@ -1,8 +1,11 @@
 package ee.carlrobert.codegpt.util;
 
+import static com.intellij.openapi.util.SystemInfo.isMac;
 import static javax.swing.event.HyperlinkEvent.EventType.ACTIVATED;
 
 import com.intellij.ide.BrowserUtil;
+import com.intellij.openapi.util.SystemInfo;
+import com.intellij.util.system.CpuArch;
 import com.intellij.util.ui.UI;
 import java.awt.Component;
 import java.awt.Desktop;
@@ -19,10 +22,21 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
+import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
 import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 
 public class SwingUtils {
+
+  public static JTextPane createTextPane(HyperlinkListener listener) {
+    var textPane = new JTextPane();
+    textPane.putClientProperty(JTextPane.HONOR_DISPLAY_PROPERTIES, true);
+    textPane.addHyperlinkListener(listener);
+    textPane.setContentType("text/html");
+    textPane.setEditable(false);
+    return textPane;
+  }
 
   public static JButton createIconButton(Icon icon) {
     var button = new JButton(icon);
@@ -32,23 +46,12 @@ public class SwingUtils {
     return button;
   }
 
-  public static Box justifyLeft(Component component) {
-    Box box = Box.createHorizontalBox();
-    box.add(component);
-    box.add(Box.createHorizontalGlue());
-    return box;
-  }
-
   public static void setEqualLabelWidths(JPanel firstPanel, JPanel secondPanel) {
     var firstLabel = firstPanel.getComponents()[0];
     var secondLabel = secondPanel.getComponents()[0];
     if (firstLabel instanceof JLabel && secondLabel instanceof JLabel) {
       firstLabel.setPreferredSize(secondLabel.getPreferredSize());
     }
-  }
-
-  public static JPanel createPanel(JComponent component, String label) {
-    return createPanel(component, label, false);
   }
 
   public static JPanel createPanel(JComponent component, String label, boolean resizeX) {

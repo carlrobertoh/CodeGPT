@@ -21,6 +21,7 @@ import javax.swing.event.HyperlinkEvent;
 
 @FunctionalInterface
 interface ActionEvent {
+
   void handleAction(String prompt);
 }
 
@@ -45,17 +46,24 @@ class ContextualChatToolWindowLandingPanel extends ResponsePanel {
     var description = createTextPane();
     if (VectorStore.getInstance(CodeGPTPlugin.getPluginBasePath()).isIndexExists()) {
       description.setText("<html>" +
-          "<p style=\"margin-top: 4px; margin-bottom: 4px;\">Feel free to ask me anything about your codebase, and I'll be your helpful guide, dedicated to providing you with the best answers possible!</p>" +
-          "<p style=\"margin-top: 4px; margin-bottom: 4px;\">Here are a few examples of how I might be helpful:</p>" +
+          "<p style=\"margin-top: 4px; margin-bottom: 4px;\">Feel free to ask me anything about your codebase, and I'll be your helpful guide, dedicated to providing you with the best answers possible!</p>"
+          +
+          "<p style=\"margin-top: 4px; margin-bottom: 4px;\">Here are a few examples of how I might be helpful:</p>"
+          +
           "<ul>" +
-          "<li><a href=\"LIST_DEPENDENCIES\">List all the dependencies that the project uses</a></li" +
-          "<li><a href=\"SCHEDULED_TASKS\">Are there any scheduled tasks or background jobs running in our codebase, and if so, what are they responsible for?</a></li>" +
-          "<li><a href=\"AUTHENTICATION_MECHANISM\">Can you provide an overview of the authentication and authorization mechanism implemented in our application?</a></li>" +
+          "<li><a href=\"LIST_DEPENDENCIES\">List all the dependencies that the project uses</a></li"
+          +
+          "<li><a href=\"SCHEDULED_TASKS\">Are there any scheduled tasks or background jobs running in our codebase, and if so, what are they responsible for?</a></li>"
+          +
+          "<li><a href=\"AUTHENTICATION_MECHANISM\">Can you provide an overview of the authentication and authorization mechanism implemented in our application?</a></li>"
+          +
           "</html>");
     } else {
       description.setText("<html>" +
-          "<p style=\"margin-top: 4px; margin-bottom: 4px;\">It looks like you haven't indexed your codebase yet.</p>" +
-          "<p style=\"margin-top: 4px; margin-bottom: 4px;\"><a href=\"START_INDEXING\">Start indexing</a> your codebase to get access to contextual chat experience.</p>" +
+          "<p style=\"margin-top: 4px; margin-bottom: 4px;\">It looks like you haven't indexed your codebase yet.</p>"
+          +
+          "<p style=\"margin-top: 4px; margin-bottom: 4px;\"><a href=\"START_INDEXING\">Start indexing</a> your codebase to get access to contextual chat experience.</p>"
+          +
           "</html>");
     }
 
@@ -63,13 +71,8 @@ class ContextualChatToolWindowLandingPanel extends ResponsePanel {
   }
 
   private JTextPane createTextPane() {
-    var textPane = new JTextPane();
-    textPane.addHyperlinkListener(this::handleHyperlinkClicked);
+    var textPane = SwingUtils.createTextPane(this::handleHyperlinkClicked);
     textPane.setBackground(getPanelBackgroundColor());
-    textPane.setContentType("text/html");
-    textPane.putClientProperty(JTextPane.HONOR_DISPLAY_PROPERTIES, true);
-    textPane.setFocusable(false);
-    textPane.setEditable(false);
     return textPane;
   }
 
@@ -88,7 +91,8 @@ class ContextualChatToolWindowLandingPanel extends ResponsePanel {
                 "Are there any scheduled tasks or background jobs running in our codebase, and if so, what are they responsible for?");
             break;
           case "AUTHENTICATION_MECHANISM":
-            actionEvent.handleAction("Can you provide an overview of the authentication and authorization mechanism implemented in our application?");
+            actionEvent.handleAction(
+                "Can you provide an overview of the authentication and authorization mechanism implemented in our application?");
             break;
           case "START_INDEXING":
             var folderStructureTreePanel = new FolderStructureTreePanel(project);

@@ -139,12 +139,8 @@ public class YouServiceSelectionForm extends JPanel {
   }
 
   private JTextPane createTextPane(String htmlContent) {
-    var textPane = new JTextPane();
-    textPane.setContentType("text/html");
-    textPane.putClientProperty(JTextPane.HONOR_DISPLAY_PROPERTIES, true);
+    var textPane = SwingUtils.createTextPane(SwingUtils::handleHyperlinkClicked);
     textPane.setText(htmlContent);
-    textPane.addHyperlinkListener(SwingUtils::handleHyperlinkClicked);
-    textPane.setEditable(false);
     return textPane;
   }
 

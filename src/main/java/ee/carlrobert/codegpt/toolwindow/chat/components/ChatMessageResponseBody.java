@@ -22,7 +22,6 @@ import com.vladsch.flexmark.util.data.MutableDataSet;
 import ee.carlrobert.codegpt.actions.ActionType;
 import ee.carlrobert.codegpt.completions.you.YouSerpResult;
 import ee.carlrobert.codegpt.settings.SettingsConfigurable;
-import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.toolwindow.chat.ResponseNodeRenderer;
 import ee.carlrobert.codegpt.toolwindow.chat.StreamParser;
@@ -277,8 +276,7 @@ public class ChatMessageResponseBody extends JPanel {
   }
 
   private JTextPane createTextPane() {
-    var textPane = new JTextPane();
-    textPane.addHyperlinkListener(event -> {
+    var textPane = SwingUtils.createTextPane(event -> {
       if (FileUtil.exists(event.getDescription()) && ACTIVATED.equals(event.getEventType())) {
         VirtualFile file = LocalFileSystem.getInstance().findFileByPath(event.getDescription());
         FileEditorManager.getInstance(project).openFile(Objects.requireNonNull(file), true);
@@ -287,14 +285,10 @@ public class ChatMessageResponseBody extends JPanel {
 
       SwingUtils.handleHyperlinkClicked(event);
     });
-    textPane.setContentType("text/html");
-    textPane.putClientProperty(JTextPane.HONOR_DISPLAY_PROPERTIES, true);
-    textPane.setCaretPosition(textPane.getDocument().getLength());
-    textPane.setBackground(getBackground());
-    textPane.setFocusable(true);
     textPane.getCaret().setVisible(true);
-    textPane.setEditable(false);
+    textPane.setCaretPosition(textPane.getDocument().getLength());
     textPane.setBorder(JBUI.Borders.empty());
+    textPane.setBackground(getBackground());
     return textPane;
   }
 

@@ -1,10 +1,12 @@
 package ee.carlrobert.codegpt.settings;
 
+import static java.util.stream.Collectors.toList;
+
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.ComponentValidator;
 import com.intellij.openapi.ui.ValidationInfo;
-import com.intellij.ui.EnumComboBoxModel;
+import com.intellij.openapi.util.SystemInfoRt;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
 import ee.carlrobert.codegpt.CodeGPTBundle;
@@ -13,6 +15,8 @@ import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import java.awt.CardLayout;
+import java.util.Arrays;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
@@ -33,7 +37,11 @@ public class SettingsComponent {
     cards.add(serviceSelectionForm.getAzureServiceSectionPanel(), ServiceType.AZURE.getCode());
     cards.add(serviceSelectionForm.getYouServiceSectionPanel(), ServiceType.YOU.getCode());
     cards.add(serviceSelectionForm.getLlamaServiceSectionPanel(), ServiceType.LLAMA_CPP.getCode());
-    serviceComboBox = new ComboBox<>(new EnumComboBoxModel<>(ServiceType.class));
+    var serviceComboBoxModel = new DefaultComboBoxModel<ServiceType>();
+    serviceComboBoxModel.addAll(Arrays.stream(ServiceType.values())
+        .filter(it -> !"LLAMA_CPP".equals(it.getCode()) || SystemInfoRt.isMac)
+        .collect(toList()));
+    serviceComboBox = new ComboBox<>(serviceComboBoxModel);
     serviceComboBox.setSelectedItem(ServiceType.OPENAI);
     serviceComboBox.setPreferredSize(displayNameField.getPreferredSize());
     var serviceInputValidator = createInputValidator(parentDisposable, serviceComboBox);

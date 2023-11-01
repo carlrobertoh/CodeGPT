@@ -121,13 +121,9 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
   }
 
   private JTextPane createTextPane() {
-    var textPane = new JTextPane();
-    textPane.addHyperlinkListener(SwingUtils::handleHyperlinkClicked);
+    var textPane = SwingUtils.createTextPane(SwingUtils::handleHyperlinkClicked);
     textPane.setBackground(getPanelBackgroundColor());
-    textPane.setContentType("text/html");
-    textPane.putClientProperty(JTextPane.HONOR_DISPLAY_PROPERTIES, true);
     textPane.setFocusable(false);
-    textPane.setEditable(false);
     textPane.setText(
         "<html>\n"
             + "<body>\n"

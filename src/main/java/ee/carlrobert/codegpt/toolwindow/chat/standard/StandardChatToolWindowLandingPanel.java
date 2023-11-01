@@ -41,13 +41,8 @@ class StandardChatToolWindowLandingPanel extends ResponsePanel {
   }
 
   private JTextPane createTextPane() {
-    var textPane = new JTextPane();
-    textPane.addHyperlinkListener(this::handleHyperlinkClicked);
+    var textPane = SwingUtils.createTextPane(this::handleHyperlinkClicked);
     textPane.setBackground(getPanelBackgroundColor());
-    textPane.setContentType("text/html");
-    textPane.putClientProperty(JTextPane.HONOR_DISPLAY_PROPERTIES, true);
-    textPane.setFocusable(false);
-    textPane.setEditable(false);
     return textPane;
   }
 
