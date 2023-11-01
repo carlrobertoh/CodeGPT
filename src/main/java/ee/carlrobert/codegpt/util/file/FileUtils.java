@@ -53,6 +53,8 @@ public class FileUtils {
       long[] bytesRead,
       long fileSize,
       ProgressIndicator indicator) throws IOException {
+    FileUtils.tryCreateDirectory(CodeGPTPlugin.getLlamaModelsPath());
+
     try (
         var readableByteChannel = Channels.newChannel(url.openStream());
         var fileOutputStream = new FileOutputStream(

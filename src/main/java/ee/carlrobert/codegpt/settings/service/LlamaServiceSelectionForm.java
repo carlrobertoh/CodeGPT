@@ -4,7 +4,6 @@ import com.intellij.icons.AllIcons.Actions;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.ui.MessageType;
 import com.intellij.openapi.ui.panel.ComponentPanelBuilder;
-import com.intellij.openapi.ui.popup.Balloon.Position;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.ui.PortField;
 import com.intellij.ui.TitledSeparator;
@@ -80,7 +79,9 @@ public class LlamaServiceSelectionForm extends JPanel {
         // TODO: Move to LlamaModelPreferencesForm
         var modelPath = llamaModelPreferencesForm.isUseCustomLlamaModel() ?
             llamaModelPreferencesForm.getCustomLlamaModelPath() :
-            "models/" + llamaModelPreferencesForm.getSelectedModel().getFileName();
+            CodeGPTPlugin.getLlamaModelsPath() +
+                File.separator +
+                llamaModelPreferencesForm.getSelectedModel().getFileName();
         llamaServerAgent.startAgent(
             modelPath,
             maxTokensField.getValue(),

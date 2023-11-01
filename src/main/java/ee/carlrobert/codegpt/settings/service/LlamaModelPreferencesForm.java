@@ -329,6 +329,7 @@ public class LlamaModelPreferencesForm {
 
     var fileChooserDescriptor = FileChooserDescriptorFactory.createSingleFileDescriptor("gguf");
     fileChooserDescriptor.setForcedToUseIdeaFileChooser(true);
+    fileChooserDescriptor.setHideIgnored(false);
     browseButton.addBrowseFolderListener(new TextBrowseFolderListener(fileChooserDescriptor));
     return browseButton;
   }

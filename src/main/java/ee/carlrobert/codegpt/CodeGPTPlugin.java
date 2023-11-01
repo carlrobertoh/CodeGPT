@@ -6,8 +6,10 @@ import com.intellij.ide.plugins.PluginManagerCore;
 import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.project.Project;
+import ee.carlrobert.codegpt.telemetry.core.util.Directories;
 import java.io.File;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import org.jetbrains.annotations.NotNull;
 
 public final class CodeGPTPlugin {
@@ -38,7 +40,7 @@ public final class CodeGPTPlugin {
   }
 
   public static @NotNull String getLlamaModelsPath() {
-    return getPluginBasePath() + File.separator + "llama.cpp" + File.separator + "models";
+    return Paths.get(System.getProperty("user.home"), ".codegpt/models/gguf").toString();
   }
 
   public static @NotNull String getProjectIndexStorePath(@NotNull Project project) {
