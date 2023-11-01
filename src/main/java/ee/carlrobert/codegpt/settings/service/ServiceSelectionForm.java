@@ -419,4 +419,12 @@ public class ServiceSelectionForm {
   public JPanel getLlamaServiceSectionPanel() {
     return llamaServiceSectionPanel;
   }
+
+  public int getContextSize() {
+    return llamaServiceSectionPanel.getContextSize();
+  }
+
+  public void setContextSize(int contextSize) {
+    llamaServiceSectionPanel.setContextSize(contextSize);
+  }
 }

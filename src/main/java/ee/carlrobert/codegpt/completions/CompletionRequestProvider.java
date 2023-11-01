@@ -38,23 +38,22 @@ public class CompletionRequestProvider {
       "Follow the user's requirements carefully & to the letter.\n" +
       "Your responses should be informative and logical.\n" +
       "You should always adhere to technical information.\n" +
-      "If the user asks for code or technical questions, you must provide code suggestions and adhere to technical information.\n"
-      +
-      "If the question is related to a developer, CodeGPT must respond with content related to a developer.\n"
-      +
-      "First think step-by-step - describe your plan for what to build in pseudocode, written out in great detail.\n"
-      +
+      "If the user asks for code or technical questions, you must provide code suggestions and " +
+      "adhere to technical information.\n" +
+      "If the question is related to a developer, CodeGPT must respond with " +
+      "content related to a developer.\n" +
+      "First think step-by-step - describe your plan for what to build in pseudocode, " +
+      "written out in great detail.\n" +
       "Then output the code in a single code block.\n" +
       "Minimize any other prose.\n" +
       "Keep your answers short and impersonal.\n" +
       "Use Markdown formatting in your answers.\n" +
-      "Make sure to include the programming language name at the start of the Markdown code blocks.\n"
-      +
+      "Make sure to include the programming language name at the start of the " +
+      "Markdown code blocks.\n" +
       "Avoid wrapping the whole response in triple backticks.\n" +
-      "The user works in an IDE built by JetBrains which has a concept for editors with open files, integrated unit test support, "
-      +
-      "and output pane that shows the output of running the code as well as an integrated terminal.\n"
-      +
+      "The user works in an IDE built by JetBrains which has a concept for editors " +
+      "with open files, integrated unit test support, and output pane that shows " +
+      "the output of running the code as well as an integrated terminal.\n" +
       "You can only give one reply for each conversation turn.";
 
   private final EncodingManager encodingManager = EncodingManager.getInstance();
@@ -77,8 +76,8 @@ public class CompletionRequestProvider {
         COMPLETION_SYSTEM_PROMPT,
         message.getPrompt(),
         conversation.getMessages());
+    System.out.println("Prompt: " + prompt);
     return new LlamaCompletionRequest.Builder(prompt)
-        // add chat history
         .setN_predict(512)
         .build();
   }

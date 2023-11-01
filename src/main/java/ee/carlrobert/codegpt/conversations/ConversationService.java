@@ -6,6 +6,7 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
+import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import java.time.LocalDateTime;
@@ -46,8 +47,10 @@ public final class ConversationService {
       conversation.setModel("YouCode");
     } else if (settings.isUseAzureService()) {
       conversation.setModel(AzureSettingsState.getInstance().getModel());
-    } else {
+    } else if (settings.isUseOpenAIService()) {
       conversation.setModel(OpenAISettingsState.getInstance().getModel());
+    } else {
+      conversation.setModel(LlamaSettingsState.getInstance().getHuggingFaceModel().getCode());
     }
     conversation.setCreatedOn(LocalDateTime.now());
     conversation.setUpdatedOn(LocalDateTime.now());
@@ -64,7 +67,11 @@ public final class ConversationService {
     conversationsMapping.put(conversation.getClientCode(), conversations);
   }
 
-  public void saveMessage(String response, Message message, Conversation conversation, boolean isRetry) {
+  public void saveMessage(
+      String response,
+      Message message,
+      Conversation conversation,
+      boolean isRetry) {
     var conversationMessages = conversation.getMessages();
     if (isRetry && !conversationMessages.isEmpty()) {
       var messageToBeSaved = conversationMessages.stream()
@@ -121,6 +128,9 @@ public final class ConversationService {
     }
     if (settings.isUseAzureService()) {
       return "azure.chat.completion";
+    }
+    if (settings.isUseLlamaService()) {
+      return "llama.chat.completion";
     }
     return "you.chat.completion";
   }

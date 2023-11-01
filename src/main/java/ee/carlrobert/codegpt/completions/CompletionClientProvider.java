@@ -7,6 +7,7 @@ import ee.carlrobert.codegpt.settings.advanced.AdvancedSettingsState;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
+import ee.carlrobert.codegpt.settings.state.YouSettingsState;
 import ee.carlrobert.llm.client.Client;
 import ee.carlrobert.llm.client.ProxyAuthenticator;
 import ee.carlrobert.llm.client.azure.AzureClient;
@@ -35,8 +36,10 @@ public class CompletionClientProvider {
     utmParameters.setMedium("jetbrains");
     utmParameters.setCampaign(CodeGPTPlugin.getVersion());
     utmParameters.setContent("CodeGPT");
-    return new YouClient.Builder(sessionId, accessToken)
+    // FIXME
+    return (YouClient) new YouClient.Builder(sessionId, accessToken)
         .setUTMParameters(utmParameters)
+        .setHost(YouSettingsState.getInstance().getBaseHost())
         .build();
   }
 

@@ -11,6 +11,7 @@ public class StreamParser {
   private boolean isProcessingCode;
 
   public List<StreamParseResponse> parse(String message) {
+    message = message.replace("\r", "");
     messageBuilder.append(message);
 
     Pattern pattern = Pattern.compile(CODE_BLOCK_STARTING_REGEX);

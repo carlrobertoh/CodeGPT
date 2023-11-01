@@ -46,6 +46,7 @@ import ee.carlrobert.codegpt.util.file.FileUtils;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.net.ConnectException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -195,6 +196,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     requestHandler.withContextualSearch(useContextualSearch);
     requestHandler.addMessageListener(partialMessage -> {
       try {
+        System.out.println(partialMessage);
         ApplicationManager.getApplication()
             .invokeLater(() -> responseContainer.update(partialMessage));
       } catch (Exception e) {
@@ -246,6 +248,10 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
             OpenAISettingsState.getInstance().setOpenAIQuotaExceeded(true);
           }
           responseContainer.displayQuotaExceeded();
+        } else if (ex instanceof ConnectException) {
+          responseContainer.displayMessage(
+              "<p style=\"margin: 4px 0;\">" + error.getMessage() + "</p>"
+                  + "<p style=\"margin: 4px 0;\"><a href=\"#SETTINGS\">Open CodeGPT settings</a></p>");
         } else {
           responseContainer.displayError(error.getMessage());
         }
@@ -385,6 +391,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
         JBUI.Borders.empty(8)));
     wrapper.setBackground(getPanelBackgroundColor());
     wrapper.add(userPromptTextArea, BorderLayout.SOUTH);
+
     if (model != null) {
       var header = new JPanel(new BorderLayout());
       header.setBackground(getPanelBackgroundColor());
@@ -399,6 +406,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
       header.add(modelIconWrapper, BorderLayout.LINE_END);
       wrapper.add(header);
     }
+
     rootPanel.add(wrapper, gbc);
     userPromptTextArea.requestFocusInWindow();
     userPromptTextArea.requestFocus();
@@ -482,11 +490,20 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
       return "YouCode";
     }
     if (settings.isUseLlamaService()) {
-      var huggingFaceModel = LlamaSettingsState.getInstance().getHuggingFaceModel();
+      var llamaSettings = LlamaSettingsState.getInstance();
+      if (llamaSettings.isUseCustomModel()) {
+        var filePath = llamaSettings.getCustomLlamaModelPath();
+        int lastSeparatorIndex = filePath.lastIndexOf('/');
+        if (lastSeparatorIndex == -1) {
+          return filePath;
+        }
+        return filePath.substring(lastSeparatorIndex + 1);
+      }
+      var huggingFaceModel = llamaSettings.getHuggingFaceModel();
       var llamaModel = LlamaModel.findByHuggingFaceModel(huggingFaceModel);
       return String.format(
           "%s %dB (Q%d)",
-          llamaModel,
+          llamaModel.getLabel(),
           huggingFaceModel.getParameterSize(),
           huggingFaceModel.getQuantization());
     }

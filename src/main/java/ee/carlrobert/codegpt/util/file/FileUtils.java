@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -144,6 +145,19 @@ public class FileUtils {
     } catch (IOException e) {
       throw new RuntimeException("Unable to read resource", e);
     }
+  }
+
+  public static String convertFileSize(long fileSizeInBytes) {
+    String[] units = {"B", "KB", "MB", "GB"};
+    int unitIndex = 0;
+    double fileSize = fileSizeInBytes;
+
+    while (fileSize >= 1024 && unitIndex < units.length - 1) {
+      fileSize /= 1024;
+      unitIndex++;
+    }
+
+    return new DecimalFormat("#.##").format(fileSize) + " " + units[unitIndex];
   }
 
   private static Optional<Map.Entry<String, String>> findFirstExtension(

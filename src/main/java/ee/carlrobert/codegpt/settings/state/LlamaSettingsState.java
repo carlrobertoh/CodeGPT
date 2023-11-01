@@ -7,6 +7,8 @@ import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import ee.carlrobert.codegpt.completions.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
+import java.io.IOException;
+import java.net.ServerSocket;
 import org.jetbrains.annotations.NotNull;
 
 @State(name = "CodeGPT_LlamaSettings", storages = @Storage("CodeGPT_CodeGPT_LlamaSettings.xml"))
@@ -16,7 +18,8 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
   private String customLlamaModelPath = "";
   private HuggingFaceModel huggingFaceModel = HuggingFaceModel.CODE_LLAMA_7B_Q4;
   private PromptTemplate promptTemplate = PromptTemplate.LLAMA;
-  private int serverPort = 8080;
+  private int serverPort = getRandomAvailablePortOrDefault();
+  private int contextSize = 2048;
 
   public LlamaSettingsState() {
   }
@@ -73,5 +76,21 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
 
   public void setServerPort(int serverPort) {
     this.serverPort = serverPort;
+  }
+
+  public int getContextSize() {
+    return contextSize;
+  }
+
+  public void setContextSize(int contextSize) {
+    this.contextSize = contextSize;
+  }
+
+  private static Integer getRandomAvailablePortOrDefault() {
+    try (ServerSocket socket = new ServerSocket(0)) {
+      return socket.getLocalPort();
+    } catch (IOException e) {
+      return 8080;
+    }
   }
 }

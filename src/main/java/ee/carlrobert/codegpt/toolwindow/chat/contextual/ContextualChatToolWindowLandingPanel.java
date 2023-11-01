@@ -4,7 +4,6 @@ import static com.intellij.openapi.ui.DialogWrapper.OK_EXIT_CODE;
 import static ee.carlrobert.codegpt.util.ThemeUtils.getPanelBackgroundColor;
 import static javax.swing.event.HyperlinkEvent.EventType.ACTIVATED;
 
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
@@ -14,9 +13,6 @@ import ee.carlrobert.codegpt.indexes.CodebaseIndexingTask;
 import ee.carlrobert.codegpt.indexes.FolderStructureTreePanel;
 import ee.carlrobert.codegpt.settings.SettingsConfigurable;
 import ee.carlrobert.codegpt.toolwindow.chat.components.ResponsePanel;
-import ee.carlrobert.codegpt.completions.you.YouUserManager;
-import ee.carlrobert.codegpt.completions.you.auth.AuthenticationNotifier;
-import ee.carlrobert.codegpt.completions.you.auth.SignedOutNotifier;
 import ee.carlrobert.codegpt.util.OverlayUtils;
 import ee.carlrobert.codegpt.util.SwingUtils;
 import ee.carlrobert.vector.VectorStore;
@@ -43,30 +39,10 @@ class ContextualChatToolWindowLandingPanel extends ResponsePanel {
         .connect()
         .subscribe(CodebaseIndexingCompletedNotifier.INDEXING_COMPLETED_TOPIC,
             (CodebaseIndexingCompletedNotifier) () -> updateContent(createContent()));
-
-    var messageBusConnection = ApplicationManager.getApplication().getMessageBus().connect();
-    messageBusConnection.subscribe(AuthenticationNotifier.AUTHENTICATION_TOPIC, (AuthenticationNotifier) () -> updateContent(createContent()));
-    messageBusConnection.subscribe(SignedOutNotifier.SIGNED_OUT_TOPIC, (SignedOutNotifier) () -> updateContent(createContent()));
   }
 
   private JTextPane createContent() {
     var description = createTextPane();
-    var userManager = YouUserManager.getInstance();
-
-    if (userManager.getAuthenticationResponse() == null) {
-      description.setText("<html>" +
-          "<p style=\"margin-top: 4px; margin-bottom: 4px;\">It looks like you haven't logged in. Please <a href=\"LOGIN\">log in</a> to use the feature.</p>" +
-          "</html>");
-      return description;
-    }
-
-    if (!userManager.isSubscribed()) {
-      description.setText("<html>" +
-          "<p style=\"margin-top: 4px; margin-bottom: 4px;\">You are not currently subscribed to any plan.</p>" +
-          "</html>");
-      return description;
-    }
-
     if (VectorStore.getInstance(CodeGPTPlugin.getPluginBasePath()).isIndexExists()) {
       description.setText("<html>" +
           "<p style=\"margin-top: 4px; margin-bottom: 4px;\">Feel free to ask me anything about your codebase, and I'll be your helpful guide, dedicated to providing you with the best answers possible!</p>" +

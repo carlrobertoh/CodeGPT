@@ -69,6 +69,7 @@ public class SettingsConfigurable implements Configurable {
 
         llamaSettings.isUseCustomModel() != llamaModelPreferencesForm.isUseCustomLlamaModel() ||
         llamaSettings.getServerPort() != serviceSelectionForm.getLlamaServerPort() ||
+        llamaSettings.getContextSize() != serviceSelectionForm.getContextSize() ||
         llamaSettings.getHuggingFaceModel() != llamaModelPreferencesForm.getSelectedModel() ||
         !llamaSettings.getPromptTemplate().equals(llamaModelPreferencesForm.getPromptTemplate()) ||
         !llamaSettings.getCustomLlamaModelPath()
@@ -111,6 +112,7 @@ public class SettingsConfigurable implements Configurable {
     llamaSettings.setUseCustomModel(llamaModelPreferencesForm.isUseCustomLlamaModel());
     llamaSettings.setPromptTemplate(llamaModelPreferencesForm.getPromptTemplate());
     llamaSettings.setServerPort(serviceSelectionForm.getLlamaServerPort());
+    llamaSettings.setContextSize(serviceSelectionForm.getContextSize());
 
     openAISettings.apply(serviceSelectionForm);
     azureSettings.apply(serviceSelectionForm);
@@ -155,7 +157,7 @@ public class SettingsConfigurable implements Configurable {
     llamaModelPreferencesForm.setUseCustomLlamaModel(llamaSettings.isUseCustomModel());
     llamaModelPreferencesForm.setPromptTemplate(llamaSettings.getPromptTemplate());
     serviceSelectionForm.setLlamaServerPort(llamaSettings.getServerPort());
-
+    serviceSelectionForm.setContextSize(llamaSettings.getContextSize());
     openAISettings.reset(serviceSelectionForm);
     azureSettings.reset(serviceSelectionForm);
 

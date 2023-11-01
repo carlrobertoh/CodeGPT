@@ -2,6 +2,8 @@ package ee.carlrobert.codegpt.util;
 
 import static java.lang.String.format;
 
+import ee.carlrobert.codegpt.util.file.FileUtils;
+
 public class DownloadingUtils {
 
   private static final int BYTES_IN_MB = 1024 * 1024;
@@ -16,9 +18,9 @@ public class DownloadingUtils {
     double remainingMB = totalMB - downloadedMB;
 
     return format(
-        "%.2fMB of %.2fMB (%.2f%%), Speed: %.2fMB/sec, Time left: %s",
-        downloadedMB,
-        totalMB,
+        "%s of %s (%.2f%%), Speed: %.2f MB/sec, Time left: %s",
+        FileUtils.convertFileSize((long) downloadedMB * BYTES_IN_MB),
+        FileUtils.convertFileSize((long) totalMB * BYTES_IN_MB),
         percent,
         speed,
         getTimeLeftFormattedString(speed, remainingMB));

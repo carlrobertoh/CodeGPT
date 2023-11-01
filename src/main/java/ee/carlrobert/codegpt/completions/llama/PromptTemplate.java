@@ -78,25 +78,22 @@ public enum PromptTemplate {
     public String buildPrompt(String systemPrompt, String userPrompt, List<Message> history) {
       StringBuilder prompt = new StringBuilder();
 
-      if (systemPrompt != null && !systemPrompt.isEmpty()) {
-        prompt.append("### System Prompt\n")
-            .append(systemPrompt)
-            .append("\n\n");
-      }
+      prompt.append(
+          "Below is an instruction that describes a task. Write a response that appropriately completes the request.\n\n");
 
       for (Message message : history) {
-        prompt.append("### User Message\n")
+        prompt.append("### Instruction\n")
             .append(message.getPrompt())
             .append("\n\n")
-            .append("### Assistant\n")
+            .append("### Response:\n")
             .append(message.getResponse())
             .append("\n\n");
       }
 
-      return prompt.append("### User Message\n")
+      return prompt.append("### Instruction\n")
           .append(userPrompt)
           .append("\n\n")
-          .append("### Assistant")
+          .append("### Response:\n")
           .toString();
     }
   };

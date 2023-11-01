@@ -14,9 +14,9 @@ public class ServerProgressPanel extends JPanel {
   public ServerProgressPanel() {
     super(new FlowLayout(FlowLayout.LEADING, 0, 0));
     setVisible(false);
-    add(label);
-    add(Box.createVerticalStrut(4));
     add(new AsyncProcessIcon("sign_in_spinner"));
+    add(Box.createHorizontalStrut(4));
+    add(label);
   }
 
   public void startProgress(String text) {

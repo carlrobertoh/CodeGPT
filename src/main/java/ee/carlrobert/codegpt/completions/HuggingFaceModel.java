@@ -17,16 +17,6 @@ public enum HuggingFaceModel {
   CODE_LLAMA_34B_Q4(34, 4, "CodeLlama-34B-Instruct-GGUF"),
   CODE_LLAMA_34B_Q5(34, 5, "CodeLlama-34B-Instruct-GGUF"),
 
-  CODE_LLAMA_PYTHON_7B_Q3(7, 3, "CodeLlama-7B-Python-GGUF"),
-  CODE_LLAMA_PYTHON_7B_Q4(7, 4, "CodeLlama-7B-Python-GGUF"),
-  CODE_LLAMA_PYTHON_7B_Q5(7, 5, "CodeLlama-7B-Python-GGUF"),
-  CODE_LLAMA_PYTHON_13B_Q3(13, 3, "CodeLlama-13B-Python-GGUF"),
-  CODE_LLAMA_PYTHON_13B_Q4(13, 4, "CodeLlama-13B-Python-GGUF"),
-  CODE_LLAMA_PYTHON_13B_Q5(13, 5, "CodeLlama-13B-Python-GGUF"),
-  CODE_LLAMA_PYTHON_34B_Q3(34, 3, "CodeLlama-34B-Python-GGUF"),
-  CODE_LLAMA_PYTHON_34B_Q4(34, 4, "CodeLlama-34B-Python-GGUF"),
-  CODE_LLAMA_PYTHON_34B_Q5(34, 5, "CodeLlama-34B-Python-GGUF"),
-
   CODE_BOOGA_34B_Q3(34, 3, "CodeBooga-34B-v0.1-GGUF"),
   CODE_BOOGA_34B_Q4(34, 4, "CodeBooga-34B-v0.1-GGUF"),
   CODE_BOOGA_34B_Q5(34, 5, "CodeBooga-34B-v0.1-GGUF"),
@@ -73,6 +63,10 @@ public enum HuggingFaceModel {
     return quantization;
   }
 
+  public String getCode() {
+    return name();
+  }
+
   public String getFileName() {
     return modelName.toLowerCase().replace("-gguf", format(".Q%d_K_M.gguf", quantization));
   }
@@ -86,8 +80,16 @@ public enum HuggingFaceModel {
     }
   }
 
+  public URL getHuggingFaceURL() {
+    try {
+      return new URL("https://huggingface.co/TheBloke/" + modelName);
+    } catch (MalformedURLException ex) {
+      throw new RuntimeException(ex);
+    }
+  }
+
   @Override
   public String toString() {
-    return format("%d - bits", quantization);
+    return format("%d-bit precision", quantization);
   }
 }

@@ -69,19 +69,15 @@ dependencies {
   testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.10.0")
 }
 
-tasks.register<Exec>("initSubmodule") {
+tasks.register<Exec>("updateSubmodules") {
   workingDir(rootDir)
   commandLine("git", "submodule", "update", "--init", "--recursive")
 }
 
-tasks.register<Task>("updateSubmodule") {
-  val submoduleExists = file("$rootDir/build/idea-sandbox/plugins/CodeGPT/llama.cpp").exists()
-  if (!submoduleExists) {
-    copy {
-      from("$rootDir/src/main/cpp/llama.cpp")
-      into("$rootDir/build/idea-sandbox/plugins/CodeGPT/llama.cpp")
-    }
-  }
+tasks.register<Copy>("copyLlamaSubmodule") {
+  dependsOn("updateSubmodules")
+  from(layout.projectDirectory.file("src/main/cpp/llama.cpp"))
+  into(layout.buildDirectory.dir("idea-sandbox/plugins/CodeGPT/llama.cpp"))
 }
 
 tasks {
@@ -129,6 +125,11 @@ tasks {
     })
   }
 
+  prepareSandbox {
+    enabled = true
+    dependsOn("copyLlamaSubmodule")
+  }
+
   signPlugin {
     enabled = true
     certificateChain.set(System.getenv("CERTIFICATE_CHAIN"))
@@ -138,7 +139,6 @@ tasks {
 
   buildPlugin {
     enabled = true
-    dependsOn("updateSubmodule")
   }
 
   publishPlugin {
@@ -150,7 +150,6 @@ tasks {
 
   runIde {
     enabled = true
-    dependsOn("updateSubmodule")
     environment("ENVIRONMENT", "LOCAL")
   }
 

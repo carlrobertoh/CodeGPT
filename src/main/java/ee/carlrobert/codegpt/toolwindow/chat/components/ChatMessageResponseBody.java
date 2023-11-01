@@ -141,6 +141,16 @@ public class ChatMessageResponseBody extends JPanel {
     }
   }
 
+  public void displayMessage(String message) {
+    if (responseReceived) {
+      var messagePane = createTextPane();
+      messagePane.setText(message);
+      add(new ResponseWrapper().add(messagePane));
+    } else {
+      currentlyProcessedTextPane.setText(message);
+    }
+  }
+
   public void displayError(String message) {
     var errorText = format(
         "<html><p style=\"margin-top: 4px; margin-bottom: 8px;\">%s</p></html>",

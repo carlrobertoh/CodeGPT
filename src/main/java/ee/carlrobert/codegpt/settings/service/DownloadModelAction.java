@@ -1,8 +1,7 @@
-package ee.carlrobert.codegpt.settings;
+package ee.carlrobert.codegpt.settings.service;
 
 import static java.lang.String.format;
 
-import com.intellij.icons.AllIcons.Actions;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.diagnostic.Logger;
