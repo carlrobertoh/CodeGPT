@@ -180,10 +180,10 @@ public class ConfigurationComponent {
           try {
             var value = Double.parseDouble(valueText);
             if (value > 1.0 || value < 0.0) {
-              return new ValidationInfo("Value must be between 0 and 1.", component);
+              return new ValidationInfo(CodeGPTBundle.get("validation.error.mustBeBetweenZeroAndOne"), component);
             }
           } catch (NumberFormatException e) {
-            return new ValidationInfo("Value must be number.", component);
+            return new ValidationInfo(CodeGPTBundle.get("validation.error.mustBeNumber"), component);
           }
 
           return null;

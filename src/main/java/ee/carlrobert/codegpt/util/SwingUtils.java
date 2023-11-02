@@ -1,21 +1,14 @@
 package ee.carlrobert.codegpt.util;
 
-import static com.intellij.openapi.util.SystemInfo.isMac;
 import static javax.swing.event.HyperlinkEvent.EventType.ACTIVATED;
 
 import com.intellij.ide.BrowserUtil;
-import com.intellij.openapi.util.SystemInfo;
-import com.intellij.util.system.CpuArch;
 import com.intellij.util.ui.UI;
-import java.awt.Component;
-import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
-import java.io.IOException;
 import java.net.URISyntaxException;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
-import javax.swing.Box;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;

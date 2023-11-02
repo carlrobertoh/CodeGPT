@@ -10,6 +10,7 @@ import com.intellij.ui.TitledSeparator;
 import com.intellij.ui.components.fields.IntegerField;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
+import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.completions.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaServerAgent;
@@ -42,14 +43,16 @@ public class LlamaServiceSelectionForm extends JPanel {
     maxTokensField.setEnabled(!serverRunning);
 
     var serverButton = new JButton();
-    serverButton.setText(serverRunning ? "Stop Server" : "Start Server");
+    serverButton.setText(serverRunning ?
+        CodeGPTBundle.get("settingsConfigurable.service.llama.stopServer.label") :
+        CodeGPTBundle.get("settingsConfigurable.service.llama.startServer.label"));
     serverButton.setIcon(serverRunning ? Actions.Suspend : Actions.Execute);
     serverButton.addActionListener(event -> {
       if (llamaModelPreferencesForm.isUseCustomLlamaModel()) {
         var customModelPath = llamaModelPreferencesForm.getCustomLlamaModelPath();
         if (customModelPath == null || customModelPath.isEmpty()) {
           OverlayUtils.showBalloon(
-              "This is a required field",
+              CodeGPTBundle.get("validation.error.fieldRequired"),
               MessageType.ERROR,
               llamaModelPreferencesForm.getCustomModelPathBrowserButton());
           return;
@@ -57,7 +60,7 @@ public class LlamaServiceSelectionForm extends JPanel {
       } else {
         if (!isModelExists(llamaModelPreferencesForm.getSelectedModel())) {
           OverlayUtils.showBalloon(
-              "Model is not downloaded",
+              CodeGPTBundle.get("settingsConfigurable.service.llama.overlay.modelNotDownloaded.text"),
               MessageType.ERROR,
               llamaModelPreferencesForm.getHuggingFaceModelComboBox());
           return;
@@ -66,15 +69,15 @@ public class LlamaServiceSelectionForm extends JPanel {
 
       if (llamaServerAgent.isServerRunning()) {
         setFormEnabled(true);
-        serverButton.setText("Start Server");
+        serverButton.setText(CodeGPTBundle.get("settingsConfigurable.service.llama.startServer.label"));
         serverButton.setIcon(Actions.Execute);
-        serverProgressPanel.updateText("Stopping a server...");
+        serverProgressPanel.updateText(CodeGPTBundle.get("settingsConfigurable.service.llama.progress.stoppingServer"));
         llamaServerAgent.stopAgent();
       } else {
         setFormEnabled(false);
-        serverButton.setText("Stop Server");
+        serverButton.setText(CodeGPTBundle.get("settingsConfigurable.service.llama.stopServer.label"));
         serverButton.setIcon(Actions.Suspend);
-        serverProgressPanel.startProgress("Starting a server...");
+        serverProgressPanel.startProgress(CodeGPTBundle.get("settingsConfigurable.service.llama.progress.startingServer"));
 
         // TODO: Move to LlamaModelPreferencesForm
         var modelPath = llamaModelPreferencesForm.isUseCustomLlamaModel() ?
@@ -96,13 +99,13 @@ public class LlamaServiceSelectionForm extends JPanel {
     setFormEnabled(!llamaServerAgent.isServerRunning());
     setLayout(new BorderLayout());
     add(FormBuilder.createFormBuilder()
-        .addComponent(new TitledSeparator("Model Preferences"))
+        .addComponent(new TitledSeparator(CodeGPTBundle.get("settingsConfigurable.service.llama.modelPreferences.title")))
         .addComponent(withEmptyLeftBorder(llamaModelPreferencesForm.getForm()))
-        .addComponent(new TitledSeparator("Server Preferences"))
+        .addComponent(new TitledSeparator(CodeGPTBundle.get("settingsConfigurable.service.llama.serverPreferences.title")))
         .addComponent(withEmptyLeftBorder(FormBuilder.createFormBuilder()
-            .addLabeledComponent("Context size:", maxTokensField)
+            .addLabeledComponent(CodeGPTBundle.get("settingsConfigurable.service.llama.contextSize.label"), maxTokensField)
             .addComponentToRightColumn(contextSizeHelpText)
-            .addLabeledComponent("Port:", JBUI.Panels.simplePanel()
+            .addLabeledComponent(CodeGPTBundle.get("settingsConfigurable.service.llama.port.label"), JBUI.Panels.simplePanel()
                 .addToLeft(portField)
                 .addToRight(serverButton))
             .getPanel()))

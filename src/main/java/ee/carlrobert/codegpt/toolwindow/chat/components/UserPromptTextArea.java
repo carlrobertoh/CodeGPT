@@ -7,6 +7,7 @@ import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBTextArea;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
+import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.completions.CompletionRequestHandler;
 import ee.carlrobert.codegpt.util.SwingUtils;
@@ -55,7 +56,7 @@ public class UserPromptTextArea extends JPanel {
     textArea.setBackground(BACKGROUND_COLOR);
     textArea.setLineWrap(true);
     textArea.setWrapStyleWord(true);
-    textArea.getEmptyText().setText("Ask me anything");
+    textArea.getEmptyText().setText(CodeGPTBundle.get("toolwindow.chat.textArea.emptyText"));
     textArea.setBorder(JBUI.Borders.empty(8, 4));
     var input = textArea.getInputMap();
     input.put(KeyStroke.getKeyStroke("ENTER"), TEXT_SUBMIT);

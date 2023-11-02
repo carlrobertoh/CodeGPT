@@ -18,7 +18,6 @@ import ee.carlrobert.codegpt.completions.you.YouUserManager;
 import ee.carlrobert.codegpt.completions.you.auth.AuthenticationNotifier;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
-import ee.carlrobert.codegpt.settings.YouServiceSelectionForm;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.YouSettingsState;
@@ -74,7 +73,7 @@ public class ServiceSelectionForm {
     azureApiKeyField.setColumns(30);
     azureApiKeyField.setText(AzureCredentialsManager.getInstance().getAzureOpenAIApiKey());
     azureApiKeyFieldPanel = UI.PanelFactory.panel(azureApiKeyField)
-        .withLabel("API key:")
+        .withLabel(CodeGPTBundle.get("settingsConfigurable.shared.apiKey.label"))
         .resizeX(false)
         .createPanel();
     azureActiveDirectoryTokenField = new JBPasswordField();
@@ -82,14 +81,14 @@ public class ServiceSelectionForm {
     azureActiveDirectoryTokenField.setText(
         AzureCredentialsManager.getInstance().getAzureActiveDirectoryToken());
     azureActiveDirectoryTokenFieldPanel = UI.PanelFactory.panel(azureActiveDirectoryTokenField)
-        .withLabel("Bearer token:")
+        .withLabel(CodeGPTBundle.get("settingsConfigurable.service.azure.bearerToken.label"))
         .resizeX(false)
         .createPanel();
     useAzureApiKeyAuthenticationRadioButton = new JBRadioButton(
-        "Use API Key authentication",
+        CodeGPTBundle.get("settingsConfigurable.service.azure.useApiKeyAuth.label"),
         azureSettings.isUseAzureApiKeyAuthentication());
     useAzureActiveDirectoryAuthenticationRadioButton = new JBRadioButton(
-        "Use Active Directory authentication",
+        CodeGPTBundle.get("settingsConfigurable.service.azure.useActiveDirectoryAuth.label"),
         azureSettings.isUseAzureActiveDirectoryAuthentication());
 
     openAIBaseHostField = new JBTextField(openAISettings.getBaseHost(), 30);
@@ -115,7 +114,7 @@ public class ServiceSelectionForm {
         .setMaximumSize(azureBaseHostField.getPreferredSize());
 
     displayWebSearchResultsCheckBox = new JBCheckBox(
-        "Display web search results",
+        CodeGPTBundle.get("settingsConfigurable.service.you.displayResults.label"),
         YouSettingsState.getInstance().isDisplayWebSearchResults());
     displayWebSearchResultsCheckBox.setEnabled(YouUserManager.getInstance().isAuthenticated());
 
@@ -138,33 +137,38 @@ public class ServiceSelectionForm {
     var requestConfigurationPanel = UI.PanelFactory.grid()
         .add(UI.PanelFactory.panel(openAIOrganizationField)
             .withLabel(CodeGPTBundle.get(
-                "settingsConfigurable.section.service.openai.organizationField.label"))
+                "settingsConfigurable.service.openai.organization.label"))
             .resizeX(false)
             .withComment(CodeGPTBundle.get(
-                "settingsConfigurable.section.service.openai.organizationField.comment")))
+                "settingsConfigurable.section.openai.organization.comment")))
         .add(UI.PanelFactory.panel(openAIBaseHostField)
-            .withLabel("Base host:")
+            .withLabel(CodeGPTBundle.get(
+                "settingsConfigurable.shared.baseHost.label"))
             .resizeX(false))
         .add(UI.PanelFactory.panel(openAIPathField)
-            .withLabel("Path:")
+            .withLabel(CodeGPTBundle.get(
+                "settingsConfigurable.shared.path.label"))
             .resizeX(false))
         .add(UI.PanelFactory.panel(openAICompletionModelComboBox)
-            .withLabel("Model:")
+            .withLabel(CodeGPTBundle.get(
+                "settingsConfigurable.shared.model.label"))
             .resizeX(false))
         .createPanel();
 
     var apiKeyFieldPanel = UI.PanelFactory.panel(openAIApiKeyField)
-        .withLabel(CodeGPTBundle.get("settingsConfigurable.section.integration.apiKeyField.label"))
+        .withLabel(CodeGPTBundle.get("settingsConfigurable.shared.apiKey.label"))
         .resizeX(false)
         .withComment(
-            CodeGPTBundle.get("settingsConfigurable.section.integration.apiKeyField.comment"))
+            CodeGPTBundle.get("settingsConfigurable.service.openai.apiKey.comment"))
         .withCommentHyperlinkListener(SwingUtils::handleHyperlinkClicked)
         .createPanel();
 
     return FormBuilder.createFormBuilder()
-        .addComponent(new TitledSeparator("Authentication"))
+        .addComponent(new TitledSeparator(
+            CodeGPTBundle.get("settingsConfigurable.shared.authentication.title")))
         .addComponent(withEmptyLeftBorder(apiKeyFieldPanel))
-        .addComponent(new TitledSeparator("Request Configuration"))
+        .addComponent(new TitledSeparator(
+            CodeGPTBundle.get("settingsConfigurable.shared.requestConfiguration.title")))
         .addComponent(withEmptyLeftBorder(requestConfigurationPanel))
         .addComponentFillVertically(new JPanel(), 0)
         .getPanel();
@@ -187,37 +191,39 @@ public class ServiceSelectionForm {
     var configPanel = withEmptyLeftBorder(UI.PanelFactory.grid()
         .add(UI.PanelFactory.panel(azureResourceNameField)
             .withLabel(CodeGPTBundle.get(
-                "settingsConfigurable.section.service.azure.resourceNameField.label"))
+                "settingsConfigurable.service.azure.resourceName.label"))
             .resizeX(false)
             .withComment(CodeGPTBundle.get(
-                "settingsConfigurable.section.service.azure.resourceNameField.comment")))
+                "settingsConfigurable.service.azure.resourceName.comment")))
         .add(UI.PanelFactory.panel(azureDeploymentIdField)
             .withLabel(CodeGPTBundle.get(
-                "settingsConfigurable.section.service.azure.deploymentIdField.label"))
+                "settingsConfigurable.service.azure.deploymentId.label"))
             .resizeX(false)
             .withComment(CodeGPTBundle.get(
-                "settingsConfigurable.section.service.azure.deploymentIdField.comment")))
+                "settingsConfigurable.service.azure.deploymentId.comment")))
         .add(UI.PanelFactory.panel(azureApiVersionField)
             .withLabel(CodeGPTBundle.get(
-                "settingsConfigurable.section.service.azure.apiVersionField.label"))
+                "settingsConfigurable.service.azure.apiVersion.label"))
             .resizeX(false)
             .withComment(CodeGPTBundle.get(
-                "settingsConfigurable.section.service.azure.apiVersionField.comment")))
+                "settingsConfigurable.service.azure.apiVersion.comment")))
         .add(UI.PanelFactory.panel(azureBaseHostField)
-            .withLabel("Base host:")
+            .withLabel(CodeGPTBundle.get("settingsConfigurable.shared.baseHost.label"))
             .resizeX(false))
         .add(UI.PanelFactory.panel(azurePathField)
-            .withLabel("Path:")
+            .withLabel(CodeGPTBundle.get("settingsConfigurable.shared.path.label"))
             .resizeX(false))
         .add(UI.PanelFactory.panel(azureCompletionModelComboBox)
-            .withLabel("Model:")
+            .withLabel(CodeGPTBundle.get("settingsConfigurable.shared.model.label"))
             .resizeX(false))
         .createPanel());
 
     return FormBuilder.createFormBuilder()
-        .addComponent(new TitledSeparator("Authentication"))
+        .addComponent(new TitledSeparator(
+            CodeGPTBundle.get("settingsConfigurable.shared.authentication.title")))
         .addComponent(authPanel)
-        .addComponent(new TitledSeparator("Request Configuration"))
+        .addComponent(new TitledSeparator(
+            CodeGPTBundle.get("settingsConfigurable.shared.requestConfiguration.title")))
         .addComponent(configPanel)
         .addComponentFillVertically(new JPanel(), 0)
         .getPanel();
@@ -226,7 +232,8 @@ public class ServiceSelectionForm {
   private JPanel createYouServiceSectionPanel() {
     return FormBuilder.createFormBuilder()
         .addComponent(new YouServiceSelectionForm(parentDisposable))
-        .addComponent(new TitledSeparator("Chat Preferences"))
+        .addComponent(new TitledSeparator(
+            CodeGPTBundle.get("settingsConfigurable.service.you.chatPreferences.title")))
         .addComponent(withEmptyLeftBorder(displayWebSearchResultsCheckBox))
         .addComponentFillVertically(new JPanel(), 0)
         .getPanel();

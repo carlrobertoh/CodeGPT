@@ -21,6 +21,7 @@ import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
+import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.completions.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
@@ -80,6 +81,7 @@ public class LlamaModelPreferencesForm {
     var llamaSettings = LlamaSettingsState.getInstance();
     customModelPathBrowserButton = createCustomModelPathBrowseButton(
         llamaSettings.isUseCustomModel() && !llamaServerAgent.isServerRunning());
+    customModelPathBrowserButton.setText(llamaSettings.getCustomLlamaModelPath());
     progressLabel = new JBLabel("");
     progressLabel.setBorder(JBUI.Borders.emptyLeft(2));
     progressLabel.setFont(JBUI.Fonts.smallFont());
@@ -123,10 +125,12 @@ public class LlamaModelPreferencesForm {
         huggingFaceComboBoxModel);
     modelSizeComboBox.setEnabled(initialModelSizes.size() > 1);
     promptTemplateComboBox = new ComboBox<>(new EnumComboBoxModel<>(PromptTemplate.class));
+    promptTemplateComboBox.setSelectedItem(llamaSettings.getPromptTemplate());
     promptTemplateComboBox.setEnabled(
         llamaSettings.isUseCustomModel() && !llamaServerAgent.isServerRunning());
     promptTemplateComboBox.setPreferredSize(modelComboBox.getPreferredSize());
-    useCustomModelCheckBox = new JBCheckBox("Use custom model");
+    useCustomModelCheckBox = new JBCheckBox(CodeGPTBundle.get(
+        "settingsConfigurable.service.llama.useCustomModel.label"), llamaSettings.isUseCustomModel());
     useCustomModelCheckBox.setEnabled(!llamaServerAgent.isServerRunning());
     useCustomModelCheckBox.addChangeListener(e -> {
       var selected = ((JBCheckBox) e.getSource()).isSelected();
@@ -140,11 +144,11 @@ public class LlamaModelPreferencesForm {
 
   public JPanel getForm() {
     var customModelHelpText = ComponentPanelBuilder.createCommentComponent(
-        "Only .gguf files are supported",
+        CodeGPTBundle.get("settingsConfigurable.service.llama.customModelPath.comment"),
         true);
     customModelHelpText.setBorder(JBUI.Borders.empty(0, 4));
     var quantizationHelpText = ComponentPanelBuilder.createCommentComponent(
-        "Quantization is a technique to reduce the computational and memory costs of running inference. <a href=\"https://huggingface.co/docs/optimum/concept_guides/quantization\">Learn more</a>",
+        CodeGPTBundle.get("settingsConfigurable.service.llama.quantization.comment"),
         true);
     quantizationHelpText.setBorder(JBUI.Borders.empty(0, 4));
 
@@ -161,16 +165,16 @@ public class LlamaModelPreferencesForm {
     huggingFaceModelComboBoxWrapper.add(modelDetailsLabel);
 
     return FormBuilder.createFormBuilder()
-        .addLabeledComponent("Model:", modelComboBoxWrapper)
-        .addLabeledComponent("Model size:", modelSizeComboBox)
-        .addLabeledComponent("Quantization:", huggingFaceModelComboBoxWrapper)
+        .addLabeledComponent(CodeGPTBundle.get("settingsConfigurable.shared.model.label"), modelComboBoxWrapper)
+        .addLabeledComponent(CodeGPTBundle.get("settingsConfigurable.service.llama.modelSize.label"), modelSizeComboBox)
+        .addLabeledComponent(CodeGPTBundle.get("settingsConfigurable.service.llama.quantization.label"), huggingFaceModelComboBoxWrapper)
         .addComponentToRightColumn(quantizationHelpText)
         .addComponentToRightColumn(downloadModelActionLinkWrapper)
         .addComponentToRightColumn(progressLabel)
         .addVerticalGap(8)
         .addComponent(useCustomModelCheckBox)
-        .addLabeledComponent("Prompt template:", promptTemplateComboBox)
-        .addLabeledComponent("Model path:", customModelPathBrowserButton)
+        .addLabeledComponent(CodeGPTBundle.get("settingsConfigurable.service.llama.promptTemplate.label"), promptTemplateComboBox)
+        .addLabeledComponent(CodeGPTBundle.get("settingsConfigurable.service.llama.customModelPath.label"), customModelPathBrowserButton)
         .addComponentToRightColumn(customModelHelpText)
         .addVerticalGap(4)
         .getPanel();
@@ -325,7 +329,6 @@ public class LlamaModelPreferencesForm {
   private TextFieldWithBrowseButton createCustomModelPathBrowseButton(boolean enabled) {
     var browseButton = new TextFieldWithBrowseButton();
     browseButton.setEnabled(enabled);
-    browseButton.setText(CodeGPTPlugin.getLlamaModelsPath());
 
     var fileChooserDescriptor = FileChooserDescriptorFactory.createSingleFileDescriptor("gguf");
     fileChooserDescriptor.setForcedToUseIdeaFileChooser(true);
@@ -344,7 +347,7 @@ public class LlamaModelPreferencesForm {
       JPanel actionLinkWrapper,
       DefaultComboBoxModel<HuggingFaceModel> huggingFaceComboBoxModel,
       ProgressIndicator progressIndicator) {
-    return new AnActionLink("Cancel Downloading", new AnAction() {
+    return new AnActionLink(CodeGPTBundle.get("settingsConfigurable.service.llama.cancelDownloadLink.label"), new AnAction() {
       @Override
       public void actionPerformed(@NotNull AnActionEvent e) {
         SwingUtilities.invokeLater(() -> {
@@ -378,7 +381,7 @@ public class LlamaModelPreferencesForm {
       JBLabel progressLabel,
       JPanel actionLinkWrapper,
       DefaultComboBoxModel<HuggingFaceModel> huggingFaceComboBoxModel) {
-    return new AnActionLink("Download Model", new DownloadModelAction(
+    return new AnActionLink(CodeGPTBundle.get("settingsConfigurable.service.llama.downloadModelLink.label"), new DownloadModelAction(
         progressIndicator -> {
           SwingUtilities.invokeLater(() -> {
             configureFieldsForDownloading(true);
@@ -413,7 +416,7 @@ public class LlamaModelPreferencesForm {
     new HelpTooltip()
         .setTitle(llamaModel.getLabel())
         .setDescription("<html><p>" + llamaModel.getDescription() + "</p></html>")
-        .setBrowserLink("Link to model", model.getHuggingFaceURL())
+        .setBrowserLink(CodeGPTBundle.get("settingsConfigurable.service.llama.linkToModel.label"), model.getHuggingFaceURL())
         .installOn(helpIcon);
   }
 

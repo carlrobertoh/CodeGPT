@@ -76,7 +76,6 @@ public class CompletionRequestProvider {
         COMPLETION_SYSTEM_PROMPT,
         message.getPrompt(),
         conversation.getMessages());
-    System.out.println("Prompt: " + prompt);
     return new LlamaCompletionRequest.Builder(prompt)
         .setN_predict(512)
         .build();

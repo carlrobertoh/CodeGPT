@@ -4,9 +4,12 @@ import static com.intellij.openapi.ui.Messages.OK;
 import static ee.carlrobert.codegpt.util.ThemeUtils.getPanelBackgroundColor;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
+import static javax.swing.event.HyperlinkEvent.EventType.ACTIVATED;
 
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.impl.EditorImpl;
+import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
 import com.intellij.ui.JBColor;
@@ -15,6 +18,7 @@ import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.messages.MessageBusConnection;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.JBUI.Borders;
+import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.actions.ActionType;
 import ee.carlrobert.codegpt.completions.CompletionRequestHandler;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
@@ -27,6 +31,7 @@ import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
+import ee.carlrobert.codegpt.settings.SettingsConfigurable;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
@@ -62,6 +67,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPanel {
+
+  private static final Logger LOG = Logger.getInstance(BaseChatToolWindowTabPanel.class);
 
   private final boolean useContextualSearch;
   private final JPanel rootPanel;
@@ -192,7 +199,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     requestHandler.withContextualSearch(useContextualSearch);
     requestHandler.addMessageListener(partialMessage -> {
       try {
-        System.out.println(partialMessage);
+        LOG.debug(partialMessage);
         ApplicationManager.getApplication()
             .invokeLater(() -> responseContainer.update(partialMessage));
       } catch (Exception e) {
@@ -247,7 +254,13 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
         } else if (ex instanceof ConnectException) {
           responseContainer.displayMessage(
               "<p style=\"margin: 4px 0;\">" + error.getMessage() + "</p>"
-                  + "<p style=\"margin: 4px 0;\"><a href=\"#SETTINGS\">Open CodeGPT settings</a></p>");
+                  + "<p style=\"margin: 4px 0;\"><a href=\"#SETTINGS\">Open CodeGPT settings</a></p>",
+              e -> {
+                if (e.getEventType() == ACTIVATED) {
+                  ShowSettingsUtil.getInstance()
+                      .showSettingsDialog(project, SettingsConfigurable.class);
+                }
+              });
         } else {
           responseContainer.displayError(error.getMessage());
         }
@@ -432,7 +445,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
   }
 
   private JBCheckBox createGPT4ModelCheckBox() {
-    var gpt4CheckBox = new JBCheckBox("Use GPT-4 model");
+    var gpt4CheckBox = new JBCheckBox(CodeGPTBundle.get("toolwindow.chat.youProCheckBox.text"));
     gpt4CheckBox.setOpaque(false);
     gpt4CheckBox.setEnabled(YouUserManager.getInstance().isSubscribed());
     gpt4CheckBox.setSelected(YouSettingsState.getInstance().isUseGPT4Model());
@@ -452,9 +465,11 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
 
   private String getTooltipText(boolean selected) {
     if (YouUserManager.getInstance().isSubscribed()) {
-      return selected ? "Turn off for faster responses" : "Turn on for complex queries";
+      return selected ?
+          CodeGPTBundle.get("toolwindow.chat.youProCheckBox.disable") :
+          CodeGPTBundle.get("toolwindow.chat.youProCheckBox.enable");
     }
-    return "Enable by subscribing to YouPro plan";
+    return CodeGPTBundle.get("toolwindow.chat.youProCheckBox.notAllowed");
   }
 
   private String getClientCode() {

@@ -69,7 +69,6 @@ public final class LlamaServerAgent implements Disposable {
     return new ProcessAdapter() {
       @Override
       public void onTextAvailable(@NotNull ProcessEvent event, @NotNull Key outputType) {
-        System.out.println(event.getText()); // TODO
         LOG.info(event.getText());
       }
 
@@ -103,7 +102,7 @@ public final class LlamaServerAgent implements Disposable {
 
       @Override
       public void onTextAvailable(@NotNull ProcessEvent event, @NotNull Key outputType) {
-        System.out.println(event.getText()); // TODO
+        LOG.debug(event.getText());
 
         if (outputType == ProcessOutputType.STDOUT) {
           try {

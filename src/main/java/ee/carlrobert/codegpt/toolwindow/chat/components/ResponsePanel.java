@@ -9,6 +9,7 @@ import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
+import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.Icons;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -82,7 +83,10 @@ public class ResponsePanel extends JPanel {
 
     public void addReloadAction(Runnable onReload) {
       addIconActionButton(new IconActionButton(
-          new AnAction("Reload Response", "Reload response description", Actions.Refresh) {
+          new AnAction(
+              CodeGPTBundle.get("toolwindow.chat.response.action.reloadResponse.text"),
+              CodeGPTBundle.get("toolwindow.chat.response.action.reloadResponse.description"),
+              Actions.Refresh) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
               enableActions(false);
@@ -93,7 +97,10 @@ public class ResponsePanel extends JPanel {
 
     public void addDeleteAction(Runnable onDelete) {
       addIconActionButton(new IconActionButton(
-          new AnAction("Delete Response", "Delete response description", Actions.GC) {
+          new AnAction(
+              CodeGPTBundle.get("toolwindow.chat.response.action.deleteResponse.text"),
+              CodeGPTBundle.get("toolwindow.chat.response.action.deleteResponse.description"),
+              Actions.GC) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
               onDelete.run();
@@ -109,7 +116,10 @@ public class ResponsePanel extends JPanel {
     }
 
     private JBLabel getIconLabel() {
-      return new JBLabel("CodeGPT", Icons.DefaultIcon, SwingConstants.LEADING)
+      return new JBLabel(
+          CodeGPTBundle.get("project.label"),
+          Icons.DefaultIcon,
+          SwingConstants.LEADING)
           .setAllowAutoWrapping(true)
           .withFont(JBFont.label().asBold());
     }

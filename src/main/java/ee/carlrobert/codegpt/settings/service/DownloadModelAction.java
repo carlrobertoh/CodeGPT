@@ -9,6 +9,7 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
+import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.completions.HuggingFaceModel;
 import ee.carlrobert.codegpt.util.DownloadingUtils;
 import ee.carlrobert.codegpt.util.file.FileUtils;
@@ -53,7 +54,7 @@ public class DownloadModelAction extends AnAction {
   class DownloadBackgroundTask extends Task.Backgroundable {
 
     DownloadBackgroundTask(Project project) {
-      super(project, "Downloading Model", true);
+      super(project, CodeGPTBundle.get("settingsConfigurable.service.llama.progress.downloadingModel.title"), true);
     }
 
     @Override
@@ -67,7 +68,7 @@ public class DownloadModelAction extends AnAction {
         onDownload.accept(indicator);
 
         indicator.setIndeterminate(false);
-        indicator.setText(format("Downloading %s...", model.getFileName()));
+        indicator.setText(format(CodeGPTBundle.get("settingsConfigurable.service.llama.progress.downloadingModelIndicator.text"), model.getFileName()));
 
         long fileSize = url.openConnection().getContentLengthLong();
         long[] bytesRead = {0};

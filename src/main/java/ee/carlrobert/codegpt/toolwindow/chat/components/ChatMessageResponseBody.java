@@ -38,6 +38,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.JTextPane;
 import javax.swing.UIManager;
+import javax.swing.event.HyperlinkListener;
 
 public class ChatMessageResponseBody extends JPanel {
 
@@ -140,9 +141,9 @@ public class ChatMessageResponseBody extends JPanel {
     }
   }
 
-  public void displayMessage(String message) {
+  public void displayMessage(String message, HyperlinkListener hyperlinkListener) {
     if (responseReceived) {
-      var messagePane = createTextPane();
+      var messagePane = createTextPane(hyperlinkListener);
       messagePane.setText(message);
       add(new ResponseWrapper().add(messagePane));
     } else {
@@ -276,7 +277,7 @@ public class ChatMessageResponseBody extends JPanel {
   }
 
   private JTextPane createTextPane() {
-    var textPane = SwingUtils.createTextPane(event -> {
+    return createTextPane(event -> {
       if (FileUtil.exists(event.getDescription()) && ACTIVATED.equals(event.getEventType())) {
         VirtualFile file = LocalFileSystem.getInstance().findFileByPath(event.getDescription());
         FileEditorManager.getInstance(project).openFile(Objects.requireNonNull(file), true);
@@ -285,6 +286,10 @@ public class ChatMessageResponseBody extends JPanel {
 
       SwingUtils.handleHyperlinkClicked(event);
     });
+  }
+
+  private JTextPane createTextPane(HyperlinkListener hyperlinkListener) {
+    var textPane = SwingUtils.createTextPane(hyperlinkListener);
     textPane.getCaret().setVisible(true);
     textPane.setCaretPosition(textPane.getDocument().getLength());
     textPane.setBorder(JBUI.Borders.empty());

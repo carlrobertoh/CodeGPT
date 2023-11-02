@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.settings;
+package ee.carlrobert.codegpt.settings.service;
 
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.ui.ComponentValidator;
@@ -51,8 +51,7 @@ public class YouServiceSelectionForm extends JPanel {
     if (!settings.getEmail().isEmpty()) {
       passwordField.setText(YouCredentialsManager.getInstance().getAccountPassword());
     }
-    signInButton = new JButton(
-        CodeGPTBundle.get("settingsConfigurable.section.userAuthentication.signIn.label"));
+    signInButton = new JButton(CodeGPTBundle.get("settingsConfigurable.service.you.signIn.label"));
     signUpTextPane = createSignUpTextPane();
     loadingSpinner = new AsyncProcessIcon("sign_in_spinner");
     loadingSpinner.setBorder(JBUI.Borders.emptyLeft(8));
@@ -105,7 +104,8 @@ public class YouServiceSelectionForm extends JPanel {
           if (component instanceof JBTextField) {
             value = ((JBTextField) component).getText();
             if (!isValidEmail(value)) {
-              return new ValidationInfo("The email you entered is invalid.", component)
+              return new ValidationInfo(
+                  CodeGPTBundle.get("validation.error.invalidEmail"), component)
                   .withOKEnabled();
             }
           } else {
@@ -113,7 +113,9 @@ public class YouServiceSelectionForm extends JPanel {
           }
 
           if (StringUtil.isEmpty(value)) {
-            return new ValidationInfo("This field is required.", component).withOKEnabled();
+            return new ValidationInfo(
+                CodeGPTBundle.get("validation.error.fieldRequired"), component)
+                .withOKEnabled();
           }
 
           return null;
@@ -170,8 +172,10 @@ public class YouServiceSelectionForm extends JPanel {
 
     var contentPanelBuilder = FormBuilder.createFormBuilder()
         .addComponentToRightColumn(JBUI.Panels.simplePanel().addToLeft(couponLabel))
-        .addLabeledComponent("Email address:", emailAddressField)
-        .addLabeledComponent("Password:", passwordField)
+        .addLabeledComponent(CodeGPTBundle.get("settingsConfigurable.service.you.email.label"),
+            emailAddressField)
+        .addLabeledComponent(CodeGPTBundle.get("settingsConfigurable.service.you.password.label"),
+            passwordField)
         .addVerticalGap(4)
         .addComponentToRightColumn(createFooterPanel())
         .addVerticalGap(4);
@@ -188,7 +192,7 @@ public class YouServiceSelectionForm extends JPanel {
 
     return FormBuilder.createFormBuilder()
         .addComponent(new TitledSeparator(
-            CodeGPTBundle.get("settingsConfigurable.section.userAuthentication.title")))
+            CodeGPTBundle.get("settingsConfigurable.service.you.authentication.title")))
         .addComponent(contentPanel)
         .getPanel();
   }
@@ -196,10 +200,11 @@ public class YouServiceSelectionForm extends JPanel {
   private JPanel createUserInformationPanel(YouUser user) {
     var userManager = YouUserManager.getInstance();
     var contentPanelBuilder = FormBuilder.createFormBuilder()
-        .addLabeledComponent("Email address:",
+        .addLabeledComponent(CodeGPTBundle.get("settingsConfigurable.service.you.email.label"),
             new JBLabel(user.getEmails().get(0).getEmail()).withFont(JBFont.label().asBold()));
 
-    var signOutButton = new JButton("Sign Out");
+    var signOutButton = new JButton(
+        CodeGPTBundle.get("settingsConfigurable.service.you.signOut.label"));
     signOutButton.addActionListener(e -> {
       userManager.clearSession();
       refreshView(createUserAuthenticationPanel(emailField, passwordField, null));
@@ -207,7 +212,7 @@ public class YouServiceSelectionForm extends JPanel {
 
     return FormBuilder.createFormBuilder()
         .addComponent(new TitledSeparator(
-            CodeGPTBundle.get("settingsConfigurable.section.userInformation.title")))
+            CodeGPTBundle.get("settingsConfigurable.service.you.userInformation.title")))
         .addVerticalGap(8)
         .addComponent(JBUI.Panels
             .simplePanel(contentPanelBuilder.addVerticalGap(4)

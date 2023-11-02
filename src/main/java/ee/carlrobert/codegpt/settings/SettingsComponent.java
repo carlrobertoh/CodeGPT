@@ -53,9 +53,11 @@ public class SettingsComponent {
 
     mainPanel = FormBuilder.createFormBuilder()
         .addLabeledComponent(
-            CodeGPTBundle.get("settingsConfigurable.section.integration.displayNameFieldLabel"),
+            CodeGPTBundle.get("settingsConfigurable.displayName.label"),
             displayNameField)
-        .addLabeledComponent("Service:", serviceComboBox)
+        .addLabeledComponent(
+            CodeGPTBundle.get("settingsConfigurable.service.label"),
+            serviceComboBox)
         .addComponent(cards)
         .addComponentFillVertically(new JPanel(), 0)
         .getPanel();
@@ -98,7 +100,9 @@ public class SettingsComponent {
             var selectedItem = ((ComboBox<?>) component).getSelectedItem();
             if (selectedItem == ServiceType.OPENAI &&
                 OpenAISettingsState.getInstance().isOpenAIQuotaExceeded()) {
-              return new ValidationInfo("OpenAI quota exceeded.", component);
+              return new ValidationInfo(
+                  CodeGPTBundle.get("settings.openaiQuotaExceeded"),
+                  component);
             }
           }
 
