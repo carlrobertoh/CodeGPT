@@ -102,7 +102,9 @@ public class LlamaServiceSelectionForm extends JPanel {
       }
     });
 
-    var contextSizeHelpText = ComponentPanelBuilder.createCommentComponent("--ctx-size N", true);
+    var contextSizeHelpText = ComponentPanelBuilder.createCommentComponent(
+        CodeGPTBundle.get("settingsConfigurable.service.llama.contextSize.comment"),
+        true);
     contextSizeHelpText.setBorder(JBUI.Borders.empty(0, 4));
 
     setLayout(new BorderLayout());

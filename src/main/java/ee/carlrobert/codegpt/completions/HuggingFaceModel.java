@@ -33,17 +33,7 @@ public enum HuggingFaceModel {
   WIZARD_CODER_PYTHON_13B_Q5(13, 5, "WizardCoder-Python-13B-V1.0-GGUF"),
   WIZARD_CODER_PYTHON_34B_Q3(34, 3, "WizardCoder-Python-34B-V1.0-GGUF"),
   WIZARD_CODER_PYTHON_34B_Q4(34, 4, "WizardCoder-Python-34B-V1.0-GGUF"),
-  WIZARD_CODER_PYTHON_34B_Q5(34, 5, "WizardCoder-Python-34B-V1.0-GGUF"),
-
-  TORA_CODE_7B_Q3(7, 3, "tora-code-7B-v1.0-GGUF"),
-  TORA_CODE_7B_Q4(7, 4, "tora-code-7B-v1.0-GGUF"),
-  TORA_CODE_7B_Q5(7, 5, "tora-code-7B-v1.0-GGUF"),
-  TORA_CODE_13B_Q3(13, 3, "tora-code-13B-v1.0-GGUF"),
-  TORA_CODE_13B_Q4(13, 4, "tora-code-13B-v1.0-GGUF"),
-  TORA_CODE_13B_Q5(13, 5, "tora-code-13B-v1.0-GGUF"),
-  TORA_CODE_34B_Q3(34, 3, "tora-code-34B-v1.0-GGUF"),
-  TORA_CODE_34B_Q4(34, 4, "tora-code-34B-v1.0-GGUF"),
-  TORA_CODE_34B_Q5(34, 5, "tora-code-34B-v1.0-GGUF");
+  WIZARD_CODER_PYTHON_34B_Q5(34, 5, "WizardCoder-Python-34B-V1.0-GGUF");
 
   private final int parameterSize;
   private final int quantization;

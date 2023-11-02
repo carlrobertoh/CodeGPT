@@ -43,7 +43,7 @@ public enum LlamaModel {
           HuggingFaceModel.PHIND_CODE_LLAMA_34B_Q5)),
   WIZARD_CODER_PYTHON(
       "WizardCoder - Python",
-      "",
+      "WizardCoder, a Code Evol-Instruct fine-tuned Code LLM, which achieves the 73.2 pass@1 and surpasses GPT4 (2023/03/15), ChatGPT-3.5, and Claude2 on the HumanEval Benchmarks.",
       PromptTemplate.ALPACA,
       List.of(
           HuggingFaceModel.WIZARD_CODER_PYTHON_7B_Q3,
@@ -54,21 +54,7 @@ public enum LlamaModel {
           HuggingFaceModel.WIZARD_CODER_PYTHON_13B_Q5,
           HuggingFaceModel.WIZARD_CODER_PYTHON_34B_Q3,
           HuggingFaceModel.WIZARD_CODER_PYTHON_34B_Q4,
-          HuggingFaceModel.WIZARD_CODER_PYTHON_34B_Q5)),
-  TORA_CODE(
-      "ToRA Code",
-      "",
-      PromptTemplate.TORA,
-      List.of(
-          HuggingFaceModel.TORA_CODE_7B_Q3,
-          HuggingFaceModel.TORA_CODE_7B_Q4,
-          HuggingFaceModel.TORA_CODE_7B_Q5,
-          HuggingFaceModel.TORA_CODE_13B_Q3,
-          HuggingFaceModel.TORA_CODE_13B_Q4,
-          HuggingFaceModel.TORA_CODE_13B_Q5,
-          HuggingFaceModel.TORA_CODE_34B_Q3,
-          HuggingFaceModel.TORA_CODE_34B_Q4,
-          HuggingFaceModel.TORA_CODE_34B_Q5));
+          HuggingFaceModel.WIZARD_CODER_PYTHON_34B_Q5));
 
   private final String label;
   private final String description;
