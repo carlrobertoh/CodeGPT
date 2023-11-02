@@ -2,6 +2,7 @@ package ee.carlrobert.codegpt.completions;
 
 import static java.util.stream.Collectors.toList;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.EncodingManager;
@@ -15,6 +16,7 @@ import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.settings.state.YouSettingsState;
 import ee.carlrobert.codegpt.telemetry.core.configuration.TelemetryConfiguration;
 import ee.carlrobert.codegpt.telemetry.core.service.UserId;
+import ee.carlrobert.codegpt.util.ApplicationUtils;
 import ee.carlrobert.embedding.EmbeddingsService;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionModel;
@@ -89,7 +91,8 @@ public class CompletionRequestProvider {
                 prevMessage.getPrompt(),
                 prevMessage.getResponse()))
             .collect(toList()));
-    if (TelemetryConfiguration.getInstance().isEnabled()) {
+    if (TelemetryConfiguration.getInstance().isEnabled() &&
+        !ApplicationManager.getApplication().isUnitTestMode()) {
       requestBuilder.setUserId(UUID.fromString(UserId.INSTANCE.get()));
     }
     return requestBuilder.build();

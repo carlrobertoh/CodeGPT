@@ -23,7 +23,6 @@ import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.settings.state.YouSettingsState;
-import ee.carlrobert.codegpt.telemetry.core.service.UserId;
 import ee.carlrobert.llm.client.http.LocalCallbackServer;
 import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange;
 import ee.carlrobert.llm.client.http.expectation.StreamExpectation;
@@ -168,8 +167,7 @@ public class DefaultCompletionRequestHandlerTest extends BasePlatformTestCase {
               "text/event-stream",
               "Keep-Alive",
               "youide CodeGPT",
-              "uuid_guest=" + UserId.INSTANCE.get() + "; " +
-                  "safesearch_guest=Moderate; " +
+              "safesearch_guest=Moderate; " +
                   "youpro_subscription=true; " +
                   "you_subscription=free; " +
                   "stytch_session=; " +
