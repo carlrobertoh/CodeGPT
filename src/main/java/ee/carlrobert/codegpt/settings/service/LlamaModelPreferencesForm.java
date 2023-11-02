@@ -111,6 +111,7 @@ public class LlamaModelPreferencesForm {
         modelExistsIcon,
         modelDetailsLabel,
         downloadModelActionLinkWrapper);
+    huggingFaceModelComboBox.setEnabled(!llamaServerAgent.isServerRunning());
     var modelSizeComboBoxModel = new DefaultComboBoxModel<ModelSize>();
     var initialModelSizes = llamaModel.getSortedUniqueModelSizes().stream()
         .map(ModelSize::new)
@@ -119,11 +120,12 @@ public class LlamaModelPreferencesForm {
     modelSizeComboBoxModel.setSelectedItem(initialModelSizes.get(0));
     var modelComboBoxModel = new EnumComboBoxModel<>(LlamaModel.class);
     modelComboBox = createModelComboBox(modelComboBoxModel, llamaModel, modelSizeComboBoxModel);
+    modelComboBox.setEnabled(!llamaServerAgent.isServerRunning());
     modelSizeComboBox = createModelSizeComboBox(
         modelComboBoxModel,
         modelSizeComboBoxModel,
         huggingFaceComboBoxModel);
-    modelSizeComboBox.setEnabled(initialModelSizes.size() > 1);
+    modelSizeComboBox.setEnabled(initialModelSizes.size() > 1 && !llamaServerAgent.isServerRunning());
     promptTemplateComboBox = new ComboBox<>(new EnumComboBoxModel<>(PromptTemplate.class));
     promptTemplateComboBox.setSelectedItem(llamaSettings.getPromptTemplate());
     promptTemplateComboBox.setEnabled(
@@ -185,8 +187,8 @@ public class LlamaModelPreferencesForm {
     modelSizeComboBox.setEnabled(enabled);
     huggingFaceModelComboBox.setEnabled(enabled);
     useCustomModelCheckBox.setEnabled(enabled);
-    promptTemplateComboBox.setEnabled(enabled);
-    customModelPathBrowserButton.setEnabled(enabled);
+    promptTemplateComboBox.setEnabled(enabled && useCustomModelCheckBox.isSelected());
+    customModelPathBrowserButton.setEnabled(enabled && useCustomModelCheckBox.isSelected());
   }
 
   private static class ModelDetails {

@@ -7,6 +7,7 @@ import com.intellij.openapi.ui.panel.ComponentPanelBuilder;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.ui.PortField;
 import com.intellij.ui.TitledSeparator;
+import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.fields.IntegerField;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
@@ -21,6 +22,7 @@ import java.io.File;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 
 public class LlamaServiceSelectionForm extends JPanel {
 
@@ -89,14 +91,20 @@ public class LlamaServiceSelectionForm extends JPanel {
             modelPath,
             maxTokensField.getValue(),
             portField.getNumber(),
-            serverProgressPanel);
+            serverProgressPanel,
+            () -> {
+              setFormEnabled(false);
+              serverProgressPanel.displayComponent(new JBLabel(
+                  "Server running",
+                  Actions.Commit,
+                  SwingConstants.LEADING));
+            });
       }
     });
 
     var contextSizeHelpText = ComponentPanelBuilder.createCommentComponent("--ctx-size N", true);
     contextSizeHelpText.setBorder(JBUI.Borders.empty(0, 4));
 
-    setFormEnabled(!llamaServerAgent.isServerRunning());
     setLayout(new BorderLayout());
     add(FormBuilder.createFormBuilder()
         .addComponent(new TitledSeparator(CodeGPTBundle.get("settingsConfigurable.service.llama.modelPreferences.title")))

@@ -38,7 +38,6 @@ import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.JTextPane;
 import javax.swing.UIManager;
-import javax.swing.event.HyperlinkListener;
 
 public class ChatMessageResponseBody extends JPanel {
 
@@ -138,16 +137,6 @@ public class ChatMessageResponseBody extends JPanel {
     }
     if (currentlyProcessedTextPane != null && currentlyProcessedTextPane.getCaret().isVisible()) {
       currentlyProcessedTextPane.getCaret().setVisible(false);
-    }
-  }
-
-  public void displayMessage(String message, HyperlinkListener hyperlinkListener) {
-    if (responseReceived) {
-      var messagePane = createTextPane(hyperlinkListener);
-      messagePane.setText(message);
-      add(new ResponseWrapper().add(messagePane));
-    } else {
-      currentlyProcessedTextPane.setText(message);
     }
   }
 
@@ -259,15 +248,13 @@ public class ChatMessageResponseBody extends JPanel {
     var editor = currentlyProcessedEditor.getEditor();
     var document = editor.getDocument();
     var application = ApplicationManager.getApplication();
-    Runnable updateDocumentRunnable = () -> {
-      application.runWriteAction(() ->
-          WriteCommandAction.runWriteCommandAction(project, () -> {
-            document.replaceString(0, document.getTextLength(), code);
-            editor.getCaretModel().moveToOffset(code.length());
-            editor.getComponent().revalidate();
-            editor.getComponent().repaint();
-          }));
-    };
+    Runnable updateDocumentRunnable = () -> application.runWriteAction(() ->
+        WriteCommandAction.runWriteCommandAction(project, () -> {
+          document.replaceString(0, document.getTextLength(), code);
+          editor.getCaretModel().moveToOffset(code.length());
+          editor.getComponent().revalidate();
+          editor.getComponent().repaint();
+        }));
 
     if (application.isUnitTestMode()) {
       application.invokeAndWait(updateDocumentRunnable);
@@ -277,7 +264,7 @@ public class ChatMessageResponseBody extends JPanel {
   }
 
   private JTextPane createTextPane() {
-    return createTextPane(event -> {
+    var textPane = SwingUtils.createTextPane(event -> {
       if (FileUtil.exists(event.getDescription()) && ACTIVATED.equals(event.getEventType())) {
         VirtualFile file = LocalFileSystem.getInstance().findFileByPath(event.getDescription());
         FileEditorManager.getInstance(project).openFile(Objects.requireNonNull(file), true);
@@ -286,10 +273,6 @@ public class ChatMessageResponseBody extends JPanel {
 
       SwingUtils.handleHyperlinkClicked(event);
     });
-  }
-
-  private JTextPane createTextPane(HyperlinkListener hyperlinkListener) {
-    var textPane = SwingUtils.createTextPane(hyperlinkListener);
     textPane.getCaret().setVisible(true);
     textPane.setCaretPosition(textPane.getDocument().getLength());
     textPane.setBorder(JBUI.Borders.empty());

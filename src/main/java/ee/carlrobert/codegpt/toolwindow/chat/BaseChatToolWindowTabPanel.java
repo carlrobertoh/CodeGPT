@@ -4,12 +4,10 @@ import static com.intellij.openapi.ui.Messages.OK;
 import static ee.carlrobert.codegpt.util.ThemeUtils.getPanelBackgroundColor;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
-import static javax.swing.event.HyperlinkEvent.EventType.ACTIVATED;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.impl.EditorImpl;
-import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
 import com.intellij.ui.JBColor;
@@ -31,7 +29,6 @@ import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
-import ee.carlrobert.codegpt.settings.SettingsConfigurable;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
@@ -51,7 +48,6 @@ import ee.carlrobert.codegpt.util.file.FileUtils;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.net.ConnectException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -251,16 +247,6 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
             OpenAISettingsState.getInstance().setOpenAIQuotaExceeded(true);
           }
           responseContainer.displayQuotaExceeded();
-        } else if (ex instanceof ConnectException) {
-          responseContainer.displayMessage(
-              "<p style=\"margin: 4px 0;\">" + error.getMessage() + "</p>"
-                  + "<p style=\"margin: 4px 0;\"><a href=\"#SETTINGS\">Open CodeGPT settings</a></p>",
-              e -> {
-                if (e.getEventType() == ACTIVATED) {
-                  ShowSettingsUtil.getInstance()
-                      .showSettingsDialog(project, SettingsConfigurable.class);
-                }
-              });
         } else {
           responseContainer.displayError(error.getMessage());
         }

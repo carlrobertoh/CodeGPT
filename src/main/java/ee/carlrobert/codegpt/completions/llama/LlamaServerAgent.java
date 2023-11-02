@@ -35,13 +35,14 @@ public final class LlamaServerAgent implements Disposable {
       String modelPath,
       int contextLength,
       int port,
-      ServerProgressPanel serverProgressPanel) {
+      ServerProgressPanel serverProgressPanel,
+      Runnable onSuccess) {
     ApplicationManager.getApplication().invokeLater(() -> {
       try {
         serverProgressPanel.updateText("Building llama.cpp...");
         makeProcessHandler = new OSProcessHandler(getMakeCommandLinde());
         makeProcessHandler.addProcessListener(
-            getMakeProcessListener(modelPath, contextLength, port, serverProgressPanel));
+            getMakeProcessListener(modelPath, contextLength, port, serverProgressPanel, onSuccess));
         makeProcessHandler.startNotify();
       } catch (ExecutionException e) {
         throw new RuntimeException(e);
@@ -65,7 +66,8 @@ public final class LlamaServerAgent implements Disposable {
       String modelPath,
       int contextLength,
       int port,
-      ServerProgressPanel serverProgressPanel) {
+      ServerProgressPanel serverProgressPanel,
+      Runnable onSuccess) {
     return new ProcessAdapter() {
       @Override
       public void onTextAvailable(@NotNull ProcessEvent event, @NotNull Key outputType) {
@@ -79,7 +81,7 @@ public final class LlamaServerAgent implements Disposable {
           startServerProcessHandler = new OSProcessHandler(
               getServerCommandLine(modelPath, contextLength, port));
           startServerProcessHandler.addProcessListener(
-              getProcessListener(port, serverProgressPanel));
+              getProcessListener(port, serverProgressPanel, onSuccess));
           startServerProcessHandler.startNotify();
         } catch (ExecutionException e) {
           throw new RuntimeException(e);
@@ -88,7 +90,10 @@ public final class LlamaServerAgent implements Disposable {
     };
   }
 
-  private ProcessListener getProcessListener(int port, ServerProgressPanel serverProgressPanel) {
+  private ProcessListener getProcessListener(
+      int port,
+      ServerProgressPanel serverProgressPanel,
+      Runnable onSuccess) {
     return new ProcessAdapter() {
       private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -109,10 +114,7 @@ public final class LlamaServerAgent implements Disposable {
             var serverMessage = objectMapper.readValue(event.getText(), LlamaServerMessage.class);
             if ("HTTP server listening".equals(serverMessage.getMessage())) {
               LlamaSettingsState.getInstance().setServerPort(port);
-              serverProgressPanel.displayComponent(new JBLabel(
-                  "Server running",
-                  Actions.Commit,
-                  SwingConstants.LEADING));
+              onSuccess.run();
             }
           } catch (Exception ignore) {
           }
