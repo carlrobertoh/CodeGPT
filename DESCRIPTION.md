@@ -1,24 +1,66 @@
 <!-- Plugin description -->
 
-**ChatGPT as your copilot to level up your developer experience.**
+## Introducing CodeGPT: Your Free, Open-Source AI Copilot for Coding
 
-This is the perfect assistant for any programmer who wants to improve their coding skills
-and make more efficient use of the time.
+CodeGPT is your go-to AI assistant, designed to enhance your coding skills and optimize your programming time.
+Access state-of-the-art LLMs like GPT-4, Code LLama and more, all for free.
 
-## Getting Started
+## Quick Start Guide
 
-### Prerequisites
+1. **Download the Plugin**: Get started by downloading the plugin from the [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/21056-codegpt?preview=true).
 
-In order to use the extension, you need to have the API key configured. You can find the API key in
-your [User settings](https://platform.openai.com/account/api-keys).
+2. **Choose Your Preferred Service**:
 
-### API Key Configuration
+   a) **OpenAI** - Requires authentication via OpenAI API key.
 
-After the plugin has been successfully installed, the API key needs to be configured.
+   b) **Azure** - Requires authentication via Active Directory or API key.
 
-You can configure the key by going to the plugin's settings via the **File | Settings/Preferences | Tools | CodeGPT**. On the settings panel simply
-click
-on the API key field, paste the key obtained from the OpenAI website and click **Apply/OK**.
+   c) **You.com** - A free, web-connected service with an optional upgrade to You⚡Pro for enhanced features..
+
+   d) **LLaMA C/C++ Port** - Run Code Llama, WizardCoder, and other state-of-the-art models locally for free.
+
+3. **Start Using the Features**: You're all set! Start exploring the features of our plugin.
+
+### OpenAI
+
+After successful installation, configure your API key. Navigate to the plugin's settings via **File | Settings/Preferences | Tools | CodeGPT**. Paste your OpenAI API key into the field and click `Apply/OK`.
+
+### Azure
+
+For Azure OpenAI services, you'll need to input three additional fields:
+* `Resource name`: The name of your Azure OpenAI Cognitive Services.
+* `Deployment ID`: The name of your Deployment.
+* `API version`: The most recent non-preview version.
+
+Also, input one of the two provided API keys.
+
+### You.com (Free)
+
+**You**.com is a search engine that summarizes the best parts of the internet for **you**, with private ads and with privacy options.
+
+**You⚡Pro**
+
+Use the **CodeGPT** coupon for a free month of unlimited GPT-4 usage.
+
+Check out the full [feature list](https://about.you.com/hc/youpro/what-features-are-included-in-youpro/) for more details.
+
+### LLaMA C/C++ Port (Free, Local)
+
+> **Note**: This feature is currently supported only on Linux and MacOS.
+
+The main goal of `llama.cpp` is to run the LLaMA model using 4-bit integer quantization on a MacBook.
+
+#### Getting Started
+
+1. **Select the Model**: Depending on your hardware capabilities, choose the appropriate model from the provided list. Once selected, click on the `Download Model` link. A progress bar will appear, indicating the download process.
+
+2. **Start the Server**: After successfully downloading the model, initiate the server by clicking on the `Start Server` button. A status message will be displayed, indicating that the server is starting up.
+
+3. **Apply Settings**: With the server running, you can now apply the settings to start using the features. Click on the `Apply/OK` button to save your settings and start using the application.
+
+<img alt="animated" style="max-width: 100%; width: 600px;" src="https://github.com/carlrobertoh/CodeGPT/raw/master/docs/assets/llama_settings.png" />
+
+> **Note**: If you're already running a server and wish to configure the plugin against that, then simply select the port and click `Apply/OK`.
 
 ## Features
 
