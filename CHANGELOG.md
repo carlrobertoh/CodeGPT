@@ -6,6 +6,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.0] - 2023-11-03
+
+### Added
+
+- Support for running local LLMs via LLaMA C/C++ port (#249)
+- Support for fetching You.com subscription
+
+### Fixed
+
+- Project build for Windows ARM64
+
+### Improved
+
+- You.com coupon design
+- Overall UI design
+
 ## [2.1.7] - 2023-10-26
 
 ### Replaced
@@ -192,7 +208,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `OPENAI_API_KEY` persistence, key is saved in the OS password safe from now on
 
-[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.1.7...HEAD
+[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.0...HEAD
+[2.2.0]: https://github.com/carlrobertoh/CodeGPT/compare/v2.1.7...v2.2.0
 [2.1.7]: https://github.com/carlrobertoh/CodeGPT/compare/v2.1.6...v2.1.7
 [2.1.6]: https://github.com/carlrobertoh/CodeGPT/compare/v2.1.5...v2.1.6
 [2.1.5]: https://github.com/carlrobertoh/CodeGPT/compare/v2.1.4...v2.1.5
