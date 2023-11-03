@@ -38,7 +38,8 @@ public class AdvancedSettingsComponent {
     proxyTypeComboBox.setSelectedItem(advancedSettings.getProxyType());
     proxyHostField = new JBTextField(advancedSettings.getProxyHost(), 20);
     proxyPortField = new PortField();
-    proxyAuthCheckbox = new JBCheckBox(CodeGPTBundle.get("advancedSettingsConfigurable.section.proxy.authCheckBoxField.label"));
+    proxyAuthCheckbox = new JBCheckBox(CodeGPTBundle.get(
+        "advancedSettingsConfigurable.proxy.authCheckBoxField.label"));
     proxyAuthUsername = new JBTextField(20);
     proxyAuthUsername.setEnabled(advancedSettings.isProxyAuthSelected());
     proxyAuthPassword = new JBPasswordField();
@@ -52,10 +53,11 @@ public class AdvancedSettingsComponent {
     readTimeoutField = new PortField(advancedSettings.getReadTimeout());
 
     mainPanel = FormBuilder.createFormBuilder()
-        .addComponent(new TitledSeparator(CodeGPTBundle.get("advancedSettingsConfigurable.section.proxy.title")))
+        .addComponent(new TitledSeparator(CodeGPTBundle.get(
+            "advancedSettingsConfigurable.proxy.title")))
         .addComponent(createProxySettingsForm())
         .addVerticalGap(4)
-        .addComponent(new TitledSeparator("Connection Settings"))
+        .addComponent(new TitledSeparator(CodeGPTBundle.get("advancedSettingsConfigurable.connectionSettings.title")))
         .addComponent(createConnectionSettingsForm())
         .addComponentFillVertically(new JPanel(), 0)
         .getPanel();
@@ -63,8 +65,8 @@ public class AdvancedSettingsComponent {
 
   private JPanel createConnectionSettingsForm() {
     var panel = FormBuilder.createFormBuilder()
-        .addLabeledComponent("Connection timeout (s):", connectionTimeoutField)
-        .addLabeledComponent("Read timeout (s):", readTimeoutField)
+        .addLabeledComponent(CodeGPTBundle.get("advancedSettingsConfigurable.connectionSettings.connectionTimeout.label"), connectionTimeoutField)
+        .addLabeledComponent(CodeGPTBundle.get("advancedSettingsConfigurable.connectionSettings.readTimeout.label"), readTimeoutField)
         .getPanel();
     panel.setBorder(JBUI.Borders.emptyLeft(16));
     return panel;
@@ -145,15 +147,15 @@ public class AdvancedSettingsComponent {
 
     var proxyTypePanel = SwingUtils.createPanel(
         proxyTypeComboBox,
-        CodeGPTBundle.get("advancedSettingsConfigurable.section.proxy.typeComboBoxField.label"),
+        CodeGPTBundle.get("advancedSettingsConfigurable.proxy.typeComboBoxField.label"),
         false);
     var proxyHostPanel = SwingUtils.createPanel(
         proxyHostField,
-        CodeGPTBundle.get("advancedSettingsConfigurable.section.proxy.hostField.label"),
+        CodeGPTBundle.get("advancedSettingsConfigurable.proxy.hostField.label"),
         false);
     var proxyPortPanel = SwingUtils.createPanel(
         proxyPortField,
-        CodeGPTBundle.get("advancedSettingsConfigurable.section.proxy.portField.label"),
+        CodeGPTBundle.get("advancedSettingsConfigurable.proxy.portField.label"),
         false);
     SwingUtils.setEqualLabelWidths(proxyTypePanel, proxyHostPanel);
     SwingUtils.setEqualLabelWidths(proxyPortPanel, proxyHostPanel);
@@ -166,10 +168,10 @@ public class AdvancedSettingsComponent {
         .createPanel());
 
     var proxyUsernamePanel = SwingUtils.createPanel(proxyAuthUsername,
-        CodeGPTBundle.get("advancedSettingsConfigurable.section.proxy.usernameField.label"),
+        CodeGPTBundle.get("advancedSettingsConfigurable.proxy.usernameField.label"),
         false);
     var proxyPasswordPanel = SwingUtils.createPanel(proxyAuthPassword,
-        CodeGPTBundle.get("advancedSettingsConfigurable.section.proxy.passwordField.label"),
+        CodeGPTBundle.get("advancedSettingsConfigurable.proxy.passwordField.label"),
         false);
     SwingUtils.setEqualLabelWidths(proxyPasswordPanel, proxyUsernamePanel);
 

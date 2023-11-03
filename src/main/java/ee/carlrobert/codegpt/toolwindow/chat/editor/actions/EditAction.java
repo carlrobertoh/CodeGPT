@@ -34,7 +34,9 @@ public class EditAction extends TrackableAction {
     settings.setCaretRowShown(!viewer);
 
     event.getPresentation().setIcon(viewer ? Actions.EditSource : Actions.Show);
-    event.getPresentation().setText(viewer ? "Edit Source" : "Disable Editing");
+    event.getPresentation().setText(viewer ?
+        CodeGPTBundle.get("toolwindow.chat.editor.action.edit.title") :
+        CodeGPTBundle.get("toolwindow.chat.editor.action.disableEditing.title"));
 
     var locationOnScreen = ((MouseEvent) event.getInputEvent()).getLocationOnScreen();
     locationOnScreen.y = locationOnScreen.y - 16;

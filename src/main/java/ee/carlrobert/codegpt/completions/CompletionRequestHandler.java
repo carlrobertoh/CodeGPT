@@ -80,6 +80,11 @@ public class CompletionRequestHandler {
     var requestProvider = new CompletionRequestProvider(conversation);
 
     try {
+      if (settings.isUseLlamaService()) {
+        return CompletionClientProvider.getLlamaClient()
+            .getChatCompletion(requestProvider.buildLlamaCompletionRequest(message), eventListener);
+      }
+
       if (settings.isUseYouService()) {
         var sessionId = "";
         var accessToken = "";

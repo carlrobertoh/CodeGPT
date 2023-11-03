@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.settings;
+package ee.carlrobert.codegpt.settings.service;
 
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.ui.ComponentValidator;
@@ -9,7 +9,6 @@ import com.intellij.ui.TitledSeparator;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPasswordField;
 import com.intellij.ui.components.JBTextField;
-import com.intellij.ui.components.OnOffButton;
 import com.intellij.util.ui.AsyncProcessIcon;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBFont;
@@ -35,7 +34,7 @@ import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 import org.jetbrains.annotations.Nullable;
 
-public class YouServiceSelectionPanel extends JPanel {
+public class YouServiceSelectionForm extends JPanel {
 
   private final JBTextField emailField;
   private final JBPasswordField passwordField;
@@ -43,7 +42,7 @@ public class YouServiceSelectionPanel extends JPanel {
   private final JTextPane signUpTextPane;
   private final AsyncProcessIcon loadingSpinner;
 
-  public YouServiceSelectionPanel(Disposable parentDisposable) {
+  public YouServiceSelectionForm(Disposable parentDisposable) {
     super(new BorderLayout());
     var settings = SettingsState.getInstance();
     emailField = new JBTextField(settings.getEmail(), 25);
@@ -52,8 +51,7 @@ public class YouServiceSelectionPanel extends JPanel {
     if (!settings.getEmail().isEmpty()) {
       passwordField.setText(YouCredentialsManager.getInstance().getAccountPassword());
     }
-    signInButton = new JButton(
-        CodeGPTBundle.get("settingsConfigurable.section.userAuthentication.signIn.label"));
+    signInButton = new JButton(CodeGPTBundle.get("settingsConfigurable.service.you.signIn.label"));
     signUpTextPane = createSignUpTextPane();
     loadingSpinner = new AsyncProcessIcon("sign_in_spinner");
     loadingSpinner.setBorder(JBUI.Borders.emptyLeft(8));
@@ -106,7 +104,8 @@ public class YouServiceSelectionPanel extends JPanel {
           if (component instanceof JBTextField) {
             value = ((JBTextField) component).getText();
             if (!isValidEmail(value)) {
-              return new ValidationInfo("The email you entered is invalid.", component)
+              return new ValidationInfo(
+                  CodeGPTBundle.get("validation.error.invalidEmail"), component)
                   .withOKEnabled();
             }
           } else {
@@ -114,7 +113,9 @@ public class YouServiceSelectionPanel extends JPanel {
           }
 
           if (StringUtil.isEmpty(value)) {
-            return new ValidationInfo("This field is required.", component).withOKEnabled();
+            return new ValidationInfo(
+                CodeGPTBundle.get("validation.error.fieldRequired"), component)
+                .withOKEnabled();
           }
 
           return null;
@@ -134,18 +135,14 @@ public class YouServiceSelectionPanel extends JPanel {
 
   private JTextPane createSignUpTextPane() {
     var textPane = createTextPane(
-        "<html><a href=\"https://you.com/code\" style=\"padding:0;\">Don't have an account?<br/>Sign up with 'CodeGPT' coupon for free GPT-4</a></html>");
+        "<html><a href=\"https://you.com/code\">Don't have an account? Sign up</a></html>");
     textPane.setBorder(JBUI.Borders.emptyLeft(4));
     return textPane;
   }
 
   private JTextPane createTextPane(String htmlContent) {
-    var textPane = new JTextPane();
-    textPane.setContentType("text/html");
-    textPane.putClientProperty(JTextPane.HONOR_DISPLAY_PROPERTIES, true);
+    var textPane = SwingUtils.createTextPane(SwingUtils::handleHyperlinkClicked);
     textPane.setText(htmlContent);
-    textPane.addHyperlinkListener(SwingUtils::handleHyperlinkClicked);
-    textPane.setEditable(false);
     return textPane;
   }
 
@@ -162,9 +159,23 @@ public class YouServiceSelectionPanel extends JPanel {
       JBTextField emailAddressField,
       JBPasswordField passwordField,
       @Nullable YouAuthenticationError error) {
+    var couponLabel = new JBLabel(
+        "<html>"
+            + "<body>"
+            + "<h1 style=\"text-align: center; padding: 0; margin: 0;\">Free GPT-4</h1>"
+            + "<p style=\"text-align: center; margin-top: 8px; margin-bottom: 8px;\">Your coupon code</p>"
+            + "<h1 style=\"text-align: center; border: 2px dotted #646464; padding: 4px 32px; margin: 0 0 12px 0; background-color: #45494a; cursor: pointer;\">CODEGPT</h1>"
+            + "</body>"
+            + "</html>")
+        .withBorder(JBUI.Borders.emptyLeft(45)) // TODO
+        .setCopyable(true);
+
     var contentPanelBuilder = FormBuilder.createFormBuilder()
-        .addLabeledComponent("Email address:", emailAddressField)
-        .addLabeledComponent("Password:", passwordField)
+        .addComponentToRightColumn(JBUI.Panels.simplePanel().addToLeft(couponLabel))
+        .addLabeledComponent(CodeGPTBundle.get("settingsConfigurable.service.you.email.label"),
+            emailAddressField)
+        .addLabeledComponent(CodeGPTBundle.get("settingsConfigurable.service.you.password.label"),
+            passwordField)
         .addVerticalGap(4)
         .addComponentToRightColumn(createFooterPanel())
         .addVerticalGap(4);
@@ -176,22 +187,24 @@ public class YouServiceSelectionPanel extends JPanel {
       contentPanelBuilder.addComponentToRightColumn(invalidCredentialsLabel);
     }
 
+    var contentPanel = contentPanelBuilder.getPanel();
+    contentPanel.setBorder(JBUI.Borders.emptyLeft(16));
+
     return FormBuilder.createFormBuilder()
         .addComponent(new TitledSeparator(
-            CodeGPTBundle.get("settingsConfigurable.section.userAuthentication.title")))
-        .addComponent(JBUI.Panels
-            .simplePanel(contentPanelBuilder.getPanel())
-            .withBorder(JBUI.Borders.emptyLeft(16)))
+            CodeGPTBundle.get("settingsConfigurable.service.you.authentication.title")))
+        .addComponent(contentPanel)
         .getPanel();
   }
 
   private JPanel createUserInformationPanel(YouUser user) {
     var userManager = YouUserManager.getInstance();
     var contentPanelBuilder = FormBuilder.createFormBuilder()
-        .addLabeledComponent("Email address:",
+        .addLabeledComponent(CodeGPTBundle.get("settingsConfigurable.service.you.email.label"),
             new JBLabel(user.getEmails().get(0).getEmail()).withFont(JBFont.label().asBold()));
 
-    var signOutButton = new JButton("Sign Out");
+    var signOutButton = new JButton(
+        CodeGPTBundle.get("settingsConfigurable.service.you.signOut.label"));
     signOutButton.addActionListener(e -> {
       userManager.clearSession();
       refreshView(createUserAuthenticationPanel(emailField, passwordField, null));
@@ -199,7 +212,7 @@ public class YouServiceSelectionPanel extends JPanel {
 
     return FormBuilder.createFormBuilder()
         .addComponent(new TitledSeparator(
-            CodeGPTBundle.get("settingsConfigurable.section.userInformation.title")))
+            CodeGPTBundle.get("settingsConfigurable.service.you.userInformation.title")))
         .addVerticalGap(8)
         .addComponent(JBUI.Panels
             .simplePanel(contentPanelBuilder.addVerticalGap(4)

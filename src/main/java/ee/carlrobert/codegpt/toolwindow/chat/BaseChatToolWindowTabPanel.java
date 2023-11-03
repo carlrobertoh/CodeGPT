@@ -5,27 +5,32 @@ import static ee.carlrobert.codegpt.util.ThemeUtils.getPanelBackgroundColor;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 
-import com.intellij.ide.HelpTooltip;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBScrollPane;
+import com.intellij.util.messages.MessageBusConnection;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.JBUI.Borders;
+import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.actions.ActionType;
 import ee.carlrobert.codegpt.completions.CompletionRequestHandler;
+import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.completions.you.YouSerpResult;
+import ee.carlrobert.codegpt.completions.you.YouSubscriptionNotifier;
 import ee.carlrobert.codegpt.completions.you.YouUserManager;
-import ee.carlrobert.codegpt.completions.you.auth.AuthenticationNotifier;
+import ee.carlrobert.codegpt.completions.you.auth.SignedOutNotifier;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
+import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.settings.state.YouSettingsState;
@@ -38,6 +43,7 @@ import ee.carlrobert.codegpt.toolwindow.chat.components.UserMessagePanel;
 import ee.carlrobert.codegpt.toolwindow.chat.components.UserPromptTextArea;
 import ee.carlrobert.codegpt.util.EditorUtils;
 import ee.carlrobert.codegpt.util.OverlayUtils;
+import ee.carlrobert.codegpt.util.SwingUtils;
 import ee.carlrobert.codegpt.util.file.FileUtils;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
@@ -50,12 +56,15 @@ import java.util.UUID;
 import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.JTextPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPanel {
+
+  private static final Logger LOG = Logger.getInstance(BaseChatToolWindowTabPanel.class);
 
   private final boolean useContextualSearch;
   private final JPanel rootPanel;
@@ -105,8 +114,29 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
   public void displayLandingView() {
     scrollablePanel.removeAll();
     scrollablePanel.add(getLandingView());
+    var youUserManager = YouUserManager.getInstance();
+    if (SettingsState.getInstance().isUseYouService() &&
+        (!youUserManager.isAuthenticated() || !youUserManager.isSubscribed())) {
+      scrollablePanel.add(new ResponsePanel().addContent(createTextPane()));
+    }
     scrollablePanel.repaint();
     scrollablePanel.revalidate();
+  }
+
+  private JTextPane createTextPane() {
+    var textPane = SwingUtils.createTextPane(SwingUtils::handleHyperlinkClicked);
+    textPane.setBackground(getPanelBackgroundColor());
+    textPane.setFocusable(false);
+    textPane.setText(
+        "<html>\n"
+            + "<body>\n"
+            + "  <p style=\"margin: 4px 0;\">Use CodeGPT coupon for free month of GPT-4.</p>\n"
+            + "  <p style=\"margin: 4px 0;\">\n"
+            + "    <a href=\"https://you.com/plans\">Sign up here</a>\n"
+            + "  </p>\n"
+            + "</body>\n"
+            + "</html>");
+    return textPane;
   }
 
   @Override
@@ -165,7 +195,9 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     requestHandler.withContextualSearch(useContextualSearch);
     requestHandler.addMessageListener(partialMessage -> {
       try {
-        responseContainer.update(partialMessage);
+        LOG.debug(partialMessage);
+        ApplicationManager.getApplication()
+            .invokeLater(() -> responseContainer.update(partialMessage));
       } catch (Exception e) {
         responseContainer.displayDefaultError();
         throw new RuntimeException("Error while updating the content", e);
@@ -354,21 +386,31 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
         JBUI.Borders.empty(8)));
     wrapper.setBackground(getPanelBackgroundColor());
     wrapper.add(userPromptTextArea, BorderLayout.SOUTH);
+
     if (model != null) {
       var header = new JPanel(new BorderLayout());
       header.setBackground(getPanelBackgroundColor());
       header.setBorder(JBUI.Borders.emptyBottom(8));
       if ("YouCode".equals(model)) {
+        var messageBusConnection = ApplicationManager.getApplication().getMessageBus().connect();
         subscribeToYouModelChangeTopic();
-        subscribeToYouAuthTopic();
+        subscribeToYouSubscriptionTopic(messageBusConnection);
+        subscribeToSignedOutTopic(messageBusConnection);
         header.add(gpt4CheckBox, BorderLayout.LINE_START);
       }
       header.add(modelIconWrapper, BorderLayout.LINE_END);
       wrapper.add(header);
     }
+
     rootPanel.add(wrapper, gbc);
     userPromptTextArea.requestFocusInWindow();
     userPromptTextArea.requestFocus();
+  }
+
+  private void subscribeToSignedOutTopic(MessageBusConnection messageBusConnection) {
+    messageBusConnection.subscribe(
+        SignedOutNotifier.SIGNED_OUT_TOPIC,
+        (SignedOutNotifier) () -> gpt4CheckBox.setEnabled(false));
   }
 
   private void subscribeToYouModelChangeTopic() {
@@ -379,24 +421,26 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
             (YouModelChangeNotifier) gpt4CheckBox::setSelected);
   }
 
-  private void subscribeToYouAuthTopic() {
-    ApplicationManager.getApplication()
-        .getMessageBus()
-        .connect()
-        .subscribe(AuthenticationNotifier.AUTHENTICATION_TOPIC,
-            (AuthenticationNotifier) () -> gpt4CheckBox.setEnabled(true));
+  private void subscribeToYouSubscriptionTopic(MessageBusConnection messageBusConnection) {
+    messageBusConnection.subscribe(
+        YouSubscriptionNotifier.SUBSCRIPTION_TOPIC,
+        (YouSubscriptionNotifier) () -> {
+          displayLandingView();
+          gpt4CheckBox.setEnabled(true);
+        });
   }
 
   private JBCheckBox createGPT4ModelCheckBox() {
-    var gpt4CheckBox = new JBCheckBox("Use GPT-4 model");
+    var gpt4CheckBox = new JBCheckBox(CodeGPTBundle.get("toolwindow.chat.youProCheckBox.text"));
     gpt4CheckBox.setOpaque(false);
-    gpt4CheckBox.setEnabled(YouUserManager.getInstance().isAuthenticated());
+    gpt4CheckBox.setEnabled(YouUserManager.getInstance().isSubscribed());
     gpt4CheckBox.setSelected(YouSettingsState.getInstance().isUseGPT4Model());
     gpt4CheckBox.setToolTipText(getTooltipText(gpt4CheckBox.isSelected()));
     gpt4CheckBox.addChangeListener(e -> {
       var selected = ((JBCheckBox) e.getSource()).isSelected();
       var tooltipText = getTooltipText(selected);
       gpt4CheckBox.setToolTipText(tooltipText);
+      // TODO: Remove
       project.getMessageBus()
           .syncPublisher(YouModelChangeNotifier.YOU_MODEL_CHANGE_NOTIFIER_TOPIC)
           .modelChanged(selected);
@@ -406,9 +450,12 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
   }
 
   private String getTooltipText(boolean selected) {
-    return selected ?
-        "Turn off for faster responses" :
-        "<html>Turn on for complex queries, enable by creating an account on you.com<br />and signing in from plugin settings.<br />Use CodeGPT coupon for free month of GPT-4.</html>";
+    if (YouUserManager.getInstance().isSubscribed()) {
+      return selected ?
+          CodeGPTBundle.get("toolwindow.chat.youProCheckBox.disable") :
+          CodeGPTBundle.get("toolwindow.chat.youProCheckBox.enable");
+    }
+    return CodeGPTBundle.get("toolwindow.chat.youProCheckBox.notAllowed");
   }
 
   private String getClientCode() {
@@ -421,6 +468,9 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     }
     if (settings.isUseYouService()) {
       return "you.chat.completion";
+    }
+    if (settings.isUseLlamaService()) {
+      return "llama.chat.completion";
     }
     return null;
   }
@@ -436,7 +486,25 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     if (settings.isUseYouService()) {
       return "YouCode";
     }
+    if (settings.isUseLlamaService()) {
+      var llamaSettings = LlamaSettingsState.getInstance();
+      if (llamaSettings.isUseCustomModel()) {
+        var filePath = llamaSettings.getCustomLlamaModelPath();
+        int lastSeparatorIndex = filePath.lastIndexOf('/');
+        if (lastSeparatorIndex == -1) {
+          return filePath;
+        }
+        return filePath.substring(lastSeparatorIndex + 1);
+      }
+      var huggingFaceModel = llamaSettings.getHuggingFaceModel();
+      var llamaModel = LlamaModel.findByHuggingFaceModel(huggingFaceModel);
+      return String.format(
+          "%s %dB (Q%d)",
+          llamaModel.getLabel(),
+          huggingFaceModel.getParameterSize(),
+          huggingFaceModel.getQuantization());
+    }
 
-    return null;
+    return "Unknown";
   }
 }

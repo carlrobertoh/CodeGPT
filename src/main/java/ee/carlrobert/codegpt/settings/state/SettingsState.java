@@ -5,6 +5,7 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
+import ee.carlrobert.codegpt.completions.HuggingFaceModel;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,6 +18,7 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
   private boolean useOpenAIService = true;
   private boolean useAzureService;
   private boolean useYouService;
+  private boolean useLlamaService;
 
   public SettingsState() {
   }
@@ -43,10 +45,15 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
     if ("azure.chat.completion".equals(clientCode)) {
       AzureSettingsState.getInstance().setModel(conversation.getModel());
     }
+    if ("llama.chat.completion".equals(clientCode)) {
+      LlamaSettingsState.getInstance().setHuggingFaceModel(
+          HuggingFaceModel.valueOf(conversation.getModel()));
+    }
 
     setUseOpenAIService("chat.completion".equals(clientCode));
     setUseAzureService("azure.chat.completion".equals(clientCode));
     setUseYouService("you.chat.completion".equals(clientCode));
+    setUseLlamaService("llama.chat.completion".equals(clientCode));
   }
 
   public String getEmail() {
@@ -102,5 +109,13 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
 
   public void setUseYouService(boolean useYouService) {
     this.useYouService = useYouService;
+  }
+
+  public boolean isUseLlamaService() {
+    return useLlamaService;
+  }
+
+  public void setUseLlamaService(boolean useLlamaService) {
+    this.useLlamaService = useLlamaService;
   }
 }

@@ -33,6 +33,8 @@ public class CopyAction extends TrackableAction {
     var locationOnScreen = ((MouseEvent) event.getInputEvent()).getLocationOnScreen();
     locationOnScreen.y = locationOnScreen.y - 16;
 
-    OverlayUtils.showInfoBalloon("Code copied!", locationOnScreen);
+    OverlayUtils.showInfoBalloon(
+        CodeGPTBundle.get("toolwindow.chat.editor.action.copy.success"),
+        locationOnScreen);
   }
 }

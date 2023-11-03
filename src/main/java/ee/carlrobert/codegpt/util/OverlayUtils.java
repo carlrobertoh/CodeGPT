@@ -17,6 +17,7 @@ import com.intellij.openapi.ui.MessageDialogBuilder;
 import com.intellij.openapi.ui.MessageType;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.popup.Balloon;
+import com.intellij.openapi.ui.popup.Balloon.Position;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.ui.awt.RelativePoint;
 import com.intellij.ui.components.JBLabel;
@@ -27,6 +28,7 @@ import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.indexes.FolderStructureTreePanel;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
+import javax.swing.JComponent;
 import org.jetbrains.annotations.NotNull;
 
 public class OverlayUtils {
@@ -116,5 +118,13 @@ public class OverlayUtils {
         .setFadeoutTime(2500)
         .createBalloon()
         .show(RelativePoint.fromScreen(locationOnScreen), Balloon.Position.above);
+  }
+
+  public static void showBalloon(String content, MessageType messageType, JComponent component) {
+    JBPopupFactory.getInstance()
+        .createHtmlTextBalloonBuilder(content, messageType, null)
+        .setFadeoutTime(2500)
+        .createBalloon()
+        .show(RelativePoint.getSouthOf(component), Position.below);
   }
 }

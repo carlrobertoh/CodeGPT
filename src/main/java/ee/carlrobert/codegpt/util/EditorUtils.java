@@ -63,7 +63,11 @@ public final class EditorUtils {
           var editor = getSelectedEditor(project);
           if (editor != null) {
             var selectionModel = editor.getSelectionModel();
-            editor.getDocument().replaceString(selectionModel.getSelectionStart(), selectionModel.getSelectionEnd(), text);
+            editor.getDocument()
+                .replaceString(
+                    selectionModel.getSelectionStart(),
+                    selectionModel.getSelectionEnd(),
+                    text);
             editor.getContentComponent().requestFocus();
             selectionModel.removeSelection();
           }

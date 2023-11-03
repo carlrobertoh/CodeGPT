@@ -116,6 +116,21 @@ Expected a different answer? Re-generate any response of your choosing.
 - **Seamless conversations** - Chat with the AI regardless of the maximum token limitations
 - **Predefined Actions** - Create your own editor actions or override the existing ones, saving time rewriting the same prompt repeatedly
 
+### Running locally
+
+**Linux or macOS**
+```shell
+git clone https://github.com/carlrobertoh/CodeGPT.git
+cd CodeGPT
+git submodule update
+./gradlew runIde
+```
+
+**Windows ARM64**
+```shell
+./gradlew runIde -Penv=win-arm64
+```
+
 ## Issues
 
 See the [open issues][open-issues] for a full list of proposed features (and known issues).

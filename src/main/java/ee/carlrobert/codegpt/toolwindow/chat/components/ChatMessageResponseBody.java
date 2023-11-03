@@ -22,7 +22,6 @@ import com.vladsch.flexmark.util.data.MutableDataSet;
 import ee.carlrobert.codegpt.actions.ActionType;
 import ee.carlrobert.codegpt.completions.you.YouSerpResult;
 import ee.carlrobert.codegpt.settings.SettingsConfigurable;
-import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.toolwindow.chat.ResponseNodeRenderer;
 import ee.carlrobert.codegpt.toolwindow.chat.StreamParser;
@@ -231,13 +230,13 @@ public class ChatMessageResponseBody extends JPanel {
     add(currentlyProcessedElement);
   }
 
-  private void prepareProcessingCodeResponse(String code, String language) {
+  private void prepareProcessingCodeResponse(String code, String markdownLanguage) {
     hideCarets();
     currentlyProcessedTextPane = null;
     currentlyProcessedEditor = new ResponseEditor(
         project,
         code,
-        language,
+        markdownLanguage,
         parentDisposable);
     currentlyProcessedElement = new ResponseWrapper();
 
@@ -249,15 +248,13 @@ public class ChatMessageResponseBody extends JPanel {
     var editor = currentlyProcessedEditor.getEditor();
     var document = editor.getDocument();
     var application = ApplicationManager.getApplication();
-    Runnable updateDocumentRunnable = () -> {
-      application.runWriteAction(() ->
-          WriteCommandAction.runWriteCommandAction(project, () -> {
-            document.replaceString(0, document.getTextLength(), code);
-            editor.getCaretModel().moveToOffset(code.length());
-            editor.getComponent().revalidate();
-            editor.getComponent().repaint();
-          }));
-    };
+    Runnable updateDocumentRunnable = () -> application.runWriteAction(() ->
+        WriteCommandAction.runWriteCommandAction(project, () -> {
+          document.replaceString(0, document.getTextLength(), code);
+          editor.getCaretModel().moveToOffset(code.length());
+          editor.getComponent().revalidate();
+          editor.getComponent().repaint();
+        }));
 
     if (application.isUnitTestMode()) {
       application.invokeAndWait(updateDocumentRunnable);
@@ -267,8 +264,7 @@ public class ChatMessageResponseBody extends JPanel {
   }
 
   private JTextPane createTextPane() {
-    var textPane = new JTextPane();
-    textPane.addHyperlinkListener(event -> {
+    var textPane = SwingUtils.createTextPane(event -> {
       if (FileUtil.exists(event.getDescription()) && ACTIVATED.equals(event.getEventType())) {
         VirtualFile file = LocalFileSystem.getInstance().findFileByPath(event.getDescription());
         FileEditorManager.getInstance(project).openFile(Objects.requireNonNull(file), true);
@@ -277,14 +273,10 @@ public class ChatMessageResponseBody extends JPanel {
 
       SwingUtils.handleHyperlinkClicked(event);
     });
-    textPane.setContentType("text/html");
-    textPane.putClientProperty(JTextPane.HONOR_DISPLAY_PROPERTIES, true);
-    textPane.setCaretPosition(textPane.getDocument().getLength());
-    textPane.setBackground(getBackground());
-    textPane.setFocusable(true);
     textPane.getCaret().setVisible(true);
-    textPane.setEditable(false);
+    textPane.setCaretPosition(textPane.getDocument().getLength());
     textPane.setBorder(JBUI.Borders.empty());
+    textPane.setBackground(getBackground());
     return textPane;
   }
 

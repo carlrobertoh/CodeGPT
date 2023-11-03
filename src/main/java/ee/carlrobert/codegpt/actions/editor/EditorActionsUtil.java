@@ -38,7 +38,7 @@ public class EditorActionsUtil {
   }
 
   public static void refreshActions() {
-    AnAction actionGroup = ActionManager.getInstance().getAction("action.editor.group.EditorActionGroup");
+    AnAction actionGroup = ActionManager.getInstance().getAction("project.label");
     if (actionGroup instanceof DefaultActionGroup) {
       DefaultActionGroup group = (DefaultActionGroup) actionGroup;
       group.removeAll();

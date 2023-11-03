@@ -5,11 +5,14 @@ import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.advanced.AdvancedSettingsState;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
+import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
+import ee.carlrobert.codegpt.settings.state.YouSettingsState;
 import ee.carlrobert.llm.client.Client;
 import ee.carlrobert.llm.client.ProxyAuthenticator;
 import ee.carlrobert.llm.client.azure.AzureClient;
 import ee.carlrobert.llm.client.azure.AzureCompletionRequestParams;
+import ee.carlrobert.llm.client.llama.LlamaClient;
 import ee.carlrobert.llm.client.openai.OpenAIClient;
 import ee.carlrobert.llm.client.you.UTMParameters;
 import ee.carlrobert.llm.client.you.YouClient;
@@ -33,8 +36,16 @@ public class CompletionClientProvider {
     utmParameters.setMedium("jetbrains");
     utmParameters.setCampaign(CodeGPTPlugin.getVersion());
     utmParameters.setContent("CodeGPT");
-    return new YouClient.Builder(sessionId, accessToken)
+    // FIXME
+    return (YouClient) new YouClient.Builder(sessionId, accessToken)
         .setUTMParameters(utmParameters)
+        .setHost(YouSettingsState.getInstance().getBaseHost())
+        .build();
+  }
+
+  public static LlamaClient getLlamaClient() {
+    return new LlamaClient.Builder()
+        .setPort(LlamaSettingsState.getInstance().getServerPort())
         .build();
   }
 
@@ -65,10 +76,9 @@ public class CompletionClientProvider {
       builder.setProxy(
           new Proxy(advancedSettings.getProxyType(), new InetSocketAddress(proxyHost, proxyPort)));
       if (advancedSettings.isProxyAuthSelected()) {
-        builder.setProxyAuthenticator(
-            new ProxyAuthenticator(
-                advancedSettings.getProxyUsername(),
-                advancedSettings.getProxyPassword()));
+        builder.setProxyAuthenticator(new ProxyAuthenticator(
+            advancedSettings.getProxyUsername(),
+            advancedSettings.getProxyPassword()));
       }
     }
 

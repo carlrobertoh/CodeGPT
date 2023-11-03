@@ -6,16 +6,23 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
+import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.VirtualFile;
+import ee.carlrobert.codegpt.CodeGPTPlugin;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Writer;
+import java.net.URL;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -37,6 +44,33 @@ public class FileUtils {
           StandardOpenOption.CREATE).toFile();
     } catch (IOException e) {
       throw new RuntimeException("Failed to create file", e);
+    }
+  }
+
+  public static void copyFileWithProgress(
+      String fileName,
+      URL url,
+      long[] bytesRead,
+      long fileSize,
+      ProgressIndicator indicator) throws IOException {
+    FileUtils.tryCreateDirectory(CodeGPTPlugin.getLlamaModelsPath());
+
+    try (
+        var readableByteChannel = Channels.newChannel(url.openStream());
+        var fileOutputStream = new FileOutputStream(
+            CodeGPTPlugin.getLlamaModelsPath() + File.separator + fileName)) {
+      var buffer = ByteBuffer.allocateDirect(1024 * 10);
+
+      while (readableByteChannel.read(buffer) != -1) {
+        if (indicator.isCanceled()) {
+          readableByteChannel.close();
+          break;
+        }
+        buffer.flip();
+        bytesRead[0] += fileOutputStream.getChannel().write(buffer);
+        buffer.clear();
+        indicator.setFraction((double) bytesRead[0] / fileSize);
+      }
     }
   }
 
@@ -113,6 +147,19 @@ public class FileUtils {
     } catch (IOException e) {
       throw new RuntimeException("Unable to read resource", e);
     }
+  }
+
+  public static String convertFileSize(long fileSizeInBytes) {
+    String[] units = {"B", "KB", "MB", "GB"};
+    int unitIndex = 0;
+    double fileSize = fileSizeInBytes;
+
+    while (fileSize >= 1024 && unitIndex < units.length - 1) {
+      fileSize /= 1024;
+      unitIndex++;
+    }
+
+    return new DecimalFormat("#.##").format(fileSize) + " " + units[unitIndex];
   }
 
   private static Optional<Map.Entry<String, String>> findFirstExtension(

@@ -1,8 +1,24 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
+import java.io.FileInputStream
+import java.util.*
 
-fun properties(key: String) = providers.gradleProperty(key)
+val env = environment("env").getOrNull()
+
+fun loadProperties(filename: String): Properties = Properties().apply {
+    load(FileInputStream(filename))
+}
+
+fun properties(key: String): Provider<String> {
+  if ("win-arm64" == env) {
+    val property = loadProperties("gradle-win-arm64.properties").getProperty(key)
+            ?: return providers.gradleProperty(key)
+    return providers.provider { property }
+  }
+  return providers.gradleProperty(key)
+}
+
 fun environment(key: String) = providers.environmentVariable(key)
 
 plugins {
@@ -53,6 +69,17 @@ dependencies {
   testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.10.0")
 }
 
+tasks.register<Exec>("updateSubmodules") {
+  workingDir(rootDir)
+  commandLine("git", "submodule", "update", "--init", "--recursive")
+}
+
+tasks.register<Copy>("copyLlamaSubmodule") {
+  dependsOn("updateSubmodules")
+  from(layout.projectDirectory.file("src/main/cpp/llama.cpp"))
+  into(layout.buildDirectory.dir("idea-sandbox/plugins/CodeGPT/llama.cpp"))
+}
+
 tasks {
   wrapper {
     gradleVersion = properties("gradleVersion").get()
@@ -98,11 +125,20 @@ tasks {
     })
   }
 
+  prepareSandbox {
+    enabled = true
+    dependsOn("copyLlamaSubmodule")
+  }
+
   signPlugin {
     enabled = true
     certificateChain.set(System.getenv("CERTIFICATE_CHAIN"))
     privateKey.set(System.getenv("PRIVATE_KEY"))
     password.set(System.getenv("PRIVATE_KEY_PASSWORD"))
+  }
+
+  buildPlugin {
+    enabled = true
   }
 
   publishPlugin {
