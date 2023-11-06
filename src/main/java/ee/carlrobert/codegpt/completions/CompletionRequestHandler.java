@@ -219,6 +219,9 @@ public class CompletionRequestHandler {
       if (settings.isUseYouService()) {
         service = "you";
       }
+      if (settings.isUseLlamaService()) {
+        service = "llama";
+      }
       TelemetryAction.COMPLETION.createActionMessage()
           .property("conversationId", conversation.getId().toString())
           .property("model", conversation.getModel())
