@@ -170,13 +170,14 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
   }
 
   private boolean isRequestAllowed() {
-    if (SettingsState.getInstance().isUseAzureService()) {
+    var settings = SettingsState.getInstance();
+    if (settings.isUseAzureService()) {
       return AzureCredentialsManager.getInstance().isCredentialSet();
     }
-    if (SettingsState.getInstance().isUseYouService()) {
-      return true;
+    if (settings.isUseOpenAIService()) {
+      return OpenAICredentialsManager.getInstance().isApiKeySet();
     }
-    return OpenAICredentialsManager.getInstance().isApiKeySet();
+    return true;
   }
 
   private void call(
