@@ -66,7 +66,7 @@ dependencies {
   testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.1")
   testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.1")
   testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
-  testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.10.0")
+  testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.10.1")
 }
 
 tasks.register<Exec>("updateSubmodules") {
