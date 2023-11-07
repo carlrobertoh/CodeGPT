@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.2] - 2023-11-07
+
+### Added
+
+- OpenAI GPT-4 Turbo and the latest GPT-3.5 models
+
+### Fixed
+
+- Credential validation when using llama service
+
 ## [2.2.1] - 2023-11-06
 
 ### Fixed
@@ -217,7 +227,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `OPENAI_API_KEY` persistence, key is saved in the OS password safe from now on
 
-[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.1...HEAD
+[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.2...HEAD
+[2.2.2]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.1...v2.2.2
 [2.2.1]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.0...v2.2.1
 [2.2.0]: https://github.com/carlrobertoh/CodeGPT/compare/v2.1.7...v2.2.0
 [2.1.7]: https://github.com/carlrobertoh/CodeGPT/compare/v2.1.6...v2.1.7
