@@ -18,6 +18,7 @@ import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
+import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
@@ -59,11 +60,7 @@ public class DefaultCompletionRequestHandlerTest extends BasePlatformTestCase {
     var conversation = ConversationService.getInstance().startConversation();
     var requestHandler = new CompletionRequestHandler();
     requestHandler.addRequestCompletedListener(message::setResponse);
-    var settings = SettingsState.getInstance();
-    settings.setUseOpenAIService(true);
-    settings.setUseAzureService(false);
-    settings.setUseYouService(false);
-    settings.setUseLlamaService(false);
+    SettingsState.getInstance().setSelectedService(ServiceType.OPENAI);
     expectStreamRequest("/v1/chat/completions", request -> {
       assertThat(request.getMethod()).isEqualTo("POST");
       assertThat(request.getHeaders().get(AUTHORIZATION).get(0)).isEqualTo("Bearer TEST_API_KEY");
@@ -91,11 +88,7 @@ public class DefaultCompletionRequestHandlerTest extends BasePlatformTestCase {
 
   public void testAzureChatCompletionCall() {
     AzureSettingsState.getInstance().setModel(OpenAIChatCompletionModel.GPT_3_5.getCode());
-    var settings = SettingsState.getInstance();
-    settings.setUseOpenAIService(false);
-    settings.setUseAzureService(true);
-    settings.setUseYouService(false);
-    settings.setUseLlamaService(false);
+    SettingsState.getInstance().setSelectedService(ServiceType.AZURE);
     var azureSettings = AzureSettingsState.getInstance();
     azureSettings.setResourceName("TEST_RESOURCE_NAME");
     azureSettings.setApiVersion("TEST_API_VERSION");
@@ -141,11 +134,7 @@ public class DefaultCompletionRequestHandlerTest extends BasePlatformTestCase {
     conversation.addMessage(new Message("Ping", "Pong"));
     var requestHandler = new CompletionRequestHandler();
     requestHandler.addRequestCompletedListener(message::setResponse);
-    var settings = SettingsState.getInstance();
-    settings.setUseOpenAIService(false);
-    settings.setUseAzureService(false);
-    settings.setUseYouService(true);
-    settings.setUseLlamaService(false);
+    SettingsState.getInstance().setSelectedService(ServiceType.YOU);
     expectStreamRequest("/api/streamingSearch", request -> {
       assertThat(request.getMethod()).isEqualTo("GET");
       assertThat(request.getUri().getPath()).isEqualTo("/api/streamingSearch");
@@ -195,11 +184,7 @@ public class DefaultCompletionRequestHandlerTest extends BasePlatformTestCase {
     conversation.addMessage(new Message("Ping", "Pong"));
     var requestHandler = new CompletionRequestHandler();
     requestHandler.addRequestCompletedListener(message::setResponse);
-    var settings = SettingsState.getInstance();
-    settings.setUseOpenAIService(false);
-    settings.setUseAzureService(false);
-    settings.setUseYouService(false);
-    settings.setUseLlamaService(true);
+    SettingsState.getInstance().setSelectedService(ServiceType.LLAMA_CPP);
     expectStreamRequest("/completion", request -> {
       assertThat(request.getBody())
           .extracting(

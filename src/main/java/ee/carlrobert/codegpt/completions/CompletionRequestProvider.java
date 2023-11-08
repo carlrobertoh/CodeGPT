@@ -11,6 +11,7 @@ import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
+import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.settings.state.YouSettingsState;
@@ -149,7 +150,7 @@ public class CompletionRequestProvider {
       messages.add(new OpenAIChatCompletionMessage("user", message.getPrompt()));
     }
 
-    if (SettingsState.getInstance().isUseYouService()) {
+    if (SettingsState.getInstance().getSelectedService() == ServiceType.YOU) {
       return messages;
     }
 

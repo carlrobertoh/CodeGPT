@@ -39,7 +39,7 @@ public class SettingsComponent {
     cards.add(serviceSelectionForm.getLlamaServiceSectionPanel(), ServiceType.LLAMA_CPP.getCode());
     var serviceComboBoxModel = new DefaultComboBoxModel<ServiceType>();
     serviceComboBoxModel.addAll(Arrays.stream(ServiceType.values())
-        .filter(it -> !"LLAMA_CPP".equals(it.getCode()) || SystemInfoRt.isUnix)
+        .filter(it -> ServiceType.LLAMA_CPP != it || SystemInfoRt.isUnix)
         .collect(toList()));
     serviceComboBox = new ComboBox<>(serviceComboBoxModel);
     serviceComboBox.setSelectedItem(ServiceType.OPENAI);

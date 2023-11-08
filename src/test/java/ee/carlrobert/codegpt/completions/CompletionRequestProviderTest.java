@@ -14,6 +14,7 @@ import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
+import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.llm.client.http.LocalCallbackServer;
@@ -144,9 +145,7 @@ public class CompletionRequestProviderTest extends BasePlatformTestCase {
 
   public void testContextualSearch() {
     var conversation = ConversationService.getInstance().startConversation();
-    var settings = SettingsState.getInstance();
-    settings.setUseOpenAIService(true);
-    settings.setUseAzureService(false);
+    SettingsState.getInstance().setSelectedService(ServiceType.OPENAI);
     expectRequest("/v1/chat/completions", request -> {
       assertThat(request.getMethod()).isEqualTo("POST");
       assertThat(request.getHeaders().get(AUTHORIZATION).get(0)).isEqualTo("Bearer TEST_API_KEY");

@@ -29,6 +29,7 @@ import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
+import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
@@ -115,7 +116,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     scrollablePanel.removeAll();
     scrollablePanel.add(getLandingView());
     var youUserManager = YouUserManager.getInstance();
-    if (SettingsState.getInstance().isUseYouService() &&
+    if (SettingsState.getInstance().getSelectedService() == ServiceType.YOU &&
         (!youUserManager.isAuthenticated() || !youUserManager.isSubscribed())) {
       scrollablePanel.add(new ResponsePanel().addContent(createTextPane()));
     }
@@ -171,10 +172,10 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
 
   private boolean isRequestAllowed() {
     var settings = SettingsState.getInstance();
-    if (settings.isUseAzureService()) {
+    if (settings.getSelectedService() == ServiceType.AZURE) {
       return AzureCredentialsManager.getInstance().isCredentialSet();
     }
-    if (settings.isUseOpenAIService()) {
+    if (settings.getSelectedService() == ServiceType.OPENAI) {
       return OpenAICredentialsManager.getInstance().isApiKeySet();
     }
     return true;
@@ -244,7 +245,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     requestHandler.addErrorListener((error, ex) -> {
       try {
         if ("insufficient_quota".equals(error.getCode())) {
-          if (SettingsState.getInstance().isUseOpenAIService()) {
+          if (SettingsState.getInstance().getSelectedService() == ServiceType.OPENAI) {
             OpenAISettingsState.getInstance().setOpenAIQuotaExceeded(true);
           }
           responseContainer.displayQuotaExceeded();
@@ -377,7 +378,11 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
 
     var model = getModel();
     var modelIconWrapper = JBUI.Panels
-        .simplePanel(new ModelIconLabel(getClientCode(), model))
+        .simplePanel(new ModelIconLabel(
+            SettingsState.getInstance()
+                .getSelectedService()
+                .getCompletionCode(),
+            model))
         .withBorder(Borders.emptyRight(4))
         .withBackground(getPanelBackgroundColor());
 
@@ -388,20 +393,18 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     wrapper.setBackground(getPanelBackgroundColor());
     wrapper.add(userPromptTextArea, BorderLayout.SOUTH);
 
-    if (model != null) {
-      var header = new JPanel(new BorderLayout());
-      header.setBackground(getPanelBackgroundColor());
-      header.setBorder(JBUI.Borders.emptyBottom(8));
-      if ("YouCode".equals(model)) {
-        var messageBusConnection = ApplicationManager.getApplication().getMessageBus().connect();
-        subscribeToYouModelChangeTopic();
-        subscribeToYouSubscriptionTopic(messageBusConnection);
-        subscribeToSignedOutTopic(messageBusConnection);
-        header.add(gpt4CheckBox, BorderLayout.LINE_START);
-      }
-      header.add(modelIconWrapper, BorderLayout.LINE_END);
-      wrapper.add(header);
+    var header = new JPanel(new BorderLayout());
+    header.setBackground(getPanelBackgroundColor());
+    header.setBorder(JBUI.Borders.emptyBottom(8));
+    if ("YouCode".equals(model)) {
+      var messageBusConnection = ApplicationManager.getApplication().getMessageBus().connect();
+      subscribeToYouModelChangeTopic();
+      subscribeToYouSubscriptionTopic(messageBusConnection);
+      subscribeToSignedOutTopic(messageBusConnection);
+      header.add(gpt4CheckBox, BorderLayout.LINE_START);
     }
+    header.add(modelIconWrapper, BorderLayout.LINE_END);
+    wrapper.add(header);
 
     rootPanel.add(wrapper, gbc);
     userPromptTextArea.requestFocusInWindow();
@@ -459,35 +462,18 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     return CodeGPTBundle.get("toolwindow.chat.youProCheckBox.notAllowed");
   }
 
-  private String getClientCode() {
+  private String getModel() {
     var settings = SettingsState.getInstance();
-    if (settings.isUseOpenAIService()) {
-      return "chat.completion";
-    }
-    if (settings.isUseAzureService()) {
-      return "azure.chat.completion";
-    }
-    if (settings.isUseYouService()) {
-      return "you.chat.completion";
-    }
-    if (settings.isUseLlamaService()) {
-      return "llama.chat.completion";
-    }
-    return null;
-  }
-
-  private @Nullable String getModel() {
-    var settings = SettingsState.getInstance();
-    if (settings.isUseOpenAIService()) {
+    if (settings.getSelectedService() == ServiceType.OPENAI) {
       return OpenAISettingsState.getInstance().getModel();
     }
-    if (settings.isUseAzureService()) {
+    if (settings.getSelectedService() == ServiceType.AZURE) {
       return AzureSettingsState.getInstance().getModel();
     }
-    if (settings.isUseYouService()) {
+    if (settings.getSelectedService() == ServiceType.YOU) {
       return "YouCode";
     }
-    if (settings.isUseLlamaService()) {
+    if (settings.getSelectedService() == ServiceType.LLAMA_CPP) {
       var llamaSettings = LlamaSettingsState.getInstance();
       if (llamaSettings.isUseCustomModel()) {
         var filePath = llamaSettings.getCustomLlamaModelPath();

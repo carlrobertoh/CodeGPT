@@ -4,6 +4,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import ee.carlrobert.codegpt.completions.you.YouUserManager;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.message.Message;
+import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
@@ -80,12 +81,12 @@ public class CompletionRequestHandler {
     var requestProvider = new CompletionRequestProvider(conversation);
 
     try {
-      if (settings.isUseLlamaService()) {
+      if (settings.getSelectedService() == ServiceType.LLAMA_CPP) {
         return CompletionClientProvider.getLlamaClient()
             .getChatCompletion(requestProvider.buildLlamaCompletionRequest(message), eventListener);
       }
 
-      if (settings.isUseYouService()) {
+      if (settings.getSelectedService() == ServiceType.YOU) {
         var sessionId = "";
         var accessToken = "";
         var youUserManager = YouUserManager.getInstance();
@@ -103,7 +104,7 @@ public class CompletionRequestHandler {
             .getChatCompletion(request, eventListener);
       }
 
-      if (settings.isUseAzureService()) {
+      if (settings.getSelectedService() == ServiceType.AZURE) {
         var azureSettings = AzureSettingsState.getInstance();
         return CompletionClientProvider.getAzureClient().getChatCompletion(
             requestProvider.buildOpenAIChatCompletionRequest(
@@ -151,7 +152,7 @@ public class CompletionRequestHandler {
             conversation,
             message,
             isRetry,
-            settings.isUseYouService() ?
+            settings.getSelectedService() == ServiceType.YOU ?
                 new YouRequestCompletionEventListener() :
                 new BaseCompletionEventListener());
       } catch (TotalUsageExceededException e) {
@@ -212,20 +213,10 @@ public class CompletionRequestHandler {
     }
 
     private void sendInfo(SettingsState settings) {
-      var service = "openai";
-      if (settings.isUseAzureService()) {
-        service = "azure";
-      }
-      if (settings.isUseYouService()) {
-        service = "you";
-      }
-      if (settings.isUseLlamaService()) {
-        service = "llama";
-      }
       TelemetryAction.COMPLETION.createActionMessage()
           .property("conversationId", conversation.getId().toString())
           .property("model", conversation.getModel())
-          .property("service", service)
+          .property("service", settings.getSelectedService().getCode().toLowerCase())
           .send();
     }
 
