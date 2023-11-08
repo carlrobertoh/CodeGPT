@@ -7,6 +7,7 @@ import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import ee.carlrobert.codegpt.completions.HuggingFaceModel;
 import ee.carlrobert.codegpt.conversations.Conversation;
+import ee.carlrobert.codegpt.settings.service.ServiceType;
 import org.jetbrains.annotations.NotNull;
 
 @State(name = "CodeGPT_GeneralSettings_210", storages = @Storage("CodeGPT_GeneralSettings_210.xml"))
@@ -15,10 +16,7 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
   private String email = "";
   private String displayName = "";
   private boolean previouslySignedIn;
-  private boolean useOpenAIService = true;
-  private boolean useAzureService;
-  private boolean useYouService;
-  private boolean useLlamaService;
+  private ServiceType selectedService = ServiceType.OPENAI;
 
   public SettingsState() {
   }
@@ -40,20 +38,28 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
   public void sync(Conversation conversation) {
     var clientCode = conversation.getClientCode();
     if ("chat.completion".equals(clientCode)) {
+      setSelectedService(ServiceType.OPENAI);
       OpenAISettingsState.getInstance().setModel(conversation.getModel());
     }
     if ("azure.chat.completion".equals(clientCode)) {
+      setSelectedService(ServiceType.AZURE);
       AzureSettingsState.getInstance().setModel(conversation.getModel());
     }
     if ("llama.chat.completion".equals(clientCode)) {
-      LlamaSettingsState.getInstance().setHuggingFaceModel(
-          HuggingFaceModel.valueOf(conversation.getModel()));
+      setSelectedService(ServiceType.LLAMA_CPP);
+      var llamaSettings = LlamaSettingsState.getInstance();
+      try {
+        var huggingFaceModel = HuggingFaceModel.valueOf(conversation.getModel());
+        llamaSettings.setHuggingFaceModel(huggingFaceModel);
+        llamaSettings.setUseCustomModel(false);
+      } catch (IllegalArgumentException ignore) {
+        llamaSettings.setCustomLlamaModelPath(conversation.getModel());
+        llamaSettings.setUseCustomModel(true);
+      }
     }
-
-    setUseOpenAIService("chat.completion".equals(clientCode));
-    setUseAzureService("azure.chat.completion".equals(clientCode));
-    setUseYouService("you.chat.completion".equals(clientCode));
-    setUseLlamaService("llama.chat.completion".equals(clientCode));
+    if ("you.chat.completion".equals(clientCode)) {
+      setSelectedService(ServiceType.YOU);
+    }
   }
 
   public String getEmail() {
@@ -87,35 +93,11 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
     this.previouslySignedIn = previouslySignedIn;
   }
 
-  public boolean isUseOpenAIService() {
-    return useOpenAIService;
+  public ServiceType getSelectedService() {
+    return selectedService;
   }
 
-  public void setUseOpenAIService(boolean useOpenAIService) {
-    this.useOpenAIService = useOpenAIService;
-  }
-
-  public boolean isUseAzureService() {
-    return useAzureService;
-  }
-
-  public void setUseAzureService(boolean useAzureService) {
-    this.useAzureService = useAzureService;
-  }
-
-  public boolean isUseYouService() {
-    return useYouService;
-  }
-
-  public void setUseYouService(boolean useYouService) {
-    this.useYouService = useYouService;
-  }
-
-  public boolean isUseLlamaService() {
-    return useLlamaService;
-  }
-
-  public void setUseLlamaService(boolean useLlamaService) {
-    this.useLlamaService = useLlamaService;
+  public void setSelectedService(ServiceType selectedService) {
+    this.selectedService = selectedService;
   }
 }
