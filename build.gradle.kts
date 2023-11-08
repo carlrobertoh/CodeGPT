@@ -51,7 +51,7 @@ dependencies {
   implementation(project(":codegpt-telemetry"))
 
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.15.3")
-  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2")
+  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.3")
   implementation("com.vladsch.flexmark:flexmark-all:0.64.8") {
     // vulnerable transitive dependency
     exclude(group = "org.jsoup", module = "jsoup")
@@ -63,10 +63,10 @@ dependencies {
 
   testImplementation("org.assertj:assertj-core:3.24.2")
   testImplementation("org.awaitility:awaitility:4.2.0")
-  testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.2")
-  testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.0")
+  testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.1")
+  testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.1")
   testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
-  testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.10.0")
+  testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.10.1")
 }
 
 tasks.register<Exec>("updateSubmodules") {

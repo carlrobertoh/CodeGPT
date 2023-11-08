@@ -186,7 +186,7 @@ public final class ConversationService {
     return Optional.empty();
   }
 
-  private String getModelForSelectedService(ServiceType serviceType) {
+  private static String getModelForSelectedService(ServiceType serviceType) {
     switch (serviceType) {
       case OPENAI:
         return OpenAISettingsState.getInstance().getModel();
