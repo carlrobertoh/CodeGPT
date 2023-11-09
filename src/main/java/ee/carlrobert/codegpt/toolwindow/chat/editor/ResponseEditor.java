@@ -65,12 +65,12 @@ public class ResponseEditor extends JPanel implements Disposable {
 
     var settings = editorEx.getSettings();
     settings.setAdditionalColumnsCount(0);
-    settings.setAdditionalLinesCount(0);
+    settings.setAdditionalLinesCount(1);
     settings.setAdditionalPageAtBottom(false);
     settings.setVirtualSpace(false);
     settings.setUseSoftWraps(false);
-    settings.setLineMarkerAreaShown(true);
-    settings.setGutterIconsShown(true);
+    settings.setLineMarkerAreaShown(false);
+    settings.setGutterIconsShown(false);
 
     add(createHeaderComponent(), BorderLayout.NORTH);
     add(editor.getComponent(), BorderLayout.SOUTH);

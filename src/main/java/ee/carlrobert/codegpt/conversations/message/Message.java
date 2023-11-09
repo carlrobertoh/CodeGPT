@@ -2,7 +2,7 @@ package ee.carlrobert.codegpt.conversations.message;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import ee.carlrobert.codegpt.completions.you.YouSerpResult;
+import ee.carlrobert.llm.client.you.completion.YouSerpResult;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;

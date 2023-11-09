@@ -13,6 +13,7 @@ import static org.awaitility.Awaitility.await;
 
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
+import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
@@ -58,8 +59,7 @@ public class DefaultCompletionRequestHandlerTest extends BasePlatformTestCase {
   public void testOpenAIChatCompletionCall() {
     var message = new Message("TEST_PROMPT");
     var conversation = ConversationService.getInstance().startConversation();
-    var requestHandler = new CompletionRequestHandler();
-    requestHandler.addRequestCompletedListener(message::setResponse);
+    var requestHandler = new CompletionRequestHandler(false, getRequestEventListener(message));
     SettingsState.getInstance().setSelectedService(ServiceType.OPENAI);
     expectStreamRequest("/v1/chat/completions", request -> {
       assertThat(request.getMethod()).isEqualTo("POST");
@@ -94,9 +94,8 @@ public class DefaultCompletionRequestHandlerTest extends BasePlatformTestCase {
     azureSettings.setApiVersion("TEST_API_VERSION");
     azureSettings.setDeploymentId("TEST_DEPLOYMENT_ID");
     var conversationService = ConversationService.getInstance();
-    var requestHandler = new CompletionRequestHandler();
     var message = new Message("TEST_PROMPT");
-    requestHandler.addRequestCompletedListener(message::setResponse);
+    var requestHandler = new CompletionRequestHandler(false, getRequestEventListener(message));
     var prevMessage = new Message("TEST_PREV_PROMPT");
     prevMessage.setResponse("TEST_PREV_RESPONSE");
     var conversation = conversationService.startConversation();
@@ -132,8 +131,7 @@ public class DefaultCompletionRequestHandlerTest extends BasePlatformTestCase {
     var message = new Message("TEST_PROMPT");
     var conversation = ConversationService.getInstance().startConversation();
     conversation.addMessage(new Message("Ping", "Pong"));
-    var requestHandler = new CompletionRequestHandler();
-    requestHandler.addRequestCompletedListener(message::setResponse);
+    var requestHandler = new CompletionRequestHandler(false, getRequestEventListener(message));
     SettingsState.getInstance().setSelectedService(ServiceType.YOU);
     expectStreamRequest("/api/streamingSearch", request -> {
       assertThat(request.getMethod()).isEqualTo("GET");
@@ -182,8 +180,7 @@ public class DefaultCompletionRequestHandlerTest extends BasePlatformTestCase {
     var message = new Message("TEST_PROMPT");
     var conversation = ConversationService.getInstance().startConversation();
     conversation.addMessage(new Message("Ping", "Pong"));
-    var requestHandler = new CompletionRequestHandler();
-    requestHandler.addRequestCompletedListener(message::setResponse);
+    var requestHandler = new CompletionRequestHandler(false, getRequestEventListener(message));
     SettingsState.getInstance().setSelectedService(ServiceType.LLAMA_CPP);
     expectStreamRequest("/completion", request -> {
       assertThat(request.getBody())
@@ -213,5 +210,18 @@ public class DefaultCompletionRequestHandlerTest extends BasePlatformTestCase {
 
   private void expectStreamRequest(String path, StreamHttpExchange exchange) {
     server.addExpectation(new StreamExpectation(path, exchange));
+  }
+
+  private ToolWindowCompletionEventListener getRequestEventListener(Message message) {
+    return new ToolWindowCompletionEventListener() {
+      @Override
+      public void handleCompleted(
+          String fullMessage,
+          Message conversationMessage,
+          Conversation conversation,
+          boolean isRetry) {
+        message.setResponse(fullMessage);
+      }
+    };
   }
 }

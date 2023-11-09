@@ -1,12 +1,8 @@
 package ee.carlrobert.codegpt.completions;
 
 import com.intellij.openapi.diagnostic.Logger;
-import ee.carlrobert.codegpt.completions.you.YouUserManager;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.message.Message;
-import ee.carlrobert.codegpt.settings.service.ServiceType;
-import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
-import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
@@ -14,50 +10,25 @@ import ee.carlrobert.llm.client.you.completion.YouCompletionEventListener;
 import ee.carlrobert.llm.client.you.completion.YouSerpResult;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import javax.swing.SwingWorker;
 import okhttp3.sse.EventSource;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class CompletionRequestHandler {
 
   private static final Logger LOG = Logger.getInstance(CompletionRequestHandler.class);
 
   private final StringBuilder messageBuilder = new StringBuilder();
+  private final boolean useContextualSearch;
+  private final ToolWindowCompletionEventListener toolWindowCompletionEventListener;
   private SwingWorker<Void, String> swingWorker;
   private EventSource eventSource;
-  private @Nullable Consumer<String> messageListener;
-  private @Nullable BiConsumer<ErrorDetails, Throwable> errorListener;
-  private @Nullable Consumer<String> completedListener;
-  private @Nullable Consumer<List<YouSerpResult>> serpResultsListener;
-  private @Nullable Runnable tokensExceededListener;
-  private boolean useContextualSearch;
 
-  public CompletionRequestHandler withContextualSearch(boolean useContextualSearch) {
+  public CompletionRequestHandler(
+      boolean useContextualSearch,
+      ToolWindowCompletionEventListener toolWindowCompletionEventListener) {
     this.useContextualSearch = useContextualSearch;
-    return this;
-  }
-
-  public void addMessageListener(Consumer<String> messageListener) {
-    this.messageListener = messageListener;
-  }
-
-  public void addErrorListener(BiConsumer<ErrorDetails, Throwable> errorListener) {
-    this.errorListener = errorListener;
-  }
-
-  public void addRequestCompletedListener(Consumer<String> completedListener) {
-    this.completedListener = completedListener;
-  }
-
-  public void addTokensExceededListener(Runnable tokensExceededListener) {
-    this.tokensExceededListener = tokensExceededListener;
-  }
-
-  public void addSerpResultsListener(Consumer<List<YouSerpResult>> serpResultsListener) {
-    this.serpResultsListener = serpResultsListener;
+    this.toolWindowCompletionEventListener = toolWindowCompletionEventListener;
   }
 
   public void call(Conversation conversation, Message message, boolean isRetry) {
@@ -75,60 +46,13 @@ public class CompletionRequestHandler {
   private EventSource startCall(
       @NotNull Conversation conversation,
       @NotNull Message message,
-      boolean isRetry,
+      boolean retry,
       CompletionEventListener eventListener) {
-    var settings = SettingsState.getInstance();
-    var requestProvider = new CompletionRequestProvider(conversation);
-
     try {
-      if (settings.getSelectedService() == ServiceType.LLAMA_CPP) {
-        return CompletionClientProvider.getLlamaClient()
-            .getChatCompletion(requestProvider.buildLlamaCompletionRequest(message), eventListener);
-      }
-
-      if (settings.getSelectedService() == ServiceType.YOU) {
-        var sessionId = "";
-        var accessToken = "";
-        var youUserManager = YouUserManager.getInstance();
-        if (youUserManager.isAuthenticated()) {
-          var authenticationResponse =
-              youUserManager.getAuthenticationResponse().getData();
-          sessionId = authenticationResponse.getSession().getSessionId();
-          accessToken = authenticationResponse.getSessionJwt();
-        }
-        var request = requestProvider.buildYouCompletionRequest(message);
-        LOG.info("Initiating completion request using model: " +
-            (request.isUseGPT4Model() ? "GPT-4" : "YouBot"));
-
-        return CompletionClientProvider.getYouClient(sessionId, accessToken)
-            .getChatCompletion(request, eventListener);
-      }
-
-      if (settings.getSelectedService() == ServiceType.AZURE) {
-        var azureSettings = AzureSettingsState.getInstance();
-        return CompletionClientProvider.getAzureClient().getChatCompletion(
-            requestProvider.buildOpenAIChatCompletionRequest(
-                azureSettings.getModel(),
-                message,
-                isRetry,
-                useContextualSearch,
-                azureSettings.isUsingCustomPath() ? azureSettings.getPath() : null),
-            eventListener);
-      }
-
-      var openAISettings = OpenAISettingsState.getInstance();
-      return CompletionClientProvider.getOpenAIClient().getChatCompletion(
-          requestProvider.buildOpenAIChatCompletionRequest(
-              openAISettings.getModel(),
-              message,
-              isRetry,
-              useContextualSearch,
-              openAISettings.isUsingCustomPath() ? openAISettings.getPath() : null),
-          eventListener);
+      return CompletionRequestService.getInstance()
+          .getChatCompletionAsync(conversation, message, retry, useContextualSearch, eventListener);
     } catch (Throwable t) {
-      if (errorListener != null) {
-        errorListener.accept(new ErrorDetails("Something went wrong"), t);
-      }
+      toolWindowCompletionEventListener.handleError(new ErrorDetails("Something went wrong"), t);
       throw t;
     }
   }
@@ -152,13 +76,9 @@ public class CompletionRequestHandler {
             conversation,
             message,
             isRetry,
-            settings.getSelectedService() == ServiceType.YOU ?
-                new YouRequestCompletionEventListener() :
-                new BaseCompletionEventListener());
+            new YouRequestCompletionEventListener());
       } catch (TotalUsageExceededException e) {
-        if (tokensExceededListener != null) {
-          tokensExceededListener.run();
-        }
+        toolWindowCompletionEventListener.handleTokensExceeded(conversation, message);
       } finally {
         sendInfo(settings);
       }
@@ -169,13 +89,16 @@ public class CompletionRequestHandler {
       message.setResponse(messageBuilder.toString());
       for (String text : chunks) {
         messageBuilder.append(text);
-        if (messageListener != null) {
-          messageListener.accept(text);
-        }
+        toolWindowCompletionEventListener.handleMessage(text);
       }
     }
 
-    class BaseCompletionEventListener implements CompletionEventListener {
+    class YouRequestCompletionEventListener implements YouCompletionEventListener {
+
+      @Override
+      public void onSerpResults(List<YouSerpResult> results) {
+        toolWindowCompletionEventListener.handleSerpResults(results, message);
+      }
 
       @Override
       public void onMessage(String message) {
@@ -184,30 +107,16 @@ public class CompletionRequestHandler {
 
       @Override
       public void onComplete(StringBuilder messageBuilder) {
-        if (completedListener != null) {
-          completedListener.accept(messageBuilder.toString());
-        }
+        toolWindowCompletionEventListener.handleCompleted(messageBuilder.toString(), message,
+            conversation, isRetry);
       }
 
       @Override
       public void onError(ErrorDetails error, Throwable ex) {
         try {
-          if (errorListener != null) {
-            errorListener.accept(error, ex);
-          }
+          toolWindowCompletionEventListener.handleError(error, ex);
         } finally {
           sendError(error, ex);
-        }
-      }
-    }
-
-    class YouRequestCompletionEventListener extends BaseCompletionEventListener
-        implements YouCompletionEventListener {
-
-      @Override
-      public void onSerpResults(List<YouSerpResult> results) {
-        if (serpResultsListener != null) {
-          serpResultsListener.accept(results);
         }
       }
     }

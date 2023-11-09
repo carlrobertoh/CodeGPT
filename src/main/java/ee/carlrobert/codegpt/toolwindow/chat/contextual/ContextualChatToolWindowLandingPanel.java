@@ -71,7 +71,7 @@ class ContextualChatToolWindowLandingPanel extends ResponsePanel {
   }
 
   private JTextPane createTextPane() {
-    var textPane = SwingUtils.createTextPane(this::handleHyperlinkClicked);
+    var textPane = SwingUtils.createTextPane("", this::handleHyperlinkClicked);
     textPane.setBackground(getPanelBackgroundColor());
     return textPane;
   }

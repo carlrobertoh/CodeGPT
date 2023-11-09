@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt.completions;
 
 import ee.carlrobert.codegpt.CodeGPTPlugin;
+import ee.carlrobert.codegpt.completions.you.YouUserManager;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.advanced.AdvancedSettingsState;
@@ -30,12 +31,22 @@ public class CompletionClientProvider {
     return getAzureClientBuilder().build();
   }
 
-  public static YouClient getYouClient(String sessionId, String accessToken) {
+  public static YouClient getYouClient() {
     var utmParameters = new UTMParameters();
     utmParameters.setSource("ide");
     utmParameters.setMedium("jetbrains");
     utmParameters.setCampaign(CodeGPTPlugin.getVersion());
     utmParameters.setContent("CodeGPT");
+
+    var sessionId = "";
+    var accessToken = "";
+    var youUserManager = YouUserManager.getInstance();
+    if (youUserManager.isAuthenticated()) {
+      var authenticationResponse = youUserManager.getAuthenticationResponse().getData();
+      sessionId = authenticationResponse.getSession().getSessionId();
+      accessToken = authenticationResponse.getSessionJwt();
+    }
+
     // FIXME
     return (YouClient) new YouClient.Builder(sessionId, accessToken)
         .setUTMParameters(utmParameters)

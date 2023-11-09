@@ -22,12 +22,17 @@ import javax.swing.event.HyperlinkListener;
 
 public class SwingUtils {
 
-  public static JTextPane createTextPane(HyperlinkListener listener) {
+  public static JTextPane createTextPane(String text) {
+    return createTextPane(text, SwingUtils::handleHyperlinkClicked);
+  }
+
+  public static JTextPane createTextPane(String text, HyperlinkListener listener) {
     var textPane = new JTextPane();
     textPane.putClientProperty(JTextPane.HONOR_DISPLAY_PROPERTIES, true);
     textPane.addHyperlinkListener(listener);
     textPane.setContentType("text/html");
     textPane.setEditable(false);
+    textPane.setText(text);
     return textPane;
   }
 

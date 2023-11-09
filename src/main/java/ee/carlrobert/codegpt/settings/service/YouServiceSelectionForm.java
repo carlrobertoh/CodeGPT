@@ -134,15 +134,10 @@ public class YouServiceSelectionForm extends JPanel {
   }
 
   private JTextPane createSignUpTextPane() {
-    var textPane = createTextPane(
+    var textPane = SwingUtils.createTextPane(
         "<html><a href=\"https://you.com/code\">Don't have an account? Sign up</a></html>");
     textPane.setBorder(JBUI.Borders.emptyLeft(4));
-    return textPane;
-  }
-
-  private JTextPane createTextPane(String htmlContent) {
-    var textPane = SwingUtils.createTextPane(SwingUtils::handleHyperlinkClicked);
-    textPane.setText(htmlContent);
+    textPane.setOpaque(false);
     return textPane;
   }
 

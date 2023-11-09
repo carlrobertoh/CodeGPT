@@ -6,6 +6,7 @@ import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import ee.carlrobert.codegpt.completions.HuggingFaceModel;
+import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import org.jetbrains.annotations.NotNull;
@@ -59,6 +60,36 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
     }
     if ("you.chat.completion".equals(clientCode)) {
       setSelectedService(ServiceType.YOU);
+    }
+  }
+
+  public String getModel() {
+    switch (selectedService) {
+      case OPENAI:
+        return OpenAISettingsState.getInstance().getModel();
+      case AZURE:
+        return AzureSettingsState.getInstance().getModel();
+      case YOU:
+        return "YouCode";
+      case LLAMA_CPP:
+        var llamaSettings = LlamaSettingsState.getInstance();
+        if (llamaSettings.isUseCustomModel()) {
+          var filePath = llamaSettings.getCustomLlamaModelPath();
+          int lastSeparatorIndex = filePath.lastIndexOf('/');
+          if (lastSeparatorIndex == -1) {
+            return filePath;
+          }
+          return filePath.substring(lastSeparatorIndex + 1);
+        }
+        var huggingFaceModel = llamaSettings.getHuggingFaceModel();
+        var llamaModel = LlamaModel.findByHuggingFaceModel(huggingFaceModel);
+        return String.format(
+            "%s %dB (Q%d)",
+            llamaModel.getLabel(),
+            huggingFaceModel.getParameterSize(),
+            huggingFaceModel.getQuantization());
+      default:
+        return "Unknown";
     }
   }
 

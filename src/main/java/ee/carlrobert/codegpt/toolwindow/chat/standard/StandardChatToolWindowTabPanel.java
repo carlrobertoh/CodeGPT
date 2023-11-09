@@ -6,15 +6,14 @@ import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.project.Project;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.message.Message;
-import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.settings.state.YouSettingsState;
 import ee.carlrobert.codegpt.toolwindow.chat.BaseChatToolWindowTabPanel;
 import ee.carlrobert.codegpt.toolwindow.chat.components.ChatMessageResponseBody;
 import ee.carlrobert.codegpt.toolwindow.chat.components.ResponsePanel;
 import ee.carlrobert.codegpt.toolwindow.chat.components.UserMessagePanel;
 import ee.carlrobert.codegpt.util.EditorUtils;
-import ee.carlrobert.codegpt.util.file.FileUtils;
 import ee.carlrobert.codegpt.util.OverlayUtils;
+import ee.carlrobert.codegpt.util.file.FileUtils;
 import javax.swing.JComponent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -25,7 +24,8 @@ public class StandardChatToolWindowTabPanel extends BaseChatToolWindowTabPanel {
     this(project, null);
   }
 
-  public StandardChatToolWindowTabPanel(@NotNull Project project,
+  public StandardChatToolWindowTabPanel(
+      @NotNull Project project,
       @Nullable Conversation conversation) {
     super(project, false);
     if (conversation == null) {
@@ -79,7 +79,7 @@ public class StandardChatToolWindowTabPanel extends BaseChatToolWindowTabPanel {
       messageWrapper.add(new UserMessagePanel(project, message, false, this));
       messageWrapper.add(new ResponsePanel()
           .withReloadAction(() -> reloadMessage(message, conversation))
-          .withDeleteAction(() -> deleteMessage(message.getId(), messageWrapper, conversation))
+          .withDeleteAction(() -> removeMessage(message.getId(), messageWrapper, conversation))
           .addContent(messageResponseBody));
     });
     setConversation(conversation);

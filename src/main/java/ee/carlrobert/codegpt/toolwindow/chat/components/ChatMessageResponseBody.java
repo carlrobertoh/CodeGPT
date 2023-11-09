@@ -20,7 +20,6 @@ import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.data.MutableDataSet;
 import ee.carlrobert.codegpt.actions.ActionType;
-import ee.carlrobert.codegpt.completions.you.YouSerpResult;
 import ee.carlrobert.codegpt.settings.SettingsConfigurable;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.toolwindow.chat.ResponseNodeRenderer;
@@ -29,6 +28,7 @@ import ee.carlrobert.codegpt.toolwindow.chat.StreamResponseType;
 import ee.carlrobert.codegpt.toolwindow.chat.editor.ResponseEditor;
 import ee.carlrobert.codegpt.util.MarkdownUtils;
 import ee.carlrobert.codegpt.util.SwingUtils;
+import ee.carlrobert.llm.client.you.completion.YouSerpResult;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.util.List;
@@ -145,9 +145,7 @@ public class ChatMessageResponseBody extends JPanel {
         "<html><p style=\"margin-top: 4px; margin-bottom: 8px;\">%s</p></html>",
         message);
     if (responseReceived) {
-      var errorPane = createTextPane();
-      errorPane.setText(errorText);
-      add(new ResponseWrapper().add(errorPane));
+      add(new ResponseWrapper().add(createTextPane(errorText)));
     } else {
       currentlyProcessedTextPane.setText(errorText);
     }
@@ -158,22 +156,24 @@ public class ChatMessageResponseBody extends JPanel {
   }
 
   public void displaySerpResults(List<YouSerpResult> serpResults) {
+    var html = getSearchResultsHtml(serpResults);
+    if (responseReceived) {
+      add(new ResponseWrapper().add(createTextPane(html)));
+    } else {
+      currentlyProcessedTextPane.setText(html);
+    }
+  }
+
+  private String getSearchResultsHtml(List<YouSerpResult> serpResults) {
     var titles = serpResults.stream()
         .map(result -> format("<li style=\"margin-bottom: 4px;\"><a href=\"%s\">%s</a></li>",
             result.getUrl(), result.getName()))
         .collect(Collectors.joining());
-    var html = format(
+    return format(
         "<html>" +
             "<p><strong>Search results:</strong></p>" +
             "<ol>%s</ol>" +
             "</html>", titles);
-    if (responseReceived) {
-      var textPane = createTextPane();
-      textPane.setText(html);
-      add(new ResponseWrapper().add(textPane));
-    } else {
-      currentlyProcessedTextPane.setText(html);
-    }
   }
 
   public void clear() {
@@ -224,7 +224,7 @@ public class ChatMessageResponseBody extends JPanel {
   private void prepareProcessingTextResponse() {
     hideCarets();
     currentlyProcessedEditor = null;
-    currentlyProcessedTextPane = createTextPane();
+    currentlyProcessedTextPane = createTextPane("");
     currentlyProcessedElement = new ResponseWrapper();
     currentlyProcessedElement.add(currentlyProcessedTextPane);
     add(currentlyProcessedElement);
@@ -263,8 +263,8 @@ public class ChatMessageResponseBody extends JPanel {
     }
   }
 
-  private JTextPane createTextPane() {
-    var textPane = SwingUtils.createTextPane(event -> {
+  private JTextPane createTextPane(String text) {
+    var textPane = SwingUtils.createTextPane(text, event -> {
       if (FileUtil.exists(event.getDescription()) && ACTIVATED.equals(event.getEventType())) {
         VirtualFile file = LocalFileSystem.getInstance().findFileByPath(event.getDescription());
         FileEditorManager.getInstance(project).openFile(Objects.requireNonNull(file), true);
