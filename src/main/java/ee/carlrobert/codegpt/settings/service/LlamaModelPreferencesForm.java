@@ -85,7 +85,7 @@ public class LlamaModelPreferencesForm {
     progressLabel = new JBLabel("");
     progressLabel.setBorder(JBUI.Borders.emptyLeft(2));
     progressLabel.setFont(JBUI.Fonts.smallFont());
-    modelExistsIcon = new JBLabel(Actions.Commit);
+    modelExistsIcon = new JBLabel(Actions.Checked);
     modelExistsIcon.setVisible(isModelExists(llamaSettings.getHuggingFaceModel()));
     helpIcon = new JBLabel(General.ContextHelp);
     huggingFaceComboBoxModel = new DefaultComboBoxModel<>();

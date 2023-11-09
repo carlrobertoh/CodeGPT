@@ -62,7 +62,8 @@ public class LlamaServiceSelectionForm extends JPanel {
       } else {
         if (!isModelExists(llamaModelPreferencesForm.getSelectedModel())) {
           OverlayUtils.showBalloon(
-              CodeGPTBundle.get("settingsConfigurable.service.llama.overlay.modelNotDownloaded.text"),
+              CodeGPTBundle.get(
+                  "settingsConfigurable.service.llama.overlay.modelNotDownloaded.text"),
               MessageType.ERROR,
               llamaModelPreferencesForm.getHuggingFaceModelComboBox());
           return;
@@ -71,15 +72,19 @@ public class LlamaServiceSelectionForm extends JPanel {
 
       if (llamaServerAgent.isServerRunning()) {
         setFormEnabled(true);
-        serverButton.setText(CodeGPTBundle.get("settingsConfigurable.service.llama.startServer.label"));
+        serverButton.setText(
+            CodeGPTBundle.get("settingsConfigurable.service.llama.startServer.label"));
         serverButton.setIcon(Actions.Execute);
-        serverProgressPanel.updateText(CodeGPTBundle.get("settingsConfigurable.service.llama.progress.stoppingServer"));
+        serverProgressPanel.updateText(
+            CodeGPTBundle.get("settingsConfigurable.service.llama.progress.stoppingServer"));
         llamaServerAgent.stopAgent();
       } else {
         setFormEnabled(false);
-        serverButton.setText(CodeGPTBundle.get("settingsConfigurable.service.llama.stopServer.label"));
+        serverButton.setText(
+            CodeGPTBundle.get("settingsConfigurable.service.llama.stopServer.label"));
         serverButton.setIcon(Actions.Suspend);
-        serverProgressPanel.startProgress(CodeGPTBundle.get("settingsConfigurable.service.llama.progress.startingServer"));
+        serverProgressPanel.startProgress(
+            CodeGPTBundle.get("settingsConfigurable.service.llama.progress.startingServer"));
 
         // TODO: Move to LlamaModelPreferencesForm
         var modelPath = llamaModelPreferencesForm.isUseCustomLlamaModel() ?
@@ -94,10 +99,8 @@ public class LlamaServiceSelectionForm extends JPanel {
             serverProgressPanel,
             () -> {
               setFormEnabled(false);
-              serverProgressPanel.displayComponent(new JBLabel(
-                  "Server running",
-                  Actions.Commit,
-                  SwingConstants.LEADING));
+              serverProgressPanel.displayComponent(
+                  new JBLabel("Server running", Actions.Checked, SwingConstants.LEADING));
             });
       }
     });
@@ -109,15 +112,21 @@ public class LlamaServiceSelectionForm extends JPanel {
 
     setLayout(new BorderLayout());
     add(FormBuilder.createFormBuilder()
-        .addComponent(new TitledSeparator(CodeGPTBundle.get("settingsConfigurable.service.llama.modelPreferences.title")))
+        .addComponent(new TitledSeparator(
+            CodeGPTBundle.get("settingsConfigurable.service.llama.modelPreferences.title")))
         .addComponent(withEmptyLeftBorder(llamaModelPreferencesForm.getForm()))
-        .addComponent(new TitledSeparator(CodeGPTBundle.get("settingsConfigurable.service.llama.serverPreferences.title")))
+        .addComponent(new TitledSeparator(
+            CodeGPTBundle.get("settingsConfigurable.service.llama.serverPreferences.title")))
         .addComponent(withEmptyLeftBorder(FormBuilder.createFormBuilder()
-            .addLabeledComponent(CodeGPTBundle.get("settingsConfigurable.service.llama.contextSize.label"), maxTokensField)
+            .addLabeledComponent(
+                CodeGPTBundle.get("settingsConfigurable.service.llama.contextSize.label"),
+                maxTokensField)
             .addComponentToRightColumn(contextSizeHelpText)
-            .addLabeledComponent(CodeGPTBundle.get("settingsConfigurable.service.llama.port.label"), JBUI.Panels.simplePanel()
-                .addToLeft(portField)
-                .addToRight(serverButton))
+            .addLabeledComponent(
+                CodeGPTBundle.get("settingsConfigurable.service.llama.port.label"),
+                JBUI.Panels.simplePanel()
+                    .addToLeft(portField)
+                    .addToRight(serverButton))
             .getPanel()))
         .addVerticalGap(4)
         .addComponent(withEmptyLeftBorder(serverProgressPanel))
