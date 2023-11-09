@@ -78,7 +78,7 @@ public class SettingsConfigurable implements Configurable {
     var azureSettings = AzureSettingsState.getInstance();
     var llamaSettings = LlamaSettingsState.getInstance();
     var serviceChanged = isServiceChanged(settings);
-    var modelChanged = openAISettings.getModel().equals(serviceSelectionForm.getOpenAIModel());
+    var modelChanged = !openAISettings.getModel().equals(serviceSelectionForm.getOpenAIModel());
 
     var prevKey = OpenAICredentialsManager.getInstance().getApiKey();
     if (prevKey != null && !prevKey.equals(serviceSelectionForm.getOpenAIApiKey())) {
