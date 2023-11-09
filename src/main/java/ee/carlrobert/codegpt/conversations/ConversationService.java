@@ -191,7 +191,7 @@ public final class ConversationService {
       case OPENAI:
         return OpenAISettingsState.getInstance().getModel();
       case AZURE:
-        return AzureSettingsState.getInstance().getModel();
+        return AzureSettingsState.getInstance().getDeploymentId();
       case YOU:
         return "YouCode";
       case LLAMA_CPP:

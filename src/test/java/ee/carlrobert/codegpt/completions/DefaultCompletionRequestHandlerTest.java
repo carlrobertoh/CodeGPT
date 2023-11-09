@@ -87,7 +87,6 @@ public class DefaultCompletionRequestHandlerTest extends BasePlatformTestCase {
   }
 
   public void testAzureChatCompletionCall() {
-    AzureSettingsState.getInstance().setModel(OpenAIChatCompletionModel.GPT_3_5.getCode());
     SettingsState.getInstance().setSelectedService(ServiceType.AZURE);
     var azureSettings = AzureSettingsState.getInstance();
     azureSettings.setResourceName("TEST_RESOURCE_NAME");
@@ -105,11 +104,8 @@ public class DefaultCompletionRequestHandlerTest extends BasePlatformTestCase {
       assertThat(request.getUri().getQuery()).isEqualTo("api-version=TEST_API_VERSION");
       assertThat(request.getHeaders().get("Api-key").get(0)).isEqualTo("TEST_API_KEY");
       assertThat(request.getBody())
-          .extracting(
-              "model",
-              "messages")
-          .containsExactly(
-              "gpt-3.5-turbo",
+          .extracting("messages")
+          .isEqualTo(
               List.of(
                   Map.of("role", "system", "content", COMPLETION_SYSTEM_PROMPT),
                   Map.of("role", "user", "content", "TEST_PREV_PROMPT"),

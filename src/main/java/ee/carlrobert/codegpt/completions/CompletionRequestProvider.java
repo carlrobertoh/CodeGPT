@@ -107,7 +107,7 @@ public class CompletionRequestProvider {
   }
 
   public OpenAIChatCompletionRequest buildOpenAIChatCompletionRequest(
-      String model,
+      @Nullable String model,
       Message message,
       boolean isRetry,
       boolean useContextualSearch,
@@ -126,7 +126,7 @@ public class CompletionRequestProvider {
   }
 
   private List<OpenAIChatCompletionMessage> buildMessages(
-      String model,
+      @Nullable String model,
       Message message,
       boolean isRetry,
       boolean useContextualSearch) {
@@ -150,7 +150,7 @@ public class CompletionRequestProvider {
       messages.add(new OpenAIChatCompletionMessage("user", message.getPrompt()));
     }
 
-    if (SettingsState.getInstance().getSelectedService() == ServiceType.YOU) {
+    if (model == null || SettingsState.getInstance().getSelectedService() == ServiceType.YOU) {
       return messages;
     }
 

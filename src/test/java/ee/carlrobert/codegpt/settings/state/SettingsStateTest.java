@@ -27,8 +27,6 @@ public class SettingsStateTest extends BasePlatformTestCase {
 
   public void testAzureSettingsSync() {
     var settings = SettingsState.getInstance();
-    var azureSettings = AzureSettingsState.getInstance();
-    azureSettings.setModel("gpt-3.5-turbo");
     var conversation = new Conversation();
     conversation.setModel("gpt-4");
     conversation.setClientCode("azure.chat.completion");
@@ -36,7 +34,6 @@ public class SettingsStateTest extends BasePlatformTestCase {
     settings.sync(conversation);
 
     assertThat(settings.getSelectedService()).isEqualTo(ServiceType.AZURE);
-    assertThat(azureSettings.getModel()).isEqualTo("gpt-4");
   }
 
   public void testYouSettingsSync() {

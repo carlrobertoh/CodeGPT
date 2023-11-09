@@ -14,7 +14,6 @@ import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
-import ee.carlrobert.codegpt.completions.you.YouUserManager;
 import ee.carlrobert.codegpt.completions.you.auth.AuthenticationNotifier;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
@@ -54,7 +53,6 @@ public class ServiceSelectionForm {
   private final JBTextField azureDeploymentIdField;
   private final JBTextField azureApiVersionField;
   private final JPanel azureServiceSectionPanel;
-  private final ComboBox<OpenAIChatCompletionModel> azureCompletionModelComboBox;
 
   private final JPanel youServiceSectionPanel;
   private final JBCheckBox displayWebSearchResultsCheckBox;
@@ -106,17 +104,10 @@ public class ServiceSelectionForm {
     azureResourceNameField = new JBTextField(azureSettings.getResourceName(), 35);
     azureDeploymentIdField = new JBTextField(azureSettings.getDeploymentId(), 35);
     azureApiVersionField = new JBTextField(azureSettings.getApiVersion(), 35);
-    azureCompletionModelComboBox = new ComboBox<>(
-        new EnumComboBoxModel<>(OpenAIChatCompletionModel.class));
-    azureCompletionModelComboBox.setSelectedItem(selectedOpenAIModel);
-    azureCompletionModelComboBox.getEditor()
-        .getEditorComponent()
-        .setMaximumSize(azureBaseHostField.getPreferredSize());
 
     displayWebSearchResultsCheckBox = new JBCheckBox(
         CodeGPTBundle.get("settingsConfigurable.service.you.displayResults.label"),
         YouSettingsState.getInstance().isDisplayWebSearchResults());
-    displayWebSearchResultsCheckBox.setEnabled(YouUserManager.getInstance().isAuthenticated());
 
     openAIServiceSectionPanel = createOpenAIServiceSectionPanel();
     azureServiceSectionPanel = createAzureServiceSectionPanel();
@@ -135,6 +126,10 @@ public class ServiceSelectionForm {
 
   private JPanel createOpenAIServiceSectionPanel() {
     var requestConfigurationPanel = UI.PanelFactory.grid()
+        .add(UI.PanelFactory.panel(openAICompletionModelComboBox)
+            .withLabel(CodeGPTBundle.get(
+                "settingsConfigurable.shared.model.label"))
+            .resizeX(false))
         .add(UI.PanelFactory.panel(openAIOrganizationField)
             .withLabel(CodeGPTBundle.get(
                 "settingsConfigurable.service.openai.organization.label"))
@@ -148,10 +143,6 @@ public class ServiceSelectionForm {
         .add(UI.PanelFactory.panel(openAIPathField)
             .withLabel(CodeGPTBundle.get(
                 "settingsConfigurable.shared.path.label"))
-            .resizeX(false))
-        .add(UI.PanelFactory.panel(openAICompletionModelComboBox)
-            .withLabel(CodeGPTBundle.get(
-                "settingsConfigurable.shared.model.label"))
             .resizeX(false))
         .createPanel();
 
@@ -212,9 +203,6 @@ public class ServiceSelectionForm {
             .resizeX(false))
         .add(UI.PanelFactory.panel(azurePathField)
             .withLabel(CodeGPTBundle.get("settingsConfigurable.shared.path.label"))
-            .resizeX(false))
-        .add(UI.PanelFactory.panel(azureCompletionModelComboBox)
-            .withLabel(CodeGPTBundle.get("settingsConfigurable.shared.model.label"))
             .resizeX(false))
         .createPanel());
 
@@ -363,16 +351,6 @@ public class ServiceSelectionForm {
 
   public String getAzureBaseHost() {
     return azureBaseHostField.getText();
-  }
-
-  public void setAzureModel(String model) {
-    azureCompletionModelComboBox.setSelectedItem(OpenAIChatCompletionModel.findByCode(model));
-  }
-
-  public String getAzureModel() {
-    return ((OpenAIChatCompletionModel) (azureCompletionModelComboBox.getModel()
-        .getSelectedItem()))
-        .getCode();
   }
 
   public void setDisplayWebSearchResults(boolean displayWebSearchResults) {

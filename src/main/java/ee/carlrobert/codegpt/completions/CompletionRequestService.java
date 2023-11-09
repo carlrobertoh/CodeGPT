@@ -46,7 +46,7 @@ public final class CompletionRequestService {
         var azureSettings = AzureSettingsState.getInstance();
         return CompletionClientProvider.getAzureClient().getChatCompletion(
             requestProvider.buildOpenAIChatCompletionRequest(
-                azureSettings.getModel(),
+                null,
                 message,
                 retry,
                 useContextualSearch,

@@ -82,7 +82,7 @@ public class ConfigurationComponent {
       }
     });
 
-    maxTokensField = new IntegerField("max_tokens", 100, 2000);
+    maxTokensField = new IntegerField();
     maxTokensField.setColumns(12);
     maxTokensField.setValue(configuration.getMaxTokens());
 

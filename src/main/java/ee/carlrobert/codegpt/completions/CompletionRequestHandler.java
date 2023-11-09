@@ -51,9 +51,13 @@ public class CompletionRequestHandler {
     try {
       return CompletionRequestService.getInstance()
           .getChatCompletionAsync(conversation, message, retry, useContextualSearch, eventListener);
-    } catch (Throwable t) {
-      toolWindowCompletionEventListener.handleError(new ErrorDetails("Something went wrong"), t);
-      throw t;
+    } catch (Throwable ex) {
+      var errorMessage = "Something went wrong";
+      if (ex instanceof TotalUsageExceededException) {
+        errorMessage = "The length of the context exceeds the maximum limit that the model can handle. Try reducing the input message or maximum completion token size.";
+      }
+      toolWindowCompletionEventListener.handleError(new ErrorDetails(errorMessage), ex);
+      throw ex;
     }
   }
 
