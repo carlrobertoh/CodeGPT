@@ -14,13 +14,19 @@ import javax.swing.JPanel;
 
 public class UserMessagePanel extends JPanel {
 
-  public UserMessagePanel(Project project, Message message, boolean displayEditorMessage, Disposable parentDisposable) {
+  public UserMessagePanel(Project project, Message message, Disposable parentDisposable) {
     super(new BorderLayout());
     setBorder(JBUI.Borders.compound(
         JBUI.Borders.customLine(JBColor.border(), 0, 0, 1, 0),
         JBUI.Borders.empty(12, 8, 8, 8)));
     add(createDisplayNameWrapper(), BorderLayout.NORTH);
-    add(createUserMessageTextPane(project, message, displayEditorMessage, parentDisposable), BorderLayout.SOUTH);
+    add(new ChatMessageResponseBody(
+            project,
+            UIUtil.getPanelBackground(),
+            false,
+            true,
+            parentDisposable).withResponse(message.getPrompt()),
+        BorderLayout.SOUTH);
   }
 
   private JPanel createDisplayNameWrapper() {
@@ -29,13 +35,5 @@ public class UserMessagePanel extends JPanel {
         .addToLeft(new JBLabel(SettingsState.getInstance().getDisplayName())
             .setAllowAutoWrapping(true)
             .withFont(JBFont.label().asBold()));
-  }
-
-  private JPanel createUserMessageTextPane(Project project, Message message, boolean displayEditorMessage, Disposable parentDisposable) {
-    var prompt = message.getPrompt();
-    if (displayEditorMessage && message.getUserMessage() != null) {
-      prompt = message.getUserMessage();
-    }
-    return new ChatMessageResponseBody(project, UIUtil.getPanelBackground(), false, parentDisposable).withResponse(prompt);
   }
 }

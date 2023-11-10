@@ -125,8 +125,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
         (!youUserManager.isAuthenticated() || !youUserManager.isSubscribed())) {
       scrollablePanel.add(new ResponsePanel().addContent(createYouCouponTextPane()));
     }
-    scrollablePanel.repaint();
-    scrollablePanel.revalidate();
+    revalidateScrollablePanel();
   }
 
   @Override
@@ -142,11 +141,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     }
 
     var messageWrapper = createNewMessageWrapper(message.getId());
-    messageWrapper.add(new UserMessagePanel(
-        project,
-        message,
-        message.getUserMessage() != null,
-        this));
+    messageWrapper.add(new UserMessagePanel(project, message, this));
     var responsePanel = new ResponsePanel()
         .withReloadAction(() -> reloadMessage(message, conversation))
         .withDeleteAction(() -> removeMessage(message.getId(), messageWrapper, conversation))
@@ -168,8 +163,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
           .filter(component -> component instanceof ResponsePanel)
           .findFirst().orElseThrow();
       ((ChatMessageResponseBody) responsePanel.getContent()).clear();
-      scrollablePanel.revalidate();
-      scrollablePanel.repaint();
+      revalidateScrollablePanel();
     } catch (Exception e) {
       throw new RuntimeException("Couldn't delete the existing message component", e);
     } finally {
@@ -187,10 +181,14 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     }
   }
 
-  protected void removeMessage(UUID messageId, JPanel messageWrapper, Conversation conversation) {
-    scrollablePanel.remove(messageWrapper);
+  private void revalidateScrollablePanel() {
     scrollablePanel.repaint();
     scrollablePanel.revalidate();
+  }
+
+  protected void removeMessage(UUID messageId, JPanel messageWrapper, Conversation conversation) {
+    scrollablePanel.remove(messageWrapper);
+    revalidateScrollablePanel();
 
     visibleMessagePanels.remove(messageId);
     conversation.removeMessage(messageId);
@@ -207,16 +205,14 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     var messageWrapper = new JPanel();
     messageWrapper.setLayout(new BoxLayout(messageWrapper, BoxLayout.PAGE_AXIS));
     scrollablePanel.add(messageWrapper);
-    scrollablePanel.repaint();
-    scrollablePanel.revalidate();
+    revalidateScrollablePanel();
     visibleMessagePanels.put(messageId, messageWrapper);
     return messageWrapper;
   }
 
   protected void clearWindow() {
     scrollablePanel.removeAll();
-    scrollablePanel.revalidate();
-    scrollablePanel.repaint();
+    revalidateScrollablePanel();
   }
 
   private void call(

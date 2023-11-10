@@ -44,6 +44,7 @@ public class ChatMessageResponseBody extends JPanel {
   private final Project project;
   private final Disposable parentDisposable;
   private final StreamParser streamParser;
+  private final boolean readOnly;
   private JPanel currentlyProcessedElement;
   private ResponseEditor currentlyProcessedEditor;
   private JTextPane currentlyProcessedTextPane;
@@ -65,10 +66,20 @@ public class ChatMessageResponseBody extends JPanel {
       Color backgroundColor,
       boolean withGhostText,
       Disposable parentDisposable) {
+    this(project, backgroundColor, withGhostText, false, parentDisposable);
+  }
+
+  public ChatMessageResponseBody(
+      Project project,
+      Color backgroundColor,
+      boolean withGhostText,
+      boolean readOnly,
+      Disposable parentDisposable) {
     super(new BorderLayout());
     this.project = project;
     this.parentDisposable = parentDisposable;
     this.streamParser = new StreamParser();
+    this.readOnly = readOnly;
     setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
     setBackground(backgroundColor);
 
@@ -237,6 +248,8 @@ public class ChatMessageResponseBody extends JPanel {
         project,
         code,
         markdownLanguage,
+        readOnly,
+        getPanelBackgroundColor(),
         parentDisposable);
     currentlyProcessedElement = new ResponseWrapper();
 

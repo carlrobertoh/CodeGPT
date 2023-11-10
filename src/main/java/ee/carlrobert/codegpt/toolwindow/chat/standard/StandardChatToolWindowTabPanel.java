@@ -76,7 +76,7 @@ public class StandardChatToolWindowTabPanel extends BaseChatToolWindowTabPanel {
       }
 
       var messageWrapper = createNewMessageWrapper(message.getId());
-      messageWrapper.add(new UserMessagePanel(project, message, false, this));
+      messageWrapper.add(new UserMessagePanel(project, message, this));
       messageWrapper.add(new ResponsePanel()
           .withReloadAction(() -> reloadMessage(message, conversation))
           .withDeleteAction(() -> removeMessage(message.getId(), messageWrapper, conversation))
