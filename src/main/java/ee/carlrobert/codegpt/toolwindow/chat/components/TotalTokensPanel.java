@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.swing.Box;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
+import org.jetbrains.annotations.Nullable;
 
 public class TotalTokensPanel extends JPanel {
 
@@ -23,7 +23,10 @@ public class TotalTokensPanel extends JPanel {
   private final TokenDetails tokenDetails;
   private final JBLabel label;
 
-  public TotalTokensPanel(Conversation conversation, String userPrompt, String highlightedText) {
+  public TotalTokensPanel(
+      Conversation conversation,
+      String userPrompt,
+      @Nullable String highlightedText) {
     super(new FlowLayout(FlowLayout.LEADING, 0, 0));
     this.encodingManager = EncodingManager.getInstance();
     this.tokenDetails = createTokenDetails(conversation, userPrompt, highlightedText);
@@ -65,11 +68,13 @@ public class TotalTokensPanel extends JPanel {
   private TokenDetails createTokenDetails(
       Conversation conversation,
       String userPrompt,
-      String highlightedText) {
+      @Nullable String highlightedText) {
     var tokenDetails = new TokenDetails(encodingManager);
     tokenDetails.setConversationTokens(encodingManager.countConversationTokens(conversation));
     tokenDetails.setUserPromptTokens(encodingManager.countTokens(userPrompt));
-    tokenDetails.setHighlightedTokens(encodingManager.countTokens(highlightedText));
+    if (highlightedText != null) {
+      tokenDetails.setHighlightedTokens(encodingManager.countTokens(highlightedText));
+    }
     return tokenDetails;
   }
 
