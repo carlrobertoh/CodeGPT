@@ -161,6 +161,6 @@ public class SettingsConfigurable implements Configurable {
       throw new RuntimeException("Could not find current project.");
     }
 
-    project.getService(StandardChatToolWindowContentManager.class).resetActiveTab();
+    project.getService(StandardChatToolWindowContentManager.class).resetAll();
   }
 }

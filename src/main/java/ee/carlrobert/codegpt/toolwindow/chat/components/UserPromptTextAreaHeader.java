@@ -21,8 +21,7 @@ public class UserPromptTextAreaHeader extends JPanel {
   public UserPromptTextAreaHeader(
       Project project,
       SettingsState settings,
-      TotalTokensPanel totalTokensPanel,
-      JBCheckBox gpt4CheckBox) {
+      TotalTokensPanel totalTokensPanel) {
     super(new BorderLayout());
     setBackground(getPanelBackgroundColor());
     setBorder(JBUI.Borders.emptyBottom(8));
@@ -32,6 +31,7 @@ public class UserPromptTextAreaHeader extends JPanel {
         add(totalTokensPanel, BorderLayout.LINE_START);
         break;
       case YOU:
+        JBCheckBox gpt4CheckBox = new YouProCheckbox(project);
         subscribeToYouTopics(project, gpt4CheckBox);
         add(gpt4CheckBox, BorderLayout.LINE_START);
         break;

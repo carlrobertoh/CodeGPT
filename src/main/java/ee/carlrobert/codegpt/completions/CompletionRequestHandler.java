@@ -20,19 +20,19 @@ public class CompletionRequestHandler {
 
   private final StringBuilder messageBuilder = new StringBuilder();
   private final boolean useContextualSearch;
-  private final ToolWindowCompletionEventListener toolWindowCompletionEventListener;
+  private final CompletionResponseEventListener completionResponseEventListener;
   private SwingWorker<Void, String> swingWorker;
   private EventSource eventSource;
 
   public CompletionRequestHandler(
       boolean useContextualSearch,
-      ToolWindowCompletionEventListener toolWindowCompletionEventListener) {
+      CompletionResponseEventListener completionResponseEventListener) {
     this.useContextualSearch = useContextualSearch;
-    this.toolWindowCompletionEventListener = toolWindowCompletionEventListener;
+    this.completionResponseEventListener = completionResponseEventListener;
   }
 
-  public void call(Conversation conversation, Message message, boolean isRetry) {
-    swingWorker = new CompletionRequestWorker(conversation, message, isRetry);
+  public void call(Conversation conversation, Message message, boolean retry) {
+    swingWorker = new CompletionRequestWorker(conversation, message, retry);
     swingWorker.execute();
   }
 
@@ -56,7 +56,7 @@ public class CompletionRequestHandler {
       if (ex instanceof TotalUsageExceededException) {
         errorMessage = "The length of the context exceeds the maximum limit that the model can handle. Try reducing the input message or maximum completion token size.";
       }
-      toolWindowCompletionEventListener.handleError(new ErrorDetails(errorMessage), ex);
+      completionResponseEventListener.handleError(new ErrorDetails(errorMessage), ex);
       throw ex;
     }
   }
@@ -65,12 +65,12 @@ public class CompletionRequestHandler {
 
     private final Conversation conversation;
     private final Message message;
-    private final boolean isRetry;
+    private final boolean retry;
 
-    public CompletionRequestWorker(Conversation conversation, Message message, boolean isRetry) {
+    public CompletionRequestWorker(Conversation conversation, Message message, boolean retry) {
       this.conversation = conversation;
       this.message = message;
-      this.isRetry = isRetry;
+      this.retry = retry;
     }
 
     protected Void doInBackground() {
@@ -79,10 +79,10 @@ public class CompletionRequestHandler {
         eventSource = startCall(
             conversation,
             message,
-            isRetry,
+            retry,
             new YouRequestCompletionEventListener());
       } catch (TotalUsageExceededException e) {
-        toolWindowCompletionEventListener.handleTokensExceeded(conversation, message);
+        completionResponseEventListener.handleTokensExceeded(conversation, message);
       } finally {
         sendInfo(settings);
       }
@@ -93,7 +93,7 @@ public class CompletionRequestHandler {
       message.setResponse(messageBuilder.toString());
       for (String text : chunks) {
         messageBuilder.append(text);
-        toolWindowCompletionEventListener.handleMessage(text);
+        completionResponseEventListener.handleMessage(text);
       }
     }
 
@@ -101,7 +101,7 @@ public class CompletionRequestHandler {
 
       @Override
       public void onSerpResults(List<YouSerpResult> results) {
-        toolWindowCompletionEventListener.handleSerpResults(results, message);
+        completionResponseEventListener.handleSerpResults(results, message);
       }
 
       @Override
@@ -111,14 +111,17 @@ public class CompletionRequestHandler {
 
       @Override
       public void onComplete(StringBuilder messageBuilder) {
-        toolWindowCompletionEventListener.handleCompleted(messageBuilder.toString(), message,
-            conversation, isRetry);
+        completionResponseEventListener.handleCompleted(
+            messageBuilder.toString(),
+            message,
+            conversation,
+            retry);
       }
 
       @Override
       public void onError(ErrorDetails error, Throwable ex) {
         try {
-          toolWindowCompletionEventListener.handleError(error, ex);
+          completionResponseEventListener.handleError(error, ex);
         } finally {
           sendError(error, ex);
         }

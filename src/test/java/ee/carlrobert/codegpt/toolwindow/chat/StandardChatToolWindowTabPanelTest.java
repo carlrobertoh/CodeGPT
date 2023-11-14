@@ -49,7 +49,11 @@ public class StandardChatToolWindowTabPanelTest extends IntegrationTest {
 
     panel.sendMessage(message);
 
-    await().atMost(5, SECONDS).until(() -> !panel.isStreaming());
+    await().atMost(5, SECONDS)
+        .until(() -> {
+          var messages = conversation.getMessages();
+          return !messages.isEmpty() && "Hello!".equals(messages.get(0).getResponse());
+        });
     var encodingManager = EncodingManager.getInstance();
     assertThat(panel.getTokenDetails()).extracting(
             "systemPromptTokens",

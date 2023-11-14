@@ -9,24 +9,17 @@ import org.jetbrains.annotations.NotNull;
 
 public class ContextualChatToolWindowTabPanel extends BaseChatToolWindowTabPanel {
 
-  public ContextualChatToolWindowTabPanel(@NotNull Project project) {
-    super(project, true);
+  public ContextualChatToolWindowTabPanel(
+      @NotNull Project project,
+      @NotNull Conversation conversation) {
+    super(project, conversation, true);
     displayLandingView();
   }
 
   @Override
   protected JComponent getLandingView() {
-    return new ContextualChatToolWindowLandingPanel(project, (prompt) -> {
-      var message = new Message(prompt);
-      if (conversation == null) {
-        startNewConversation(message);
-      } else {
-        sendMessage(message);
-      }
-    });
-  }
-
-  @Override
-  public void displayConversation(Conversation conversation) {
+    return new ContextualChatToolWindowLandingPanel(
+        project,
+        (prompt) -> sendMessage(new Message(prompt)));
   }
 }

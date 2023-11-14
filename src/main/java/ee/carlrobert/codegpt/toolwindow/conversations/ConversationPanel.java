@@ -32,13 +32,20 @@ class ConversationPanel extends JPanel {
       @NotNull Conversation conversation,
       @NotNull Runnable onDelete) {
     super(new BorderLayout());
+    var toolWindowContentManager = project.getService(StandardChatToolWindowContentManager.class);
+    init(toolWindowContentManager, conversation, onDelete);
+  }
+
+  private void init(
+      StandardChatToolWindowContentManager toolWindowContentManager,
+      Conversation conversation,
+      Runnable onDelete) {
     setBackground(JBColor.background());
     addMouseListener(new MouseAdapter() {
       @Override
       public void mouseClicked(MouseEvent e) {
         SettingsState.getInstance().sync(conversation);
-        project.getService(StandardChatToolWindowContentManager.class)
-            .displayConversation(conversation);
+        toolWindowContentManager.displayConversation(conversation);
       }
     });
     addStyles(isSelected(conversation));

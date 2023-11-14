@@ -43,7 +43,7 @@ public class DeleteAllConversationsAction extends AnAction {
       if (project != null) {
         try {
           ConversationService.getInstance().clearAll();
-          project.getService(StandardChatToolWindowContentManager.class).resetActiveTab();
+          project.getService(StandardChatToolWindowContentManager.class).resetAll();
         } finally {
           TelemetryAction.IDE_ACTION.createActionMessage()
               .property("action", ActionType.DELETE_ALL_CONVERSATIONS.name())

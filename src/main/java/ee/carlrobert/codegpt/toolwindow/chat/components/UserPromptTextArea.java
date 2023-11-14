@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt.toolwindow.chat.components;
 
 import com.intellij.icons.AllIcons;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.ex.util.EditorUtil;
 import com.intellij.openapi.util.registry.Registry;
 import com.intellij.ui.DocumentAdapter;
@@ -31,10 +32,13 @@ import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 import javax.swing.event.DocumentEvent;
+import javax.swing.text.BadLocationException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class UserPromptTextArea extends JPanel {
+
+  private static final Logger LOG = Logger.getInstance(UserPromptTextArea.class);
 
   private static final String TEXT_SUBMIT = "text-submit";
   private static final String INSERT_BREAK = "insert-break";
@@ -49,11 +53,11 @@ public class UserPromptTextArea extends JPanel {
   private JPanel iconsPanel;
   private boolean submitEnabled = true;
 
-  public UserPromptTextArea(Consumer<String> onSubmit, DocumentAdapter documentAdapter) {
+  public UserPromptTextArea(Consumer<String> onSubmit, TotalTokensPanel totalTokensPanel) {
     this.onSubmit = onSubmit;
 
     textArea = new JBTextArea();
-    textArea.getDocument().addDocumentListener(documentAdapter);
+    textArea.getDocument().addDocumentListener(getDocumentAdapter(totalTokensPanel));
     textArea.setOpaque(false);
     textArea.setBackground(BACKGROUND_COLOR);
     textArea.setLineWrap(true);
@@ -66,7 +70,11 @@ public class UserPromptTextArea extends JPanel {
     textArea.getActionMap().put(TEXT_SUBMIT, new AbstractAction() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        handleSubmit();
+        try {
+          handleSubmit();
+        } finally {
+          totalTokensPanel.updateUserPromptTokens("");
+        }
       }
     });
     textArea.addFocusListener(new FocusListener() {
@@ -88,6 +96,25 @@ public class UserPromptTextArea extends JPanel {
     });
     updateFont();
     init();
+  }
+
+  private DocumentAdapter getDocumentAdapter(TotalTokensPanel totalTokensPanel) {
+    return new DocumentAdapter() {
+      @Override
+      protected void textChanged(@NotNull DocumentEvent event) {
+        if (submitEnabled) {
+          try {
+            var document = event.getDocument();
+            var text = document.getText(
+                document.getStartPosition().getOffset(),
+                document.getEndPosition().getOffset() - 1);
+            totalTokensPanel.updateUserPromptTokens(text);
+          } catch (BadLocationException ex) {
+            LOG.error("Something went wrong while processing user input tokens", ex);
+          }
+        }
+      }
+    };
   }
 
   public String getText() {
@@ -133,7 +160,7 @@ public class UserPromptTextArea extends JPanel {
     if (submitEnabled && !textArea.getText().isEmpty()) {
       // Replacing each newline with two newlines to ensure proper Markdown formatting
       var text = textArea.getText().replace("\n", "\n\n");
-      onSubmit.accept(text);
+      onSubmit.accept(text.trim());
       textArea.setText("");
     }
   }

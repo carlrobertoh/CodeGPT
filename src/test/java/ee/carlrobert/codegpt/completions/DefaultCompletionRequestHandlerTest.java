@@ -171,14 +171,14 @@ public class DefaultCompletionRequestHandlerTest extends IntegrationTest {
     await().atMost(5, SECONDS).until(() -> "Hello!".equals(message.getResponse()));
   }
 
-  private ToolWindowCompletionEventListener getRequestEventListener(Message message) {
-    return new ToolWindowCompletionEventListener() {
+  private CompletionResponseEventListener getRequestEventListener(Message message) {
+    return new CompletionResponseEventListener() {
       @Override
       public void handleCompleted(
           String fullMessage,
           Message conversationMessage,
           Conversation conversation,
-          boolean isRetry) {
+          boolean retry) {
         message.setResponse(fullMessage);
       }
     };

@@ -32,13 +32,12 @@ public class ChatToolWindowScrollablePanel extends ScrollablePanel {
   }
 
   public void displayLandingView(JComponent landingView) {
-    removeAll();
+    clearAll();
     add(landingView);
     if (settings.getSelectedService() == ServiceType.YOU &&
         (!youUserManager.isAuthenticated() || !youUserManager.isSubscribed())) {
       add(new ResponsePanel().addContent(createYouCouponTextPane()));
     }
-    update();
   }
 
   public ResponsePanel getMessageResponsePanel(UUID messageId) {

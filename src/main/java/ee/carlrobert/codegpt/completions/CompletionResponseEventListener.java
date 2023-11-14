@@ -6,7 +6,7 @@ import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.client.you.completion.YouSerpResult;
 import java.util.List;
 
-public interface ToolWindowCompletionEventListener {
+public interface CompletionResponseEventListener {
 
   default void handleMessage(String message) {}
 
@@ -18,7 +18,7 @@ public interface ToolWindowCompletionEventListener {
       String fullMessage,
       Message message,
       Conversation conversation,
-      boolean isRetry) {}
+      boolean retry) {}
 
   default void handleSerpResults(List<YouSerpResult> results, Message message) {}
 }

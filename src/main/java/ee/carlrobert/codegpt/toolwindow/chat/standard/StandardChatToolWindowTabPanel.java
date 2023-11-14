@@ -16,19 +16,14 @@ import ee.carlrobert.codegpt.util.OverlayUtils;
 import ee.carlrobert.codegpt.util.file.FileUtils;
 import javax.swing.JComponent;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class StandardChatToolWindowTabPanel extends BaseChatToolWindowTabPanel {
 
-  public StandardChatToolWindowTabPanel(@NotNull Project project) {
-    this(project, null);
-  }
-
   public StandardChatToolWindowTabPanel(
       @NotNull Project project,
-      @Nullable Conversation conversation) {
-    super(project, false);
-    if (conversation == null) {
+      @NotNull Conversation conversation) {
+    super(project, conversation, false);
+    if (conversation.getMessages().isEmpty()) {
       displayLandingView();
     } else {
       displayConversation(conversation);
@@ -55,16 +50,11 @@ public class StandardChatToolWindowTabPanel extends BaseChatToolWindowTabPanel {
           format("\n```%s\n%s\n```", fileExtension, editor.getSelectionModel().getSelectedText())));
       message.setUserMessage(action.getUserMessage());
 
-      if (conversation == null) {
-        startNewConversation(message);
-      } else {
-        sendMessage(message);
-      }
+      sendMessage(message);
     });
   }
 
-  @Override
-  public void displayConversation(@NotNull Conversation conversation) {
+  private void displayConversation(@NotNull Conversation conversation) {
     clearWindow();
     conversation.getMessages().forEach(message -> {
       var messageResponseBody = new ChatMessageResponseBody(project, this)
@@ -83,6 +73,5 @@ public class StandardChatToolWindowTabPanel extends BaseChatToolWindowTabPanel {
           .withDeleteAction(() -> removeMessage(message.getId(), conversation))
           .addContent(messageResponseBody));
     });
-    setConversation(conversation);
   }
 }

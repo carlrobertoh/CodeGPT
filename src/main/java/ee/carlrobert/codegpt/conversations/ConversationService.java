@@ -64,9 +64,9 @@ public final class ConversationService {
       String response,
       Message message,
       Conversation conversation,
-      boolean isRetry) {
+      boolean retry) {
     var conversationMessages = conversation.getMessages();
-    if (isRetry && !conversationMessages.isEmpty()) {
+    if (retry && !conversationMessages.isEmpty()) {
       var messageToBeSaved = conversationMessages.stream()
           .filter(item -> item.getId().equals(message.getId()))
           .findFirst().orElseThrow();

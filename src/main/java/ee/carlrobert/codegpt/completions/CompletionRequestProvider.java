@@ -100,18 +100,18 @@ public class CompletionRequestProvider {
   public OpenAIChatCompletionRequest buildOpenAIChatCompletionRequest(
       String model,
       Message message,
-      boolean isRetry) {
-    return buildOpenAIChatCompletionRequest(model, message, isRetry, false, null);
+      boolean retry) {
+    return buildOpenAIChatCompletionRequest(model, message, retry, false, null);
   }
 
   public OpenAIChatCompletionRequest buildOpenAIChatCompletionRequest(
       @Nullable String model,
       Message message,
-      boolean isRetry,
+      boolean retry,
       boolean useContextualSearch,
       @Nullable String overriddenPath) {
     var builder = new OpenAIChatCompletionRequest.Builder(
-        buildMessages(model, message, isRetry, useContextualSearch))
+        buildMessages(model, message, retry, useContextualSearch))
         .setModel(model)
         .setMaxTokens(ConfigurationState.getInstance().getMaxTokens())
         .setTemperature(ConfigurationState.getInstance().getTemperature());
@@ -125,7 +125,7 @@ public class CompletionRequestProvider {
 
   public List<OpenAIChatCompletionMessage> buildMessages(
       Message message,
-      boolean isRetry,
+      boolean retry,
       boolean useContextualSearch) {
     var messages = new ArrayList<OpenAIChatCompletionMessage>();
     if (useContextualSearch) {
@@ -138,7 +138,7 @@ public class CompletionRequestProvider {
           systemPrompt.isEmpty() ? COMPLETION_SYSTEM_PROMPT : systemPrompt));
 
       for (var prevMessage : conversation.getMessages()) {
-        if (isRetry && prevMessage.getId().equals(message.getId())) {
+        if (retry && prevMessage.getId().equals(message.getId())) {
           break;
         }
         messages.add(new OpenAIChatCompletionMessage("user", prevMessage.getPrompt()));
@@ -152,9 +152,9 @@ public class CompletionRequestProvider {
   private List<OpenAIChatCompletionMessage> buildMessages(
       @Nullable String model,
       Message message,
-      boolean isRetry,
+      boolean retry,
       boolean useContextualSearch) {
-    var messages = buildMessages(message, isRetry, useContextualSearch);
+    var messages = buildMessages(message, retry, useContextualSearch);
 
     if (model == null || SettingsState.getInstance().getSelectedService() == ServiceType.YOU) {
       return messages;
