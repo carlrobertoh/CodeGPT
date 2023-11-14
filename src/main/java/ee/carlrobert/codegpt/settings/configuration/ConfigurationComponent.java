@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt.settings.configuration;
 
 import static ee.carlrobert.codegpt.actions.editor.EditorActionsUtil.DEFAULT_ACTIONS_ARRAY;
+import static ee.carlrobert.codegpt.completions.CompletionRequestProvider.COMPLETION_SYSTEM_PROMPT;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.icons.AllIcons.Nodes;
@@ -87,6 +88,12 @@ public class ConfigurationComponent {
     maxTokensField.setValue(configuration.getMaxTokens());
 
     systemPromptTextArea = new JTextArea();
+    if (configuration.getSystemPrompt().isEmpty()) {
+      // for backward compatibility
+      systemPromptTextArea.setText(COMPLETION_SYSTEM_PROMPT);
+    } else {
+      systemPromptTextArea.setText(configuration.getSystemPrompt());
+    }
     systemPromptTextArea.setLineWrap(true);
     systemPromptTextArea.setBorder(JBUI.Borders.empty(8, 4));
     systemPromptTextArea.setColumns(60);

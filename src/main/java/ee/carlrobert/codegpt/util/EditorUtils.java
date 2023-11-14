@@ -52,6 +52,15 @@ public final class EditorUtils {
     return editorManager != null ? editorManager.getSelectedTextEditor() : null;
   }
 
+  public static @NotNull String getSelectedEditorSelectedText(@NotNull Project project) {
+    var selectedEditor = EditorUtils.getSelectedEditor(project);
+    var selectedText = "";
+    if (selectedEditor != null) {
+      selectedText = selectedEditor.getSelectionModel().getSelectedText();
+    }
+    return selectedText == null ? "" : selectedText;
+  }
+
   public static boolean isMainEditorTextSelected(@NotNull Project project) {
     return hasSelection(getSelectedEditor(project));
   }

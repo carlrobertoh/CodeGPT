@@ -11,57 +11,24 @@ import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
-import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
-import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
-import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
-import ee.carlrobert.codegpt.settings.service.ServiceType;
-import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
-import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
-import ee.carlrobert.codegpt.settings.state.SettingsState;
-import ee.carlrobert.codegpt.settings.state.YouSettingsState;
-import ee.carlrobert.llm.client.http.LocalCallbackServer;
 import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange;
-import ee.carlrobert.llm.client.http.expectation.StreamExpectation;
-import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionModel;
 import java.util.List;
 import java.util.Map;
+import testsupport.IntegrationTest;
 
-public class DefaultCompletionRequestHandlerTest extends BasePlatformTestCase {
-
-  private LocalCallbackServer server;
-
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
-    AzureCredentialsManager.getInstance().setApiKey("TEST_API_KEY");
-    OpenAICredentialsManager.getInstance().setApiKey("TEST_API_KEY");
-    // FIXME
-    OpenAISettingsState.getInstance().setBaseHost("http://127.0.0.1:8000");
-    AzureSettingsState.getInstance().setBaseHost("http://127.0.0.1:8000");
-    YouSettingsState.getInstance().setBaseHost("http://127.0.0.1:8000");
-    LlamaSettingsState.getInstance().setServerPort(8000);
-    ConfigurationState.getInstance().setSystemPrompt("");
-    server = new LocalCallbackServer(8000);
-  }
-
-  @Override
-  protected void tearDown() throws Exception {
-    server.stop();
-    super.tearDown();
-  }
+public class DefaultCompletionRequestHandlerTest extends IntegrationTest {
 
   public void testOpenAIChatCompletionCall() {
+    useOpenAIService();
     var message = new Message("TEST_PROMPT");
     var conversation = ConversationService.getInstance().startConversation();
     var requestHandler = new CompletionRequestHandler(false, getRequestEventListener(message));
-    SettingsState.getInstance().setSelectedService(ServiceType.OPENAI);
-    expectStreamRequest("/v1/chat/completions", request -> {
+    expectOpenAI((StreamHttpExchange) request -> {
+      assertThat(request.getUri().getPath()).isEqualTo("/v1/chat/completions");
       assertThat(request.getMethod()).isEqualTo("POST");
       assertThat(request.getHeaders().get(AUTHORIZATION).get(0)).isEqualTo("Bearer TEST_API_KEY");
       assertThat(request.getBody())
@@ -69,7 +36,7 @@ public class DefaultCompletionRequestHandlerTest extends BasePlatformTestCase {
               "model",
               "messages")
           .containsExactly(
-              "gpt-3.5-turbo",
+              "gpt-4",
               List.of(
                   Map.of("role", "system", "content", COMPLETION_SYSTEM_PROMPT),
                   Map.of("role", "user", "content", "TEST_PROMPT")));
@@ -87,11 +54,7 @@ public class DefaultCompletionRequestHandlerTest extends BasePlatformTestCase {
   }
 
   public void testAzureChatCompletionCall() {
-    SettingsState.getInstance().setSelectedService(ServiceType.AZURE);
-    var azureSettings = AzureSettingsState.getInstance();
-    azureSettings.setResourceName("TEST_RESOURCE_NAME");
-    azureSettings.setApiVersion("TEST_API_VERSION");
-    azureSettings.setDeploymentId("TEST_DEPLOYMENT_ID");
+    useAzureService();
     var conversationService = ConversationService.getInstance();
     var message = new Message("TEST_PROMPT");
     var requestHandler = new CompletionRequestHandler(false, getRequestEventListener(message));
@@ -100,7 +63,9 @@ public class DefaultCompletionRequestHandlerTest extends BasePlatformTestCase {
     var conversation = conversationService.startConversation();
     conversation.addMessage(prevMessage);
     conversationService.saveConversation(conversation);
-    expectStreamRequest("/openai/deployments/TEST_DEPLOYMENT_ID/chat/completions", request -> {
+    expectAzure((StreamHttpExchange) request -> {
+      assertThat(request.getUri().getPath()).isEqualTo(
+          "/openai/deployments/TEST_DEPLOYMENT_ID/chat/completions");
       assertThat(request.getUri().getQuery()).isEqualTo("api-version=TEST_API_VERSION");
       assertThat(request.getHeaders().get("Api-key").get(0)).isEqualTo("TEST_API_KEY");
       assertThat(request.getBody())
@@ -124,12 +89,13 @@ public class DefaultCompletionRequestHandlerTest extends BasePlatformTestCase {
   }
 
   public void testYouChatCompletionCall() {
+    useYouService();
     var message = new Message("TEST_PROMPT");
     var conversation = ConversationService.getInstance().startConversation();
     conversation.addMessage(new Message("Ping", "Pong"));
     var requestHandler = new CompletionRequestHandler(false, getRequestEventListener(message));
-    SettingsState.getInstance().setSelectedService(ServiceType.YOU);
-    expectStreamRequest("/api/streamingSearch", request -> {
+    expectYou((StreamHttpExchange) request -> {
+      assertThat(request.getUri().getPath()).isEqualTo("/api/streamingSearch");
       assertThat(request.getMethod()).isEqualTo("GET");
       assertThat(request.getUri().getPath()).isEqualTo("/api/streamingSearch");
       assertThat(request.getUri().getQuery()).isEqualTo(
@@ -145,8 +111,8 @@ public class DefaultCompletionRequestHandlerTest extends BasePlatformTestCase {
               "utm_campaign=" + CodeGPTPlugin.getVersion() + "&" +
               "utm_content=CodeGPT");
       assertThat(request.getHeaders())
-          .flatExtracting("Host", "Accept", "Connection", "User-agent", "Cookie")
-          .containsExactly("127.0.0.1:8000",
+          .flatExtracting("Accept", "Connection", "User-agent", "Cookie")
+          .containsExactly(
               "text/event-stream",
               "Keep-Alive",
               "youide CodeGPT",
@@ -173,12 +139,13 @@ public class DefaultCompletionRequestHandlerTest extends BasePlatformTestCase {
   }
 
   public void testLlamaChatCompletionCall() {
+    useLlamaService();
     var message = new Message("TEST_PROMPT");
     var conversation = ConversationService.getInstance().startConversation();
     conversation.addMessage(new Message("Ping", "Pong"));
     var requestHandler = new CompletionRequestHandler(false, getRequestEventListener(message));
-    SettingsState.getInstance().setSelectedService(ServiceType.LLAMA_CPP);
-    expectStreamRequest("/completion", request -> {
+    expectLlama((StreamHttpExchange) request -> {
+      assertThat(request.getUri().getPath()).isEqualTo("/completion");
       assertThat(request.getBody())
           .extracting(
               "prompt",
@@ -202,10 +169,6 @@ public class DefaultCompletionRequestHandlerTest extends BasePlatformTestCase {
     requestHandler.call(conversation, message, false);
 
     await().atMost(5, SECONDS).until(() -> "Hello!".equals(message.getResponse()));
-  }
-
-  private void expectStreamRequest(String path, StreamHttpExchange exchange) {
-    server.addExpectation(new StreamExpectation(path, exchange));
   }
 
   private ToolWindowCompletionEventListener getRequestEventListener(Message message) {

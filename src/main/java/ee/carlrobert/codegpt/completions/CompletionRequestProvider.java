@@ -17,7 +17,6 @@ import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.settings.state.YouSettingsState;
 import ee.carlrobert.codegpt.telemetry.core.configuration.TelemetryConfiguration;
 import ee.carlrobert.codegpt.telemetry.core.service.UserId;
-import ee.carlrobert.codegpt.util.ApplicationUtils;
 import ee.carlrobert.embedding.EmbeddingsService;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionModel;
@@ -37,13 +36,12 @@ public class CompletionRequestProvider {
   private static final Logger LOG = Logger.getInstance(CompletionRequestProvider.class);
 
   public static final String COMPLETION_SYSTEM_PROMPT = "You are an AI programming assistant.\n" +
-      "When asked for you name, you must respond with \"CodeGPT\".\n" +
       "Follow the user's requirements carefully & to the letter.\n" +
       "Your responses should be informative and logical.\n" +
       "You should always adhere to technical information.\n" +
       "If the user asks for code or technical questions, you must provide code suggestions and " +
       "adhere to technical information.\n" +
-      "If the question is related to a developer, CodeGPT must respond with " +
+      "If the question is related to a developer, you must respond with " +
       "content related to a developer.\n" +
       "First think step-by-step - describe your plan for what to build in pseudocode, " +
       "written out in great detail.\n" +
@@ -125,8 +123,7 @@ public class CompletionRequestProvider {
     return (OpenAIChatCompletionRequest) builder.build();
   }
 
-  private List<OpenAIChatCompletionMessage> buildMessages(
-      @Nullable String model,
+  public List<OpenAIChatCompletionMessage> buildMessages(
       Message message,
       boolean isRetry,
       boolean useContextualSearch) {
@@ -149,6 +146,15 @@ public class CompletionRequestProvider {
       }
       messages.add(new OpenAIChatCompletionMessage("user", message.getPrompt()));
     }
+    return messages;
+  }
+
+  private List<OpenAIChatCompletionMessage> buildMessages(
+      @Nullable String model,
+      Message message,
+      boolean isRetry,
+      boolean useContextualSearch) {
+    var messages = buildMessages(message, isRetry, useContextualSearch);
 
     if (model == null || SettingsState.getInstance().getSelectedService() == ServiceType.YOU) {
       return messages;

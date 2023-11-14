@@ -8,6 +8,7 @@ import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowTabPanel;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowTabbedPane;
+import testsupport.IntegrationTest;
 
 public class StandardChatToolWindowTabbedPaneTest extends BasePlatformTestCase {
 
@@ -29,7 +30,8 @@ public class StandardChatToolWindowTabbedPaneTest extends BasePlatformTestCase {
 
     var tabMapping = tabbedPane.getActiveTabMapping();
     assertThat(tabMapping.keySet()).containsExactly("Chat 1", "Chat 2", "Chat 3");
-    assertThat(tabMapping.values().stream().allMatch(item -> item.getConversation() == null)).isTrue();
+    assertThat(
+        tabMapping.values().stream().allMatch(item -> item.getConversation() == null)).isTrue();
   }
 
   public void testResetCurrentlyActiveTabPanel() {

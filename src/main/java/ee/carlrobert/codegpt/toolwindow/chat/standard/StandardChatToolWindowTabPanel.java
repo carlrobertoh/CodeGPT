@@ -32,6 +32,7 @@ public class StandardChatToolWindowTabPanel extends BaseChatToolWindowTabPanel {
       displayLandingView();
     } else {
       displayConversation(conversation);
+      totalTokensPanel.updateConversationTokens(conversation);
     }
   }
 
@@ -75,11 +76,11 @@ public class StandardChatToolWindowTabPanel extends BaseChatToolWindowTabPanel {
         messageResponseBody.displaySerpResults(serpResults);
       }
 
-      var messageWrapper = createNewMessageWrapper(message.getId());
-      messageWrapper.add(new UserMessagePanel(project, message, this));
-      messageWrapper.add(new ResponsePanel()
+      var messagePanel = toolWindowScrollablePanel.addMessage(message.getId());
+      messagePanel.add(new UserMessagePanel(project, message, this));
+      messagePanel.add(new ResponsePanel()
           .withReloadAction(() -> reloadMessage(message, conversation))
-          .withDeleteAction(() -> removeMessage(message.getId(), messageWrapper, conversation))
+          .withDeleteAction(() -> removeMessage(message.getId(), conversation))
           .addContent(messageResponseBody));
     });
     setConversation(conversation);

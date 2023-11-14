@@ -1,6 +1,5 @@
 package ee.carlrobert.codegpt.settings.state;
 
-
 import static ee.carlrobert.codegpt.completions.HuggingFaceModel.CODE_LLAMA_7B_Q3;
 import static org.assertj.core.api.Assertions.assertThat;
 

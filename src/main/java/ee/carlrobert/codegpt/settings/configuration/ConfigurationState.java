@@ -1,5 +1,7 @@
 package ee.carlrobert.codegpt.settings.configuration;
 
+import static ee.carlrobert.codegpt.completions.CompletionRequestProvider.COMPLETION_SYSTEM_PROMPT;
+
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
@@ -13,7 +15,7 @@ import org.jetbrains.annotations.Nullable;
 @State(name = "CodeGPT_ConfigurationSettings_210", storages = @Storage("CodeGPT_ConfigurationSettings_210.xml"))
 public class ConfigurationState implements PersistentStateComponent<ConfigurationState> {
 
-  private String systemPrompt = "";
+  private String systemPrompt = COMPLETION_SYSTEM_PROMPT;
   private int maxTokens = 1000;
   private double temperature = 0.2;
   private boolean createNewChatOnEachAction;

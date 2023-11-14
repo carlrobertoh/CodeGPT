@@ -43,6 +43,7 @@
                 icon="ee.carlrobert.codegpt.Icons.DefaultSmallIcon">
             </group>
             <add-to-group group-id="EditorPopupMenu1" anchor="first"/>
+            <add-to-group group-id="Vcs.MessageActionGroup" anchor="first"/>
             <separator/>
         </group>
     </actions>

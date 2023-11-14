@@ -112,6 +112,7 @@ public class StandardChatToolWindowTabbedPane extends JBTabbedPane {
     tryFindActiveTabPanel().ifPresent(tabPanel -> {
       tabPanel.displayLandingView();
       tabPanel.setConversation(null);
+      tabPanel.updateConversationTokens();
     });
     ConversationsState.getInstance().setCurrentConversation(null);
   }

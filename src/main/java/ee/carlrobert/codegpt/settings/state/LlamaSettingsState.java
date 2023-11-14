@@ -18,7 +18,7 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
   private String customLlamaModelPath = "";
   private HuggingFaceModel huggingFaceModel = HuggingFaceModel.CODE_LLAMA_7B_Q4;
   private PromptTemplate promptTemplate = PromptTemplate.LLAMA;
-  private int serverPort = getRandomAvailablePortOrDefault();
+  private Integer serverPort = getRandomAvailablePortOrDefault();
   private int contextSize = 2048;
 
   public LlamaSettingsState() {
@@ -70,11 +70,11 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
     this.promptTemplate = promptTemplate;
   }
 
-  public int getServerPort() {
+  public Integer getServerPort() {
     return serverPort;
   }
 
-  public void setServerPort(int serverPort) {
+  public void setServerPort(Integer serverPort) {
     this.serverPort = serverPort;
   }
 

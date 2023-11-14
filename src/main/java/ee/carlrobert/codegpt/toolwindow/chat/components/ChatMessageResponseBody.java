@@ -142,13 +142,17 @@ public class ChatMessageResponseBody extends JPanel {
   }
 
   public void hideCarets() {
-    if (currentlyProcessedEditor != null) {
-      ((EditorEx) currentlyProcessedEditor.getEditor()).setCaretVisible(false);
-      ((EditorEx) currentlyProcessedEditor.getEditor()).setCaretEnabled(false);
-    }
-    if (currentlyProcessedTextPane != null && currentlyProcessedTextPane.getCaret().isVisible()) {
-      currentlyProcessedTextPane.getCaret().setVisible(false);
-    }
+    ApplicationManager.getApplication().invokeLater(() ->
+        ApplicationManager.getApplication().runWriteAction(() -> {
+          if (currentlyProcessedEditor != null) {
+            ((EditorEx) currentlyProcessedEditor.getEditor()).setCaretVisible(false);
+            ((EditorEx) currentlyProcessedEditor.getEditor()).setCaretEnabled(false);
+          }
+          if (currentlyProcessedTextPane != null && currentlyProcessedTextPane.getCaret()
+              .isVisible()) {
+            currentlyProcessedTextPane.getCaret().setVisible(false);
+          }
+        }));
   }
 
   public void displayError(String message) {

@@ -3,7 +3,10 @@ package ee.carlrobert.codegpt.util;
 import static javax.swing.event.HyperlinkEvent.EventType.ACTIVATED;
 
 import com.intellij.ide.BrowserUtil;
+import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
+import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.util.ui.UI;
+import ee.carlrobert.codegpt.toolwindow.chat.components.SmartScroller;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.net.URISyntaxException;
@@ -14,9 +17,11 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
@@ -42,6 +47,13 @@ public class SwingUtils {
     button.setContentAreaFilled(false);
     button.setPreferredSize(new Dimension(icon.getIconWidth(), icon.getIconHeight()));
     return button;
+  }
+
+  public static JScrollPane createScrollPaneWithSmartScroller(ScrollablePanel scrollablePanel) {
+    var scrollPane = ScrollPaneFactory.createScrollPane(scrollablePanel, true);
+    scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+    new SmartScroller(scrollPane);
+    return scrollPane;
   }
 
   public static void setEqualLabelWidths(JPanel firstPanel, JPanel secondPanel) {

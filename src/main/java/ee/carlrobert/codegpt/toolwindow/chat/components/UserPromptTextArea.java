@@ -3,6 +3,7 @@ package ee.carlrobert.codegpt.toolwindow.chat.components;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.editor.ex.util.EditorUtil;
 import com.intellij.openapi.util.registry.Registry;
+import com.intellij.ui.DocumentAdapter;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBTextArea;
 import com.intellij.util.ui.JBUI;
@@ -30,7 +31,6 @@ import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -38,7 +38,8 @@ public class UserPromptTextArea extends JPanel {
 
   private static final String TEXT_SUBMIT = "text-submit";
   private static final String INSERT_BREAK = "insert-break";
-  private static final JBColor BACKGROUND_COLOR = JBColor.namedColor("Editor.SearchField.background", UIUtil.getTextFieldBackground());
+  private static final JBColor BACKGROUND_COLOR = JBColor.namedColor(
+      "Editor.SearchField.background", UIUtil.getTextFieldBackground());
 
   private final JBTextArea textArea;
 
@@ -48,10 +49,11 @@ public class UserPromptTextArea extends JPanel {
   private JPanel iconsPanel;
   private boolean submitEnabled = true;
 
-  public UserPromptTextArea(Consumer<String> onSubmit) {
+  public UserPromptTextArea(Consumer<String> onSubmit, DocumentAdapter documentAdapter) {
     this.onSubmit = onSubmit;
 
     textArea = new JBTextArea();
+    textArea.getDocument().addDocumentListener(documentAdapter);
     textArea.setOpaque(false);
     textArea.setBackground(BACKGROUND_COLOR);
     textArea.setLineWrap(true);
@@ -78,27 +80,18 @@ public class UserPromptTextArea extends JPanel {
         UserPromptTextArea.super.paintBorder(UserPromptTextArea.super.getGraphics());
       }
     });
-    textArea.getDocument().addDocumentListener(new DocumentListener() {
+    textArea.getDocument().addDocumentListener(new DocumentAdapter() {
       @Override
-      public void removeUpdate(DocumentEvent e) {
-        if (e.getDocument().getLength() == 0) {
-          iconsPanel.getComponents()[0].setEnabled(false);
-        }
-      }
-
-      @Override
-      public void insertUpdate(DocumentEvent e) {
-        if (e.getDocument().getLength() == 1) {
-          iconsPanel.getComponents()[0].setEnabled(true);
-        }
-      }
-
-      @Override
-      public void changedUpdate(DocumentEvent e) {
+      protected void textChanged(@NotNull DocumentEvent e) {
+        iconsPanel.getComponents()[0].setEnabled(e.getDocument().getLength() > 0);
       }
     });
     updateFont();
     init();
+  }
+
+  public String getText() {
+    return textArea.getText().trim();
   }
 
   public void focus() {
@@ -134,10 +127,6 @@ public class UserPromptTextArea extends JPanel {
   public void setSubmitEnabled(boolean submitEnabled) {
     this.submitEnabled = submitEnabled;
     stopButton.setEnabled(!submitEnabled);
-  }
-
-  public void setTextAreaEnabled(boolean textAreaEnabled) {
-    textArea.setEnabled(textAreaEnabled);
   }
 
   private void handleSubmit() {

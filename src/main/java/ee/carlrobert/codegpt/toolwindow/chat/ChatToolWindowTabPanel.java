@@ -12,6 +12,10 @@ public interface ChatToolWindowTabPanel extends Disposable {
 
   @Nullable Conversation getConversation();
 
+  TokenDetails getTokenDetails();
+
+  boolean isStreaming();
+
   void setConversation(@Nullable Conversation conversation);
 
   void displayLandingView();

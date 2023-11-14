@@ -154,9 +154,10 @@ tasks {
   }
 
   test {
+    exclude("**/testsupport/*")
     useJUnitPlatform()
     testLogging {
-      events("passed", "skipped", "failed")
+      events("started", "passed", "skipped", "failed")
       exceptionFormat = TestExceptionFormat.FULL
       showStandardStreams = true
     }
