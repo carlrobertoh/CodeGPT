@@ -6,6 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.3] - 2023-11-15
+
+### Added
+
+- Expand/Collapse logic for tool window editors
+- Interactive total token count label
+
+### Removed
+
+- Azure model selection (redundant field)
+
 ## [2.2.2] - 2023-11-07
 
 ### Added
@@ -227,7 +238,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `OPENAI_API_KEY` persistence, key is saved in the OS password safe from now on
 
-[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.2...HEAD
+[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.3...HEAD
+[2.2.3]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.2...v2.2.3
 [2.2.2]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.1...v2.2.2
 [2.2.1]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.0...v2.2.1
 [2.2.0]: https://github.com/carlrobertoh/CodeGPT/compare/v2.1.7...v2.2.0
