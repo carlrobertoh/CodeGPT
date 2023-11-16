@@ -45,5 +45,11 @@
             <add-to-group group-id="EditorPopupMenu1" anchor="first"/>
             <separator/>
         </group>
+        <group id="CodeGPT.GenerateGitCommitMessageGroup">
+            <add-to-group group-id="Vcs.MessageActionGroup" anchor="first"/>
+            <action
+              id="CodeGPT.GenerateGitCommitMessage"
+              class="ee.carlrobert.codegpt.actions.GenerateGitCommitMessageAction" />
+        </group>
     </actions>
 </idea-plugin>

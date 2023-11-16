@@ -3,6 +3,7 @@ package ee.carlrobert.codegpt.util;
 import static com.intellij.openapi.ui.Messages.CANCEL;
 import static com.intellij.openapi.ui.Messages.OK;
 import static ee.carlrobert.codegpt.Icons.DefaultIcon;
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 import com.intellij.execution.ExecutionBundle;
@@ -26,6 +27,7 @@ import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.indexes.FolderStructureTreePanel;
+import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import javax.swing.JComponent;
@@ -73,14 +75,43 @@ public class OverlayUtils {
     return MessageDialogBuilder.okCancel(
             CodeGPTBundle.get("dialog.tokenLimitExceeded.title"),
             CodeGPTBundle.get("dialog.tokenLimitExceeded.description"))
-        .yesText(CodeGPTBundle.get("dialog.tokenLimitExceeded.continue"))
-        .noText(CodeGPTBundle.get("dialog.tokenLimitExceeded.cancel"))
+        .yesText(CodeGPTBundle.get("dialog.continue"))
+        .noText(CodeGPTBundle.get("dialog.cancel"))
         .icon(DefaultIcon)
         .doNotAsk(new DoNotAskOption.Adapter() {
           @Override
           public void rememberChoice(boolean isSelected, int exitCode) {
             if (isSelected) {
               ConversationsState.getInstance().discardAllTokenLimits();
+            }
+          }
+
+          @NotNull
+          @Override
+          public String getDoNotShowMessage() {
+            return ExecutionBundle.message("don.t.ask.again");
+          }
+
+          @Override
+          public boolean shouldSaveOptionsOnCancel() {
+            return true;
+          }
+        })
+        .guessWindowAndAsk() ? OK : CANCEL;
+  }
+
+  public static int showTokenSoftLimitWarningDialog(int tokenCount) {
+    return MessageDialogBuilder.okCancel(
+            CodeGPTBundle.get("dialog.tokenSoftLimitExceeded.title"),
+            format(CodeGPTBundle.get("dialog.tokenSoftLimitExceeded.description"), tokenCount))
+        .yesText(CodeGPTBundle.get("dialog.continue"))
+        .noText(CodeGPTBundle.get("dialog.cancel"))
+        .icon(DefaultIcon)
+        .doNotAsk(new DoNotAskOption.Adapter() {
+          @Override
+          public void rememberChoice(boolean isSelected, int exitCode) {
+            if (isSelected) {
+              ConfigurationState.getInstance().setIgnoreGitCommitTokenLimit(true);
             }
           }
 

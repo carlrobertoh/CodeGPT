@@ -1,0 +1,3 @@
+Write a short and descriptive git commit message for the following git diff.
+Use imperative mood, present tense, active voice and verbs.
+Your entire response will be passed directly into git commit.
