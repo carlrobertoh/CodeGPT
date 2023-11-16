@@ -12,6 +12,7 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.WriteCommandAction;
+import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.openapi.project.Project;
@@ -25,7 +26,6 @@ import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.util.OverlayUtils;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
-import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionModel;
 import ee.carlrobert.llm.client.openai.completion.chat.request.OpenAIChatCompletionMessage;
 import ee.carlrobert.llm.client.openai.completion.chat.request.OpenAIChatCompletionRequest;
 import ee.carlrobert.llm.completion.CompletionEventListener;
@@ -84,28 +84,33 @@ public class GenerateGitCommitMessageAction extends AnAction {
                 getResourceContent("/prompts/git-message.txt")),
             new OpenAIChatCompletionMessage("user", gitDiff)))
             .setModel(OpenAISettingsState.getInstance().getModel())
-            .build(), new CompletionEventListener() {
-          private final StringBuilder messageBuilder = new StringBuilder();
+            .build(),
+        getEventListener(project, editor.getDocument()));
+  }
 
-          @Override
-          public void onMessage(String message) {
-            messageBuilder.append(message);
-            var application = ApplicationManager.getApplication();
-            application.invokeLater(() ->
-                application.runWriteAction(() ->
-                    WriteCommandAction.runWriteCommandAction(project, () ->
-                        editor.getDocument().setText(messageBuilder))));
-          }
+  private CompletionEventListener getEventListener(Project project, Document document) {
+    return new CompletionEventListener() {
+      private final StringBuilder messageBuilder = new StringBuilder();
 
-          @Override
-          public void onError(ErrorDetails error, Throwable ex) {
-            Notifications.Bus.notify(new Notification(
-                "CodeGPT Notification Group",
-                "CodeGPT",
-                error.getMessage(),
-                NotificationType.ERROR));
-          }
-        });
+      @Override
+      public void onMessage(String message) {
+        messageBuilder.append(message);
+        var application = ApplicationManager.getApplication();
+        application.invokeLater(() ->
+            application.runWriteAction(() ->
+                WriteCommandAction.runWriteCommandAction(project, () ->
+                    document.setText(messageBuilder))));
+      }
+
+      @Override
+      public void onError(ErrorDetails error, Throwable ex) {
+        Notifications.Bus.notify(new Notification(
+            "CodeGPT Notification Group",
+            "CodeGPT",
+            error.getMessage(),
+            NotificationType.ERROR));
+      }
+    };
   }
 
   private Editor getCommitMessageEditor(AnActionEvent event) {
