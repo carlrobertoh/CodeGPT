@@ -8,7 +8,8 @@ import org.jetbrains.annotations.Nullable;
 @Service
 public final class OpenAICredentialsManager {
 
-  private static final CredentialAttributes openAIApiKeyCredentialAttributes = CredentialsUtil.createCredentialAttributes("OPENAI_API_KEY");
+  private static final CredentialAttributes openAIApiKeyCredentialAttributes =
+      CredentialsUtil.createCredentialAttributes("OPENAI_API_KEY");
 
   private String openAIApiKey;
 

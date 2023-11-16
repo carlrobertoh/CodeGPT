@@ -9,7 +9,9 @@ public class YouAuthenticationError {
   private final String errorType;
   private final String errorMessage;
 
-  public YouAuthenticationError(@JsonProperty("error_type") String errorType, @JsonProperty("error_message") String errorMessage) {
+  public YouAuthenticationError(
+      @JsonProperty("error_type") String errorType,
+      @JsonProperty("error_message") String errorMessage) {
     this.errorType = errorType;
     this.errorMessage = errorMessage;
   }

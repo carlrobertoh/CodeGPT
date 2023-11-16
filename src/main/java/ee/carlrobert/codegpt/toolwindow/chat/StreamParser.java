@@ -40,7 +40,11 @@ public class StreamParser {
           new StreamParseResponse(StreamResponseType.TEXT, messageBuilder.toString()));
     }
 
-    return List.of(new StreamParseResponse(isProcessingCode ? StreamResponseType.CODE : StreamResponseType.TEXT, messageBuilder.toString()));
+    return List.of(new StreamParseResponse(
+        isProcessingCode
+            ? StreamResponseType.CODE
+            : StreamResponseType.TEXT,
+        messageBuilder.toString()));
   }
 
   public void clear() {

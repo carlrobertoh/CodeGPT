@@ -54,7 +54,10 @@ public class DownloadModelAction extends AnAction {
   class DownloadBackgroundTask extends Task.Backgroundable {
 
     DownloadBackgroundTask(Project project) {
-      super(project, CodeGPTBundle.get("settingsConfigurable.service.llama.progress.downloadingModel.title"), true);
+      super(
+          project,
+          CodeGPTBundle.get("settingsConfigurable.service.llama.progress.downloadingModel.title"),
+          true);
     }
 
     @Override
@@ -68,15 +71,20 @@ public class DownloadModelAction extends AnAction {
         onDownload.accept(indicator);
 
         indicator.setIndeterminate(false);
-        indicator.setText(format(CodeGPTBundle.get("settingsConfigurable.service.llama.progress.downloadingModelIndicator.text"), model.getFileName()));
+        indicator.setText(format(
+            CodeGPTBundle.get(
+                "settingsConfigurable.service.llama.progress.downloadingModelIndicator.text"),
+            model.getFileName()));
 
         long fileSize = url.openConnection().getContentLengthLong();
         long[] bytesRead = {0};
         long startTime = System.currentTimeMillis();
 
         progressUpdateScheduler = executorService.scheduleAtFixedRate(() ->
-                onUpdateProgress.accept(
-                    DownloadingUtils.getFormattedDownloadProgress(startTime, fileSize, bytesRead[0])),
+                onUpdateProgress.accept(DownloadingUtils.getFormattedDownloadProgress(
+                    startTime,
+                    fileSize,
+                    bytesRead[0])),
             0, 1, TimeUnit.SECONDS);
         FileUtils.copyFileWithProgress(model.getFileName(), url, bytesRead, fileSize, indicator);
       } catch (IOException ex) {

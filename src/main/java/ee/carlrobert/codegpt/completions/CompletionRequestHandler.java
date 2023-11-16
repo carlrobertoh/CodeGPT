@@ -54,7 +54,9 @@ public class CompletionRequestHandler {
     } catch (Throwable ex) {
       var errorMessage = "Something went wrong";
       if (ex instanceof TotalUsageExceededException) {
-        errorMessage = "The length of the context exceeds the maximum limit that the model can handle. Try reducing the input message or maximum completion token size.";
+        errorMessage =
+            "The length of the context exceeds the maximum limit that the model can handle. "
+                + "Try reducing the input message or maximum completion token size.";
       }
       completionResponseEventListener.handleError(new ErrorDetails(errorMessage), ex);
       throw ex;

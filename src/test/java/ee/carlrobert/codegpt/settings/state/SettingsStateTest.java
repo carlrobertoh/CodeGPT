@@ -11,12 +11,12 @@ import ee.carlrobert.codegpt.settings.service.ServiceType;
 public class SettingsStateTest extends BasePlatformTestCase {
 
   public void testOpenAISettingsSync() {
-    var settings = SettingsState.getInstance();
     var openAISettings = OpenAISettingsState.getInstance();
     openAISettings.setModel("gpt-3.5-turbo");
     var conversation = new Conversation();
     conversation.setModel("gpt-4");
     conversation.setClientCode("chat.completion");
+    var settings = SettingsState.getInstance();
 
     settings.sync(conversation);
 
@@ -47,12 +47,12 @@ public class SettingsStateTest extends BasePlatformTestCase {
   }
 
   public void testLlamaSettingsModelPathSync() {
-    var settings = SettingsState.getInstance();
     var llamaSettings = LlamaSettingsState.getInstance();
     llamaSettings.setHuggingFaceModel(HuggingFaceModel.WIZARD_CODER_PYTHON_7B_Q3);
     var conversation = new Conversation();
     conversation.setModel("TEST_LLAMA_MODEL_PATH");
     conversation.setClientCode("llama.chat.completion");
+    var settings = SettingsState.getInstance();
 
     settings.sync(conversation);
 
@@ -62,12 +62,12 @@ public class SettingsStateTest extends BasePlatformTestCase {
   }
 
   public void testLlamaSettingsHuggingFaceModelSync() {
-    var settings = SettingsState.getInstance();
     var llamaSettings = LlamaSettingsState.getInstance();
     llamaSettings.setHuggingFaceModel(HuggingFaceModel.WIZARD_CODER_PYTHON_7B_Q3);
     var conversation = new Conversation();
     conversation.setModel("CODE_LLAMA_7B_Q3");
     conversation.setClientCode("llama.chat.completion");
+    var settings = SettingsState.getInstance();
 
     settings.sync(conversation);
 

@@ -60,7 +60,8 @@ public class ConfigurationComponent {
     table.getColumnModel().getColumn(1).setPreferredWidth(240);
     table.getEmptyText().setText(CodeGPTBundle.get("configurationConfigurable.table.emptyText"));
     var tablePanel = createTablePanel();
-    tablePanel.setBorder(BorderFactory.createTitledBorder(CodeGPTBundle.get("configurationConfigurable.table.title")));
+    tablePanel.setBorder(BorderFactory.createTitledBorder(
+        CodeGPTBundle.get("configurationConfigurable.table.title")));
 
     temperatureField = new JBTextField(12);
     temperatureField.setText(String.valueOf(configuration.getTemperature()));
@@ -99,14 +100,16 @@ public class ConfigurationComponent {
     systemPromptTextArea.setColumns(60);
     systemPromptTextArea.setRows(3);
 
-    openNewTabCheckBox = new JBCheckBox(CodeGPTBundle.get("configurationConfigurable.openNewTabCheckBox.label"), false);
+    openNewTabCheckBox = new JBCheckBox(
+        CodeGPTBundle.get("configurationConfigurable.openNewTabCheckBox.label"), false);
 
     mainPanel = FormBuilder.createFormBuilder()
         .addComponent(tablePanel)
         .addVerticalGap(4)
         .addComponent(openNewTabCheckBox)
         .addVerticalGap(4)
-        .addComponent(new TitledSeparator(CodeGPTBundle.get("configurationConfigurable.section.assistant.title")))
+        .addComponent(new TitledSeparator(
+            CodeGPTBundle.get("configurationConfigurable.section.assistant.title")))
         .addComponent(createAssistantConfigurationForm())
         .addComponentFillVertically(new JPanel(), 0)
         .getPanel();
@@ -140,7 +143,11 @@ public class ConfigurationComponent {
   }
 
   // Formatted keys are not referenced in the messages bundle file
-  private void addAssistantFormLabeledComponent(FormBuilder formBuilder, String labelKey, String commentKey, JComponent component) {
+  private void addAssistantFormLabeledComponent(
+      FormBuilder formBuilder,
+      String labelKey,
+      String commentKey,
+      JComponent component) {
     formBuilder.addLabeledComponent(
         new JBLabel(CodeGPTBundle.get(labelKey))
             .withBorder(JBUI.Borders.emptyLeft(2)),
@@ -180,17 +187,23 @@ public class ConfigurationComponent {
     return form;
   }
 
-  private ComponentValidator createInputValidator(Disposable parentDisposable, JBTextField component) {
+  private ComponentValidator createInputValidator(
+      Disposable parentDisposable,
+      JBTextField component) {
     var validator = new ComponentValidator(parentDisposable)
         .withValidator(() -> {
           var valueText = component.getText();
           try {
             var value = Double.parseDouble(valueText);
             if (value > 1.0 || value < 0.0) {
-              return new ValidationInfo(CodeGPTBundle.get("validation.error.mustBeBetweenZeroAndOne"), component);
+              return new ValidationInfo(
+                  CodeGPTBundle.get("validation.error.mustBeBetweenZeroAndOne"),
+                  component);
             }
           } catch (NumberFormatException e) {
-            return new ValidationInfo(CodeGPTBundle.get("validation.error.mustBeNumber"), component);
+            return new ValidationInfo(
+                CodeGPTBundle.get("validation.error.mustBeNumber"),
+                component);
           }
 
           return null;
@@ -246,7 +259,9 @@ public class ConfigurationComponent {
   class RevertToDefaultsActionButton extends AnActionButton {
 
     RevertToDefaultsActionButton() {
-      super(CodeGPTBundle.get("configurationConfigurable.table.action.revertToDefaults.text"), AllIcons.Actions.Rollback);
+      super(
+          CodeGPTBundle.get("configurationConfigurable.table.action.revertToDefaults.text"),
+          AllIcons.Actions.Rollback);
     }
 
     @Override
@@ -261,7 +276,9 @@ public class ConfigurationComponent {
   class KeymapActionButton extends AnActionButton {
 
     KeymapActionButton() {
-      super(CodeGPTBundle.get("configurationConfigurable.table.action.addKeymap.text"), Nodes.KeymapEditor);
+      super(
+          CodeGPTBundle.get("configurationConfigurable.table.action.addKeymap.text"),
+          Nodes.KeymapEditor);
     }
 
     @Override

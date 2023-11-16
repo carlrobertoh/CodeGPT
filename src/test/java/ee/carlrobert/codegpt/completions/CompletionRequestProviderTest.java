@@ -144,20 +144,20 @@ public class CompletionRequestProviderTest extends IntegrationTest {
               List.of(Map.of(
                   "role", "user",
                   "content",
-                  "You are Text Generator, a helpful expert of generating natural language into semantically comparable search query.\n"
-                      +
-                      "\n" +
-                      "Text: List all the dependencies that the project uses\n" +
-                      "AI: project dependencies, development dependencies, versions, libraries, frameworks, packages\n"
-                      +
-                      "\n" +
-                      "Text: Are there any scheduled tasks or background jobs running in our codebase, and if so, what are they responsible for?\n"
-                      +
-                      "AI: scheduled tasks, background jobs, cron jobs, task schedules, codebase tasks\n"
-                      +
-                      "\n" +
-                      "Text: TEST_CHAT_COMPLETION_PROMPT\n" +
-                      "AI:")));
+                  "You are Text Generator, a helpful expert of generating natural "
+                      + "language into semantically comparable search query.\n"
+                      + "\n"
+                      + "Text: List all the dependencies that the project uses\n"
+                      + "AI: project dependencies, development dependencies, "
+                      + "versions, libraries, frameworks, packages\n"
+                      + "\n"
+                      + "Text: Are there any scheduled tasks or background jobs "
+                      + "running in our codebase, and if so, what are they responsible for?\n"
+                      + "AI: scheduled tasks, background jobs, cron jobs, "
+                      + "task schedules, codebase tasks\n"
+                      + "\n"
+                      + "Text: TEST_CHAT_COMPLETION_PROMPT\n"
+                      + "AI:")));
 
       return new ResponseEntity(200,
           jsonMapResponse("choices", jsonArray(jsonMap("message",
@@ -183,17 +183,17 @@ public class CompletionRequestProviderTest extends IntegrationTest {
     assertThat(request.getMessages().get(0))
         .extracting("role", "content")
         .containsExactly("user",
-            "Use the following pieces of context to answer the question at the end.\n" +
-                "If you don't know the answer, just say that you don't know, don't try to make up an answer.\n"
-                +
-                "\n" +
-                "Context:\n" +
-                "\n" +
-                "TEST_CONTEXT\n" +
-                "\n" +
-                "Question: TEST_CHAT_COMPLETION_PROMPT\n" +
-                "\n" +
-                "Helpful answer in Markdown format:");
+            "Use the following pieces of context to answer the question at the end.\n"
+                + "If you don't know the answer, just say that you don't know, "
+                + "don't try to make up an answer.\n"
+                + "\n"
+                + "Context:\n"
+                + "\n"
+                + "TEST_CONTEXT\n"
+                + "\n"
+                + "Question: TEST_CHAT_COMPLETION_PROMPT\n"
+                + "\n"
+                + "Helpful answer in Markdown format:");
   }
 
   private Message createDummyMessage(int tokenSize) {

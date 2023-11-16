@@ -4,7 +4,8 @@ import com.intellij.util.messages.Topic;
 
 public interface AuthenticationNotifier {
 
-  Topic<AuthenticationNotifier> AUTHENTICATION_TOPIC = Topic.create("authenticationTopic", AuthenticationNotifier.class);
+  Topic<AuthenticationNotifier> AUTHENTICATION_TOPIC =
+      Topic.create("authenticationTopic", AuthenticationNotifier.class);
 
   void authenticationSuccessful();
 }

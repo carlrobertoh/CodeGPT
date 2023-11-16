@@ -26,7 +26,9 @@ abstract class CodeSplitter implements Splitter {
   @Override
   public List<String> split(String fileName, String content) {
     chunks = new ArrayList<>();
-    ParseTreeWalker.DEFAULT.walk(getParseTreeListener(), getParseTree(CharStreams.fromString(content)));
+    ParseTreeWalker.DEFAULT.walk(
+        getParseTreeListener(),
+        getParseTree(CharStreams.fromString(content)));
     return chunks;
   }
 }
