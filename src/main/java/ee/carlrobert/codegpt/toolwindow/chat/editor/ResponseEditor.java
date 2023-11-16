@@ -112,11 +112,11 @@ public class ResponseEditor extends JPanel implements Disposable {
   }
 
   private String getLinkText(boolean expanded) {
-    return expanded ?
-        format(
+    return expanded
+        ? format(
             CodeGPTBundle.get("toolwindow.chat.editor.action.expand"),
-            ((EditorEx) editor).getDocument().getLineCount() - 1) :
-        CodeGPTBundle.get("toolwindow.chat.editor.action.collapse");
+            ((EditorEx) editor).getDocument().getLineCount() - 1)
+        : CodeGPTBundle.get("toolwindow.chat.editor.action.collapse");
   }
 
   private JPanel createFooterComponent(Color backgroundColor) {

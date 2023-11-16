@@ -78,8 +78,8 @@ public enum PromptTemplate {
     public String buildPrompt(String systemPrompt, String userPrompt, List<Message> history) {
       StringBuilder prompt = new StringBuilder();
 
-      prompt.append(
-          "Below is an instruction that describes a task. Write a response that appropriately completes the request.\n\n");
+      prompt.append("Below is an instruction that describes a task. "
+          + "Write a response that appropriately completes the request.\n\n");
 
       for (Message message : history) {
         prompt.append("### Instruction\n")

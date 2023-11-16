@@ -86,6 +86,7 @@ public class FolderStructureTreePanel {
             totalSize -= length;
           }
         } catch (Throwable ignored) {
+          // ignore
         }
       }
     });
@@ -122,10 +123,11 @@ public class FolderStructureTreePanel {
       panel.add(new JBLabel("Total size:"));
       panel.add(loadingFilesSpinner);
     } else {
-      panel.add(new JBLabel("Total size: " +
-          FileUtils.convertFileSize(totalSize) + " ~ " +
-          (convertLongValue(totalSize / 4)) + " tokens " + " ~ " +
-          new DecimalFormat("#.##").format(((double) (totalSize / 4) / 1000) * 0.0001) + " $"));
+      panel.add(new JBLabel("Total size: "
+          + FileUtils.convertFileSize(totalSize) + " ~ "
+          + (convertLongValue(totalSize / 4)) + " tokens " + " ~ "
+          + new DecimalFormat("#.##")
+          .format(((double) (totalSize / 4) / 1000) * 0.0001) + " $"));
     }
     return panel;
   }
@@ -149,16 +151,17 @@ public class FolderStructureTreePanel {
 
     try {
       if (node.isChecked()) {
-        node.setChecked(!changeListManager.isIgnoredFile(file) &&
-            !ignoreManager.isPotentiallyIgnoredFile(file) &&
-            FileUtils.isUtf8File(file.getPath()) &&
-            fileSize < Math.pow(1024, 2));
+        node.setChecked(!changeListManager.isIgnoredFile(file)
+            && !ignoreManager.isPotentiallyIgnoredFile(file)
+            && FileUtils.isUtf8File(file.getPath())
+            && fileSize < Math.pow(1024, 2));
       }
 
       if (node.isChecked()) {
         totalSize += fileSize;
       }
     } catch (RuntimeException ignored) {
+      // ignore
     }
   }
 

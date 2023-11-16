@@ -31,9 +31,9 @@ public class YouProCheckbox extends JBCheckBox {
 
   private String getTooltipText(YouUserManager youUserManager, boolean selected) {
     if (youUserManager.isSubscribed()) {
-      return selected ?
-          CodeGPTBundle.get("toolwindow.chat.youProCheckBox.disable") :
-          CodeGPTBundle.get("toolwindow.chat.youProCheckBox.enable");
+      return selected
+          ? CodeGPTBundle.get("toolwindow.chat.youProCheckBox.disable")
+          : CodeGPTBundle.get("toolwindow.chat.youProCheckBox.enable");
     }
     return CodeGPTBundle.get("toolwindow.chat.youProCheckBox.notAllowed");
   }

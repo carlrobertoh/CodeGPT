@@ -125,14 +125,16 @@ public class LlamaModelPreferencesForm {
         modelComboBoxModel,
         modelSizeComboBoxModel,
         huggingFaceComboBoxModel);
-    modelSizeComboBox.setEnabled(initialModelSizes.size() > 1 && !llamaServerAgent.isServerRunning());
+    modelSizeComboBox.setEnabled(
+        initialModelSizes.size() > 1 && !llamaServerAgent.isServerRunning());
     promptTemplateComboBox = new ComboBox<>(new EnumComboBoxModel<>(PromptTemplate.class));
     promptTemplateComboBox.setSelectedItem(llamaSettings.getPromptTemplate());
     promptTemplateComboBox.setEnabled(
         llamaSettings.isUseCustomModel() && !llamaServerAgent.isServerRunning());
     promptTemplateComboBox.setPreferredSize(modelComboBox.getPreferredSize());
     useCustomModelCheckBox = new JBCheckBox(CodeGPTBundle.get(
-        "settingsConfigurable.service.llama.useCustomModel.label"), llamaSettings.isUseCustomModel());
+        "settingsConfigurable.service.llama.useCustomModel.label"),
+        llamaSettings.isUseCustomModel());
     useCustomModelCheckBox.setEnabled(!llamaServerAgent.isServerRunning());
     useCustomModelCheckBox.addChangeListener(e -> {
       var selected = ((JBCheckBox) e.getSource()).isSelected();
@@ -167,16 +169,25 @@ public class LlamaModelPreferencesForm {
     huggingFaceModelComboBoxWrapper.add(modelDetailsLabel);
 
     return FormBuilder.createFormBuilder()
-        .addLabeledComponent(CodeGPTBundle.get("settingsConfigurable.shared.model.label"), modelComboBoxWrapper)
-        .addLabeledComponent(CodeGPTBundle.get("settingsConfigurable.service.llama.modelSize.label"), modelSizeComboBox)
-        .addLabeledComponent(CodeGPTBundle.get("settingsConfigurable.service.llama.quantization.label"), huggingFaceModelComboBoxWrapper)
+        .addLabeledComponent(CodeGPTBundle.get("settingsConfigurable.shared.model.label"),
+            modelComboBoxWrapper)
+        .addLabeledComponent(
+            CodeGPTBundle.get("settingsConfigurable.service.llama.modelSize.label"),
+            modelSizeComboBox)
+        .addLabeledComponent(
+            CodeGPTBundle.get("settingsConfigurable.service.llama.quantization.label"),
+            huggingFaceModelComboBoxWrapper)
         .addComponentToRightColumn(quantizationHelpText)
         .addComponentToRightColumn(downloadModelActionLinkWrapper)
         .addComponentToRightColumn(progressLabel)
         .addVerticalGap(8)
         .addComponent(useCustomModelCheckBox)
-        .addLabeledComponent(CodeGPTBundle.get("settingsConfigurable.service.llama.promptTemplate.label"), promptTemplateComboBox)
-        .addLabeledComponent(CodeGPTBundle.get("settingsConfigurable.service.llama.customModelPath.label"), customModelPathBrowserButton)
+        .addLabeledComponent(
+            CodeGPTBundle.get("settingsConfigurable.service.llama.promptTemplate.label"),
+            promptTemplateComboBox)
+        .addLabeledComponent(
+            CodeGPTBundle.get("settingsConfigurable.service.llama.customModelPath.label"),
+            customModelPathBrowserButton)
         .addComponentToRightColumn(customModelHelpText)
         .addVerticalGap(4)
         .getPanel();
@@ -297,8 +308,8 @@ public class LlamaModelPreferencesForm {
       var models = selectedModel.getHuggingFaceModels().stream()
           .filter(model -> {
             var selectedModelSize = (ModelSize) modelSizeComboBoxModel.getSelectedItem();
-            return selectedModelSize != null &&
-                selectedModelSize.getSize() == model.getParameterSize();
+            return selectedModelSize != null
+                && selectedModelSize.getSize() == model.getParameterSize();
           })
           .collect(toList());
       if (!models.isEmpty()) {
@@ -349,18 +360,23 @@ public class LlamaModelPreferencesForm {
       JPanel actionLinkWrapper,
       DefaultComboBoxModel<HuggingFaceModel> huggingFaceComboBoxModel,
       ProgressIndicator progressIndicator) {
-    return new AnActionLink(CodeGPTBundle.get("settingsConfigurable.service.llama.cancelDownloadLink.label"), new AnAction() {
-      @Override
-      public void actionPerformed(@NotNull AnActionEvent e) {
-        SwingUtilities.invokeLater(() -> {
-          configureFieldsForDownloading(false);
-          updateActionLink(
-              actionLinkWrapper,
-              createDownloadModelLink(progressLabel, actionLinkWrapper, huggingFaceComboBoxModel));
-          progressIndicator.cancel();
+    return new AnActionLink(
+        CodeGPTBundle.get("settingsConfigurable.service.llama.cancelDownloadLink.label"),
+        new AnAction() {
+          @Override
+          public void actionPerformed(@NotNull AnActionEvent e) {
+            SwingUtilities.invokeLater(() -> {
+              configureFieldsForDownloading(false);
+              updateActionLink(
+                  actionLinkWrapper,
+                  createDownloadModelLink(
+                      progressLabel,
+                      actionLinkWrapper,
+                      huggingFaceComboBoxModel));
+              progressIndicator.cancel();
+            });
+          }
         });
-      }
-    });
   }
 
   private void updateActionLink(JPanel actionLinkWrapper, AnActionLink actionLink) {
@@ -383,33 +399,39 @@ public class LlamaModelPreferencesForm {
       JBLabel progressLabel,
       JPanel actionLinkWrapper,
       DefaultComboBoxModel<HuggingFaceModel> huggingFaceComboBoxModel) {
-    return new AnActionLink(CodeGPTBundle.get("settingsConfigurable.service.llama.downloadModelLink.label"), new DownloadModelAction(
-        progressIndicator -> {
-          SwingUtilities.invokeLater(() -> {
-            configureFieldsForDownloading(true);
-            updateActionLink(
-                actionLinkWrapper,
-                createCancelDownloadLink(
-                    progressLabel,
+    return new AnActionLink(
+        CodeGPTBundle.get("settingsConfigurable.service.llama.downloadModelLink.label"),
+        new DownloadModelAction(
+            progressIndicator -> {
+              SwingUtilities.invokeLater(() -> {
+                configureFieldsForDownloading(true);
+                updateActionLink(
                     actionLinkWrapper,
-                    huggingFaceComboBoxModel,
-                    progressIndicator));
-          });
-        },
-        () -> SwingUtilities.invokeLater(() -> {
-          configureFieldsForDownloading(false);
-          updateActionLink(
-              actionLinkWrapper,
-              createDownloadModelLink(progressLabel, actionLinkWrapper, huggingFaceComboBoxModel));
-          actionLinkWrapper.setVisible(false);
-          LlamaSettingsState.getInstance()
-              .setHuggingFaceModel((HuggingFaceModel) huggingFaceComboBoxModel.getSelectedItem());
-        }),
-        (error) -> {
-          throw new RuntimeException(error);
-        },
-        (text) -> SwingUtilities.invokeLater(() -> progressLabel.setText(text)),
-        huggingFaceComboBoxModel), "unknown");
+                    createCancelDownloadLink(
+                        progressLabel,
+                        actionLinkWrapper,
+                        huggingFaceComboBoxModel,
+                        progressIndicator));
+              });
+            },
+            () -> SwingUtilities.invokeLater(() -> {
+              configureFieldsForDownloading(false);
+              updateActionLink(
+                  actionLinkWrapper,
+                  createDownloadModelLink(
+                      progressLabel,
+                      actionLinkWrapper,
+                      huggingFaceComboBoxModel));
+              actionLinkWrapper.setVisible(false);
+              LlamaSettingsState.getInstance()
+                  .setHuggingFaceModel(
+                      (HuggingFaceModel) huggingFaceComboBoxModel.getSelectedItem());
+            }),
+            (error) -> {
+              throw new RuntimeException(error);
+            },
+            (text) -> SwingUtilities.invokeLater(() -> progressLabel.setText(text)),
+            huggingFaceComboBoxModel), "unknown");
   }
 
   private void updateModelHelpTooltip(HuggingFaceModel model) {
@@ -418,7 +440,9 @@ public class LlamaModelPreferencesForm {
     new HelpTooltip()
         .setTitle(llamaModel.getLabel())
         .setDescription("<html><p>" + llamaModel.getDescription() + "</p></html>")
-        .setBrowserLink(CodeGPTBundle.get("settingsConfigurable.service.llama.linkToModel.label"), model.getHuggingFaceURL())
+        .setBrowserLink(
+            CodeGPTBundle.get("settingsConfigurable.service.llama.linkToModel.label"),
+            model.getHuggingFaceURL())
         .installOn(helpIcon);
   }
 

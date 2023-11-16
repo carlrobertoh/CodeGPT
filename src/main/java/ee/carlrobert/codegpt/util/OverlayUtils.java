@@ -34,18 +34,23 @@ import org.jetbrains.annotations.NotNull;
 public class OverlayUtils {
 
   public static void showNotification(String content, NotificationType type) {
-    Notifications.Bus.notify(new Notification("CodeGPT Notification Group", "CodeGPT", content, type));
+    Notifications.Bus.notify(
+        new Notification("CodeGPT Notification Group", "CodeGPT", content, type));
   }
 
-  public static int showFileStructureDialog(Project project, FolderStructureTreePanel folderStructureTreePanel) {
+  public static int showFileStructureDialog(
+      Project project,
+      FolderStructureTreePanel folderStructureTreePanel) {
     var dialogBuilder = new DialogBuilder(project);
     dialogBuilder.setNorthPanel(JBUI.Panels.simplePanel(new JBLabel(
-            "<html>" +
-                "<p>Indexing files enables direct queries related to your codebase.</p>" +
-                "<br/>" +
-                "<p>File indexing occurs locally on your computer; no files are sent to any 3rd party services.</p>" +
-                "<p>For additional information, refer to the <a href=\"https://google.com\">CodeGPT documentation</a>.</p>" +
-                "</html>")
+            "<html>"
+                + "<p>Indexing files enables direct queries related to your codebase.</p>"
+                + "<br/>"
+                + "<p>File indexing occurs locally on your computer; "
+                + "no files are sent to any 3rd party services.</p>"
+                + "<p>For additional information, refer to the "
+                + "<a href=\"https://google.com\">CodeGPT documentation</a>.</p>"
+                + "</html>")
             .setCopyable(true)
             .setAllowAutoWrapping(true)
             .withFont(JBFont.medium()))

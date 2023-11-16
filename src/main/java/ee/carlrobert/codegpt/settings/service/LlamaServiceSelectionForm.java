@@ -31,12 +31,12 @@ public class LlamaServiceSelectionForm extends JPanel {
   private final IntegerField maxTokensField;
 
   public LlamaServiceSelectionForm() {
-    var llamaServerAgent = ApplicationManager.getApplication().getService(LlamaServerAgent.class);
+    var llamaServerAgent =
+        ApplicationManager.getApplication().getService(LlamaServerAgent.class);
     var serverRunning = llamaServerAgent.isServerRunning();
     portField = new PortField(LlamaSettingsState.getInstance().getServerPort());
     portField.setEnabled(!serverRunning);
 
-    var serverProgressPanel = new ServerProgressPanel();
     llamaModelPreferencesForm = new LlamaModelPreferencesForm();
 
     maxTokensField = new IntegerField("max_tokens", 256, 4096);
@@ -44,10 +44,68 @@ public class LlamaServiceSelectionForm extends JPanel {
     maxTokensField.setValue(2048);
     maxTokensField.setEnabled(!serverRunning);
 
+    var serverProgressPanel = new ServerProgressPanel();
+    var serverButton = getServerButton(serverRunning, llamaServerAgent, serverProgressPanel);
+    var contextSizeHelpText = ComponentPanelBuilder.createCommentComponent(
+        CodeGPTBundle.get("settingsConfigurable.service.llama.contextSize.comment"),
+        true);
+    contextSizeHelpText.setBorder(JBUI.Borders.empty(0, 4));
+
+    setLayout(new BorderLayout());
+    add(FormBuilder.createFormBuilder()
+        .addComponent(new TitledSeparator(
+            CodeGPTBundle.get("settingsConfigurable.service.llama.modelPreferences.title")))
+        .addComponent(withEmptyLeftBorder(llamaModelPreferencesForm.getForm()))
+        .addComponent(new TitledSeparator(
+            CodeGPTBundle.get("settingsConfigurable.service.llama.serverPreferences.title")))
+        .addComponent(withEmptyLeftBorder(FormBuilder.createFormBuilder()
+            .addLabeledComponent(
+                CodeGPTBundle.get("settingsConfigurable.service.llama.contextSize.label"),
+                maxTokensField)
+            .addComponentToRightColumn(contextSizeHelpText)
+            .addLabeledComponent(
+                CodeGPTBundle.get("settingsConfigurable.service.llama.port.label"),
+                JBUI.Panels.simplePanel()
+                    .addToLeft(portField)
+                    .addToRight(serverButton))
+            .getPanel()))
+        .addVerticalGap(4)
+        .addComponent(withEmptyLeftBorder(serverProgressPanel))
+        .addComponentFillVertically(new JPanel(), 0)
+        .getPanel());
+  }
+
+  public void setServerPort(int serverPort) {
+    portField.setNumber(serverPort);
+  }
+
+  public int getServerPort() {
+    return portField.getNumber();
+  }
+
+  public LlamaModelPreferencesForm getLlamaModelPreferencesForm() {
+    return llamaModelPreferencesForm;
+  }
+
+  private JComponent withEmptyLeftBorder(JComponent component) {
+    component.setBorder(JBUI.Borders.emptyLeft(16));
+    return component;
+  }
+
+  public int getContextSize() {
+    return maxTokensField.getValue();
+  }
+
+  public void setContextSize(int contextSize) {
+    maxTokensField.setValue(contextSize);
+  }
+
+  private JButton getServerButton(boolean serverRunning, LlamaServerAgent llamaServerAgent,
+      ServerProgressPanel serverProgressPanel) {
     var serverButton = new JButton();
-    serverButton.setText(serverRunning ?
-        CodeGPTBundle.get("settingsConfigurable.service.llama.stopServer.label") :
-        CodeGPTBundle.get("settingsConfigurable.service.llama.startServer.label"));
+    serverButton.setText(serverRunning
+        ? CodeGPTBundle.get("settingsConfigurable.service.llama.stopServer.label")
+        : CodeGPTBundle.get("settingsConfigurable.service.llama.startServer.label"));
     serverButton.setIcon(serverRunning ? Actions.Suspend : Actions.Execute);
     serverButton.addActionListener(event -> {
       if (llamaModelPreferencesForm.isUseCustomLlamaModel()) {
@@ -87,11 +145,11 @@ public class LlamaServiceSelectionForm extends JPanel {
             CodeGPTBundle.get("settingsConfigurable.service.llama.progress.startingServer"));
 
         // TODO: Move to LlamaModelPreferencesForm
-        var modelPath = llamaModelPreferencesForm.isUseCustomLlamaModel() ?
-            llamaModelPreferencesForm.getCustomLlamaModelPath() :
-            CodeGPTPlugin.getLlamaModelsPath() +
-                File.separator +
-                llamaModelPreferencesForm.getSelectedModel().getFileName();
+        var modelPath = llamaModelPreferencesForm.isUseCustomLlamaModel()
+            ? llamaModelPreferencesForm.getCustomLlamaModelPath()
+            : CodeGPTPlugin.getLlamaModelsPath()
+                + File.separator
+                + llamaModelPreferencesForm.getSelectedModel().getFileName();
         llamaServerAgent.startAgent(
             modelPath,
             maxTokensField.getValue(),
@@ -104,34 +162,7 @@ public class LlamaServiceSelectionForm extends JPanel {
             });
       }
     });
-
-    var contextSizeHelpText = ComponentPanelBuilder.createCommentComponent(
-        CodeGPTBundle.get("settingsConfigurable.service.llama.contextSize.comment"),
-        true);
-    contextSizeHelpText.setBorder(JBUI.Borders.empty(0, 4));
-
-    setLayout(new BorderLayout());
-    add(FormBuilder.createFormBuilder()
-        .addComponent(new TitledSeparator(
-            CodeGPTBundle.get("settingsConfigurable.service.llama.modelPreferences.title")))
-        .addComponent(withEmptyLeftBorder(llamaModelPreferencesForm.getForm()))
-        .addComponent(new TitledSeparator(
-            CodeGPTBundle.get("settingsConfigurable.service.llama.serverPreferences.title")))
-        .addComponent(withEmptyLeftBorder(FormBuilder.createFormBuilder()
-            .addLabeledComponent(
-                CodeGPTBundle.get("settingsConfigurable.service.llama.contextSize.label"),
-                maxTokensField)
-            .addComponentToRightColumn(contextSizeHelpText)
-            .addLabeledComponent(
-                CodeGPTBundle.get("settingsConfigurable.service.llama.port.label"),
-                JBUI.Panels.simplePanel()
-                    .addToLeft(portField)
-                    .addToRight(serverButton))
-            .getPanel()))
-        .addVerticalGap(4)
-        .addComponent(withEmptyLeftBorder(serverProgressPanel))
-        .addComponentFillVertically(new JPanel(), 0)
-        .getPanel());
+    return serverButton;
   }
 
   private boolean isModelExists(HuggingFaceModel model) {
@@ -143,30 +174,5 @@ public class LlamaServiceSelectionForm extends JPanel {
     llamaModelPreferencesForm.enableFields(enabled);
     portField.setEnabled(enabled);
     maxTokensField.setEnabled(enabled);
-  }
-
-  public void setServerPort(int serverPort) {
-    portField.setNumber(serverPort);
-  }
-
-  public int getServerPort() {
-    return portField.getNumber();
-  }
-
-  public LlamaModelPreferencesForm getLlamaModelPreferencesForm() {
-    return llamaModelPreferencesForm;
-  }
-
-  private JComponent withEmptyLeftBorder(JComponent component) {
-    component.setBorder(JBUI.Borders.emptyLeft(16));
-    return component;
-  }
-
-  public int getContextSize() {
-    return maxTokensField.getValue();
-  }
-
-  public void setContextSize(int contextSize) {
-    maxTokensField.setValue(contextSize);
   }
 }

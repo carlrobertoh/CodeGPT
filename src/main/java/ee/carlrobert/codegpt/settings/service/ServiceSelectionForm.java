@@ -61,12 +61,17 @@ public class ServiceSelectionForm {
 
   public ServiceSelectionForm(Disposable parentDisposable) {
     this.parentDisposable = parentDisposable;
-    var openAISettings = OpenAISettingsState.getInstance();
-    var azureSettings = AzureSettingsState.getInstance();
     openAIApiKeyField = new JBPasswordField();
     openAIApiKeyField.setColumns(30);
     openAIApiKeyField.setText(OpenAICredentialsManager.getInstance().getApiKey());
 
+    var azureSettings = AzureSettingsState.getInstance();
+    useAzureApiKeyAuthenticationRadioButton = new JBRadioButton(
+        CodeGPTBundle.get("settingsConfigurable.service.azure.useApiKeyAuth.label"),
+        azureSettings.isUseAzureApiKeyAuthentication());
+    useAzureActiveDirectoryAuthenticationRadioButton = new JBRadioButton(
+        CodeGPTBundle.get("settingsConfigurable.service.azure.useActiveDirectoryAuth.label"),
+        azureSettings.isUseAzureActiveDirectoryAuthentication());
     azureApiKeyField = new JBPasswordField();
     azureApiKeyField.setColumns(30);
     azureApiKeyField.setText(AzureCredentialsManager.getInstance().getAzureOpenAIApiKey());
@@ -82,13 +87,8 @@ public class ServiceSelectionForm {
         .withLabel(CodeGPTBundle.get("settingsConfigurable.service.azure.bearerToken.label"))
         .resizeX(false)
         .createPanel();
-    useAzureApiKeyAuthenticationRadioButton = new JBRadioButton(
-        CodeGPTBundle.get("settingsConfigurable.service.azure.useApiKeyAuth.label"),
-        azureSettings.isUseAzureApiKeyAuthentication());
-    useAzureActiveDirectoryAuthenticationRadioButton = new JBRadioButton(
-        CodeGPTBundle.get("settingsConfigurable.service.azure.useActiveDirectoryAuth.label"),
-        azureSettings.isUseAzureActiveDirectoryAuthentication());
 
+    var openAISettings = OpenAISettingsState.getInstance();
     openAIBaseHostField = new JBTextField(openAISettings.getBaseHost(), 30);
     openAIPathField = new JBTextField(openAISettings.getPath(), 30);
     openAIOrganizationField = new JBTextField(openAISettings.getOrganization(), 30);

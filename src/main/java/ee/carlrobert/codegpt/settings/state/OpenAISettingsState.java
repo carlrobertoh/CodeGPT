@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 @State(name = "CodeGPT_OpenAISettings_210", storages = @Storage("CodeGPT_OpenAISettings_210.xml"))
 public class OpenAISettingsState implements PersistentStateComponent<OpenAISettingsState> {
 
-  private final String BASE_PATH = "/v1/chat/completions";
+  private static final String BASE_PATH = "/v1/chat/completions";
 
   private String organization = "";
   private String baseHost = "https://api.openai.com";
@@ -36,11 +36,12 @@ public class OpenAISettingsState implements PersistentStateComponent<OpenAISetti
   }
 
   public boolean isModified(ServiceSelectionForm serviceSelectionForm) {
-    return !serviceSelectionForm.getOpenAIApiKey().equals(OpenAICredentialsManager.getInstance().getApiKey()) ||
-        !serviceSelectionForm.getOpenAIOrganization().equals(organization) ||
-        !serviceSelectionForm.getOpenAIBaseHost().equals(baseHost) ||
-        !serviceSelectionForm.getOpenAIPath().equals(path) ||
-        !serviceSelectionForm.getOpenAIModel().equals(model);
+    return !serviceSelectionForm.getOpenAIApiKey()
+        .equals(OpenAICredentialsManager.getInstance().getApiKey())
+        || !serviceSelectionForm.getOpenAIOrganization().equals(organization)
+        || !serviceSelectionForm.getOpenAIBaseHost().equals(baseHost)
+        || !serviceSelectionForm.getOpenAIPath().equals(path)
+        || !serviceSelectionForm.getOpenAIModel().equals(model);
   }
 
   public void apply(ServiceSelectionForm serviceSelectionForm) {

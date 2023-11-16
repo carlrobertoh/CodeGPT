@@ -27,14 +27,16 @@ public class AdvancedSettingsConfigurable implements Configurable {
   @Override
   public boolean isModified() {
     var advancedSettings = AdvancedSettingsState.getInstance();
-    return !advancedSettingsComponent.getProxyType().equals(advancedSettings.getProxyType()) ||
-        !advancedSettingsComponent.getProxyHost().equals(advancedSettings.getProxyHost()) ||
-        advancedSettingsComponent.getProxyPort() != advancedSettings.getProxyPort() ||
-        advancedSettingsComponent.isProxyAuthSelected() != advancedSettings.isProxyAuthSelected() ||
-        !advancedSettingsComponent.getProxyAuthUsername().equals(advancedSettings.getProxyUsername()) ||
-        !advancedSettingsComponent.getProxyAuthPassword().equals(advancedSettings.getProxyPassword()) ||
-        advancedSettingsComponent.getConnectionTimeout() != advancedSettings.getConnectTimeout() ||
-        advancedSettingsComponent.getReadTimeout() != advancedSettings.getReadTimeout();
+    return !advancedSettingsComponent.getProxyType().equals(advancedSettings.getProxyType())
+        || !advancedSettingsComponent.getProxyHost().equals(advancedSettings.getProxyHost())
+        || advancedSettingsComponent.getProxyPort() != advancedSettings.getProxyPort()
+        || advancedSettingsComponent.isProxyAuthSelected() != advancedSettings.isProxyAuthSelected()
+        || !advancedSettingsComponent.getProxyAuthUsername()
+        .equals(advancedSettings.getProxyUsername())
+        || !advancedSettingsComponent.getProxyAuthPassword()
+        .equals(advancedSettings.getProxyPassword())
+        || advancedSettingsComponent.getConnectionTimeout() != advancedSettings.getConnectTimeout()
+        || advancedSettingsComponent.getReadTimeout() != advancedSettings.getReadTimeout();
   }
 
   @Override

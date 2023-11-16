@@ -159,7 +159,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
   }
 
   private void call(Message message, ResponsePanel responsePanel, boolean retry) {
-    ChatMessageResponseBody responseContainer = (ChatMessageResponseBody) responsePanel.getContent();
+    var responseContainer = (ChatMessageResponseBody) responsePanel.getContent();
 
     if (!CompletionRequestService.getInstance().isRequestAllowed()) {
       responseContainer.displayMissingCredential();
@@ -215,13 +215,14 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
   }
 
   private JPanel createRootPanel(SettingsState settings) {
-    var rootPanel = new JPanel(new GridBagLayout());
     var gbc = new GridBagConstraints();
     gbc.fill = GridBagConstraints.BOTH;
     gbc.weighty = 1;
     gbc.weightx = 1;
     gbc.gridx = 0;
     gbc.gridy = 0;
+
+    var rootPanel = new JPanel(new GridBagLayout());
     rootPanel.add(createScrollPaneWithSmartScroller(toolWindowScrollablePanel), gbc);
 
     gbc.weighty = 0;

@@ -25,18 +25,36 @@ class StandardChatToolWindowLandingPanel extends ResponsePanel {
 
   private JTextPane createContent() {
     var textPane = SwingUtils.createTextPane(
-        "<html>" +
-            format(
-                "<p style=\"margin-top: 4px; margin-bottom: 4px;\">Welcome <strong>%s</strong>, I'm your intelligent code companion, here to be your partner-in-crime for getting things done in a flash. Together, we'll tackle tasks swiftly and efficiently, making your coding experience a joy.</p>",
-                SettingsState.getInstance().getDisplayName()) +
-            "<p style=\"margin-top: 4px; margin-bottom: 4px;\">Feel free to ask me anything you'd like, but my true superpower lies in assisting you with your code! Here are a few examples of how I can assist you:</p>" +
-            "<ul style=\"margin-top: 4px; margin-bottom: 4px;\">" +
-            "<li><a href=\"GENERATE_UNIT_TESTS\">Generate unit tests for the selected code</a></li" +
-            "<li><a href=\"EXPLAIN_CODE\">Explain the selected code</a></li>" +
-            "<li><a href=\"FIND_BUGS\">Find bugs in the selected code</a></li>" +
-            "</ul" +
-            "<p style=\"margin-top: 4px; margin-bottom: 4px;\">Being an AI-powered assistant, I may occasionally have surprises or make mistakes. Therefore, it's wise to double-check any code or suggestions I provide.</p>" +
-            "</html>",
+        "<html>"
+            + format(
+                "<p style=\"margin-top: 4px; margin-bottom: 4px;\">"
+                    + "Welcome <strong>%s</strong>, I'm your intelligent code companion, here to be"
+                    + " your partner-in-crime for getting things done in a flash. Together, we'll "
+                    + "tackle tasks swiftly and efficiently, making your coding experience a joy."
+                    + "</p>",
+                SettingsState.getInstance().getDisplayName())
+            + "<p style=\"margin-top: 4px; margin-bottom: 4px;\">"
+            + "Feel free to ask me anything you'd like, but my true superpower lies in assisting "
+            + "you with your code! Here are a few examples of how I can assist you:"
+            + "</p>"
+
+            + "<ul style=\"margin-top: 4px; margin-bottom: 4px;\">"
+            + "<li>"
+            + "<a href=\"GENERATE_UNIT_TESTS\">Generate unit tests for the selected code</a>"
+            + "</li>"
+            + "<li>"
+            + "<a href=\"EXPLAIN_CODE\">Explain the selected code</a>"
+            + "</li>"
+            + "<li>"
+            + "<a href=\"FIND_BUGS\">Find bugs in the selected code</a>"
+            + "</li>"
+            + "</ul"
+
+            + "<p style=\"margin-top: 4px; margin-bottom: 4px;\">"
+            + "Being an AI-powered assistant, I may occasionally have surprises or make mistakes. "
+            + "Therefore, it's wise to double-check any code or suggestions I provide."
+            + "</p>"
+            + "</html>",
         this::handleHyperlinkClicked);
     textPane.setBackground(getPanelBackgroundColor());
     return textPane;

@@ -98,8 +98,8 @@ public class SettingsComponent {
         .withValidator(() -> {
           if (component instanceof ComboBox) {
             var selectedItem = ((ComboBox<?>) component).getSelectedItem();
-            if (selectedItem == ServiceType.OPENAI &&
-                OpenAISettingsState.getInstance().isOpenAIQuotaExceeded()) {
+            if (selectedItem == ServiceType.OPENAI
+                && OpenAISettingsState.getInstance().isOpenAIQuotaExceeded()) {
               return new ValidationInfo(
                   CodeGPTBundle.get("settings.openaiQuotaExceeded"),
                   component);

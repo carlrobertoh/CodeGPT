@@ -21,7 +21,8 @@ import org.apache.commons.text.CaseUtils;
 public class EditorActionsUtil {
 
   public static Map<String, String> DEFAULT_ACTIONS = new LinkedHashMap<>(Map.of(
-      "Find Bugs", "Find bugs and output code with bugs fixed in the following code: {{selectedCode}}",
+      "Find Bugs", "Find bugs and output code with bugs "
+          + "fixed in the following code: {{selectedCode}}",
       "Write Tests", "Write Tests for the selected code {{selectedCode}}",
       "Explain", "Explain the selected code {{selectedCode}}",
       "Refactor", "Refactor the selected code {{selectedCode}}",
@@ -38,7 +39,8 @@ public class EditorActionsUtil {
   }
 
   public static void refreshActions() {
-    AnAction actionGroup = ActionManager.getInstance().getAction("action.editor.group.EditorActionGroup");
+    AnAction actionGroup =
+        ActionManager.getInstance().getAction("action.editor.group.EditorActionGroup");
     if (actionGroup instanceof DefaultActionGroup) {
       DefaultActionGroup group = (DefaultActionGroup) actionGroup;
       group.removeAll();
@@ -53,10 +55,14 @@ public class EditorActionsUtil {
         var action = new BaseEditorAction(label, label) {
           @Override
           protected void actionPerformed(Project project, Editor editor, String selectedText) {
-            var fileExtension = FileUtils.getFileExtension(((EditorImpl) editor).getVirtualFile().getName());
-            var message = new Message(prompt.replace("{{selectedCode}}", format("\n```%s\n%s\n```", fileExtension, selectedText)));
+            var fileExtension = FileUtils.getFileExtension(
+                ((EditorImpl) editor).getVirtualFile().getName());
+            var message = new Message(prompt.replace(
+                "{{selectedCode}}",
+                format("\n```%s\n%s\n```", fileExtension, selectedText)));
             message.setUserMessage(prompt.replace("{{selectedCode}}", ""));
-            var toolWindowContentManager = project.getService(StandardChatToolWindowContentManager.class);
+            var toolWindowContentManager =
+                project.getService(StandardChatToolWindowContentManager.class);
             var toolWindow = toolWindowContentManager.getToolWindow();
             if (toolWindow != null) {
               toolWindow.show();

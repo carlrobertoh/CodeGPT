@@ -34,10 +34,10 @@ public class Word implements Item<Object, double[]> {
 
   @Override
   public String toString() {
-    return "Word{" +
-        "id='" + id + '\'' +
-        ", vector=" + Arrays.toString(vector) +
-        '}';
+    return "Word{"
+        + "id='" + id + '\''
+        + ", vector=" + Arrays.toString(vector)
+        + '}';
   }
 
   public String getMeta() {

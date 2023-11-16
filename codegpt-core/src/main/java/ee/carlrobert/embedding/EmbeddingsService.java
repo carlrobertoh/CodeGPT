@@ -40,7 +40,7 @@ public class EmbeddingsService {
   public List<double[]> getEmbeddings(List<String> chunks) {
     return openAIClient.getEmbeddings(chunks);
   }
-  
+
   public String buildPromptWithContext(String prompt) {
     try {
       var inputEmbedding = openAIClient.getEmbedding(getSearchQuery(prompt));
@@ -63,7 +63,9 @@ public class EmbeddingsService {
     }
   }
 
-  public List<Item<Object, double[]>> createEmbeddings(List<CheckedFile> checkedFiles, @Nullable ProgressIndicator indicator) {
+  public List<Item<Object, double[]>> createEmbeddings(
+      List<CheckedFile> checkedFiles,
+      @Nullable ProgressIndicator indicator) {
     var words = new ArrayList<Item<Object, double[]>>();
     for (int i = 0; i < checkedFiles.size(); i++) {
       try {
@@ -81,7 +83,10 @@ public class EmbeddingsService {
   }
 
   private String getSearchQuery(String userPrompt) throws JsonProcessingException {
-    var message = new OpenAIChatCompletionMessage("user", getResourceContent("/prompts/text-generator.txt").replace("{prompt}", userPrompt));
+    var message = new OpenAIChatCompletionMessage(
+        "user",
+        getResourceContent("/prompts/text-generator.txt")
+            .replace("{prompt}", userPrompt));
     var request = new OpenAIChatCompletionRequest.Builder(List.of(message))
         .setModel(OpenAIChatCompletionModel.GPT_4)
         .setMaxTokens(400)
@@ -100,16 +105,20 @@ public class EmbeddingsService {
     var fileExtension = checkedFile.getFileExtension();
     var codeSplitter = SplitterFactory.getCodeSplitter(fileExtension);
     if (codeSplitter != null) {
-      var chunks = codeSplitter.split(checkedFile.getFileName(), checkedFile.getFileContent());
+      var chunks = codeSplitter.split(
+          checkedFile.getFileName(),
+          checkedFile.getFileContent());
       var embeddings = openAIClient.getEmbeddings(chunks);
       for (int i = 0; i < chunks.size(); i++) {
-        prevEmbeddings.add(new Word(chunks.get(i), checkedFile.getFileName(), normalize(embeddings.get(i))));
+        prevEmbeddings.add(
+            new Word(chunks.get(i), checkedFile.getFileName(), normalize(embeddings.get(i))));
       }
     } else {
       var chunks = splitText(checkedFile.getFileContent(), 400);
       var embeddings = getEmbeddings(chunks);
       for (int i = 0; i < chunks.size(); i++) {
-        prevEmbeddings.add(new Word(chunks.get(i), checkedFile.getFileName(), normalize(embeddings.get(i))));
+        prevEmbeddings.add(
+            new Word(chunks.get(i), checkedFile.getFileName(), normalize(embeddings.get(i))));
       }
     }
   }
@@ -125,7 +134,8 @@ public class EmbeddingsService {
 
   // TODO: Move to shared module
   private static String getResourceContent(String name) {
-    try (var stream = Objects.requireNonNull(EmbeddingsService.class.getResourceAsStream(name))) {
+    try (var stream =
+        Objects.requireNonNull(EmbeddingsService.class.getResourceAsStream(name))) {
       return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
     } catch (IOException e) {
       throw new RuntimeException("Unable to read resource", e);

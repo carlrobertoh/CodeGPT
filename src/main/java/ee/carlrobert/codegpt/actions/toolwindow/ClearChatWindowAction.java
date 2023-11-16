@@ -5,8 +5,8 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import ee.carlrobert.codegpt.actions.ActionType;
 import ee.carlrobert.codegpt.actions.editor.EditorActionsUtil;
-import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
+import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import org.jetbrains.annotations.NotNull;
 
 public class ClearChatWindowAction extends AnAction {

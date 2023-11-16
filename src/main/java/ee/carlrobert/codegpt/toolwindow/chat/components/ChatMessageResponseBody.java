@@ -185,10 +185,10 @@ public class ChatMessageResponseBody extends JPanel {
             result.getUrl(), result.getName()))
         .collect(Collectors.joining());
     return format(
-        "<html>" +
-            "<p><strong>Search results:</strong></p>" +
-            "<ol>%s</ol>" +
-            "</html>", titles);
+        "<html>"
+            + "<p><strong>Search results:</strong></p>"
+            + "<ol>%s</ol>"
+            + "</html>", titles);
   }
 
   public void clear() {
