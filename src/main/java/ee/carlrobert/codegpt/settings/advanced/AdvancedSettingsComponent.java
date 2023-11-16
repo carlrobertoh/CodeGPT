@@ -30,7 +30,7 @@ public class AdvancedSettingsComponent {
   private final PortField readTimeoutField;
 
   public AdvancedSettingsComponent(AdvancedSettingsState advancedSettings) {
-    proxyTypeComboBox = new ComboBox<>(new Proxy.Type[] {
+    proxyTypeComboBox = new ComboBox<>(new Proxy.Type[]{
         Proxy.Type.SOCKS,
         Proxy.Type.HTTP,
         Proxy.Type.DIRECT,
@@ -57,7 +57,8 @@ public class AdvancedSettingsComponent {
             "advancedSettingsConfigurable.proxy.title")))
         .addComponent(createProxySettingsForm())
         .addVerticalGap(4)
-        .addComponent(new TitledSeparator(CodeGPTBundle.get("advancedSettingsConfigurable.connectionSettings.title")))
+        .addComponent(new TitledSeparator(
+            CodeGPTBundle.get("advancedSettingsConfigurable.connectionSettings.title")))
         .addComponent(createConnectionSettingsForm())
         .addComponentFillVertically(new JPanel(), 0)
         .getPanel();
@@ -65,8 +66,13 @@ public class AdvancedSettingsComponent {
 
   private JPanel createConnectionSettingsForm() {
     var panel = FormBuilder.createFormBuilder()
-        .addLabeledComponent(CodeGPTBundle.get("advancedSettingsConfigurable.connectionSettings.connectionTimeout.label"), connectionTimeoutField)
-        .addLabeledComponent(CodeGPTBundle.get("advancedSettingsConfigurable.connectionSettings.readTimeout.label"), readTimeoutField)
+        .addLabeledComponent(
+            CodeGPTBundle.get(
+                "advancedSettingsConfigurable.connectionSettings.connectionTimeout.label"),
+            connectionTimeoutField)
+        .addLabeledComponent(
+            CodeGPTBundle.get("advancedSettingsConfigurable.connectionSettings.readTimeout.label"),
+            readTimeoutField)
         .getPanel();
     panel.setBorder(JBUI.Borders.emptyLeft(16));
     return panel;

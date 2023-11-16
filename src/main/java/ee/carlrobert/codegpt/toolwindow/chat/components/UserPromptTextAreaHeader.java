@@ -35,6 +35,7 @@ public class UserPromptTextAreaHeader extends JPanel {
         subscribeToYouTopics(project, gpt4CheckBox);
         add(gpt4CheckBox, BorderLayout.LINE_START);
         break;
+      default:
     }
     add(JBUI.Panels
         .simplePanel(new ModelIconLabel(

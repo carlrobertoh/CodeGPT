@@ -18,8 +18,8 @@ import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.actions.ActionType;
 import ee.carlrobert.codegpt.actions.TrackableAction;
 import ee.carlrobert.codegpt.util.EditorUtils;
-import ee.carlrobert.codegpt.util.file.FileUtils;
 import ee.carlrobert.codegpt.util.OverlayUtils;
+import ee.carlrobert.codegpt.util.file.FileUtils;
 import org.jetbrains.annotations.NotNull;
 
 public class DiffAction extends TrackableAction {

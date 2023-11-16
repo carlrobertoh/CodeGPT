@@ -45,7 +45,8 @@ public class PromptTemplateTest {
     var prompt = ALPACA.buildPrompt(SYSTEM_PROMPT, USER_PROMPT, HISTORY);
 
     assertThat(prompt).isEqualTo(
-        "Below is an instruction that describes a task. Write a response that appropriately completes the request.\n"
+        "Below is an instruction that describes a task. "
+            + "Write a response that appropriately completes the request.\n"
             + "\n"
             + "### Instruction\n"
             + "TEST_PREV_PROMPT_1\n"
@@ -70,7 +71,8 @@ public class PromptTemplateTest {
     var prompt = ALPACA.buildPrompt(SYSTEM_PROMPT, USER_PROMPT, List.of());
 
     assertThat(prompt).isEqualTo(
-        "Below is an instruction that describes a task. Write a response that appropriately completes the request.\n"
+        "Below is an instruction that describes a task. "
+            + "Write a response that appropriately completes the request.\n"
             + "\n"
             + "### Instruction\n"
             + "TEST_USER_PROMPT\n"

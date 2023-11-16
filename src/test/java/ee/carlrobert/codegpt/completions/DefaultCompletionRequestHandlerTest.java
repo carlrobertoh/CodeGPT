@@ -56,8 +56,6 @@ public class DefaultCompletionRequestHandlerTest extends IntegrationTest {
   public void testAzureChatCompletionCall() {
     useAzureService();
     var conversationService = ConversationService.getInstance();
-    var message = new Message("TEST_PROMPT");
-    var requestHandler = new CompletionRequestHandler(false, getRequestEventListener(message));
     var prevMessage = new Message("TEST_PREV_PROMPT");
     prevMessage.setResponse("TEST_PREV_RESPONSE");
     var conversation = conversationService.startConversation();
@@ -82,6 +80,8 @@ public class DefaultCompletionRequestHandlerTest extends IntegrationTest {
           jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "lo")))),
           jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "!")))));
     });
+    var message = new Message("TEST_PROMPT");
+    var requestHandler = new CompletionRequestHandler(false, getRequestEventListener(message));
 
     requestHandler.call(conversation, message, false);
 
@@ -99,34 +99,36 @@ public class DefaultCompletionRequestHandlerTest extends IntegrationTest {
       assertThat(request.getMethod()).isEqualTo("GET");
       assertThat(request.getUri().getPath()).isEqualTo("/api/streamingSearch");
       assertThat(request.getUri().getQuery()).isEqualTo(
-          "q=TEST_PROMPT&" +
-              "page=1&" +
-              "cfr=CodeGPT&" +
-              "count=10&" +
-              "safeSearch=WebPages,Translations,TimeZone,Computation,RelatedSearches&" +
-              "domain=youchat&" +
-              "chat=[{\"question\":\"Ping\",\"answer\":\"Pong\"}]&" +
-              "utm_source=ide&" +
-              "utm_medium=jetbrains&" +
-              "utm_campaign=" + CodeGPTPlugin.getVersion() + "&" +
-              "utm_content=CodeGPT");
+          "q=TEST_PROMPT&"
+              + "page=1&"
+              + "cfr=CodeGPT&"
+              + "count=10&"
+              + "safeSearch=WebPages,Translations,TimeZone,Computation,RelatedSearches&"
+              + "domain=youchat&"
+              + "chat=[{\"question\":\"Ping\",\"answer\":\"Pong\"}]&"
+              + "utm_source=ide&"
+              + "utm_medium=jetbrains&"
+              + "utm_campaign=" + CodeGPTPlugin.getVersion() + "&"
+              + "utm_content=CodeGPT");
       assertThat(request.getHeaders())
           .flatExtracting("Accept", "Connection", "User-agent", "Cookie")
           .containsExactly(
               "text/event-stream",
               "Keep-Alive",
               "youide CodeGPT",
-              "safesearch_guest=Moderate; " +
-                  "youpro_subscription=true; " +
-                  "you_subscription=free; " +
-                  "stytch_session=; " +
-                  "ydc_stytch_session=; " +
-                  "stytch_session_jwt=; " +
-                  "ydc_stytch_session_jwt=; " +
-                  "eg4=false; " +
-                  "safesearch_9015f218b47611b62bbbaf61125cd2dac629e65c3d6f47573a2ec0e9b615c691=Moderate; "
-                  +
-                  "__cf_bm=aN2b3pQMH8XADeMB7bg9s1bJ_bfXBcCHophfOGRg6g0-1693601599-0-AWIt5Mr4Y3xQI4mIJ1lSf4+vijWKDobrty8OopDeBxY+NABe0MRFidF3dCUoWjRt8SVMvBZPI3zkOgcRs7Mz3yazd7f7c58HwW5Xg9jdBjNg;");
+              "safesearch_guest=Moderate; "
+                  + "youpro_subscription=true; "
+                  + "you_subscription=free; "
+                  + "stytch_session=; "
+                  + "ydc_stytch_session=; "
+                  + "stytch_session_jwt=; "
+                  + "ydc_stytch_session_jwt=; "
+                  + "eg4=false; "
+                  + "safesearch_9015f218b47611b62bbbaf61125cd2dac629e65c3d6f"
+                  + "47573a2ec0e9b615c691=Moderate; "
+                  + "__cf_bm=aN2b3pQMH8XADeMB7bg9s1bJ_bfXBcCHophfOGRg6g0-1693601599-0-"
+                  + "AWIt5Mr4Y3xQI4mIJ1lSf4+vijWKDobrty8OopDeBxY+NABe0MRFidF3dCUoWjRt8"
+                  + "SVMvBZPI3zkOgcRs7Mz3yazd7f7c58HwW5Xg9jdBjNg;");
       return List.of(
           jsonMapResponse("youChatToken", "Hel"),
           jsonMapResponse("youChatToken", "lo"),

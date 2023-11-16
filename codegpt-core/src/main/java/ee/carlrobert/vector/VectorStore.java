@@ -37,7 +37,10 @@ public class VectorStore {
 
   public void save(List<Item<Object, double[]>> words) {
     var hnswIndex = HnswIndex
-        .newBuilder(words.get(0).vector().length, DistanceFunctions.DOUBLE_COSINE_DISTANCE, words.size())
+        .newBuilder(
+            words.get(0).vector().length,
+            DistanceFunctions.DOUBLE_COSINE_DISTANCE,
+            words.size())
         .build();
     try {
       hnswIndex.addAll(words);

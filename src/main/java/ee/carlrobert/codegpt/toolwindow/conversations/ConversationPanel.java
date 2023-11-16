@@ -59,9 +59,9 @@ class ConversationPanel extends JPanel {
   }
 
   private void addStyles(boolean isSelected) {
-    var border = isSelected ?
-        JBUI.Borders.customLine(JBUI.CurrentTheme.ActionButton.focusedBorder(), 2, 2, 2, 2) :
-        JBUI.Borders.customLine(JBColor.border(), 1, 0, 1, 0);
+    var border = isSelected
+        ? JBUI.Borders.customLine(JBUI.CurrentTheme.ActionButton.focusedBorder(), 2, 2, 2, 2)
+        : JBUI.Borders.customLine(JBColor.border(), 1, 0, 1, 0);
     setBackground(getPanelBackgroundColor());
     setBorder(JBUI.Borders.compound(border, JBUI.Borders.empty(8)));
     setLayout(new GridBagLayout());

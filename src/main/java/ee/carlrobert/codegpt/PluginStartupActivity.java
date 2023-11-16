@@ -8,13 +8,13 @@ import com.intellij.openapi.project.ProjectManagerListener;
 import com.intellij.openapi.startup.StartupActivity;
 import ee.carlrobert.codegpt.actions.editor.EditorActionsUtil;
 import ee.carlrobert.codegpt.completions.you.YouUserManager;
+import ee.carlrobert.codegpt.completions.you.auth.AuthenticationHandler;
+import ee.carlrobert.codegpt.completions.you.auth.SessionVerificationJob;
+import ee.carlrobert.codegpt.completions.you.auth.YouAuthenticationError;
+import ee.carlrobert.codegpt.completions.you.auth.YouAuthenticationService;
+import ee.carlrobert.codegpt.completions.you.auth.response.YouAuthenticationResponse;
 import ee.carlrobert.codegpt.credentials.YouCredentialsManager;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
-import ee.carlrobert.codegpt.completions.you.auth.YouAuthenticationError;
-import ee.carlrobert.codegpt.completions.you.auth.AuthenticationHandler;
-import ee.carlrobert.codegpt.completions.you.auth.YouAuthenticationService;
-import ee.carlrobert.codegpt.completions.you.auth.SessionVerificationJob;
-import ee.carlrobert.codegpt.completions.you.auth.response.YouAuthenticationResponse;
 import ee.carlrobert.codegpt.util.OverlayUtils;
 import org.jetbrains.annotations.NotNull;
 import org.quartz.JobBuilder;
@@ -89,18 +89,24 @@ public class PluginStartupActivity implements StartupActivity {
           .signInAsync(settings.getEmail(), password, new AuthenticationHandler() {
             @Override
             public void handleAuthenticated(YouAuthenticationResponse authenticationResponse) {
-              OverlayUtils.showNotification("Authentication successful.", NotificationType.INFORMATION);
+              OverlayUtils.showNotification(
+                  "Authentication successful.",
+                  NotificationType.INFORMATION);
               startSessionVerificationJob();
             }
 
             @Override
             public void handleGenericError() {
-              OverlayUtils.showNotification("Something went wrong while trying to authenticate.", NotificationType.ERROR);
+              OverlayUtils.showNotification(
+                  "Something went wrong while trying to authenticate.",
+                  NotificationType.ERROR);
             }
 
             @Override
             public void handleError(YouAuthenticationError youAuthenticationError) {
-              OverlayUtils.showNotification(youAuthenticationError.getErrorMessage(), NotificationType.ERROR);
+              OverlayUtils.showNotification(
+                  youAuthenticationError.getErrorMessage(),
+                  NotificationType.ERROR);
             }
           });
     }

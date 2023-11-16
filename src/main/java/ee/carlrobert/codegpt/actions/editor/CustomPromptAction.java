@@ -12,8 +12,8 @@ import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
-import ee.carlrobert.codegpt.util.file.FileUtils;
 import ee.carlrobert.codegpt.util.SwingUtils;
+import ee.carlrobert.codegpt.util.file.FileUtils;
 import javax.swing.JComponent;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
@@ -31,18 +31,22 @@ class CustomPromptAction extends BaseEditorAction {
   @Override
   protected void actionPerformed(Project project, Editor editor, String selectedText) {
     if (selectedText != null && !selectedText.isEmpty()) {
-      var fileExtension = FileUtils.getFileExtension(((EditorImpl) editor).getVirtualFile().getName());
+      var fileExtension =
+          FileUtils.getFileExtension(((EditorImpl) editor).getVirtualFile().getName());
       var dialog = new CustomPromptDialog(previousUserPrompt);
       if (dialog.showAndGet()) {
         previousUserPrompt = dialog.getUserPrompt();
-        var message = new Message(format("%s\n```%s\n%s\n```", previousUserPrompt, fileExtension, selectedText));
+        var message = new Message(
+            format("%s\n```%s\n%s\n```", previousUserPrompt, fileExtension, selectedText));
         message.setUserMessage(previousUserPrompt);
-        SwingUtilities.invokeLater(() -> project.getService(StandardChatToolWindowContentManager.class).sendMessage(message));
+        SwingUtilities.invokeLater(() ->
+            project.getService(StandardChatToolWindowContentManager.class).sendMessage(message));
       }
     }
   }
 
   private static class CustomPromptDialog extends DialogWrapper {
+
     private final JTextArea userPromptTextArea;
 
     public CustomPromptDialog(String previousUserPrompt) {

@@ -57,9 +57,9 @@ public final class LlamaServerAgent implements Disposable {
   }
 
   public boolean isServerRunning() {
-    return startServerProcessHandler != null &&
-        startServerProcessHandler.isStartNotified() &&
-        !startServerProcessHandler.isProcessTerminated();
+    return startServerProcessHandler != null
+        && startServerProcessHandler.isStartNotified()
+        && !startServerProcessHandler.isProcessTerminated();
   }
 
   private ProcessListener getMakeProcessListener(
@@ -117,6 +117,7 @@ public final class LlamaServerAgent implements Disposable {
               onSuccess.run();
             }
           } catch (Exception ignore) {
+            // ignore
           }
         }
       }

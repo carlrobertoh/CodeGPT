@@ -33,11 +33,12 @@ public class ConfigurationConfigurable implements Configurable {
   @Override
   public boolean isModified() {
     var configuration = ConfigurationState.getInstance();
-    return !configurationComponent.getTableData().equals(configuration.getTableData()) ||
-        configurationComponent.getMaxTokens() != configuration.getMaxTokens() ||
-        configurationComponent.getTemperature() != configuration.getTemperature() ||
-        !configurationComponent.getSystemPrompt().equals(configuration.getSystemPrompt()) ||
-        configurationComponent.isCreateNewChatOnEachAction() != configuration.isCreateNewChatOnEachAction();
+    return !configurationComponent.getTableData().equals(configuration.getTableData())
+        || configurationComponent.getMaxTokens() != configuration.getMaxTokens()
+        || configurationComponent.getTemperature() != configuration.getTemperature()
+        || !configurationComponent.getSystemPrompt().equals(configuration.getSystemPrompt())
+        || configurationComponent.isCreateNewChatOnEachAction()
+        != configuration.isCreateNewChatOnEachAction();
   }
 
   @Override
@@ -47,7 +48,8 @@ public class ConfigurationConfigurable implements Configurable {
     configuration.setMaxTokens(configurationComponent.getMaxTokens());
     configuration.setTemperature(configurationComponent.getTemperature());
     configuration.setSystemPrompt(configurationComponent.getSystemPrompt());
-    configuration.setCreateNewChatOnEachAction(configurationComponent.isCreateNewChatOnEachAction());
+    configuration.setCreateNewChatOnEachAction(
+        configurationComponent.isCreateNewChatOnEachAction());
     EditorActionsUtil.refreshActions();
   }
 
@@ -58,7 +60,8 @@ public class ConfigurationConfigurable implements Configurable {
     configurationComponent.setMaxTokens(configuration.getMaxTokens());
     configurationComponent.setTemperature(configuration.getTemperature());
     configurationComponent.setSystemPrompt(configuration.getSystemPrompt());
-    configurationComponent.setCreateNewChatOnEachAction(configuration.isCreateNewChatOnEachAction());
+    configurationComponent.setCreateNewChatOnEachAction(
+        configuration.isCreateNewChatOnEachAction());
     EditorActionsUtil.refreshActions();
   }
 

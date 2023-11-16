@@ -30,10 +30,10 @@ public final class YouApiClient {
         .header("Cache-Control", "no-cache")
         .header("User-Agent", "youide CodeGPT")
         .header("Cookie", (
-                "stytch_session=" + sessionId + "; " +
-                "ydc_stytch_session=" + sessionId + "; " +
-                "stytch_session_jwt=" + sessionJwt + "; " +
-                "ydc_stytch_session_jwt=" + sessionJwt + "; "))
+            "stytch_session=" + sessionId + "; "
+                + "ydc_stytch_session=" + sessionId + "; "
+                + "stytch_session_jwt=" + sessionJwt + "; "
+                + "ydc_stytch_session_jwt=" + sessionJwt + "; "))
         .get()
         .build();
 

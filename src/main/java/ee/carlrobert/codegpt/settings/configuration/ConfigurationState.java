@@ -12,7 +12,9 @@ import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-@State(name = "CodeGPT_ConfigurationSettings_210", storages = @Storage("CodeGPT_ConfigurationSettings_210.xml"))
+@State(
+    name = "CodeGPT_ConfigurationSettings_210",
+    storages = @Storage("CodeGPT_ConfigurationSettings_210.xml"))
 public class ConfigurationState implements PersistentStateComponent<ConfigurationState> {
 
   private String systemPrompt = COMPLETION_SYSTEM_PROMPT;

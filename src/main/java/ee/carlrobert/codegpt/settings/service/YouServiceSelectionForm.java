@@ -158,8 +158,13 @@ public class YouServiceSelectionForm extends JPanel {
         "<html>"
             + "<body>"
             + "<h1 style=\"text-align: center; padding: 0; margin: 0;\">Free GPT-4</h1>"
-            + "<p style=\"text-align: center; margin-top: 8px; margin-bottom: 8px;\">Your coupon code</p>"
-            + "<h1 style=\"text-align: center; border: 2px dotted #646464; padding: 4px 32px; margin: 0 0 12px 0; background-color: #45494a; cursor: pointer;\">CODEGPT</h1>"
+            + "<p style=\"text-align: center; margin-top: 8px; margin-bottom: 8px;\">"
+            + "Your coupon code"
+            + "</p>"
+            + "<h1 style=\"text-align: center; border: 2px dotted #646464; padding: 4px 32px; "
+            + "margin: 0 0 12px 0; background-color: #45494a; cursor: pointer;\">"
+            + "CODEGPT"
+            + "</h1>"
             + "</body>"
             + "</html>")
         .withBorder(JBUI.Borders.emptyLeft(45)) // TODO

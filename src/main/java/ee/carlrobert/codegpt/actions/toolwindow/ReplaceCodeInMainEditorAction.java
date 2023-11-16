@@ -20,8 +20,8 @@ public class ReplaceCodeInMainEditorAction extends AnAction {
   @Override
   public void update(@NotNull AnActionEvent event) {
     event.getPresentation().setEnabled(
-        EditorUtils.isMainEditorTextSelected(requireNonNull(event.getProject())) &&
-            EditorUtils.hasSelection(event.getData(PlatformDataKeys.EDITOR)));
+        EditorUtils.isMainEditorTextSelected(requireNonNull(event.getProject()))
+            && EditorUtils.hasSelection(event.getData(PlatformDataKeys.EDITOR)));
   }
 
   @Override
@@ -29,7 +29,9 @@ public class ReplaceCodeInMainEditorAction extends AnAction {
     var project = event.getProject();
     var toolWindowEditor = event.getData(PlatformDataKeys.EDITOR);
     if (project != null && toolWindowEditor != null) {
-      EditorUtils.replaceMainEditorSelection(project, requireNonNull(toolWindowEditor.getSelectionModel().getSelectedText()));
+      EditorUtils.replaceMainEditorSelection(
+          project,
+          requireNonNull(toolWindowEditor.getSelectionModel().getSelectedText()));
     }
   }
 }
