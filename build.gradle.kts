@@ -50,7 +50,7 @@ dependencies {
   implementation(project(":codegpt-core"))
   implementation(project(":codegpt-telemetry"))
 
-  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.15.3")
+  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.16.0")
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.3")
   implementation("com.vladsch.flexmark:flexmark-all:0.64.8") {
     // vulnerable transitive dependency
