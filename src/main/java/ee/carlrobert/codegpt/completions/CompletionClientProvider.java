@@ -8,7 +8,6 @@ import ee.carlrobert.codegpt.settings.advanced.AdvancedSettingsState;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
-import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.settings.state.YouSettingsState;
 import ee.carlrobert.llm.client.Client;
 import ee.carlrobert.llm.client.ProxyAuthenticator;
@@ -23,23 +22,7 @@ import java.net.Proxy;
 import java.util.concurrent.TimeUnit;
 
 public class CompletionClientProvider {
-
-  public static Object getClient() {
-    var selectedService = SettingsState.getInstance().getSelectedService();
-    switch (selectedService) {
-      case OPENAI:
-        return getOpenAIClient();
-      case AZURE:
-        return getAzureClient();
-      case YOU:
-        return getYouClient();
-      case LLAMA_CPP:
-        return getLlamaClient();
-      default:
-        throw new RuntimeException("Client not implemented for service " + selectedService);
-    }
-  }
-
+  
   public static OpenAIClient getOpenAIClient() {
     return getOpenAIClientBuilder().build();
   }

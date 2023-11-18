@@ -1,7 +1,6 @@
 package ee.carlrobert.codegpt.completions;
 
 import static ee.carlrobert.codegpt.util.file.FileUtils.getResourceContent;
-import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 
 import com.intellij.openapi.application.ApplicationManager;
@@ -73,7 +72,7 @@ public class CompletionRequestProvider {
     this.conversation = conversation;
   }
 
-  public static OpenAICompletionRequest buildOpenAILookupGeneratorCompletionRequest(
+  public static OpenAICompletionRequest buildOpenAILookupCompletionRequest(
       String context) {
     return new OpenAIChatCompletionRequest.Builder(
         List.of(
@@ -85,7 +84,7 @@ public class CompletionRequestProvider {
         .build();
   }
 
-  public static LlamaCompletionRequest buildLlamaLookupGeneratorCompletionRequest(String context) {
+  public static LlamaCompletionRequest buildLlamaLookupCompletionRequest(String context) {
     return new LlamaCompletionRequest.Builder(PromptTemplate.LLAMA
         .buildPrompt(getResourceContent("/prompts/method-name-generator.txt"), context, List.of()))
         .setStream(false)

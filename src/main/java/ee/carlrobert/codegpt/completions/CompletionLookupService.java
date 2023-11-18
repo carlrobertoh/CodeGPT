@@ -39,13 +39,13 @@ public final class CompletionLookupService {
       case AZURE:
         return Optional.ofNullable(CompletionClientProvider.getOpenAIClient()
                 .getChatCompletion(
-                    CompletionRequestProvider.buildOpenAILookupGeneratorCompletionRequest(prompt))
+                    CompletionRequestProvider.buildOpenAILookupCompletionRequest(prompt))
                 .getChoices())
             .map(choices -> choices.get(0).getMessage().getContent())
             .orElse(null);
       // TODO
       /*case LLAMA_CPP:
-        var request = CompletionRequestProvider.buildLlamaLookupGeneratorCompletionRequest(prompt);
+        var request = CompletionRequestProvider.buildLlamaLookupCompletionRequest(prompt);
         return CompletionClientProvider.getLlamaClient()
             .getChatCompletion(request)
             .getContent();*/
@@ -54,7 +54,10 @@ public final class CompletionLookupService {
     }
   }
 
-  private void addNewLookupValues(LookupImpl lookup, Application application, String prompt) {
+  private void addCompletionLookupValues(
+      LookupImpl lookup,
+      Application application,
+      String prompt) {
     Optional.ofNullable(getCompletionResponse(prompt))
         .ifPresent(response -> {
           for (var value : response.split(",")) {
@@ -88,7 +91,7 @@ public final class CompletionLookupService {
                 if ("METHOD".equals(type.toString())) {
                   var selection = context.getText();
                   application.executeOnPooledThread(
-                      () -> addNewLookupValues(lookup, application, selection));
+                      () -> addCompletionLookupValues(lookup, application, selection));
                 }
               }));
     };
