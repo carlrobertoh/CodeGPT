@@ -10,7 +10,6 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.keymap.impl.ui.EditKeymapsDialog;
 import com.intellij.openapi.ui.ComponentValidator;
 import com.intellij.openapi.ui.ValidationInfo;
-import com.intellij.openapi.util.Disposer;
 import com.intellij.ui.AnActionButton;
 import com.intellij.ui.TitledSeparator;
 import com.intellij.ui.ToolbarDecorator;
@@ -26,8 +25,6 @@ import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.actions.editor.EditorActionsUtil;
 import ee.carlrobert.codegpt.util.SwingUtils;
 import java.awt.Dimension;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -45,6 +42,7 @@ public class ConfigurationComponent {
   private final JPanel mainPanel;
   private final JBTable table;
   private final JBCheckBox openNewTabCheckBox;
+  private final JBCheckBox methodNameGenerationCheckBox;
   private final JTextArea systemPromptTextArea;
   private final IntegerField maxTokensField;
   private final JBTextField temperatureField;
@@ -52,7 +50,7 @@ public class ConfigurationComponent {
   public ConfigurationComponent(Disposable parentDisposable, ConfigurationState configuration) {
     table = new JBTable(new DefaultTableModel(
         EditorActionsUtil.toArray(configuration.getTableData()),
-        new String[] {
+        new String[]{
             CodeGPTBundle.get("configurationConfigurable.table.header.actionColumnLabel"),
             CodeGPTBundle.get("configurationConfigurable.table.header.promptColumnLabel")
         }));
@@ -101,12 +99,17 @@ public class ConfigurationComponent {
     systemPromptTextArea.setRows(3);
 
     openNewTabCheckBox = new JBCheckBox(
-        CodeGPTBundle.get("configurationConfigurable.openNewTabCheckBox.label"), false);
+        CodeGPTBundle.get("configurationConfigurable.openNewTabCheckBox.label"),
+        configuration.isCreateNewChatOnEachAction());
+    methodNameGenerationCheckBox = new JBCheckBox(
+        CodeGPTBundle.get("configurationConfigurable.disableMethodNameGeneration.label"),
+        configuration.isMethodNameGenerationEnabled());
 
     mainPanel = FormBuilder.createFormBuilder()
         .addComponent(tablePanel)
         .addVerticalGap(4)
         .addComponent(openNewTabCheckBox)
+        .addComponent(methodNameGenerationCheckBox)
         .addVerticalGap(4)
         .addComponent(new TitledSeparator(
             CodeGPTBundle.get("configurationConfigurable.section.assistant.title")))
@@ -133,7 +136,7 @@ public class ConfigurationComponent {
   private JPanel createTablePanel() {
     return ToolbarDecorator.createDecorator(table)
         .setPreferredSize(new Dimension(table.getPreferredSize().width, 140))
-        .setAddAction(anActionButton -> getModel().addRow(new Object[] {"", ""}))
+        .setAddAction(anActionButton -> getModel().addRow(new Object[]{"", ""}))
         .setRemoveAction(anActionButton -> getModel().removeRow(table.getSelectedRow()))
         .disableUpAction()
         .disableDownAction()
@@ -221,7 +224,7 @@ public class ConfigurationComponent {
   public void setTableData(Map<String, String> tableData) {
     var model = getModel();
     model.setNumRows(0);
-    tableData.forEach((action, prompt) -> model.addRow(new Object[] {action, prompt}));
+    tableData.forEach((action, prompt) -> model.addRow(new Object[]{action, prompt}));
   }
 
   public void setSystemPrompt(String systemPrompt) {
@@ -254,6 +257,14 @@ public class ConfigurationComponent {
 
   public void setCreateNewChatOnEachAction(boolean createNewChatOnEachAction) {
     openNewTabCheckBox.setSelected(createNewChatOnEachAction);
+  }
+
+  public boolean isMethodNameGenerationEnabled() {
+    return methodNameGenerationCheckBox.isSelected();
+  }
+
+  public void setDisableMethodNameGeneration(boolean disableMethodNameGeneration) {
+    methodNameGenerationCheckBox.setSelected(disableMethodNameGeneration);
   }
 
   class RevertToDefaultsActionButton extends AnActionButton {
