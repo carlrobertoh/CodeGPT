@@ -55,9 +55,9 @@ public class CompletionClientProvider {
   }
 
   public static LlamaClient getLlamaClient() {
-    return new LlamaClient.Builder()
-        .setPort(LlamaSettingsState.getInstance().getServerPort())
-        .build();
+    var builder = new LlamaClient.Builder()
+        .setPort(LlamaSettingsState.getInstance().getServerPort());
+    return (LlamaClient) addDefaultClientParams(builder).build();
   }
 
   private static OpenAIClient.Builder getOpenAIClientBuilder() {
