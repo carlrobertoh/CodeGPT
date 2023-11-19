@@ -22,6 +22,7 @@ public class ConfigurationState implements PersistentStateComponent<Configuratio
   private double temperature = 0.2;
   private boolean createNewChatOnEachAction;
   private boolean ignoreGitCommitTokenLimit;
+  private boolean methodNameGenerationEnabled = true;
   private Map<String, String> tableData = EditorActionsUtil.DEFAULT_ACTIONS;
 
   public static ConfigurationState getInstance() {
@@ -85,5 +86,13 @@ public class ConfigurationState implements PersistentStateComponent<Configuratio
 
   public void setIgnoreGitCommitTokenLimit(boolean ignoreGitCommitTokenLimit) {
     this.ignoreGitCommitTokenLimit = ignoreGitCommitTokenLimit;
+  }
+
+  public boolean isMethodNameGenerationEnabled() {
+    return methodNameGenerationEnabled;
+  }
+
+  public void setMethodNameGenerationEnabled(boolean methodNameGenerationEnabled) {
+    this.methodNameGenerationEnabled = methodNameGenerationEnabled;
   }
 }

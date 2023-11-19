@@ -1,0 +1,2 @@
+Given an existing function or method body, generate five alternative names for the function.
+The response must be a comma-separated list of names. Exclude any additional information.

@@ -7,6 +7,7 @@ import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.project.ProjectManagerListener;
 import com.intellij.openapi.startup.StartupActivity;
 import ee.carlrobert.codegpt.actions.editor.EditorActionsUtil;
+import ee.carlrobert.codegpt.completions.CompletionLookupService;
 import ee.carlrobert.codegpt.completions.you.YouUserManager;
 import ee.carlrobert.codegpt.completions.you.auth.AuthenticationHandler;
 import ee.carlrobert.codegpt.completions.you.auth.SessionVerificationJob;
@@ -31,6 +32,7 @@ public class PluginStartupActivity implements StartupActivity {
 
   @Override
   public void runActivity(@NotNull Project project) {
+    project.getService(CompletionLookupService.class).subscribeToLookupTopic();
     EditorActionsUtil.refreshActions();
 
     var authenticationResponse = YouUserManager.getInstance().getAuthenticationResponse();

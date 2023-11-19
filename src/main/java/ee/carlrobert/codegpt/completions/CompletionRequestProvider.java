@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.completions;
 
+import static ee.carlrobert.codegpt.util.file.FileUtils.getResourceContent;
 import static java.util.stream.Collectors.toList;
 
 import com.intellij.openapi.application.ApplicationManager;
@@ -7,18 +8,21 @@ import com.intellij.openapi.diagnostic.Logger;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
+import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
+import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.settings.state.YouSettingsState;
 import ee.carlrobert.codegpt.telemetry.core.configuration.TelemetryConfiguration;
 import ee.carlrobert.codegpt.telemetry.core.service.UserId;
 import ee.carlrobert.embedding.EmbeddingsService;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
+import ee.carlrobert.llm.client.openai.completion.OpenAICompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionModel;
 import ee.carlrobert.llm.client.openai.completion.chat.request.OpenAIChatCompletionMessage;
 import ee.carlrobert.llm.client.openai.completion.chat.request.OpenAIChatCompletionRequest;
@@ -66,6 +70,25 @@ public class CompletionRequestProvider {
         CompletionClientProvider.getOpenAIClient(),
         CodeGPTPlugin.getPluginBasePath());
     this.conversation = conversation;
+  }
+
+  public static OpenAICompletionRequest buildOpenAILookupCompletionRequest(
+      String context) {
+    return new OpenAIChatCompletionRequest.Builder(
+        List.of(
+            new OpenAIChatCompletionMessage("system",
+                getResourceContent("/prompts/method-name-generator.txt")),
+            new OpenAIChatCompletionMessage("user", context)))
+        .setModel(OpenAISettingsState.getInstance().getModel())
+        .setStream(false)
+        .build();
+  }
+
+  public static LlamaCompletionRequest buildLlamaLookupCompletionRequest(String context) {
+    return new LlamaCompletionRequest.Builder(PromptTemplate.LLAMA
+        .buildPrompt(getResourceContent("/prompts/method-name-generator.txt"), context, List.of()))
+        .setStream(false)
+        .build();
   }
 
   public LlamaCompletionRequest buildLlamaCompletionRequest(Message message) {

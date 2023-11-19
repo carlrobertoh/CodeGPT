@@ -38,7 +38,9 @@ public class ConfigurationConfigurable implements Configurable {
         || configurationComponent.getTemperature() != configuration.getTemperature()
         || !configurationComponent.getSystemPrompt().equals(configuration.getSystemPrompt())
         || configurationComponent.isCreateNewChatOnEachAction()
-        != configuration.isCreateNewChatOnEachAction();
+        != configuration.isCreateNewChatOnEachAction()
+        || configurationComponent.isMethodNameGenerationEnabled()
+        != configuration.isMethodNameGenerationEnabled();
   }
 
   @Override
@@ -50,6 +52,8 @@ public class ConfigurationConfigurable implements Configurable {
     configuration.setSystemPrompt(configurationComponent.getSystemPrompt());
     configuration.setCreateNewChatOnEachAction(
         configurationComponent.isCreateNewChatOnEachAction());
+    configuration.setMethodNameGenerationEnabled(
+        configurationComponent.isMethodNameGenerationEnabled());
     EditorActionsUtil.refreshActions();
   }
 
@@ -62,6 +66,8 @@ public class ConfigurationConfigurable implements Configurable {
     configurationComponent.setSystemPrompt(configuration.getSystemPrompt());
     configurationComponent.setCreateNewChatOnEachAction(
         configuration.isCreateNewChatOnEachAction());
+    configurationComponent.setDisableMethodNameGeneration(
+        configuration.isMethodNameGenerationEnabled());
     EditorActionsUtil.refreshActions();
   }
 
