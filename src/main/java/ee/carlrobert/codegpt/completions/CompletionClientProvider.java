@@ -22,7 +22,7 @@ import java.net.Proxy;
 import java.util.concurrent.TimeUnit;
 
 public class CompletionClientProvider {
-  
+
   public static OpenAIClient getOpenAIClient() {
     return getOpenAIClientBuilder().build();
   }
