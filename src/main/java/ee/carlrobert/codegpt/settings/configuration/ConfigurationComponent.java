@@ -102,7 +102,7 @@ public class ConfigurationComponent {
         CodeGPTBundle.get("configurationConfigurable.openNewTabCheckBox.label"),
         configuration.isCreateNewChatOnEachAction());
     methodNameGenerationCheckBox = new JBCheckBox(
-        CodeGPTBundle.get("configurationConfigurable.disableMethodNameGeneration.label"),
+        CodeGPTBundle.get("configurationConfigurable.enableMethodNameGeneration.label"),
         configuration.isMethodNameGenerationEnabled());
 
     mainPanel = FormBuilder.createFormBuilder()
