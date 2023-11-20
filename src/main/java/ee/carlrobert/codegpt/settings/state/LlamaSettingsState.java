@@ -21,6 +21,8 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
   private Integer serverPort = getRandomAvailablePortOrDefault();
   private int contextSize = 2048;
 
+  private int threads = 8;
+
   public LlamaSettingsState() {
   }
 
@@ -84,6 +86,14 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
 
   public void setContextSize(int contextSize) {
     this.contextSize = contextSize;
+  }
+
+  public int getThreads() {
+    return threads;
+  }
+
+  public void setThreads(int threads) {
+    this.threads = threads;
   }
 
   private static Integer getRandomAvailablePortOrDefault() {

@@ -412,4 +412,12 @@ public class ServiceSelectionForm {
   public void setContextSize(int contextSize) {
     llamaServiceSectionPanel.setContextSize(contextSize);
   }
+
+  public int getThreads() {
+    return llamaServiceSectionPanel.getThreads();
+  }
+
+  public void setThreads(int threads) {
+    llamaServiceSectionPanel.setThreads(threads);
+  }
 }
