@@ -29,6 +29,7 @@ public class LlamaServiceSelectionForm extends JPanel {
   private final LlamaModelPreferencesForm llamaModelPreferencesForm;
   private final PortField portField;
   private final IntegerField maxTokensField;
+  private final IntegerField threadsField;
 
   public LlamaServiceSelectionForm() {
     var llamaServerAgent =
@@ -44,12 +45,20 @@ public class LlamaServiceSelectionForm extends JPanel {
     maxTokensField.setValue(2048);
     maxTokensField.setEnabled(!serverRunning);
 
+    threadsField = new IntegerField("threads", 1, 256);
+    threadsField.setColumns(12);
+    threadsField.setValue(8);
+    threadsField.setEnabled(!serverRunning);
+
     var serverProgressPanel = new ServerProgressPanel();
     var serverButton = getServerButton(serverRunning, llamaServerAgent, serverProgressPanel);
     var contextSizeHelpText = ComponentPanelBuilder.createCommentComponent(
         CodeGPTBundle.get("settingsConfigurable.service.llama.contextSize.comment"),
         true);
     contextSizeHelpText.setBorder(JBUI.Borders.empty(0, 4));
+    var threadsHelpText = ComponentPanelBuilder.createCommentComponent(
+            CodeGPTBundle.get("settingsConfigurable.service.llama.threads.comment"),
+            true);
 
     setLayout(new BorderLayout());
     add(FormBuilder.createFormBuilder()
@@ -63,6 +72,10 @@ public class LlamaServiceSelectionForm extends JPanel {
                 CodeGPTBundle.get("settingsConfigurable.service.llama.contextSize.label"),
                 maxTokensField)
             .addComponentToRightColumn(contextSizeHelpText)
+            .addLabeledComponent(
+                CodeGPTBundle.get("settingsConfigurable.service.llama.threads.label"),
+                threadsField)
+            .addComponentToRightColumn(threadsHelpText)
             .addLabeledComponent(
                 CodeGPTBundle.get("settingsConfigurable.service.llama.port.label"),
                 JBUI.Panels.simplePanel()
@@ -98,6 +111,14 @@ public class LlamaServiceSelectionForm extends JPanel {
 
   public void setContextSize(int contextSize) {
     maxTokensField.setValue(contextSize);
+  }
+
+  public void setThreads(int threads) {
+    threadsField.setValue(threads);
+  }
+
+  public int getThreads() {
+    return threadsField.getValue();
   }
 
   private JButton getServerButton(boolean serverRunning, LlamaServerAgent llamaServerAgent,
@@ -153,6 +174,7 @@ public class LlamaServiceSelectionForm extends JPanel {
         llamaServerAgent.startAgent(
             modelPath,
             maxTokensField.getValue(),
+            threadsField.getValue(),
             portField.getNumber(),
             serverProgressPanel,
             () -> {
@@ -174,5 +196,6 @@ public class LlamaServiceSelectionForm extends JPanel {
     llamaModelPreferencesForm.enableFields(enabled);
     portField.setEnabled(enabled);
     maxTokensField.setEnabled(enabled);
+    threadsField.setEnabled(enabled);
   }
 }

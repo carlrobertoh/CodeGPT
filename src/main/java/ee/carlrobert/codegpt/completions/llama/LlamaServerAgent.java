@@ -34,6 +34,7 @@ public final class LlamaServerAgent implements Disposable {
   public void startAgent(
       String modelPath,
       int contextLength,
+      int threads,
       int port,
       ServerProgressPanel serverProgressPanel,
       Runnable onSuccess) {
@@ -42,7 +43,7 @@ public final class LlamaServerAgent implements Disposable {
         serverProgressPanel.updateText("Building llama.cpp...");
         makeProcessHandler = new OSProcessHandler(getMakeCommandLinde());
         makeProcessHandler.addProcessListener(
-            getMakeProcessListener(modelPath, contextLength, port, serverProgressPanel, onSuccess));
+            getMakeProcessListener(modelPath, contextLength, threads, port, serverProgressPanel, onSuccess));
         makeProcessHandler.startNotify();
       } catch (ExecutionException e) {
         throw new RuntimeException(e);
@@ -65,6 +66,7 @@ public final class LlamaServerAgent implements Disposable {
   private ProcessListener getMakeProcessListener(
       String modelPath,
       int contextLength,
+      int threads,
       int port,
       ServerProgressPanel serverProgressPanel,
       Runnable onSuccess) {
@@ -79,7 +81,7 @@ public final class LlamaServerAgent implements Disposable {
         try {
           serverProgressPanel.updateText("Booting up server...");
           startServerProcessHandler = new OSProcessHandler(
-              getServerCommandLine(modelPath, contextLength, port));
+              getServerCommandLine(modelPath, contextLength, threads, port));
           startServerProcessHandler.addProcessListener(
               getProcessListener(port, serverProgressPanel, onSuccess));
           startServerProcessHandler.startNotify();
@@ -133,14 +135,15 @@ public final class LlamaServerAgent implements Disposable {
     return commandLine;
   }
 
-  private GeneralCommandLine getServerCommandLine(String modelPath, int contextLength, int port) {
+  private GeneralCommandLine getServerCommandLine(String modelPath, int contextLength, int threads, int port) {
     GeneralCommandLine commandLine = new GeneralCommandLine().withCharset(StandardCharsets.UTF_8);
     commandLine.setExePath("./server");
     commandLine.withWorkDirectory(CodeGPTPlugin.getLlamaSourcePath());
     commandLine.addParameters(
         "-m", modelPath,
         "-c", String.valueOf(contextLength),
-        "--port", String.valueOf(port));
+        "--port", String.valueOf(port),
+        "-t", String.valueOf(threads));
     commandLine.setRedirectErrorStream(false);
     return commandLine;
   }
