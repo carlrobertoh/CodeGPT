@@ -33,7 +33,7 @@ public class EditorActionsUtil {
   public static String[][] toArray(Map<String, String> actionsMap) {
     return actionsMap.entrySet()
         .stream()
-        .map((entry) -> new String[] {entry.getKey(), entry.getValue()})
+        .map((entry) -> new String[]{entry.getKey(), entry.getValue()})
         .collect(toList())
         .toArray(new String[0][0]);
   }
@@ -66,10 +66,6 @@ public class EditorActionsUtil {
             var toolWindow = toolWindowContentManager.getToolWindow();
             if (toolWindow != null) {
               toolWindow.show();
-
-              if (ConfigurationState.getInstance().isCreateNewChatOnEachAction()) {
-                toolWindowContentManager.createNewTabPanel();
-              }
             }
             toolWindowContentManager.sendMessage(message);
           }
