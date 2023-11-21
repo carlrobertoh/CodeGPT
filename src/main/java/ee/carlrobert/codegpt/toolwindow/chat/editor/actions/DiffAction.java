@@ -17,9 +17,9 @@ import com.intellij.openapi.util.Pair;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.actions.ActionType;
 import ee.carlrobert.codegpt.actions.TrackableAction;
-import ee.carlrobert.codegpt.util.EditorUtils;
-import ee.carlrobert.codegpt.util.OverlayUtils;
-import ee.carlrobert.codegpt.util.file.FileUtils;
+import ee.carlrobert.codegpt.util.EditorUtil;
+import ee.carlrobert.codegpt.util.OverlayUtil;
+import ee.carlrobert.codegpt.util.file.FileUtil;
 import org.jetbrains.annotations.NotNull;
 
 public class DiffAction extends TrackableAction {
@@ -37,16 +37,16 @@ public class DiffAction extends TrackableAction {
   public void handleAction(@NotNull AnActionEvent event) {
     var project = requireNonNull(event.getProject());
     var selectedTextEditor = FileEditorManager.getInstance(project).getSelectedTextEditor();
-    if (!EditorUtils.hasSelection(selectedTextEditor)) {
-      OverlayUtils.showSelectedEditorSelectionWarning(event);
+    if (!EditorUtil.hasSelection(selectedTextEditor)) {
+      OverlayUtil.showSelectedEditorSelectionWarning(event);
       return;
     }
 
-    var resultEditorFile = FileUtils.getEditorFile(selectedTextEditor);
+    var resultEditorFile = FileUtil.getEditorFile(selectedTextEditor);
     var diffContentFactory = DiffContentFactory.getInstance();
     var request = new SimpleDiffRequest(
         CodeGPTBundle.get("editor.diff.title"),
-        diffContentFactory.create(project, FileUtils.getEditorFile(editor)),
+        diffContentFactory.create(project, FileUtil.getEditorFile(editor)),
         diffContentFactory.create(project, resultEditorFile),
         CodeGPTBundle.get("editor.diff.local.content.title"),
         resultEditorFile.getName());

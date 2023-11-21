@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Test;
 
-public class MarkdownUtilsTest {
+public class MarkdownUtilTest {
 
   @Test
   public void shouldExtractMarkdownCodeBlocks() {
@@ -29,7 +29,7 @@ public class MarkdownUtilsTest {
         + "1. We define a **public class** called **Main**.\n"
         + "2. We define the **main** method which is the entry point of the program.\n";
 
-    var result = MarkdownUtils.splitCodeBlocks(testInput);
+    var result = MarkdownUtil.splitCodeBlocks(testInput);
 
     assertThat(result).containsExactly(
         "**C++ Code Block**\n",
@@ -61,7 +61,7 @@ public class MarkdownUtilsTest {
         + "2. We define the main function.\n"
         + "\n";
 
-    var result = MarkdownUtils.splitCodeBlocks(testInput);
+    var result = MarkdownUtil.splitCodeBlocks(testInput);
 
     assertThat(result).containsExactly(
         "**C++ Code Block**\n"
@@ -86,7 +86,7 @@ public class MarkdownUtilsTest {
         + "}\n"
         + "```\n";
 
-    var result = MarkdownUtils.splitCodeBlocks(testInput);
+    var result = MarkdownUtil.splitCodeBlocks(testInput);
 
     assertThat(result).containsExactly(
         "```cpp\n"

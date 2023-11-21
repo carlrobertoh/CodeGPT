@@ -1,6 +1,6 @@
 package ee.carlrobert.codegpt.toolwindow.chat.editor;
 
-import static ee.carlrobert.codegpt.util.file.FileUtils.findLanguageExtensionMapping;
+import static ee.carlrobert.codegpt.util.file.FileUtil.findLanguageExtensionMapping;
 import static java.lang.String.format;
 
 import com.intellij.icons.AllIcons.General;
@@ -28,7 +28,7 @@ import ee.carlrobert.codegpt.toolwindow.chat.editor.actions.DiffAction;
 import ee.carlrobert.codegpt.toolwindow.chat.editor.actions.EditAction;
 import ee.carlrobert.codegpt.toolwindow.chat.editor.actions.NewFileAction;
 import ee.carlrobert.codegpt.toolwindow.chat.editor.actions.ReplaceSelectionAction;
-import ee.carlrobert.codegpt.util.EditorUtils;
+import ee.carlrobert.codegpt.util.EditorUtil;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
@@ -53,7 +53,7 @@ public class ResponseEditor extends JPanel implements Disposable {
     var extensionMapping = findLanguageExtensionMapping(markdownLanguage);
     language = extensionMapping.getKey();
     extension = extensionMapping.getValue();
-    editor = EditorUtils.createEditor(project, extension, code);
+    editor = EditorUtil.createEditor(project, extension, code);
 
     DefaultActionGroup group = new DefaultActionGroup();
     group.add(new ReplaceCodeInMainEditorAction());

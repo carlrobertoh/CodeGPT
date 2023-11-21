@@ -6,7 +6,7 @@ import com.intellij.openapi.editor.Editor;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.actions.ActionType;
 import ee.carlrobert.codegpt.actions.TrackableAction;
-import ee.carlrobert.codegpt.util.OverlayUtils;
+import ee.carlrobert.codegpt.util.OverlayUtil;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -33,7 +33,7 @@ public class CopyAction extends TrackableAction {
     var locationOnScreen = ((MouseEvent) event.getInputEvent()).getLocationOnScreen();
     locationOnScreen.y = locationOnScreen.y - 16;
 
-    OverlayUtils.showInfoBalloon(
+    OverlayUtil.showInfoBalloon(
         CodeGPTBundle.get("toolwindow.chat.editor.action.copy.success"),
         locationOnScreen);
   }

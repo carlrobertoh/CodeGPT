@@ -8,7 +8,7 @@ import ee.carlrobert.codegpt.actions.ActionType;
 import ee.carlrobert.codegpt.actions.editor.EditorActionsUtil;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
-import ee.carlrobert.codegpt.util.OverlayUtils;
+import ee.carlrobert.codegpt.util.OverlayUtil;
 import org.jetbrains.annotations.NotNull;
 
 public class DeleteConversationAction extends AnAction {
@@ -28,7 +28,7 @@ public class DeleteConversationAction extends AnAction {
 
   @Override
   public void actionPerformed(@NotNull AnActionEvent event) {
-    if (OverlayUtils.showDeleteConversationDialog() == Messages.YES) {
+    if (OverlayUtil.showDeleteConversationDialog() == Messages.YES) {
       var project = event.getProject();
       if (project != null) {
         TelemetryAction.IDE_ACTION.createActionMessage()

@@ -1,9 +1,8 @@
 package ee.carlrobert.codegpt.toolwindow.chat.components;
 
-import static ee.carlrobert.codegpt.util.ThemeUtils.getPanelBackgroundColor;
+import static ee.carlrobert.codegpt.util.UIUtil.getPanelBackgroundColor;
 
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.project.Project;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.util.messages.MessageBusConnection;
 import com.intellij.util.ui.JBUI;
@@ -12,16 +11,12 @@ import ee.carlrobert.codegpt.completions.you.YouSubscriptionNotifier;
 import ee.carlrobert.codegpt.completions.you.auth.SignedOutNotifier;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.toolwindow.ModelIconLabel;
-import ee.carlrobert.codegpt.toolwindow.chat.YouModelChangeNotifier;
 import java.awt.BorderLayout;
 import javax.swing.JPanel;
 
 public class UserPromptTextAreaHeader extends JPanel {
 
-  public UserPromptTextAreaHeader(
-      Project project,
-      SettingsState settings,
-      TotalTokensPanel totalTokensPanel) {
+  public UserPromptTextAreaHeader(SettingsState settings, TotalTokensPanel totalTokensPanel) {
     super(new BorderLayout());
     setBackground(getPanelBackgroundColor());
     setBorder(JBUI.Borders.emptyBottom(8));
@@ -31,8 +26,8 @@ public class UserPromptTextAreaHeader extends JPanel {
         add(totalTokensPanel, BorderLayout.LINE_START);
         break;
       case YOU:
-        JBCheckBox gpt4CheckBox = new YouProCheckbox(project);
-        subscribeToYouTopics(project, gpt4CheckBox);
+        JBCheckBox gpt4CheckBox = new YouProCheckbox();
+        subscribeToYouTopics(gpt4CheckBox);
         add(gpt4CheckBox, BorderLayout.LINE_START);
         break;
       default:
@@ -45,19 +40,10 @@ public class UserPromptTextAreaHeader extends JPanel {
         .withBackground(getPanelBackgroundColor()), BorderLayout.LINE_END);
   }
 
-  private void subscribeToYouTopics(Project project, JBCheckBox gpt4CheckBox) {
+  private void subscribeToYouTopics(JBCheckBox gpt4CheckBox) {
     var messageBusConnection = ApplicationManager.getApplication().getMessageBus().connect();
-    subscribeToYouModelChangeTopic(project, gpt4CheckBox);
     subscribeToYouSubscriptionTopic(messageBusConnection, gpt4CheckBox);
     subscribeToSignedOutTopic(messageBusConnection, gpt4CheckBox);
-  }
-
-  private void subscribeToYouModelChangeTopic(Project project, JBCheckBox gpt4CheckBox) {
-    project.getMessageBus()
-        .connect()
-        .subscribe(
-            YouModelChangeNotifier.YOU_MODEL_CHANGE_NOTIFIER_TOPIC,
-            (YouModelChangeNotifier) gpt4CheckBox::setSelected);
   }
 
   private void subscribeToSignedOutTopic(

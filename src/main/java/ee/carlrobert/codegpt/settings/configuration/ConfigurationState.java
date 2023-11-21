@@ -88,7 +88,7 @@ public class ConfigurationState implements PersistentStateComponent<Configuratio
     this.ignoreGitCommitTokenLimit = ignoreGitCommitTokenLimit;
   }
 
-  public boolean isMethodNameGenerationEnabled() {
+  public boolean isMethodRefactoringEnabled() {
     return methodNameGenerationEnabled;
   }
 

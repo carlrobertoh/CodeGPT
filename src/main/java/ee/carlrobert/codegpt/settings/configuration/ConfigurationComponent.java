@@ -23,7 +23,7 @@ import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.actions.editor.EditorActionsUtil;
-import ee.carlrobert.codegpt.util.SwingUtils;
+import ee.carlrobert.codegpt.util.UIUtil;
 import java.awt.Dimension;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -103,7 +103,7 @@ public class ConfigurationComponent {
         configuration.isCreateNewChatOnEachAction());
     methodNameGenerationCheckBox = new JBCheckBox(
         CodeGPTBundle.get("configurationConfigurable.enableMethodNameGeneration.label"),
-        configuration.isMethodNameGenerationEnabled());
+        configuration.isMethodRefactoringEnabled());
 
     mainPanel = FormBuilder.createFormBuilder()
         .addComponent(tablePanel)
@@ -157,7 +157,7 @@ public class ConfigurationComponent {
         UI.PanelFactory.panel(component)
             .resizeX(false)
             .withComment(CodeGPTBundle.get(commentKey))
-            .withCommentHyperlinkListener(SwingUtils::handleHyperlinkClicked)
+            .withCommentHyperlinkListener(UIUtil::handleHyperlinkClicked)
             .createPanel(),
         true
     );

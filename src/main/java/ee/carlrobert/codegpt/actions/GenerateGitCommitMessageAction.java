@@ -2,7 +2,7 @@ package ee.carlrobert.codegpt.actions;
 
 import static com.intellij.openapi.ui.Messages.OK;
 import static com.intellij.util.ObjectUtils.tryCast;
-import static ee.carlrobert.codegpt.util.file.FileUtils.getResourceContent;
+import static ee.carlrobert.codegpt.util.file.FileUtil.getResourceContent;
 import static java.util.stream.Collectors.joining;
 
 import com.intellij.notification.Notification;
@@ -24,7 +24,7 @@ import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.completions.CompletionClientProvider;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
-import ee.carlrobert.codegpt.util.OverlayUtils;
+import ee.carlrobert.codegpt.util.OverlayUtil;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.client.openai.completion.chat.request.OpenAIChatCompletionMessage;
 import ee.carlrobert.llm.client.openai.completion.chat.request.OpenAIChatCompletionRequest;
@@ -66,7 +66,7 @@ public class GenerateGitCommitMessageAction extends AnAction {
 
     var gitDiff = getGitDiff(project);
     var tokenCount = encodingManager.countTokens(gitDiff);
-    if (tokenCount > 4096 && OverlayUtils.showTokenSoftLimitWarningDialog(tokenCount) != OK) {
+    if (tokenCount > 4096 && OverlayUtil.showTokenSoftLimitWarningDialog(tokenCount) != OK) {
       return;
     }
 

@@ -8,7 +8,7 @@ import com.intellij.openapi.wm.IdeFocusManager;
 import com.intellij.openapi.wm.IdeFrame;
 import org.jetbrains.annotations.Nullable;
 
-public class ApplicationUtils {
+public class ApplicationUtil {
 
   public static boolean isUnitTestingMode() {
     Application app = ApplicationManager.getApplication();

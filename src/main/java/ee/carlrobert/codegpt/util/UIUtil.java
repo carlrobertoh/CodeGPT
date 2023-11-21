@@ -1,14 +1,17 @@
 package ee.carlrobert.codegpt.util;
 
+import static com.intellij.util.ui.UIUtil.isUnderDarcula;
 import static javax.swing.event.HyperlinkEvent.EventType.ACTIVATED;
 
 import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
+import com.intellij.ui.ColorUtil;
+import com.intellij.ui.JBColor;
 import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.toolwindow.chat.components.SmartScroller;
+import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
 import java.net.URISyntaxException;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -25,10 +28,10 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
-public class SwingUtils {
+public class UIUtil {
 
   public static JTextPane createTextPane(String text) {
-    return createTextPane(text, SwingUtils::handleHyperlinkClicked);
+    return createTextPane(text, UIUtil::handleHyperlinkClicked);
   }
 
   public static JTextPane createTextPane(String text, HyperlinkListener listener) {
@@ -72,25 +75,26 @@ public class SwingUtils {
   }
 
   public static void handleHyperlinkClicked(HyperlinkEvent event) {
-    if (ACTIVATED.equals(event.getEventType()) && event.getURL() != null) {
+    var url = event.getURL();
+    if (ACTIVATED.equals(event.getEventType()) && url != null) {
       try {
-        BrowserUtil.browse(event.getURL().toURI());
+        BrowserUtil.browse(url.toURI());
       } catch (URISyntaxException e) {
         throw new RuntimeException(e);
       }
     }
   }
 
-  public static void addShiftEnterInputMap(JTextArea textArea, Runnable onSubmit) {
-    var enterStroke = KeyStroke.getKeyStroke("ENTER");
-    var shiftEnterStroke = KeyStroke.getKeyStroke("shift ENTER");
-    textArea.getInputMap().put(shiftEnterStroke, "insert-break");
-    textArea.getInputMap().put(enterStroke, "text-submit");
-    textArea.getActionMap().put("text-submit", new AbstractAction() {
-      public void actionPerformed(ActionEvent e) {
-        onSubmit.run();
-      }
-    });
+  public static void addShiftEnterInputMap(JTextArea textArea, AbstractAction onSubmit) {
+    textArea.getInputMap().put(KeyStroke.getKeyStroke("shift ENTER"), "insert-break");
+    textArea.getInputMap().put(KeyStroke.getKeyStroke("ENTER"), "text-submit");
+    textArea.getActionMap().put("text-submit", onSubmit);
+  }
+
+  public static Color getPanelBackgroundColor() {
+    return isUnderDarcula()
+        ? ColorUtil.darker(JBColor.PanelBackground, 1)
+        : JBColor.PanelBackground.brighter();
   }
 }
 

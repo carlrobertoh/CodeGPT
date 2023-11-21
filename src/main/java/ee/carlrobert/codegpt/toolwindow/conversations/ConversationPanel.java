@@ -1,6 +1,6 @@
 package ee.carlrobert.codegpt.toolwindow.conversations;
 
-import static ee.carlrobert.codegpt.util.ThemeUtils.getPanelBackgroundColor;
+import static ee.carlrobert.codegpt.util.UIUtil.getPanelBackgroundColor;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;

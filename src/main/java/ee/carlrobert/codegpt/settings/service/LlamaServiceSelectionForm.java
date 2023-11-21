@@ -16,7 +16,7 @@ import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.completions.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaServerAgent;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
-import ee.carlrobert.codegpt.util.OverlayUtils;
+import ee.carlrobert.codegpt.util.OverlayUtil;
 import java.awt.BorderLayout;
 import java.io.File;
 import javax.swing.JButton;
@@ -51,14 +51,14 @@ public class LlamaServiceSelectionForm extends JPanel {
     threadsField.setEnabled(!serverRunning);
 
     var serverProgressPanel = new ServerProgressPanel();
-    var serverButton = getServerButton(serverRunning, llamaServerAgent, serverProgressPanel);
+    var serverButton = getServerButton(llamaServerAgent, serverProgressPanel);
     var contextSizeHelpText = ComponentPanelBuilder.createCommentComponent(
         CodeGPTBundle.get("settingsConfigurable.service.llama.contextSize.comment"),
         true);
     contextSizeHelpText.setBorder(JBUI.Borders.empty(0, 4));
     var threadsHelpText = ComponentPanelBuilder.createCommentComponent(
-            CodeGPTBundle.get("settingsConfigurable.service.llama.threads.comment"),
-            true);
+        CodeGPTBundle.get("settingsConfigurable.service.llama.threads.comment"),
+        true);
 
     setLayout(new BorderLayout());
     add(FormBuilder.createFormBuilder()
@@ -121,70 +121,81 @@ public class LlamaServiceSelectionForm extends JPanel {
     return threadsField.getValue();
   }
 
-  private JButton getServerButton(boolean serverRunning, LlamaServerAgent llamaServerAgent,
+  private JButton getServerButton(
+      LlamaServerAgent llamaServerAgent,
       ServerProgressPanel serverProgressPanel) {
+    var serverRunning = llamaServerAgent.isServerRunning();
     var serverButton = new JButton();
     serverButton.setText(serverRunning
         ? CodeGPTBundle.get("settingsConfigurable.service.llama.stopServer.label")
         : CodeGPTBundle.get("settingsConfigurable.service.llama.startServer.label"));
     serverButton.setIcon(serverRunning ? Actions.Suspend : Actions.Execute);
     serverButton.addActionListener(event -> {
-      if (llamaModelPreferencesForm.isUseCustomLlamaModel()) {
-        var customModelPath = llamaModelPreferencesForm.getCustomLlamaModelPath();
-        if (customModelPath == null || customModelPath.isEmpty()) {
-          OverlayUtils.showBalloon(
-              CodeGPTBundle.get("validation.error.fieldRequired"),
-              MessageType.ERROR,
-              llamaModelPreferencesForm.getCustomModelPathBrowserButton());
-          return;
-        }
-      } else {
-        if (!isModelExists(llamaModelPreferencesForm.getSelectedModel())) {
-          OverlayUtils.showBalloon(
-              CodeGPTBundle.get(
-                  "settingsConfigurable.service.llama.overlay.modelNotDownloaded.text"),
-              MessageType.ERROR,
-              llamaModelPreferencesForm.getHuggingFaceModelComboBox());
-          return;
-        }
+      if (!validateModelConfiguration()) {
+        return;
       }
 
       if (llamaServerAgent.isServerRunning()) {
-        setFormEnabled(true);
-        serverButton.setText(
-            CodeGPTBundle.get("settingsConfigurable.service.llama.startServer.label"));
-        serverButton.setIcon(Actions.Execute);
-        serverProgressPanel.updateText(
-            CodeGPTBundle.get("settingsConfigurable.service.llama.progress.stoppingServer"));
+        enableForm(serverButton, serverProgressPanel);
         llamaServerAgent.stopAgent();
       } else {
-        setFormEnabled(false);
-        serverButton.setText(
-            CodeGPTBundle.get("settingsConfigurable.service.llama.stopServer.label"));
-        serverButton.setIcon(Actions.Suspend);
-        serverProgressPanel.startProgress(
-            CodeGPTBundle.get("settingsConfigurable.service.llama.progress.startingServer"));
-
-        // TODO: Move to LlamaModelPreferencesForm
-        var modelPath = llamaModelPreferencesForm.isUseCustomLlamaModel()
-            ? llamaModelPreferencesForm.getCustomLlamaModelPath()
-            : CodeGPTPlugin.getLlamaModelsPath()
-                + File.separator
-                + llamaModelPreferencesForm.getSelectedModel().getFileName();
-        llamaServerAgent.startAgent(
-            modelPath,
-            maxTokensField.getValue(),
-            threadsField.getValue(),
-            portField.getNumber(),
-            serverProgressPanel,
-            () -> {
-              setFormEnabled(false);
-              serverProgressPanel.displayComponent(
-                  new JBLabel("Server running", Actions.Checked, SwingConstants.LEADING));
-            });
+        disableForm(serverButton, serverProgressPanel);
+        llamaServerAgent.startAgent(this, serverProgressPanel, () -> {
+          setFormEnabled(false);
+          serverProgressPanel.displayComponent(
+              new JBLabel("Server running", Actions.Checked, SwingConstants.LEADING));
+        });
       }
     });
     return serverButton;
+  }
+
+  private boolean validateModelConfiguration() {
+    return validateCustomModelPath() && validateSelectedModel();
+  }
+
+  private boolean validateCustomModelPath() {
+    if (llamaModelPreferencesForm.isUseCustomLlamaModel()) {
+      var customModelPath = llamaModelPreferencesForm.getCustomLlamaModelPath();
+      if (customModelPath == null || customModelPath.isEmpty()) {
+        OverlayUtil.showBalloon(
+            CodeGPTBundle.get("validation.error.fieldRequired"),
+            MessageType.ERROR,
+            llamaModelPreferencesForm.getCustomModelPathBrowserButton());
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private boolean validateSelectedModel() {
+    if (!llamaModelPreferencesForm.isUseCustomLlamaModel() && !isModelExists(
+        llamaModelPreferencesForm.getSelectedModel())) {
+      OverlayUtil.showBalloon(
+          CodeGPTBundle.get("settingsConfigurable.service.llama.overlay.modelNotDownloaded.text"),
+          MessageType.ERROR,
+          llamaModelPreferencesForm.getHuggingFaceModelComboBox());
+      return false;
+    }
+    return true;
+  }
+
+  private void enableForm(JButton serverButton, ServerProgressPanel progressPanel) {
+    setFormEnabled(true);
+    serverButton.setText(
+        CodeGPTBundle.get("settingsConfigurable.service.llama.startServer.label"));
+    serverButton.setIcon(Actions.Execute);
+    progressPanel.updateText(
+        CodeGPTBundle.get("settingsConfigurable.service.llama.progress.stoppingServer"));
+  }
+
+  private void disableForm(JButton serverButton, ServerProgressPanel progressPanel) {
+    setFormEnabled(false);
+    serverButton.setText(
+        CodeGPTBundle.get("settingsConfigurable.service.llama.stopServer.label"));
+    serverButton.setIcon(Actions.Suspend);
+    progressPanel.startProgress(
+        CodeGPTBundle.get("settingsConfigurable.service.llama.progress.startingServer"));
   }
 
   private boolean isModelExists(HuggingFaceModel model) {

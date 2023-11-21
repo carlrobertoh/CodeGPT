@@ -20,7 +20,7 @@ import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.YouSettingsState;
-import ee.carlrobert.codegpt.util.SwingUtils;
+import ee.carlrobert.codegpt.util.UIUtil;
 import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionModel;
 import java.util.List;
 import java.util.Map;
@@ -151,7 +151,7 @@ public class ServiceSelectionForm {
         .resizeX(false)
         .withComment(
             CodeGPTBundle.get("settingsConfigurable.service.openai.apiKey.comment"))
-        .withCommentHyperlinkListener(SwingUtils::handleHyperlinkClicked)
+        .withCommentHyperlinkListener(UIUtil::handleHyperlinkClicked)
         .createPanel();
 
     return FormBuilder.createFormBuilder()

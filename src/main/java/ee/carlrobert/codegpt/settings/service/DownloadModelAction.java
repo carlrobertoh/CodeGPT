@@ -11,8 +11,8 @@ import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.completions.HuggingFaceModel;
-import ee.carlrobert.codegpt.util.DownloadingUtils;
-import ee.carlrobert.codegpt.util.file.FileUtils;
+import ee.carlrobert.codegpt.util.DownloadingUtil;
+import ee.carlrobert.codegpt.util.file.FileUtil;
 import java.io.IOException;
 import java.net.URL;
 import java.util.concurrent.Executors;
@@ -81,12 +81,12 @@ public class DownloadModelAction extends AnAction {
         long startTime = System.currentTimeMillis();
 
         progressUpdateScheduler = executorService.scheduleAtFixedRate(() ->
-                onUpdateProgress.accept(DownloadingUtils.getFormattedDownloadProgress(
+                onUpdateProgress.accept(DownloadingUtil.getFormattedDownloadProgress(
                     startTime,
                     fileSize,
                     bytesRead[0])),
             0, 1, TimeUnit.SECONDS);
-        FileUtils.copyFileWithProgress(model.getFileName(), url, bytesRead, fileSize, indicator);
+        FileUtil.copyFileWithProgress(model.getFileName(), url, bytesRead, fileSize, indicator);
       } catch (IOException ex) {
         LOG.error("Unable to open connection", ex);
         onFailed.accept(ex);

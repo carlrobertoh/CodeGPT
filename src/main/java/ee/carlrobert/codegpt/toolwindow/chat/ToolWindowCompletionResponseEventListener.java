@@ -18,7 +18,7 @@ import ee.carlrobert.codegpt.toolwindow.chat.components.ChatMessageResponseBody;
 import ee.carlrobert.codegpt.toolwindow.chat.components.ResponsePanel;
 import ee.carlrobert.codegpt.toolwindow.chat.components.TotalTokensPanel;
 import ee.carlrobert.codegpt.toolwindow.chat.components.UserPromptTextArea;
-import ee.carlrobert.codegpt.util.OverlayUtils;
+import ee.carlrobert.codegpt.util.OverlayUtil;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.client.you.completion.YouSerpResult;
 import java.util.HashMap;
@@ -98,7 +98,7 @@ abstract class ToolWindowCompletionResponseEventListener implements
 
   @Override
   public void handleTokensExceeded(Conversation conversation, Message message) {
-    var answer = OverlayUtils.showTokenLimitExceededDialog();
+    var answer = OverlayUtil.showTokenLimitExceededDialog();
     if (answer == OK) {
       TelemetryAction.IDE_ACTION.createActionMessage()
           .property("action", "DISCARD_TOKEN_LIMIT")

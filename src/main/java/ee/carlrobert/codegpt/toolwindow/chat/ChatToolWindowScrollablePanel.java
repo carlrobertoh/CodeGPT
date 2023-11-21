@@ -1,6 +1,6 @@
 package ee.carlrobert.codegpt.toolwindow.chat;
 
-import static ee.carlrobert.codegpt.util.ThemeUtils.getPanelBackgroundColor;
+import static ee.carlrobert.codegpt.util.UIUtil.getPanelBackgroundColor;
 
 import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
 import com.intellij.openapi.roots.ui.componentsList.layout.VerticalStackLayout;
@@ -8,7 +8,7 @@ import ee.carlrobert.codegpt.completions.you.YouUserManager;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.toolwindow.chat.components.ResponsePanel;
-import ee.carlrobert.codegpt.util.SwingUtils;
+import ee.carlrobert.codegpt.util.UIUtil;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -73,7 +73,7 @@ public class ChatToolWindowScrollablePanel extends ScrollablePanel {
 
   // TODO: Move
   private JTextPane createYouCouponTextPane() {
-    var textPane = SwingUtils.createTextPane(
+    var textPane = UIUtil.createTextPane(
         "<html>\n"
             + "<body>\n"
             + "  <p style=\"margin: 4px 0;\">Use CodeGPT coupon for free month of GPT-4.</p>\n"

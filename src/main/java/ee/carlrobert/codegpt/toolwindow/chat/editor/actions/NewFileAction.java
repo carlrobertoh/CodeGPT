@@ -18,7 +18,7 @@ import com.intellij.util.ui.FormBuilder;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.actions.ActionType;
 import ee.carlrobert.codegpt.actions.TrackableAction;
-import ee.carlrobert.codegpt.util.file.FileUtils;
+import ee.carlrobert.codegpt.util.file.FileUtil;
 import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 
@@ -49,7 +49,7 @@ public class NewFileAction extends TrackableAction {
     fileNameTextField.setColumns(30);
 
     if (showDialog(project, textFieldWithBrowseButton, fileNameTextField) == OK_EXIT_CODE) {
-      var file = FileUtils.createFile(
+      var file = FileUtil.createFile(
           textFieldWithBrowseButton.getText(),
           fileNameTextField.getText(),
           editor.getDocument().getText());

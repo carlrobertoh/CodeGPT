@@ -8,11 +8,10 @@ import com.intellij.ui.DocumentAdapter;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBTextArea;
 import com.intellij.util.ui.JBUI;
-import com.intellij.util.ui.UIUtil;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.completions.CompletionRequestHandler;
-import ee.carlrobert.codegpt.util.SwingUtils;
+import ee.carlrobert.codegpt.util.UIUtil;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Cursor;
@@ -29,7 +28,6 @@ import javax.swing.AbstractAction;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
-import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 import javax.swing.event.DocumentEvent;
 import javax.swing.text.BadLocationException;
@@ -40,10 +38,8 @@ public class UserPromptTextArea extends JPanel {
 
   private static final Logger LOG = Logger.getInstance(UserPromptTextArea.class);
 
-  private static final String TEXT_SUBMIT = "text-submit";
-  private static final String INSERT_BREAK = "insert-break";
   private static final JBColor BACKGROUND_COLOR = JBColor.namedColor(
-      "Editor.SearchField.background", UIUtil.getTextFieldBackground());
+      "Editor.SearchField.background", com.intellij.util.ui.UIUtil.getTextFieldBackground());
 
   private final JBTextArea textArea;
 
@@ -64,10 +60,7 @@ public class UserPromptTextArea extends JPanel {
     textArea.setWrapStyleWord(true);
     textArea.getEmptyText().setText(CodeGPTBundle.get("toolwindow.chat.textArea.emptyText"));
     textArea.setBorder(JBUI.Borders.empty(8, 4));
-    var input = textArea.getInputMap();
-    input.put(KeyStroke.getKeyStroke("ENTER"), TEXT_SUBMIT);
-    input.put(KeyStroke.getKeyStroke("shift ENTER"), INSERT_BREAK);
-    textArea.getActionMap().put(TEXT_SUBMIT, new AbstractAction() {
+    UIUtil.addShiftEnterInputMap(textArea, new AbstractAction() {
       @Override
       public void actionPerformed(ActionEvent e) {
         try {
@@ -190,7 +183,7 @@ public class UserPromptTextArea extends JPanel {
 
   // TODO: IconActionButton?
   private JButton createIconButton(Icon icon, @Nullable Runnable submitListener) {
-    var button = SwingUtils.createIconButton(icon);
+    var button = UIUtil.createIconButton(icon);
     if (submitListener != null) {
       button.addActionListener((e) -> handleSubmit());
     }

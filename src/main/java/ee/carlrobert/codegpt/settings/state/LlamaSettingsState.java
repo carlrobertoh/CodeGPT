@@ -7,6 +7,7 @@ import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import ee.carlrobert.codegpt.completions.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
+import ee.carlrobert.codegpt.settings.service.ServiceSelectionForm;
 import java.io.IOException;
 import java.net.ServerSocket;
 import org.jetbrains.annotations.NotNull;
@@ -38,6 +39,39 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
   @Override
   public void loadState(@NotNull LlamaSettingsState state) {
     XmlSerializerUtil.copyBean(state, this);
+  }
+
+  public boolean isModified(ServiceSelectionForm serviceSelectionForm) {
+    var modelPreferencesForm = serviceSelectionForm.getLlamaModelPreferencesForm();
+    return serverPort != serviceSelectionForm.getLlamaServerPort()
+        || contextSize != serviceSelectionForm.getContextSize()
+        || threads != serviceSelectionForm.getThreads()
+        || huggingFaceModel != modelPreferencesForm.getSelectedModel()
+        || !promptTemplate.equals(modelPreferencesForm.getPromptTemplate())
+        || useCustomModel != modelPreferencesForm.isUseCustomLlamaModel()
+        || !customLlamaModelPath.equals(modelPreferencesForm.getCustomLlamaModelPath());
+  }
+
+  public void apply(ServiceSelectionForm serviceSelectionForm) {
+    var modelPreferencesForm = serviceSelectionForm.getLlamaModelPreferencesForm();
+    customLlamaModelPath = modelPreferencesForm.getCustomLlamaModelPath();
+    huggingFaceModel = modelPreferencesForm.getSelectedModel();
+    useCustomModel = modelPreferencesForm.isUseCustomLlamaModel();
+    promptTemplate = modelPreferencesForm.getPromptTemplate();
+    serverPort = serviceSelectionForm.getLlamaServerPort();
+    contextSize = serviceSelectionForm.getContextSize();
+    threads = serviceSelectionForm.getThreads();
+  }
+
+  public void reset(ServiceSelectionForm serviceSelectionForm) {
+    var modelPreferencesForm = serviceSelectionForm.getLlamaModelPreferencesForm();
+    modelPreferencesForm.setSelectedModel(huggingFaceModel);
+    modelPreferencesForm.setCustomLlamaModelPath(customLlamaModelPath);
+    modelPreferencesForm.setUseCustomLlamaModel(useCustomModel);
+    modelPreferencesForm.setPromptTemplate(promptTemplate);
+    serviceSelectionForm.setLlamaServerPort(serverPort);
+    serviceSelectionForm.setContextSize(contextSize);
+    serviceSelectionForm.setThreads(threads);
   }
 
   public boolean isUseCustomModel() {

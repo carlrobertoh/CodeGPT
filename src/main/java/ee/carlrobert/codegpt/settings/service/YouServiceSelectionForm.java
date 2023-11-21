@@ -22,7 +22,7 @@ import ee.carlrobert.codegpt.completions.you.auth.response.YouAuthenticationResp
 import ee.carlrobert.codegpt.completions.you.auth.response.YouUser;
 import ee.carlrobert.codegpt.credentials.YouCredentialsManager;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
-import ee.carlrobert.codegpt.util.SwingUtils;
+import ee.carlrobert.codegpt.util.UIUtil;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.util.regex.Pattern;
@@ -134,7 +134,7 @@ public class YouServiceSelectionForm extends JPanel {
   }
 
   private JTextPane createSignUpTextPane() {
-    var textPane = SwingUtils.createTextPane(
+    var textPane = UIUtil.createTextPane(
         "<html><a href=\"https://you.com/code\">Don't have an account? Sign up</a></html>");
     textPane.setBorder(JBUI.Borders.emptyLeft(4));
     textPane.setOpaque(false);

@@ -14,7 +14,7 @@ import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.settings.state.YouSettingsState;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
-import ee.carlrobert.codegpt.util.ApplicationUtils;
+import ee.carlrobert.codegpt.util.ApplicationUtil;
 import javax.swing.JComponent;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
@@ -53,22 +53,13 @@ public class SettingsConfigurable implements Configurable {
     var llamaSettings = LlamaSettingsState.getInstance();
 
     var serviceSelectionForm = settingsComponent.getServiceSelectionForm();
-    var llamaModelPreferencesForm = serviceSelectionForm.getLlamaModelPreferencesForm();
     return !settingsComponent.getDisplayName().equals(settings.getDisplayName())
         || isServiceChanged(settings)
         || openAISettings.isModified(serviceSelectionForm)
         || azureSettings.isModified(serviceSelectionForm)
         || serviceSelectionForm.isDisplayWebSearchResults()
         != YouSettingsState.getInstance().isDisplayWebSearchResults()
-
-        || llamaSettings.isUseCustomModel() != llamaModelPreferencesForm.isUseCustomLlamaModel()
-        || llamaSettings.getServerPort() != serviceSelectionForm.getLlamaServerPort()
-        || llamaSettings.getContextSize() != serviceSelectionForm.getContextSize()
-        || llamaSettings.getThreads() != serviceSelectionForm.getThreads()
-        || llamaSettings.getHuggingFaceModel() != llamaModelPreferencesForm.getSelectedModel()
-        || !llamaSettings.getPromptTemplate().equals(llamaModelPreferencesForm.getPromptTemplate())
-        || !llamaSettings.getCustomLlamaModelPath()
-        .equals(llamaModelPreferencesForm.getCustomLlamaModelPath());
+        || llamaSettings.isModified(serviceSelectionForm);
   }
 
   @Override
@@ -89,20 +80,11 @@ public class SettingsConfigurable implements Configurable {
     settings.setDisplayName(settingsComponent.getDisplayName());
     settings.setSelectedService(settingsComponent.getSelectedService());
 
-    var llamaModelPreferencesForm = serviceSelectionForm.getLlamaModelPreferencesForm();
-    var llamaSettings = LlamaSettingsState.getInstance();
-    llamaSettings.setCustomLlamaModelPath(llamaModelPreferencesForm.getCustomLlamaModelPath());
-    llamaSettings.setHuggingFaceModel(llamaModelPreferencesForm.getSelectedModel());
-    llamaSettings.setUseCustomModel(llamaModelPreferencesForm.isUseCustomLlamaModel());
-    llamaSettings.setPromptTemplate(llamaModelPreferencesForm.getPromptTemplate());
-    llamaSettings.setServerPort(serviceSelectionForm.getLlamaServerPort());
-    llamaSettings.setContextSize(serviceSelectionForm.getContextSize());
-    llamaSettings.setThreads(serviceSelectionForm.getThreads());
-
     var azureSettings = AzureSettingsState.getInstance();
     var openAISettings = OpenAISettingsState.getInstance();
     openAISettings.apply(serviceSelectionForm);
     azureSettings.apply(serviceSelectionForm);
+    LlamaSettingsState.getInstance().apply(serviceSelectionForm);
     YouSettingsState.getInstance()
         .setDisplayWebSearchResults(serviceSelectionForm.isDisplayWebSearchResults());
 
@@ -127,18 +109,9 @@ public class SettingsConfigurable implements Configurable {
     settingsComponent.setDisplayName(settings.getDisplayName());
     settingsComponent.setSelectedService(settings.getSelectedService());
 
-    var llamaSettings = LlamaSettingsState.getInstance();
-    var llamaModelPreferencesForm = serviceSelectionForm.getLlamaModelPreferencesForm();
-    llamaModelPreferencesForm.setSelectedModel(llamaSettings.getHuggingFaceModel());
-    llamaModelPreferencesForm.setCustomLlamaModelPath(llamaSettings.getCustomLlamaModelPath());
-    llamaModelPreferencesForm.setUseCustomLlamaModel(llamaSettings.isUseCustomModel());
-    llamaModelPreferencesForm.setPromptTemplate(llamaSettings.getPromptTemplate());
-    serviceSelectionForm.setLlamaServerPort(llamaSettings.getServerPort());
-    serviceSelectionForm.setContextSize(llamaSettings.getContextSize());
-    serviceSelectionForm.setThreads(llamaSettings.getThreads());
-
     OpenAISettingsState.getInstance().reset(serviceSelectionForm);
     AzureSettingsState.getInstance().reset(serviceSelectionForm);
+    LlamaSettingsState.getInstance().reset(serviceSelectionForm);
 
     serviceSelectionForm.setDisplayWebSearchResults(
         YouSettingsState.getInstance().isDisplayWebSearchResults());
@@ -158,7 +131,7 @@ public class SettingsConfigurable implements Configurable {
 
   private void resetActiveTab() {
     ConversationsState.getInstance().setCurrentConversation(null);
-    var project = ApplicationUtils.findCurrentProject();
+    var project = ApplicationUtil.findCurrentProject();
     if (project == null) {
       throw new RuntimeException("Could not find current project.");
     }

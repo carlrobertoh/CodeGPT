@@ -10,7 +10,7 @@ import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
-import ee.carlrobert.codegpt.util.SwingUtils;
+import ee.carlrobert.codegpt.util.UIUtil;
 import java.awt.event.ItemEvent;
 import java.net.Proxy;
 import javax.swing.BoxLayout;
@@ -151,20 +151,20 @@ public class AdvancedSettingsComponent {
     proxyPanel.setBorder(JBUI.Borders.emptyLeft(16));
     proxyPanel.setLayout(new BoxLayout(proxyPanel, BoxLayout.PAGE_AXIS));
 
-    var proxyTypePanel = SwingUtils.createPanel(
+    var proxyTypePanel = UIUtil.createPanel(
         proxyTypeComboBox,
         CodeGPTBundle.get("advancedSettingsConfigurable.proxy.typeComboBoxField.label"),
         false);
-    var proxyHostPanel = SwingUtils.createPanel(
+    var proxyHostPanel = UIUtil.createPanel(
         proxyHostField,
         CodeGPTBundle.get("advancedSettingsConfigurable.proxy.hostField.label"),
         false);
-    var proxyPortPanel = SwingUtils.createPanel(
+    var proxyPortPanel = UIUtil.createPanel(
         proxyPortField,
         CodeGPTBundle.get("advancedSettingsConfigurable.proxy.portField.label"),
         false);
-    SwingUtils.setEqualLabelWidths(proxyTypePanel, proxyHostPanel);
-    SwingUtils.setEqualLabelWidths(proxyPortPanel, proxyHostPanel);
+    UIUtil.setEqualLabelWidths(proxyTypePanel, proxyHostPanel);
+    UIUtil.setEqualLabelWidths(proxyPortPanel, proxyHostPanel);
 
     proxyPanel.add(proxyTypePanel);
     proxyPanel.add(proxyHostPanel);
@@ -173,13 +173,13 @@ public class AdvancedSettingsComponent {
         .panel(proxyAuthCheckbox)
         .createPanel());
 
-    var proxyUsernamePanel = SwingUtils.createPanel(proxyAuthUsername,
+    var proxyUsernamePanel = UIUtil.createPanel(proxyAuthUsername,
         CodeGPTBundle.get("advancedSettingsConfigurable.proxy.usernameField.label"),
         false);
-    var proxyPasswordPanel = SwingUtils.createPanel(proxyAuthPassword,
+    var proxyPasswordPanel = UIUtil.createPanel(proxyAuthPassword,
         CodeGPTBundle.get("advancedSettingsConfigurable.proxy.passwordField.label"),
         false);
-    SwingUtils.setEqualLabelWidths(proxyPasswordPanel, proxyUsernamePanel);
+    UIUtil.setEqualLabelWidths(proxyPasswordPanel, proxyUsernamePanel);
 
     var proxyAuthPanel = FormBuilder.createFormBuilder()
         .addVerticalGap(4)

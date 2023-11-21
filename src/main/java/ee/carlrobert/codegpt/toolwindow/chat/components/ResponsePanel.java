@@ -1,6 +1,6 @@
 package ee.carlrobert.codegpt.toolwindow.chat.components;
 
-import static ee.carlrobert.codegpt.util.ThemeUtils.getPanelBackgroundColor;
+import static ee.carlrobert.codegpt.util.UIUtil.getPanelBackgroundColor;
 
 import com.intellij.icons.AllIcons.Actions;
 import com.intellij.openapi.actionSystem.AnAction;

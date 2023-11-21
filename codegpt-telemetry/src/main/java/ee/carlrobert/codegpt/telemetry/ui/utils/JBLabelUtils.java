@@ -81,5 +81,4 @@ public class JBLabelUtils {
         }
         return ColorUtil.toHex(color);
     }
-
 }

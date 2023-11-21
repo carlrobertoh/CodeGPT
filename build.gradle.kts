@@ -59,7 +59,6 @@ dependencies {
   implementation("org.jsoup:jsoup:1.16.2")
   implementation("org.apache.commons:commons-text:1.11.0")
   implementation("com.knuddels:jtokkit:0.6.1")
-  implementation("org.quartz-scheduler:quartz:2.3.2")
 
   testImplementation("org.assertj:assertj-core:3.24.2")
   testImplementation("org.awaitility:awaitility:4.2.0")

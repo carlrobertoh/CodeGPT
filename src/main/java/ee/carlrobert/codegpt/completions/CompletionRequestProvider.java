@@ -1,6 +1,6 @@
 package ee.carlrobert.codegpt.completions;
 
-import static ee.carlrobert.codegpt.util.file.FileUtils.getResourceContent;
+import static ee.carlrobert.codegpt.util.file.FileUtil.getResourceContent;
 import static java.util.stream.Collectors.toList;
 
 import com.intellij.openapi.application.ApplicationManager;

@@ -20,7 +20,7 @@ import java.time.format.DateTimeFormatter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public final class EditorUtils {
+public final class EditorUtil {
 
   public static Editor createEditor(@NotNull Project project, String fileExtension, String code) {
     var timestamp = DateTimeFormatter.ofPattern("yyyyMMddHHmmss").format(LocalDateTime.now());
@@ -53,7 +53,7 @@ public final class EditorUtils {
   }
 
   public static @Nullable String getSelectedEditorSelectedText(@NotNull Project project) {
-    var selectedEditor = EditorUtils.getSelectedEditor(project);
+    var selectedEditor = EditorUtil.getSelectedEditor(project);
     if (selectedEditor != null) {
       return selectedEditor.getSelectionModel().getSelectedText();
     }

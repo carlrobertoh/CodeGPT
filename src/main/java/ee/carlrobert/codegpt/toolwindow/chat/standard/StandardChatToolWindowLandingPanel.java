@@ -1,13 +1,13 @@
 package ee.carlrobert.codegpt.toolwindow.chat.standard;
 
-import static ee.carlrobert.codegpt.util.ThemeUtils.getPanelBackgroundColor;
+import static ee.carlrobert.codegpt.util.UIUtil.getPanelBackgroundColor;
 import static java.lang.String.format;
 import static javax.swing.event.HyperlinkEvent.EventType.ACTIVATED;
 
 import com.intellij.openapi.diagnostic.Logger;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.toolwindow.chat.components.ResponsePanel;
-import ee.carlrobert.codegpt.util.SwingUtils;
+import ee.carlrobert.codegpt.util.UIUtil;
 import java.awt.event.MouseEvent;
 import javax.swing.JTextPane;
 import javax.swing.event.HyperlinkEvent;
@@ -24,7 +24,7 @@ class StandardChatToolWindowLandingPanel extends ResponsePanel {
   }
 
   private JTextPane createContent() {
-    var textPane = SwingUtils.createTextPane(
+    var textPane = UIUtil.createTextPane(
         "<html>"
             + format(
                 "<p style=\"margin-top: 4px; margin-bottom: 4px;\">"
@@ -79,7 +79,7 @@ class StandardChatToolWindowLandingPanel extends ResponsePanel {
             LOG.error("Could not trigger action {}", event.getDescription());
         }
       } else {
-        SwingUtils.handleHyperlinkClicked(event);
+        UIUtil.handleHyperlinkClicked(event);
       }
     }
   }

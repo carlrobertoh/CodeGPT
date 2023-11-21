@@ -264,6 +264,12 @@ public class LlamaModelPreferencesForm {
     return promptTemplateComboBox.getItem();
   }
 
+  public String getActualModelPath() {
+    return isUseCustomLlamaModel()
+        ? getCustomLlamaModelPath()
+        : CodeGPTPlugin.getLlamaModelsPath() + File.separator + getSelectedModel().getFileName();
+  }
+
   private ComboBox<LlamaModel> createModelComboBox(
       EnumComboBoxModel<LlamaModel> llamaModelEnumComboBoxModel,
       LlamaModel llamaModel,

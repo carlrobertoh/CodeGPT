@@ -1,7 +1,7 @@
 package ee.carlrobert.codegpt.toolwindow.chat;
 
-import static ee.carlrobert.codegpt.util.SwingUtils.createScrollPaneWithSmartScroller;
-import static ee.carlrobert.codegpt.util.ThemeUtils.getPanelBackgroundColor;
+import static ee.carlrobert.codegpt.util.UIUtil.createScrollPaneWithSmartScroller;
+import static ee.carlrobert.codegpt.util.UIUtil.getPanelBackgroundColor;
 import static java.lang.String.format;
 
 import com.intellij.openapi.diagnostic.Logger;
@@ -24,8 +24,8 @@ import ee.carlrobert.codegpt.toolwindow.chat.components.TotalTokensPanel;
 import ee.carlrobert.codegpt.toolwindow.chat.components.UserMessagePanel;
 import ee.carlrobert.codegpt.toolwindow.chat.components.UserPromptTextArea;
 import ee.carlrobert.codegpt.toolwindow.chat.components.UserPromptTextAreaHeader;
-import ee.carlrobert.codegpt.util.EditorUtils;
-import ee.carlrobert.codegpt.util.file.FileUtils;
+import ee.carlrobert.codegpt.util.EditorUtil;
+import ee.carlrobert.codegpt.util.file.FileUtil;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -62,7 +62,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     toolWindowScrollablePanel = new ChatToolWindowScrollablePanel(settings);
     totalTokensPanel = new TotalTokensPanel(
         conversation,
-        EditorUtils.getSelectedEditorSelectedText(project),
+        EditorUtil.getSelectedEditorSelectedText(project),
         this);
     userPromptTextArea = new UserPromptTextArea(this::handleSubmit, totalTokensPanel);
     rootPanel = createRootPanel(settings);
@@ -185,12 +185,12 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
 
   private void handleSubmit(String text) {
     var message = new Message(text);
-    var editor = EditorUtils.getSelectedEditor(project);
+    var editor = EditorUtil.getSelectedEditor(project);
     if (editor != null) {
       var selectionModel = editor.getSelectionModel();
       var selectedText = selectionModel.getSelectedText();
       if (selectedText != null && !selectedText.isEmpty()) {
-        var fileExtension = FileUtils.getFileExtension(
+        var fileExtension = FileUtil.getFileExtension(
             ((EditorImpl) editor).getVirtualFile().getName());
         message = new Message(text + format("\n```%s\n%s\n```", fileExtension, selectedText));
         message.setUserMessage(text);
@@ -207,9 +207,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
         JBUI.Borders.customLine(JBColor.border(), 1, 0, 0, 0),
         JBUI.Borders.empty(8)));
     panel.setBackground(getPanelBackgroundColor());
-    panel.add(
-        new UserPromptTextAreaHeader(project, settings, totalTokensPanel),
-        BorderLayout.NORTH);
+    panel.add(new UserPromptTextAreaHeader(settings, totalTokensPanel), BorderLayout.NORTH);
     panel.add(userPromptTextArea, BorderLayout.SOUTH);
     return panel;
   }

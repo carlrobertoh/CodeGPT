@@ -8,8 +8,8 @@ import com.intellij.openapi.editor.Editor;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.actions.ActionType;
 import ee.carlrobert.codegpt.actions.TrackableAction;
-import ee.carlrobert.codegpt.util.EditorUtils;
-import ee.carlrobert.codegpt.util.OverlayUtils;
+import ee.carlrobert.codegpt.util.EditorUtil;
+import ee.carlrobert.codegpt.util.OverlayUtil;
 import org.jetbrains.annotations.NotNull;
 
 public class ReplaceSelectionAction extends TrackableAction {
@@ -26,10 +26,10 @@ public class ReplaceSelectionAction extends TrackableAction {
   @Override
   public void handleAction(@NotNull AnActionEvent event) {
     var project = requireNonNull(event.getProject());
-    if (EditorUtils.isMainEditorTextSelected(project)) {
-      EditorUtils.replaceMainEditorSelection(project, editor.getDocument().getText());
+    if (EditorUtil.isMainEditorTextSelected(project)) {
+      EditorUtil.replaceMainEditorSelection(project, editor.getDocument().getText());
     } else {
-      OverlayUtils.showSelectedEditorSelectionWarning(event);
+      OverlayUtil.showSelectedEditorSelectionWarning(event);
     }
   }
 }

@@ -7,7 +7,7 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import ee.carlrobert.codegpt.actions.editor.EditorActionsUtil;
-import ee.carlrobert.codegpt.util.EditorUtils;
+import ee.carlrobert.codegpt.util.EditorUtil;
 import org.jetbrains.annotations.NotNull;
 
 public class ReplaceCodeInMainEditorAction extends AnAction {
@@ -20,8 +20,8 @@ public class ReplaceCodeInMainEditorAction extends AnAction {
   @Override
   public void update(@NotNull AnActionEvent event) {
     event.getPresentation().setEnabled(
-        EditorUtils.isMainEditorTextSelected(requireNonNull(event.getProject()))
-            && EditorUtils.hasSelection(event.getData(PlatformDataKeys.EDITOR)));
+        EditorUtil.isMainEditorTextSelected(requireNonNull(event.getProject()))
+            && EditorUtil.hasSelection(event.getData(PlatformDataKeys.EDITOR)));
   }
 
   @Override
@@ -29,7 +29,7 @@ public class ReplaceCodeInMainEditorAction extends AnAction {
     var project = event.getProject();
     var toolWindowEditor = event.getData(PlatformDataKeys.EDITOR);
     if (project != null && toolWindowEditor != null) {
-      EditorUtils.replaceMainEditorSelection(
+      EditorUtil.replaceMainEditorSelection(
           project,
           requireNonNull(toolWindowEditor.getSelectionModel().getSelectedText()));
     }

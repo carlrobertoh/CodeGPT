@@ -7,7 +7,6 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.progress.ProgressIndicator;
-import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
 import java.io.File;
@@ -31,9 +30,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jetbrains.annotations.NotNull;
 
-public class FileUtils {
+public class FileUtil {
 
-  private static final Logger LOG = Logger.getInstance(FileUtils.class);
+  private static final Logger LOG = Logger.getInstance(FileUtil.class);
 
   public static File createFile(String directoryPath, String fileName, String fileContent) {
     try {
@@ -53,7 +52,7 @@ public class FileUtils {
       long[] bytesRead,
       long fileSize,
       ProgressIndicator indicator) throws IOException {
-    FileUtils.tryCreateDirectory(CodeGPTPlugin.getLlamaModelsPath());
+    FileUtil.tryCreateDirectory(CodeGPTPlugin.getLlamaModelsPath());
 
     try (
         var readableByteChannel = Channels.newChannel(url.openStream());
@@ -80,8 +79,9 @@ public class FileUtils {
 
   public static void tryCreateDirectory(String directoryPath) {
     try {
-      if (!FileUtil.exists(directoryPath)) {
-        if (!FileUtil.createDirectory(Path.of(directoryPath).toFile())) {
+      if (!com.intellij.openapi.util.io.FileUtil.exists(directoryPath)) {
+        if (!com.intellij.openapi.util.io.FileUtil.createDirectory(
+            Path.of(directoryPath).toFile())) {
           throw new IOException("Failed to create directory: " + directoryPath);
         }
       }
@@ -142,7 +142,7 @@ public class FileUtils {
   }
 
   public static String getResourceContent(String name) {
-    try (var stream = Objects.requireNonNull(FileUtils.class.getResourceAsStream(name))) {
+    try (var stream = Objects.requireNonNull(FileUtil.class.getResourceAsStream(name))) {
       return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
     } catch (IOException e) {
       throw new RuntimeException("Unable to read resource", e);

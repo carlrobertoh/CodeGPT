@@ -13,7 +13,7 @@ import com.intellij.openapi.project.Project;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
-import ee.carlrobert.codegpt.util.file.FileUtils;
+import ee.carlrobert.codegpt.util.file.FileUtil;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.commons.text.CaseUtils;
@@ -55,7 +55,7 @@ public class EditorActionsUtil {
         var action = new BaseEditorAction(label, label) {
           @Override
           protected void actionPerformed(Project project, Editor editor, String selectedText) {
-            var fileExtension = FileUtils.getFileExtension(
+            var fileExtension = FileUtil.getFileExtension(
                 ((EditorImpl) editor).getVirtualFile().getName());
             var message = new Message(prompt.replace(
                 "{{selectedCode}}",

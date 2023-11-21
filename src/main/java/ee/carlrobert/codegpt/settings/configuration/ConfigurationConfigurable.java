@@ -40,7 +40,7 @@ public class ConfigurationConfigurable implements Configurable {
         || configurationComponent.isCreateNewChatOnEachAction()
         != configuration.isCreateNewChatOnEachAction()
         || configurationComponent.isMethodNameGenerationEnabled()
-        != configuration.isMethodNameGenerationEnabled();
+        != configuration.isMethodRefactoringEnabled();
   }
 
   @Override
@@ -67,7 +67,7 @@ public class ConfigurationConfigurable implements Configurable {
     configurationComponent.setCreateNewChatOnEachAction(
         configuration.isCreateNewChatOnEachAction());
     configurationComponent.setDisableMethodNameGeneration(
-        configuration.isMethodNameGenerationEnabled());
+        configuration.isMethodRefactoringEnabled());
     EditorActionsUtil.refreshActions();
   }
 

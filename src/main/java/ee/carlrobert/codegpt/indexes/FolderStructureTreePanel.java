@@ -19,7 +19,7 @@ import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.AsyncProcessIcon;
 import com.intellij.util.ui.JBUI;
-import ee.carlrobert.codegpt.util.file.FileUtils;
+import ee.carlrobert.codegpt.util.file.FileUtil;
 import ee.carlrobert.embedding.CheckedFile;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -124,7 +124,7 @@ public class FolderStructureTreePanel {
       panel.add(loadingFilesSpinner);
     } else {
       panel.add(new JBLabel("Total size: "
-          + FileUtils.convertFileSize(totalSize) + " ~ "
+          + FileUtil.convertFileSize(totalSize) + " ~ "
           + (convertLongValue(totalSize / 4)) + " tokens " + " ~ "
           + new DecimalFormat("#.##")
           .format(((double) (totalSize / 4) / 1000) * 0.0001) + " $"));
@@ -153,7 +153,7 @@ public class FolderStructureTreePanel {
       if (node.isChecked()) {
         node.setChecked(!changeListManager.isIgnoredFile(file)
             && !ignoreManager.isPotentiallyIgnoredFile(file)
-            && FileUtils.isUtf8File(file.getPath())
+            && FileUtil.isUtf8File(file.getPath())
             && fileSize < Math.pow(1024, 2));
       }
 
@@ -212,7 +212,7 @@ public class FolderStructureTreePanel {
                 .getFileTypeByFile((VirtualFileSystemEntry) userObject);
             getTextRenderer().setIcon(fileType.getIcon());
             getTextRenderer().append(
-                " - " + FileUtils.convertFileSize(
+                " - " + FileUtil.convertFileSize(
                     ((VirtualFileSystemEntry) userObject).getLength()));
           }
         }

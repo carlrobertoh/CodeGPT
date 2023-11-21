@@ -33,7 +33,7 @@ import java.awt.event.MouseEvent;
 import javax.swing.JComponent;
 import org.jetbrains.annotations.NotNull;
 
-public class OverlayUtils {
+public class OverlayUtil {
 
   public static void showNotification(String content, NotificationType type) {
     Notifications.Bus.notify(
@@ -134,7 +134,7 @@ public class OverlayUtils {
     locationOnScreen.y = locationOnScreen.y - 16;
 
     showWarningBalloon(
-        EditorUtils.getSelectedEditor(requireNonNull(event.getProject())) == null
+        EditorUtil.getSelectedEditor(requireNonNull(event.getProject())) == null
             ? "Unable to locate a selected editor"
             : "Please select a target code before proceeding",
         locationOnScreen);

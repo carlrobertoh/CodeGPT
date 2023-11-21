@@ -9,7 +9,7 @@ import ee.carlrobert.codegpt.completions.you.YouApiClient;
 import ee.carlrobert.codegpt.completions.you.YouSubscriptionNotifier;
 import ee.carlrobert.codegpt.completions.you.YouUserManager;
 import ee.carlrobert.codegpt.completions.you.auth.response.YouAuthenticationResponse;
-import ee.carlrobert.codegpt.util.OverlayUtils;
+import ee.carlrobert.codegpt.util.OverlayUtil;
 import java.io.IOException;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -29,7 +29,9 @@ public final class YouAuthenticationService {
     return ApplicationManager.getApplication().getService(YouAuthenticationService.class);
   }
 
-  public void signInAsync(String email, String password,
+  public void signInAsync(
+      @NotNull String email,
+      @NotNull String password,
       AuthenticationHandler authenticationHandler) {
     authClient.authenticate(email, password, new AuthenticationCallback(authenticationHandler));
   }
@@ -44,7 +46,7 @@ public final class YouAuthenticationService {
 
     @Override
     public void onFailure(@NotNull Call call, @NotNull IOException e) {
-      OverlayUtils.showNotification("Authentication failed.", NotificationType.ERROR);
+      OverlayUtil.showNotification("Authentication failed.", NotificationType.ERROR);
       LOG.error("Unable to retrieve session", e);
     }
 

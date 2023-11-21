@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class MarkdownUtils {
+public class MarkdownUtil {
 
   /**
    *  Splits a given string into a list of strings where each element is either a code block

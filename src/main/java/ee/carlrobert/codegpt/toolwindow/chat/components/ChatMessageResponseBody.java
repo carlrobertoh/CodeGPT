@@ -1,6 +1,6 @@
 package ee.carlrobert.codegpt.toolwindow.chat.components;
 
-import static ee.carlrobert.codegpt.util.ThemeUtils.getPanelBackgroundColor;
+import static ee.carlrobert.codegpt.util.UIUtil.getPanelBackgroundColor;
 import static java.lang.String.format;
 import static javax.swing.event.HyperlinkEvent.EventType.ACTIVATED;
 
@@ -26,8 +26,8 @@ import ee.carlrobert.codegpt.toolwindow.chat.ResponseNodeRenderer;
 import ee.carlrobert.codegpt.toolwindow.chat.StreamParser;
 import ee.carlrobert.codegpt.toolwindow.chat.StreamResponseType;
 import ee.carlrobert.codegpt.toolwindow.chat.editor.ResponseEditor;
-import ee.carlrobert.codegpt.util.MarkdownUtils;
-import ee.carlrobert.codegpt.util.SwingUtils;
+import ee.carlrobert.codegpt.util.MarkdownUtil;
+import ee.carlrobert.codegpt.util.UIUtil;
 import ee.carlrobert.llm.client.you.completion.YouSerpResult;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -93,7 +93,7 @@ public class ChatMessageResponseBody extends JPanel {
   }
 
   public ChatMessageResponseBody withResponse(String response) {
-    for (var message : MarkdownUtils.splitCodeBlocks(response)) {
+    for (var message : MarkdownUtil.splitCodeBlocks(response)) {
       boolean isCodeResponse = message.startsWith("```");
       if (isCodeResponse) {
         currentlyProcessedEditor = null;
@@ -281,14 +281,14 @@ public class ChatMessageResponseBody extends JPanel {
   }
 
   private JTextPane createTextPane(String text) {
-    var textPane = SwingUtils.createTextPane(text, event -> {
+    var textPane = UIUtil.createTextPane(text, event -> {
       if (FileUtil.exists(event.getDescription()) && ACTIVATED.equals(event.getEventType())) {
         VirtualFile file = LocalFileSystem.getInstance().findFileByPath(event.getDescription());
         FileEditorManager.getInstance(project).openFile(Objects.requireNonNull(file), true);
         return;
       }
 
-      SwingUtils.handleHyperlinkClicked(event);
+      UIUtil.handleHyperlinkClicked(event);
     });
     textPane.getCaret().setVisible(true);
     textPane.setCaretPosition(textPane.getDocument().getLength());

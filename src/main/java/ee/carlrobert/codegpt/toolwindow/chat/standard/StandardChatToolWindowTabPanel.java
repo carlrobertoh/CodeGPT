@@ -11,9 +11,9 @@ import ee.carlrobert.codegpt.toolwindow.chat.BaseChatToolWindowTabPanel;
 import ee.carlrobert.codegpt.toolwindow.chat.components.ChatMessageResponseBody;
 import ee.carlrobert.codegpt.toolwindow.chat.components.ResponsePanel;
 import ee.carlrobert.codegpt.toolwindow.chat.components.UserMessagePanel;
-import ee.carlrobert.codegpt.util.EditorUtils;
-import ee.carlrobert.codegpt.util.OverlayUtils;
-import ee.carlrobert.codegpt.util.file.FileUtils;
+import ee.carlrobert.codegpt.util.EditorUtil;
+import ee.carlrobert.codegpt.util.OverlayUtil;
+import ee.carlrobert.codegpt.util.file.FileUtil;
 import javax.swing.JComponent;
 import org.jetbrains.annotations.NotNull;
 
@@ -34,16 +34,16 @@ public class StandardChatToolWindowTabPanel extends BaseChatToolWindowTabPanel {
   @Override
   protected JComponent getLandingView() {
     return new StandardChatToolWindowLandingPanel((action, locationOnScreen) -> {
-      var editor = EditorUtils.getSelectedEditor(project);
+      var editor = EditorUtil.getSelectedEditor(project);
       if (editor == null || !editor.getSelectionModel().hasSelection()) {
-        OverlayUtils.showWarningBalloon(
+        OverlayUtil.showWarningBalloon(
             editor == null ? "Unable to locate a selected editor"
                 : "Please select a target code before proceeding",
             locationOnScreen);
         return;
       }
 
-      var fileExtension = FileUtils.getFileExtension(
+      var fileExtension = FileUtil.getFileExtension(
           ((EditorImpl) editor).getVirtualFile().getName());
       var message = new Message(action.getPrompt().replace(
           "{{selectedCode}}",

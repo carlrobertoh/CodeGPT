@@ -1,7 +1,7 @@
 package ee.carlrobert.codegpt.toolwindow.chat.contextual;
 
 import static com.intellij.openapi.ui.DialogWrapper.OK_EXIT_CODE;
-import static ee.carlrobert.codegpt.util.ThemeUtils.getPanelBackgroundColor;
+import static ee.carlrobert.codegpt.util.UIUtil.getPanelBackgroundColor;
 import static javax.swing.event.HyperlinkEvent.EventType.ACTIVATED;
 
 import com.intellij.openapi.diagnostic.Logger;
@@ -13,8 +13,8 @@ import ee.carlrobert.codegpt.indexes.CodebaseIndexingTask;
 import ee.carlrobert.codegpt.indexes.FolderStructureTreePanel;
 import ee.carlrobert.codegpt.settings.SettingsConfigurable;
 import ee.carlrobert.codegpt.toolwindow.chat.components.ResponsePanel;
-import ee.carlrobert.codegpt.util.OverlayUtils;
-import ee.carlrobert.codegpt.util.SwingUtils;
+import ee.carlrobert.codegpt.util.OverlayUtil;
+import ee.carlrobert.codegpt.util.UIUtil;
 import ee.carlrobert.vector.VectorStore;
 import javax.swing.JTextPane;
 import javax.swing.event.HyperlinkEvent;
@@ -77,7 +77,7 @@ class ContextualChatToolWindowLandingPanel extends ResponsePanel {
   }
 
   private JTextPane createTextPane() {
-    var textPane = SwingUtils.createTextPane("", this::handleHyperlinkClicked);
+    var textPane = UIUtil.createTextPane("", this::handleHyperlinkClicked);
     textPane.setBackground(getPanelBackgroundColor());
     return textPane;
   }
@@ -102,7 +102,7 @@ class ContextualChatToolWindowLandingPanel extends ResponsePanel {
             break;
           case "START_INDEXING":
             var folderStructureTreePanel = new FolderStructureTreePanel(project);
-            var show = OverlayUtils.showFileStructureDialog(project, folderStructureTreePanel);
+            var show = OverlayUtil.showFileStructureDialog(project, folderStructureTreePanel);
             if (show == OK_EXIT_CODE) {
               new CodebaseIndexingTask(project, folderStructureTreePanel.getCheckedFiles()).run();
             }
@@ -111,7 +111,7 @@ class ContextualChatToolWindowLandingPanel extends ResponsePanel {
             LOG.error("Could not trigger action {}", event.getDescription());
         }
       } else {
-        SwingUtils.handleHyperlinkClicked(event);
+        UIUtil.handleHyperlinkClicked(event);
       }
     }
   }
