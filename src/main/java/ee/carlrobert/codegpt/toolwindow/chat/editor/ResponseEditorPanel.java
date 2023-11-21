@@ -35,13 +35,13 @@ import java.awt.FlowLayout;
 import javax.swing.Box;
 import javax.swing.JPanel;
 
-public class ResponseEditor extends JPanel implements Disposable {
+public class ResponseEditorPanel extends JPanel implements Disposable {
 
   private final Editor editor;
   private final String language;
   private final String extension;
 
-  public ResponseEditor(
+  public ResponseEditorPanel(
       Project project,
       String code,
       String markdownLanguage,
@@ -66,22 +66,7 @@ public class ResponseEditor extends JPanel implements Disposable {
       }
     }
 
-    var editorEx = ((EditorEx) editor);
-    if (readOnly) {
-      editorEx.setOneLineMode(true);
-      editorEx.setHorizontalScrollbarVisible(false);
-    }
-    editorEx.installPopupHandler(new ContextMenuPopupHandler.Simple(group));
-    editorEx.setColorsScheme(EditorColorsManager.getInstance().getSchemeForCurrentUITheme());
-
-    var settings = editorEx.getSettings();
-    settings.setAdditionalColumnsCount(0);
-    settings.setAdditionalLinesCount(1);
-    settings.setAdditionalPageAtBottom(false);
-    settings.setVirtualSpace(false);
-    settings.setUseSoftWraps(false);
-    settings.setLineMarkerAreaShown(false);
-    settings.setGutterIconsShown(false);
+    configureEditor((EditorEx) editor, readOnly, new ContextMenuPopupHandler.Simple(group));
 
     add(createHeaderComponent(readOnly), BorderLayout.NORTH);
     add(editor.getComponent(), BorderLayout.CENTER);
@@ -99,6 +84,27 @@ public class ResponseEditor extends JPanel implements Disposable {
     return editor;
   }
 
+  private void configureEditor(
+      EditorEx editorEx,
+      boolean readOnly,
+      ContextMenuPopupHandler popupHandler) {
+    if (readOnly) {
+      editorEx.setOneLineMode(true);
+      editorEx.setHorizontalScrollbarVisible(false);
+    }
+    editorEx.installPopupHandler(popupHandler);
+    editorEx.setColorsScheme(EditorColorsManager.getInstance().getSchemeForCurrentUITheme());
+
+    var settings = editorEx.getSettings();
+    settings.setAdditionalColumnsCount(0);
+    settings.setAdditionalLinesCount(1);
+    settings.setAdditionalPageAtBottom(false);
+    settings.setVirtualSpace(false);
+    settings.setUseSoftWraps(false);
+    settings.setLineMarkerAreaShown(false);
+    settings.setGutterIconsShown(false);
+  }
+
   private JPanel createHeaderComponent(boolean readOnly) {
     var headerComponent = new JPanel(new BorderLayout());
     headerComponent.setBorder(JBUI.Borders.compound(
@@ -114,8 +120,8 @@ public class ResponseEditor extends JPanel implements Disposable {
   private String getLinkText(boolean expanded) {
     return expanded
         ? format(
-            CodeGPTBundle.get("toolwindow.chat.editor.action.expand"),
-            ((EditorEx) editor).getDocument().getLineCount() - 1)
+        CodeGPTBundle.get("toolwindow.chat.editor.action.expand"),
+        ((EditorEx) editor).getDocument().getLineCount() - 1)
         : CodeGPTBundle.get("toolwindow.chat.editor.action.collapse");
   }
 

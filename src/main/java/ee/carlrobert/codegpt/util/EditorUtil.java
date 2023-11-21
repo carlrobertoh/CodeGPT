@@ -39,7 +39,7 @@ public final class EditorUtil {
         document,
         project,
         lightVirtualFile,
-        false,
+        true,
         EditorKind.MAIN_EDITOR);
   }
 

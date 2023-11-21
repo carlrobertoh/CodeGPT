@@ -25,7 +25,7 @@ import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.toolwindow.chat.ResponseNodeRenderer;
 import ee.carlrobert.codegpt.toolwindow.chat.StreamParser;
 import ee.carlrobert.codegpt.toolwindow.chat.StreamResponseType;
-import ee.carlrobert.codegpt.toolwindow.chat.editor.ResponseEditor;
+import ee.carlrobert.codegpt.toolwindow.chat.editor.ResponseEditorPanel;
 import ee.carlrobert.codegpt.util.MarkdownUtil;
 import ee.carlrobert.codegpt.util.UIUtil;
 import ee.carlrobert.llm.client.you.completion.YouSerpResult;
@@ -46,7 +46,7 @@ public class ChatMessageResponseBody extends JPanel {
   private final StreamParser streamParser;
   private final boolean readOnly;
   private JPanel currentlyProcessedElement;
-  private ResponseEditor currentlyProcessedEditor;
+  private ResponseEditorPanel currentlyProcessedEditor;
   private JTextPane currentlyProcessedTextPane;
   private boolean responseReceived;
 
@@ -248,7 +248,7 @@ public class ChatMessageResponseBody extends JPanel {
   private void prepareProcessingCodeResponse(String code, String markdownLanguage) {
     hideCarets();
     currentlyProcessedTextPane = null;
-    currentlyProcessedEditor = new ResponseEditor(
+    currentlyProcessedEditor = new ResponseEditorPanel(
         project,
         code,
         markdownLanguage,
