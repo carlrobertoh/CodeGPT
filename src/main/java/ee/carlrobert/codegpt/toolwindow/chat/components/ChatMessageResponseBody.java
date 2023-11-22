@@ -7,7 +7,6 @@ import static javax.swing.event.HyperlinkEvent.EventType.ACTIVATED;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.WriteCommandAction;
-import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
@@ -84,7 +83,7 @@ public class ChatMessageResponseBody extends JPanel {
     setBackground(backgroundColor);
 
     if (withGhostText) {
-      prepareProcessingTextResponse();
+      prepareProcessingTextResponse(!readOnly);
       currentlyProcessedTextPane.setText(
           "<html><p style=\"margin-top: 4px; margin-bottom: 8px;\">&#8205;</p></html>");
     }
@@ -94,20 +93,15 @@ public class ChatMessageResponseBody extends JPanel {
 
   public ChatMessageResponseBody withResponse(String response) {
     for (var message : MarkdownUtil.splitCodeBlocks(response)) {
-      boolean isCodeResponse = message.startsWith("```");
-      if (isCodeResponse) {
-        currentlyProcessedEditor = null;
-      }
-      processResponse(message, isCodeResponse);
+      processResponse(message, message.startsWith("```"), false);
     }
-    hideCarets();
 
     return this;
   }
 
   public void update(String partialMessage) {
     for (var item : streamParser.parse(partialMessage)) {
-      processResponse(item.getResponse(), StreamResponseType.CODE.equals(item.getType()));
+      processResponse(item.getResponse(), StreamResponseType.CODE.equals(item.getType()), true);
     }
   }
 
@@ -138,21 +132,13 @@ public class ChatMessageResponseBody extends JPanel {
             .send();
       }
     });
-    currentlyProcessedTextPane.getCaret().setVisible(false);
+    hideCaret();
   }
 
-  public void hideCarets() {
-    ApplicationManager.getApplication().invokeLater(() ->
-        ApplicationManager.getApplication().runWriteAction(() -> {
-          if (currentlyProcessedEditor != null) {
-            ((EditorEx) currentlyProcessedEditor.getEditor()).setCaretVisible(false);
-            ((EditorEx) currentlyProcessedEditor.getEditor()).setCaretEnabled(false);
-          }
-          if (currentlyProcessedTextPane != null && currentlyProcessedTextPane.getCaret()
-              .isVisible()) {
-            currentlyProcessedTextPane.getCaret().setVisible(false);
-          }
-        }));
+  public void hideCaret() {
+    if (currentlyProcessedTextPane != null) {
+      currentlyProcessedTextPane.getCaret().setVisible(false);
+    }
   }
 
   public void displayError(String message) {
@@ -160,7 +146,7 @@ public class ChatMessageResponseBody extends JPanel {
         "<html><p style=\"margin-top: 4px; margin-bottom: 8px;\">%s</p></html>",
         message);
     if (responseReceived) {
-      add(new ResponseWrapper().add(createTextPane(errorText)));
+      add(new ResponseWrapper().add(createTextPane(errorText, false)));
     } else {
       currentlyProcessedTextPane.setText(errorText);
     }
@@ -173,7 +159,7 @@ public class ChatMessageResponseBody extends JPanel {
   public void displaySerpResults(List<YouSerpResult> serpResults) {
     var html = getSearchResultsHtml(serpResults);
     if (responseReceived) {
-      add(new ResponseWrapper().add(createTextPane(html)));
+      add(new ResponseWrapper().add(createTextPane(html, false)));
     } else {
       currentlyProcessedTextPane.setText(html);
     }
@@ -196,7 +182,7 @@ public class ChatMessageResponseBody extends JPanel {
 
     streamParser.clear();
     // TODO: First message might be code block
-    prepareProcessingTextResponse();
+    prepareProcessingTextResponse(true);
     currentlyProcessedTextPane.setText(
         "<html><p style=\"margin-top: 4px; margin-bottom: 8px;\">&#8205;</p></html>");
 
@@ -204,49 +190,48 @@ public class ChatMessageResponseBody extends JPanel {
     revalidate();
   }
 
-  private void processResponse(String markdownInput, boolean isCodeResponse) {
+  private void processResponse(String markdownInput, boolean codeResponse, boolean caretVisible) {
     responseReceived = true;
 
-    if (isCodeResponse) {
+    if (codeResponse) {
       processCode(markdownInput);
     } else {
-      processText(markdownInput);
+      processText(markdownInput, caretVisible);
     }
   }
 
   private void processCode(String markdownCode) {
     var document = Parser.builder().build().parse(markdownCode);
-    var codeBlock = document.getChildOfType(FencedCodeBlock.class);
-    if (codeBlock != null) {
-      var code = ((FencedCodeBlock) codeBlock).getContentChars().unescape();
-      var language = ((FencedCodeBlock) codeBlock).getInfo();
+    var child = document.getChildOfType(FencedCodeBlock.class);
+    if (child != null) {
+      var codeBlock = ((FencedCodeBlock) child);
+      var code = codeBlock.getContentChars().unescape();
       if (!code.isEmpty()) {
         if (currentlyProcessedEditor == null) {
-          prepareProcessingCodeResponse(code, language.unescape());
+          prepareProcessingCodeResponse(code, codeBlock.getInfo().unescape());
         }
         updateEditorDocument(code);
       }
     }
   }
 
-  private void processText(String markdownText) {
+  private void processText(String markdownText, boolean caretVisible) {
     if (currentlyProcessedTextPane == null) {
-      prepareProcessingTextResponse();
+      prepareProcessingTextResponse(caretVisible);
     }
     currentlyProcessedTextPane.setText(convertMdToHtml(markdownText));
   }
 
-  private void prepareProcessingTextResponse() {
-    hideCarets();
+  private void prepareProcessingTextResponse(boolean caretVisible) {
     currentlyProcessedEditor = null;
-    currentlyProcessedTextPane = createTextPane("");
+    currentlyProcessedTextPane = createTextPane("", caretVisible);
     currentlyProcessedElement = new ResponseWrapper();
     currentlyProcessedElement.add(currentlyProcessedTextPane);
     add(currentlyProcessedElement);
   }
 
   private void prepareProcessingCodeResponse(String code, String markdownLanguage) {
-    hideCarets();
+    currentlyProcessedTextPane.getCaret().setVisible(false);
     currentlyProcessedTextPane = null;
     currentlyProcessedEditor = new ResponseEditorPanel(
         project,
@@ -256,7 +241,6 @@ public class ChatMessageResponseBody extends JPanel {
         getPanelBackgroundColor(),
         parentDisposable);
     currentlyProcessedElement = new ResponseWrapper();
-
     currentlyProcessedElement.add(currentlyProcessedEditor);
     add(currentlyProcessedElement);
   }
@@ -266,12 +250,8 @@ public class ChatMessageResponseBody extends JPanel {
     var document = editor.getDocument();
     var application = ApplicationManager.getApplication();
     Runnable updateDocumentRunnable = () -> application.runWriteAction(() ->
-        WriteCommandAction.runWriteCommandAction(project, () -> {
-          document.replaceString(0, document.getTextLength(), code);
-          editor.getCaretModel().moveToOffset(code.length());
-          editor.getComponent().revalidate();
-          editor.getComponent().repaint();
-        }));
+        WriteCommandAction.runWriteCommandAction(project, () ->
+            document.replaceString(0, document.getTextLength(), code)));
 
     if (application.isUnitTestMode()) {
       application.invokeAndWait(updateDocumentRunnable);
@@ -280,7 +260,7 @@ public class ChatMessageResponseBody extends JPanel {
     }
   }
 
-  private JTextPane createTextPane(String text) {
+  private JTextPane createTextPane(String text, boolean caretVisible) {
     var textPane = UIUtil.createTextPane(text, event -> {
       if (FileUtil.exists(event.getDescription()) && ACTIVATED.equals(event.getEventType())) {
         VirtualFile file = LocalFileSystem.getInstance().findFileByPath(event.getDescription());
@@ -290,8 +270,10 @@ public class ChatMessageResponseBody extends JPanel {
 
       UIUtil.handleHyperlinkClicked(event);
     });
-    textPane.getCaret().setVisible(true);
-    textPane.setCaretPosition(textPane.getDocument().getLength());
+    if (caretVisible) {
+      textPane.getCaret().setVisible(true);
+      textPane.setCaretPosition(textPane.getDocument().getLength());
+    }
     textPane.setBorder(JBUI.Borders.empty());
     textPane.setBackground(getBackground());
     return textPane;

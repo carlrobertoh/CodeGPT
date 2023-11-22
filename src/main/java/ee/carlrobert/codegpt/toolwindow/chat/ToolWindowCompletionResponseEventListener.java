@@ -147,6 +147,6 @@ abstract class ToolWindowCompletionResponseEventListener implements
   private void stopStreaming(ChatMessageResponseBody responseContainer) {
     completed = true;
     userPromptTextArea.setSubmitEnabled(true);
-    responseContainer.hideCarets();
+    responseContainer.hideCaret();
   }
 }
