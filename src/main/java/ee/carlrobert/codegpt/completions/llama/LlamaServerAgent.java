@@ -78,7 +78,7 @@ public final class LlamaServerAgent implements Disposable {
       public void processTerminated(@NotNull ProcessEvent event) {
         try {
           serverProgressPanel.updateText("Booting up server...");
-          startServerProcessHandler = new OSProcessHandler(
+          startServerProcessHandler = new OSProcessHandler.Silent(
               getServerCommandLine(modelPath, contextLength, port));
           startServerProcessHandler.addProcessListener(
               getProcessListener(port, serverProgressPanel, onSuccess));
