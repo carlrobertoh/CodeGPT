@@ -38,6 +38,23 @@ public enum LlamaModel {
           HuggingFaceModel.CODE_BOOGA_34B_Q3,
           HuggingFaceModel.CODE_BOOGA_34B_Q4,
           HuggingFaceModel.CODE_BOOGA_34B_Q5)),
+  DEEPSEEK_CODER(
+      "Deepseek Coder",
+      "Deepseek Coder is composed of a series of code language models, each trained "
+          + "from scratch on 2T tokens, with a composition of 87% code and 13% natural language "
+          + "in both English and Chinese. It achieves state-of-the-art performance among "
+          + "open-source code models on multiple programming languages and various benchmarks.",
+      PromptTemplate.ALPACA,
+      List.of(
+          HuggingFaceModel.DEEPSEEK_CODER_1_3B_Q3,
+          HuggingFaceModel.DEEPSEEK_CODER_1_3B_Q4,
+          HuggingFaceModel.DEEPSEEK_CODER_1_3B_Q5,
+          HuggingFaceModel.DEEPSEEK_CODER_6_7B_Q3,
+          HuggingFaceModel.DEEPSEEK_CODER_6_7B_Q4,
+          HuggingFaceModel.DEEPSEEK_CODER_6_7B_Q5,
+          HuggingFaceModel.DEEPSEEK_CODER_33B_Q3,
+          HuggingFaceModel.DEEPSEEK_CODER_33B_Q4,
+          HuggingFaceModel.DEEPSEEK_CODER_33B_Q5)),
   PHIND_CODE_LLAMA(
       "Phind Code Llama",
       "This model is fine-tuned from Phind-CodeLlama-34B-v1 on an additional 1.5B tokens "
