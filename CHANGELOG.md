@@ -6,6 +6,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.5] - 2023-11-23
+
+### Added
+
+- Option to set the number of threads for local LLM models
+
+### Fixed
+
+- Tool window chat editor enabled/disabled logic
+- Tool window text pane caret visibility
+- Editor actions for `createNewChatOnEachAction` state
+- Plugin from crashing when the LLaMA server process is stuck
+
 ## [2.2.4] - 2023-11-20
 
 ### Added
@@ -249,7 +262,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `OPENAI_API_KEY` persistence, key is saved in the OS password safe from now on
 
-[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.4...HEAD
+[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.5...HEAD
+[2.2.5]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.4...v2.2.5
 [2.2.4]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.3...v2.2.4
 [2.2.3]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.2...v2.2.3
 [2.2.2]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.1...v2.2.2
