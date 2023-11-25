@@ -1,7 +1,6 @@
 package ee.carlrobert.codegpt.toolwindow.chat;
 
 import static ee.carlrobert.codegpt.util.UIUtil.createScrollPaneWithSmartScroller;
-import static ee.carlrobert.codegpt.util.UIUtil.getPanelBackgroundColor;
 import static java.lang.String.format;
 
 import com.intellij.openapi.diagnostic.Logger;
@@ -16,6 +15,7 @@ import ee.carlrobert.codegpt.completions.CompletionRequestService;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
+import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.toolwindow.chat.components.ChatMessageResponseBody;
@@ -24,6 +24,7 @@ import ee.carlrobert.codegpt.toolwindow.chat.components.TotalTokensPanel;
 import ee.carlrobert.codegpt.toolwindow.chat.components.UserMessagePanel;
 import ee.carlrobert.codegpt.toolwindow.chat.components.UserPromptTextArea;
 import ee.carlrobert.codegpt.toolwindow.chat.components.UserPromptTextAreaHeader;
+import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
 import ee.carlrobert.codegpt.util.EditorUtil;
 import ee.carlrobert.codegpt.util.file.FileUtil;
 import java.awt.BorderLayout;
@@ -65,7 +66,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
         EditorUtil.getSelectedEditorSelectedText(project),
         this);
     userPromptTextArea = new UserPromptTextArea(this::handleSubmit, totalTokensPanel);
-    rootPanel = createRootPanel(settings);
+    rootPanel = createRootPanel(settings.getSelectedService());
     userPromptTextArea.requestFocusInWindow();
     userPromptTextArea.requestFocus();
   }
@@ -201,18 +202,21 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     sendMessage(message);
   }
 
-  private JPanel createUserPromptPanel(SettingsState settings) {
+  private JPanel createUserPromptPanel(ServiceType selectedService) {
     var panel = new JPanel(new BorderLayout());
     panel.setBorder(JBUI.Borders.compound(
         JBUI.Borders.customLine(JBColor.border(), 1, 0, 0, 0),
         JBUI.Borders.empty(8)));
-    panel.setBackground(getPanelBackgroundColor());
-    panel.add(new UserPromptTextAreaHeader(settings, totalTokensPanel), BorderLayout.NORTH);
-    panel.add(userPromptTextArea, BorderLayout.SOUTH);
+    var contentManager = project.getService(StandardChatToolWindowContentManager.class);
+    panel.add(JBUI.Panels.simplePanel(new UserPromptTextAreaHeader(
+        selectedService,
+        totalTokensPanel,
+        contentManager::createNewTabPanel)), BorderLayout.NORTH);
+    panel.add(JBUI.Panels.simplePanel(userPromptTextArea), BorderLayout.CENTER);
     return panel;
   }
 
-  private JPanel createRootPanel(SettingsState settings) {
+  private JPanel createRootPanel(ServiceType selectedService) {
     var gbc = new GridBagConstraints();
     gbc.fill = GridBagConstraints.BOTH;
     gbc.weighty = 1;
@@ -226,7 +230,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     gbc.weighty = 0;
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.gridy = 1;
-    rootPanel.add(createUserPromptPanel(settings), gbc);
+    rootPanel.add(createUserPromptPanel(selectedService), gbc);
     return rootPanel;
   }
 }

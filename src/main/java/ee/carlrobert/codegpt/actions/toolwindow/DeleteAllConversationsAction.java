@@ -1,6 +1,6 @@
 package ee.carlrobert.codegpt.actions.toolwindow;
 
-import static ee.carlrobert.codegpt.Icons.DefaultIcon;
+import static ee.carlrobert.codegpt.Icons.Default;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnAction;
@@ -37,7 +37,7 @@ public class DeleteAllConversationsAction extends AnAction {
     int answer = Messages.showYesNoDialog(
         "Are you sure you want to delete all conversations?",
         "Clear History",
-        DefaultIcon);
+        Default);
     if (answer == Messages.YES) {
       var project = event.getProject();
       if (project != null) {

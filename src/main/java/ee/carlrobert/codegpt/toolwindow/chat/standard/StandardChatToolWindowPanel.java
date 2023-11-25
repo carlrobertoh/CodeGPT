@@ -12,7 +12,8 @@ import ee.carlrobert.codegpt.actions.toolwindow.CreateNewConversationAction;
 import ee.carlrobert.codegpt.actions.toolwindow.OpenInEditorAction;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
-import java.awt.FlowLayout;
+import java.awt.BorderLayout;
+import javax.swing.JPanel;
 import org.jetbrains.annotations.NotNull;
 
 public class StandardChatToolWindowPanel extends SimpleToolWindowPanel {
@@ -29,11 +30,22 @@ public class StandardChatToolWindowPanel extends SimpleToolWindowPanel {
     if (conversation == null) {
       conversation = ConversationService.getInstance().startConversation();
     }
+
     var tabPanel = new StandardChatToolWindowTabPanel(project, conversation);
     var tabbedPane = createTabbedPane(tabPanel, parentDisposable);
-    var toolbarComponent = createActionToolbar(project, tabbedPane).getComponent();
-    toolbarComponent.setLayout(new FlowLayout());
-    setToolbar(toolbarComponent);
+    Runnable onAddNewTab = () -> {
+      tabbedPane.addNewTab(new StandardChatToolWindowTabPanel(
+          project,
+          ConversationService.getInstance().startConversation()));
+      repaint();
+      revalidate();
+    };
+    var actionToolbarPanel = new JPanel(new BorderLayout());
+    actionToolbarPanel.add(
+        createActionToolbar(project, tabbedPane, onAddNewTab).getComponent(),
+        BorderLayout.LINE_START);
+
+    setToolbar(actionToolbarPanel);
     setContent(tabbedPane);
 
     Disposer.register(parentDisposable, tabPanel);
@@ -41,15 +53,10 @@ public class StandardChatToolWindowPanel extends SimpleToolWindowPanel {
 
   private ActionToolbar createActionToolbar(
       Project project,
-      StandardChatToolWindowTabbedPane tabbedPane) {
+      StandardChatToolWindowTabbedPane tabbedPane,
+      Runnable onAddNewTab) {
     var actionGroup = new DefaultCompactActionGroup("TOOLBAR_ACTION_GROUP", false);
-    actionGroup.add(new CreateNewConversationAction(() -> {
-      tabbedPane.addNewTab(new StandardChatToolWindowTabPanel(
-          project,
-          ConversationService.getInstance().startConversation()));
-      repaint();
-      revalidate();
-    }));
+    actionGroup.add(new CreateNewConversationAction(onAddNewTab));
     actionGroup.add(
         new ClearChatWindowAction(() -> tabbedPane.resetCurrentlyActiveTabPanel(project)));
     actionGroup.addSeparator();
@@ -61,7 +68,8 @@ public class StandardChatToolWindowPanel extends SimpleToolWindowPanel {
     return toolbar;
   }
 
-  private StandardChatToolWindowTabbedPane createTabbedPane(StandardChatToolWindowTabPanel tabPanel,
+  private StandardChatToolWindowTabbedPane createTabbedPane(
+      StandardChatToolWindowTabPanel tabPanel,
       Disposable parentDisposable) {
     var tabbedPane = new StandardChatToolWindowTabbedPane(parentDisposable);
     tabbedPane.addNewTab(tabPanel);

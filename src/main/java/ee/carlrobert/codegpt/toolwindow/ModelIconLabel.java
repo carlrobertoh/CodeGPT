@@ -11,21 +11,21 @@ public class ModelIconLabel extends JBLabel {
 
   public ModelIconLabel(String clientCode, String modelCode) {
     if ("you.chat.completion".equals(clientCode)) {
-      setIcon(Icons.YouIcon);
+      setIcon(Icons.You);
       return;
     }
 
     if ("chat.completion".equals(clientCode)) {
-      setIcon(Icons.OpenAIIcon);
+      setIcon(Icons.OpenAI);
     }
     if ("azure.chat.completion".equals(clientCode)) {
-      setIcon(Icons.AzureIcon);
+      setIcon(Icons.Azure);
     }
     if ("llama.chat.completion".equals(clientCode)) {
-      setIcon(Icons.LlamaIcon);
+      setIcon(Icons.Llama);
     }
     setText(formatModelName(modelCode));
-    setFont(JBFont.small().asBold());
+    setFont(JBFont.small());
     setHorizontalAlignment(SwingConstants.LEADING);
   }
 

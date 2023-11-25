@@ -10,35 +10,35 @@ import com.intellij.diff.util.DiffUserDataKeys;
 import com.intellij.diff.util.DiffUtil;
 import com.intellij.diff.util.Side;
 import com.intellij.icons.AllIcons.Actions;
-import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.util.Pair;
 import ee.carlrobert.codegpt.CodeGPTBundle;
-import ee.carlrobert.codegpt.actions.ActionType;
-import ee.carlrobert.codegpt.actions.TrackableAction;
 import ee.carlrobert.codegpt.util.EditorUtil;
 import ee.carlrobert.codegpt.util.OverlayUtil;
 import ee.carlrobert.codegpt.util.file.FileUtil;
+import java.awt.Point;
+import java.awt.event.ActionEvent;
+import javax.swing.AbstractAction;
 import org.jetbrains.annotations.NotNull;
 
-public class DiffAction extends TrackableAction {
+public class DiffAction extends AbstractAction {
 
-  public DiffAction(@NotNull Editor editor) {
-    super(
-        editor,
-        CodeGPTBundle.get("toolwindow.chat.editor.action.diff.title"),
-        CodeGPTBundle.get("toolwindow.chat.editor.action.diff.description"),
-        Actions.DiffWithClipboard,
-        ActionType.DIFF_CODE);
+  private final EditorEx editor;
+  private final Point locationOnScreen;
+
+  public DiffAction(@NotNull EditorEx editor, @NotNull Point locationOnScreen) {
+    super("Diff", Actions.DiffWithClipboard);
+    this.editor = editor;
+    this.locationOnScreen = locationOnScreen;
   }
 
   @Override
-  public void handleAction(@NotNull AnActionEvent event) {
-    var project = requireNonNull(event.getProject());
+  public void actionPerformed(ActionEvent event) {
+    var project = requireNonNull(editor.getProject());
     var selectedTextEditor = FileEditorManager.getInstance(project).getSelectedTextEditor();
     if (!EditorUtil.hasSelection(selectedTextEditor)) {
-      OverlayUtil.showSelectedEditorSelectionWarning(event);
+      OverlayUtil.showSelectedEditorSelectionWarning(project, locationOnScreen);
       return;
     }
 

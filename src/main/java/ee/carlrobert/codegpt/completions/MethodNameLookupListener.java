@@ -56,7 +56,7 @@ public class MethodNameLookupListener implements LookupManagerListener {
           for (var value : response.split(",")) {
             application.runReadAction(() -> {
               lookup.addItem(
-                  LookupElementBuilder.create(value.trim()).withIcon(Icons.SparkleIcon),
+                  LookupElementBuilder.create(value.trim()).withIcon(Icons.Sparkle),
                   PrefixMatcher.ALWAYS_TRUE);
             });
             application.invokeLater(() -> lookup.refreshUi(true, true));

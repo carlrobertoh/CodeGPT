@@ -1,7 +1,5 @@
 package ee.carlrobert.codegpt.toolwindow.conversations;
 
-import static ee.carlrobert.codegpt.util.UIUtil.getPanelBackgroundColor;
-
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBLabel;
@@ -62,7 +60,6 @@ class ConversationPanel extends JPanel {
     var border = isSelected
         ? JBUI.Borders.customLine(JBUI.CurrentTheme.ActionButton.focusedBorder(), 2, 2, 2, 2)
         : JBUI.Borders.customLine(JBColor.border(), 1, 0, 1, 0);
-    setBackground(getPanelBackgroundColor());
     setBorder(JBUI.Borders.compound(border, JBUI.Borders.empty(8)));
     setLayout(new GridBagLayout());
     setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -85,7 +82,6 @@ class ConversationPanel extends JPanel {
     gbc.weightx = 1.0;
     gbc.gridx = 0;
 
-    headerPanel.setBackground(getPanelBackgroundColor());
     headerPanel.add(new JBLabel(getFirstPrompt(conversation))
         .withFont(JBFont.label().asBold()), gbc);
 
@@ -94,7 +90,6 @@ class ConversationPanel extends JPanel {
     headerPanel.add(new IconActionButton(new DeleteConversationAction(onDelete)), gbc);
 
     var bottomPanel = new JPanel(new BorderLayout());
-    bottomPanel.setBackground(getPanelBackgroundColor());
     bottomPanel.add(new JLabel(conversation.getUpdatedOn()
         .format(DateTimeFormatter.ofPattern("M/d/yyyy, h:mm:ss a"))), BorderLayout.WEST);
     if (conversation.getModel() != null) {
@@ -104,7 +99,6 @@ class ConversationPanel extends JPanel {
     }
 
     var textPanel = new JPanel(new BorderLayout());
-    textPanel.setBackground(getPanelBackgroundColor());
     textPanel.add(headerPanel, BorderLayout.NORTH);
     textPanel.add(bottomPanel, BorderLayout.SOUTH);
     return textPanel;

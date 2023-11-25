@@ -1,6 +1,5 @@
 package ee.carlrobert.codegpt.toolwindow.chat.components;
 
-import static ee.carlrobert.codegpt.util.UIUtil.getPanelBackgroundColor;
 import static java.lang.String.format;
 import static javax.swing.event.HyperlinkEvent.EventType.ACTIVATED;
 
@@ -13,6 +12,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.ui.JBColor;
 import com.intellij.util.ui.JBUI;
 import com.vladsch.flexmark.ast.FencedCodeBlock;
 import com.vladsch.flexmark.html.HtmlRenderer;
@@ -36,7 +36,6 @@ import java.util.stream.Collectors;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.JTextPane;
-import javax.swing.UIManager;
 
 public class ChatMessageResponseBody extends JPanel {
 
@@ -44,33 +43,23 @@ public class ChatMessageResponseBody extends JPanel {
   private final Disposable parentDisposable;
   private final StreamParser streamParser;
   private final boolean readOnly;
-  private JPanel currentlyProcessedElement;
   private ResponseEditorPanel currentlyProcessedEditor;
   private JTextPane currentlyProcessedTextPane;
   private boolean responseReceived;
 
   public ChatMessageResponseBody(Project project, Disposable parentDisposable) {
-    this(project, getPanelBackgroundColor(), false, parentDisposable);
+    this(project, false, parentDisposable);
   }
 
   public ChatMessageResponseBody(
       Project project,
       boolean withGhostText,
       Disposable parentDisposable) {
-    this(project, getPanelBackgroundColor(), withGhostText, parentDisposable);
+    this(project, withGhostText, false, parentDisposable);
   }
 
   public ChatMessageResponseBody(
       Project project,
-      Color backgroundColor,
-      boolean withGhostText,
-      Disposable parentDisposable) {
-    this(project, backgroundColor, withGhostText, false, parentDisposable);
-  }
-
-  public ChatMessageResponseBody(
-      Project project,
-      Color backgroundColor,
       boolean withGhostText,
       boolean readOnly,
       Disposable parentDisposable) {
@@ -80,15 +69,13 @@ public class ChatMessageResponseBody extends JPanel {
     this.streamParser = new StreamParser();
     this.readOnly = readOnly;
     setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
-    setBackground(backgroundColor);
+    setOpaque(false);
 
     if (withGhostText) {
       prepareProcessingTextResponse(!readOnly);
       currentlyProcessedTextPane.setText(
           "<html><p style=\"margin-top: 4px; margin-bottom: 8px;\">&#8205;</p></html>");
     }
-
-    UIManager.addPropertyChangeListener(propertyChangeEvent -> setBackground(backgroundColor));
   }
 
   public ChatMessageResponseBody withResponse(String response) {
@@ -146,7 +133,7 @@ public class ChatMessageResponseBody extends JPanel {
         "<html><p style=\"margin-top: 4px; margin-bottom: 8px;\">%s</p></html>",
         message);
     if (responseReceived) {
-      add(new ResponseWrapper().add(createTextPane(errorText, false)));
+      add(createTextPane(errorText, false));
     } else {
       currentlyProcessedTextPane.setText(errorText);
     }
@@ -159,22 +146,10 @@ public class ChatMessageResponseBody extends JPanel {
   public void displaySerpResults(List<YouSerpResult> serpResults) {
     var html = getSearchResultsHtml(serpResults);
     if (responseReceived) {
-      add(new ResponseWrapper().add(createTextPane(html, false)));
+      add(createTextPane(html, false));
     } else {
       currentlyProcessedTextPane.setText(html);
     }
-  }
-
-  private String getSearchResultsHtml(List<YouSerpResult> serpResults) {
-    var titles = serpResults.stream()
-        .map(result -> format("<li style=\"margin-bottom: 4px;\"><a href=\"%s\">%s</a></li>",
-            result.getUrl(), result.getName()))
-        .collect(Collectors.joining());
-    return format(
-        "<html>"
-            + "<p><strong>Search results:</strong></p>"
-            + "<ol>%s</ol>"
-            + "</html>", titles);
   }
 
   public void clear() {
@@ -188,6 +163,18 @@ public class ChatMessageResponseBody extends JPanel {
 
     repaint();
     revalidate();
+  }
+
+  private String getSearchResultsHtml(List<YouSerpResult> serpResults) {
+    var titles = serpResults.stream()
+        .map(result -> format("<li style=\"margin-bottom: 4px;\"><a href=\"%s\">%s</a></li>",
+            result.getUrl(), result.getName()))
+        .collect(Collectors.joining());
+    return format(
+        "<html>"
+            + "<p><strong>Search results:</strong></p>"
+            + "<ol>%s</ol>"
+            + "</html>", titles);
   }
 
   private void processResponse(String markdownInput, boolean codeResponse, boolean caretVisible) {
@@ -225,24 +212,17 @@ public class ChatMessageResponseBody extends JPanel {
   private void prepareProcessingTextResponse(boolean caretVisible) {
     currentlyProcessedEditor = null;
     currentlyProcessedTextPane = createTextPane("", caretVisible);
-    currentlyProcessedElement = new ResponseWrapper();
-    currentlyProcessedElement.add(currentlyProcessedTextPane);
-    add(currentlyProcessedElement);
+    add(currentlyProcessedTextPane);
   }
 
   private void prepareProcessingCodeResponse(String code, String markdownLanguage) {
-    currentlyProcessedTextPane.getCaret().setVisible(false);
+    if (currentlyProcessedTextPane != null) {
+      currentlyProcessedTextPane.getCaret().setVisible(false);
+    }
     currentlyProcessedTextPane = null;
-    currentlyProcessedEditor = new ResponseEditorPanel(
-        project,
-        code,
-        markdownLanguage,
-        readOnly,
-        getPanelBackgroundColor(),
-        parentDisposable);
-    currentlyProcessedElement = new ResponseWrapper();
-    currentlyProcessedElement.add(currentlyProcessedEditor);
-    add(currentlyProcessedElement);
+    currentlyProcessedEditor =
+        new ResponseEditorPanel(project, code, markdownLanguage, readOnly, parentDisposable);
+    add(currentlyProcessedEditor);
   }
 
   private void updateEditorDocument(String code) {
@@ -250,8 +230,11 @@ public class ChatMessageResponseBody extends JPanel {
     var document = editor.getDocument();
     var application = ApplicationManager.getApplication();
     Runnable updateDocumentRunnable = () -> application.runWriteAction(() ->
-        WriteCommandAction.runWriteCommandAction(project, () ->
-            document.replaceString(0, document.getTextLength(), code)));
+        WriteCommandAction.runWriteCommandAction(project, () -> {
+          document.replaceString(0, document.getTextLength(), code);
+          editor.getComponent().repaint();
+          editor.getComponent().revalidate();
+        }));
 
     if (application.isUnitTestMode()) {
       application.invokeAndWait(updateDocumentRunnable);
@@ -261,7 +244,7 @@ public class ChatMessageResponseBody extends JPanel {
   }
 
   private JTextPane createTextPane(String text, boolean caretVisible) {
-    var textPane = UIUtil.createTextPane(text, event -> {
+    var textPane = UIUtil.createTextPane(text, false, event -> {
       if (FileUtil.exists(event.getDescription()) && ACTIVATED.equals(event.getEventType())) {
         VirtualFile file = LocalFileSystem.getInstance().findFileByPath(event.getDescription());
         FileEditorManager.getInstance(project).openFile(Objects.requireNonNull(file), true);
@@ -275,7 +258,6 @@ public class ChatMessageResponseBody extends JPanel {
       textPane.setCaretPosition(textPane.getDocument().getLength());
     }
     textPane.setBorder(JBUI.Borders.empty());
-    textPane.setBackground(getBackground());
     return textPane;
   }
 
@@ -286,16 +268,5 @@ public class ChatMessageResponseBody extends JPanel {
         .nodeRendererFactory(new ResponseNodeRenderer.Factory())
         .build()
         .render(document);
-  }
-
-  private static class ResponseWrapper extends JPanel {
-
-    ResponseWrapper() {
-      super(new BorderLayout());
-      setBorder(JBUI.Borders.empty());
-      setBackground(getBackground());
-
-      UIManager.addPropertyChangeListener(propertyChangeEvent -> setBackground(getBackground()));
-    }
   }
 }

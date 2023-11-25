@@ -100,8 +100,10 @@ public class CompletionRequestProvider {
         COMPLETION_SYSTEM_PROMPT,
         message.getPrompt(),
         conversation.getMessages());
+    var configuration = ConfigurationState.getInstance();
     return new LlamaCompletionRequest.Builder(prompt)
-        .setN_predict(512)
+        .setN_predict(configuration.getMaxTokens())
+        .setTemperature(configuration.getTemperature())
         .build();
   }
 

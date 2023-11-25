@@ -50,6 +50,7 @@ public class UserPromptTextArea extends JPanel {
   private boolean submitEnabled = true;
 
   public UserPromptTextArea(Consumer<String> onSubmit, TotalTokensPanel totalTokensPanel) {
+    super(new BorderLayout());
     this.onSubmit = onSubmit;
 
     textArea = new JBTextArea();
@@ -160,7 +161,6 @@ public class UserPromptTextArea extends JPanel {
 
   private void init() {
     setOpaque(false);
-    setLayout(new BorderLayout());
     add(textArea, BorderLayout.CENTER);
 
     stopButton = createIconButton(AllIcons.Actions.Suspend, null);
@@ -168,9 +168,9 @@ public class UserPromptTextArea extends JPanel {
     var flowLayout = new FlowLayout(FlowLayout.RIGHT);
     flowLayout.setHgap(8);
     iconsPanel = new JPanel(flowLayout);
-    iconsPanel.add(createIconButton(Icons.SendIcon, this::handleSubmit));
+    iconsPanel.add(createIconButton(Icons.Send, this::handleSubmit));
     iconsPanel.add(stopButton);
-    add(JBUI.Panels.simplePanel().addToBottom(iconsPanel), BorderLayout.EAST);
+    add(iconsPanel, BorderLayout.EAST);
   }
 
   private void updateFont() {

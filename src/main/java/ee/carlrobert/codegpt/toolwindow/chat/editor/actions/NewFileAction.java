@@ -1,11 +1,11 @@
 package ee.carlrobert.codegpt.toolwindow.chat.editor.actions;
 
 import static com.intellij.openapi.ui.DialogWrapper.OK_EXIT_CODE;
+import static java.util.Objects.requireNonNull;
 
 import com.intellij.icons.AllIcons.Actions;
 import com.intellij.ide.util.EditorHelper;
-import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogBuilder;
@@ -15,30 +15,25 @@ import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.psi.PsiManager;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
-import ee.carlrobert.codegpt.CodeGPTBundle;
-import ee.carlrobert.codegpt.actions.ActionType;
-import ee.carlrobert.codegpt.actions.TrackableAction;
 import ee.carlrobert.codegpt.util.file.FileUtil;
-import java.util.Objects;
+import java.awt.event.ActionEvent;
+import javax.swing.AbstractAction;
 import org.jetbrains.annotations.NotNull;
 
-public class NewFileAction extends TrackableAction {
+public class NewFileAction extends AbstractAction {
 
   private final String fileExtension;
+  private final EditorEx editor;
 
-  public NewFileAction(@NotNull Editor editor, String fileExtension) {
-    super(
-        editor,
-        CodeGPTBundle.get("toolwindow.chat.editor.action.newFile.title"),
-        CodeGPTBundle.get("toolwindow.chat.editor.action.newFile.description"),
-        Actions.AddFile,
-        ActionType.CREATE_NEW_FILE);
+  public NewFileAction(@NotNull EditorEx editor, String fileExtension) {
+    super("Create New File", Actions.AddFile);
     this.fileExtension = fileExtension;
+    this.editor = editor;
   }
 
   @Override
-  public void handleAction(@NotNull AnActionEvent e) {
-    var project = Objects.requireNonNull(e.getProject());
+  public void actionPerformed(@NotNull ActionEvent event) {
+    var project = requireNonNull(editor.getProject());
     var fileChooserDescriptor = FileChooserDescriptorFactory.createSingleFolderDescriptor();
     fileChooserDescriptor.setForcedToUseIdeaFileChooser(true);
     var textFieldWithBrowseButton = new TextFieldWithBrowseButton();
