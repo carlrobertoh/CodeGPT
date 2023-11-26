@@ -58,8 +58,8 @@ public class MethodNameLookupListener implements LookupManagerListener {
               lookup.addItem(
                   LookupElementBuilder.create(value.trim()).withIcon(Icons.Sparkle),
                   PrefixMatcher.ALWAYS_TRUE);
+              application.invokeLater(() -> lookup.refreshUi(true, true));
             });
-            application.invokeLater(() -> lookup.refreshUi(true, true));
           }
         });
   }

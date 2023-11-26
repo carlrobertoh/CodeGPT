@@ -1,35 +1,30 @@
 package ee.carlrobert.codegpt.toolwindow.chat.components;
 
+import static ee.carlrobert.codegpt.toolwindow.chat.StreamResponseType.CODE;
+import static ee.carlrobert.codegpt.util.MarkdownUtil.convertMdToHtml;
 import static java.lang.String.format;
 import static javax.swing.event.HyperlinkEvent.EventType.ACTIVATED;
 
 import com.intellij.openapi.Disposable;
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.ui.JBColor;
 import com.intellij.util.ui.JBUI;
 import com.vladsch.flexmark.ast.FencedCodeBlock;
-import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
-import com.vladsch.flexmark.util.data.MutableDataSet;
 import ee.carlrobert.codegpt.actions.ActionType;
 import ee.carlrobert.codegpt.settings.SettingsConfigurable;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
-import ee.carlrobert.codegpt.toolwindow.chat.ResponseNodeRenderer;
 import ee.carlrobert.codegpt.toolwindow.chat.StreamParser;
-import ee.carlrobert.codegpt.toolwindow.chat.StreamResponseType;
 import ee.carlrobert.codegpt.toolwindow.chat.editor.ResponseEditorPanel;
+import ee.carlrobert.codegpt.util.EditorUtil;
 import ee.carlrobert.codegpt.util.MarkdownUtil;
 import ee.carlrobert.codegpt.util.UIUtil;
 import ee.carlrobert.llm.client.you.completion.YouSerpResult;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -43,7 +38,7 @@ public class ChatMessageResponseBody extends JPanel {
   private final Disposable parentDisposable;
   private final StreamParser streamParser;
   private final boolean readOnly;
-  private ResponseEditorPanel currentlyProcessedEditor;
+  private ResponseEditorPanel currentlyProcessedEditorPanel;
   private JTextPane currentlyProcessedTextPane;
   private boolean responseReceived;
 
@@ -72,7 +67,7 @@ public class ChatMessageResponseBody extends JPanel {
     setOpaque(false);
 
     if (withGhostText) {
-      prepareProcessingTextResponse(!readOnly);
+      prepareProcessingText(!readOnly);
       currentlyProcessedTextPane.setText(
           "<html><p style=\"margin-top: 4px; margin-bottom: 8px;\">&#8205;</p></html>");
     }
@@ -88,7 +83,7 @@ public class ChatMessageResponseBody extends JPanel {
 
   public void update(String partialMessage) {
     for (var item : streamParser.parse(partialMessage)) {
-      processResponse(item.getResponse(), StreamResponseType.CODE.equals(item.getType()), true);
+      processResponse(item.getResponse(), CODE.equals(item.getType()), true);
     }
   }
 
@@ -139,10 +134,6 @@ public class ChatMessageResponseBody extends JPanel {
     }
   }
 
-  public void displayDefaultError() {
-    displayError("Something went wrong.");
-  }
-
   public void displaySerpResults(List<YouSerpResult> serpResults) {
     var html = getSearchResultsHtml(serpResults);
     if (responseReceived) {
@@ -157,7 +148,7 @@ public class ChatMessageResponseBody extends JPanel {
 
     streamParser.clear();
     // TODO: First message might be code block
-    prepareProcessingTextResponse(true);
+    prepareProcessingText(true);
     currentlyProcessedTextPane.setText(
         "<html><p style=\"margin-top: 4px; margin-bottom: 8px;\">&#8205;</p></html>");
 
@@ -167,14 +158,17 @@ public class ChatMessageResponseBody extends JPanel {
 
   private String getSearchResultsHtml(List<YouSerpResult> serpResults) {
     var titles = serpResults.stream()
-        .map(result -> format("<li style=\"margin-bottom: 4px;\"><a href=\"%s\">%s</a></li>",
-            result.getUrl(), result.getName()))
+        .map(result -> format(
+            "<li style=\"margin-bottom: 4px;\"><a href=\"%s\">%s</a></li>",
+            result.getUrl(),
+            result.getName()))
         .collect(Collectors.joining());
     return format(
         "<html>"
             + "<p><strong>Search results:</strong></p>"
             + "<ol>%s</ol>"
-            + "</html>", titles);
+            + "</html>",
+        titles);
   }
 
   private void processResponse(String markdownInput, boolean codeResponse, boolean caretVisible) {
@@ -194,53 +188,33 @@ public class ChatMessageResponseBody extends JPanel {
       var codeBlock = ((FencedCodeBlock) child);
       var code = codeBlock.getContentChars().unescape();
       if (!code.isEmpty()) {
-        if (currentlyProcessedEditor == null) {
-          prepareProcessingCodeResponse(code, codeBlock.getInfo().unescape());
+        if (currentlyProcessedEditorPanel == null) {
+          prepareProcessingCode(code, codeBlock.getInfo().unescape());
         }
-        updateEditorDocument(code);
+        EditorUtil.updateEditorDocument(currentlyProcessedEditorPanel.getEditor(), code);
       }
     }
   }
 
   private void processText(String markdownText, boolean caretVisible) {
     if (currentlyProcessedTextPane == null) {
-      prepareProcessingTextResponse(caretVisible);
+      prepareProcessingText(caretVisible);
     }
     currentlyProcessedTextPane.setText(convertMdToHtml(markdownText));
   }
 
-  private void prepareProcessingTextResponse(boolean caretVisible) {
-    currentlyProcessedEditor = null;
+  private void prepareProcessingText(boolean caretVisible) {
+    currentlyProcessedEditorPanel = null;
     currentlyProcessedTextPane = createTextPane("", caretVisible);
     add(currentlyProcessedTextPane);
   }
 
-  private void prepareProcessingCodeResponse(String code, String markdownLanguage) {
-    if (currentlyProcessedTextPane != null) {
-      currentlyProcessedTextPane.getCaret().setVisible(false);
-    }
+  private void prepareProcessingCode(String code, String markdownLanguage) {
+    hideCaret();
     currentlyProcessedTextPane = null;
-    currentlyProcessedEditor =
+    currentlyProcessedEditorPanel =
         new ResponseEditorPanel(project, code, markdownLanguage, readOnly, parentDisposable);
-    add(currentlyProcessedEditor);
-  }
-
-  private void updateEditorDocument(String code) {
-    var editor = currentlyProcessedEditor.getEditor();
-    var document = editor.getDocument();
-    var application = ApplicationManager.getApplication();
-    Runnable updateDocumentRunnable = () -> application.runWriteAction(() ->
-        WriteCommandAction.runWriteCommandAction(project, () -> {
-          document.replaceString(0, document.getTextLength(), code);
-          editor.getComponent().repaint();
-          editor.getComponent().revalidate();
-        }));
-
-    if (application.isUnitTestMode()) {
-      application.invokeAndWait(updateDocumentRunnable);
-    } else {
-      application.invokeLater(updateDocumentRunnable);
-    }
+    add(currentlyProcessedEditorPanel);
   }
 
   private JTextPane createTextPane(String text, boolean caretVisible) {
@@ -259,14 +233,5 @@ public class ChatMessageResponseBody extends JPanel {
     }
     textPane.setBorder(JBUI.Borders.empty());
     return textPane;
-  }
-
-  private String convertMdToHtml(String message) {
-    MutableDataSet options = new MutableDataSet();
-    var document = Parser.builder(options).build().parse(message);
-    return HtmlRenderer.builder(options)
-        .nodeRendererFactory(new ResponseNodeRenderer.Factory())
-        .build()
-        .render(document);
   }
 }

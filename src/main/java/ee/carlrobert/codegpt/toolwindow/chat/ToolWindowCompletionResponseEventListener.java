@@ -73,7 +73,7 @@ abstract class ToolWindowCompletionResponseEventListener implements
             }
           });
     } catch (Exception e) {
-      responseContainer.displayDefaultError();
+      responseContainer.displayError("Something went wrong.");
       throw new RuntimeException("Error while updating the content", e);
     }
   }

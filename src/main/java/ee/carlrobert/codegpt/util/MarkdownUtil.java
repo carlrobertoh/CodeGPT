@@ -2,6 +2,10 @@ package ee.carlrobert.codegpt.util;
 
 import static java.util.stream.Collectors.toList;
 
+import com.vladsch.flexmark.html.HtmlRenderer;
+import com.vladsch.flexmark.parser.Parser;
+import com.vladsch.flexmark.util.data.MutableDataSet;
+import ee.carlrobert.codegpt.toolwindow.chat.ResponseNodeRenderer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -29,5 +33,14 @@ public class MarkdownUtil {
     }
     result.add(inputMarkdown.substring(start));
     return result.stream().filter(item -> !item.isBlank()).collect(toList());
+  }
+
+  public static String convertMdToHtml(String message) {
+    MutableDataSet options = new MutableDataSet();
+    var document = Parser.builder(options).build().parse(message);
+    return HtmlRenderer.builder(options)
+        .nodeRendererFactory(new ResponseNodeRenderer.Factory())
+        .build()
+        .render(document);
   }
 }

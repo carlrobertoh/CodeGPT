@@ -43,6 +43,23 @@ public final class EditorUtil {
         EditorKind.MAIN_EDITOR);
   }
 
+  public static void updateEditorDocument(Editor editor, String content) {
+    var document = editor.getDocument();
+    var application = ApplicationManager.getApplication();
+    Runnable updateDocumentRunnable = () -> application.runWriteAction(() ->
+        WriteCommandAction.runWriteCommandAction(editor.getProject(), () -> {
+          document.replaceString(0, document.getTextLength(), content);
+          editor.getComponent().repaint();
+          editor.getComponent().revalidate();
+        }));
+
+    if (application.isUnitTestMode()) {
+      application.invokeAndWait(updateDocumentRunnable);
+    } else {
+      application.invokeLater(updateDocumentRunnable);
+    }
+  }
+
   public static boolean hasSelection(@Nullable Editor editor) {
     return editor != null && editor.getSelectionModel().hasSelection();
   }
