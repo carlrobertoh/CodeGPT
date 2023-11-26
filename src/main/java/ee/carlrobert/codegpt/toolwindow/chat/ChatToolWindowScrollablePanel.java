@@ -1,7 +1,5 @@
 package ee.carlrobert.codegpt.toolwindow.chat;
 
-import static ee.carlrobert.codegpt.util.UIUtil.getPanelBackgroundColor;
-
 import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
 import com.intellij.openapi.roots.ui.componentsList.layout.VerticalStackLayout;
 import ee.carlrobert.codegpt.completions.you.YouUserManager;
@@ -73,7 +71,7 @@ public class ChatToolWindowScrollablePanel extends ScrollablePanel {
 
   // TODO: Move
   private JTextPane createYouCouponTextPane() {
-    var textPane = UIUtil.createTextPane(
+    return UIUtil.createTextPane(
         "<html>\n"
             + "<body>\n"
             + "  <p style=\"margin: 4px 0;\">Use CodeGPT coupon for free month of GPT-4.</p>\n"
@@ -81,10 +79,7 @@ public class ChatToolWindowScrollablePanel extends ScrollablePanel {
             + "    <a href=\"https://you.com/plans\">Sign up here</a>\n"
             + "  </p>\n"
             + "</body>\n"
-            + "</html>"
-    );
-    textPane.setBackground(getPanelBackgroundColor());
-    textPane.setFocusable(false);
-    return textPane;
+            + "</html>",
+        false);
   }
 }

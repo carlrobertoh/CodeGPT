@@ -44,7 +44,7 @@ public class GenerateGitCommitMessageAction extends AnAction {
     super(
         CodeGPTBundle.get("action.generateCommitMessage.title"),
         CodeGPTBundle.get("action.generateCommitMessage.description"),
-        Icons.SparkleIcon);
+        Icons.Sparkle);
     encodingManager = EncodingManager.getInstance();
   }
 

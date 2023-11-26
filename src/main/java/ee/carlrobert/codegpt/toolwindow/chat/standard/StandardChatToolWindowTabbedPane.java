@@ -134,11 +134,10 @@ public class StandardChatToolWindowTabbedPane extends JBTabbedPane {
     button.setToolTipText("Close Chat");
     button.setRolloverIcon(AllIcons.Actions.CloseHovered);
 
-    var panel = JBUI.Panels.simplePanel(4, 0)
+    return JBUI.Panels.simplePanel(4, 0)
         .addToLeft(new JBLabel(title))
-        .addToRight(button);
-    panel.setOpaque(false);
-    return panel;
+        .addToRight(button)
+        .andTransparent();
   }
 
   class CloseActionListener implements ActionListener {

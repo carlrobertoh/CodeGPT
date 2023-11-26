@@ -1,7 +1,6 @@
 package ee.carlrobert.codegpt.toolwindow.chat.contextual;
 
 import static com.intellij.openapi.ui.DialogWrapper.OK_EXIT_CODE;
-import static ee.carlrobert.codegpt.util.UIUtil.getPanelBackgroundColor;
 import static javax.swing.event.HyperlinkEvent.EventType.ACTIVATED;
 
 import com.intellij.openapi.diagnostic.Logger;
@@ -37,7 +36,7 @@ class ContextualChatToolWindowLandingPanel extends ResponsePanel {
   }
 
   private JTextPane createContent() {
-    var description = createTextPane();
+    var description = UIUtil.createTextPane("", false, this::handleHyperlinkClicked);
     if (VectorStore.getInstance(CodeGPTPlugin.getPluginBasePath()).isIndexExists()) {
       description.setText("<html>"
           + "<p style=\"margin-top: 4px; margin-bottom: 4px;\">"
@@ -74,12 +73,6 @@ class ContextualChatToolWindowLandingPanel extends ResponsePanel {
     }
 
     return description;
-  }
-
-  private JTextPane createTextPane() {
-    var textPane = UIUtil.createTextPane("", this::handleHyperlinkClicked);
-    textPane.setBackground(getPanelBackgroundColor());
-    return textPane;
   }
 
   private void handleHyperlinkClicked(HyperlinkEvent event) {

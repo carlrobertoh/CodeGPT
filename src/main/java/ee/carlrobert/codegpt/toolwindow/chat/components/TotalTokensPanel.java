@@ -10,6 +10,7 @@ import com.intellij.openapi.editor.event.EditorFactoryListener;
 import com.intellij.openapi.editor.event.SelectionEvent;
 import com.intellij.openapi.editor.event.SelectionListener;
 import com.intellij.ui.components.JBLabel;
+import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.toolwindow.chat.TokenDetails;
@@ -35,6 +36,7 @@ public class TotalTokensPanel extends JPanel {
       @Nullable String highlightedText,
       Disposable parentDisposable) {
     super(new FlowLayout(FlowLayout.LEADING, 0, 0));
+    setBorder(JBUI.Borders.empty(4));
     this.encodingManager = EncodingManager.getInstance();
     this.tokenDetails = createTokenDetails(conversation, highlightedText);
     this.label = getLabel(tokenDetails);

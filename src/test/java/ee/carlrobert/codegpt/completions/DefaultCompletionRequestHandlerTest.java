@@ -15,6 +15,7 @@ import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
+import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
 import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange;
 import java.util.List;
 import java.util.Map;
@@ -142,6 +143,7 @@ public class DefaultCompletionRequestHandlerTest extends IntegrationTest {
 
   public void testLlamaChatCompletionCall() {
     useLlamaService();
+    ConfigurationState.getInstance().setMaxTokens(99);
     var message = new Message("TEST_PROMPT");
     var conversation = ConversationService.getInstance().startConversation();
     conversation.addMessage(new Message("Ping", "Pong"));
@@ -158,7 +160,7 @@ public class DefaultCompletionRequestHandlerTest extends IntegrationTest {
                   COMPLETION_SYSTEM_PROMPT,
                   "TEST_PROMPT",
                   conversation.getMessages()),
-              512,
+              99,
               true);
       return List.of(
           jsonMapResponse("content", "Hel"),

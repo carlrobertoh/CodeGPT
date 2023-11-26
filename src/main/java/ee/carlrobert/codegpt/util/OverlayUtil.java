@@ -2,7 +2,7 @@ package ee.carlrobert.codegpt.util;
 
 import static com.intellij.openapi.ui.Messages.CANCEL;
 import static com.intellij.openapi.ui.Messages.OK;
-import static ee.carlrobert.codegpt.Icons.DefaultIcon;
+import static ee.carlrobert.codegpt.Icons.Default;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
@@ -68,7 +68,7 @@ public class OverlayUtil {
     return Messages.showYesNoDialog(
         CodeGPTBundle.get("dialog.deleteConversation.description"),
         CodeGPTBundle.get("dialog.deleteConversation.title"),
-        DefaultIcon);
+        Default);
   }
 
   public static int showTokenLimitExceededDialog() {
@@ -77,7 +77,7 @@ public class OverlayUtil {
             CodeGPTBundle.get("dialog.tokenLimitExceeded.description"))
         .yesText(CodeGPTBundle.get("dialog.continue"))
         .noText(CodeGPTBundle.get("dialog.cancel"))
-        .icon(DefaultIcon)
+        .icon(Default)
         .doNotAsk(new DoNotAskOption.Adapter() {
           @Override
           public void rememberChoice(boolean isSelected, int exitCode) {
@@ -106,7 +106,7 @@ public class OverlayUtil {
             format(CodeGPTBundle.get("dialog.tokenSoftLimitExceeded.description"), tokenCount))
         .yesText(CodeGPTBundle.get("dialog.continue"))
         .noText(CodeGPTBundle.get("dialog.cancel"))
-        .icon(DefaultIcon)
+        .icon(Default)
         .doNotAsk(new DoNotAskOption.Adapter() {
           @Override
           public void rememberChoice(boolean isSelected, int exitCode) {
@@ -132,9 +132,14 @@ public class OverlayUtil {
   public static void showSelectedEditorSelectionWarning(AnActionEvent event) {
     var locationOnScreen = ((MouseEvent) event.getInputEvent()).getLocationOnScreen();
     locationOnScreen.y = locationOnScreen.y - 16;
+    showSelectedEditorSelectionWarning(requireNonNull(event.getProject()), locationOnScreen);
+  }
 
+  public static void showSelectedEditorSelectionWarning(
+      @NotNull Project project,
+      Point locationOnScreen) {
     showWarningBalloon(
-        EditorUtil.getSelectedEditor(requireNonNull(event.getProject())) == null
+        EditorUtil.getSelectedEditor(project) == null
             ? "Unable to locate a selected editor"
             : "Please select a target code before proceeding",
         locationOnScreen);

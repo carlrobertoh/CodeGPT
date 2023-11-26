@@ -1,11 +1,8 @@
 package ee.carlrobert.codegpt.toolwindow.chat.components;
 
-import static ee.carlrobert.codegpt.util.UIUtil.getPanelBackgroundColor;
-
 import com.intellij.icons.AllIcons.Actions;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
@@ -66,7 +63,6 @@ public class ResponsePanel extends JPanel {
 
     Header() {
       super(new BorderLayout());
-      setBackground(getPanelBackgroundColor());
       setBorder(JBUI.Borders.empty(12, 8, 4, 8));
       add(getIconLabel(), BorderLayout.LINE_START);
 
@@ -118,7 +114,7 @@ public class ResponsePanel extends JPanel {
     private JBLabel getIconLabel() {
       return new JBLabel(
           CodeGPTBundle.get("project.label"),
-          Icons.DefaultIcon,
+          Icons.Default,
           SwingConstants.LEADING)
           .setAllowAutoWrapping(true)
           .withFont(JBFont.label().asBold());
@@ -131,10 +127,7 @@ public class ResponsePanel extends JPanel {
 
     Body() {
       super(new BorderLayout());
-      setBackground(getPanelBackgroundColor());
-      setBorder(JBUI.Borders.compound(
-          JBUI.Borders.customLine(JBColor.border(), 0, 0, 1, 0),
-          JBUI.Borders.empty(4, 8, 8, 8)));
+      setBorder(JBUI.Borders.empty(4, 8, 8, 8));
     }
 
     public void addContent(JComponent content) {

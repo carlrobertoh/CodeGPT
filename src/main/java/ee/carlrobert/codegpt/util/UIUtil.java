@@ -31,16 +31,21 @@ import javax.swing.event.HyperlinkListener;
 public class UIUtil {
 
   public static JTextPane createTextPane(String text) {
-    return createTextPane(text, UIUtil::handleHyperlinkClicked);
+    return createTextPane(text, true);
   }
 
-  public static JTextPane createTextPane(String text, HyperlinkListener listener) {
+  public static JTextPane createTextPane(String text, boolean opaque) {
+    return createTextPane(text, opaque, UIUtil::handleHyperlinkClicked);
+  }
+
+  public static JTextPane createTextPane(String text, boolean opaque, HyperlinkListener listener) {
     var textPane = new JTextPane();
     textPane.putClientProperty(JTextPane.HONOR_DISPLAY_PROPERTIES, true);
     textPane.addHyperlinkListener(listener);
     textPane.setContentType("text/html");
     textPane.setEditable(false);
     textPane.setText(text);
+    textPane.setOpaque(opaque);
     return textPane;
   }
 

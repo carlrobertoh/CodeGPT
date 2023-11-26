@@ -56,8 +56,8 @@ public class StandardChatToolWindowTabPanel extends BaseChatToolWindowTabPanel {
   private void displayConversation(@NotNull Conversation conversation) {
     clearWindow();
     conversation.getMessages().forEach(message -> {
-      var messageResponseBody = new ChatMessageResponseBody(project, this)
-          .withResponse(message.getResponse());
+      var messageResponseBody =
+          new ChatMessageResponseBody(project, this).withResponse(message.getResponse());
 
       var serpResults = message.getSerpResults();
       if (YouSettingsState.getInstance().isDisplayWebSearchResults()

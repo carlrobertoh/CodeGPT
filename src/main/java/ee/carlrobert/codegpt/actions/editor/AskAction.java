@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 public class AskAction extends AnAction {
 
   public AskAction() {
-    super("New Chat", "Chat with CodeGPT", Icons.SparkleIcon);
+    super("New Chat", "Chat with CodeGPT", Icons.Sparkle);
     EditorActionsUtil.registerOrReplaceAction(this);
   }
 
