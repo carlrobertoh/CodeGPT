@@ -43,6 +43,7 @@ public class ConfigurationComponent {
   private final JBTable table;
   private final JBCheckBox openNewTabCheckBox;
   private final JBCheckBox methodNameGenerationCheckBox;
+  private final JBCheckBox autoFormattingCheckBox;
   private final JTextArea systemPromptTextArea;
   private final IntegerField maxTokensField;
   private final JBTextField temperatureField;
@@ -104,12 +105,16 @@ public class ConfigurationComponent {
     methodNameGenerationCheckBox = new JBCheckBox(
         CodeGPTBundle.get("configurationConfigurable.enableMethodNameGeneration.label"),
         configuration.isMethodRefactoringEnabled());
+    autoFormattingCheckBox = new JBCheckBox(
+        CodeGPTBundle.get("configurationConfigurable.autoFormatting.label"),
+        configuration.isAutoFormattingEnabled());
 
     mainPanel = FormBuilder.createFormBuilder()
         .addComponent(tablePanel)
         .addVerticalGap(4)
         .addComponent(openNewTabCheckBox)
         .addComponent(methodNameGenerationCheckBox)
+        .addComponent(autoFormattingCheckBox)
         .addVerticalGap(4)
         .addComponent(new TitledSeparator(
             CodeGPTBundle.get("configurationConfigurable.section.assistant.title")))
@@ -265,6 +270,14 @@ public class ConfigurationComponent {
 
   public void setDisableMethodNameGeneration(boolean disableMethodNameGeneration) {
     methodNameGenerationCheckBox.setSelected(disableMethodNameGeneration);
+  }
+
+  public boolean isAutoFormattingEnabled() {
+    return autoFormattingCheckBox.isSelected();
+  }
+
+  public void setAutoFormattingEnabled(boolean enabled) {
+    autoFormattingCheckBox.setSelected(enabled);
   }
 
   class RevertToDefaultsActionButton extends AnActionButton {

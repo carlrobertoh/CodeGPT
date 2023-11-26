@@ -40,7 +40,9 @@ public class ConfigurationConfigurable implements Configurable {
         || configurationComponent.isCreateNewChatOnEachAction()
         != configuration.isCreateNewChatOnEachAction()
         || configurationComponent.isMethodNameGenerationEnabled()
-        != configuration.isMethodRefactoringEnabled();
+        != configuration.isMethodRefactoringEnabled()
+        || configurationComponent.isAutoFormattingEnabled()
+        != configuration.isAutoFormattingEnabled();
   }
 
   @Override
@@ -54,6 +56,7 @@ public class ConfigurationConfigurable implements Configurable {
         configurationComponent.isCreateNewChatOnEachAction());
     configuration.setMethodNameGenerationEnabled(
         configurationComponent.isMethodNameGenerationEnabled());
+    configuration.setAutoFormattingEnabled(configurationComponent.isAutoFormattingEnabled());
     EditorActionsUtil.refreshActions();
   }
 
@@ -68,6 +71,7 @@ public class ConfigurationConfigurable implements Configurable {
         configuration.isCreateNewChatOnEachAction());
     configurationComponent.setDisableMethodNameGeneration(
         configuration.isMethodRefactoringEnabled());
+    configurationComponent.setAutoFormattingEnabled(configuration.isAutoFormattingEnabled());
     EditorActionsUtil.refreshActions();
   }
 

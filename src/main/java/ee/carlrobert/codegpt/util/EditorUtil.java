@@ -14,7 +14,9 @@ import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiDocumentManager;
+import com.intellij.psi.codeStyle.CodeStyleManager;
 import com.intellij.testFramework.LightVirtualFile;
+import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import org.jetbrains.annotations.NotNull;
@@ -88,15 +90,34 @@ public final class EditorUtil {
           var editor = getSelectedEditor(project);
           if (editor != null) {
             var selectionModel = editor.getSelectionModel();
-            editor.getDocument()
-                .replaceString(
-                    selectionModel.getSelectionStart(),
-                    selectionModel.getSelectionEnd(),
-                    text);
+            int startOffset = selectionModel.getSelectionStart();
+            int endOffset = selectionModel.getSelectionEnd();
+            var document = editor.getDocument();
+
+            document.replaceString(startOffset, endOffset, text);
+
+            if (ConfigurationState.getInstance().isAutoFormattingEnabled()) {
+              reformatDocument(project, document, startOffset, endOffset);
+            }
+
             editor.getContentComponent().requestFocus();
             selectionModel.removeSelection();
           }
         })));
+  }
+
+  private static void reformatDocument(
+      @NotNull Project project,
+      @NotNull Document document,
+      int startOffset,
+      int endOffset) {
+    var psiDocumentManager = PsiDocumentManager.getInstance(project);
+    psiDocumentManager.commitDocument(document);
+    var psiFile = psiDocumentManager.getPsiFile(document);
+    if (psiFile != null) {
+      CodeStyleManager.getInstance(project)
+          .reformatText(psiFile, startOffset, endOffset);
+    }
   }
 
   public static void disableHighlighting(@NotNull Project project, Document document) {

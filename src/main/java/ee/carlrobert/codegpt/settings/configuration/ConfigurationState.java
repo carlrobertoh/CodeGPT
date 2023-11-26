@@ -23,6 +23,7 @@ public class ConfigurationState implements PersistentStateComponent<Configuratio
   private boolean createNewChatOnEachAction;
   private boolean ignoreGitCommitTokenLimit;
   private boolean methodNameGenerationEnabled = true;
+  private boolean autoFormattingEnabled = true;
   private Map<String, String> tableData = EditorActionsUtil.DEFAULT_ACTIONS;
 
   public static ConfigurationState getInstance() {
@@ -94,5 +95,13 @@ public class ConfigurationState implements PersistentStateComponent<Configuratio
 
   public void setMethodNameGenerationEnabled(boolean methodNameGenerationEnabled) {
     this.methodNameGenerationEnabled = methodNameGenerationEnabled;
+  }
+
+  public boolean isAutoFormattingEnabled() {
+    return autoFormattingEnabled;
+  }
+
+  public void setAutoFormattingEnabled(boolean autoFormattingEnabled) {
+    this.autoFormattingEnabled = autoFormattingEnabled;
   }
 }
