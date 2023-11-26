@@ -4,6 +4,7 @@ import static com.intellij.openapi.ui.Messages.OK;
 import static com.intellij.util.ObjectUtils.tryCast;
 import static ee.carlrobert.codegpt.util.file.FileUtil.getResourceContent;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
@@ -17,6 +18,8 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vcs.VcsDataKeys;
+import com.intellij.openapi.vcs.changes.ui.ChangesBrowserBase;
+import com.intellij.openapi.vcs.changes.ui.CommitDialogChangesBrowser;
 import com.intellij.openapi.vcs.ui.CommitMessage;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.EncodingManager;
@@ -33,6 +36,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.List;
 import org.jetbrains.annotations.NotNull;
 
@@ -51,7 +55,7 @@ public class GenerateGitCommitMessageAction extends AnAction {
   @Override
   public void update(@NotNull AnActionEvent event) {
     var apiKeyExists = OpenAICredentialsManager.getInstance().isApiKeySet();
-    event.getPresentation().setEnabled(apiKeyExists);
+    event.getPresentation().setEnabled(apiKeyExists && !getCheckedFilePaths(event).isEmpty());
     event.getPresentation().setText(CodeGPTBundle.get(apiKeyExists
         ? "action.generateCommitMessage.title"
         : "action.generateCommitMessage.serviceWarning"));
@@ -64,7 +68,7 @@ public class GenerateGitCommitMessageAction extends AnAction {
       return;
     }
 
-    var gitDiff = getGitDiff(project);
+    var gitDiff = getGitDiff(project, getCheckedFilePaths(event));
     var tokenCount = encodingManager.countTokens(gitDiff);
     if (tokenCount > 4096 && OverlayUtil.showTokenSoftLimitWarningDialog(tokenCount) != OK) {
       return;
@@ -120,20 +124,37 @@ public class GenerateGitCommitMessageAction extends AnAction {
     return commitMessage != null ? commitMessage.getEditorField().getEditor() : null;
   }
 
-  // TODO: Get diff based on the user selection
-  private String getGitDiff(Project project) {
-    var process = createGitDiffProcess(project.getBasePath());
+  private String getGitDiff(Project project, List<String> filePaths) {
+    var process = createGitDiffProcess(project.getBasePath(), filePaths);
     var reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
     return reader.lines().collect(joining("\n"));
   }
 
-  private Process createGitDiffProcess(String projectPath) {
-    var processBuilder = new ProcessBuilder("git", "diff", "--cached");
+  private Process createGitDiffProcess(String projectPath, List<String> filePaths) {
+    var command = new ArrayList<String>();
+    command.add("git");
+    command.add("diff");
+    command.addAll(filePaths);
+
+    var processBuilder = new ProcessBuilder(command);
     processBuilder.directory(new File(projectPath));
     try {
       return processBuilder.start();
     } catch (IOException ex) {
       throw new RuntimeException("Unable to start git diff process", ex);
     }
+  }
+
+  private @NotNull List<String> getCheckedFilePaths(AnActionEvent event) {
+    var changesBrowserBase = event.getData(ChangesBrowserBase.DATA_KEY);
+    if (changesBrowserBase == null) {
+      return List.of();
+    }
+
+    var includedChanges = ((CommitDialogChangesBrowser) changesBrowserBase).getIncludedChanges();
+    return includedChanges.stream()
+        .filter(item -> item.getVirtualFile() != null)
+        .map(item -> item.getVirtualFile().getPath())
+        .collect(toList());
   }
 }
