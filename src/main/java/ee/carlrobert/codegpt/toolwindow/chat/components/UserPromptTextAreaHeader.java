@@ -20,7 +20,7 @@ public class UserPromptTextAreaHeader extends JPanel {
       Runnable onAddNewTab) {
     super(new BorderLayout());
     setOpaque(false);
-    setBorder(JBUI.Borders.emptyBottom(4));
+    setBorder(JBUI.Borders.emptyBottom(8));
     switch (selectedService) {
       case OPENAI:
       case AZURE:

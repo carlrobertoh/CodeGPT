@@ -20,6 +20,7 @@ import ee.carlrobert.codegpt.settings.service.LlamaServiceSelectionForm;
 import ee.carlrobert.codegpt.settings.service.ServerProgressPanel;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import javax.swing.SwingConstants;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -80,14 +81,16 @@ public final class LlamaServerAgent implements Disposable {
                   serviceSelectionForm.getLlamaModelPreferencesForm().getActualModelPath(),
                   serviceSelectionForm.getContextSize(),
                   serviceSelectionForm.getThreads(),
-                  serviceSelectionForm.getServerPort()));
+                  serviceSelectionForm.getServerPort(),
+                  serviceSelectionForm.getListOfAdditionalParameters()));
           startServerProcessHandler.addProcessListener(getProcessListener(
               serviceSelectionForm.getServerPort(),
               serverProgressPanel,
               onSuccess));
           startServerProcessHandler.startNotify();
-        } catch (ExecutionException e) {
-          throw new RuntimeException(e);
+        } catch (ExecutionException ex) {
+          LOG.error("Unable to start the server", ex);
+          throw new RuntimeException(ex);
         }
       }
     };
@@ -140,7 +143,8 @@ public final class LlamaServerAgent implements Disposable {
       String modelPath,
       int contextLength,
       int threads,
-      int port) {
+      int port,
+      List<String> additionalParameters) {
     GeneralCommandLine commandLine = new GeneralCommandLine().withCharset(StandardCharsets.UTF_8);
     commandLine.setExePath("./server");
     commandLine.withWorkDirectory(CodeGPTPlugin.getLlamaSourcePath());
@@ -149,6 +153,7 @@ public final class LlamaServerAgent implements Disposable {
         "-c", String.valueOf(contextLength),
         "--port", String.valueOf(port),
         "-t", String.valueOf(threads));
+    commandLine.addParameters(additionalParameters);
     commandLine.setRedirectErrorStream(false);
     return commandLine;
   }

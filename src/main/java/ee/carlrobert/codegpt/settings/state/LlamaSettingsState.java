@@ -21,8 +21,8 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
   private PromptTemplate promptTemplate = PromptTemplate.LLAMA;
   private Integer serverPort = getRandomAvailablePortOrDefault();
   private int contextSize = 2048;
-
   private int threads = 8;
+  private String additionalParameters = "";
 
   public LlamaSettingsState() {
   }
@@ -46,6 +46,7 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
     return serverPort != serviceSelectionForm.getLlamaServerPort()
         || contextSize != serviceSelectionForm.getContextSize()
         || threads != serviceSelectionForm.getThreads()
+        || !additionalParameters.equals(serviceSelectionForm.getAdditionalParameters())
         || huggingFaceModel != modelPreferencesForm.getSelectedModel()
         || !promptTemplate.equals(modelPreferencesForm.getPromptTemplate())
         || useCustomModel != modelPreferencesForm.isUseCustomLlamaModel()
@@ -61,6 +62,7 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
     serverPort = serviceSelectionForm.getLlamaServerPort();
     contextSize = serviceSelectionForm.getContextSize();
     threads = serviceSelectionForm.getThreads();
+    additionalParameters = serviceSelectionForm.getAdditionalParameters();
   }
 
   public void reset(ServiceSelectionForm serviceSelectionForm) {
@@ -72,6 +74,7 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
     serviceSelectionForm.setLlamaServerPort(serverPort);
     serviceSelectionForm.setContextSize(contextSize);
     serviceSelectionForm.setThreads(threads);
+    serviceSelectionForm.setAdditionalParameters(additionalParameters);
   }
 
   public boolean isUseCustomModel() {
@@ -128,6 +131,14 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
 
   public void setThreads(int threads) {
     this.threads = threads;
+  }
+
+  public String getAdditionalParameters() {
+    return additionalParameters;
+  }
+
+  public void setAdditionalParameters(String additionalParameters) {
+    this.additionalParameters = additionalParameters;
   }
 
   private static Integer getRandomAvailablePortOrDefault() {

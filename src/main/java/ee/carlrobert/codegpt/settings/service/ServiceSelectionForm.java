@@ -420,4 +420,12 @@ public class ServiceSelectionForm {
   public void setThreads(int threads) {
     llamaServiceSectionPanel.setThreads(threads);
   }
+
+  public String getAdditionalParameters() {
+    return llamaServiceSectionPanel.getAdditionalParameters();
+  }
+
+  public void setAdditionalParameters(String additionalParameters) {
+    llamaServiceSectionPanel.setAdditionalParameters(additionalParameters);
+  }
 }

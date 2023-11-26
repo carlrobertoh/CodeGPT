@@ -1,5 +1,7 @@
 package ee.carlrobert.codegpt.settings.service;
 
+import static java.util.stream.Collectors.toList;
+
 import com.intellij.icons.AllIcons.Actions;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.ui.MessageType;
@@ -8,6 +10,7 @@ import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.ui.PortField;
 import com.intellij.ui.TitledSeparator;
 import com.intellij.ui.components.JBLabel;
+import com.intellij.ui.components.JBTextField;
 import com.intellij.ui.components.fields.IntegerField;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
@@ -19,8 +22,11 @@ import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.util.OverlayUtil;
 import java.awt.BorderLayout;
 import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
@@ -30,6 +36,7 @@ public class LlamaServiceSelectionForm extends JPanel {
   private final PortField portField;
   private final IntegerField maxTokensField;
   private final IntegerField threadsField;
+  private final JBTextField additionalParametersField;
 
   public LlamaServiceSelectionForm() {
     var llamaServerAgent =
@@ -40,52 +47,21 @@ public class LlamaServiceSelectionForm extends JPanel {
 
     llamaModelPreferencesForm = new LlamaModelPreferencesForm();
 
+    var llamaSettings = LlamaSettingsState.getInstance();
     maxTokensField = new IntegerField("max_tokens", 256, 4096);
     maxTokensField.setColumns(12);
-    maxTokensField.setValue(2048);
+    maxTokensField.setValue(llamaSettings.getContextSize());
     maxTokensField.setEnabled(!serverRunning);
 
     threadsField = new IntegerField("threads", 1, 256);
     threadsField.setColumns(12);
-    threadsField.setValue(8);
+    threadsField.setValue(llamaSettings.getThreads());
     threadsField.setEnabled(!serverRunning);
 
-    var serverProgressPanel = new ServerProgressPanel();
-    var serverButton = getServerButton(llamaServerAgent, serverProgressPanel);
-    var contextSizeHelpText = ComponentPanelBuilder.createCommentComponent(
-        CodeGPTBundle.get("settingsConfigurable.service.llama.contextSize.comment"),
-        true);
-    contextSizeHelpText.setBorder(JBUI.Borders.empty(0, 4));
-    var threadsHelpText = ComponentPanelBuilder.createCommentComponent(
-        CodeGPTBundle.get("settingsConfigurable.service.llama.threads.comment"),
-        true);
+    additionalParametersField = new JBTextField(llamaSettings.getAdditionalParameters(), 30);
+    additionalParametersField.setEnabled(!serverRunning);
 
-    setLayout(new BorderLayout());
-    add(FormBuilder.createFormBuilder()
-        .addComponent(new TitledSeparator(
-            CodeGPTBundle.get("settingsConfigurable.service.llama.modelPreferences.title")))
-        .addComponent(withEmptyLeftBorder(llamaModelPreferencesForm.getForm()))
-        .addComponent(new TitledSeparator(
-            CodeGPTBundle.get("settingsConfigurable.service.llama.serverPreferences.title")))
-        .addComponent(withEmptyLeftBorder(FormBuilder.createFormBuilder()
-            .addLabeledComponent(
-                CodeGPTBundle.get("settingsConfigurable.service.llama.contextSize.label"),
-                maxTokensField)
-            .addComponentToRightColumn(contextSizeHelpText)
-            .addLabeledComponent(
-                CodeGPTBundle.get("settingsConfigurable.service.llama.threads.label"),
-                threadsField)
-            .addComponentToRightColumn(threadsHelpText)
-            .addLabeledComponent(
-                CodeGPTBundle.get("settingsConfigurable.service.llama.port.label"),
-                JBUI.Panels.simplePanel()
-                    .addToLeft(portField)
-                    .addToRight(serverButton))
-            .getPanel()))
-        .addVerticalGap(4)
-        .addComponent(withEmptyLeftBorder(serverProgressPanel))
-        .addComponentFillVertically(new JPanel(), 0)
-        .getPanel());
+    init(llamaServerAgent);
   }
 
   public void setServerPort(int serverPort) {
@@ -119,6 +95,65 @@ public class LlamaServiceSelectionForm extends JPanel {
 
   public int getThreads() {
     return threadsField.getValue();
+  }
+
+  public void setAdditionalParameters(String additionalParameters) {
+    additionalParametersField.setText(additionalParameters);
+  }
+
+  public String getAdditionalParameters() {
+    return additionalParametersField.getText();
+  }
+
+  public List<String> getListOfAdditionalParameters() {
+    var parameters = additionalParametersField.getText().split(",");
+    return Arrays.stream(parameters)
+        .map(String::trim)
+        .collect(toList());
+  }
+
+  private void init(LlamaServerAgent llamaServerAgent) {
+    var serverProgressPanel = new ServerProgressPanel();
+    setLayout(new BorderLayout());
+    add(FormBuilder.createFormBuilder()
+        .addComponent(new TitledSeparator(
+            CodeGPTBundle.get("settingsConfigurable.service.llama.modelPreferences.title")))
+        .addComponent(withEmptyLeftBorder(llamaModelPreferencesForm.getForm()))
+        .addComponent(new TitledSeparator(
+            CodeGPTBundle.get("settingsConfigurable.service.llama.serverPreferences.title")))
+        .addComponent(withEmptyLeftBorder(FormBuilder.createFormBuilder()
+            .addLabeledComponent(
+                CodeGPTBundle.get("settingsConfigurable.service.llama.contextSize.label"),
+                maxTokensField)
+            .addComponentToRightColumn(
+                createComment("settingsConfigurable.service.llama.contextSize.comment"))
+            .addLabeledComponent(
+                CodeGPTBundle.get("settingsConfigurable.service.llama.threads.label"),
+                threadsField)
+            .addComponentToRightColumn(
+                createComment("settingsConfigurable.service.llama.threads.comment"))
+            .addLabeledComponent(
+                CodeGPTBundle.get("settingsConfigurable.service.llama.additionalParameters.label"),
+                additionalParametersField)
+            .addComponentToRightColumn(
+                createComment("settingsConfigurable.service.llama.additionalParameters.comment"))
+            .addLabeledComponent(
+                CodeGPTBundle.get("settingsConfigurable.service.llama.port.label"),
+                JBUI.Panels.simplePanel()
+                    .addToLeft(portField)
+                    .addToRight(getServerButton(llamaServerAgent, serverProgressPanel)))
+            .getPanel()))
+        .addVerticalGap(4)
+        .addComponent(withEmptyLeftBorder(serverProgressPanel))
+        .addComponentFillVertically(new JPanel(), 0)
+        .getPanel());
+  }
+
+  private JLabel createComment(String messageKey) {
+    var comment = ComponentPanelBuilder.createCommentComponent(
+        CodeGPTBundle.get(messageKey), true);
+    comment.setBorder(JBUI.Borders.empty(0, 4));
+    return comment;
   }
 
   private JButton getServerButton(
@@ -208,5 +243,6 @@ public class LlamaServiceSelectionForm extends JPanel {
     portField.setEnabled(enabled);
     maxTokensField.setEnabled(enabled);
     threadsField.setEnabled(enabled);
+    additionalParametersField.setEnabled(enabled);
   }
 }
