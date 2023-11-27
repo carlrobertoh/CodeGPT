@@ -6,6 +6,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.6] - 2023-11-27
+
+### Added
+
+- Support for automatic code formatting (#262)
+- Support for additional command-line params for the llama server startup process
+- Support for changing between different provides/models in the chat window (#227)
+- Deepseek coder instruct models
+
+### Fixed
+
+- Git commit message generation based on the actual user selected/checked files (#291)
+
+### Improved
+
+- Toolwindow Chat UI
+
 ## [2.2.5] - 2023-11-23
 
 ### Added
@@ -262,7 +279,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `OPENAI_API_KEY` persistence, key is saved in the OS password safe from now on
 
-[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.5...HEAD
+[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.6...HEAD
+[2.2.6]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.5...v2.2.6
 [2.2.5]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.4...v2.2.5
 [2.2.4]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.3...v2.2.4
 [2.2.3]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.2...v2.2.3
