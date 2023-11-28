@@ -18,7 +18,7 @@ import ee.carlrobert.codegpt.toolwindow.chat.components.ChatMessageResponseBody;
 import ee.carlrobert.codegpt.toolwindow.chat.components.ResponsePanel;
 import ee.carlrobert.codegpt.toolwindow.chat.components.TotalTokensPanel;
 import ee.carlrobert.codegpt.toolwindow.chat.components.UserPromptTextArea;
-import ee.carlrobert.codegpt.util.OverlayUtil;
+import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.client.you.completion.YouSerpResult;
 import java.util.HashMap;

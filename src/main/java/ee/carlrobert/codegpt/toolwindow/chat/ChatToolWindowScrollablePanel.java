@@ -6,7 +6,7 @@ import ee.carlrobert.codegpt.completions.you.YouUserManager;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.toolwindow.chat.components.ResponsePanel;
-import ee.carlrobert.codegpt.util.UIUtil;
+import ee.carlrobert.codegpt.ui.UIUtil;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;

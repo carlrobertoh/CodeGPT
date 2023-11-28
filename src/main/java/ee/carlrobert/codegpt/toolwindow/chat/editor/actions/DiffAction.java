@@ -15,7 +15,7 @@ import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.util.Pair;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.util.EditorUtil;
-import ee.carlrobert.codegpt.util.OverlayUtil;
+import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.codegpt.util.file.FileUtil;
 import java.awt.Point;
 import java.awt.event.ActionEvent;

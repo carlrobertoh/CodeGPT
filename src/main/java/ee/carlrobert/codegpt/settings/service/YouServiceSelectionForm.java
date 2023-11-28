@@ -22,7 +22,7 @@ import ee.carlrobert.codegpt.completions.you.auth.response.YouAuthenticationResp
 import ee.carlrobert.codegpt.completions.you.auth.response.YouUser;
 import ee.carlrobert.codegpt.credentials.YouCredentialsManager;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
-import ee.carlrobert.codegpt.util.UIUtil;
+import ee.carlrobert.codegpt.ui.UIUtil;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.util.regex.Pattern;

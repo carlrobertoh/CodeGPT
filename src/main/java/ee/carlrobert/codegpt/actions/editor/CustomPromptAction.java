@@ -12,7 +12,7 @@ import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
-import ee.carlrobert.codegpt.util.UIUtil;
+import ee.carlrobert.codegpt.ui.UIUtil;
 import ee.carlrobert.codegpt.util.file.FileUtil;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
@@ -21,7 +21,7 @@ import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import org.jetbrains.annotations.Nullable;
 
-class CustomPromptAction extends BaseEditorAction {
+public class CustomPromptAction extends BaseEditorAction {
 
   private static String previousUserPrompt = "";
 
@@ -47,7 +47,7 @@ class CustomPromptAction extends BaseEditorAction {
     }
   }
 
-  private static class CustomPromptDialog extends DialogWrapper {
+  public static class CustomPromptDialog extends DialogWrapper {
 
     private final JTextArea userPromptTextArea;
 

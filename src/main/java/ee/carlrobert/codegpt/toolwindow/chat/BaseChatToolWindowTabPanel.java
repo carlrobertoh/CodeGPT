@@ -1,6 +1,6 @@
 package ee.carlrobert.codegpt.toolwindow.chat;
 
-import static ee.carlrobert.codegpt.util.UIUtil.createScrollPaneWithSmartScroller;
+import static ee.carlrobert.codegpt.ui.UIUtil.createScrollPaneWithSmartScroller;
 import static java.lang.String.format;
 
 import com.intellij.openapi.diagnostic.Logger;

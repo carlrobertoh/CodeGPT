@@ -8,7 +8,7 @@ import ee.carlrobert.codegpt.actions.ActionType;
 import ee.carlrobert.codegpt.actions.editor.EditorActionsUtil;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
-import ee.carlrobert.codegpt.util.OverlayUtil;
+import ee.carlrobert.codegpt.ui.OverlayUtil;
 import org.jetbrains.annotations.NotNull;
 
 public class DeleteConversationAction extends AnAction {

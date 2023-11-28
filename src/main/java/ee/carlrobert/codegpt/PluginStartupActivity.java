@@ -12,7 +12,7 @@ import ee.carlrobert.codegpt.completions.you.auth.YouAuthenticationService;
 import ee.carlrobert.codegpt.completions.you.auth.response.YouAuthenticationResponse;
 import ee.carlrobert.codegpt.credentials.YouCredentialsManager;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
-import ee.carlrobert.codegpt.util.OverlayUtil;
+import ee.carlrobert.codegpt.ui.OverlayUtil;
 import org.jetbrains.annotations.NotNull;
 
 public class PluginStartupActivity implements StartupActivity {

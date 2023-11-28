@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.util;
+package ee.carlrobert.codegpt.ui;
 
 import static com.intellij.openapi.ui.Messages.CANCEL;
 import static com.intellij.openapi.ui.Messages.OK;
@@ -20,6 +20,7 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.popup.Balloon;
 import com.intellij.openapi.ui.popup.Balloon.Position;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
+import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.ui.awt.RelativePoint;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.JBFont;
@@ -28,6 +29,7 @@ import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.indexes.FolderStructureTreePanel;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
+import ee.carlrobert.codegpt.util.EditorUtil;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import javax.swing.JComponent;
@@ -61,6 +63,32 @@ public class OverlayUtil {
     dialogBuilder.addOkAction().setText("Start Indexing");
     dialogBuilder.addCancelAction();
     dialogBuilder.setTitle("Choose Files for Indexing");
+    return dialogBuilder.show();
+  }
+
+  public static int showMultiFilePromptDialog(Project project, JComponent component) {
+    var dialogBuilder = new DialogBuilder(project);
+    dialogBuilder.setTitle("Include Files in Prompt");
+    dialogBuilder.setNorthPanel(JBUI.Panels.simplePanel(
+        new JBLabel(
+            "<html>"
+                + "<head><style>body { font-size: 12pt; }</style></head>"
+                + "<body>"
+                + "<p>Select the files that you want to include in the prompt.</p>"
+                + "<br/>"
+                + "<p>Choose the files carefully, and only related to the context that you wish "
+                + "to get help with.</p>"
+                + "<p>Keep in mind, the bigger the context, the bigger the cost.</p>"
+                + "<br/>"
+                + "</body>"
+                + "</html>")
+            .setCopyable(true)
+            .setAllowAutoWrapping(true)));
+    var scrollPane = ScrollPaneFactory.createScrollPane(component);
+    scrollPane.setPreferredSize(JBUI.size(250, 250));
+    dialogBuilder.setCenterPanel(scrollPane);
+    dialogBuilder.addOkAction().setText("Continue");
+    dialogBuilder.addCancelAction();
     return dialogBuilder.show();
   }
 

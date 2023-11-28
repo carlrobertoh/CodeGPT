@@ -11,7 +11,7 @@ import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.completions.CompletionRequestHandler;
-import ee.carlrobert.codegpt.util.UIUtil;
+import ee.carlrobert.codegpt.ui.UIUtil;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Cursor;

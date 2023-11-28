@@ -9,7 +9,7 @@ import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.actions.ActionType;
 import ee.carlrobert.codegpt.actions.TrackableAction;
 import ee.carlrobert.codegpt.util.EditorUtil;
-import ee.carlrobert.codegpt.util.OverlayUtil;
+import ee.carlrobert.codegpt.ui.OverlayUtil;
 import org.jetbrains.annotations.NotNull;
 
 public class ReplaceSelectionAction extends TrackableAction {
