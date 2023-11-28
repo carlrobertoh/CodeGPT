@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.toolwindow;
+package ee.carlrobert.codegpt.ui;
 
 import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.JBFont;

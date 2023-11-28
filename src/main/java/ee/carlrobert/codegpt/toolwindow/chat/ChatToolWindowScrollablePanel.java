@@ -5,7 +5,7 @@ import com.intellij.openapi.roots.ui.componentsList.layout.VerticalStackLayout;
 import ee.carlrobert.codegpt.completions.you.YouUserManager;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
-import ee.carlrobert.codegpt.toolwindow.chat.components.ResponsePanel;
+import ee.carlrobert.codegpt.toolwindow.chat.ui.ResponsePanel;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import java.util.Arrays;
 import java.util.HashMap;

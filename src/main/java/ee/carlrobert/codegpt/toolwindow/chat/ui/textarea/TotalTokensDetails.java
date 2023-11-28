@@ -1,16 +1,16 @@
-package ee.carlrobert.codegpt.toolwindow.chat;
+package ee.carlrobert.codegpt.toolwindow.chat.ui.textarea;
 
 import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
 
-public class TokenDetails {
+public class TotalTokensDetails {
 
   private final int systemPromptTokens;
   private int conversationTokens;
   private int userPromptTokens;
   private int highlightedTokens;
 
-  public TokenDetails(EncodingManager encodingManager) {
+  public TotalTokensDetails(EncodingManager encodingManager) {
     systemPromptTokens = encodingManager.countTokens(
         ConfigurationState.getInstance().getSystemPrompt());
   }

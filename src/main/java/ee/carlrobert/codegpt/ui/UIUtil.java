@@ -6,7 +6,7 @@ import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
 import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.util.ui.UI;
-import ee.carlrobert.codegpt.toolwindow.chat.components.SmartScroller;
+import ee.carlrobert.codegpt.toolwindow.chat.ui.SmartScroller;
 import java.awt.Dimension;
 import java.net.URISyntaxException;
 import javax.swing.AbstractAction;

@@ -11,10 +11,10 @@ import com.intellij.openapi.actionSystem.CommonDataKeys;
 import ee.carlrobert.codegpt.actions.editor.CustomPromptAction.CustomPromptDialog;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
+import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.codegpt.ui.checkbox.FileCheckboxTree;
 import ee.carlrobert.codegpt.ui.checkbox.PsiElementCheckboxTree;
 import ee.carlrobert.codegpt.ui.checkbox.VirtualFileCheckboxTree;
-import ee.carlrobert.codegpt.ui.OverlayUtil;
 import javax.swing.SwingUtilities;
 import org.jetbrains.annotations.NotNull;
 

@@ -18,13 +18,14 @@ import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
-import ee.carlrobert.codegpt.toolwindow.chat.components.ChatMessageResponseBody;
-import ee.carlrobert.codegpt.toolwindow.chat.components.ResponsePanel;
-import ee.carlrobert.codegpt.toolwindow.chat.components.TotalTokensPanel;
-import ee.carlrobert.codegpt.toolwindow.chat.components.UserMessagePanel;
-import ee.carlrobert.codegpt.toolwindow.chat.components.UserPromptTextArea;
-import ee.carlrobert.codegpt.toolwindow.chat.components.UserPromptTextAreaHeader;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
+import ee.carlrobert.codegpt.toolwindow.chat.ui.ChatMessageResponseBody;
+import ee.carlrobert.codegpt.toolwindow.chat.ui.ResponsePanel;
+import ee.carlrobert.codegpt.toolwindow.chat.ui.UserMessagePanel;
+import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.TotalTokensDetails;
+import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.TotalTokensPanel;
+import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.UserPromptTextArea;
+import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.UserPromptTextAreaHeader;
 import ee.carlrobert.codegpt.util.EditorUtil;
 import ee.carlrobert.codegpt.util.file.FileUtil;
 import java.awt.BorderLayout;
@@ -103,7 +104,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
   }
 
   @Override
-  public TokenDetails getTokenDetails() {
+  public TotalTokensDetails getTokenDetails() {
     return totalTokensPanel.getTokenDetails();
   }
 

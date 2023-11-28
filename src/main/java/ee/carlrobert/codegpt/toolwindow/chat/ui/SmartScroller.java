@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.toolwindow.chat.components;
+package ee.carlrobert.codegpt.toolwindow.chat.ui;
 
 import java.awt.Component;
 import java.awt.event.AdjustmentEvent;
