@@ -22,6 +22,7 @@ import com.intellij.openapi.ui.popup.Balloon.Position;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.ui.awt.RelativePoint;
+import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
@@ -66,27 +67,21 @@ public class OverlayUtil {
     return dialogBuilder.show();
   }
 
-  public static int showMultiFilePromptDialog(Project project, JComponent component) {
+  public static int showMultiFilePromptDialog(
+      Project project,
+      JBLabel totalTokensLabel,
+      JComponent component) {
     var dialogBuilder = new DialogBuilder(project);
     dialogBuilder.setTitle("Include Files in Prompt");
     dialogBuilder.setNorthPanel(JBUI.Panels.simplePanel(
-        new JBLabel(
-            "<html>"
-                + "<head><style>body { font-size: 12pt; }</style></head>"
-                + "<body>"
-                + "<p>Select the files that you want to include in the prompt.</p>"
-                + "<br/>"
-                + "<p>Choose the files carefully, and only related to the context that you wish "
-                + "to get help with.</p>"
-                + "<p>Keep in mind, the bigger the context, the bigger the cost.</p>"
-                + "<br/>"
-                + "</body>"
-                + "</html>")
-            .setCopyable(true)
+        new JBLabel("Include only the files that are directly related to your problem.")
+            .withBorder(JBUI.Borders.emptyBottom(16))
+            .setCopyable(false)
             .setAllowAutoWrapping(true)));
     var scrollPane = ScrollPaneFactory.createScrollPane(component);
     scrollPane.setPreferredSize(JBUI.size(250, 250));
-    dialogBuilder.setCenterPanel(scrollPane);
+    dialogBuilder.setCenterPanel(JBUI.Panels.simplePanel(scrollPane)
+        .addToTop(totalTokensLabel.withBorder(JBUI.Borders.emptyBottom(8))));
     dialogBuilder.addOkAction().setText("Continue");
     dialogBuilder.addCancelAction();
     return dialogBuilder.show();

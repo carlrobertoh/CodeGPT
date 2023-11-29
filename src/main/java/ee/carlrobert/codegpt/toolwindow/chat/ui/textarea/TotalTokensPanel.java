@@ -134,7 +134,7 @@ public class TotalTokensPanel extends JPanel {
   }
 
   private String getLabelHtml(int total) {
-    return format("<html><small>Total Tokens: <strong>%d</strong></small></html>", total);
+    return format("<html><small>Tokens: <strong>%d</strong></small></html>", total);
   }
 
   private JBLabel getLabel(TotalTokensDetails totalTokensDetails) {

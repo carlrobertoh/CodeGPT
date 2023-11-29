@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.ComponentContainer;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.content.Content;
@@ -88,6 +89,13 @@ public final class StandardChatToolWindowContentManager {
       }
     }
     return Optional.empty();
+  }
+
+  public Optional<StandardChatToolWindowPanel> tryFindChatToolWindowPanel() {
+    return tryFindFirstChatTabContent()
+        .map(ComponentContainer::getComponent)
+        .filter(component -> component instanceof StandardChatToolWindowPanel)
+        .map(component -> (StandardChatToolWindowPanel) component);
   }
 
   public void resetAll() {

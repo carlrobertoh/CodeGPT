@@ -2,12 +2,15 @@ package ee.carlrobert.codegpt.toolwindow.chat;
 
 import static ee.carlrobert.codegpt.ui.UIUtil.createScrollPaneWithSmartScroller;
 import static java.lang.String.format;
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.joining;
 
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
 import com.intellij.util.ui.JBUI;
+import ee.carlrobert.codegpt.CodeGPTKeys;
 import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.actions.ActionType;
 import ee.carlrobert.codegpt.completions.CompletionRequestHandler;
@@ -19,7 +22,9 @@ import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
+import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowPanel;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ChatMessageResponseBody;
+import ee.carlrobert.codegpt.toolwindow.chat.ui.ChatToolWindowScrollablePanel;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ResponsePanel;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.UserMessagePanel;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.TotalTokensDetails;
@@ -68,6 +73,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
         this);
     userPromptTextArea = new UserPromptTextArea(this::handleSubmit, totalTokensPanel);
     rootPanel = createRootPanel(settings.getSelectedService());
+
     userPromptTextArea.requestFocusInWindow();
     userPromptTextArea.requestFocus();
   }
@@ -77,7 +83,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
   }
 
   @Override
-  public JPanel getContent() {
+  public JComponent getContent() {
     return rootPanel;
   }
 
@@ -88,6 +94,26 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
 
   @Override
   public void sendMessage(Message message) {
+    var checkedFiles = project.getUserData(CodeGPTKeys.SELECTED_FILES);
+    if (checkedFiles != null && !checkedFiles.isEmpty()) {
+      var context = checkedFiles.stream()
+          .map(item -> format(
+              "\nPath:\n"
+                  + "[File Path](%s)\n\n"
+                  + "Content:\n\n"
+                  + "%s\n",
+              item.getFilePath(),
+              format("```%s\n%s\n```\n", item.getFileExtension(), item.getFileContent().trim())))
+          .collect(joining());
+
+      message.setPrompt(format(
+          "Use the following context to answer question at the end:\n"
+              + "%s\n"
+              + "Question: %s",
+          context,
+          message.getPrompt()));
+    }
+
     var messagePanel = toolWindowScrollablePanel.addMessage(message.getId());
     messagePanel.add(new UserMessagePanel(project, message, this));
     var responsePanel = new ResponsePanel()
@@ -101,6 +127,9 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     totalTokensPanel.updateConversationTokens(conversationTokens + userPromptTokens);
 
     call(message, responsePanel, false);
+    project.getService(StandardChatToolWindowContentManager.class)
+        .tryFindChatToolWindowPanel()
+        .ifPresent(StandardChatToolWindowPanel::clearSelectedFilesNotification);
   }
 
   @Override

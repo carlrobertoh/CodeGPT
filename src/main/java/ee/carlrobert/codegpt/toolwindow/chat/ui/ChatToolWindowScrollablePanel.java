@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.toolwindow.chat;
+package ee.carlrobert.codegpt.toolwindow.chat.ui;
 
 import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
 import com.intellij.openapi.roots.ui.componentsList.layout.VerticalStackLayout;
@@ -22,7 +22,7 @@ public class ChatToolWindowScrollablePanel extends ScrollablePanel {
   private final YouUserManager youUserManager;
   private final Map<UUID, JPanel> visibleMessagePanels;
 
-  ChatToolWindowScrollablePanel(SettingsState settings) {
+  public ChatToolWindowScrollablePanel(SettingsState settings) {
     super(new VerticalStackLayout());
     this.settings = settings;
     this.youUserManager = YouUserManager.getInstance();

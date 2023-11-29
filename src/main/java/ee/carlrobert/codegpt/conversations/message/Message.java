@@ -10,7 +10,7 @@ import java.util.UUID;
 public class Message {
 
   private final UUID id;
-  private final String prompt;
+  private String prompt;
   private String response;
   private String userMessage;
   private List<YouSerpResult> serpResults;
@@ -32,6 +32,10 @@ public class Message {
 
   public String getPrompt() {
     return prompt;
+  }
+
+  public void setPrompt(String prompt) {
+    this.prompt = prompt;
   }
 
   public String getResponse() {
