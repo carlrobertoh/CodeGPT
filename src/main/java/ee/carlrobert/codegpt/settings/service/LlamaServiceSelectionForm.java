@@ -23,6 +23,7 @@ import ee.carlrobert.codegpt.ui.OverlayUtil;
 import java.awt.BorderLayout;
 import java.io.File;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -106,6 +107,9 @@ public class LlamaServiceSelectionForm extends JPanel {
   }
 
   public List<String> getListOfAdditionalParameters() {
+    if (additionalParametersField.getText().trim().isEmpty()) {
+      return Collections.emptyList();
+    }
     var parameters = additionalParametersField.getText().split(",");
     return Arrays.stream(parameters)
         .map(String::trim)

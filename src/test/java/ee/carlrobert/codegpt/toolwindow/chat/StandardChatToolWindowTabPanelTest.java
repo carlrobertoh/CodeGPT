@@ -62,7 +62,7 @@ public class StandardChatToolWindowTabPanelTest extends IntegrationTest {
             "highlightedTokens")
         .containsExactly(
             encodingManager.countTokens(COMPLETION_SYSTEM_PROMPT),
-            encodingManager.countConversationTokens(panel.getConversation()),
+            encodingManager.countTokens(message.getPrompt()),
             0,
             0);
     assertThat(panel.getConversation())
