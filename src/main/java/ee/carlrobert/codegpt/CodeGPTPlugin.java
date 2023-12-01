@@ -5,11 +5,15 @@ import static java.util.Objects.requireNonNull;
 import com.intellij.ide.plugins.PluginManagerCore;
 import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.extensions.PluginId;
+import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.project.Project;
-import ee.carlrobert.codegpt.telemetry.core.util.Directories;
+import com.intellij.openapi.updateSettings.impl.PluginDownloader;
+import com.intellij.openapi.updateSettings.impl.UpdateChecker;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
+import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 
 public final class CodeGPTPlugin {
@@ -45,5 +49,19 @@ public final class CodeGPTPlugin {
 
   public static @NotNull String getProjectIndexStorePath(@NotNull Project project) {
     return getIndexStorePath() + File.separator + project.getName();
+  }
+
+  public static Optional<PluginDownloader> tryFindAvailableUpdate(
+      @NotNull ProgressIndicator indicator) {
+    return findAvailableUpdates(indicator).stream()
+        .filter((update) -> CODEGPT_ID.equals(update.getId()))
+        .findFirst();
+  }
+
+  private static @NotNull Collection<PluginDownloader> findAvailableUpdates(
+      @NotNull ProgressIndicator indicator) {
+    return UpdateChecker.getInternalPluginUpdates(null, indicator)
+        .getPluginUpdates()
+        .getAllEnabled();
   }
 }

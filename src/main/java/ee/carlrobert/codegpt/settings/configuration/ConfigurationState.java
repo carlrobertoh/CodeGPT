@@ -20,6 +20,7 @@ public class ConfigurationState implements PersistentStateComponent<Configuratio
   private String systemPrompt = COMPLETION_SYSTEM_PROMPT;
   private int maxTokens = 1000;
   private double temperature = 0.1;
+  private boolean checkForPluginUpdates = true;
   private boolean createNewChatOnEachAction;
   private boolean ignoreGitCommitTokenLimit;
   private boolean methodNameGenerationEnabled = true;
@@ -79,6 +80,14 @@ public class ConfigurationState implements PersistentStateComponent<Configuratio
 
   public void setTableData(Map<String, String> tableData) {
     this.tableData = tableData;
+  }
+
+  public boolean isCheckForPluginUpdates() {
+    return checkForPluginUpdates;
+  }
+
+  public void setCheckForPluginUpdates(boolean checkForPluginUpdates) {
+    this.checkForPluginUpdates = checkForPluginUpdates;
   }
 
   public boolean isIgnoreGitCommitTokenLimit() {

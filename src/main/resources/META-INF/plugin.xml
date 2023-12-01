@@ -10,6 +10,7 @@
     </projectListeners>
 
     <extensions defaultExtensionNs="com.intellij">
+        <postStartupActivity implementation="ee.carlrobert.codegpt.CodeGPTUpdateStartupActivity"/>
         <postStartupActivity implementation="ee.carlrobert.codegpt.PluginStartupActivity"/>
         <applicationConfigurable id="settings.codegpt" parentId="tools" displayName="CodeGPT"
             instance="ee.carlrobert.codegpt.settings.SettingsConfigurable"/>

@@ -41,6 +41,7 @@ public class ConfigurationComponent {
 
   private final JPanel mainPanel;
   private final JBTable table;
+  private final JBCheckBox checkForPluginUpdatesCheckBox;
   private final JBCheckBox openNewTabCheckBox;
   private final JBCheckBox methodNameGenerationCheckBox;
   private final JBCheckBox autoFormattingCheckBox;
@@ -99,6 +100,9 @@ public class ConfigurationComponent {
     systemPromptTextArea.setColumns(60);
     systemPromptTextArea.setRows(3);
 
+    checkForPluginUpdatesCheckBox = new JBCheckBox(
+        CodeGPTBundle.get("configurationConfigurable.checkForPluginUpdates.label"),
+        configuration.isCheckForPluginUpdates());
     openNewTabCheckBox = new JBCheckBox(
         CodeGPTBundle.get("configurationConfigurable.openNewTabCheckBox.label"),
         configuration.isCreateNewChatOnEachAction());
@@ -112,6 +116,7 @@ public class ConfigurationComponent {
     mainPanel = FormBuilder.createFormBuilder()
         .addComponent(tablePanel)
         .addVerticalGap(4)
+        .addComponent(checkForPluginUpdatesCheckBox)
         .addComponent(openNewTabCheckBox)
         .addComponent(methodNameGenerationCheckBox)
         .addComponent(autoFormattingCheckBox)
@@ -254,6 +259,14 @@ public class ConfigurationComponent {
 
   public void setMaxTokens(int maxTokens) {
     maxTokensField.setValue(maxTokens);
+  }
+
+  public boolean isCheckForPluginUpdates() {
+    return checkForPluginUpdatesCheckBox.isSelected();
+  }
+
+  public void setCheckForPluginUpdates(boolean checkForUpdates) {
+    checkForPluginUpdatesCheckBox.setSelected(checkForUpdates);
   }
 
   public boolean isCreateNewChatOnEachAction() {
