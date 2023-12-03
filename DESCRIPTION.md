@@ -7,30 +7,31 @@ Access state-of-the-art LLMs like GPT-4, Code LLama and more, all for free.
 
 ## Quick Start Guide
 
-1. **Download the Plugin**: Get started by downloading the plugin from the [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/21056-codegpt?preview=true).
+1. **Download the Plugin**
 
-2. **Choose Your Preferred Service**:
+2. **Choose Your Preferred Service**
 
    a) **OpenAI** - Requires authentication via OpenAI API key.
 
    b) **Azure** - Requires authentication via Active Directory or API key.
 
-   c) **You.com** - A free, web-connected service with an optional upgrade to You⚡Pro for enhanced features..
+   c) **You.com** - A free, web-connected service with an optional upgrade to You⚡Pro for enhanced features.
 
-   d) **LLaMA C/C++ Port** - Run Code Llama, WizardCoder, and other state-of-the-art models locally for free.
+   d) **LLaMA C/C++ Port** - Run Code Llama, WizardCoder, Deepseek Coder, and other state-of-the-art models locally for free.
 
-3. **Start Using the Features**: You're all set! Start exploring the features of our plugin.
+3. **Start Using the Features**
 
 ### OpenAI
 
 After successful installation, configure your API key. Navigate to the plugin's settings via **File | Settings/Preferences | Tools | CodeGPT**. Paste your OpenAI API key into the field and click `Apply/OK`.
 
-### Azure
+### Azure OpenAI
 
 For Azure OpenAI services, you'll need to input three additional fields:
-* `Resource name`: The name of your Azure OpenAI Cognitive Services.
-* `Deployment ID`: The name of your Deployment.
-* `API version`: The most recent non-preview version.
+
+- **Resource name**: The name of your Azure OpenAI Cognitive Services.
+- **Deployment ID**: The name of your Deployment.
+- **API version**: The most recent non-preview version.
 
 Also, input one of the two provided API keys.
 
@@ -58,7 +59,7 @@ The main goal of `llama.cpp` is to run the LLaMA model using 4-bit integer quant
 
 3. **Apply Settings**: With the server running, you can now apply the settings to start using the features. Click on the `Apply/OK` button to save your settings and start using the application.
 
-<img alt="animated" style="max-width: 100%; width: 600px;" src="https://github.com/carlrobertoh/CodeGPT/raw/master/docs/assets/llama_settings.png" />
+<img alt="animated" style="max-width: 100%; width: 600px;" src="https://github.com/carlrobertoh/CodeGPT/raw/master/docs/assets/llama-settings.png" />
 
 > **Note**: If you're already running a server and wish to configure the plugin against that, then simply select the port and click `Apply/OK`.
 
@@ -66,7 +67,7 @@ The main goal of `llama.cpp` is to run the LLaMA model using 4-bit integer quant
 
 The plugin provides several key features, such as:
 
-### Ask Anything
+### Chat with AI
 
 Ask anything you'd like.
 
