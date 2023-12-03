@@ -1,5 +1,7 @@
 package ee.carlrobert.codegpt.completions.llama;
 
+import static java.lang.String.format;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.GeneralCommandLine;
@@ -9,18 +11,21 @@ import com.intellij.execution.process.ProcessEvent;
 import com.intellij.execution.process.ProcessListener;
 import com.intellij.execution.process.ProcessOutputType;
 import com.intellij.icons.AllIcons.Actions;
+import com.intellij.notification.NotificationType;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.Key;
 import com.intellij.ui.components.JBLabel;
+import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
-import ee.carlrobert.codegpt.settings.service.LlamaServiceSelectionForm;
 import ee.carlrobert.codegpt.settings.service.ServerProgressPanel;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
+import ee.carlrobert.codegpt.util.OverlayUtil;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import javax.swing.SwingConstants;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -30,19 +35,20 @@ public final class LlamaServerAgent implements Disposable {
 
   private static final Logger LOG = Logger.getInstance(LlamaServerAgent.class);
 
-  private static @Nullable OSProcessHandler makeProcessHandler;
-  private static @Nullable OSProcessHandler startServerProcessHandler;
+  private @Nullable OSProcessHandler makeProcessHandler;
+  private @Nullable OSProcessHandler startServerProcessHandler;
 
   public void startAgent(
-      LlamaServiceSelectionForm llamaServiceSelectionForm,
+      LlamaServerStartupParams params,
       ServerProgressPanel serverProgressPanel,
       Runnable onSuccess) {
     ApplicationManager.getApplication().invokeLater(() -> {
       try {
-        serverProgressPanel.updateText("Building llama.cpp...");
+        serverProgressPanel.updateText(
+            CodeGPTBundle.get("llamaServerAgent.buildingProject.description"));
         makeProcessHandler = new OSProcessHandler(getMakeCommandLinde());
         makeProcessHandler.addProcessListener(
-            getMakeProcessListener(llamaServiceSelectionForm, serverProgressPanel, onSuccess));
+            getMakeProcessListener(params, serverProgressPanel, onSuccess));
         makeProcessHandler.startNotify();
       } catch (ExecutionException e) {
         throw new RuntimeException(e);
@@ -63,9 +69,11 @@ public final class LlamaServerAgent implements Disposable {
   }
 
   private ProcessListener getMakeProcessListener(
-      LlamaServiceSelectionForm serviceSelectionForm,
+      LlamaServerStartupParams params,
       ServerProgressPanel serverProgressPanel,
       Runnable onSuccess) {
+    LOG.info("Building llama project");
+
     return new ProcessAdapter() {
       @Override
       public void onTextAvailable(@NotNull ProcessEvent event, @NotNull Key outputType) {
@@ -75,21 +83,16 @@ public final class LlamaServerAgent implements Disposable {
       @Override
       public void processTerminated(@NotNull ProcessEvent event) {
         try {
-          serverProgressPanel.updateText("Booting up server...");
-          startServerProcessHandler = new OSProcessHandler.Silent(
-              getServerCommandLine(
-                  serviceSelectionForm.getLlamaModelPreferencesForm().getActualModelPath(),
-                  serviceSelectionForm.getContextSize(),
-                  serviceSelectionForm.getThreads(),
-                  serviceSelectionForm.getServerPort(),
-                  serviceSelectionForm.getListOfAdditionalParameters()));
-          startServerProcessHandler.addProcessListener(getProcessListener(
-              serviceSelectionForm.getServerPort(),
-              serverProgressPanel,
-              onSuccess));
+          LOG.info("Booting up llama server");
+
+          serverProgressPanel.updateText(
+              CodeGPTBundle.get("llamaServerAgent.serverBootup.description"));
+          startServerProcessHandler = new OSProcessHandler.Silent(getServerCommandLine(params));
+          startServerProcessHandler.addProcessListener(
+              getProcessListener(params.getPort(), serverProgressPanel, onSuccess));
           startServerProcessHandler.startNotify();
         } catch (ExecutionException ex) {
-          LOG.error("Unable to start the server", ex);
+          LOG.error("Unable to start llama server", ex);
           throw new RuntimeException(ex);
         }
       }
@@ -102,9 +105,18 @@ public final class LlamaServerAgent implements Disposable {
       Runnable onSuccess) {
     return new ProcessAdapter() {
       private final ObjectMapper objectMapper = new ObjectMapper();
+      private final List<String> errorLines = new CopyOnWriteArrayList<>();
 
       @Override
       public void processTerminated(@NotNull ProcessEvent event) {
+        if (errorLines.isEmpty()) {
+          LOG.info(format("Server terminated with code %d", event.getExitCode()));
+        } else {
+          var error = String.join("", errorLines);
+          OverlayUtil.showNotification(error, NotificationType.ERROR);
+          LOG.error(error);
+        }
+
         serverProgressPanel.displayComponent(new JBLabel(
             "Server terminated",
             Actions.Cancel,
@@ -113,12 +125,19 @@ public final class LlamaServerAgent implements Disposable {
 
       @Override
       public void onTextAvailable(@NotNull ProcessEvent event, @NotNull Key outputType) {
-        LOG.debug(event.getText());
+        if (ProcessOutputType.isStderr(outputType)) {
+          errorLines.add(event.getText());
+          return;
+        }
 
-        if (outputType == ProcessOutputType.STDOUT) {
+        if (ProcessOutputType.isStdout(outputType)) {
+          LOG.info(event.getText());
+
           try {
             var serverMessage = objectMapper.readValue(event.getText(), LlamaServerMessage.class);
             if ("HTTP server listening".equals(serverMessage.getMessage())) {
+              LOG.info("Server up and running!");
+
               LlamaSettingsState.getInstance().setServerPort(port);
               onSuccess.run();
             }
@@ -139,21 +158,16 @@ public final class LlamaServerAgent implements Disposable {
     return commandLine;
   }
 
-  private GeneralCommandLine getServerCommandLine(
-      String modelPath,
-      int contextLength,
-      int threads,
-      int port,
-      List<String> additionalParameters) {
+  private GeneralCommandLine getServerCommandLine(LlamaServerStartupParams params) {
     GeneralCommandLine commandLine = new GeneralCommandLine().withCharset(StandardCharsets.UTF_8);
     commandLine.setExePath("./server");
     commandLine.withWorkDirectory(CodeGPTPlugin.getLlamaSourcePath());
     commandLine.addParameters(
-        "-m", modelPath,
-        "-c", String.valueOf(contextLength),
-        "--port", String.valueOf(port),
-        "-t", String.valueOf(threads));
-    commandLine.addParameters(additionalParameters);
+        "-m", params.getModelPath(),
+        "-c", String.valueOf(params.getContextLength()),
+        "--port", String.valueOf(params.getPort()),
+        "-t", String.valueOf(params.getThreads()));
+    commandLine.addParameters(params.getAdditionalParameters());
     commandLine.setRedirectErrorStream(false);
     return commandLine;
   }
