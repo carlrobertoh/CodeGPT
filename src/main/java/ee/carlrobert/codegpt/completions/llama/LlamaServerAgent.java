@@ -10,14 +10,12 @@ import com.intellij.execution.process.ProcessAdapter;
 import com.intellij.execution.process.ProcessEvent;
 import com.intellij.execution.process.ProcessListener;
 import com.intellij.execution.process.ProcessOutputType;
-import com.intellij.icons.AllIcons.Actions;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.Key;
-import com.intellij.ui.components.JBLabel;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.settings.service.ServerProgressPanel;
@@ -26,7 +24,6 @@ import ee.carlrobert.codegpt.util.OverlayUtil;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import javax.swing.SwingConstants;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -41,14 +38,15 @@ public final class LlamaServerAgent implements Disposable {
   public void startAgent(
       LlamaServerStartupParams params,
       ServerProgressPanel serverProgressPanel,
-      Runnable onSuccess) {
+      Runnable onSuccess,
+      Runnable onServerTerminated) {
     ApplicationManager.getApplication().invokeLater(() -> {
       try {
         serverProgressPanel.updateText(
             CodeGPTBundle.get("llamaServerAgent.buildingProject.description"));
         makeProcessHandler = new OSProcessHandler(getMakeCommandLinde());
         makeProcessHandler.addProcessListener(
-            getMakeProcessListener(params, serverProgressPanel, onSuccess));
+            getMakeProcessListener(params, serverProgressPanel, onSuccess, onServerTerminated));
         makeProcessHandler.startNotify();
       } catch (ExecutionException e) {
         throw new RuntimeException(e);
@@ -71,7 +69,8 @@ public final class LlamaServerAgent implements Disposable {
   private ProcessListener getMakeProcessListener(
       LlamaServerStartupParams params,
       ServerProgressPanel serverProgressPanel,
-      Runnable onSuccess) {
+      Runnable onSuccess,
+      Runnable onServerTerminated) {
     LOG.info("Building llama project");
 
     return new ProcessAdapter() {
@@ -89,7 +88,7 @@ public final class LlamaServerAgent implements Disposable {
               CodeGPTBundle.get("llamaServerAgent.serverBootup.description"));
           startServerProcessHandler = new OSProcessHandler.Silent(getServerCommandLine(params));
           startServerProcessHandler.addProcessListener(
-              getProcessListener(params.getPort(), serverProgressPanel, onSuccess));
+              getProcessListener(params.getPort(), onSuccess, onServerTerminated));
           startServerProcessHandler.startNotify();
         } catch (ExecutionException ex) {
           LOG.error("Unable to start llama server", ex);
@@ -101,8 +100,8 @@ public final class LlamaServerAgent implements Disposable {
 
   private ProcessListener getProcessListener(
       int port,
-      ServerProgressPanel serverProgressPanel,
-      Runnable onSuccess) {
+      Runnable onSuccess,
+      Runnable onServerTerminated) {
     return new ProcessAdapter() {
       private final ObjectMapper objectMapper = new ObjectMapper();
       private final List<String> errorLines = new CopyOnWriteArrayList<>();
@@ -117,10 +116,7 @@ public final class LlamaServerAgent implements Disposable {
           LOG.error(error);
         }
 
-        serverProgressPanel.displayComponent(new JBLabel(
-            "Server terminated",
-            Actions.Cancel,
-            SwingConstants.LEADING));
+        onServerTerminated.run();
       }
 
       @Override

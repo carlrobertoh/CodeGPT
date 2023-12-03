@@ -194,6 +194,16 @@ public class LlamaServiceSelectionForm extends JPanel {
                   CodeGPTBundle.get("settingsConfigurable.service.llama.progress.serverRunning"),
                   Actions.Checked,
                   SwingConstants.LEADING));
+            },
+            () -> {
+              setFormEnabled(true);
+              serverButton.setText(
+                  CodeGPTBundle.get("settingsConfigurable.service.llama.startServer.label"));
+              serverButton.setIcon(Actions.Execute);
+              serverProgressPanel.displayComponent(new JBLabel(
+                  CodeGPTBundle.get("settingsConfigurable.service.llama.progress.serverTerminated"),
+                  Actions.Cancel,
+                  SwingConstants.LEADING));
             });
       }
     });
