@@ -7,7 +7,7 @@
   </a>
   <h1 style="margin: 0;" align="center">CodeGPT</h1>
   <p>
-    A JetBrains extension that allows you to use ChatGPT inside your favourite IDE
+    A JetBrains extension providing access to state-of-the-art LLMs, such as GPT-4, Code Llama, and others, all for free
   </p>
 </div>
 
@@ -21,6 +21,7 @@
   <summary>Table of Contents</summary>
   <ol>
     <li><a href="#about-the-project">About The Project</a></li>
+    <li><a href="#quick-start-guide">Quick Start Guide</a></li>
     <li>
       <a href="#getting-started">Getting Started</a>
       <ul>
@@ -37,17 +38,60 @@
 
 ## About The Project
 
-This is an extension for JetBrains IDEs that integrates ChatGPT into your coding environment.
-By leveraging the power of GPT-3, this makes it an invaluable tool for developers looking to streamline their workflow and gain a deeper understanding of the code they're working on.
+This is an extension for JetBrains IDEs that integrates AI into your coding environment.
+By leveraging the power of Large Language Models (LLMs), this makes it an invaluable tool for developers looking to streamline their workflow and gain a deeper understanding of the code they're working on.
+
+## Features
+
+The plugin provides several key features, such as:
+
+### Chat with AI
+
+<p align="center">
+  <img src="docs/assets/chat-with-ai.png" alt="animated" />
+</p>
+
+### Generate Git Commit Messages
+
+<p align="center">
+  <img src="docs/assets/generate-commit-message.png" />
+</p>
+
+### Method name suggestions
+
+<p align="center">
+  <img src="docs/assets/method-name-suggestions.png" />
+</p>
+
+### Multiple providers
+
+<p align="center">
+  <img src="docs/assets/model-selection.png" />
+</p>
+
+### Other features
+
+- **Conversation History** - View recent conversation history and restore previous sessions, making it easy to pick up where you left off
+- **Concurrent conversations** - Chat with AI in multiple tabs simultaneously
+- **Seamless conversations** - Chat with AI regardless of the maximum token limitations
+- **Predefined Actions** - Create your own editor actions or override the existing ones, saving time rewriting the same prompt repeatedly
 
 ## Getting Started
 
-To get started, follow these simple steps:
+1. **Download the Plugin**
 
-### Prerequisites
+2. **Choose Your Preferred Service**:
 
-In order to use the extension, you need to have a JetBrains IDE installed and the API key configured.
-You can find the API key in your [User settings][api-key-url].
+   a) **OpenAI** - Requires authentication via OpenAI API key.
+
+   b) **Azure** - Requires authentication via Active Directory or API key.
+
+   c) **You.com** - A free, web-connected service with an optional upgrade to You⚡Pro for enhanced features.
+
+   d) **LLaMA C/C++ Port** - Recommended to have a decent computer to handle the computational requirements of running inference.
+   > **Note**: Currently supported only on Linux and MacOS.
+
+3. **Start Using the Features**
 
 ### Installation
 
@@ -57,64 +101,47 @@ On the `Marketplace` tab simply search for `codegpt` and select the `CodeGPT` su
 
 ![marketplace][marketplace-img]
 
-### API Key Configuration
+### OpenAI
 
-After the plugin has been successfully installed, the API key needs to be configured.
+After successful installation, configure your API key. Navigate to the plugin's settings via **File | Settings/Preferences | Tools | CodeGPT**. Paste your OpenAI API key into the field and click `Apply/OK`.
 
-You can configure the key by going to the plugin's settings via the `File | Settings/Preferences | Tools | CodeGPT`.
-On the settings panel simply click on the `API key` field, paste the key obtained from the OpenAI website and click `Apply/OK`:
+### Azure OpenAI
 
-![plugin-settings][plugin-settings]
+For Azure OpenAI services, you'll need to input three additional fields:
 
-#### Azure OpenAI configuration
-Specifically for Azure OpenAI services, you will have to input three supplementary fields:
-* the `Resource Name`, which is the name of your Azure OpenAI Cognitive Services. It's the first part of the url you're provided to use the service: `https://my-resource-name.openai.azure.com/` -> use `my-resource-name`. You can find it in your Azure Cognitive Services page, under `Resource Management` -> `Resource Management` -> `Keys and Endpoints`.
-* the `Deployment ID`, which is the name of your Deployment. You can find it in the Azure AI Studio, under `Management` -> `Deployment` -> `Deployment Name` column in the table.
-* the `API Version`, I usually used the last non-preview version, which is currently `2023-05-15`. 
+- **Resource name**: The name of your Azure OpenAI Cognitive Services. It's the first part of the url you're provided to use the service: "https://**my-resource-name**.openai.azure.com/". You can find it in your Azure Cognitive Services page, under `Resource Management` → `Resource Management` → `Keys and Endpoints`.
+- **Deployment ID**: The name of your Deployment. You can find it in the Azure AI Studio, under `Management` → `Deployment` → `Deployment Name` column in the table.
+- **API version**: The most recent non-preview version.
+
 In addition to these, you need to input one of the two API Keys provided, found along with the `Resource Name`.
 
-## Features
+### You.com (Free)
 
-The plugin provides several key features, such as:
+**You.com** is a search engine that summarizes the best parts of the internet for **you**, with private ads and with privacy options.
 
-### Ask Anything
+**You⚡Pro**
 
-Ask anything you'd like.
+Use the **CodeGPT** coupon for a free month of unlimited GPT-4 usage.
 
-<p align="center">
-  <img src="docs/assets/gif/ask-anything.gif" alt="animated" />
-</p>
+Check out the full [feature list](https://about.you.com/hc/youpro/what-features-are-included-in-youpro/) for more details.
 
-### Select and Ask
+### LLaMA C/C++ Port (Free, Local)
 
-Ask anything related to your selected code.
+> **Note**: Currently supported only on Linux and MacOS.
 
-<p align="center">
-  <img src="docs/assets/gif/custom-prompt.gif" />
-</p>
+The main goal of `llama.cpp` is to run the LLaMA model using 4-bit integer quantization on a MacBook.
 
-### Replace Generated Code
+#### Getting Started
 
-Instantly replace a selected code block in the editor with suggested code generated by AI.
+1. **Select the Model**: Depending on your hardware capabilities, choose the appropriate model from the provided list. Once selected, click on the `Download Model` link. A progress bar will appear, indicating the download process.
 
-<p align="center">
-  <img src="docs/assets/gif/replace-code.gif" />
-</p>
+2. **Start the Server**: After successfully downloading the model, initiate the server by clicking on the `Start Server` button. A status message will be displayed, indicating that the server is starting up.
 
-### Regenerate Response
+3. **Apply Settings**: With the server running, you can now apply the settings to start using the features. Click on the `Apply/OK` button to save your settings and start using the application.
 
-Expected a different answer? Re-generate any response of your choosing.
+<img alt="animated" style="max-width: 100%; width: 600px;" src="https://github.com/carlrobertoh/CodeGPT/raw/master/docs/assets/llama-settings.png" />
 
-<p align="center">
-  <img src="docs/assets/gif/regenerate.gif" />
-</p>
-
-### Other features
-
-- **Conversation History** - View recent conversation history and restore previous sessions, making it easy to pick up where you left off
-- **Concurrent conversations** - Chat with the AI in multiple tabs simultaneously
-- **Seamless conversations** - Chat with the AI regardless of the maximum token limitations
-- **Predefined Actions** - Create your own editor actions or override the existing ones, saving time rewriting the same prompt repeatedly
+> **Note**: If you're already running a server and wish to configure the plugin against that, then simply select the port and click `Apply/OK`.
 
 ### Running locally
 

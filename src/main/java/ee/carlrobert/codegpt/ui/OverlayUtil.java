@@ -38,9 +38,12 @@ import org.jetbrains.annotations.NotNull;
 
 public class OverlayUtil {
 
+  public static Notification getDefaultNotification(String content, NotificationType type) {
+    return new Notification("CodeGPT Notification Group", "CodeGPT", content, type);
+  }
+
   public static void showNotification(String content, NotificationType type) {
-    Notifications.Bus.notify(
-        new Notification("CodeGPT Notification Group", "CodeGPT", content, type));
+    Notifications.Bus.notify(getDefaultNotification(content, type));
   }
 
   public static int showFileStructureDialog(

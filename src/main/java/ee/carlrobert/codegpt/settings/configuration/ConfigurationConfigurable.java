@@ -37,6 +37,8 @@ public class ConfigurationConfigurable implements Configurable {
         || configurationComponent.getMaxTokens() != configuration.getMaxTokens()
         || configurationComponent.getTemperature() != configuration.getTemperature()
         || !configurationComponent.getSystemPrompt().equals(configuration.getSystemPrompt())
+        || configurationComponent.isCheckForPluginUpdates()
+        != configuration.isCheckForPluginUpdates()
         || configurationComponent.isCreateNewChatOnEachAction()
         != configuration.isCreateNewChatOnEachAction()
         || configurationComponent.isMethodNameGenerationEnabled()
@@ -52,6 +54,7 @@ public class ConfigurationConfigurable implements Configurable {
     configuration.setMaxTokens(configurationComponent.getMaxTokens());
     configuration.setTemperature(configurationComponent.getTemperature());
     configuration.setSystemPrompt(configurationComponent.getSystemPrompt());
+    configuration.setCheckForPluginUpdates(configurationComponent.isCheckForPluginUpdates());
     configuration.setCreateNewChatOnEachAction(
         configurationComponent.isCreateNewChatOnEachAction());
     configuration.setMethodNameGenerationEnabled(
@@ -67,6 +70,7 @@ public class ConfigurationConfigurable implements Configurable {
     configurationComponent.setMaxTokens(configuration.getMaxTokens());
     configurationComponent.setTemperature(configuration.getTemperature());
     configurationComponent.setSystemPrompt(configuration.getSystemPrompt());
+    configurationComponent.setCheckForPluginUpdates(configuration.isCheckForPluginUpdates());
     configurationComponent.setCreateNewChatOnEachAction(
         configuration.isCreateNewChatOnEachAction());
     configurationComponent.setDisableMethodNameGeneration(

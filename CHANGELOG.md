@@ -6,6 +6,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.9] - 2023-12-04
+
+### Added
+
+- IDE notification on new plugin versions
+
+### Fixed
+
+- LLaMA settings state on server failure
+
+### Improved
+
+- LLaMA server logging
+
 ## [2.2.8] - 2023-12-01
 
 ### Fixed
@@ -291,7 +305,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `OPENAI_API_KEY` persistence, key is saved in the OS password safe from now on
 
-[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.8...HEAD
+[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.9...HEAD
+[2.2.9]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.8...v2.2.9
 [2.2.8]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.7...v2.2.8
 [2.2.7]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.6...v2.2.7
 [2.2.6]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.5...v2.2.6

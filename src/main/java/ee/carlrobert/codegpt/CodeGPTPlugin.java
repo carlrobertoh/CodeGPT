@@ -6,7 +6,6 @@ import com.intellij.ide.plugins.PluginManagerCore;
 import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.project.Project;
-import ee.carlrobert.codegpt.telemetry.core.util.Directories;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;

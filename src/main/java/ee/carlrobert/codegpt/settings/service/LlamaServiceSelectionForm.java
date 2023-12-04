@@ -18,6 +18,7 @@ import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.completions.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaServerAgent;
+import ee.carlrobert.codegpt.completions.llama.LlamaServerStartupParams;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import java.awt.BorderLayout;
@@ -179,11 +180,31 @@ public class LlamaServiceSelectionForm extends JPanel {
         llamaServerAgent.stopAgent();
       } else {
         disableForm(serverButton, serverProgressPanel);
-        llamaServerAgent.startAgent(this, serverProgressPanel, () -> {
-          setFormEnabled(false);
-          serverProgressPanel.displayComponent(
-              new JBLabel("Server running", Actions.Checked, SwingConstants.LEADING));
-        });
+        llamaServerAgent.startAgent(
+            new LlamaServerStartupParams(
+                llamaModelPreferencesForm.getActualModelPath(),
+                getContextSize(),
+                getThreads(),
+                getServerPort(),
+                getListOfAdditionalParameters()),
+            serverProgressPanel,
+            () -> {
+              setFormEnabled(false);
+              serverProgressPanel.displayComponent(new JBLabel(
+                  CodeGPTBundle.get("settingsConfigurable.service.llama.progress.serverRunning"),
+                  Actions.Checked,
+                  SwingConstants.LEADING));
+            },
+            () -> {
+              setFormEnabled(true);
+              serverButton.setText(
+                  CodeGPTBundle.get("settingsConfigurable.service.llama.startServer.label"));
+              serverButton.setIcon(Actions.Execute);
+              serverProgressPanel.displayComponent(new JBLabel(
+                  CodeGPTBundle.get("settingsConfigurable.service.llama.progress.serverTerminated"),
+                  Actions.Cancel,
+                  SwingConstants.LEADING));
+            });
       }
     });
     return serverButton;
