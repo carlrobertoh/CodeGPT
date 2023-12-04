@@ -51,19 +51,19 @@ The plugin provides several key features, such as:
   <img src="docs/assets/chat-with-ai.png" alt="animated" />
 </p>
 
-### Generate Git Commit Messages
+### Generate Commit Messages
 
 <p align="center">
   <img src="docs/assets/generate-commit-message.png" />
 </p>
 
-### Method name suggestions
+### Method Name Suggestions
 
 <p align="center">
   <img src="docs/assets/method-name-suggestions.png" />
 </p>
 
-### Multiple providers
+### Choose Between Different Providers
 
 <p align="center">
   <img src="docs/assets/model-selection.png" />
@@ -74,7 +74,7 @@ The plugin provides several key features, such as:
 - **Conversation History** - View recent conversation history and restore previous sessions, making it easy to pick up where you left off
 - **Concurrent conversations** - Chat with AI in multiple tabs simultaneously
 - **Seamless conversations** - Chat with AI regardless of the maximum token limitations
-- **Predefined Actions** - Create your own editor actions or override the existing ones, saving time rewriting the same prompt repeatedly
+- **Predefined Prompts** - Create your own editor prompt or override the existing ones
 
 ## Getting Started
 
@@ -180,7 +180,6 @@ If you found this project interesting, kindly rate it on the marketplace and don
 [contributions-welcome]: #
 [marketplace-img]: docs/assets/marketplace.png
 [plugin-repo]: https://plugins.jetbrains.com/plugin/21056-codegpt
-[plugin-settings]: docs/assets/plugin-settings.png
 [open-issues]: https://github.com/carlrobertoh/CodeGPT/issues
 [api-key-url]: https://platform.openai.com/account/api-keys
 [portfolio]: https://carlrobert.ee
