@@ -1,5 +1,8 @@
 package ee.carlrobert.codegpt;
 
+import static ee.carlrobert.codegpt.CodeGPTPlugin.CODEGPT_ID;
+
+import com.intellij.ide.plugins.InstalledPluginsState;
 import com.intellij.notification.NotificationAction;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.application.ApplicationManager;
@@ -50,18 +53,19 @@ public class CodeGPTUpdateStartupActivity implements StartupActivity.Background 
 
     public void run(@NotNull ProgressIndicator indicator) {
       if (!myProject.isDisposed()) {
-        CodeGPTPlugin.tryFindAvailableUpdate(indicator)
-            .ifPresent((update) -> OverlayUtil.getDefaultNotification(
-                    CodeGPTBundle.get("checkForUpdatesTask.notification.message"),
-                    NotificationType.IDE_UPDATE)
-                .addAction(NotificationAction.createSimpleExpiring(
-                    CodeGPTBundle.get("checkForUpdatesTask.notification.installButton"),
-                    () -> ApplicationManager.getApplication()
-                        .executeOnPooledThread(() -> installCodeGPTUpdate(myProject))))
-                .addAction(NotificationAction.createSimpleExpiring(
-                    CodeGPTBundle.get("checkForUpdatesTask.notification.hideButton"),
-                    () -> ConfigurationState.getInstance().setCheckForPluginUpdates(false)))
-                .notify(myProject));
+        if (InstalledPluginsState.getInstance().hasNewerVersion(CODEGPT_ID)) {
+          OverlayUtil.getDefaultNotification(
+                  CodeGPTBundle.get("checkForUpdatesTask.notification.message"),
+                  NotificationType.IDE_UPDATE)
+              .addAction(NotificationAction.createSimpleExpiring(
+                  CodeGPTBundle.get("checkForUpdatesTask.notification.installButton"),
+                  () -> ApplicationManager.getApplication()
+                      .executeOnPooledThread(() -> installCodeGPTUpdate(myProject))))
+              .addAction(NotificationAction.createSimpleExpiring(
+                  CodeGPTBundle.get("checkForUpdatesTask.notification.hideButton"),
+                  () -> ConfigurationState.getInstance().setCheckForPluginUpdates(false)))
+              .notify(myProject);
+        }
       }
     }
   }
