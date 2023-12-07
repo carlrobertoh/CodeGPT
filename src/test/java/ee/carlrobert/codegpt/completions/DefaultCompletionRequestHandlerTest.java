@@ -67,6 +67,7 @@ public class DefaultCompletionRequestHandlerTest extends IntegrationTest {
           "/openai/deployments/TEST_DEPLOYMENT_ID/chat/completions");
       assertThat(request.getUri().getQuery()).isEqualTo("api-version=TEST_API_VERSION");
       assertThat(request.getHeaders().get("Api-key").get(0)).isEqualTo("TEST_API_KEY");
+      assertThat(request.getHeaders().get("X-application-name").get(0)).isEqualTo("CODEGPT");
       assertThat(request.getBody())
           .extracting("messages")
           .isEqualTo(
