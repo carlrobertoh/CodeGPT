@@ -7,7 +7,7 @@ import com.knuddels.jtokkit.api.Encoding;
 import com.knuddels.jtokkit.api.EncodingRegistry;
 import com.knuddels.jtokkit.api.EncodingType;
 import ee.carlrobert.codegpt.conversations.Conversation;
-import ee.carlrobert.llm.client.openai.completion.chat.request.OpenAIChatCompletionMessage;
+import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
 
 @Service
 public final class EncodingManager {

@@ -125,8 +125,6 @@ public class DefaultCompletionRequestHandlerTest extends IntegrationTest {
                   + "stytch_session_jwt=; "
                   + "ydc_stytch_session_jwt=; "
                   + "eg4=false; "
-                  + "safesearch_9015f218b47611b62bbbaf61125cd2dac629e65c3d6f"
-                  + "47573a2ec0e9b615c691=Moderate; "
                   + "__cf_bm=aN2b3pQMH8XADeMB7bg9s1bJ_bfXBcCHophfOGRg6g0-1693601599-0-"
                   + "AWIt5Mr4Y3xQI4mIJ1lSf4+vijWKDobrty8OopDeBxY+NABe0MRFidF3dCUoWjRt8"
                   + "SVMvBZPI3zkOgcRs7Mz3yazd7f7c58HwW5Xg9jdBjNg;");

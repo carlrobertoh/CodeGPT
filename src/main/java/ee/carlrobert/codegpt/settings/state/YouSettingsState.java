@@ -12,7 +12,6 @@ public class YouSettingsState implements PersistentStateComponent<YouSettingsSta
 
   private boolean displayWebSearchResults = true;
   private boolean useGPT4Model;
-  private String baseHost;
 
   public static YouSettingsState getInstance() {
     return ApplicationManager.getApplication().getService(YouSettingsState.class);
@@ -42,13 +41,5 @@ public class YouSettingsState implements PersistentStateComponent<YouSettingsSta
 
   public void setUseGPT4Model(boolean useGPT4Model) {
     this.useGPT4Model = useGPT4Model;
-  }
-
-  public void setBaseHost(String baseHost) {
-    this.baseHost = baseHost;
-  }
-
-  public String getBaseHost() {
-    return baseHost;
   }
 }
