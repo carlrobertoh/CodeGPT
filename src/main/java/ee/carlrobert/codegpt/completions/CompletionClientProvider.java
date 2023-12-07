@@ -39,9 +39,13 @@ public class CompletionClientProvider {
         settings.getResourceName(),
         settings.getDeploymentId(),
         settings.getApiVersion());
-    return new AzureClient.Builder(AzureCredentialsManager.getInstance().getSecret(), params)
-        .setActiveDirectoryAuthentication(settings.isUseAzureActiveDirectoryAuthentication())
-        .build();
+    var builder = new AzureClient.Builder(AzureCredentialsManager.getInstance().getSecret(), params)
+        .setActiveDirectoryAuthentication(settings.isUseAzureActiveDirectoryAuthentication());
+    var baseHost = settings.getBaseHost();
+    if (baseHost != null) {
+      builder.setUrl(String.format(baseHost, params.getResourceName()));
+    }
+    return builder.build();
   }
 
   public static YouClient getYouClient() {
