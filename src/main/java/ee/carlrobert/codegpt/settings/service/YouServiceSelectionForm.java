@@ -154,24 +154,7 @@ public class YouServiceSelectionForm extends JPanel {
       JBTextField emailAddressField,
       JBPasswordField passwordField,
       @Nullable YouAuthenticationError error) {
-    var couponLabel = new JBLabel(
-        "<html>"
-            + "<body>"
-            + "<h1 style=\"text-align: center; padding: 0; margin: 0;\">Free GPT-4</h1>"
-            + "<p style=\"text-align: center; margin-top: 8px; margin-bottom: 8px;\">"
-            + "Your coupon code"
-            + "</p>"
-            + "<h1 style=\"text-align: center; border: 2px dotted #646464; padding: 4px 32px; "
-            + "margin: 0 0 12px 0; background-color: #45494a; cursor: pointer;\">"
-            + "CODEGPT"
-            + "</h1>"
-            + "</body>"
-            + "</html>")
-        .withBorder(JBUI.Borders.emptyLeft(45)) // TODO
-        .setCopyable(true);
-
     var contentPanelBuilder = FormBuilder.createFormBuilder()
-        .addComponentToRightColumn(JBUI.Panels.simplePanel().addToLeft(couponLabel))
         .addLabeledComponent(CodeGPTBundle.get("settingsConfigurable.service.you.email.label"),
             emailAddressField)
         .addLabeledComponent(CodeGPTBundle.get("settingsConfigurable.service.you.password.label"),

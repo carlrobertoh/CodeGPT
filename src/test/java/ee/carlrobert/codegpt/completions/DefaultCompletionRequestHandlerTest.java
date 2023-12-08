@@ -16,6 +16,7 @@ import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
+import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange;
 import java.util.List;
 import java.util.Map;
@@ -67,6 +68,44 @@ public class DefaultCompletionRequestHandlerTest extends IntegrationTest {
           "/openai/deployments/TEST_DEPLOYMENT_ID/chat/completions");
       assertThat(request.getUri().getQuery()).isEqualTo("api-version=TEST_API_VERSION");
       assertThat(request.getHeaders().get("Api-key").get(0)).isEqualTo("TEST_API_KEY");
+      assertThat(request.getHeaders().get("X-application-name").get(0)).isEqualTo("CODEGPT");
+      assertThat(request.getBody())
+          .extracting("messages")
+          .isEqualTo(
+              List.of(
+                  Map.of("role", "system", "content", COMPLETION_SYSTEM_PROMPT),
+                  Map.of("role", "user", "content", "TEST_PREV_PROMPT"),
+                  Map.of("role", "assistant", "content", "TEST_PREV_RESPONSE"),
+                  Map.of("role", "user", "content", "TEST_PROMPT")));
+      return List.of(
+          jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("role", "assistant")))),
+          jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "Hel")))),
+          jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "lo")))),
+          jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "!")))));
+    });
+    var message = new Message("TEST_PROMPT");
+    var requestHandler = new CompletionRequestHandler(false, getRequestEventListener(message));
+
+    requestHandler.call(conversation, message, false);
+
+    await().atMost(5, SECONDS).until(() -> "Hello!".equals(message.getResponse()));
+  }
+
+  public void testAzureChatCompletionCallWithCustomSettings() {
+    useAzureService();
+    AzureSettingsState.getInstance().setPath("/codegpt/deployments/%s/completions?api-version=%s");
+    var conversationService = ConversationService.getInstance();
+    var prevMessage = new Message("TEST_PREV_PROMPT");
+    prevMessage.setResponse("TEST_PREV_RESPONSE");
+    var conversation = conversationService.startConversation();
+    conversation.addMessage(prevMessage);
+    conversationService.saveConversation(conversation);
+    expectAzure((StreamHttpExchange) request -> {
+      assertThat(request.getUri().getPath())
+          .isEqualTo("/codegpt/deployments/TEST_DEPLOYMENT_ID/completions");
+      assertThat(request.getUri().getQuery()).isEqualTo("api-version=TEST_API_VERSION");
+      assertThat(request.getHeaders().get("Api-key").get(0)).isEqualTo("TEST_API_KEY");
+      assertThat(request.getHeaders().get("X-application-name").get(0)).isEqualTo("CODEGPT");
       assertThat(request.getBody())
           .extracting("messages")
           .isEqualTo(
@@ -125,8 +164,6 @@ public class DefaultCompletionRequestHandlerTest extends IntegrationTest {
                   + "stytch_session_jwt=; "
                   + "ydc_stytch_session_jwt=; "
                   + "eg4=false; "
-                  + "safesearch_9015f218b47611b62bbbaf61125cd2dac629e65c3d6f"
-                  + "47573a2ec0e9b615c691=Moderate; "
                   + "__cf_bm=aN2b3pQMH8XADeMB7bg9s1bJ_bfXBcCHophfOGRg6g0-1693601599-0-"
                   + "AWIt5Mr4Y3xQI4mIJ1lSf4+vijWKDobrty8OopDeBxY+NABe0MRFidF3dCUoWjRt8"
                   + "SVMvBZPI3zkOgcRs7Mz3yazd7f7c58HwW5Xg9jdBjNg;");

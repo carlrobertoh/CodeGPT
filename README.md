@@ -3,7 +3,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/carlrobertoh/CodeGPT">
-    <img alt="plugin-icon" src="docs/assets/icon.png">
+    <img alt="plugin-icon" src="https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/icon.png?raw=true">
   </a>
   <h1 style="margin: 0;" align="center">CodeGPT</h1>
   <p>
@@ -48,25 +48,25 @@ The plugin provides several key features, such as:
 ### Chat with AI
 
 <p align="center">
-  <img src="docs/assets/chat-with-ai.png" alt="animated" />
+  <img src="https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/chat-with-ai.png?raw=true" alt="animated" />
 </p>
 
-### Generate Git Commit Messages
+### Generate Commit Messages
 
 <p align="center">
-  <img src="docs/assets/generate-commit-message.png" />
+  <img src="https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/generate-commit-message.png?raw=true" />
 </p>
 
-### Method name suggestions
+### Method Name Suggestions
 
 <p align="center">
-  <img src="docs/assets/method-name-suggestions.png" />
+  <img src="https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/method-name-suggestions.png?raw=true" />
 </p>
 
-### Multiple providers
+### Choose Between Different Providers
 
 <p align="center">
-  <img src="docs/assets/model-selection.png" />
+  <img src="https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/model-selection.png?raw=true" />
 </p>
 
 ### Other features
@@ -74,7 +74,7 @@ The plugin provides several key features, such as:
 - **Conversation History** - View recent conversation history and restore previous sessions, making it easy to pick up where you left off
 - **Concurrent conversations** - Chat with AI in multiple tabs simultaneously
 - **Seamless conversations** - Chat with AI regardless of the maximum token limitations
-- **Predefined Actions** - Create your own editor actions or override the existing ones, saving time rewriting the same prompt repeatedly
+- **Predefined Prompts** - Create your own editor prompt or override the existing ones
 
 ## Getting Started
 
@@ -139,7 +139,7 @@ The main goal of `llama.cpp` is to run the LLaMA model using 4-bit integer quant
 
 3. **Apply Settings**: With the server running, you can now apply the settings to start using the features. Click on the `Apply/OK` button to save your settings and start using the application.
 
-<img alt="animated" style="max-width: 100%; width: 600px;" src="https://github.com/carlrobertoh/CodeGPT/raw/master/docs/assets/llama-settings.png" />
+<img alt="animated" style="max-width: 100%; width: 600px;" src="https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/llama-settings.png?raw=true" />
 
 > **Note**: If you're already running a server and wish to configure the plugin against that, then simply select the port and click `Apply/OK`.
 
@@ -178,9 +178,8 @@ If you found this project interesting, kindly rate it on the marketplace and don
 [rating-shield]: https://img.shields.io/jetbrains/plugin/r/rating/21056-codegpt
 [contributions-welcome-svg]: http://img.shields.io/badge/contributions-welcome-brightgreen
 [contributions-welcome]: #
-[marketplace-img]: docs/assets/marketplace.png
+[marketplace-img]: https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/marketplace.png?raw=true
 [plugin-repo]: https://plugins.jetbrains.com/plugin/21056-codegpt
-[plugin-settings]: docs/assets/plugin-settings.png
 [open-issues]: https://github.com/carlrobertoh/CodeGPT/issues
 [api-key-url]: https://platform.openai.com/account/api-keys
 [portfolio]: https://carlrobert.ee

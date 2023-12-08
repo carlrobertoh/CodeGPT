@@ -8,9 +8,6 @@ import ee.carlrobert.codegpt.settings.advanced.AdvancedSettingsState;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
-import ee.carlrobert.codegpt.settings.state.YouSettingsState;
-import ee.carlrobert.llm.client.Client;
-import ee.carlrobert.llm.client.ProxyAuthenticator;
 import ee.carlrobert.llm.client.azure.AzureClient;
 import ee.carlrobert.llm.client.azure.AzureCompletionRequestParams;
 import ee.carlrobert.llm.client.llama.LlamaClient;
@@ -20,15 +17,35 @@ import ee.carlrobert.llm.client.you.YouClient;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.concurrent.TimeUnit;
+import okhttp3.Credentials;
+import okhttp3.OkHttpClient;
 
 public class CompletionClientProvider {
 
   public static OpenAIClient getOpenAIClient() {
-    return getOpenAIClientBuilder().build();
+    var settings = OpenAISettingsState.getInstance();
+    var builder = new OpenAIClient.Builder(OpenAICredentialsManager.getInstance().getApiKey())
+        .setOrganization(settings.getOrganization());
+    var baseHost = settings.getBaseHost();
+    if (baseHost != null) {
+      builder.setHost(baseHost);
+    }
+    return builder.build(getDefaultClientBuilder());
   }
 
   public static AzureClient getAzureClient() {
-    return getAzureClientBuilder().build();
+    var settings = AzureSettingsState.getInstance();
+    var params = new AzureCompletionRequestParams(
+        settings.getResourceName(),
+        settings.getDeploymentId(),
+        settings.getApiVersion());
+    var builder = new AzureClient.Builder(AzureCredentialsManager.getInstance().getSecret(), params)
+        .setActiveDirectoryAuthentication(settings.isUseAzureActiveDirectoryAuthentication());
+    var baseHost = settings.getBaseHost();
+    if (baseHost != null) {
+      builder.setUrl(String.format(baseHost, params.getResourceName()));
+    }
+    return builder.build();
   }
 
   public static YouClient getYouClient() {
@@ -47,56 +64,39 @@ public class CompletionClientProvider {
       accessToken = authenticationResponse.getSessionJwt();
     }
 
-    // FIXME
-    return (YouClient) new YouClient.Builder(sessionId, accessToken)
+    return new YouClient.Builder(sessionId, accessToken)
         .setUTMParameters(utmParameters)
-        .setHost(YouSettingsState.getInstance().getBaseHost())
         .build();
   }
 
   public static LlamaClient getLlamaClient() {
-    var builder = new LlamaClient.Builder()
-        .setPort(LlamaSettingsState.getInstance().getServerPort());
-    return (LlamaClient) addDefaultClientParams(builder).build();
+    return new LlamaClient.Builder()
+        .setPort(LlamaSettingsState.getInstance().getServerPort())
+        .build(getDefaultClientBuilder());
   }
 
-  private static OpenAIClient.Builder getOpenAIClientBuilder() {
-    var settings = OpenAISettingsState.getInstance();
-    var builder = new OpenAIClient
-        .Builder(OpenAICredentialsManager.getInstance().getApiKey())
-        .setOrganization(settings.getOrganization());
-    return (OpenAIClient.Builder) addDefaultClientParams(builder).setHost(settings.getBaseHost());
-  }
-
-  private static AzureClient.Builder getAzureClientBuilder() {
-    var settings = AzureSettingsState.getInstance();
-    var params = new AzureCompletionRequestParams(
-        settings.getResourceName(),
-        settings.getDeploymentId(),
-        settings.getApiVersion());
-    var builder = new AzureClient.Builder(AzureCredentialsManager.getInstance().getSecret(), params)
-        .setActiveDirectoryAuthentication(settings.isUseAzureActiveDirectoryAuthentication());
-    return (AzureClient.Builder) addDefaultClientParams(builder).setHost(settings.getBaseHost());
-  }
-
-  private static Client.Builder addDefaultClientParams(Client.Builder builder) {
+  private static OkHttpClient.Builder getDefaultClientBuilder() {
+    OkHttpClient.Builder builder = new OkHttpClient.Builder();
     var advancedSettings = AdvancedSettingsState.getInstance();
     var proxyHost = advancedSettings.getProxyHost();
     var proxyPort = advancedSettings.getProxyPort();
     if (!proxyHost.isEmpty() && proxyPort != 0) {
-      builder.setProxy(
+      builder.proxy(
           new Proxy(advancedSettings.getProxyType(), new InetSocketAddress(proxyHost, proxyPort)));
       if (advancedSettings.isProxyAuthSelected()) {
-        builder.setProxyAuthenticator(new ProxyAuthenticator(
-            advancedSettings.getProxyUsername(),
-            advancedSettings.getProxyPassword()));
+        builder.proxyAuthenticator((route, response) ->
+            response.request()
+                .newBuilder()
+                .header("Proxy-Authorization", Credentials.basic(
+                    advancedSettings.getProxyUsername(),
+                    advancedSettings.getProxyPassword()))
+                .build());
       }
     }
 
     return builder
-        .setConnectTimeout((long) advancedSettings.getConnectTimeout(), TimeUnit.SECONDS)
-        .setReadTimeout((long) advancedSettings.getReadTimeout(), TimeUnit.SECONDS)
-        .setRetryOnReadTimeout(true);
+        .connectTimeout(advancedSettings.getConnectTimeout(), TimeUnit.SECONDS)
+        .readTimeout(advancedSettings.getReadTimeout(), TimeUnit.SECONDS);
   }
 }
 
