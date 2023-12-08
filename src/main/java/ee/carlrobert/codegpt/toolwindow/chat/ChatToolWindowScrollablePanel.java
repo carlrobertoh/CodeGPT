@@ -2,11 +2,7 @@ package ee.carlrobert.codegpt.toolwindow.chat;
 
 import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
 import com.intellij.openapi.roots.ui.componentsList.layout.VerticalStackLayout;
-import ee.carlrobert.codegpt.completions.you.YouUserManager;
-import ee.carlrobert.codegpt.settings.service.ServiceType;
-import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.toolwindow.chat.components.ResponsePanel;
-import ee.carlrobert.codegpt.util.UIUtil;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,28 +10,18 @@ import java.util.UUID;
 import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
-import javax.swing.JTextPane;
 
 public class ChatToolWindowScrollablePanel extends ScrollablePanel {
 
-  private final SettingsState settings;
-  private final YouUserManager youUserManager;
-  private final Map<UUID, JPanel> visibleMessagePanels;
+  private final Map<UUID, JPanel> visibleMessagePanels = new HashMap<>();
 
-  ChatToolWindowScrollablePanel(SettingsState settings) {
+  ChatToolWindowScrollablePanel() {
     super(new VerticalStackLayout());
-    this.settings = settings;
-    this.youUserManager = YouUserManager.getInstance();
-    this.visibleMessagePanels = new HashMap<>();
   }
 
   public void displayLandingView(JComponent landingView) {
     clearAll();
     add(landingView);
-    if (settings.getSelectedService() == ServiceType.YOU
-        && (!youUserManager.isAuthenticated() || !youUserManager.isSubscribed())) {
-      add(new ResponsePanel().addContent(createYouCouponTextPane()));
-    }
   }
 
   public ResponsePanel getMessageResponsePanel(UUID messageId) {
@@ -67,19 +53,5 @@ public class ChatToolWindowScrollablePanel extends ScrollablePanel {
   public void update() {
     repaint();
     revalidate();
-  }
-
-  // TODO: Move
-  private JTextPane createYouCouponTextPane() {
-    return UIUtil.createTextPane(
-        "<html>\n"
-            + "<body>\n"
-            + "  <p style=\"margin: 4px 0;\">Use CodeGPT coupon for free month of GPT-4.</p>\n"
-            + "  <p style=\"margin: 4px 0;\">\n"
-            + "    <a href=\"https://you.com/plans\">Sign up here</a>\n"
-            + "  </p>\n"
-            + "</body>\n"
-            + "</html>",
-        false);
   }
 }

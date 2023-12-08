@@ -59,14 +59,13 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     this.conversation = conversation;
     this.useContextualSearch = useContextualSearch;
     conversationService = ConversationService.getInstance();
-    var settings = SettingsState.getInstance();
-    toolWindowScrollablePanel = new ChatToolWindowScrollablePanel(settings);
+    toolWindowScrollablePanel = new ChatToolWindowScrollablePanel();
     totalTokensPanel = new TotalTokensPanel(
         conversation,
         EditorUtil.getSelectedEditorSelectedText(project),
         this);
     userPromptTextArea = new UserPromptTextArea(this::handleSubmit, totalTokensPanel);
-    rootPanel = createRootPanel(settings.getSelectedService());
+    rootPanel = createRootPanel();
     userPromptTextArea.requestFocusInWindow();
     userPromptTextArea.requestFocus();
   }
@@ -216,7 +215,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     return panel;
   }
 
-  private JPanel createRootPanel(ServiceType selectedService) {
+  private JPanel createRootPanel() {
     var gbc = new GridBagConstraints();
     gbc.fill = GridBagConstraints.BOTH;
     gbc.weighty = 1;
@@ -230,7 +229,8 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     gbc.weighty = 0;
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.gridy = 1;
-    rootPanel.add(createUserPromptPanel(selectedService), gbc);
+    rootPanel.add(
+        createUserPromptPanel(SettingsState.getInstance().getSelectedService()), gbc);
     return rootPanel;
   }
 }
