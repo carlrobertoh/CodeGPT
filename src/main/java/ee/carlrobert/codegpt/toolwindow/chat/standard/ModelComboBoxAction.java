@@ -9,6 +9,8 @@ import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.actionSystem.ex.ComboBoxAction;
 import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
+import ee.carlrobert.codegpt.conversations.ConversationService;
+import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
@@ -125,12 +127,26 @@ public class ModelComboBoxAction extends ComboBoxAction {
 
       @Override
       public void actionPerformed(@NotNull AnActionEvent e) {
-        settings.setSelectedService(serviceType);
-        comboBoxPresentation.setIcon(icon);
-        comboBoxPresentation.setText(label);
-        onAddNewTab.run();
+        handleProviderChange(serviceType, label, icon, comboBoxPresentation);
       }
     };
+  }
+
+  private void handleProviderChange(
+      ServiceType serviceType,
+      String label,
+      Icon icon,
+      Presentation comboBoxPresentation) {
+    settings.setSelectedService(serviceType);
+    comboBoxPresentation.setIcon(icon);
+    comboBoxPresentation.setText(label);
+
+    var currentConversation = ConversationsState.getCurrentConversation();
+    if (currentConversation != null && !currentConversation.getMessages().isEmpty()) {
+      onAddNewTab.run();
+    } else {
+      ConversationService.getInstance().startConversation();
+    }
   }
 
   private AnAction createOpenAIModelAction(
@@ -147,11 +163,12 @@ public class ModelComboBoxAction extends ComboBoxAction {
 
       @Override
       public void actionPerformed(@NotNull AnActionEvent e) {
-        settings.setSelectedService(ServiceType.OPENAI);
         openAISettings.setModel(model.getCode());
-        comboBoxPresentation.setIcon(Icons.OpenAI);
-        comboBoxPresentation.setText(model.getDescription());
-        onAddNewTab.run();
+        handleProviderChange(
+            ServiceType.OPENAI,
+            model.getDescription(),
+            Icons.OpenAI,
+            comboBoxPresentation);
       }
     };
   }
