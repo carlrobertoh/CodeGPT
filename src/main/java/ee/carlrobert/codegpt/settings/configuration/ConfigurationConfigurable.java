@@ -37,6 +37,7 @@ public class ConfigurationConfigurable implements Configurable {
         || configurationComponent.getMaxTokens() != configuration.getMaxTokens()
         || configurationComponent.getTemperature() != configuration.getTemperature()
         || !configurationComponent.getSystemPrompt().equals(configuration.getSystemPrompt())
+        || !configurationComponent.getCommitMessagePrompt().equals(configuration.getCommitMessagePrompt())
         || configurationComponent.isCheckForPluginUpdates()
         != configuration.isCheckForPluginUpdates()
         || configurationComponent.isCreateNewChatOnEachAction()
@@ -54,6 +55,7 @@ public class ConfigurationConfigurable implements Configurable {
     configuration.setMaxTokens(configurationComponent.getMaxTokens());
     configuration.setTemperature(configurationComponent.getTemperature());
     configuration.setSystemPrompt(configurationComponent.getSystemPrompt());
+    configuration.setCommitMessagePrompt(configurationComponent.getCommitMessagePrompt());
     configuration.setCheckForPluginUpdates(configurationComponent.isCheckForPluginUpdates());
     configuration.setCreateNewChatOnEachAction(
         configurationComponent.isCreateNewChatOnEachAction());
@@ -70,6 +72,7 @@ public class ConfigurationConfigurable implements Configurable {
     configurationComponent.setMaxTokens(configuration.getMaxTokens());
     configurationComponent.setTemperature(configuration.getTemperature());
     configurationComponent.setSystemPrompt(configuration.getSystemPrompt());
+    configurationComponent.setCommitMessagePrompt(configuration.getCommitMessagePrompt());
     configurationComponent.setCheckForPluginUpdates(configuration.isCheckForPluginUpdates());
     configurationComponent.setCreateNewChatOnEachAction(
         configuration.isCreateNewChatOnEachAction());
