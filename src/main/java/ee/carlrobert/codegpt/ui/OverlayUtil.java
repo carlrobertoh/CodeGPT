@@ -31,6 +31,7 @@ import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.indexes.FolderStructureTreePanel;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
 import ee.carlrobert.codegpt.util.EditorUtil;
+import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import javax.swing.JComponent;
@@ -75,14 +76,16 @@ public class OverlayUtil {
       JBLabel totalTokensLabel,
       JComponent component) {
     var dialogBuilder = new DialogBuilder(project);
-    dialogBuilder.setTitle("Include Files in Prompt");
+    dialogBuilder.setTitle("Include In Context");
     dialogBuilder.setNorthPanel(JBUI.Panels.simplePanel(
-        new JBLabel("Include only the files that are directly related to your problem.")
+        new JBLabel("Choose the files that you wish to include in the final prompt")
             .withBorder(JBUI.Borders.emptyBottom(16))
             .setCopyable(false)
             .setAllowAutoWrapping(true)));
     var scrollPane = ScrollPaneFactory.createScrollPane(component);
-    scrollPane.setPreferredSize(JBUI.size(250, 250));
+    scrollPane.setPreferredSize(new Dimension(
+        component.getPreferredSize().width,
+        component.getPreferredSize().height + 32));
     dialogBuilder.setCenterPanel(JBUI.Panels.simplePanel(scrollPane)
         .addToTop(totalTokensLabel.withBorder(JBUI.Borders.emptyBottom(8))));
     dialogBuilder.addOkAction().setText("Continue");

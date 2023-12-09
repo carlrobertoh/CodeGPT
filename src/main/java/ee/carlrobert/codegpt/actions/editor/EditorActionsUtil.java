@@ -10,12 +10,16 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.project.Project;
+import ee.carlrobert.codegpt.CodeGPTKeys;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
 import ee.carlrobert.codegpt.util.file.FileUtil;
+import ee.carlrobert.embedding.CheckedFile;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 import org.apache.commons.text.CaseUtils;
 
 public class EditorActionsUtil {
@@ -67,6 +71,12 @@ public class EditorActionsUtil {
             if (toolWindow != null) {
               toolWindow.show();
             }
+
+            message.setReferencedFilePaths(
+                Stream.ofNullable(project.getUserData(CodeGPTKeys.SELECTED_FILES))
+                    .flatMap(Collection::stream)
+                    .map(CheckedFile::getFilePath)
+                    .collect(toList()));
             toolWindowContentManager.sendMessage(message);
           }
         };

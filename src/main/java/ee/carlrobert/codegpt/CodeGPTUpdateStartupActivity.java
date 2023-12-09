@@ -22,6 +22,10 @@ public class CodeGPTUpdateStartupActivity implements StartupActivity.Background 
 
   @Override
   public void runActivity(@NotNull Project project) {
+    if (ApplicationManager.getApplication().isUnitTestMode()) {
+      return;
+    }
+
     schedulePluginUpdateChecks(project);
   }
 

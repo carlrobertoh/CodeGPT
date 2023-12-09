@@ -4,7 +4,6 @@ import static com.intellij.openapi.actionSystem.CommonDataKeys.VIRTUAL_FILE_ARRA
 import static com.intellij.openapi.ui.DialogWrapper.OK_EXIT_CODE;
 import static java.lang.String.format;
 
-import com.intellij.icons.AllIcons.Actions;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
@@ -20,15 +19,13 @@ import ee.carlrobert.codegpt.ui.checkbox.PsiElementCheckboxTree;
 import ee.carlrobert.codegpt.ui.checkbox.VirtualFileCheckboxTree;
 import ee.carlrobert.embedding.CheckedFile;
 import java.util.List;
-import java.util.Optional;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class ApplyMultipleFilesInPromptAction extends AnAction {
 
   public ApplyMultipleFilesInPromptAction() {
-    super("Include In Prompt", "Include in prompt description", Actions.AddFile);
+    super("Include In Context...");
   }
 
   @Override
@@ -59,14 +56,14 @@ public class ApplyMultipleFilesInPromptAction extends AnAction {
   private @Nullable FileCheckboxTree getCheckboxTree(AnActionEvent event) {
     var dataContext = event.getDataContext();
 
-    var selectedVirtualFiles = VIRTUAL_FILE_ARRAY.getData(dataContext);
-    if (selectedVirtualFiles != null) {
-      return new VirtualFileCheckboxTree(selectedVirtualFiles);
-    }
-
     var psiElement = CommonDataKeys.PSI_ELEMENT.getData(dataContext);
     if (psiElement != null) {
       return new PsiElementCheckboxTree(psiElement);
+    }
+
+    var selectedVirtualFiles = VIRTUAL_FILE_ARRAY.getData(dataContext);
+    if (selectedVirtualFiles != null) {
+      return new VirtualFileCheckboxTree(selectedVirtualFiles);
     }
 
     return null;

@@ -23,7 +23,6 @@ import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.embedding.CheckedFile;
 import java.awt.BorderLayout;
-import java.util.Collections;
 import java.util.List;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
@@ -34,6 +33,7 @@ public class StandardChatToolWindowPanel extends SimpleToolWindowPanel {
   private final Project project;
   private final JPanel selectedFilesLabelWrapper;
   private final JBLabel selectedFilesLabel;
+  private StandardChatToolWindowTabbedPane tabbedPane;
 
   public StandardChatToolWindowPanel(
       @NotNull Project project,
@@ -74,7 +74,7 @@ public class StandardChatToolWindowPanel extends SimpleToolWindowPanel {
     }
 
     var tabPanel = new StandardChatToolWindowTabPanel(project, conversation);
-    var tabbedPane = createTabbedPane(tabPanel, parentDisposable);
+    tabbedPane = createTabbedPane(tabPanel, parentDisposable);
     Runnable onAddNewTab = () -> {
       tabbedPane.addNewTab(new StandardChatToolWindowTabPanel(
           project,
@@ -131,6 +131,10 @@ public class StandardChatToolWindowPanel extends SimpleToolWindowPanel {
       Disposable parentDisposable) {
     var tabbedPane = new StandardChatToolWindowTabbedPane(parentDisposable);
     tabbedPane.addNewTab(tabPanel);
+    return tabbedPane;
+  }
+
+  public StandardChatToolWindowTabbedPane getChatTabbedPane() {
     return tabbedPane;
   }
 }

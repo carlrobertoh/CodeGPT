@@ -2,8 +2,8 @@ package ee.carlrobert.codegpt.toolwindow.chat;
 
 import static ee.carlrobert.codegpt.ui.UIUtil.createScrollPaneWithSmartScroller;
 import static java.lang.String.format;
-import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.impl.EditorImpl;
@@ -33,9 +33,11 @@ import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.UserPromptTextArea;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.UserPromptTextAreaHeader;
 import ee.carlrobert.codegpt.util.EditorUtil;
 import ee.carlrobert.codegpt.util.file.FileUtil;
+import ee.carlrobert.embedding.CheckedFile;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.util.List;
 import java.util.UUID;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -92,28 +94,19 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
 
   @Override
   public void sendMessage(Message message) {
-    var checkedFiles = project.getUserData(CodeGPTKeys.SELECTED_FILES);
-    if (checkedFiles != null && !checkedFiles.isEmpty()) {
-      var context = checkedFiles.stream()
-          .map(item -> format(
-              "\nPath:\n"
-                  + "[File Path](%s)\n\n"
-                  + "Content:\n\n"
-                  + "%s\n",
-              item.getFilePath(),
-              format("```%s\n%s\n```\n", item.getFileExtension(), item.getFileContent().trim())))
-          .collect(joining());
-
-      message.setPrompt(format(
-          "Use the following context to answer question at the end:\n"
-              + "%s\n"
-              + "Question: %s",
-          context,
-          message.getPrompt()));
+    var referencedFiles = project.getUserData(CodeGPTKeys.SELECTED_FILES);
+    if (referencedFiles != null && !referencedFiles.isEmpty()) {
+      var referencedFilePaths = referencedFiles.stream()
+          .map(CheckedFile::getFilePath)
+          .collect(toList());
+      message.setReferencedFilePaths(referencedFilePaths);
+      message.setUserMessage(message.getPrompt());
+      message.setPrompt(getPromptWithContext(referencedFiles, message.getPrompt()));
     }
 
+    var userMessagePanel = new UserMessagePanel(project, message, this);
     var messagePanel = toolWindowScrollablePanel.addMessage(message.getId());
-    messagePanel.add(new UserMessagePanel(project, message, this));
+    messagePanel.add(userMessagePanel);
     var responsePanel = new ResponsePanel()
         .withReloadAction(() -> reloadMessage(message, conversation))
         .withDeleteAction(() -> removeMessage(message.getId(), conversation))
@@ -128,6 +121,25 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     project.getService(StandardChatToolWindowContentManager.class)
         .tryFindChatToolWindowPanel()
         .ifPresent(StandardChatToolWindowPanel::clearSelectedFilesNotification);
+  }
+
+  // TODO: Move to util class
+  private String getPromptWithContext(List<CheckedFile> referencedFiles, String userPrompt) {
+    var context = referencedFiles.stream()
+        .map(item -> format(
+            "Path:\n"
+                + "[File Path](%s)\n\n"
+                + "Content:\n"
+                + "%s\n",
+            item.getFilePath(),
+            format("```%s\n%s\n```", item.getFileExtension(), item.getFileContent().trim())))
+        .collect(joining("\n"));
+    return format(
+        "Use the following context to answer question at the end:\n\n"
+            + "%s\n"
+            + "Question: %s",
+        context,
+        userPrompt);
   }
 
   @Override
@@ -222,11 +234,10 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
         var fileExtension = FileUtil.getFileExtension(
             ((EditorImpl) editor).getVirtualFile().getName());
         message = new Message(text + format("\n```%s\n%s\n```", fileExtension, selectedText));
-        message.setUserMessage(text);
         selectionModel.removeSelection();
       }
     }
-
+    message.setUserMessage(text);
     sendMessage(message);
   }
 

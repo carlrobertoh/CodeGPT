@@ -2,10 +2,13 @@ package ee.carlrobert.codegpt.toolwindow.chat.standard;
 
 import static java.util.Objects.requireNonNull;
 
+import com.intellij.icons.AllIcons;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComponentContainer;
+import com.intellij.openapi.wm.RegisterToolWindowTask;
 import com.intellij.openapi.wm.ToolWindow;
+import com.intellij.openapi.wm.ToolWindowAnchor;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.content.Content;
 import ee.carlrobert.codegpt.conversations.Conversation;
@@ -81,12 +84,8 @@ public final class StandardChatToolWindowContentManager {
   public Optional<StandardChatToolWindowTabbedPane> tryFindChatTabbedPane() {
     var chatTabContent = tryFindFirstChatTabContent();
     if (chatTabContent.isPresent()) {
-      var tabbedPane = Arrays.stream(chatTabContent.get().getComponent().getComponents())
-          .filter(component -> component instanceof StandardChatToolWindowTabbedPane)
-          .findFirst();
-      if (tabbedPane.isPresent()) {
-        return Optional.of((StandardChatToolWindowTabbedPane) tabbedPane.get());
-      }
+      var chatToolWindowPanel = (StandardChatToolWindowPanel) chatTabContent.get().getComponent();
+      return Optional.of(chatToolWindowPanel.getChatTabbedPane());
     }
     return Optional.empty();
   }
@@ -107,8 +106,16 @@ public final class StandardChatToolWindowContentManager {
     });
   }
 
-  public ToolWindow getToolWindow() {
-    return requireNonNull(ToolWindowManager.getInstance(project).getToolWindow("CodeGPT"));
+  public @NotNull ToolWindow getToolWindow() {
+    var toolWindowManager = ToolWindowManager.getInstance(project);
+    var toolWindow = ToolWindowManager.getInstance(project).getToolWindow("CodeGPT");
+    if (toolWindow == null) {
+      return toolWindowManager
+          .registerToolWindow(
+              RegisterToolWindowTask.closable("CodeGPT", () -> "CodeGPT",
+                  AllIcons.Toolwindows.Documentation, ToolWindowAnchor.RIGHT));
+    }
+    return toolWindow;
   }
 
   private Optional<Content> tryFindFirstChatTabContent() {
