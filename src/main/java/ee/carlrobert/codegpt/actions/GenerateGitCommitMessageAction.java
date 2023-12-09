@@ -2,7 +2,6 @@ package ee.carlrobert.codegpt.actions;
 
 import static com.intellij.openapi.ui.Messages.OK;
 import static com.intellij.util.ObjectUtils.tryCast;
-import static ee.carlrobert.codegpt.util.file.FileUtil.getResourceContent;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
@@ -26,6 +25,7 @@ import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.completions.CompletionClientProvider;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
+import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.util.OverlayUtil;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
@@ -85,7 +85,7 @@ public class GenerateGitCommitMessageAction extends AnAction {
     CompletionClientProvider.getOpenAIClient().getChatCompletion(
         new OpenAIChatCompletionRequest.Builder(List.of(
             new OpenAIChatCompletionMessage("system",
-                getResourceContent("/prompts/git-message.txt")),
+                ConfigurationState.getInstance().getCommitMessagePrompt()),
             new OpenAIChatCompletionMessage("user", gitDiff)))
             .setModel(OpenAISettingsState.getInstance().getModel())
             .build(),

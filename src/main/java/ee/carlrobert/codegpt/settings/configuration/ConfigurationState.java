@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.settings.configuration;
 
+import static ee.carlrobert.codegpt.completions.CompletionRequestProvider.COMPLETION_COMMIT_MESSAGE_PROMPT;
 import static ee.carlrobert.codegpt.completions.CompletionRequestProvider.COMPLETION_SYSTEM_PROMPT;
 
 import com.intellij.openapi.application.ApplicationManager;
@@ -18,6 +19,7 @@ import org.jetbrains.annotations.Nullable;
 public class ConfigurationState implements PersistentStateComponent<ConfigurationState> {
 
   private String systemPrompt = COMPLETION_SYSTEM_PROMPT;
+  private String commitMessagePrompt = COMPLETION_COMMIT_MESSAGE_PROMPT;
   private int maxTokens = 1000;
   private double temperature = 0.1;
   private boolean checkForPluginUpdates = true;
@@ -46,8 +48,16 @@ public class ConfigurationState implements PersistentStateComponent<Configuratio
     return systemPrompt;
   }
 
+  public String getCommitMessagePrompt() {
+    return commitMessagePrompt;
+  }
+
   public void setSystemPrompt(String systemPrompt) {
     this.systemPrompt = systemPrompt;
+  }
+
+  public void setCommitMessagePrompt(String commitMessagePrompt) {
+    this.commitMessagePrompt = commitMessagePrompt;
   }
 
   public int getMaxTokens() {
