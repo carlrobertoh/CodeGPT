@@ -1,7 +1,6 @@
 package ee.carlrobert.codegpt.settings.configuration;
 
 import static ee.carlrobert.codegpt.actions.editor.EditorActionsUtil.DEFAULT_ACTIONS_ARRAY;
-import static ee.carlrobert.codegpt.completions.CompletionRequestProvider.COMPLETION_COMMIT_MESSAGE_PROMPT;
 import static ee.carlrobert.codegpt.completions.CompletionRequestProvider.COMPLETION_SYSTEM_PROMPT;
 
 import com.intellij.icons.AllIcons;
@@ -16,6 +15,7 @@ import com.intellij.ui.TitledSeparator;
 import com.intellij.ui.ToolbarDecorator;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBLabel;
+import com.intellij.ui.components.JBTextArea;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.ui.components.fields.IntegerField;
 import com.intellij.ui.table.JBTable;
@@ -102,17 +102,9 @@ public class ConfigurationComponent {
     systemPromptTextArea.setColumns(60);
     systemPromptTextArea.setRows(3);
 
-    commitMessagePromptTextArea = new JTextArea();
-    if (configuration.getCommitMessagePrompt().isEmpty()) {
-      // for backward compatibility
-      commitMessagePromptTextArea.setText(COMPLETION_COMMIT_MESSAGE_PROMPT);
-    } else {
-      commitMessagePromptTextArea.setText(configuration.getCommitMessagePrompt());
-    }
+    commitMessagePromptTextArea = new JBTextArea(configuration.getCommitMessagePrompt(), 3, 60);
     commitMessagePromptTextArea.setLineWrap(true);
     commitMessagePromptTextArea.setBorder(JBUI.Borders.empty(8, 4));
-    commitMessagePromptTextArea.setColumns(60);
-    commitMessagePromptTextArea.setRows(3);
 
     checkForPluginUpdatesCheckBox = new JBCheckBox(
         CodeGPTBundle.get("configurationConfigurable.checkForPluginUpdates.label"),
@@ -221,13 +213,13 @@ public class ConfigurationComponent {
   private JPanel createCommitMessageConfigurationForm() {
     var formBuilder = FormBuilder.createFormBuilder();
     addAssistantFormLabeledComponent(
-            formBuilder,
-            "configurationConfigurable.section.commitMessage.systemPromptField.label",
-            "configurationConfigurable.section.commitMessage.systemPromptField.comment",
-            JBUI.Panels
-                    .simplePanel(commitMessagePromptTextArea)
-                    .withBorder(JBUI.Borders.customLine(
-                            JBUI.CurrentTheme.CustomFrameDecorations.separatorForeground())));
+        formBuilder,
+        "configurationConfigurable.section.commitMessage.systemPromptField.label",
+        "configurationConfigurable.section.commitMessage.systemPromptField.comment",
+        JBUI.Panels
+            .simplePanel(commitMessagePromptTextArea)
+            .withBorder(JBUI.Borders.customLine(
+                JBUI.CurrentTheme.CustomFrameDecorations.separatorForeground())));
     formBuilder.addVerticalGap(8);
 
     var form = formBuilder.getPanel();
@@ -283,6 +275,7 @@ public class ConfigurationComponent {
   public void setCommitMessagePrompt(String commitMessagePrompt) {
     commitMessagePromptTextArea.setText(commitMessagePrompt);
   }
+
   public String getCommitMessagePrompt() {
     return commitMessagePromptTextArea.getText();
   }

@@ -61,9 +61,10 @@ public class CompletionRequestProvider {
       + "the output of running the code as well as an integrated terminal.\n"
       + "You can only give one reply for each conversation turn.";
 
-  public static final String COMPLETION_COMMIT_MESSAGE_PROMPT = "Write a short and descriptive git commit message for the following git diff.\n"
-      + "Use imperative mood, present tense, active voice and verbs.\n"
-      + "Your entire response will be passed directly into git commit.";
+  public static final String COMPLETION_COMMIT_MESSAGE_PROMPT =
+      "Write a short and descriptive git commit message for the following git diff.\n"
+          + "Use imperative mood, present tense, active voice and verbs.\n"
+          + "Your entire response will be passed directly into git commit.";
 
   private final EncodingManager encodingManager = EncodingManager.getInstance();
   private final EmbeddingsService embeddingsService;
