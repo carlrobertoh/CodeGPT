@@ -7,6 +7,9 @@ import static java.lang.String.format;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
+import com.intellij.openapi.actionSystem.DataContext;
+import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.psi.PsiElement;
 import com.intellij.ui.CheckboxTreeListener;
 import com.intellij.ui.CheckedTreeNode;
 import com.intellij.ui.components.JBLabel;
@@ -18,11 +21,17 @@ import ee.carlrobert.codegpt.ui.checkbox.FileCheckboxTree;
 import ee.carlrobert.codegpt.ui.checkbox.PsiElementCheckboxTree;
 import ee.carlrobert.codegpt.ui.checkbox.VirtualFileCheckboxTree;
 import ee.carlrobert.embedding.CheckedFile;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
+import javax.swing.SwingUtilities;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class ApplyMultipleFilesInPromptAction extends AnAction {
+
+  private static final Logger LOG = Logger.getInstance(ApplyMultipleFilesInPromptAction.class);
 
   public ApplyMultipleFilesInPromptAction() {
     super("Include In Context...");
@@ -35,14 +44,19 @@ public class ApplyMultipleFilesInPromptAction extends AnAction {
       return;
     }
 
-    var checkboxTree = getCheckboxTree(e);
-    var totalTokensLabel = new JBLabel(getTotalTokensText(checkboxTree.getCheckedFiles()));
+    var checkboxTree = getCheckboxTree(e.getDataContext());
+    if (checkboxTree == null) {
+      throw new RuntimeException("Could not obtain file tree");
+    }
+
+    var totalTokensLabel = new TotalTokensLabel(checkboxTree.getCheckedFiles());
     checkboxTree.addCheckboxTreeListener(new CheckboxTreeListener() {
       @Override
       public void nodeStateChanged(@NotNull CheckedTreeNode node) {
-        totalTokensLabel.setText(getTotalTokensText(checkboxTree.getCheckedFiles()));
+        totalTokensLabel.updateState(node);
       }
     });
+
     var show = OverlayUtil.showMultiFilePromptDialog(project, totalTokensLabel, checkboxTree);
     if (show == OK_EXIT_CODE) {
       project.putUserData(CodeGPTKeys.SELECTED_FILES, checkboxTree.getCheckedFiles());
@@ -53,9 +67,7 @@ public class ApplyMultipleFilesInPromptAction extends AnAction {
     }
   }
 
-  private @Nullable FileCheckboxTree getCheckboxTree(AnActionEvent event) {
-    var dataContext = event.getDataContext();
-
+  private @Nullable FileCheckboxTree getCheckboxTree(DataContext dataContext) {
     var psiElement = CommonDataKeys.PSI_ELEMENT.getData(dataContext);
     if (psiElement != null) {
       return new PsiElementCheckboxTree(psiElement);
@@ -69,16 +81,65 @@ public class ApplyMultipleFilesInPromptAction extends AnAction {
     return null;
   }
 
-  private String getTotalTokensText(List<CheckedFile> checkedFiles) {
-    var totalTokens = checkedFiles.stream()
-        .map(file -> EncodingManager.getInstance().countTokens(file.getFileContent()))
-        .mapToInt(Integer::intValue)
-        .sum();
+  private static class TotalTokensLabel extends JBLabel {
 
-    return format(
-        "<html><strong>%d</strong> %s totaling <strong>%d</strong> tokens</html>",
-        checkedFiles.size(),
-        checkedFiles.size() == 1 ? "file" : "files",
-        totalTokens);
+    private static final EncodingManager encodingManager = EncodingManager.getInstance();
+
+    private int fileCount;
+    private int totalTokens;
+
+    TotalTokensLabel(List<CheckedFile> checkedFiles) {
+      fileCount = checkedFiles.size();
+      totalTokens = calculateTotalTokens(checkedFiles);
+      updateText();
+    }
+
+    void updateState(CheckedTreeNode checkedNode) {
+      var fileContent = getNodeFileContent(checkedNode);
+      if (fileContent != null) {
+        int tokenCount = encodingManager.countTokens(fileContent);
+        if (checkedNode.isChecked()) {
+          totalTokens += tokenCount;
+          fileCount++;
+        } else {
+          totalTokens -= tokenCount;
+          fileCount--;
+        }
+
+        SwingUtilities.invokeLater(this::updateText);
+      }
+    }
+
+    private @Nullable String getNodeFileContent(CheckedTreeNode checkedNode) {
+      var userObject = checkedNode.getUserObject();
+      if (userObject instanceof PsiElement) {
+        var psiFile = ((PsiElement) userObject).getContainingFile();
+        if (psiFile != null) {
+          var virtualFile = psiFile.getVirtualFile();
+          if (virtualFile != null) {
+            try {
+              return new String(Files.readAllBytes(Paths.get(virtualFile.getPath())));
+            } catch (IOException ex) {
+              LOG.error(ex);
+            }
+          }
+        }
+      }
+      return null;
+    }
+
+    private void updateText() {
+      setText(format(
+          "<html><strong>%d</strong> %s totaling <strong>%d</strong> tokens</html>",
+          fileCount,
+          fileCount == 1 ? "file" : "files",
+          totalTokens));
+    }
+
+    private int calculateTotalTokens(List<CheckedFile> checkedFiles) {
+      return checkedFiles.stream()
+          .mapToInt(file -> encodingManager.countTokens(file.getFileContent()))
+          .sum();
+    }
   }
 }

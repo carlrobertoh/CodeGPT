@@ -26,7 +26,9 @@ public class PsiElementCheckboxTree extends FileCheckboxTree {
   public List<CheckedFile> getCheckedFiles() {
     return Arrays.stream(getCheckedNodes(
             PsiElement.class,
-            node -> Optional.ofNullable(node.getContainingFile()).isPresent()))
+            node -> Optional.ofNullable(node.getContainingFile())
+                .map(PsiFile::getVirtualFile)
+                .isPresent()))
         .map(item -> new CheckedFile(new File(item.getContainingFile().getVirtualFile().getPath())))
         .collect(toList());
   }
