@@ -1,6 +1,5 @@
 package ee.carlrobert.codegpt.toolwindow.chat.ui;
 
-import com.intellij.icons.AllIcons.General;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.ColorUtil;
@@ -12,17 +11,14 @@ import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import java.awt.BorderLayout;
-import java.util.List;
-import java.util.stream.Collectors;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
 public class UserMessagePanel extends JPanel {
 
-  private final JPanel headerPanel = new JPanel(new BorderLayout());
-
   public UserMessagePanel(Project project, Message message, Disposable parentDisposable) {
     super(new BorderLayout());
+    var headerPanel = new JPanel(new BorderLayout());
     headerPanel.setOpaque(false);
     headerPanel.add(createDisplayNameLabel(), BorderLayout.LINE_START);
     setBorder(JBUI.Borders.compound(
@@ -33,7 +29,7 @@ public class UserMessagePanel extends JPanel {
 
     var referencedFilePaths = message.getReferencedFilePaths();
     if (referencedFilePaths != null && !referencedFilePaths.isEmpty()) {
-      headerPanel.add(getContextHelpIcon(referencedFilePaths), BorderLayout.LINE_END);
+      add(new SelectedFilesAccordion(project, referencedFilePaths), BorderLayout.CENTER);
       add(createResponseBody(
           project,
           message.getUserMessage(),
@@ -41,17 +37,6 @@ public class UserMessagePanel extends JPanel {
     } else {
       add(createResponseBody(project, message.getPrompt(), parentDisposable), BorderLayout.SOUTH);
     }
-  }
-
-  private JBLabel getContextHelpIcon(List<String> checkedFiles) {
-    var iconLabel = new JBLabel("Referenced files", General.ContextHelp, SwingConstants.RIGHT);
-    iconLabel.setToolTipText(
-        "<html>"
-            + checkedFiles.stream()
-            .map(item -> String.format("<p style=\"margin: 0;\">%s</p>", item))
-            .collect(Collectors.joining())
-            + "</html>");
-    return iconLabel;
   }
 
   private ChatMessageResponseBody createResponseBody(

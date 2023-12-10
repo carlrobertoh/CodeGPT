@@ -78,7 +78,7 @@ public class OverlayUtil {
     var dialogBuilder = new DialogBuilder(project);
     dialogBuilder.setTitle("Include In Context");
     dialogBuilder.setNorthPanel(JBUI.Panels.simplePanel(
-        new JBLabel("Choose the files that you wish to include in the final prompt")
+        new JBLabel("Choose the files that you wish to include in the final context")
             .withBorder(JBUI.Borders.emptyBottom(16))
             .setCopyable(false)
             .setAllowAutoWrapping(true)));
