@@ -9,6 +9,7 @@ public class TotalTokensDetails {
   private int conversationTokens;
   private int userPromptTokens;
   private int highlightedTokens;
+  private int referencedFilesTokens;
 
   public TotalTokensDetails(EncodingManager encodingManager) {
     systemPromptTokens = encodingManager.countTokens(
@@ -43,7 +44,19 @@ public class TotalTokensDetails {
     return highlightedTokens;
   }
 
+  public void setReferencedFilesTokens(int referencedFilesTokens) {
+    this.referencedFilesTokens = referencedFilesTokens;
+  }
+
+  public int getReferencedFilesTokens() {
+    return referencedFilesTokens;
+  }
+
   public int getTotal() {
-    return systemPromptTokens + conversationTokens + userPromptTokens + highlightedTokens;
+    return systemPromptTokens
+        + conversationTokens
+        + userPromptTokens
+        + highlightedTokens
+        + referencedFilesTokens;
   }
 }

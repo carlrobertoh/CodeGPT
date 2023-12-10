@@ -19,6 +19,7 @@ import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
+import ee.carlrobert.codegpt.settings.state.IncludedFilesSettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
@@ -69,6 +70,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     conversationService = ConversationService.getInstance();
     toolWindowScrollablePanel = new ChatToolWindowScrollablePanel();
     totalTokensPanel = new TotalTokensPanel(
+        project,
         conversation,
         EditorUtil.getSelectedEditorSelectedText(project),
         this);
@@ -102,6 +104,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
       message.setReferencedFilePaths(referencedFilePaths);
       message.setUserMessage(message.getPrompt());
       message.setPrompt(getPromptWithContext(referencedFiles, message.getPrompt()));
+      totalTokensPanel.updateReferencedFilesTokens(referencedFiles);
     }
 
     var userMessagePanel = new UserMessagePanel(project, message, this);
@@ -123,23 +126,20 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
         .ifPresent(StandardChatToolWindowPanel::clearSelectedFilesNotification);
   }
 
-  // TODO: Move to util class
   private String getPromptWithContext(List<CheckedFile> referencedFiles, String userPrompt) {
-    var context = referencedFiles.stream()
-        .map(item -> format(
-            "Path:\n"
-                + "[File Path](%s)\n\n"
-                + "Content:\n"
-                + "%s\n",
-            item.getFilePath(),
-            format("```%s\n%s\n```", item.getFileExtension(), item.getFileContent().trim())))
-        .collect(joining("\n"));
-    return format(
-        "Use the following context to answer question at the end:\n\n"
-            + "%s\n"
-            + "Question: %s",
-        context,
-        userPrompt);
+    var includedFilesSettings = IncludedFilesSettingsState.getInstance();
+    var repeatableContext = referencedFiles.stream()
+        .map(item -> includedFilesSettings.getRepeatableContext()
+            .replace("{FILE_PATH}", item.getFilePath())
+            .replace("{FILE_CONTENT}", format(
+                "```%s\n%s\n```",
+                item.getFileExtension(),
+                item.getFileContent().trim())))
+        .collect(joining("\n\n"));
+
+    return includedFilesSettings.getPromptTemplate()
+        .replace("{REPEATABLE_CONTEXT}", repeatableContext)
+        .replace("{QUESTION}", userPrompt);
   }
 
   @Override

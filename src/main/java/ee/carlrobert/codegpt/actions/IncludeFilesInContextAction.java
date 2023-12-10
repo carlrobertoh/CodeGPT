@@ -13,9 +13,11 @@ import com.intellij.psi.PsiElement;
 import com.intellij.ui.CheckboxTreeListener;
 import com.intellij.ui.CheckedTreeNode;
 import com.intellij.ui.components.JBLabel;
+import com.intellij.ui.components.JBTextArea;
+import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.CodeGPTKeys;
 import ee.carlrobert.codegpt.EncodingManager;
-import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
+import ee.carlrobert.codegpt.settings.state.IncludedFilesSettingsState;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.codegpt.ui.checkbox.FileCheckboxTree;
 import ee.carlrobert.codegpt.ui.checkbox.PsiElementCheckboxTree;
@@ -29,11 +31,11 @@ import javax.swing.SwingUtilities;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class ApplyMultipleFilesInPromptAction extends AnAction {
+public class IncludeFilesInContextAction extends AnAction {
 
-  private static final Logger LOG = Logger.getInstance(ApplyMultipleFilesInPromptAction.class);
+  private static final Logger LOG = Logger.getInstance(IncludeFilesInContextAction.class);
 
-  public ApplyMultipleFilesInPromptAction() {
+  public IncludeFilesInContextAction() {
     super("Include In Context...");
   }
 
@@ -57,13 +59,24 @@ public class ApplyMultipleFilesInPromptAction extends AnAction {
       }
     });
 
-    var show = OverlayUtil.showMultiFilePromptDialog(project, totalTokensLabel, checkboxTree);
+    var includedFilesSettings = IncludedFilesSettingsState.getInstance();
+    var promptTemplateTextArea =
+        getPromptTemplateTextArea(includedFilesSettings.getPromptTemplate());
+    var repeatableContextTextArea =
+        getRepeatableContextTextArea(includedFilesSettings.getRepeatableContext());
+    var show = OverlayUtil.showMultiFilePromptDialog(
+        project,
+        promptTemplateTextArea,
+        repeatableContextTextArea,
+        totalTokensLabel,
+        checkboxTree);
     if (show == OK_EXIT_CODE) {
       project.putUserData(CodeGPTKeys.SELECTED_FILES, checkboxTree.getCheckedFiles());
-      project.getService(StandardChatToolWindowContentManager.class)
-          .tryFindChatToolWindowPanel()
-          .ifPresent(chatToolWindowPanel ->
-              chatToolWindowPanel.displaySelectedFilesNotification(checkboxTree.getCheckedFiles()));
+      project.getMessageBus()
+          .syncPublisher(IncludeFilesInContextNotifier.FILES_INCLUDED_IN_CONTEXT_TOPIC)
+          .filesIncluded(checkboxTree.getCheckedFiles());
+      includedFilesSettings.setPromptTemplate(promptTemplateTextArea.getText());
+      includedFilesSettings.setRepeatableContext(repeatableContextTextArea.getText());
     }
   }
 
@@ -141,5 +154,21 @@ public class ApplyMultipleFilesInPromptAction extends AnAction {
           .mapToInt(file -> encodingManager.countTokens(file.getFileContent()))
           .sum();
     }
+  }
+
+  private static JBTextArea getPromptTemplateTextArea(String promptTemplate) {
+    var textArea = new JBTextArea(promptTemplate);
+    textArea.setRows(3);
+    textArea.setBorder(JBUI.Borders.empty(4));
+    textArea.setLineWrap(true);
+    return textArea;
+  }
+
+  private static JBTextArea getRepeatableContextTextArea(String repeatableContext) {
+    var textArea = new JBTextArea(repeatableContext);
+    textArea.setRows(3);
+    textArea.setBorder(JBUI.Borders.empty(4));
+    textArea.setLineWrap(true);
+    return textArea;
   }
 }

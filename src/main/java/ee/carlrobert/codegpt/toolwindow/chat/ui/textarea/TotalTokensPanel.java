@@ -9,14 +9,20 @@ import com.intellij.openapi.editor.event.EditorFactoryEvent;
 import com.intellij.openapi.editor.event.EditorFactoryListener;
 import com.intellij.openapi.editor.event.SelectionEvent;
 import com.intellij.openapi.editor.event.SelectionListener;
+import com.intellij.openapi.project.Project;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.JBUI;
+import ee.carlrobert.codegpt.CodeGPTKeys;
 import ee.carlrobert.codegpt.EncodingManager;
+import ee.carlrobert.codegpt.actions.IncludeFilesInContextNotifier;
 import ee.carlrobert.codegpt.conversations.Conversation;
+import ee.carlrobert.codegpt.indexes.CodebaseIndexingCompletedNotifier;
+import ee.carlrobert.embedding.CheckedFile;
 import java.awt.FlowLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.swing.Box;
@@ -26,25 +32,33 @@ import org.jetbrains.annotations.Nullable;
 
 public class TotalTokensPanel extends JPanel {
 
-  private final EncodingManager encodingManager;
+  private final EncodingManager encodingManager = EncodingManager.getInstance();
   private final TotalTokensDetails totalTokensDetails;
   private final JBLabel label;
 
   public TotalTokensPanel(
+      @NotNull Project project,
       Conversation conversation,
       @Nullable String highlightedText,
       Disposable parentDisposable) {
     super(new FlowLayout(FlowLayout.LEADING, 0, 0));
-    setBorder(JBUI.Borders.empty(4));
-    this.encodingManager = EncodingManager.getInstance();
-    this.totalTokensDetails = createTokenDetails(conversation, highlightedText);
+    this.totalTokensDetails = createTokenDetails(
+        conversation,
+        project.getUserData(CodeGPTKeys.SELECTED_FILES),
+        highlightedText);
     this.label = getLabel(totalTokensDetails);
 
+    setBorder(JBUI.Borders.empty(4));
     setOpaque(false);
     add(getContextHelpIcon(totalTokensDetails));
     add(Box.createHorizontalStrut(4));
     add(label);
     addSelectionListeners(parentDisposable);
+
+    project.getMessageBus()
+        .connect()
+        .subscribe(IncludeFilesInContextNotifier.FILES_INCLUDED_IN_CONTEXT_TOPIC,
+            (IncludeFilesInContextNotifier) this::updateReferencedFilesTokens);
   }
 
   private void addSelectionListeners(Disposable parentDisposable) {
@@ -100,11 +114,24 @@ public class TotalTokensPanel extends JPanel {
     update();
   }
 
+  public void updateReferencedFilesTokens(List<CheckedFile> includedFiles) {
+    totalTokensDetails.setReferencedFilesTokens(includedFiles.stream()
+        .mapToInt(file -> encodingManager.countTokens(file.getFileContent()))
+        .sum());
+    update();
+  }
+
   private TotalTokensDetails createTokenDetails(
       Conversation conversation,
+      List<CheckedFile> includedFiles,
       @Nullable String highlightedText) {
     var tokenDetails = new TotalTokensDetails(encodingManager);
     tokenDetails.setConversationTokens(encodingManager.countConversationTokens(conversation));
+    if (includedFiles != null) {
+      tokenDetails.setReferencedFilesTokens(includedFiles.stream()
+          .mapToInt(file -> encodingManager.countTokens(file.getFileContent()))
+          .sum());
+    }
     if (highlightedText != null) {
       tokenDetails.setHighlightedTokens(encodingManager.countTokens(highlightedText));
     }
@@ -120,7 +147,8 @@ public class TotalTokensPanel extends JPanel {
             "System Prompt", totalTokensDetails.getSystemPromptTokens(),
             "Conversation Tokens", totalTokensDetails.getConversationTokens(),
             "Input Tokens", totalTokensDetails.getUserPromptTokens(),
-            "Highlighted Tokens", totalTokensDetails.getHighlightedTokens()))
+            "Highlighted Tokens", totalTokensDetails.getHighlightedTokens(),
+            "Referenced Files Tokens", totalTokensDetails.getReferencedFilesTokens()))
             .entrySet().stream()
             .map(entry -> format(
                 "<p style=\"margin: 0;\"><small>%s: <strong>%d</strong></small></p>",

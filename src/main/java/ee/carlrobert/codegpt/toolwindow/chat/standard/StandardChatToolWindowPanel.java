@@ -8,6 +8,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.util.ui.JBUI;
+import ee.carlrobert.codegpt.actions.IncludeFilesInContextNotifier;
 import ee.carlrobert.codegpt.actions.toolwindow.ClearChatWindowAction;
 import ee.carlrobert.codegpt.actions.toolwindow.CreateNewConversationAction;
 import ee.carlrobert.codegpt.actions.toolwindow.OpenInEditorAction;
@@ -31,6 +32,11 @@ public class StandardChatToolWindowPanel extends SimpleToolWindowPanel {
     super(true);
     selectedFilesNotification = new SelectedFilesNotification(project);
     init(project, selectedFilesNotification, parentDisposable);
+
+    project.getMessageBus()
+        .connect()
+        .subscribe(IncludeFilesInContextNotifier.FILES_INCLUDED_IN_CONTEXT_TOPIC,
+            (IncludeFilesInContextNotifier) this::displaySelectedFilesNotification);
   }
 
   public void displaySelectedFilesNotification(List<CheckedFile> checkedFiles) {

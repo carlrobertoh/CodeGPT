@@ -11,6 +11,7 @@ import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.JBUI.CurrentTheme.NotificationInfo;
 import ee.carlrobert.codegpt.CodeGPTKeys;
+import ee.carlrobert.codegpt.actions.IncludeFilesInContextNotifier;
 import ee.carlrobert.embedding.CheckedFile;
 import java.awt.BorderLayout;
 import java.nio.file.Paths;
@@ -61,6 +62,10 @@ public class SelectedFilesNotification extends JPanel {
 
   public void clearSelectedFilesNotification() {
     project.putUserData(CodeGPTKeys.SELECTED_FILES, emptyList());
+    project.getMessageBus()
+        .syncPublisher(IncludeFilesInContextNotifier.FILES_INCLUDED_IN_CONTEXT_TOPIC)
+        .filesIncluded(emptyList());
+
     label.setText("0 files selected");
     label.setToolTipText(null);
     setVisible(false);

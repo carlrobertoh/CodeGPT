@@ -22,8 +22,9 @@ import com.intellij.openapi.ui.popup.Balloon.Position;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.ui.awt.RelativePoint;
-import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBLabel;
+import com.intellij.ui.components.JBTextArea;
+import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
@@ -73,24 +74,49 @@ public class OverlayUtil {
 
   public static int showMultiFilePromptDialog(
       Project project,
+      JBTextArea promptTemplateTextArea,
+      JBTextArea repeatableContextTextArea,
       JBLabel totalTokensLabel,
       JComponent component) {
     var dialogBuilder = new DialogBuilder(project);
     dialogBuilder.setTitle("Include In Context");
     dialogBuilder.setNorthPanel(JBUI.Panels.simplePanel(
-        new JBLabel("Choose the files that you wish to include in the final context")
+        new JBLabel("Choose the files that you wish to include in the final prompt")
             .withBorder(JBUI.Borders.emptyBottom(16))
             .setCopyable(false)
             .setAllowAutoWrapping(true)));
     var scrollPane = ScrollPaneFactory.createScrollPane(component);
     scrollPane.setPreferredSize(new Dimension(
-        component.getPreferredSize().width,
+        480,
         component.getPreferredSize().height + 32));
-    dialogBuilder.setCenterPanel(JBUI.Panels.simplePanel(scrollPane)
-        .addToTop(totalTokensLabel.withBorder(JBUI.Borders.emptyBottom(8))));
+    dialogBuilder.setCenterPanel(FormBuilder.createFormBuilder()
+        .addLabeledComponent("Prompt template:", promptTemplateTextArea, true)
+        .addLabeledComponent("Repeatable context:", repeatableContextTextArea, true)
+        .addVerticalGap(8)
+        .addComponent(
+            JBUI.Panels.simplePanel(totalTokensLabel.withBorder(JBUI.Borders.emptyBottom(4))))
+        .addComponent(scrollPane)
+        .addVerticalGap(16)
+        .getPanel());
     dialogBuilder.addOkAction().setText("Continue");
     dialogBuilder.addCancelAction();
     return dialogBuilder.show();
+  }
+
+  private static JBTextArea getPromptTemplateTextArea(String promptTemplate) {
+    var textArea = new JBTextArea(promptTemplate);
+    textArea.setRows(3);
+    textArea.setBorder(JBUI.Borders.empty(4));
+    textArea.setLineWrap(true);
+    return textArea;
+  }
+
+  private static JBTextArea getRepeatableContextTextArea(String repeatableContext) {
+    var textArea = new JBTextArea(repeatableContext);
+    textArea.setRows(3);
+    textArea.setBorder(JBUI.Borders.empty(4));
+    textArea.setLineWrap(true);
+    return textArea;
   }
 
   public static int showDeleteConversationDialog() {
