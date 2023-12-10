@@ -31,10 +31,12 @@ import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.indexes.FolderStructureTreePanel;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
+import ee.carlrobert.codegpt.settings.state.IncludedFilesSettingsState;
 import ee.carlrobert.codegpt.util.EditorUtil;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import org.jetbrains.annotations.NotNull;
 
@@ -80,22 +82,22 @@ public class OverlayUtil {
       JComponent component) {
     var dialogBuilder = new DialogBuilder(project);
     dialogBuilder.setTitle("Include In Context");
-    dialogBuilder.setNorthPanel(JBUI.Panels.simplePanel(
-        new JBLabel("Choose the files that you wish to include in the final prompt")
-            .withBorder(JBUI.Borders.emptyBottom(16))
-            .setCopyable(false)
-            .setAllowAutoWrapping(true)));
-    var scrollPane = ScrollPaneFactory.createScrollPane(component);
-    scrollPane.setPreferredSize(new Dimension(
-        480,
-        component.getPreferredSize().height + 32));
-    dialogBuilder.setCenterPanel(FormBuilder.createFormBuilder()
+    dialogBuilder.setActionDescriptors();
+    var fileTreeScrollPane = ScrollPaneFactory.createScrollPane(component);
+    fileTreeScrollPane.setPreferredSize(
+        new Dimension(480, component.getPreferredSize().height + 48));
+    dialogBuilder.setNorthPanel(FormBuilder.createFormBuilder()
         .addLabeledComponent("Prompt template:", promptTemplateTextArea, true)
         .addLabeledComponent("Repeatable context:", repeatableContextTextArea, true)
-        .addVerticalGap(8)
-        .addComponent(
-            JBUI.Panels.simplePanel(totalTokensLabel.withBorder(JBUI.Borders.emptyBottom(4))))
-        .addComponent(scrollPane)
+        .addVerticalGap(4)
+        .addComponent(JBUI.Panels.simplePanel()
+            .addToRight(getRestoreButton(promptTemplateTextArea, repeatableContextTextArea)))
+        .addVerticalGap(16)
+        .addComponent(new JBLabel("Choose the files that you wish to include in the final prompt")
+            .setCopyable(false)
+            .setAllowAutoWrapping(true))
+        .addVerticalGap(4)
+        .addLabeledComponent(totalTokensLabel, fileTreeScrollPane, true)
         .addVerticalGap(16)
         .getPanel());
     dialogBuilder.addOkAction().setText("Continue");
@@ -103,20 +105,18 @@ public class OverlayUtil {
     return dialogBuilder.show();
   }
 
-  private static JBTextArea getPromptTemplateTextArea(String promptTemplate) {
-    var textArea = new JBTextArea(promptTemplate);
-    textArea.setRows(3);
-    textArea.setBorder(JBUI.Borders.empty(4));
-    textArea.setLineWrap(true);
-    return textArea;
-  }
-
-  private static JBTextArea getRepeatableContextTextArea(String repeatableContext) {
-    var textArea = new JBTextArea(repeatableContext);
-    textArea.setRows(3);
-    textArea.setBorder(JBUI.Borders.empty(4));
-    textArea.setLineWrap(true);
-    return textArea;
+  private static JButton getRestoreButton(JBTextArea promptTemplateTextArea,
+      JBTextArea repeatableContextTextArea) {
+    var restoreButton = new JButton("Restore to Defaults");
+    restoreButton.addActionListener(e -> {
+      var includedFilesSettings = IncludedFilesSettingsState.getInstance();
+      includedFilesSettings.setPromptTemplate(IncludedFilesSettingsState.DEFAULT_PROMPT_TEMPLATE);
+      includedFilesSettings.setRepeatableContext(
+          IncludedFilesSettingsState.DEFAULT_REPEATABLE_CONTEXT);
+      promptTemplateTextArea.setText(IncludedFilesSettingsState.DEFAULT_PROMPT_TEMPLATE);
+      repeatableContextTextArea.setText(IncludedFilesSettingsState.DEFAULT_REPEATABLE_CONTEXT);
+    });
+    return restoreButton;
   }
 
   public static int showDeleteConversationDialog() {

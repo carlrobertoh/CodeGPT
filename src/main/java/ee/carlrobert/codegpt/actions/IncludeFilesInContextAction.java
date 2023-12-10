@@ -12,6 +12,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.psi.PsiElement;
 import com.intellij.ui.CheckboxTreeListener;
 import com.intellij.ui.CheckedTreeNode;
+import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBTextArea;
 import com.intellij.util.ui.JBUI;
@@ -159,7 +160,9 @@ public class IncludeFilesInContextAction extends AnAction {
   private static JBTextArea getPromptTemplateTextArea(String promptTemplate) {
     var textArea = new JBTextArea(promptTemplate);
     textArea.setRows(3);
-    textArea.setBorder(JBUI.Borders.empty(4));
+    textArea.setBorder(JBUI.Borders.compound(
+        JBUI.Borders.customLine(JBColor.border()),
+        JBUI.Borders.empty(4)));
     textArea.setLineWrap(true);
     return textArea;
   }
@@ -167,7 +170,9 @@ public class IncludeFilesInContextAction extends AnAction {
   private static JBTextArea getRepeatableContextTextArea(String repeatableContext) {
     var textArea = new JBTextArea(repeatableContext);
     textArea.setRows(3);
-    textArea.setBorder(JBUI.Borders.empty(4));
+    textArea.setBorder(JBUI.Borders.compound(
+        JBUI.Borders.customLine(JBColor.border()),
+        JBUI.Borders.empty(4)));
     textArea.setLineWrap(true);
     return textArea;
   }
