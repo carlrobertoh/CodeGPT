@@ -52,15 +52,19 @@ public class CompletionRequestHandler {
       return CompletionRequestService.getInstance()
           .getChatCompletionAsync(conversation, message, retry, useContextualSearch, eventListener);
     } catch (Throwable ex) {
-      var errorMessage = "Something went wrong";
-      if (ex instanceof TotalUsageExceededException) {
-        errorMessage =
-            "The length of the context exceeds the maximum limit that the model can handle. "
-                + "Try reducing the input message or maximum completion token size.";
-      }
-      completionResponseEventListener.handleError(new ErrorDetails(errorMessage), ex);
+      handleCallException(ex);
       throw ex;
     }
+  }
+
+  private void handleCallException(Throwable ex) {
+    var errorMessage = "Something went wrong";
+    if (ex instanceof TotalUsageExceededException) {
+      errorMessage =
+          "The length of the context exceeds the maximum limit that the model can handle. "
+              + "Try reducing the input message or maximum completion token size.";
+    }
+    completionResponseEventListener.handleError(new ErrorDetails(errorMessage), ex);
   }
 
   private class CompletionRequestWorker extends SwingWorker<Void, String> {

@@ -51,29 +51,35 @@ public class MethodNameLookupListener implements LookupManagerListener {
       LookupImpl lookup,
       Application application,
       String prompt) {
-    Optional.ofNullable(getCompletionResponse(prompt))
-        .ifPresent(response -> {
-          for (var value : response.split(",")) {
-            application.runReadAction(() -> {
-              lookup.addItem(
-                  LookupElementBuilder.create(value.trim()).withIcon(Icons.Sparkle),
-                  PrefixMatcher.ALWAYS_TRUE);
-              application.invokeLater(() -> lookup.refreshUi(true, true));
-            });
-          }
+    getCompletionResponse(prompt).ifPresent(response -> {
+      for (var value : response.split(",")) {
+        application.runReadAction(() -> {
+          lookup.addItem(
+              LookupElementBuilder.create(value.trim()).withIcon(Icons.Sparkle),
+              PrefixMatcher.ALWAYS_TRUE);
+          application.invokeLater(() -> lookup.refreshUi(true, true));
         });
+      }
+    });
   }
 
-  private @Nullable String getCompletionResponse(String prompt) {
+  // TODO: Refactor
+  private Optional<String> getCompletionResponse(String prompt) {
     var selectedService = SettingsState.getInstance().getSelectedService();
-    if (selectedService == OPENAI || selectedService == AZURE) {
+    if (selectedService == OPENAI) {
       return Optional.ofNullable(CompletionClientProvider.getOpenAIClient()
               .getChatCompletion(
                   CompletionRequestProvider.buildOpenAILookupCompletionRequest(prompt))
               .getChoices())
-          .map(choices -> choices.get(0).getMessage().getContent())
-          .orElse(null);
+          .map(choices -> choices.get(0).getMessage().getContent());
     }
-    return null;
+    if (selectedService == AZURE) {
+      return Optional.ofNullable(CompletionClientProvider.getAzureClient()
+              .getChatCompletion(
+                  CompletionRequestProvider.buildOpenAILookupCompletionRequest(prompt))
+              .getChoices())
+          .map(choices -> choices.get(0).getMessage().getContent());
+    }
+    return Optional.empty();
   }
 }

@@ -24,9 +24,12 @@ import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.completions.CompletionClientProvider;
+import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
+import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
+import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
@@ -54,11 +57,22 @@ public class GenerateGitCommitMessageAction extends AnAction {
 
   @Override
   public void update(@NotNull AnActionEvent event) {
-    var apiKeyExists = OpenAICredentialsManager.getInstance().isApiKeySet();
-    event.getPresentation().setEnabled(apiKeyExists && !getCheckedFilePaths(event).isEmpty());
-    event.getPresentation().setText(CodeGPTBundle.get(apiKeyExists
-        ? "action.generateCommitMessage.title"
-        : "action.generateCommitMessage.serviceWarning"));
+    var selectedService = SettingsState.getInstance().getSelectedService();
+    if (selectedService == ServiceType.OPENAI || selectedService == ServiceType.AZURE) {
+      var filesSelected = !getCheckedFilePaths(event).isEmpty();
+      var callAllowed = (selectedService == ServiceType.OPENAI
+          && OpenAICredentialsManager.getInstance().isApiKeySet())
+          || (selectedService == ServiceType.AZURE
+          && AzureCredentialsManager.getInstance().isCredentialSet());
+      event.getPresentation().setEnabled(callAllowed && filesSelected);
+      event.getPresentation().setText(CodeGPTBundle.get(callAllowed
+          ? "action.generateCommitMessage.title"
+          : "action.generateCommitMessage.missingCredentials"));
+    } else {
+      event.getPresentation().setEnabled(false);
+      event.getPresentation()
+          .setText(CodeGPTBundle.get("action.generateCommitMessage.serviceWarning"));
+    }
   }
 
   @Override
@@ -82,14 +96,21 @@ public class GenerateGitCommitMessageAction extends AnAction {
   }
 
   private void generateMessage(Project project, Editor editor, String gitDiff) {
-    CompletionClientProvider.getOpenAIClient().getChatCompletion(
-        new OpenAIChatCompletionRequest.Builder(List.of(
-            new OpenAIChatCompletionMessage("system",
-                ConfigurationState.getInstance().getCommitMessagePrompt()),
-            new OpenAIChatCompletionMessage("user", gitDiff)))
-            .setModel(OpenAISettingsState.getInstance().getModel())
-            .build(),
-        getEventListener(project, editor.getDocument()));
+    var request = new OpenAIChatCompletionRequest.Builder(List.of(
+        new OpenAIChatCompletionMessage("system",
+            ConfigurationState.getInstance().getCommitMessagePrompt()),
+        new OpenAIChatCompletionMessage("user", gitDiff)))
+        .setModel(OpenAISettingsState.getInstance().getModel())
+        .build();
+    var selectedService = SettingsState.getInstance().getSelectedService();
+    if (selectedService == ServiceType.OPENAI) {
+      CompletionClientProvider.getOpenAIClient()
+          .getChatCompletion(request, getEventListener(project, editor.getDocument()));
+    }
+    if (selectedService == ServiceType.AZURE) {
+      CompletionClientProvider.getAzureClient()
+          .getChatCompletion(request, getEventListener(project, editor.getDocument()));
+    }
   }
 
   private CompletionEventListener getEventListener(Project project, Document document) {
