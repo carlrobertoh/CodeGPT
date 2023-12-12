@@ -9,6 +9,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.ui.CheckboxTreeListener;
 import com.intellij.ui.CheckedTreeNode;
@@ -131,13 +132,21 @@ public class IncludeFilesInContextAction extends AnAction {
         if (psiFile != null) {
           var virtualFile = psiFile.getVirtualFile();
           if (virtualFile != null) {
-            try {
-              return new String(Files.readAllBytes(Paths.get(virtualFile.getPath())));
-            } catch (IOException ex) {
-              LOG.error(ex);
-            }
+            return getVirtualFileContent(virtualFile);
           }
         }
+      }
+      if (userObject instanceof VirtualFile) {
+        return getVirtualFileContent((VirtualFile) userObject);
+      }
+      return null;
+    }
+
+    private String getVirtualFileContent(VirtualFile virtualFile) {
+      try {
+        return new String(Files.readAllBytes(Paths.get(virtualFile.getPath())));
+      } catch (IOException ex) {
+        LOG.error(ex);
       }
       return null;
     }
