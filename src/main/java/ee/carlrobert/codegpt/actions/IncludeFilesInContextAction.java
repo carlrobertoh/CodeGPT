@@ -9,26 +9,33 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.DialogBuilder;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.ui.CheckboxTreeListener;
 import com.intellij.ui.CheckedTreeNode;
-import com.intellij.ui.JBColor;
+import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBTextArea;
+import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
+import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.CodeGPTKeys;
 import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.settings.state.IncludedFilesSettingsState;
-import ee.carlrobert.codegpt.ui.OverlayUtil;
+import ee.carlrobert.codegpt.ui.UIUtil;
 import ee.carlrobert.codegpt.ui.checkbox.FileCheckboxTree;
 import ee.carlrobert.codegpt.ui.checkbox.PsiElementCheckboxTree;
 import ee.carlrobert.codegpt.ui.checkbox.VirtualFileCheckboxTree;
 import ee.carlrobert.embedding.CheckedFile;
+import java.awt.Dimension;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -38,7 +45,7 @@ public class IncludeFilesInContextAction extends AnAction {
   private static final Logger LOG = Logger.getInstance(IncludeFilesInContextAction.class);
 
   public IncludeFilesInContextAction() {
-    super("Include In Context...");
+    super(CodeGPTBundle.get("action.includeFilesInContext.title"));
   }
 
   @Override
@@ -62,11 +69,10 @@ public class IncludeFilesInContextAction extends AnAction {
     });
 
     var includedFilesSettings = IncludedFilesSettingsState.getInstance();
-    var promptTemplateTextArea =
-        getPromptTemplateTextArea(includedFilesSettings.getPromptTemplate());
+    var promptTemplateTextArea = UIUtil.createTextArea(includedFilesSettings.getPromptTemplate());
     var repeatableContextTextArea =
-        getRepeatableContextTextArea(includedFilesSettings.getRepeatableContext());
-    var show = OverlayUtil.showMultiFilePromptDialog(
+        UIUtil.createTextArea(includedFilesSettings.getRepeatableContext());
+    var show = showMultiFilePromptDialog(
         project,
         promptTemplateTextArea,
         repeatableContextTextArea,
@@ -166,23 +172,56 @@ public class IncludeFilesInContextAction extends AnAction {
     }
   }
 
-  private static JBTextArea getPromptTemplateTextArea(String promptTemplate) {
-    var textArea = new JBTextArea(promptTemplate);
-    textArea.setRows(3);
-    textArea.setBorder(JBUI.Borders.compound(
-        JBUI.Borders.customLine(JBColor.border()),
-        JBUI.Borders.empty(4)));
-    textArea.setLineWrap(true);
-    return textArea;
+  private static int showMultiFilePromptDialog(
+      Project project,
+      JBTextArea promptTemplateTextArea,
+      JBTextArea repeatableContextTextArea,
+      JBLabel totalTokensLabel,
+      JComponent component) {
+    var dialogBuilder = new DialogBuilder(project);
+    dialogBuilder.setTitle(CodeGPTBundle.get("action.includeFilesInContext.dialog.title"));
+    dialogBuilder.setActionDescriptors();
+    var fileTreeScrollPane = ScrollPaneFactory.createScrollPane(component);
+    fileTreeScrollPane.setPreferredSize(
+        new Dimension(480, component.getPreferredSize().height + 48));
+    dialogBuilder.setNorthPanel(FormBuilder.createFormBuilder()
+        .addLabeledComponent(
+            CodeGPTBundle.get("action.includeFilesInContext.dialog.promptTemplate.label"),
+            promptTemplateTextArea,
+            true)
+        .addLabeledComponent(
+            CodeGPTBundle.get("action.includeFilesInContext.dialog.repeatableContext.label"),
+            repeatableContextTextArea,
+            true)
+        .addVerticalGap(4)
+        .addComponent(JBUI.Panels.simplePanel()
+            .addToRight(getRestoreButton(promptTemplateTextArea, repeatableContextTextArea)))
+        .addVerticalGap(16)
+        .addComponent(
+            new JBLabel(CodeGPTBundle.get("action.includeFilesInContext.dialog.description"))
+                .setCopyable(false)
+                .setAllowAutoWrapping(true))
+        .addVerticalGap(4)
+        .addLabeledComponent(totalTokensLabel, fileTreeScrollPane, true)
+        .addVerticalGap(16)
+        .getPanel());
+    dialogBuilder.addOkAction().setText(CodeGPTBundle.get("dialog.continue"));
+    dialogBuilder.addCancelAction();
+    return dialogBuilder.show();
   }
 
-  private static JBTextArea getRepeatableContextTextArea(String repeatableContext) {
-    var textArea = new JBTextArea(repeatableContext);
-    textArea.setRows(3);
-    textArea.setBorder(JBUI.Borders.compound(
-        JBUI.Borders.customLine(JBColor.border()),
-        JBUI.Borders.empty(4)));
-    textArea.setLineWrap(true);
-    return textArea;
+  private static JButton getRestoreButton(JBTextArea promptTemplateTextArea,
+      JBTextArea repeatableContextTextArea) {
+    var restoreButton = new JButton(
+        CodeGPTBundle.get("action.includeFilesInContext.dialog.restoreToDefaults.label"));
+    restoreButton.addActionListener(e -> {
+      var includedFilesSettings = IncludedFilesSettingsState.getInstance();
+      includedFilesSettings.setPromptTemplate(IncludedFilesSettingsState.DEFAULT_PROMPT_TEMPLATE);
+      includedFilesSettings.setRepeatableContext(
+          IncludedFilesSettingsState.DEFAULT_REPEATABLE_CONTEXT);
+      promptTemplateTextArea.setText(IncludedFilesSettingsState.DEFAULT_PROMPT_TEMPLATE);
+      repeatableContextTextArea.setText(IncludedFilesSettingsState.DEFAULT_REPEATABLE_CONTEXT);
+    });
+    return restoreButton;
   }
 }

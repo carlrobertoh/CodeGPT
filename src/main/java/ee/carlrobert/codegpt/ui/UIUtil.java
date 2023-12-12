@@ -4,7 +4,10 @@ import static javax.swing.event.HyperlinkEvent.EventType.ACTIVATED;
 
 import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
+import com.intellij.ui.JBColor;
 import com.intellij.ui.ScrollPaneFactory;
+import com.intellij.ui.components.JBTextArea;
+import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.SmartScroller;
 import java.awt.Dimension;
@@ -43,6 +46,16 @@ public class UIUtil {
     textPane.setText(text);
     textPane.setOpaque(opaque);
     return textPane;
+  }
+
+  public static JBTextArea createTextArea(String initialValue) {
+    var textArea = new JBTextArea(initialValue);
+    textArea.setRows(3);
+    textArea.setBorder(JBUI.Borders.compound(
+        JBUI.Borders.customLine(JBColor.border()),
+        JBUI.Borders.empty(4)));
+    textArea.setLineWrap(true);
+    return textArea;
   }
 
   public static JButton createIconButton(Icon icon) {
