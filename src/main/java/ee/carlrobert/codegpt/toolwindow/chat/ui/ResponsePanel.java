@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.toolwindow.chat.components;
+package ee.carlrobert.codegpt.toolwindow.chat.ui;
 
 import com.intellij.icons.AllIcons.Actions;
 import com.intellij.openapi.actionSystem.AnAction;
@@ -8,6 +8,7 @@ import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.Icons;
+import ee.carlrobert.codegpt.ui.IconActionButton;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import javax.swing.Box;

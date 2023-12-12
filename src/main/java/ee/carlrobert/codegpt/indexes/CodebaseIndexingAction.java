@@ -5,7 +5,7 @@ import static com.intellij.openapi.ui.DialogWrapper.OK_EXIT_CODE;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import ee.carlrobert.codegpt.util.OverlayUtil;
+import ee.carlrobert.codegpt.ui.OverlayUtil;
 import org.jetbrains.annotations.NotNull;
 
 public class CodebaseIndexingAction extends AnAction {

@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.toolwindow.chat.components;
+package ee.carlrobert.codegpt.toolwindow.chat.ui;
 
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.project.Project;
@@ -18,20 +18,32 @@ public class UserMessagePanel extends JPanel {
 
   public UserMessagePanel(Project project, Message message, Disposable parentDisposable) {
     super(new BorderLayout());
+    var headerPanel = new JPanel(new BorderLayout());
+    headerPanel.setOpaque(false);
+    headerPanel.add(createDisplayNameLabel(), BorderLayout.LINE_START);
     setBorder(JBUI.Borders.compound(
         JBUI.Borders.customLine(JBColor.border(), 1, 0, 1, 0),
         JBUI.Borders.empty(12, 8, 8, 8)));
     setBackground(ColorUtil.brighter(getBackground(), 2));
-    add(createDisplayNameLabel(), BorderLayout.NORTH);
-    add(createResponseBody(project, message, parentDisposable), BorderLayout.SOUTH);
+    add(headerPanel, BorderLayout.NORTH);
+
+    var referencedFilePaths = message.getReferencedFilePaths();
+    if (referencedFilePaths != null && !referencedFilePaths.isEmpty()) {
+      add(new SelectedFilesAccordion(project, referencedFilePaths), BorderLayout.CENTER);
+      add(createResponseBody(
+          project,
+          message.getUserMessage(),
+          parentDisposable), BorderLayout.SOUTH);
+    } else {
+      add(createResponseBody(project, message.getPrompt(), parentDisposable), BorderLayout.SOUTH);
+    }
   }
 
   private ChatMessageResponseBody createResponseBody(
       Project project,
-      Message message,
+      String prompt,
       Disposable parentDisposable) {
-    return new ChatMessageResponseBody(project, false, true, parentDisposable)
-        .withResponse(message.getPrompt());
+    return new ChatMessageResponseBody(project, false, true, parentDisposable).withResponse(prompt);
   }
 
   private JBLabel createDisplayNameLabel() {

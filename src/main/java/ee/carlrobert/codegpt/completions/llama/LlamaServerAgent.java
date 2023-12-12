@@ -20,7 +20,7 @@ import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.settings.service.ServerProgressPanel;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
-import ee.carlrobert.codegpt.util.OverlayUtil;
+import ee.carlrobert.codegpt.ui.OverlayUtil;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;

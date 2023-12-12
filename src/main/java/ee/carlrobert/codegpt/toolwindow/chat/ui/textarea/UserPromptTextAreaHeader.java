@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.toolwindow.chat.components;
+package ee.carlrobert.codegpt.toolwindow.chat.ui.textarea;
 
 import com.intellij.openapi.actionSystem.ActionPlaces;
 import com.intellij.openapi.application.ApplicationManager;

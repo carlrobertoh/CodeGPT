@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.toolwindow.chat.components;
+package ee.carlrobert.codegpt.toolwindow.chat.ui;
 
 import static ee.carlrobert.codegpt.toolwindow.chat.StreamResponseType.CODE;
 import static ee.carlrobert.codegpt.util.MarkdownUtil.convertMdToHtml;
@@ -20,9 +20,9 @@ import ee.carlrobert.codegpt.settings.SettingsConfigurable;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.toolwindow.chat.StreamParser;
 import ee.carlrobert.codegpt.toolwindow.chat.editor.ResponseEditorPanel;
+import ee.carlrobert.codegpt.ui.UIUtil;
 import ee.carlrobert.codegpt.util.EditorUtil;
 import ee.carlrobert.codegpt.util.MarkdownUtil;
-import ee.carlrobert.codegpt.util.UIUtil;
 import ee.carlrobert.llm.client.you.completion.YouSerpResult;
 import java.awt.BorderLayout;
 import java.util.List;

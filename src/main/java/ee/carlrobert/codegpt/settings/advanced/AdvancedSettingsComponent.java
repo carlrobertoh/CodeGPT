@@ -10,7 +10,7 @@ import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
-import ee.carlrobert.codegpt.util.UIUtil;
+import ee.carlrobert.codegpt.ui.UIUtil;
 import java.awt.event.ItemEvent;
 import java.net.Proxy;
 import javax.swing.BoxLayout;

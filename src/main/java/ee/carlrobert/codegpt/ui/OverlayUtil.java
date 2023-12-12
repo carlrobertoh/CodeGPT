@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.util;
+package ee.carlrobert.codegpt.ui;
 
 import static com.intellij.openapi.ui.Messages.CANCEL;
 import static com.intellij.openapi.ui.Messages.OK;
@@ -28,6 +28,7 @@ import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.indexes.FolderStructureTreePanel;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
+import ee.carlrobert.codegpt.util.EditorUtil;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import javax.swing.JComponent;

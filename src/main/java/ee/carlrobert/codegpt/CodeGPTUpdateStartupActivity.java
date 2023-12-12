@@ -14,7 +14,7 @@ import com.intellij.openapi.updateSettings.impl.UpdateChecker;
 import com.intellij.openapi.updateSettings.impl.UpdateSettings;
 import com.intellij.util.concurrency.AppExecutorUtil;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
-import ee.carlrobert.codegpt.util.OverlayUtil;
+import ee.carlrobert.codegpt.ui.OverlayUtil;
 import java.util.concurrent.TimeUnit;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,6 +22,10 @@ public class CodeGPTUpdateStartupActivity implements StartupActivity.Background 
 
   @Override
   public void runActivity(@NotNull Project project) {
+    if (ApplicationManager.getApplication().isUnitTestMode()) {
+      return;
+    }
+
     schedulePluginUpdateChecks(project);
   }
 

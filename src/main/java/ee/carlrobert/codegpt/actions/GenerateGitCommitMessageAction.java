@@ -27,7 +27,7 @@ import ee.carlrobert.codegpt.completions.CompletionClientProvider;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
-import ee.carlrobert.codegpt.util.OverlayUtil;
+import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;

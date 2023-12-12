@@ -1,16 +1,17 @@
-package ee.carlrobert.codegpt.toolwindow.chat;
+package ee.carlrobert.codegpt.toolwindow.chat.ui.textarea;
 
 import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
 
-public class TokenDetails {
+public class TotalTokensDetails {
 
   private final int systemPromptTokens;
   private int conversationTokens;
   private int userPromptTokens;
   private int highlightedTokens;
+  private int referencedFilesTokens;
 
-  public TokenDetails(EncodingManager encodingManager) {
+  public TotalTokensDetails(EncodingManager encodingManager) {
     systemPromptTokens = encodingManager.countTokens(
         ConfigurationState.getInstance().getSystemPrompt());
   }
@@ -43,7 +44,19 @@ public class TokenDetails {
     return highlightedTokens;
   }
 
+  public void setReferencedFilesTokens(int referencedFilesTokens) {
+    this.referencedFilesTokens = referencedFilesTokens;
+  }
+
+  public int getReferencedFilesTokens() {
+    return referencedFilesTokens;
+  }
+
   public int getTotal() {
-    return systemPromptTokens + conversationTokens + userPromptTokens + highlightedTokens;
+    return systemPromptTokens
+        + conversationTokens
+        + userPromptTokens
+        + highlightedTokens
+        + referencedFilesTokens;
   }
 }

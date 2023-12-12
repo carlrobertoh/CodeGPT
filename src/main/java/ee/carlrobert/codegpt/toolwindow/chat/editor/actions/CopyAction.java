@@ -6,7 +6,7 @@ import com.intellij.openapi.editor.Editor;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.actions.ActionType;
 import ee.carlrobert.codegpt.actions.TrackableAction;
-import ee.carlrobert.codegpt.util.OverlayUtil;
+import ee.carlrobert.codegpt.ui.OverlayUtil;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;

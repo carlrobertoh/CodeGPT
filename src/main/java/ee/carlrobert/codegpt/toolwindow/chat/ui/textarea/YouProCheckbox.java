@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.toolwindow.chat.components;
+package ee.carlrobert.codegpt.toolwindow.chat.ui.textarea;
 
 import com.intellij.ui.components.JBCheckBox;
 import ee.carlrobert.codegpt.CodeGPTBundle;

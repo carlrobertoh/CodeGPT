@@ -1,13 +1,16 @@
 package ee.carlrobert.codegpt.toolwindow.chat;
 
-import static ee.carlrobert.codegpt.util.UIUtil.createScrollPaneWithSmartScroller;
+import static ee.carlrobert.codegpt.ui.UIUtil.createScrollPaneWithSmartScroller;
 import static java.lang.String.format;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
 import com.intellij.util.ui.JBUI;
+import ee.carlrobert.codegpt.CodeGPTKeys;
 import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.actions.ActionType;
 import ee.carlrobert.codegpt.completions.CompletionRequestHandler;
@@ -16,20 +19,26 @@ import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
+import ee.carlrobert.codegpt.settings.state.IncludedFilesSettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
-import ee.carlrobert.codegpt.toolwindow.chat.components.ChatMessageResponseBody;
-import ee.carlrobert.codegpt.toolwindow.chat.components.ResponsePanel;
-import ee.carlrobert.codegpt.toolwindow.chat.components.TotalTokensPanel;
-import ee.carlrobert.codegpt.toolwindow.chat.components.UserMessagePanel;
-import ee.carlrobert.codegpt.toolwindow.chat.components.UserPromptTextArea;
-import ee.carlrobert.codegpt.toolwindow.chat.components.UserPromptTextAreaHeader;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
+import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowPanel;
+import ee.carlrobert.codegpt.toolwindow.chat.ui.ChatMessageResponseBody;
+import ee.carlrobert.codegpt.toolwindow.chat.ui.ChatToolWindowScrollablePanel;
+import ee.carlrobert.codegpt.toolwindow.chat.ui.ResponsePanel;
+import ee.carlrobert.codegpt.toolwindow.chat.ui.UserMessagePanel;
+import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.TotalTokensDetails;
+import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.TotalTokensPanel;
+import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.UserPromptTextArea;
+import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.UserPromptTextAreaHeader;
 import ee.carlrobert.codegpt.util.EditorUtil;
 import ee.carlrobert.codegpt.util.file.FileUtil;
+import ee.carlrobert.embedding.CheckedFile;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.util.List;
 import java.util.UUID;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -61,6 +70,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     conversationService = ConversationService.getInstance();
     toolWindowScrollablePanel = new ChatToolWindowScrollablePanel();
     totalTokensPanel = new TotalTokensPanel(
+        project,
         conversation,
         EditorUtil.getSelectedEditorSelectedText(project),
         this);
@@ -75,7 +85,7 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
   }
 
   @Override
-  public JPanel getContent() {
+  public JComponent getContent() {
     return rootPanel;
   }
 
@@ -86,8 +96,20 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
 
   @Override
   public void sendMessage(Message message) {
+    var referencedFiles = project.getUserData(CodeGPTKeys.SELECTED_FILES);
+    if (referencedFiles != null && !referencedFiles.isEmpty()) {
+      var referencedFilePaths = referencedFiles.stream()
+          .map(CheckedFile::getFilePath)
+          .collect(toList());
+      message.setReferencedFilePaths(referencedFilePaths);
+      message.setUserMessage(message.getPrompt());
+      message.setPrompt(getPromptWithContext(referencedFiles, message.getPrompt()));
+      totalTokensPanel.updateReferencedFilesTokens(referencedFiles);
+    }
+
+    var userMessagePanel = new UserMessagePanel(project, message, this);
     var messagePanel = toolWindowScrollablePanel.addMessage(message.getId());
-    messagePanel.add(new UserMessagePanel(project, message, this));
+    messagePanel.add(userMessagePanel);
     var responsePanel = new ResponsePanel()
         .withReloadAction(() -> reloadMessage(message, conversation))
         .withDeleteAction(() -> removeMessage(message.getId(), conversation))
@@ -99,10 +121,29 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
     totalTokensPanel.updateConversationTokens(conversationTokens + userPromptTokens);
 
     call(message, responsePanel, false);
+    project.getService(StandardChatToolWindowContentManager.class)
+        .tryFindChatToolWindowPanel()
+        .ifPresent(StandardChatToolWindowPanel::clearSelectedFilesNotification);
+  }
+
+  private String getPromptWithContext(List<CheckedFile> referencedFiles, String userPrompt) {
+    var includedFilesSettings = IncludedFilesSettingsState.getInstance();
+    var repeatableContext = referencedFiles.stream()
+        .map(item -> includedFilesSettings.getRepeatableContext()
+            .replace("{FILE_PATH}", item.getFilePath())
+            .replace("{FILE_CONTENT}", format(
+                "```%s\n%s\n```",
+                item.getFileExtension(),
+                item.getFileContent().trim())))
+        .collect(joining("\n\n"));
+
+    return includedFilesSettings.getPromptTemplate()
+        .replace("{REPEATABLE_CONTEXT}", repeatableContext)
+        .replace("{QUESTION}", userPrompt);
   }
 
   @Override
-  public TokenDetails getTokenDetails() {
+  public TotalTokensDetails getTokenDetails() {
     return totalTokensPanel.getTokenDetails();
   }
 
@@ -193,11 +234,10 @@ public abstract class BaseChatToolWindowTabPanel implements ChatToolWindowTabPan
         var fileExtension = FileUtil.getFileExtension(
             ((EditorImpl) editor).getVirtualFile().getName());
         message = new Message(text + format("\n```%s\n%s\n```", fileExtension, selectedText));
-        message.setUserMessage(text);
         selectionModel.removeSelection();
       }
     }
-
+    message.setUserMessage(text);
     sendMessage(message);
   }
 

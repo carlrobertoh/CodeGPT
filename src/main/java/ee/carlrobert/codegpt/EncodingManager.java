@@ -2,6 +2,7 @@ package ee.carlrobert.codegpt;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
+import com.intellij.openapi.diagnostic.Logger;
 import com.knuddels.jtokkit.Encodings;
 import com.knuddels.jtokkit.api.Encoding;
 import com.knuddels.jtokkit.api.EncodingRegistry;
@@ -11,6 +12,8 @@ import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMe
 
 @Service
 public final class EncodingManager {
+
+  private static final Logger LOG = Logger.getInstance(EncodingManager.class);
 
   private final EncodingRegistry registry = Encodings.newDefaultEncodingRegistry();
   private final Encoding encoding = registry.getEncoding(EncodingType.CL100K_BASE);
@@ -42,6 +45,11 @@ public final class EncodingManager {
   }
 
   public int countTokens(String text) {
-    return encoding.countTokens(text);
+    try {
+      return encoding.countTokens(text);
+    } catch (Exception ex) {
+      LOG.error(ex);
+      return 0;
+    }
   }
 }

@@ -23,6 +23,12 @@ public class CheckedFile {
     }
   }
 
+  public CheckedFile(String fileName, String filePath, String fileContent) {
+    this.fileName = fileName;
+    this.filePath = filePath;
+    this.fileContent = fileContent;
+  }
+
   public String getFileName() {
     return fileName;
   }

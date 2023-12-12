@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.toolwindow.chat.components;
+package ee.carlrobert.codegpt.toolwindow.chat.ui.textarea;
 
 import static java.lang.String.format;
 
@@ -9,15 +9,20 @@ import com.intellij.openapi.editor.event.EditorFactoryEvent;
 import com.intellij.openapi.editor.event.EditorFactoryListener;
 import com.intellij.openapi.editor.event.SelectionEvent;
 import com.intellij.openapi.editor.event.SelectionListener;
+import com.intellij.openapi.project.Project;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.JBUI;
+import ee.carlrobert.codegpt.CodeGPTKeys;
 import ee.carlrobert.codegpt.EncodingManager;
+import ee.carlrobert.codegpt.actions.IncludeFilesInContextNotifier;
 import ee.carlrobert.codegpt.conversations.Conversation;
-import ee.carlrobert.codegpt.toolwindow.chat.TokenDetails;
+import ee.carlrobert.codegpt.indexes.CodebaseIndexingCompletedNotifier;
+import ee.carlrobert.embedding.CheckedFile;
 import java.awt.FlowLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.swing.Box;
@@ -27,25 +32,33 @@ import org.jetbrains.annotations.Nullable;
 
 public class TotalTokensPanel extends JPanel {
 
-  private final EncodingManager encodingManager;
-  private final TokenDetails tokenDetails;
+  private final EncodingManager encodingManager = EncodingManager.getInstance();
+  private final TotalTokensDetails totalTokensDetails;
   private final JBLabel label;
 
   public TotalTokensPanel(
+      @NotNull Project project,
       Conversation conversation,
       @Nullable String highlightedText,
       Disposable parentDisposable) {
     super(new FlowLayout(FlowLayout.LEADING, 0, 0));
-    setBorder(JBUI.Borders.empty(4));
-    this.encodingManager = EncodingManager.getInstance();
-    this.tokenDetails = createTokenDetails(conversation, highlightedText);
-    this.label = getLabel(tokenDetails);
+    this.totalTokensDetails = createTokenDetails(
+        conversation,
+        project.getUserData(CodeGPTKeys.SELECTED_FILES),
+        highlightedText);
+    this.label = getLabel(totalTokensDetails);
 
+    setBorder(JBUI.Borders.empty(4));
     setOpaque(false);
-    add(getContextHelpIcon(tokenDetails));
+    add(getContextHelpIcon(totalTokensDetails));
     add(Box.createHorizontalStrut(4));
     add(label);
     addSelectionListeners(parentDisposable);
+
+    project.getMessageBus()
+        .connect()
+        .subscribe(IncludeFilesInContextNotifier.FILES_INCLUDED_IN_CONTEXT_TOPIC,
+            (IncludeFilesInContextNotifier) this::updateReferencedFilesTokens);
   }
 
   private void addSelectionListeners(Disposable parentDisposable) {
@@ -70,12 +83,12 @@ public class TotalTokensPanel extends JPanel {
     };
   }
 
-  public TokenDetails getTokenDetails() {
-    return tokenDetails;
+  public TotalTokensDetails getTokenDetails() {
+    return totalTokensDetails;
   }
 
   public void update() {
-    update(tokenDetails.getTotal());
+    update(totalTokensDetails.getTotal());
   }
 
   public void update(int total) {
@@ -83,7 +96,7 @@ public class TotalTokensPanel extends JPanel {
   }
 
   public void updateConversationTokens(int total) {
-    tokenDetails.setConversationTokens(total);
+    totalTokensDetails.setConversationTokens(total);
     update();
   }
 
@@ -92,36 +105,50 @@ public class TotalTokensPanel extends JPanel {
   }
 
   public void updateUserPromptTokens(String userPrompt) {
-    tokenDetails.setUserPromptTokens(encodingManager.countTokens(userPrompt));
+    totalTokensDetails.setUserPromptTokens(encodingManager.countTokens(userPrompt));
     update();
   }
 
   public void updateHighlightedTokens(String highlightedText) {
-    tokenDetails.setHighlightedTokens(encodingManager.countTokens(highlightedText));
+    totalTokensDetails.setHighlightedTokens(encodingManager.countTokens(highlightedText));
     update();
   }
 
-  private TokenDetails createTokenDetails(
+  public void updateReferencedFilesTokens(List<CheckedFile> includedFiles) {
+    totalTokensDetails.setReferencedFilesTokens(includedFiles.stream()
+        .mapToInt(file -> encodingManager.countTokens(file.getFileContent()))
+        .sum());
+    update();
+  }
+
+  private TotalTokensDetails createTokenDetails(
       Conversation conversation,
+      List<CheckedFile> includedFiles,
       @Nullable String highlightedText) {
-    var tokenDetails = new TokenDetails(encodingManager);
+    var tokenDetails = new TotalTokensDetails(encodingManager);
     tokenDetails.setConversationTokens(encodingManager.countConversationTokens(conversation));
+    if (includedFiles != null) {
+      tokenDetails.setReferencedFilesTokens(includedFiles.stream()
+          .mapToInt(file -> encodingManager.countTokens(file.getFileContent()))
+          .sum());
+    }
     if (highlightedText != null) {
       tokenDetails.setHighlightedTokens(encodingManager.countTokens(highlightedText));
     }
     return tokenDetails;
   }
 
-  private JBLabel getContextHelpIcon(TokenDetails tokenDetails) {
+  private JBLabel getContextHelpIcon(TotalTokensDetails totalTokensDetails) {
     var iconLabel = new JBLabel(General.ContextHelp);
     iconLabel.addMouseListener(new MouseAdapter() {
       @Override
       public void mouseEntered(MouseEvent e) {
         var html = new LinkedHashMap<>(Map.of(
-            "System Prompt", tokenDetails.getSystemPromptTokens(),
-            "Conversation Tokens", tokenDetails.getConversationTokens(),
-            "Input Tokens", tokenDetails.getUserPromptTokens(),
-            "Highlighted Tokens", tokenDetails.getHighlightedTokens()))
+            "System Prompt", totalTokensDetails.getSystemPromptTokens(),
+            "Conversation Tokens", totalTokensDetails.getConversationTokens(),
+            "Input Tokens", totalTokensDetails.getUserPromptTokens(),
+            "Highlighted Tokens", totalTokensDetails.getHighlightedTokens(),
+            "Referenced Files Tokens", totalTokensDetails.getReferencedFilesTokens()))
             .entrySet().stream()
             .map(entry -> format(
                 "<p style=\"margin: 0;\"><small>%s: <strong>%d</strong></small></p>",
@@ -135,10 +162,10 @@ public class TotalTokensPanel extends JPanel {
   }
 
   private String getLabelHtml(int total) {
-    return format("<html><small>Total Tokens: <strong>%d</strong></small></html>", total);
+    return format("<html><small>Tokens: <strong>%d</strong></small></html>", total);
   }
 
-  private JBLabel getLabel(TokenDetails tokenDetails) {
-    return new JBLabel(getLabelHtml(tokenDetails.getTotal()));
+  private JBLabel getLabel(TotalTokensDetails totalTokensDetails) {
+    return new JBLabel(getLabelHtml(totalTokensDetails.getTotal()));
   }
 }

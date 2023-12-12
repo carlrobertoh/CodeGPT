@@ -7,32 +7,57 @@ import com.intellij.openapi.actionSystem.DefaultCompactActionGroup;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.util.Disposer;
+import com.intellij.util.ui.JBUI;
+import ee.carlrobert.codegpt.actions.IncludeFilesInContextNotifier;
 import ee.carlrobert.codegpt.actions.toolwindow.ClearChatWindowAction;
 import ee.carlrobert.codegpt.actions.toolwindow.CreateNewConversationAction;
 import ee.carlrobert.codegpt.actions.toolwindow.OpenInEditorAction;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
+import ee.carlrobert.codegpt.toolwindow.chat.ui.SelectedFilesNotification;
+import ee.carlrobert.embedding.CheckedFile;
 import java.awt.BorderLayout;
+import java.util.List;
 import javax.swing.JPanel;
 import org.jetbrains.annotations.NotNull;
 
 public class StandardChatToolWindowPanel extends SimpleToolWindowPanel {
 
+  private final SelectedFilesNotification selectedFilesNotification;
+  private StandardChatToolWindowTabbedPane tabbedPane;
+
   public StandardChatToolWindowPanel(
       @NotNull Project project,
       @NotNull Disposable parentDisposable) {
     super(true);
-    init(project, parentDisposable);
+    selectedFilesNotification = new SelectedFilesNotification(project);
+    init(project, selectedFilesNotification, parentDisposable);
+
+    project.getMessageBus()
+        .connect()
+        .subscribe(IncludeFilesInContextNotifier.FILES_INCLUDED_IN_CONTEXT_TOPIC,
+            (IncludeFilesInContextNotifier) this::displaySelectedFilesNotification);
   }
 
-  private void init(Project project, Disposable parentDisposable) {
+  public void displaySelectedFilesNotification(List<CheckedFile> checkedFiles) {
+    selectedFilesNotification.displaySelectedFilesNotification(checkedFiles);
+  }
+
+  public void clearSelectedFilesNotification() {
+    selectedFilesNotification.clearSelectedFilesNotification();
+  }
+
+  private void init(
+      Project project,
+      SelectedFilesNotification selectedFilesNotification,
+      Disposable parentDisposable) {
     var conversation = ConversationsState.getCurrentConversation();
     if (conversation == null) {
       conversation = ConversationService.getInstance().startConversation();
     }
 
     var tabPanel = new StandardChatToolWindowTabPanel(project, conversation);
-    var tabbedPane = createTabbedPane(tabPanel, parentDisposable);
+    tabbedPane = createTabbedPane(tabPanel, parentDisposable);
     Runnable onAddNewTab = () -> {
       tabbedPane.addNewTab(new StandardChatToolWindowTabPanel(
           project,
@@ -46,7 +71,8 @@ public class StandardChatToolWindowPanel extends SimpleToolWindowPanel {
         BorderLayout.LINE_START);
 
     setToolbar(actionToolbarPanel);
-    setContent(tabbedPane);
+    setContent(
+        JBUI.Panels.simplePanel(tabbedPane).addToBottom(selectedFilesNotification));
 
     Disposer.register(parentDisposable, tabPanel);
   }
@@ -73,6 +99,10 @@ public class StandardChatToolWindowPanel extends SimpleToolWindowPanel {
       Disposable parentDisposable) {
     var tabbedPane = new StandardChatToolWindowTabbedPane(parentDisposable);
     tabbedPane.addNewTab(tabPanel);
+    return tabbedPane;
+  }
+
+  public StandardChatToolWindowTabbedPane getChatTabbedPane() {
     return tabbedPane;
   }
 }

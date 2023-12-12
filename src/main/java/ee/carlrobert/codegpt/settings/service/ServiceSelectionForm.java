@@ -20,7 +20,7 @@ import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.YouSettingsState;
-import ee.carlrobert.codegpt.util.UIUtil;
+import ee.carlrobert.codegpt.ui.UIUtil;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import java.util.List;
 import java.util.Map;

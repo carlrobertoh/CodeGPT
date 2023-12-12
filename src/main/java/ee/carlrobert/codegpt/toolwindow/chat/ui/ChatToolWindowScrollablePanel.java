@@ -1,8 +1,7 @@
-package ee.carlrobert.codegpt.toolwindow.chat;
+package ee.carlrobert.codegpt.toolwindow.chat.ui;
 
 import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
 import com.intellij.openapi.roots.ui.componentsList.layout.VerticalStackLayout;
-import ee.carlrobert.codegpt.toolwindow.chat.components.ResponsePanel;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,7 +14,7 @@ public class ChatToolWindowScrollablePanel extends ScrollablePanel {
 
   private final Map<UUID, JPanel> visibleMessagePanels = new HashMap<>();
 
-  ChatToolWindowScrollablePanel() {
+  public ChatToolWindowScrollablePanel() {
     super(new VerticalStackLayout());
   }
 

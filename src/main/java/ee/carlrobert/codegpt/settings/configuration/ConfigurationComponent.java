@@ -24,7 +24,7 @@ import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.actions.editor.EditorActionsUtil;
-import ee.carlrobert.codegpt.util.UIUtil;
+import ee.carlrobert.codegpt.ui.UIUtil;
 import java.awt.Dimension;
 import java.util.Arrays;
 import java.util.LinkedHashMap;

@@ -9,7 +9,7 @@ import ee.carlrobert.codegpt.completions.you.YouApiClient;
 import ee.carlrobert.codegpt.completions.you.YouSubscriptionNotifier;
 import ee.carlrobert.codegpt.completions.you.YouUserManager;
 import ee.carlrobert.codegpt.completions.you.auth.response.YouAuthenticationResponse;
-import ee.carlrobert.codegpt.util.OverlayUtil;
+import ee.carlrobert.codegpt.ui.OverlayUtil;
 import java.io.IOException;
 import okhttp3.Call;
 import okhttp3.Callback;

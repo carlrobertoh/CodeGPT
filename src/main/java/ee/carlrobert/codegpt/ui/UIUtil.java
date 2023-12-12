@@ -1,16 +1,15 @@
-package ee.carlrobert.codegpt.util;
+package ee.carlrobert.codegpt.ui;
 
-import static com.intellij.util.ui.UIUtil.isUnderDarcula;
 import static javax.swing.event.HyperlinkEvent.EventType.ACTIVATED;
 
 import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
-import com.intellij.ui.ColorUtil;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.ScrollPaneFactory;
+import com.intellij.ui.components.JBTextArea;
+import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
-import ee.carlrobert.codegpt.toolwindow.chat.components.SmartScroller;
-import java.awt.Color;
+import ee.carlrobert.codegpt.toolwindow.chat.ui.SmartScroller;
 import java.awt.Dimension;
 import java.net.URISyntaxException;
 import javax.swing.AbstractAction;
@@ -47,6 +46,16 @@ public class UIUtil {
     textPane.setText(text);
     textPane.setOpaque(opaque);
     return textPane;
+  }
+
+  public static JBTextArea createTextArea(String initialValue) {
+    var textArea = new JBTextArea(initialValue);
+    textArea.setRows(3);
+    textArea.setBorder(JBUI.Borders.compound(
+        JBUI.Borders.customLine(JBColor.border()),
+        JBUI.Borders.empty(4)));
+    textArea.setLineWrap(true);
+    return textArea;
   }
 
   public static JButton createIconButton(Icon icon) {
@@ -94,12 +103,6 @@ public class UIUtil {
     textArea.getInputMap().put(KeyStroke.getKeyStroke("shift ENTER"), "insert-break");
     textArea.getInputMap().put(KeyStroke.getKeyStroke("ENTER"), "text-submit");
     textArea.getActionMap().put("text-submit", onSubmit);
-  }
-
-  public static Color getPanelBackgroundColor() {
-    return isUnderDarcula()
-        ? ColorUtil.darker(JBColor.PanelBackground, 1)
-        : JBColor.PanelBackground.brighter();
   }
 }
 
