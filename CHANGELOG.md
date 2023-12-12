@@ -6,6 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.10] - 2023-12-12
+
+### Added
+
+- Configurable commit-message system prompt
+
+### Fixed
+
+- Redundant chat tab creation on provider/model change
+- Azure bas host and path overriding
+
 ## [2.2.9] - 2023-12-04
 
 ### Added
@@ -305,7 +316,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `OPENAI_API_KEY` persistence, key is saved in the OS password safe from now on
 
-[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.9...HEAD
+[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.10...HEAD
+[2.2.10]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.9...v2.2.10
 [2.2.9]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.8...v2.2.9
 [2.2.8]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.7...v2.2.8
 [2.2.7]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.6...v2.2.7
