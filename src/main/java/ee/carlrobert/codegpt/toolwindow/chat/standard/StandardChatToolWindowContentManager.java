@@ -2,7 +2,6 @@ package ee.carlrobert.codegpt.toolwindow.chat.standard;
 
 import static java.util.Objects.requireNonNull;
 
-import com.intellij.icons.AllIcons;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComponentContainer;
@@ -11,6 +10,7 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowAnchor;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.content.Content;
+import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
@@ -30,10 +30,7 @@ public final class StandardChatToolWindowContentManager {
   }
 
   public void sendMessage(Message message) {
-    var toolWindow = getToolWindow();
-    if (toolWindow != null) {
-      toolWindow.show();
-    }
+    getToolWindow().show();
 
     if (ConfigurationState.getInstance().isCreateNewChatOnEachAction()
         || ConversationsState.getCurrentConversation() == null) {
@@ -108,12 +105,15 @@ public final class StandardChatToolWindowContentManager {
 
   public @NotNull ToolWindow getToolWindow() {
     var toolWindowManager = ToolWindowManager.getInstance(project);
-    var toolWindow = ToolWindowManager.getInstance(project).getToolWindow("CodeGPT");
+    var toolWindow = toolWindowManager.getToolWindow("CodeGPT");
     if (toolWindow == null) {
+      // https://intellij-support.jetbrains.com/hc/en-us/community/posts/11533368171026/comments/11538403084562
       return toolWindowManager
-          .registerToolWindow(
-              RegisterToolWindowTask.closable("CodeGPT", () -> "CodeGPT",
-                  AllIcons.Toolwindows.Documentation, ToolWindowAnchor.RIGHT));
+          .registerToolWindow(RegisterToolWindowTask.closable(
+              "CodeGPT",
+              () -> "CodeGPT",
+              Icons.DefaultSmall,
+              ToolWindowAnchor.RIGHT));
     }
     return toolWindow;
   }

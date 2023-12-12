@@ -7,7 +7,9 @@ import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import org.jetbrains.annotations.NotNull;
 
-@State(name = "CodeGPT_IncludedFilesSettings", storages = @Storage("CodeGPT_IncludedFilesSettings.xml"))
+@State(
+    name = "CodeGPT_IncludedFilesSettings",
+    storages = @Storage("CodeGPT_IncludedFilesSettings.xml"))
 public class IncludedFilesSettingsState implements
     PersistentStateComponent<IncludedFilesSettingsState> {
 
