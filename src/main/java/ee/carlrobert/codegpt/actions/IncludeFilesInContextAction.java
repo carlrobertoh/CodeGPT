@@ -20,6 +20,7 @@ import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBTextArea;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
+import com.intellij.util.ui.UI.PanelFactory;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.CodeGPTKeys;
 import ee.carlrobert.codegpt.EncodingManager;
@@ -28,6 +29,7 @@ import ee.carlrobert.codegpt.ui.UIUtil;
 import ee.carlrobert.codegpt.ui.checkbox.FileCheckboxTree;
 import ee.carlrobert.codegpt.ui.checkbox.PsiElementCheckboxTree;
 import ee.carlrobert.codegpt.ui.checkbox.VirtualFileCheckboxTree;
+import ee.carlrobert.codegpt.util.file.FileUtil;
 import ee.carlrobert.embedding.CheckedFile;
 import java.awt.Dimension;
 import java.io.IOException;
@@ -159,10 +161,10 @@ public class IncludeFilesInContextAction extends AnAction {
 
     private void updateText() {
       setText(format(
-          "<html><strong>%d</strong> %s totaling <strong>%d</strong> tokens</html>",
+          "<html><strong>%d</strong> %s totaling <strong>%s</strong> tokens</html>",
           fileCount,
           fileCount == 1 ? "file" : "files",
-          totalTokens));
+          FileUtil.convertLongValue(totalTokens)));
     }
 
     private int calculateTotalTokens(List<CheckedFile> checkedFiles) {
@@ -187,13 +189,21 @@ public class IncludeFilesInContextAction extends AnAction {
     dialogBuilder.setNorthPanel(FormBuilder.createFormBuilder()
         .addLabeledComponent(
             CodeGPTBundle.get("action.includeFilesInContext.dialog.promptTemplate.label"),
-            promptTemplateTextArea,
-            true)
-        .addLabeledComponent(
-            CodeGPTBundle.get("action.includeFilesInContext.dialog.repeatableContext.label"),
-            repeatableContextTextArea,
+            PanelFactory.panel(promptTemplateTextArea).withComment(
+                    "<html><p>The template that will be used to create the final prompt. "
+                        + "The <strong>{REPEATABLE_CONTEXT}</strong> placeholder must be included "
+                        + "to correctly map the file contents.</p></html>")
+                .createPanel(),
             true)
         .addVerticalGap(4)
+        .addLabeledComponent(
+            CodeGPTBundle.get("action.includeFilesInContext.dialog.repeatableContext.label"),
+            PanelFactory.panel(repeatableContextTextArea).withComment(
+                    "<html><p>The context that will be repeated for each included file. "
+                        + "Acceptable placeholders include <strong>{FILE_PATH}</strong> and "
+                        + "<strong>{FILE_CONTENT}</strong>.</p></html>")
+                .createPanel(),
+            true)
         .addComponent(JBUI.Panels.simplePanel()
             .addToRight(getRestoreButton(promptTemplateTextArea, repeatableContextTextArea)))
         .addVerticalGap(16)

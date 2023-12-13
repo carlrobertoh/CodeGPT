@@ -162,6 +162,17 @@ public class FileUtil {
     return new DecimalFormat("#.##").format(fileSize) + " " + units[unitIndex];
   }
 
+  public static String convertLongValue(long value) {
+    if (value >= 1_000_000) {
+      return value / 1_000_000 + "M";
+    }
+    if (value >= 1_000) {
+      return value / 1_000 + "K";
+    }
+
+    return String.valueOf(value);
+  }
+
   private static Optional<Map.Entry<String, String>> findFirstExtension(
       List<LanguageFileExtensionDetails> languageFileExtensionMappings,
       String language) {
