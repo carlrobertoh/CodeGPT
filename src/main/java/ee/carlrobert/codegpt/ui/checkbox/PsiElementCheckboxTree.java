@@ -24,11 +24,16 @@ public class PsiElementCheckboxTree extends FileCheckboxTree {
   }
 
   public List<CheckedFile> getCheckedFiles() {
-    return Arrays.stream(getCheckedNodes(
-            PsiElement.class,
-            node -> Optional.ofNullable(node.getContainingFile())
-                .map(PsiFile::getVirtualFile)
-                .isPresent()))
+    var checkedNodes = getCheckedNodes(
+        PsiElement.class,
+        node -> Optional.ofNullable(node.getContainingFile())
+            .map(PsiFile::getVirtualFile)
+            .isPresent());
+    if (checkedNodes.length > 1000) {
+      throw new RuntimeException("Too many files selected");
+    }
+
+    return Arrays.stream(checkedNodes)
         .map(item -> new CheckedFile(new File(item.getContainingFile().getVirtualFile().getPath())))
         .collect(toList());
   }

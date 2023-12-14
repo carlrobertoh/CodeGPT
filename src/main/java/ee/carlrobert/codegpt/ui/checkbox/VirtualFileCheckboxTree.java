@@ -20,7 +20,12 @@ public class VirtualFileCheckboxTree extends FileCheckboxTree {
   }
 
   public List<CheckedFile> getCheckedFiles() {
-    return Arrays.stream(getCheckedNodes(VirtualFile.class, Objects::nonNull))
+    var checkedNodes = getCheckedNodes(VirtualFile.class, Objects::nonNull);
+    if (checkedNodes.length > 1000) {
+      throw new RuntimeException("Too many files selected");
+    }
+
+    return Arrays.stream(checkedNodes)
         .map(item -> new CheckedFile(new File(item.getPath())))
         .collect(toList());
   }
