@@ -37,6 +37,8 @@
         <toolWindow id="CodeGPT" icon="ee.carlrobert.codegpt.Icons.DefaultSmall" anchor="right"
             factoryClass="ee.carlrobert.codegpt.toolwindow.ProjectToolWindowFactory"/>
         <notificationGroup id="CodeGPT Notification Group" displayType="BALLOON" key="notification.group.name"/>
+
+        <editorFactoryListener implementation="ee.carlrobert.codegpt.codecompletion.InlineCodeCompletionInitializer"/>
     </extensions>
 
     <resource-bundle>messages.codegpt</resource-bundle>
