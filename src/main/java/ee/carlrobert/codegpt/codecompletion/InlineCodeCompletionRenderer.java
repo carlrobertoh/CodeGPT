@@ -1,18 +1,11 @@
 package ee.carlrobert.codegpt.codecompletion;
 
 import com.intellij.openapi.actionSystem.ActionManager;
-import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.actionSystem.KeyboardShortcut;
-import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.editor.Caret;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.EditorCustomElementRenderer;
-import com.intellij.openapi.editor.actionSystem.EditorAction;
-import com.intellij.openapi.editor.actionSystem.EditorActionHandler;
 import com.intellij.openapi.editor.colors.EditorFontType;
-import com.intellij.openapi.editor.event.DocumentEvent;
-import com.intellij.openapi.editor.event.DocumentListener;
-import com.intellij.openapi.editor.event.EditorMouseListener;
+import com.intellij.openapi.editor.event.*;
 import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.WriteCommandAction;
@@ -21,7 +14,9 @@ import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.keymap.Keymap;
 import com.intellij.openapi.keymap.KeymapManager;
 import com.intellij.openapi.util.Key;
+import com.intellij.openapi.util.TextRange;
 import com.intellij.ui.JBColor;
+import ee.carlrobert.codegpt.actions.editor.InsertInlineTextAction;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -30,10 +25,10 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.geom.Rectangle2D;
 
-public class InlineCodeCompletionRenderer implements EditorCustomElementRenderer, DocumentListener, KeyListener, EditorMouseListener {
+public class InlineCodeCompletionRenderer implements EditorCustomElementRenderer, DocumentListener, KeyListener, CaretListener, EditorMouseListener, SelectionListener {
     public static final Key<Inlay<InlineCodeCompletionRenderer>> INLAY_KEY = Key.create("codegpt.inlay");
+    public static final String ACTION_ID = "InsertInlineTextAction";
     public static final String INLINE_TEXT = "testing test";
-    private static final Logger LOG = Logger.getInstance(InlineCodeCompletionInitializer.class);
     private Timer typingTimer;
     private final Editor editor;
 
@@ -42,16 +37,9 @@ public class InlineCodeCompletionRenderer implements EditorCustomElementRenderer
         ((EditorEx) editor).getDocument().addDocumentListener(this);
         editor.getContentComponent().addKeyListener(this);
         editor.addEditorMouseListener(this);
+        editor.getCaretModel().addCaretListener(this);
+        editor.getSelectionModel().addSelectionListener(this);
         initTypingTimer();
-
-
-        ActionManager actionManager = ActionManager.getInstance();
-        String actionId = "InsertInlineTextAction";
-        InsertInlineTextAction insertAction = new InsertInlineTextAction();
-        actionManager.registerAction(actionId, insertAction);
-
-        Keymap keymap = KeymapManager.getInstance().getActiveKeymap();
-        keymap.addShortcut(actionId, new KeyboardShortcut(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), null));
     }
 
     private void initTypingTimer() {
@@ -60,6 +48,13 @@ public class InlineCodeCompletionRenderer implements EditorCustomElementRenderer
                 Inlay<InlineCodeCompletionRenderer> inlay = editor.getUserData(INLAY_KEY);
                 if (inlay == null) {
                     createInlay();
+
+                    ActionManager actionManager = ActionManager.getInstance();
+                    InsertInlineTextAction insertAction = new InsertInlineTextAction(INLAY_KEY, INLINE_TEXT);
+                    actionManager.registerAction(ACTION_ID, insertAction);
+
+                    Keymap keymap = KeymapManager.getInstance().getActiveKeymap();
+                    keymap.addShortcut(ACTION_ID, new KeyboardShortcut(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), null));
                 }
             }
         }));
@@ -85,26 +80,55 @@ public class InlineCodeCompletionRenderer implements EditorCustomElementRenderer
 
     @Override
     public void beforeDocumentChange(@NotNull DocumentEvent event) {
-        resetInlay();
+        resetSuggestion();
     }
 
-    private void resetInlay() {
+    private void resetSuggestion() {
         typingTimer.restart();
+        ActionManager actionManager = ActionManager.getInstance();
+        actionManager.unregisterAction(ACTION_ID);
         removeInlay();
+    }
+
+    private void enableSuggestions() {
+        if (!typingTimer.isRunning()) {
+            typingTimer.start();
+        }
+    }
+
+    private void disableSuggestions() {
+        resetSuggestion();
+        typingTimer.stop();
     }
 
     @Override
     public void keyTyped(KeyEvent e) {
-        resetInlay();
+        resetSuggestion();
     }
 
     @Override
     public void keyPressed(KeyEvent e) {
-        resetInlay();
+        resetSuggestion();
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
+    }
+
+    @Override
+    public void caretPositionChanged(@NotNull CaretEvent event) {
+        resetSuggestion();
+    }
+
+    @Override
+    public void selectionChanged(@NotNull SelectionEvent e) {
+        TextRange range = e.getNewRange();
+        int rangeLength = range.getLength();
+        if (rangeLength != 0) {
+            disableSuggestions();
+        } else {
+            enableSuggestions();
+        }
     }
 
     @Override
@@ -127,37 +151,10 @@ public class InlineCodeCompletionRenderer implements EditorCustomElementRenderer
         g.setColor(customAttributes.getForegroundColor());
 
         // Calculate the ascent to render the text on the same line as the caret
-        FontMetrics metrics = g.getFontMetrics(font);
         int ascent = editor.getAscent();
 
         // Draw the string with the custom attributes
         g.drawString(INLINE_TEXT, (int) targetRegion.getX(), (int) targetRegion.getY() + ascent);
     }
 
-}
-
-class InsertInlineTextAction extends EditorAction {
-    public InsertInlineTextAction(
-    ) {
-        super(new EditorActionHandler() {
-            @Override
-            protected void doExecute(@NotNull Editor editor, Caret caret, DataContext dataContext) {
-                ApplicationManager.getApplication().invokeLater(() -> {
-                    Inlay<InlineCodeCompletionRenderer> inlay = editor.getUserData(InlineCodeCompletionRenderer.INLAY_KEY);
-                    if (inlay != null) {
-                        WriteCommandAction.runWriteCommandAction(editor.getProject(), () -> {
-                            int offset = inlay.getOffset();
-                            editor.getDocument().insertString(offset, InlineCodeCompletionRenderer.INLINE_TEXT);
-                            editor.getCaretModel().moveToOffset(offset + InlineCodeCompletionRenderer.INLINE_TEXT.length());
-                            Inlay<InlineCodeCompletionRenderer> currentInlay = editor.getUserData(InlineCodeCompletionRenderer.INLAY_KEY);
-                            if (currentInlay != null) {
-                                currentInlay.dispose();
-                                editor.putUserData(InlineCodeCompletionRenderer.INLAY_KEY, null);
-                            }
-                        });
-                    }
-                });
-            }
-        });
-    }
 }
