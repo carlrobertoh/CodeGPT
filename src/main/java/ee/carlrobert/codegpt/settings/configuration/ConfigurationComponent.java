@@ -50,6 +50,10 @@ public class ConfigurationComponent {
   private final JTextArea commitMessagePromptTextArea;
   private final IntegerField maxTokensField;
   private final JBTextField temperatureField;
+  private final IntegerField topKField;
+  private final JBTextField topPField;
+  private final JBTextField minPField;
+  private final JBTextField repeatPenaltyField;
 
   public ConfigurationComponent(Disposable parentDisposable, ConfigurationState configuration) {
     table = new JBTable(new DefaultTableModel(
@@ -67,6 +71,19 @@ public class ConfigurationComponent {
 
     temperatureField = new JBTextField(12);
     temperatureField.setText(String.valueOf(configuration.getTemperature()));
+
+    topKField = new IntegerField();
+    topKField.setColumns(12);
+    topKField.setValue(configuration.getTopK());
+    
+    topPField = new JBTextField(12);
+    topPField.setText(String.valueOf(configuration.getTopP()));
+
+    minPField = new JBTextField(12);
+    minPField.setText(String.valueOf(configuration.getMinP()));
+
+    repeatPenaltyField = new JBTextField(12);
+    repeatPenaltyField.setText(String.valueOf(configuration.getRepeatPenalty()));
 
     var temperatureFieldValidator = createInputValidator(parentDisposable, temperatureField);
     temperatureField.getDocument().addDocumentListener(new DocumentListener() {
@@ -131,6 +148,9 @@ public class ConfigurationComponent {
             CodeGPTBundle.get("configurationConfigurable.section.assistant.title")))
         .addComponent(createAssistantConfigurationForm())
         .addComponentFillVertically(new JPanel(), 0)
+        .addComponent(new TitledSeparator(
+            CodeGPTBundle.get("configurationConfigurable.section.assistant.llamacppParams.title")))
+        .addComponent(createLlamaAssistantConfigurationForm())
         .addComponent(new TitledSeparator(
             CodeGPTBundle.get("configurationConfigurable.section.commitMessage.title")))
         .addComponent(createCommitMessageConfigurationForm())
@@ -204,6 +224,34 @@ public class ConfigurationComponent {
         "configurationConfigurable.section.assistant.maxTokensField.label",
         "configurationConfigurable.section.assistant.maxTokensField.comment",
         maxTokensField);
+
+    var form = formBuilder.getPanel();
+    form.setBorder(JBUI.Borders.emptyLeft(16));
+    return form;
+  }
+
+  private JPanel createLlamaAssistantConfigurationForm() {
+    var formBuilder = FormBuilder.createFormBuilder();
+    addAssistantFormLabeledComponent(
+        formBuilder,
+        "configurationConfigurable.section.assistant.topKField.label",
+        "configurationConfigurable.section.assistant.topKField.comment",
+        topKField);
+    addAssistantFormLabeledComponent(
+        formBuilder,
+        "configurationConfigurable.section.assistant.topPField.label",
+        "configurationConfigurable.section.assistant.topPField.comment",
+        topPField);
+    addAssistantFormLabeledComponent(
+        formBuilder,
+        "configurationConfigurable.section.assistant.minPField.label",
+        "configurationConfigurable.section.assistant.minPField.comment",
+        minPField);
+    addAssistantFormLabeledComponent(
+        formBuilder,
+        "configurationConfigurable.section.assistant.repeatPenaltyField.label",
+        "configurationConfigurable.section.assistant.repeatPenaltyField.comment",
+        repeatPenaltyField);
 
     var form = formBuilder.getPanel();
     form.setBorder(JBUI.Borders.emptyLeft(16));
@@ -294,6 +342,38 @@ public class ConfigurationComponent {
 
   public void setMaxTokens(int maxTokens) {
     maxTokensField.setValue(maxTokens);
+  }
+
+  public int getTopK() {
+    return topKField.getValue();
+  }
+
+  public void setTopK(int topK) {
+    topKField.setValue(topK);
+  }
+
+  public double getTopP() {
+    return Double.parseDouble(topPField.getText());
+  }
+
+  public void setTopP(double topP) {
+    topPField.setText(String.valueOf(topP));
+  }
+
+  public double getMinP() {
+    return Double.parseDouble(minPField.getText());
+  }
+
+  public void setMinP(double minP) {
+    minPField.setText(String.valueOf(minP));
+  }
+
+  public double getRepeatPenalty() {
+    return Double.parseDouble(repeatPenaltyField.getText());
+  }
+
+  public void setRepeatPenalty(double repeatPenalty) {
+    repeatPenaltyField.setText(String.valueOf(repeatPenalty));
   }
 
   public boolean isCheckForPluginUpdates() {

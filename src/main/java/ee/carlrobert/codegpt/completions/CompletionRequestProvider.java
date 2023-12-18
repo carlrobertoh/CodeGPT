@@ -109,6 +109,10 @@ public class CompletionRequestProvider {
     return new LlamaCompletionRequest.Builder(prompt)
         .setN_predict(configuration.getMaxTokens())
         .setTemperature(configuration.getTemperature())
+        .setTop_k(configuration.getTopK())
+        .setTop_p(configuration.getTopP())
+        .setMin_p(configuration.getMinP())
+        .setRepeat_penalty(configuration.getRepeatPenalty())
         .build();
   }
 
