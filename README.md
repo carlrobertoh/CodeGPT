@@ -164,7 +164,7 @@ See the [open issues][open-issues] for a full list of proposed features (and kno
 
 ## License
 
-MIT © [Carl-Robert Linnupuu][portfolio]
+Apache 2.0 © [Carl-Robert Linnupuu][portfolio]
 
 If you found this project interesting, kindly rate it on the marketplace and don't forget to give it a star. Thanks again!
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
