@@ -1,8 +1,8 @@
 package ee.carlrobert.codegpt.actions.editor;
 
-import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
 import org.jetbrains.annotations.NotNull;
@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 public class AskAction extends AnAction {
 
   public AskAction() {
-    super("Ask CodeGPT", "Chat with CodeGPT", AllIcons.Actions.Find);
+    super("New Chat", "Chat with CodeGPT", Icons.Sparkle);
     EditorActionsUtil.registerOrReplaceAction(this);
   }
 
@@ -24,7 +24,8 @@ public class AskAction extends AnAction {
     var project = event.getProject();
     if (project != null) {
       ConversationsState.getInstance().setCurrentConversation(null);
-      var tabPanel = project.getService(StandardChatToolWindowContentManager.class).createNewTabPanel();
+      var tabPanel =
+          project.getService(StandardChatToolWindowContentManager.class).createNewTabPanel();
       if (tabPanel != null) {
         tabPanel.displayLandingView();
       }

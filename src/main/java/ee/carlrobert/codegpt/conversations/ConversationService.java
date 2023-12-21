@@ -5,7 +5,9 @@ import static java.util.stream.Collectors.toList;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
 import ee.carlrobert.codegpt.conversations.message.Message;
+import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
+import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import java.time.LocalDateTime;
@@ -42,15 +44,9 @@ public final class ConversationService {
     var conversation = new Conversation();
     conversation.setId(UUID.randomUUID());
     conversation.setClientCode(clientCode);
-    if (settings.isUseYouService()) {
-      conversation.setModel("YouCode");
-    } else if (settings.isUseAzureService()) {
-      conversation.setModel(AzureSettingsState.getInstance().getModel());
-    } else {
-      conversation.setModel(OpenAISettingsState.getInstance().getModel());
-    }
     conversation.setCreatedOn(LocalDateTime.now());
     conversation.setUpdatedOn(LocalDateTime.now());
+    conversation.setModel(getModelForSelectedService(settings.getSelectedService()));
     return conversation;
   }
 
@@ -64,9 +60,13 @@ public final class ConversationService {
     conversationsMapping.put(conversation.getClientCode(), conversations);
   }
 
-  public void saveMessage(String response, Message message, Conversation conversation, boolean isRetry) {
+  public void saveMessage(
+      String response,
+      Message message,
+      Conversation conversation,
+      boolean retry) {
     var conversationMessages = conversation.getMessages();
-    if (isRetry && !conversationMessages.isEmpty()) {
+    if (retry && !conversationMessages.isEmpty()) {
       var messageToBeSaved = conversationMessages.stream()
           .filter(item -> item.getId().equals(message.getId()))
           .findFirst().orElseThrow();
@@ -114,19 +114,9 @@ public final class ConversationService {
     conversationState.setCurrentConversation(conversation);
   }
 
-  private String getClientCode() {
-    var settings = SettingsState.getInstance();
-    if (settings.isUseOpenAIService()) {
-      return "chat.completion";
-    }
-    if (settings.isUseAzureService()) {
-      return "azure.chat.completion";
-    }
-    return "you.chat.completion";
-  }
-
   public Conversation startConversation() {
-    var conversation = createConversation(getClientCode());
+    var completionCode = SettingsState.getInstance().getSelectedService().getCompletionCode();
+    var conversation = createConversation(completionCode);
     conversationState.setCurrentConversation(conversation);
     addConversation(conversation);
     return conversation;
@@ -135,32 +125,6 @@ public final class ConversationService {
   public void clearAll() {
     conversationState.getConversationsMapping().clear();
     conversationState.setCurrentConversation(null);
-  }
-
-  public Optional<Conversation> getPreviousConversation() {
-    return tryGetNextOrPreviousConversation(true);
-  }
-
-  public Optional<Conversation> getNextConversation() {
-    return tryGetNextOrPreviousConversation(false);
-  }
-
-  private Optional<Conversation> tryGetNextOrPreviousConversation(boolean isPrevious) {
-    var currentConversation = ConversationsState.getCurrentConversation();
-    if (currentConversation != null) {
-      var sortedConversations = getSortedConversations();
-      for (int i = 0; i < sortedConversations.size(); i++) {
-        var conversation = sortedConversations.get(i);
-        if (conversation != null && conversation.getId().equals(currentConversation.getId())) {
-          // higher index indicates older conversation
-          var previousIndex = isPrevious ? i + 1 : i - 1;
-          if (isPrevious ? previousIndex < sortedConversations.size() : previousIndex != -1) {
-            return Optional.of(sortedConversations.get(previousIndex));
-          }
-        }
-      }
-    }
-    return Optional.empty();
   }
 
   public void deleteConversation(Conversation conversation) {
@@ -194,5 +158,49 @@ public final class ConversationService {
   public void discardTokenLimits(Conversation conversation) {
     conversation.discardTokenLimits();
     saveConversation(conversation);
+  }
+
+  public Optional<Conversation> getPreviousConversation() {
+    return tryGetNextOrPreviousConversation(true);
+  }
+
+  public Optional<Conversation> getNextConversation() {
+    return tryGetNextOrPreviousConversation(false);
+  }
+
+  private Optional<Conversation> tryGetNextOrPreviousConversation(boolean isPrevious) {
+    var currentConversation = ConversationsState.getCurrentConversation();
+    if (currentConversation != null) {
+      var sortedConversations = getSortedConversations();
+      for (int i = 0; i < sortedConversations.size(); i++) {
+        var conversation = sortedConversations.get(i);
+        if (conversation != null && conversation.getId().equals(currentConversation.getId())) {
+          // higher index indicates older conversation
+          var previousIndex = isPrevious ? i + 1 : i - 1;
+          if (isPrevious ? previousIndex < sortedConversations.size() : previousIndex != -1) {
+            return Optional.of(sortedConversations.get(previousIndex));
+          }
+        }
+      }
+    }
+    return Optional.empty();
+  }
+
+  private static String getModelForSelectedService(ServiceType serviceType) {
+    switch (serviceType) {
+      case OPENAI:
+        return OpenAISettingsState.getInstance().getModel();
+      case AZURE:
+        return AzureSettingsState.getInstance().getDeploymentId();
+      case YOU:
+        return "YouCode";
+      case LLAMA_CPP:
+        var llamaSettings = LlamaSettingsState.getInstance();
+        return llamaSettings.isUseCustomModel()
+            ? llamaSettings.getCustomLlamaModelPath()
+            : llamaSettings.getHuggingFaceModel().getCode();
+      default:
+        throw new RuntimeException("Could not find corresponding service mapping");
+    }
   }
 }

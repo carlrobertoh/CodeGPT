@@ -1,11 +1,26 @@
 package ee.carlrobert.codegpt.toolwindow.chat.standard;
 
 enum EditorAction {
-  FIND_BUGS("Find Bugs", "Find bugs in the following code", "Find bugs and output code with bugs fixed in the following code: {{selectedCode}}"),
-  WRITE_TESTS("Write Tests", "Write Tests for the following code", "Write Tests for the following code: {{selectedCode}}"),
-  EXPLAIN("Explain", "Explain the following code", "Explain the following code: {{selectedCode}}"),
-  REFACTOR("Refactor", "Refactor the following code", "Refactor the following code: {{selectedCode}}"),
-  OPTIMIZE("Optimize", "Optimize the following code", "Optimize the following code: {{selectedCode}}");
+  FIND_BUGS(
+      "Find Bugs",
+      "Find bugs in the selected code",
+      "Find bugs and output code with bugs fixed in the selected code: {{selectedCode}}"),
+  WRITE_TESTS(
+      "Write Tests",
+      "Write unit tests for the selected code",
+      "Write unit tests for the selected code: {{selectedCode}}"),
+  EXPLAIN(
+      "Explain",
+      "Explain the selected code",
+      "Explain the selected code: {{selectedCode}}"),
+  REFACTOR(
+      "Refactor",
+      "Refactor the selected code",
+      "Refactor the selected code: {{selectedCode}}"),
+  OPTIMIZE(
+      "Optimize",
+      "Optimize the selected code",
+      "Optimize the selected code: {{selectedCode}}");
 
   private final String label;
   private final String userMessage;

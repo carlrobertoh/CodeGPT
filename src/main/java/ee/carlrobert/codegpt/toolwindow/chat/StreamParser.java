@@ -11,6 +11,7 @@ public class StreamParser {
   private boolean isProcessingCode;
 
   public List<StreamParseResponse> parse(String message) {
+    message = message.replace("\r", "");
     messageBuilder.append(message);
 
     Pattern pattern = Pattern.compile(CODE_BLOCK_STARTING_REGEX);
@@ -39,11 +40,34 @@ public class StreamParser {
           new StreamParseResponse(StreamResponseType.TEXT, messageBuilder.toString()));
     }
 
-    return List.of(new StreamParseResponse(isProcessingCode ? StreamResponseType.CODE : StreamResponseType.TEXT, messageBuilder.toString()));
+    return List.of(new StreamParseResponse(
+        isProcessingCode
+            ? StreamResponseType.CODE
+            : StreamResponseType.TEXT,
+        messageBuilder.toString()));
   }
 
   public void clear() {
     messageBuilder.setLength(0);
     isProcessingCode = false;
+  }
+
+  public static class StreamParseResponse {
+
+    private final StreamResponseType type;
+    private final String response;
+
+    public StreamParseResponse(StreamResponseType type, String response) {
+      this.type = type;
+      this.response = response;
+    }
+
+    public StreamResponseType getType() {
+      return type;
+    }
+
+    public String getResponse() {
+      return response;
+    }
   }
 }

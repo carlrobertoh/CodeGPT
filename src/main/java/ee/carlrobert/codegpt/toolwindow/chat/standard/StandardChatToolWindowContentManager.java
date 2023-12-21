@@ -4,16 +4,21 @@ import static java.util.Objects.requireNonNull;
 
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.ComponentContainer;
+import com.intellij.openapi.wm.RegisterToolWindowTask;
 import com.intellij.openapi.wm.ToolWindow;
+import com.intellij.openapi.wm.ToolWindowAnchor;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.content.Content;
+import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.conversations.Conversation;
+import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
-import ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowTabPanel;
 import java.util.Arrays;
 import java.util.Optional;
+import org.jetbrains.annotations.NotNull;
 
 @Service(Service.Level.PROJECT)
 public final class StandardChatToolWindowContentManager {
@@ -25,48 +30,41 @@ public final class StandardChatToolWindowContentManager {
   }
 
   public void sendMessage(Message message) {
-    var chatTabbedPane = tryFindChatTabbedPane();
-    if (chatTabbedPane.isPresent()) {
-      var activeTabPanel = chatTabbedPane.get().tryFindActiveTabPanel();
-      if (activeTabPanel.isPresent()) {
-        sendMessage(activeTabPanel.get(), message);
-        return;
-      }
+    getToolWindow().show();
+
+    if (ConfigurationState.getInstance().isCreateNewChatOnEachAction()
+        || ConversationsState.getCurrentConversation() == null) {
+      createNewTabPanel().sendMessage(message);
+      return;
     }
-    sendMessage(createNewTabPanel(), message);
+
+    tryFindChatTabbedPane()
+        .map(tabbedPane -> tabbedPane.tryFindActiveTabPanel().orElseGet(this::createNewTabPanel))
+        .orElseGet(this::createNewTabPanel)
+        .sendMessage(message);
   }
 
-  public void sendMessage(ChatToolWindowTabPanel toolWindowTabPanel, Message message) {
-    var toolWindow = getToolWindow();
-    if (toolWindow != null) {
-      toolWindow.show();
-    }
-
-    if (ConfigurationState.getInstance().isCreateNewChatOnEachAction() || ConversationsState.getCurrentConversation() == null) {
-      toolWindowTabPanel.startNewConversation(message);
-    } else {
-      toolWindowTabPanel.sendMessage(message);
-    }
-  }
-
-  public void displayConversation(Conversation conversation) {
+  public void displayConversation(@NotNull Conversation conversation) {
     displayChatTab();
     tryFindChatTabbedPane()
-        .ifPresent(tabbedPane -> tabbedPane.tryFindActiveConversationTitle(conversation.getId())
+        .ifPresent(tabbedPane -> tabbedPane.tryFindTabTitle(conversation.getId())
             .ifPresentOrElse(
                 title -> tabbedPane.setSelectedIndex(tabbedPane.indexOfTab(title)),
-                () -> tabbedPane.addNewTab(new StandardChatToolWindowTabPanel(project, conversation))));
+                () -> tabbedPane.addNewTab(
+                    new StandardChatToolWindowTabPanel(project, conversation))));
   }
 
   public StandardChatToolWindowTabPanel createNewTabPanel() {
     displayChatTab();
-    var tabbedPane = tryFindChatTabbedPane();
-    if (tabbedPane.isPresent()) {
-      var panel = new StandardChatToolWindowTabPanel(project);
-      tabbedPane.get().addNewTab(panel);
-      return panel;
-    }
-    return null;
+    return tryFindChatTabbedPane()
+        .map(item -> {
+          var panel = new StandardChatToolWindowTabPanel(
+              project,
+              ConversationService.getInstance().startConversation());
+          item.addNewTab(panel);
+          return panel;
+        })
+        .orElseThrow();
   }
 
   public void displayChatTab() {
@@ -74,37 +72,53 @@ public final class StandardChatToolWindowContentManager {
     toolWindow.show();
 
     var contentManager = toolWindow.getContentManager();
-    tryFindChatTabContent().ifPresentOrElse(
+    tryFindFirstChatTabContent().ifPresentOrElse(
         contentManager::setSelectedContent,
         () -> contentManager.setSelectedContent(requireNonNull(contentManager.getContent(0)))
     );
   }
 
   public Optional<StandardChatToolWindowTabbedPane> tryFindChatTabbedPane() {
-    var chatTabContent = tryFindChatTabContent();
+    var chatTabContent = tryFindFirstChatTabContent();
     if (chatTabContent.isPresent()) {
-      var tabbedPane = Arrays.stream(chatTabContent.get().getComponent().getComponents())
-          .filter(component -> component instanceof StandardChatToolWindowTabbedPane)
-          .findFirst();
-      if (tabbedPane.isPresent()) {
-        return Optional.of((StandardChatToolWindowTabbedPane) tabbedPane.get());
-      }
+      var chatToolWindowPanel = (StandardChatToolWindowPanel) chatTabContent.get().getComponent();
+      return Optional.of(chatToolWindowPanel.getChatTabbedPane());
     }
     return Optional.empty();
   }
 
-  public void resetActiveTab() {
+  public Optional<StandardChatToolWindowPanel> tryFindChatToolWindowPanel() {
+    return tryFindFirstChatTabContent()
+        .map(ComponentContainer::getComponent)
+        .filter(component -> component instanceof StandardChatToolWindowPanel)
+        .map(component -> (StandardChatToolWindowPanel) component);
+  }
+
+  public void resetAll() {
     tryFindChatTabbedPane().ifPresent(tabbedPane -> {
       tabbedPane.clearAll();
-      tabbedPane.addNewTab(new StandardChatToolWindowTabPanel(project));
+      tabbedPane.addNewTab(new StandardChatToolWindowTabPanel(
+          project,
+          ConversationService.getInstance().startConversation()));
     });
   }
 
-  public ToolWindow getToolWindow() {
-    return requireNonNull(ToolWindowManager.getInstance(project).getToolWindow("CodeGPT"));
+  public @NotNull ToolWindow getToolWindow() {
+    var toolWindowManager = ToolWindowManager.getInstance(project);
+    var toolWindow = toolWindowManager.getToolWindow("CodeGPT");
+    if (toolWindow == null) {
+      // https://intellij-support.jetbrains.com/hc/en-us/community/posts/11533368171026/comments/11538403084562
+      return toolWindowManager
+          .registerToolWindow(RegisterToolWindowTask.closable(
+              "CodeGPT",
+              () -> "CodeGPT",
+              Icons.DefaultSmall,
+              ToolWindowAnchor.RIGHT));
+    }
+    return toolWindow;
   }
 
-  private Optional<Content> tryFindChatTabContent() {
+  private Optional<Content> tryFindFirstChatTabContent() {
     return Arrays.stream(getToolWindow().getContentManager().getContents())
         .filter(content -> "Chat".equals(content.getTabName()))
         .findFirst();

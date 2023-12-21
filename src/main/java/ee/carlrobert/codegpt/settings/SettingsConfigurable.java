@@ -8,12 +8,13 @@ import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
+import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.settings.state.YouSettingsState;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
-import ee.carlrobert.codegpt.util.ApplicationUtils;
+import ee.carlrobert.codegpt.util.ApplicationUtil;
 import javax.swing.JComponent;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
@@ -49,46 +50,51 @@ public class SettingsConfigurable implements Configurable {
     var settings = SettingsState.getInstance();
     var openAISettings = OpenAISettingsState.getInstance();
     var azureSettings = AzureSettingsState.getInstance();
+    var llamaSettings = LlamaSettingsState.getInstance();
 
     var serviceSelectionForm = settingsComponent.getServiceSelectionForm();
-    return !settingsComponent.getDisplayName().equals(settings.getDisplayName()) ||
-        isServiceChanged(serviceSelectionForm, settings) ||
-        openAISettings.isModified(serviceSelectionForm) ||
-        azureSettings.isModified(serviceSelectionForm) ||
-        serviceSelectionForm.isDisplayWebSearchResults() !=
-            YouSettingsState.getInstance().isDisplayWebSearchResults();
+    return !settingsComponent.getDisplayName().equals(settings.getDisplayName())
+        || isServiceChanged(settings)
+        || openAISettings.isModified(serviceSelectionForm)
+        || azureSettings.isModified(serviceSelectionForm)
+        || serviceSelectionForm.isDisplayWebSearchResults()
+        != YouSettingsState.getInstance().isDisplayWebSearchResults()
+        || llamaSettings.isModified(serviceSelectionForm);
   }
 
   @Override
   public void apply() {
     var serviceSelectionForm = settingsComponent.getServiceSelectionForm();
-    var settings = SettingsState.getInstance();
-    var openAISettings = OpenAISettingsState.getInstance();
-    var azureSettings = AzureSettingsState.getInstance();
-    var serviceChanged = isServiceChanged(serviceSelectionForm, settings);
-    var modelChanged = openAISettings.getModel().equals(serviceSelectionForm.getOpenAIModel()) ||
-        azureSettings.getModel().equals(serviceSelectionForm.getAzureModel());
+
+    var prevKey = OpenAICredentialsManager.getInstance().getApiKey();
+    if (prevKey != null && !prevKey.equals(serviceSelectionForm.getOpenAIApiKey())) {
+      OpenAISettingsState.getInstance().setOpenAIQuotaExceeded(false);
+    }
 
     OpenAICredentialsManager.getInstance().setApiKey(serviceSelectionForm.getOpenAIApiKey());
     AzureCredentialsManager.getInstance().setApiKey(serviceSelectionForm.getAzureOpenAIApiKey());
     AzureCredentialsManager.getInstance()
         .setAzureActiveDirectoryToken(serviceSelectionForm.getAzureActiveDirectoryToken());
 
+    var settings = SettingsState.getInstance();
     settings.setDisplayName(settingsComponent.getDisplayName());
-    settings.setUseOpenAIService(serviceSelectionForm.isOpenAIServiceSelected());
-    settings.setUseAzureService(serviceSelectionForm.isAzureServiceSelected());
-    settings.setUseYouService(serviceSelectionForm.isYouServiceSelected());
+    settings.setSelectedService(settingsComponent.getSelectedService());
+
+    var azureSettings = AzureSettingsState.getInstance();
+    var openAISettings = OpenAISettingsState.getInstance();
+    openAISettings.apply(serviceSelectionForm);
+    azureSettings.apply(serviceSelectionForm);
+    LlamaSettingsState.getInstance().apply(serviceSelectionForm);
     YouSettingsState.getInstance()
         .setDisplayWebSearchResults(serviceSelectionForm.isDisplayWebSearchResults());
 
-    openAISettings.apply(serviceSelectionForm);
-    azureSettings.apply(serviceSelectionForm);
-
+    var serviceChanged = isServiceChanged(settings);
+    var modelChanged = !openAISettings.getModel().equals(serviceSelectionForm.getOpenAIModel());
     if (serviceChanged || modelChanged) {
       resetActiveTab();
       if (serviceChanged) {
         TelemetryAction.SETTINGS_CHANGED.createActionMessage()
-            .property("service", getServiceCode(serviceSelectionForm))
+            .property("service", settingsComponent.getSelectedService().getCode().toLowerCase())
             .send();
       }
     }
@@ -97,19 +103,15 @@ public class SettingsConfigurable implements Configurable {
   @Override
   public void reset() {
     var settings = SettingsState.getInstance();
-    var openAISettings = OpenAISettingsState.getInstance();
-    var azureSettings = AzureSettingsState.getInstance();
     var serviceSelectionForm = settingsComponent.getServiceSelectionForm();
 
-    settingsComponent.setEmail(settings.getEmail());
+    // settingsComponent.setEmail(settings.getEmail());
     settingsComponent.setDisplayName(settings.getDisplayName());
+    settingsComponent.setSelectedService(settings.getSelectedService());
 
-    serviceSelectionForm.setOpenAIServiceSelected(settings.isUseOpenAIService());
-    serviceSelectionForm.setAzureServiceSelected(settings.isUseAzureService());
-    serviceSelectionForm.setYouServiceSelected(settings.isUseYouService());
-
-    openAISettings.reset(serviceSelectionForm);
-    azureSettings.reset(serviceSelectionForm);
+    OpenAISettingsState.getInstance().reset(serviceSelectionForm);
+    AzureSettingsState.getInstance().reset(serviceSelectionForm);
+    LlamaSettingsState.getInstance().reset(serviceSelectionForm);
 
     serviceSelectionForm.setDisplayWebSearchResults(
         YouSettingsState.getInstance().isDisplayWebSearchResults());
@@ -123,34 +125,17 @@ public class SettingsConfigurable implements Configurable {
     settingsComponent = null;
   }
 
-  private boolean isServiceChanged(
-      ServiceSelectionForm serviceSelectionForm,
-      SettingsState settings) {
-    return serviceSelectionForm.isOpenAIServiceSelected() != settings.isUseOpenAIService() ||
-        serviceSelectionForm.isAzureServiceSelected() != settings.isUseAzureService() ||
-        serviceSelectionForm.isYouServiceSelected() != settings.isUseYouService();
+  private boolean isServiceChanged(SettingsState settings) {
+    return settingsComponent.getSelectedService() != settings.getSelectedService();
   }
 
   private void resetActiveTab() {
     ConversationsState.getInstance().setCurrentConversation(null);
-    var project = ApplicationUtils.findCurrentProject();
+    var project = ApplicationUtil.findCurrentProject();
     if (project == null) {
       throw new RuntimeException("Could not find current project.");
     }
 
-    project.getService(StandardChatToolWindowContentManager.class).resetActiveTab();
-  }
-
-  private String getServiceCode(ServiceSelectionForm serviceSelectionForm) {
-    if (serviceSelectionForm.isOpenAIServiceSelected()) {
-      return "openai";
-    }
-    if (serviceSelectionForm.isAzureServiceSelected()) {
-      return "azure";
-    }
-    if (serviceSelectionForm.isYouServiceSelected()) {
-      return "you";
-    }
-    return null;
+    project.getService(StandardChatToolWindowContentManager.class).resetAll();
   }
 }

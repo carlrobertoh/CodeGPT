@@ -8,6 +8,7 @@ import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.project.Project;
 import java.io.File;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import org.jetbrains.annotations.NotNull;
 
 public final class CodeGPTPlugin {
@@ -15,6 +16,10 @@ public final class CodeGPTPlugin {
   public static final PluginId CODEGPT_ID = PluginId.getId("ee.carlrobert.chatgpt");
 
   private CodeGPTPlugin() {
+  }
+
+  public static @NotNull String getVersion() {
+    return requireNonNull(PluginManagerCore.getPlugin(CODEGPT_ID)).getVersion();
   }
 
   public static @NotNull Path getPluginBasePath() {
@@ -27,6 +32,14 @@ public final class CodeGPTPlugin {
 
   public static @NotNull String getIndexStorePath() {
     return getPluginOptionsPath() + File.separator + "indexes";
+  }
+
+  public static @NotNull String getLlamaSourcePath() {
+    return getPluginBasePath() + File.separator + "llama.cpp";
+  }
+
+  public static @NotNull String getLlamaModelsPath() {
+    return Paths.get(System.getProperty("user.home"), ".codegpt/models/gguf").toString();
   }
 
   public static @NotNull String getProjectIndexStorePath(@NotNull Project project) {

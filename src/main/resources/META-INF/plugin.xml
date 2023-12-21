@@ -5,7 +5,13 @@
     <depends>com.intellij.modules.platform</depends>
     <depends optional="true" config-file="plugin-java.xml">com.intellij.modules.java</depends>
 
+    <projectListeners>
+        <listener topic="com.intellij.codeInsight.lookup.LookupManagerListener"
+                  class="ee.carlrobert.codegpt.completions.MethodNameLookupListener"/>
+    </projectListeners>
+
     <extensions defaultExtensionNs="com.intellij">
+        <postStartupActivity implementation="ee.carlrobert.codegpt.CodeGPTUpdateStartupActivity"/>
         <postStartupActivity implementation="ee.carlrobert.codegpt.PluginStartupActivity"/>
         <applicationConfigurable id="settings.codegpt" parentId="tools" displayName="CodeGPT"
             instance="ee.carlrobert.codegpt.settings.SettingsConfigurable"/>
@@ -24,10 +30,12 @@
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.AzureSettingsState"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.OpenAISettingsState"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.YouSettingsState"/>
+        <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.LlamaSettingsState"/>
+        <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.IncludedFilesSettingsState"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.configuration.ConfigurationState"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.advanced.AdvancedSettingsState"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.conversations.ConversationsState"/>
-        <toolWindow id="CodeGPT" icon="ee.carlrobert.codegpt.Icons.DefaultSmallIcon" anchor="right"
+        <toolWindow id="CodeGPT" icon="ee.carlrobert.codegpt.Icons.DefaultSmall" anchor="right"
             factoryClass="ee.carlrobert.codegpt.toolwindow.ProjectToolWindowFactory"/>
         <notificationGroup id="CodeGPT Notification Group" displayType="BALLOON" key="notification.group.name"/>
     </extensions>
@@ -40,10 +48,32 @@
                 text="CodeGPT"
                 class="com.intellij.openapi.actionSystem.DefaultActionGroup"
                 popup="true"
-                icon="ee.carlrobert.codegpt.Icons.DefaultSmallIcon">
+                icon="ee.carlrobert.codegpt.Icons.DefaultSmall">
             </group>
             <add-to-group group-id="EditorPopupMenu1" anchor="first"/>
             <separator/>
+        </group>
+        <group id="CodeGPT.ProjectViewPopupMenuRootGroup">
+            <group id="CodeGPT.ProjectViewPopupMenuGroup"
+              text="CodeGPT"
+              class="com.intellij.openapi.actionSystem.DefaultActionGroup"
+              popup="true"
+              icon="ee.carlrobert.codegpt.Icons.DefaultSmall">
+                <action
+                  id="CodeGPT.IncludeFilesInContextAction"
+                  class="ee.carlrobert.codegpt.actions.IncludeFilesInContextAction" />
+            </group>
+            <add-to-group
+              group-id="ProjectViewPopupMenu"
+              relative-to-action="ProjectViewPopupMenuRefactoringGroup"
+              anchor="before"/>
+            <separator/>
+        </group>
+        <group id="CodeGPT.GenerateGitCommitMessageGroup">
+            <add-to-group group-id="Vcs.MessageActionGroup" anchor="first"/>
+            <action
+              id="CodeGPT.GenerateGitCommitMessage"
+              class="ee.carlrobert.codegpt.actions.GenerateGitCommitMessageAction" />
         </group>
     </actions>
 </idea-plugin>

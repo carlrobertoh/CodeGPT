@@ -1,51 +1,56 @@
 package ee.carlrobert.codegpt.completions.you;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.Map;
-import okhttp3.Callback;
+import ee.carlrobert.codegpt.completions.you.auth.response.YouAuthenticationResponse;
+import java.io.IOException;
+import java.util.List;
 import okhttp3.Headers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.RequestBody;
+import org.jetbrains.annotations.Nullable;
 
 @Service
 public final class YouApiClient {
 
-  private static final String API_BASE_URL = "https://web.stytch.com/sdk";
-  private static final String publicToken = "public-token-live-507a52ad-7e69-496b-aee0-1c9863c7c819";
+  private static final String API_BASE_URL = "https://you.com/api";
 
   public static YouApiClient getInstance() {
     return ApplicationManager.getApplication().getService(YouApiClient.class);
   }
 
-  public void authenticate(String email, String password, Callback callback) {
-    try {
-      new OkHttpClient()
-          .newCall(new Request.Builder()
-              .url(API_BASE_URL + "/v1/passwords/authenticate")
-              .headers(Headers.of(
-                  "content-type", "application/json",
-                  "authority", "web.stytch.com",
-                  "authorization", "Basic " + Base64.getEncoder().encodeToString((publicToken + ":" + publicToken).getBytes()),
-                  "x-sdk-client", "eyJldmVudF9pZCI6ImV2ZW50LWlkLWY5YmU4YWU5LWE3MjctNGFlYy1hNzY0LTk4NDg1NDFkZjcwYSIsImFwcF9zZXNzaW9uX2lkIjoiYXBwLXNlc3Npb24taWQtYjY1NzcwZjMtMWFkMy00YjlhLWFjYzctMzJjNWQyMGMxNGU0IiwicGVyc2lzdGVudF9pZCI6InBlcnNpc3RlbnQtaWQtYzY0M2M0YTMtZDg5MC00ZGJkLTk3YjQtMjY0MmFlODdkMTZhIiwiY2xpZW50X3NlbnRfYXQiOiIyMDIzLTA5LTAxVDIyOjMwOjU1LjIzNFoiLCJ0aW1lem9uZSI6IkV1cm9wZS9UYWxsaW5uIiwiYXBwIjp7ImlkZW50aWZpZXIiOiJ5b3UuY29tIn0sInNkayI6eyJpZGVudGlmaWVyIjoiU3R5dGNoLmpzIEphdmFzY3JpcHQgU0RLIC0gWU9VLkNPTSBERUJVRyBCVUlMRCIsInZlcnNpb24iOiI0LjAuMCJ9fQ==",
-                  "x-sdk-parent-host", "https://you.com"
-              ))
-              .post(RequestBody.create(new ObjectMapper()
-                  .writerWithDefaultPrettyPrinter()
-                  .writeValueAsString(Map.of(
-                      "email", email,
-                      "password", password,
-                      "session_duration_minutes", 129_600))
-                  .getBytes(StandardCharsets.UTF_8)))
-              .build())
-          .enqueue(callback);
-    } catch (JsonProcessingException e) {
-      throw new RuntimeException("Could not process request", e);
+  public @Nullable YouSubscription getSubscription(YouAuthenticationResponse auth) {
+    var sessionId = auth.getData().getSession().getSessionId();
+    var sessionJwt = auth.getData().getSessionJwt();
+    var request = new Request.Builder()
+        .url(API_BASE_URL + "/payments/orders/subscriptions/current")
+        .header("Accept", "application/json")
+        .header("Cache-Control", "no-cache")
+        .header("User-Agent", "youide CodeGPT")
+        .header("Cookie", (
+            "stytch_session=" + sessionId + "; "
+                + "ydc_stytch_session=" + sessionId + "; "
+                + "stytch_session_jwt=" + sessionJwt + "; "
+                + "ydc_stytch_session_jwt=" + sessionJwt + "; "))
+        .get()
+        .build();
+
+    try (var response = new OkHttpClient().newCall(request).execute()) {
+      var body = response.body();
+      if (body == null || !response.isSuccessful()) {
+        return null;
+      }
+      List<YouSubscription> subscriptions =
+          new ObjectMapper().readValue(body.string(), new TypeReference<>() {
+          });
+      if (subscriptions == null || subscriptions.isEmpty()) {
+        return null;
+      }
+      return subscriptions.get(0);
+    } catch (IOException ex) {
+      throw new RuntimeException("Could not get You.com subscription", ex);
     }
   }
 }

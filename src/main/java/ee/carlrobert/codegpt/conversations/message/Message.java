@@ -2,7 +2,7 @@ package ee.carlrobert.codegpt.conversations.message;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import ee.carlrobert.codegpt.completions.you.YouSerpResult;
+import ee.carlrobert.llm.client.you.completion.YouSerpResult;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -10,10 +10,11 @@ import java.util.UUID;
 public class Message {
 
   private final UUID id;
-  private final String prompt;
+  private String prompt;
   private String response;
   private String userMessage;
   private List<YouSerpResult> serpResults;
+  private List<String> referencedFilePaths;
 
   public Message(String prompt, String response) {
     this(prompt);
@@ -32,6 +33,10 @@ public class Message {
 
   public String getPrompt() {
     return prompt;
+  }
+
+  public void setPrompt(String prompt) {
+    this.prompt = prompt;
   }
 
   public String getResponse() {
@@ -56,6 +61,14 @@ public class Message {
 
   public void setSerpResults(List<YouSerpResult> serpResults) {
     this.serpResults = serpResults;
+  }
+
+  public List<String> getReferencedFilePaths() {
+    return referencedFilePaths;
+  }
+
+  public void setReferencedFilePaths(List<String> referencedFilePaths) {
+    this.referencedFilePaths = referencedFilePaths;
   }
 
   @Override

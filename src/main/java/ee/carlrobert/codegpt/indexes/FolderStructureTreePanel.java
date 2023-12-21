@@ -19,8 +19,8 @@ import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.AsyncProcessIcon;
 import com.intellij.util.ui.JBUI;
+import ee.carlrobert.codegpt.util.file.FileUtil;
 import ee.carlrobert.embedding.CheckedFile;
-import ee.carlrobert.codegpt.util.file.FileUtils;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.MouseAdapter;
@@ -86,6 +86,7 @@ public class FolderStructureTreePanel {
             totalSize -= length;
           }
         } catch (Throwable ignored) {
+          // ignore
         }
       }
     });
@@ -122,10 +123,11 @@ public class FolderStructureTreePanel {
       panel.add(new JBLabel("Total size:"));
       panel.add(loadingFilesSpinner);
     } else {
-      panel.add(new JBLabel("Total size: " +
-          convertFileSize(totalSize) + " ~ " +
-          (convertLongValue(totalSize / 4)) + " tokens " + " ~ " +
-          new DecimalFormat("#.##").format(((double) (totalSize / 4) / 1000) * 0.0001) + " $"));
+      panel.add(new JBLabel("Total size: "
+          + FileUtil.convertFileSize(totalSize) + " ~ "
+          + (FileUtil.convertLongValue(totalSize / 4)) + " tokens " + " ~ "
+          + new DecimalFormat("#.##")
+          .format(((double) (totalSize / 4) / 1000) * 0.0001) + " $"));
     }
     return panel;
   }
@@ -137,7 +139,9 @@ public class FolderStructureTreePanel {
   }
 
   private List<VirtualFileImpl> getCheckedVirtualFiles() {
-    return Arrays.stream(checkboxTree.getCheckedNodes(VirtualFileSystemEntry.class, node -> node instanceof VirtualFileImpl))
+    return Arrays.stream(checkboxTree.getCheckedNodes(
+            VirtualFileSystemEntry.class,
+            node -> node instanceof VirtualFileImpl))
         .map(entry -> (VirtualFileImpl) entry)
         .collect(toList());
   }
@@ -147,25 +151,29 @@ public class FolderStructureTreePanel {
 
     try {
       if (node.isChecked()) {
-        node.setChecked(!changeListManager.isIgnoredFile(file) &&
-            !ignoreManager.isPotentiallyIgnoredFile(file) &&
-            FileUtils.isUtf8File(file.getPath()) &&
-            fileSize < Math.pow(1024, 2));
+        node.setChecked(!changeListManager.isIgnoredFile(file)
+            && !ignoreManager.isPotentiallyIgnoredFile(file)
+            && FileUtil.isUtf8File(file.getPath())
+            && fileSize < Math.pow(1024, 2));
       }
 
       if (node.isChecked()) {
         totalSize += fileSize;
       }
     } catch (RuntimeException ignored) {
+      // ignore
     }
   }
 
-  private void traverseDirectory(@NotNull CheckedTreeNode parentNode, @NotNull VirtualFile projectDirectory) {
+  private void traverseDirectory(@NotNull CheckedTreeNode parentNode,
+      @NotNull VirtualFile projectDirectory) {
     for (VirtualFile childFile : projectDirectory.getChildren()) {
       var node = new CheckedTreeNode(childFile);
       parentNode.add(node);
 
-      if (!parentNode.isChecked() || ignoredFileDirectories.parallelStream().anyMatch(it -> it.equalsIgnoreCase(childFile.getName()))) {
+      var potentiallyIgnored = ignoredFileDirectories.parallelStream()
+          .anyMatch(it -> it.equalsIgnoreCase(childFile.getName()));
+      if (!parentNode.isChecked() || potentiallyIgnored) {
         node.setChecked(false);
       }
 
@@ -180,7 +188,13 @@ public class FolderStructureTreePanel {
   private @NotNull CheckboxTree.CheckboxTreeCellRenderer createFileTypesRenderer() {
     return new CheckboxTree.CheckboxTreeCellRenderer() {
       @Override
-      public void customizeRenderer(JTree t, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean focus) {
+      public void customizeRenderer(JTree t,
+          Object value,
+          boolean selected,
+          boolean expanded,
+          boolean leaf,
+          int row,
+          boolean focus) {
         if (!(value instanceof CheckedTreeNode)) {
           return;
         }
@@ -194,37 +208,16 @@ public class FolderStructureTreePanel {
           if (userObject instanceof VirtualDirectoryImpl) {
             getTextRenderer().setIcon(AllIcons.Nodes.Folder);
           } else {
-            var fileType = FileTypeManager.getInstance().getFileTypeByFile((VirtualFileSystemEntry) userObject);
+            var fileType = FileTypeManager.getInstance()
+                .getFileTypeByFile((VirtualFileSystemEntry) userObject);
             getTextRenderer().setIcon(fileType.getIcon());
-            getTextRenderer().append(" - " + convertFileSize(((VirtualFileSystemEntry) userObject).getLength()));
+            getTextRenderer().append(
+                " - " + FileUtil.convertFileSize(
+                    ((VirtualFileSystemEntry) userObject).getLength()));
           }
         }
       }
     };
-  }
-
-  private static String convertFileSize(long fileSizeInBytes) {
-    String[] units = {"B", "KB", "MB", "GB"};
-    int unitIndex = 0;
-    double fileSize = fileSizeInBytes;
-
-    while (fileSize >= 1024 && unitIndex < units.length - 1) {
-      fileSize /= 1024;
-      unitIndex++;
-    }
-
-    return new DecimalFormat("#.##").format(fileSize) + " " + units[unitIndex];
-  }
-
-  private static String convertLongValue(long value) {
-    if (value >= 1_000_000) {
-      return value / 1_000_000 + "M";
-    }
-    if (value >= 1_000) {
-      return value / 1_000 + "K";
-    }
-
-    return String.valueOf(value);
   }
 
   private static final List<String> ignoredFileDirectories = List.of(

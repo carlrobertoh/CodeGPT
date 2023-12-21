@@ -1,5 +1,8 @@
 package ee.carlrobert.codegpt.settings.configuration;
 
+import static ee.carlrobert.codegpt.completions.CompletionRequestProvider.COMPLETION_COMMIT_MESSAGE_PROMPT;
+import static ee.carlrobert.codegpt.completions.CompletionRequestProvider.COMPLETION_SYSTEM_PROMPT;
+
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
@@ -10,13 +13,20 @@ import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-@State(name = "CodeGPT_ConfigurationSettings_210", storages = @Storage("CodeGPT_ConfigurationSettings_210.xml"))
+@State(
+    name = "CodeGPT_ConfigurationSettings_210",
+    storages = @Storage("CodeGPT_ConfigurationSettings_210.xml"))
 public class ConfigurationState implements PersistentStateComponent<ConfigurationState> {
 
-  private String systemPrompt = "";
+  private String systemPrompt = COMPLETION_SYSTEM_PROMPT;
+  private String commitMessagePrompt = COMPLETION_COMMIT_MESSAGE_PROMPT;
   private int maxTokens = 1000;
-  private double temperature = 0.2;
+  private double temperature = 0.1;
+  private boolean checkForPluginUpdates = true;
   private boolean createNewChatOnEachAction;
+  private boolean ignoreGitCommitTokenLimit;
+  private boolean methodNameGenerationEnabled = true;
+  private boolean autoFormattingEnabled = true;
   private Map<String, String> tableData = EditorActionsUtil.DEFAULT_ACTIONS;
 
   public static ConfigurationState getInstance() {
@@ -38,8 +48,16 @@ public class ConfigurationState implements PersistentStateComponent<Configuratio
     return systemPrompt;
   }
 
+  public String getCommitMessagePrompt() {
+    return commitMessagePrompt;
+  }
+
   public void setSystemPrompt(String systemPrompt) {
     this.systemPrompt = systemPrompt;
+  }
+
+  public void setCommitMessagePrompt(String commitMessagePrompt) {
+    this.commitMessagePrompt = commitMessagePrompt;
   }
 
   public int getMaxTokens() {
@@ -72,5 +90,37 @@ public class ConfigurationState implements PersistentStateComponent<Configuratio
 
   public void setTableData(Map<String, String> tableData) {
     this.tableData = tableData;
+  }
+
+  public boolean isCheckForPluginUpdates() {
+    return checkForPluginUpdates;
+  }
+
+  public void setCheckForPluginUpdates(boolean checkForPluginUpdates) {
+    this.checkForPluginUpdates = checkForPluginUpdates;
+  }
+
+  public boolean isIgnoreGitCommitTokenLimit() {
+    return ignoreGitCommitTokenLimit;
+  }
+
+  public void setIgnoreGitCommitTokenLimit(boolean ignoreGitCommitTokenLimit) {
+    this.ignoreGitCommitTokenLimit = ignoreGitCommitTokenLimit;
+  }
+
+  public boolean isMethodRefactoringEnabled() {
+    return methodNameGenerationEnabled;
+  }
+
+  public void setMethodNameGenerationEnabled(boolean methodNameGenerationEnabled) {
+    this.methodNameGenerationEnabled = methodNameGenerationEnabled;
+  }
+
+  public boolean isAutoFormattingEnabled() {
+    return autoFormattingEnabled;
+  }
+
+  public void setAutoFormattingEnabled(boolean autoFormattingEnabled) {
+    this.autoFormattingEnabled = autoFormattingEnabled;
   }
 }

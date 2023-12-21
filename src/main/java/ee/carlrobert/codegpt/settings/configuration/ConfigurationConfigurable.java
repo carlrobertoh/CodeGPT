@@ -33,11 +33,20 @@ public class ConfigurationConfigurable implements Configurable {
   @Override
   public boolean isModified() {
     var configuration = ConfigurationState.getInstance();
-    return !configurationComponent.getTableData().equals(configuration.getTableData()) ||
-        configurationComponent.getMaxTokens() != configuration.getMaxTokens() ||
-        configurationComponent.getTemperature() != configuration.getTemperature() ||
-        !configurationComponent.getSystemPrompt().equals(configuration.getSystemPrompt()) ||
-        configurationComponent.isCreateNewChatOnEachAction() != configuration.isCreateNewChatOnEachAction();
+    return !configurationComponent.getTableData().equals(configuration.getTableData())
+        || configurationComponent.getMaxTokens() != configuration.getMaxTokens()
+        || configurationComponent.getTemperature() != configuration.getTemperature()
+        || !configurationComponent.getSystemPrompt().equals(configuration.getSystemPrompt())
+        || !configurationComponent.getCommitMessagePrompt()
+        .equals(configuration.getCommitMessagePrompt())
+        || configurationComponent.isCheckForPluginUpdates()
+        != configuration.isCheckForPluginUpdates()
+        || configurationComponent.isCreateNewChatOnEachAction()
+        != configuration.isCreateNewChatOnEachAction()
+        || configurationComponent.isMethodNameGenerationEnabled()
+        != configuration.isMethodRefactoringEnabled()
+        || configurationComponent.isAutoFormattingEnabled()
+        != configuration.isAutoFormattingEnabled();
   }
 
   @Override
@@ -47,7 +56,13 @@ public class ConfigurationConfigurable implements Configurable {
     configuration.setMaxTokens(configurationComponent.getMaxTokens());
     configuration.setTemperature(configurationComponent.getTemperature());
     configuration.setSystemPrompt(configurationComponent.getSystemPrompt());
-    configuration.setCreateNewChatOnEachAction(configurationComponent.isCreateNewChatOnEachAction());
+    configuration.setCommitMessagePrompt(configurationComponent.getCommitMessagePrompt());
+    configuration.setCheckForPluginUpdates(configurationComponent.isCheckForPluginUpdates());
+    configuration.setCreateNewChatOnEachAction(
+        configurationComponent.isCreateNewChatOnEachAction());
+    configuration.setMethodNameGenerationEnabled(
+        configurationComponent.isMethodNameGenerationEnabled());
+    configuration.setAutoFormattingEnabled(configurationComponent.isAutoFormattingEnabled());
     EditorActionsUtil.refreshActions();
   }
 
@@ -58,7 +73,13 @@ public class ConfigurationConfigurable implements Configurable {
     configurationComponent.setMaxTokens(configuration.getMaxTokens());
     configurationComponent.setTemperature(configuration.getTemperature());
     configurationComponent.setSystemPrompt(configuration.getSystemPrompt());
-    configurationComponent.setCreateNewChatOnEachAction(configuration.isCreateNewChatOnEachAction());
+    configurationComponent.setCommitMessagePrompt(configuration.getCommitMessagePrompt());
+    configurationComponent.setCheckForPluginUpdates(configuration.isCheckForPluginUpdates());
+    configurationComponent.setCreateNewChatOnEachAction(
+        configuration.isCreateNewChatOnEachAction());
+    configurationComponent.setDisableMethodNameGeneration(
+        configuration.isMethodRefactoringEnabled());
+    configurationComponent.setAutoFormattingEnabled(configuration.isAutoFormattingEnabled());
     EditorActionsUtil.refreshActions();
   }
 

@@ -10,12 +10,11 @@ import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.io.FileUtil;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.completions.CompletionClientProvider;
-import ee.carlrobert.codegpt.util.file.FileUtils;
-import ee.carlrobert.codegpt.util.OverlayUtils;
+import ee.carlrobert.codegpt.ui.OverlayUtil;
+import ee.carlrobert.codegpt.util.file.FileUtil;
 import ee.carlrobert.embedding.CheckedFile;
 import ee.carlrobert.embedding.EmbeddingsService;
 import ee.carlrobert.vector.VectorStore;
@@ -34,7 +33,9 @@ public class CodebaseIndexingTask extends Task.Backgroundable {
     super(project, CodeGPTBundle.get("codebaseIndexing.task.title"), true);
     this.project = project;
     this.checkedFiles = checkedFiles;
-    this.embeddingsService = new EmbeddingsService(CompletionClientProvider.getOpenAIClient(), CodeGPTPlugin.getPluginBasePath());
+    this.embeddingsService = new EmbeddingsService(
+        CompletionClientProvider.getOpenAIClient(),
+        CodeGPTPlugin.getPluginBasePath());
   }
 
   public void run() {
@@ -53,16 +54,18 @@ public class CodebaseIndexingTask extends Task.Backgroundable {
       throw new RuntimeException("Unable to serialize json file");
     }
 
-    if (!FileUtil.exists(CodeGPTPlugin.getIndexStorePath())) {
-      FileUtils.tryCreateDirectory(CodeGPTPlugin.getIndexStorePath());
+    if (!com.intellij.openapi.util.io.FileUtil.exists(CodeGPTPlugin.getIndexStorePath())) {
+      FileUtil.tryCreateDirectory(CodeGPTPlugin.getIndexStorePath());
     }
-    FileUtils.createFile(CodeGPTPlugin.getProjectIndexStorePath(project), "index.json", fileContent);
+    FileUtil.createFile(
+        CodeGPTPlugin.getProjectIndexStorePath(project), "index.json", fileContent);
 
     try {
       indicator.setFraction(0);
-      List<Item<Object, double[]>> embeddings = embeddingsService.createEmbeddings(checkedFiles, indicator);
+      List<Item<Object, double[]>> embeddings =
+          embeddingsService.createEmbeddings(checkedFiles, indicator);
       VectorStore.getInstance(CodeGPTPlugin.getPluginBasePath()).save(embeddings);
-      OverlayUtils.showNotification("Indexing completed", NotificationType.INFORMATION);
+      OverlayUtil.showNotification("Indexing completed", NotificationType.INFORMATION);
 
       project.getMessageBus()
           .syncPublisher(CodebaseIndexingCompletedNotifier.INDEXING_COMPLETED_TOPIC)

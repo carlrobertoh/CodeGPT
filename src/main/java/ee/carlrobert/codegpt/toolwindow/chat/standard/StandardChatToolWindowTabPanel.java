@@ -6,29 +6,24 @@ import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.project.Project;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.message.Message;
-import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.settings.state.YouSettingsState;
 import ee.carlrobert.codegpt.toolwindow.chat.BaseChatToolWindowTabPanel;
-import ee.carlrobert.codegpt.toolwindow.chat.components.ChatMessageResponseBody;
-import ee.carlrobert.codegpt.toolwindow.chat.components.ResponsePanel;
-import ee.carlrobert.codegpt.toolwindow.chat.components.UserMessagePanel;
-import ee.carlrobert.codegpt.util.EditorUtils;
-import ee.carlrobert.codegpt.util.file.FileUtils;
-import ee.carlrobert.codegpt.util.OverlayUtils;
+import ee.carlrobert.codegpt.toolwindow.chat.ui.ChatMessageResponseBody;
+import ee.carlrobert.codegpt.toolwindow.chat.ui.ResponsePanel;
+import ee.carlrobert.codegpt.toolwindow.chat.ui.UserMessagePanel;
+import ee.carlrobert.codegpt.ui.OverlayUtil;
+import ee.carlrobert.codegpt.util.EditorUtil;
+import ee.carlrobert.codegpt.util.file.FileUtil;
 import javax.swing.JComponent;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class StandardChatToolWindowTabPanel extends BaseChatToolWindowTabPanel {
 
-  public StandardChatToolWindowTabPanel(@NotNull Project project) {
-    this(project, null);
-  }
-
-  public StandardChatToolWindowTabPanel(@NotNull Project project,
-      @Nullable Conversation conversation) {
-    super(project, false);
-    if (conversation == null) {
+  public StandardChatToolWindowTabPanel(
+      @NotNull Project project,
+      @NotNull Conversation conversation) {
+    super(project, conversation, false);
+    if (conversation.getMessages().isEmpty()) {
       displayLandingView();
     } else {
       displayConversation(conversation);
@@ -38,50 +33,45 @@ public class StandardChatToolWindowTabPanel extends BaseChatToolWindowTabPanel {
   @Override
   protected JComponent getLandingView() {
     return new StandardChatToolWindowLandingPanel((action, locationOnScreen) -> {
-      var editor = EditorUtils.getSelectedEditor(project);
+      var editor = EditorUtil.getSelectedEditor(project);
       if (editor == null || !editor.getSelectionModel().hasSelection()) {
-        OverlayUtils.showWarningBalloon(
+        OverlayUtil.showWarningBalloon(
             editor == null ? "Unable to locate a selected editor"
                 : "Please select a target code before proceeding",
             locationOnScreen);
         return;
       }
 
-      var fileExtension = FileUtils.getFileExtension(
+      var fileExtension = FileUtil.getFileExtension(
           ((EditorImpl) editor).getVirtualFile().getName());
       var message = new Message(action.getPrompt().replace(
           "{{selectedCode}}",
           format("\n```%s\n%s\n```", fileExtension, editor.getSelectionModel().getSelectedText())));
       message.setUserMessage(action.getUserMessage());
 
-      if (conversation == null) {
-        startNewConversation(message);
-      } else {
-        sendMessage(message);
-      }
+      sendMessage(message);
     });
   }
 
-  @Override
-  public void displayConversation(@NotNull Conversation conversation) {
+  private void displayConversation(@NotNull Conversation conversation) {
     clearWindow();
     conversation.getMessages().forEach(message -> {
-      var messageResponseBody = new ChatMessageResponseBody(project, this)
-          .withResponse(message.getResponse());
+      var messageResponseBody =
+          new ChatMessageResponseBody(project, this).withResponse(message.getResponse());
 
       var serpResults = message.getSerpResults();
-      if (YouSettingsState.getInstance().isDisplayWebSearchResults() &&
-          serpResults != null && !serpResults.isEmpty()) {
+      if (YouSettingsState.getInstance().isDisplayWebSearchResults()
+          && serpResults != null && !serpResults.isEmpty()) {
         messageResponseBody.displaySerpResults(serpResults);
       }
+      messageResponseBody.hideCaret();
 
-      var messageWrapper = createNewMessageWrapper(message.getId());
-      messageWrapper.add(new UserMessagePanel(project, message, false, this));
-      messageWrapper.add(new ResponsePanel()
+      var messagePanel = toolWindowScrollablePanel.addMessage(message.getId());
+      messagePanel.add(new UserMessagePanel(project, message, this));
+      messagePanel.add(new ResponsePanel()
           .withReloadAction(() -> reloadMessage(message, conversation))
-          .withDeleteAction(() -> deleteMessage(message.getId(), messageWrapper, conversation))
+          .withDeleteAction(() -> removeMessage(message.getId(), conversation))
           .addContent(messageResponseBody));
     });
-    setConversation(conversation);
   }
 }

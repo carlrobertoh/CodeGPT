@@ -10,7 +10,7 @@ import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
-import ee.carlrobert.codegpt.util.SwingUtils;
+import ee.carlrobert.codegpt.ui.UIUtil;
 import java.awt.event.ItemEvent;
 import java.net.Proxy;
 import javax.swing.BoxLayout;
@@ -30,7 +30,7 @@ public class AdvancedSettingsComponent {
   private final PortField readTimeoutField;
 
   public AdvancedSettingsComponent(AdvancedSettingsState advancedSettings) {
-    proxyTypeComboBox = new ComboBox<>(new Proxy.Type[] {
+    proxyTypeComboBox = new ComboBox<>(new Proxy.Type[]{
         Proxy.Type.SOCKS,
         Proxy.Type.HTTP,
         Proxy.Type.DIRECT,
@@ -38,7 +38,8 @@ public class AdvancedSettingsComponent {
     proxyTypeComboBox.setSelectedItem(advancedSettings.getProxyType());
     proxyHostField = new JBTextField(advancedSettings.getProxyHost(), 20);
     proxyPortField = new PortField();
-    proxyAuthCheckbox = new JBCheckBox(CodeGPTBundle.get("advancedSettingsConfigurable.section.proxy.authCheckBoxField.label"));
+    proxyAuthCheckbox = new JBCheckBox(CodeGPTBundle.get(
+        "advancedSettingsConfigurable.proxy.authCheckBoxField.label"));
     proxyAuthUsername = new JBTextField(20);
     proxyAuthUsername.setEnabled(advancedSettings.isProxyAuthSelected());
     proxyAuthPassword = new JBPasswordField();
@@ -52,10 +53,12 @@ public class AdvancedSettingsComponent {
     readTimeoutField = new PortField(advancedSettings.getReadTimeout());
 
     mainPanel = FormBuilder.createFormBuilder()
-        .addComponent(new TitledSeparator(CodeGPTBundle.get("advancedSettingsConfigurable.section.proxy.title")))
+        .addComponent(new TitledSeparator(CodeGPTBundle.get(
+            "advancedSettingsConfigurable.proxy.title")))
         .addComponent(createProxySettingsForm())
         .addVerticalGap(4)
-        .addComponent(new TitledSeparator("Connection Settings"))
+        .addComponent(new TitledSeparator(
+            CodeGPTBundle.get("advancedSettingsConfigurable.connectionSettings.title")))
         .addComponent(createConnectionSettingsForm())
         .addComponentFillVertically(new JPanel(), 0)
         .getPanel();
@@ -63,8 +66,13 @@ public class AdvancedSettingsComponent {
 
   private JPanel createConnectionSettingsForm() {
     var panel = FormBuilder.createFormBuilder()
-        .addLabeledComponent("Connection timeout (s):", connectionTimeoutField)
-        .addLabeledComponent("Read timeout (s):", readTimeoutField)
+        .addLabeledComponent(
+            CodeGPTBundle.get(
+                "advancedSettingsConfigurable.connectionSettings.connectionTimeout.label"),
+            connectionTimeoutField)
+        .addLabeledComponent(
+            CodeGPTBundle.get("advancedSettingsConfigurable.connectionSettings.readTimeout.label"),
+            readTimeoutField)
         .getPanel();
     panel.setBorder(JBUI.Borders.emptyLeft(16));
     return panel;
@@ -143,20 +151,20 @@ public class AdvancedSettingsComponent {
     proxyPanel.setBorder(JBUI.Borders.emptyLeft(16));
     proxyPanel.setLayout(new BoxLayout(proxyPanel, BoxLayout.PAGE_AXIS));
 
-    var proxyTypePanel = SwingUtils.createPanel(
+    var proxyTypePanel = UIUtil.createPanel(
         proxyTypeComboBox,
-        CodeGPTBundle.get("advancedSettingsConfigurable.section.proxy.typeComboBoxField.label"),
+        CodeGPTBundle.get("advancedSettingsConfigurable.proxy.typeComboBoxField.label"),
         false);
-    var proxyHostPanel = SwingUtils.createPanel(
+    var proxyHostPanel = UIUtil.createPanel(
         proxyHostField,
-        CodeGPTBundle.get("advancedSettingsConfigurable.section.proxy.hostField.label"),
+        CodeGPTBundle.get("advancedSettingsConfigurable.proxy.hostField.label"),
         false);
-    var proxyPortPanel = SwingUtils.createPanel(
+    var proxyPortPanel = UIUtil.createPanel(
         proxyPortField,
-        CodeGPTBundle.get("advancedSettingsConfigurable.section.proxy.portField.label"),
+        CodeGPTBundle.get("shared.port"),
         false);
-    SwingUtils.setEqualLabelWidths(proxyTypePanel, proxyHostPanel);
-    SwingUtils.setEqualLabelWidths(proxyPortPanel, proxyHostPanel);
+    UIUtil.setEqualLabelWidths(proxyTypePanel, proxyHostPanel);
+    UIUtil.setEqualLabelWidths(proxyPortPanel, proxyHostPanel);
 
     proxyPanel.add(proxyTypePanel);
     proxyPanel.add(proxyHostPanel);
@@ -165,13 +173,13 @@ public class AdvancedSettingsComponent {
         .panel(proxyAuthCheckbox)
         .createPanel());
 
-    var proxyUsernamePanel = SwingUtils.createPanel(proxyAuthUsername,
-        CodeGPTBundle.get("advancedSettingsConfigurable.section.proxy.usernameField.label"),
+    var proxyUsernamePanel = UIUtil.createPanel(proxyAuthUsername,
+        CodeGPTBundle.get("advancedSettingsConfigurable.proxy.usernameField.label"),
         false);
-    var proxyPasswordPanel = SwingUtils.createPanel(proxyAuthPassword,
-        CodeGPTBundle.get("advancedSettingsConfigurable.section.proxy.passwordField.label"),
+    var proxyPasswordPanel = UIUtil.createPanel(proxyAuthPassword,
+        CodeGPTBundle.get("advancedSettingsConfigurable.proxy.passwordField.label"),
         false);
-    SwingUtils.setEqualLabelWidths(proxyPasswordPanel, proxyUsernamePanel);
+    UIUtil.setEqualLabelWidths(proxyPasswordPanel, proxyUsernamePanel);
 
     var proxyAuthPanel = FormBuilder.createFormBuilder()
         .addVerticalGap(4)

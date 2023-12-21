@@ -19,7 +19,8 @@ public final class AzureCredentialsManager {
 
   private AzureCredentialsManager() {
     azureOpenAIApiKey = CredentialsUtil.getPassword(azureOpenAIApiKeyCredentialAttributes);
-    azureActiveDirectoryToken = CredentialsUtil.getPassword(azureActiveDirectoryTokenCredentialAttributes);
+    azureActiveDirectoryToken =
+        CredentialsUtil.getPassword(azureActiveDirectoryTokenCredentialAttributes);
   }
 
   public static AzureCredentialsManager getInstance() {
@@ -27,7 +28,9 @@ public final class AzureCredentialsManager {
   }
 
   public String getSecret() {
-    return AzureSettingsState.getInstance().isUseAzureActiveDirectoryAuthentication() ? azureActiveDirectoryToken : azureOpenAIApiKey;
+    return AzureSettingsState.getInstance().isUseAzureActiveDirectoryAuthentication()
+        ? azureActiveDirectoryToken
+        : azureOpenAIApiKey;
   }
 
   public @Nullable String getAzureOpenAIApiKey() {
@@ -45,7 +48,9 @@ public final class AzureCredentialsManager {
 
   public void setAzureActiveDirectoryToken(String azureActiveDirectoryToken) {
     this.azureActiveDirectoryToken = azureActiveDirectoryToken;
-    CredentialsUtil.setPassword(azureActiveDirectoryTokenCredentialAttributes, azureActiveDirectoryToken);
+    CredentialsUtil.setPassword(
+        azureActiveDirectoryTokenCredentialAttributes,
+        azureActiveDirectoryToken);
   }
 
   public boolean isCredentialSet() {

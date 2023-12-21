@@ -8,7 +8,8 @@ import org.jetbrains.annotations.Nullable;
 @Service
 public final class YouCredentialsManager {
 
-  private static final CredentialAttributes accountPasswordCredentialAttributes = CredentialsUtil.createCredentialAttributes("ACCOUNT_PASSWORD");
+  private static final CredentialAttributes accountPasswordCredentialAttributes =
+      CredentialsUtil.createCredentialAttributes("ACCOUNT_PASSWORD");
 
   private String accountPassword;
 

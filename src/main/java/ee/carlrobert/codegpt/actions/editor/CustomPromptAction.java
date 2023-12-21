@@ -12,14 +12,16 @@ import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
-import ee.carlrobert.codegpt.util.file.FileUtils;
-import ee.carlrobert.codegpt.util.SwingUtils;
+import ee.carlrobert.codegpt.ui.UIUtil;
+import ee.carlrobert.codegpt.util.file.FileUtil;
+import java.awt.event.ActionEvent;
+import javax.swing.AbstractAction;
 import javax.swing.JComponent;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import org.jetbrains.annotations.Nullable;
 
-class CustomPromptAction extends BaseEditorAction {
+public class CustomPromptAction extends BaseEditorAction {
 
   private static String previousUserPrompt = "";
 
@@ -31,18 +33,22 @@ class CustomPromptAction extends BaseEditorAction {
   @Override
   protected void actionPerformed(Project project, Editor editor, String selectedText) {
     if (selectedText != null && !selectedText.isEmpty()) {
-      var fileExtension = FileUtils.getFileExtension(((EditorImpl) editor).getVirtualFile().getName());
+      var fileExtension =
+          FileUtil.getFileExtension(((EditorImpl) editor).getVirtualFile().getName());
       var dialog = new CustomPromptDialog(previousUserPrompt);
       if (dialog.showAndGet()) {
         previousUserPrompt = dialog.getUserPrompt();
-        var message = new Message(format("%s\n```%s\n%s\n```", previousUserPrompt, fileExtension, selectedText));
+        var message = new Message(
+            format("%s\n```%s\n%s\n```", previousUserPrompt, fileExtension, selectedText));
         message.setUserMessage(previousUserPrompt);
-        SwingUtilities.invokeLater(() -> project.getService(StandardChatToolWindowContentManager.class).sendMessage(message));
+        SwingUtilities.invokeLater(() ->
+            project.getService(StandardChatToolWindowContentManager.class).sendMessage(message));
       }
     }
   }
 
-  private static class CustomPromptDialog extends DialogWrapper {
+  public static class CustomPromptDialog extends DialogWrapper {
+
     private final JTextArea userPromptTextArea;
 
     public CustomPromptDialog(String previousUserPrompt) {
@@ -65,7 +71,12 @@ class CustomPromptAction extends BaseEditorAction {
       userPromptTextArea.setLineWrap(true);
       userPromptTextArea.setWrapStyleWord(true);
       userPromptTextArea.setMargin(JBUI.insets(5));
-      SwingUtils.addShiftEnterInputMap(userPromptTextArea, this::clickDefaultButton);
+      UIUtil.addShiftEnterInputMap(userPromptTextArea, new AbstractAction() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+          clickDefaultButton();
+        }
+      });
 
       return FormBuilder.createFormBuilder()
           .addComponent(UI.PanelFactory.panel(userPromptTextArea)

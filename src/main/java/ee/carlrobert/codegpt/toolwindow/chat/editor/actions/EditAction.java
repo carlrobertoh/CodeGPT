@@ -1,42 +1,38 @@
 package ee.carlrobert.codegpt.toolwindow.chat.editor.actions;
 
 import com.intellij.icons.AllIcons.Actions;
-import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.editor.Editor;
+import com.intellij.icons.AllIcons.Diff;
 import com.intellij.openapi.editor.ex.EditorEx;
+import com.intellij.openapi.ui.JBMenuItem;
 import ee.carlrobert.codegpt.CodeGPTBundle;
-import ee.carlrobert.codegpt.actions.ActionType;
-import ee.carlrobert.codegpt.actions.TrackableAction;
-import java.awt.event.MouseEvent;
+import java.awt.event.ActionEvent;
+import javax.swing.AbstractAction;
 import org.jetbrains.annotations.NotNull;
 
-public class EditAction extends TrackableAction {
+public class EditAction extends AbstractAction {
 
-  public EditAction(@NotNull Editor editor) {
-    super(
-        editor,
-        CodeGPTBundle.get("toolwindow.chat.editor.action.edit.title"),
-        CodeGPTBundle.get("toolwindow.chat.editor.action.edit.description"),
-        Actions.EditSource,
-        ActionType.EDIT_CODE);
+  private final EditorEx editor;
+
+  public EditAction(@NotNull EditorEx editor) {
+    super("Edit Source", Actions.EditSource);
+    this.editor = editor;
   }
 
   @Override
-  public void handleAction(@NotNull AnActionEvent event) {
-    var editorEx = ((EditorEx) editor);
-    editorEx.setViewer(!editorEx.isViewer());
+  public void actionPerformed(@NotNull ActionEvent event) {
+    editor.setViewer(!editor.isViewer());
 
-    var viewer = editorEx.isViewer();
-    editorEx.setCaretVisible(!viewer);
-    editorEx.setCaretEnabled(!viewer);
+    var viewer = editor.isViewer();
+    editor.setCaretVisible(!viewer);
+    editor.setCaretEnabled(!viewer);
 
-    var settings = editorEx.getSettings();
+    var settings = editor.getSettings();
     settings.setCaretRowShown(!viewer);
 
-    event.getPresentation().setIcon(viewer ? Actions.EditSource : Actions.Show);
-    event.getPresentation().setText(viewer ? "Edit Source" : "Disable Editing");
-
-    var locationOnScreen = ((MouseEvent) event.getInputEvent()).getLocationOnScreen();
-    locationOnScreen.y = locationOnScreen.y - 16;
+    var menuItem = (JBMenuItem) event.getSource();
+    menuItem.setText(viewer
+        ? CodeGPTBundle.get("toolwindow.chat.editor.action.edit.title")
+        : CodeGPTBundle.get("toolwindow.chat.editor.action.disableEditing.title"));
+    menuItem.setIcon(viewer ? Actions.EditSource : Diff.Lock);
   }
 }

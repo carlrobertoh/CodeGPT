@@ -1,6 +1,7 @@
 fun properties(key: String) = project.findProperty(key).toString()
 
 plugins {
+  checkstyle
   id("java")
   id("idea")
   id("org.jetbrains.intellij")
@@ -17,8 +18,12 @@ intellij {
   version.set(properties("platformVersion"))
 }
 
+checkstyle {
+  toolVersion = "10.12.5"
+}
+
 dependencies {
-  implementation("ee.carlrobert:llm-client:0.0.5")
+  implementation("ee.carlrobert:llm-client:0.1.3")
 }
 
 tasks {

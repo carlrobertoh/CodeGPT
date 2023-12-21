@@ -5,10 +5,15 @@ import javax.swing.Icon;
 
 public final class Icons {
 
-  public static final Icon DefaultIcon = IconLoader.getIcon("/icons/codegpt.svg", Icons.class);
-  public static final Icon DefaultSmallIcon = IconLoader.getIcon("/icons/codegpt-small.svg", Icons.class);
-  public static final Icon SendIcon = IconLoader.getIcon("/icons/send.svg", Icons.class);
-  public static final Icon OpenAIIcon = IconLoader.getIcon("/icons/openai.svg", Icons.class);
-  public static final Icon AzureIcon = IconLoader.getIcon("/icons/azure.svg", Icons.class);
-  public static final Icon YouIcon = IconLoader.getIcon("/icons/you.svg", Icons.class);
+  public static final Icon Default = IconLoader.getIcon("/icons/codegpt.svg", Icons.class);
+  public static final Icon DefaultSmall =
+      IconLoader.getIcon("/icons/codegpt-small.svg", Icons.class);
+  public static final Icon Azure = IconLoader.getIcon("/icons/azure.svg", Icons.class);
+  public static final Icon Llama = IconLoader.getIcon("/icons/llama.svg", Icons.class);
+  public static final Icon OpenAI = IconLoader.getIcon("/icons/openai.svg", Icons.class);
+  public static final Icon Send = IconLoader.getIcon("/icons/send.svg", Icons.class);
+  public static final Icon Sparkle = IconLoader.getIcon("/icons/sparkle.svg", Icons.class);
+  public static final Icon You = IconLoader.getIcon("/icons/you.svg", Icons.class);
+  public static final Icon YouSmall = IconLoader.getIcon("/icons/you_small.png", Icons.class);
+  public static final Icon User = IconLoader.getIcon("/icons/user.svg", Icons.class);
 }

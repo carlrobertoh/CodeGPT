@@ -1,50 +1,25 @@
 package ee.carlrobert.codegpt.toolwindow.chat.contextual;
 
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
-import ee.carlrobert.codegpt.completions.you.YouUserManager;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.message.Message;
-import ee.carlrobert.codegpt.indexes.CodebaseIndexingCompletedNotifier;
 import ee.carlrobert.codegpt.toolwindow.chat.BaseChatToolWindowTabPanel;
-import ee.carlrobert.codegpt.completions.you.auth.AuthenticationNotifier;
-import ee.carlrobert.codegpt.completions.you.auth.SignedOutNotifier;
 import javax.swing.JComponent;
 import org.jetbrains.annotations.NotNull;
 
 public class ContextualChatToolWindowTabPanel extends BaseChatToolWindowTabPanel {
 
-  public ContextualChatToolWindowTabPanel(@NotNull Project project) {
-    super(project, true);
+  public ContextualChatToolWindowTabPanel(
+      @NotNull Project project,
+      @NotNull Conversation conversation) {
+    super(project, conversation, true);
     displayLandingView();
-    userPromptTextArea.setTextAreaEnabled(YouUserManager.getInstance().isSubscribed());
-
-    project.getMessageBus()
-        .connect()
-        .subscribe(CodebaseIndexingCompletedNotifier.INDEXING_COMPLETED_TOPIC,
-            (CodebaseIndexingCompletedNotifier) () -> userPromptTextArea.setTextAreaEnabled(
-                YouUserManager.getInstance().isSubscribed()));
-
-    var messageBusConnection = ApplicationManager.getApplication().getMessageBus().connect();
-    messageBusConnection.subscribe(AuthenticationNotifier.AUTHENTICATION_TOPIC,
-        (AuthenticationNotifier) () -> userPromptTextArea.setTextAreaEnabled(
-            YouUserManager.getInstance().isSubscribed()));
-    messageBusConnection.subscribe(SignedOutNotifier.SIGNED_OUT_TOPIC, (SignedOutNotifier) () -> userPromptTextArea.setTextAreaEnabled(false));
   }
 
   @Override
   protected JComponent getLandingView() {
-    return new ContextualChatToolWindowLandingPanel(project, (prompt) -> {
-      var message = new Message(prompt);
-      if (conversation == null) {
-        startNewConversation(message);
-      } else {
-        sendMessage(message);
-      }
-    });
-  }
-
-  @Override
-  public void displayConversation(Conversation conversation) {
+    return new ContextualChatToolWindowLandingPanel(
+        project,
+        (prompt) -> sendMessage(new Message(prompt)));
   }
 }

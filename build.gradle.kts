@@ -1,8 +1,24 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
+import java.io.FileInputStream
+import java.util.*
 
-fun properties(key: String) = providers.gradleProperty(key)
+val env = environment("env").getOrNull()
+
+fun loadProperties(filename: String): Properties = Properties().apply {
+    load(FileInputStream(filename))
+}
+
+fun properties(key: String): Provider<String> {
+  if ("win-arm64" == env) {
+    val property = loadProperties("gradle-win-arm64.properties").getProperty(key)
+            ?: return providers.gradleProperty(key)
+    return providers.provider { property }
+  }
+  return providers.gradleProperty(key)
+}
+
 fun environment(key: String) = providers.environmentVariable(key)
 
 plugins {
@@ -34,23 +50,33 @@ dependencies {
   implementation(project(":codegpt-core"))
   implementation(project(":codegpt-telemetry"))
 
-  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.15.3")
-  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2")
+  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.16.0")
+  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.0")
   implementation("com.vladsch.flexmark:flexmark-all:0.64.8") {
     // vulnerable transitive dependency
     exclude(group = "org.jsoup", module = "jsoup")
   }
-  implementation("org.jsoup:jsoup:1.16.1")
-  implementation("org.apache.commons:commons-text:1.10.0")
+  implementation("org.jsoup:jsoup:1.17.1")
+  implementation("org.apache.commons:commons-text:1.11.0")
   implementation("com.knuddels:jtokkit:0.6.1")
-  implementation("org.quartz-scheduler:quartz:2.3.2")
 
   testImplementation("org.assertj:assertj-core:3.24.2")
   testImplementation("org.awaitility:awaitility:4.2.0")
-  testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.2")
-  testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.0")
-  testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
-  testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.10.0")
+  testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.1")
+  testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.1")
+  testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.1")
+  testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.10.1")
+}
+
+tasks.register<Exec>("updateSubmodules") {
+  workingDir(rootDir)
+  commandLine("git", "submodule", "update", "--init", "--recursive")
+}
+
+tasks.register<Copy>("copyLlamaSubmodule") {
+  dependsOn("updateSubmodules")
+  from(layout.projectDirectory.file("src/main/cpp/llama.cpp"))
+  into(layout.buildDirectory.dir("idea-sandbox/plugins/CodeGPT/llama.cpp"))
 }
 
 tasks {
@@ -98,11 +124,20 @@ tasks {
     })
   }
 
+  prepareSandbox {
+    enabled = true
+    dependsOn("copyLlamaSubmodule")
+  }
+
   signPlugin {
     enabled = true
     certificateChain.set(System.getenv("CERTIFICATE_CHAIN"))
     privateKey.set(System.getenv("PRIVATE_KEY"))
     password.set(System.getenv("PRIVATE_KEY_PASSWORD"))
+  }
+
+  buildPlugin {
+    enabled = true
   }
 
   publishPlugin {
@@ -118,9 +153,10 @@ tasks {
   }
 
   test {
+    exclude("**/testsupport/*")
     useJUnitPlatform()
     testLogging {
-      events("passed", "skipped", "failed")
+      events("started", "passed", "skipped", "failed")
       exceptionFormat = TestExceptionFormat.FULL
       showStandardStreams = true
     }

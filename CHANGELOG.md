@@ -6,6 +6,154 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.12] - 2023-12-21
+
+### Added
+
+- Support for extended request parameters for llama.cpp
+
+## [2.2.11] - 2023-12-14
+
+### Added
+
+- Support for chatting with multiple files
+- Support for generating commit messages and method names with Azure service
+
+## [2.2.10] - 2023-12-12
+
+### Added
+
+- Configurable commit-message system prompt
+
+### Fixed
+
+- Redundant chat tab creation on provider/model change
+- Azure bas host and path overriding
+
+## [2.2.9] - 2023-12-04
+
+### Added
+
+- IDE notification on new plugin versions
+
+### Fixed
+
+- LLaMA settings state on server failure
+
+### Improved
+
+- LLaMA server logging
+
+## [2.2.8] - 2023-12-01
+
+### Fixed
+
+- UI concurrency issues (run completion events on EDT)
+
+## [2.2.7] - 2023-11-30
+
+### Fixed
+
+- LLaMA server boot up when additional params are not set
+
+## [2.2.6] - 2023-11-27
+
+### Added
+
+- Support for automatic code formatting (#262)
+- Support for additional command-line params for the llama server startup process
+- Support for changing between different provides/models in the chat window (#227)
+- Deepseek coder instruct models
+
+### Fixed
+
+- Git commit message generation based on the actual user selected/checked files (#291)
+
+### Improved
+
+- Toolwindow Chat UI
+
+## [2.2.5] - 2023-11-23
+
+### Added
+
+- Option to set the number of threads for local LLM models
+
+### Fixed
+
+- Tool window chat editor enabled/disabled logic
+- Tool window text pane caret visibility
+- Editor actions for `createNewChatOnEachAction` state
+- Plugin from crashing when the LLaMA server process is stuck
+
+## [2.2.4] - 2023-11-20
+
+### Added
+
+- Support for git commit message generation
+- Support for method/function name lookup generation
+
+### Fixed
+
+- Llama client read/connect timeout configuration
+
+## [2.2.3] - 2023-11-15
+
+### Added
+
+- Expand/Collapse logic for tool window editors
+- Interactive total token count label
+
+### Removed
+
+- Azure model selection (redundant field)
+
+## [2.2.2] - 2023-11-07
+
+### Added
+
+- OpenAI GPT-4 Turbo and the latest GPT-3.5 models
+
+### Fixed
+
+- Credential validation when using llama service
+
+## [2.2.1] - 2023-11-06
+
+### Fixed
+
+- Right click context menu (#251)
+- Azure path (#232)
+- Llama telemetry service value
+- Include all feature builds by removing the value (#242)
+
+## [2.2.0] - 2023-11-03
+
+### Added
+
+- Support for running local LLMs via LLaMA C/C++ port (#249)
+- Support for fetching You.com subscription
+
+### Fixed
+
+- Project build for Windows ARM64
+
+### Improved
+
+- You.com coupon design
+- Overall UI design
+
+## [2.1.7] - 2023-10-26
+
+### Replaced
+
+- You.com GPT-4 toggle component with checkbox
+- Telemetry segment service with rudderstack
+
+### Fixed
+
+- You.com web search not being displayed regardless of the flag
+
 ## [2.1.6] - 2023-10-12
 
 ### Added
@@ -181,7 +329,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `OPENAI_API_KEY` persistence, key is saved in the OS password safe from now on
 
-[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.1.6...HEAD
+[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.12...HEAD
+[2.2.12]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.11...v2.2.12
+[2.2.11]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.10...v2.2.11
+[2.2.10]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.9...v2.2.10
+[2.2.9]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.8...v2.2.9
+[2.2.8]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.7...v2.2.8
+[2.2.7]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.6...v2.2.7
+[2.2.6]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.5...v2.2.6
+[2.2.5]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.4...v2.2.5
+[2.2.4]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.3...v2.2.4
+[2.2.3]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.2...v2.2.3
+[2.2.2]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.1...v2.2.2
+[2.2.1]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.0...v2.2.1
+[2.2.0]: https://github.com/carlrobertoh/CodeGPT/compare/v2.1.7...v2.2.0
+[2.1.7]: https://github.com/carlrobertoh/CodeGPT/compare/v2.1.6...v2.1.7
 [2.1.6]: https://github.com/carlrobertoh/CodeGPT/compare/v2.1.5...v2.1.6
 [2.1.5]: https://github.com/carlrobertoh/CodeGPT/compare/v2.1.4...v2.1.5
 [2.1.4]: https://github.com/carlrobertoh/CodeGPT/compare/v2.1.3...v2.1.4

@@ -3,22 +3,19 @@ package ee.carlrobert.codegpt.toolwindow.chat;
 import com.intellij.openapi.Disposable;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.message.Message;
+import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.TotalTokensDetails;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
-import org.jetbrains.annotations.Nullable;
 
 public interface ChatToolWindowTabPanel extends Disposable {
 
-  JPanel getContent();
+  JComponent getContent();
 
-  @Nullable Conversation getConversation();
+  Conversation getConversation();
 
-  void setConversation(@Nullable Conversation conversation);
+  TotalTokensDetails getTokenDetails();
 
   void displayLandingView();
-
-  void displayConversation(Conversation conversation);
-
-  void startNewConversation(Message message);
 
   void sendMessage(Message message);
 

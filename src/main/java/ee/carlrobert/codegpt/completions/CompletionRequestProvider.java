@@ -1,79 +1,151 @@
 package ee.carlrobert.codegpt.completions;
 
+import static ee.carlrobert.codegpt.util.file.FileUtil.getResourceContent;
 import static java.util.stream.Collectors.toList;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.EncodingManager;
+import ee.carlrobert.codegpt.completions.llama.LlamaModel;
+import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
+import ee.carlrobert.codegpt.settings.service.ServiceType;
+import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
+import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.settings.state.YouSettingsState;
+import ee.carlrobert.codegpt.telemetry.core.configuration.TelemetryConfiguration;
+import ee.carlrobert.codegpt.telemetry.core.service.UserId;
 import ee.carlrobert.embedding.EmbeddingsService;
-import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionModel;
-import ee.carlrobert.llm.client.openai.completion.chat.request.OpenAIChatCompletionMessage;
-import ee.carlrobert.llm.client.openai.completion.chat.request.OpenAIChatCompletionRequest;
+import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
+import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
+import ee.carlrobert.llm.client.openai.completion.OpenAICompletionRequest;
+import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
+import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
 import ee.carlrobert.llm.client.you.completion.YouCompletionRequest;
 import ee.carlrobert.llm.client.you.completion.YouCompletionRequestMessage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.UUID;
 import org.jetbrains.annotations.Nullable;
 
 public class CompletionRequestProvider {
 
   private static final Logger LOG = Logger.getInstance(CompletionRequestProvider.class);
 
-  public static final String COMPLETION_SYSTEM_PROMPT = "You are an AI programming assistant.\n" +
-      "When asked for you name, you must respond with \"CodeGPT\".\n" +
-      "Follow the user's requirements carefully & to the letter.\n" +
-      "Your responses should be informative and logical.\n" +
-      "You should always adhere to technical information.\n" +
-      "If the user asks for code or technical questions, you must provide code suggestions and adhere to technical information.\n" +
-      "If the question is related to a developer, CodeGPT must respond with content related to a developer.\n" +
-      "First think step-by-step - describe your plan for what to build in pseudocode, written out in great detail.\n" +
-      "Then output the code in a single code block.\n" +
-      "Minimize any other prose.\n" +
-      "Keep your answers short and impersonal.\n" +
-      "Use Markdown formatting in your answers.\n" +
-      "Make sure to include the programming language name at the start of the Markdown code blocks.\n" +
-      "Avoid wrapping the whole response in triple backticks.\n" +
-      "The user works in an IDE built by JetBrains which has a concept for editors with open files, integrated unit test support, " +
-      "and output pane that shows the output of running the code as well as an integrated terminal.\n" +
-      "You can only give one reply for each conversation turn.";
+  public static final String COMPLETION_SYSTEM_PROMPT = "You are an AI programming assistant.\n"
+      + "Follow the user's requirements carefully & to the letter.\n"
+      + "Your responses should be informative and logical.\n"
+      + "You should always adhere to technical information.\n"
+      + "If the user asks for code or technical questions, you must provide code suggestions and "
+      + "adhere to technical information.\n"
+      + "If the question is related to a developer, you must respond with "
+      + "content related to a developer.\n"
+      + "First think step-by-step - describe your plan for what to build in pseudocode, "
+      + "written out in great detail.\n"
+      + "Then output the code in a single code block.\n"
+      + "Minimize any other prose.\n"
+      + "Keep your answers short and impersonal.\n"
+      + "Use Markdown formatting in your answers.\n"
+      + "Make sure to include the programming language name at the start of the "
+      + "Markdown code blocks.\n"
+      + "Avoid wrapping the whole response in triple backticks.\n"
+      + "The user works in an IDE built by JetBrains which has a concept for editors "
+      + "with open files, integrated unit test support, and output pane that shows "
+      + "the output of running the code as well as an integrated terminal.\n"
+      + "You can only give one reply for each conversation turn.";
+
+  public static final String COMPLETION_COMMIT_MESSAGE_PROMPT =
+      "Write a short and descriptive git commit message for the following git diff.\n"
+          + "Use imperative mood, present tense, active voice and verbs.\n"
+          + "Your entire response will be passed directly into git commit.";
 
   private final EncodingManager encodingManager = EncodingManager.getInstance();
   private final EmbeddingsService embeddingsService;
   private final Conversation conversation;
 
   public CompletionRequestProvider(Conversation conversation) {
-    this.embeddingsService = new EmbeddingsService(CompletionClientProvider.getOpenAIClient(), CodeGPTPlugin.getPluginBasePath());
+    this.embeddingsService = new EmbeddingsService(
+        CompletionClientProvider.getOpenAIClient(),
+        CodeGPTPlugin.getPluginBasePath());
     this.conversation = conversation;
   }
 
-  public YouCompletionRequest buildYouCompletionRequest(Message message) {
-    return new YouCompletionRequest.Builder(message.getPrompt())
-        .setUseGPT4Model(YouSettingsState.getInstance().isUseGPT4Model())
-        .setChatHistory(conversation.getMessages().stream()
-            .map(prevMessage -> new YouCompletionRequestMessage(prevMessage.getPrompt(), prevMessage.getResponse()))
-            .collect(toList()))
+  public static OpenAICompletionRequest buildOpenAILookupCompletionRequest(
+      String context) {
+    return new OpenAIChatCompletionRequest.Builder(
+        List.of(
+            new OpenAIChatCompletionMessage("system",
+                getResourceContent("/prompts/method-name-generator.txt")),
+            new OpenAIChatCompletionMessage("user", context)))
+        .setModel(OpenAISettingsState.getInstance().getModel())
+        .setStream(false)
         .build();
   }
 
-  public OpenAIChatCompletionRequest buildOpenAIChatCompletionRequest(String model, Message message, boolean isRetry) {
-    return buildOpenAIChatCompletionRequest(model, message, isRetry, false, null);
+  public static LlamaCompletionRequest buildLlamaLookupCompletionRequest(String context) {
+    return new LlamaCompletionRequest.Builder(PromptTemplate.LLAMA
+        .buildPrompt(getResourceContent("/prompts/method-name-generator.txt"), context, List.of()))
+        .setStream(false)
+        .build();
+  }
+
+  public LlamaCompletionRequest buildLlamaCompletionRequest(Message message) {
+    var settings = LlamaSettingsState.getInstance();
+    var promptTemplate = settings.isUseCustomModel()
+        ? settings.getPromptTemplate()
+        : LlamaModel.findByHuggingFaceModel(settings.getHuggingFaceModel()).getPromptTemplate();
+    var prompt = promptTemplate.buildPrompt(
+        COMPLETION_SYSTEM_PROMPT,
+        message.getPrompt(),
+        conversation.getMessages());
+    var configuration = ConfigurationState.getInstance();
+    return new LlamaCompletionRequest.Builder(prompt)
+        .setN_predict(configuration.getMaxTokens())
+        .setTemperature(configuration.getTemperature())
+        .setTop_k(settings.getTopK())
+        .setTop_p(settings.getTopP())
+        .setMin_p(settings.getMinP())
+        .setRepeat_penalty(settings.getRepeatPenalty())
+        .build();
+  }
+
+  public YouCompletionRequest buildYouCompletionRequest(Message message) {
+    var requestBuilder = new YouCompletionRequest.Builder(message.getPrompt())
+        .setUseGPT4Model(YouSettingsState.getInstance().isUseGPT4Model())
+        .setChatHistory(conversation.getMessages().stream()
+            .map(prevMessage -> new YouCompletionRequestMessage(
+                prevMessage.getPrompt(),
+                prevMessage.getResponse()))
+            .collect(toList()));
+    if (TelemetryConfiguration.getInstance().isEnabled()
+        && !ApplicationManager.getApplication().isUnitTestMode()) {
+      requestBuilder.setUserId(UUID.fromString(UserId.INSTANCE.get()));
+    }
+    return requestBuilder.build();
   }
 
   public OpenAIChatCompletionRequest buildOpenAIChatCompletionRequest(
       String model,
       Message message,
-      boolean isRetry,
+      boolean retry) {
+    return buildOpenAIChatCompletionRequest(model, message, retry, false, null);
+  }
+
+  public OpenAIChatCompletionRequest buildOpenAIChatCompletionRequest(
+      @Nullable String model,
+      Message message,
+      boolean retry,
       boolean useContextualSearch,
       @Nullable String overriddenPath) {
-    var builder = new OpenAIChatCompletionRequest.Builder(buildMessages(model, message, isRetry, useContextualSearch))
+    var builder = new OpenAIChatCompletionRequest.Builder(
+        buildMessages(model, message, retry, useContextualSearch))
         .setModel(model)
         .setMaxTokens(ConfigurationState.getInstance().getMaxTokens())
         .setTemperature(ConfigurationState.getInstance().getTemperature());
@@ -85,7 +157,10 @@ public class CompletionRequestProvider {
     return (OpenAIChatCompletionRequest) builder.build();
   }
 
-  private List<OpenAIChatCompletionMessage> buildMessages(String model, Message message, boolean isRetry, boolean useContextualSearch) {
+  public List<OpenAIChatCompletionMessage> buildMessages(
+      Message message,
+      boolean retry,
+      boolean useContextualSearch) {
     var messages = new ArrayList<OpenAIChatCompletionMessage>();
     if (useContextualSearch) {
       var prompt = embeddingsService.buildPromptWithContext(message.getPrompt());
@@ -97,7 +172,7 @@ public class CompletionRequestProvider {
           systemPrompt.isEmpty() ? COMPLETION_SYSTEM_PROMPT : systemPrompt));
 
       for (var prevMessage : conversation.getMessages()) {
-        if (isRetry && prevMessage.getId().equals(message.getId())) {
+        if (retry && prevMessage.getId().equals(message.getId())) {
           break;
         }
         messages.add(new OpenAIChatCompletionMessage("user", prevMessage.getPrompt()));
@@ -105,8 +180,17 @@ public class CompletionRequestProvider {
       }
       messages.add(new OpenAIChatCompletionMessage("user", message.getPrompt()));
     }
+    return messages;
+  }
 
-    if (SettingsState.getInstance().isUseYouService()) {
+  private List<OpenAIChatCompletionMessage> buildMessages(
+      @Nullable String model,
+      Message message,
+      boolean retry,
+      boolean useContextualSearch) {
+    var messages = buildMessages(message, retry, useContextualSearch);
+
+    if (model == null || SettingsState.getInstance().getSelectedService() == ServiceType.YOU) {
       return messages;
     }
 
