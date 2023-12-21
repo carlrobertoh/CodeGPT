@@ -22,10 +22,6 @@ public class ConfigurationState implements PersistentStateComponent<Configuratio
   private String commitMessagePrompt = COMPLETION_COMMIT_MESSAGE_PROMPT;
   private int maxTokens = 1000;
   private double temperature = 0.1;
-  private int topK = 40;
-  private double topP = 0.9;
-  private double minP = 0.05;
-  private double repeatPenalty = 1.1;
   private boolean checkForPluginUpdates = true;
   private boolean createNewChatOnEachAction;
   private boolean ignoreGitCommitTokenLimit;
@@ -78,38 +74,6 @@ public class ConfigurationState implements PersistentStateComponent<Configuratio
 
   public void setTemperature(double temperature) {
     this.temperature = temperature;
-  }
-
-  public int getTopK() {
-    return topK;
-  }
-
-  public void setTopK(int topK) {
-    this.topK = topK;
-  }
-
-  public double getTopP() {
-    return topP;
-  }
-
-  public void setTopP(double topP) {
-    this.topP = topP;
-  }
-
-  public double getMinP() {
-    return minP;
-  }
-
-  public void setMinP(double minP) {
-    this.minP = minP;
-  }
-
-  public double getRepeatPenalty() {
-    return repeatPenalty;
-  }
-
-  public void setRepeatPenalty(double repeatPenalty) {
-    this.repeatPenalty = repeatPenalty;
   }
 
   public boolean isCreateNewChatOnEachAction() {

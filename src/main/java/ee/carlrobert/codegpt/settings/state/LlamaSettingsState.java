@@ -23,6 +23,10 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
   private int contextSize = 2048;
   private int threads = 8;
   private String additionalParameters = "";
+  private int topK = 40;
+  private double topP = 0.9;
+  private double minP = 0.05;
+  private double repeatPenalty = 1.1;
 
   public LlamaSettingsState() {
   }
@@ -43,11 +47,16 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
 
   public boolean isModified(ServiceSelectionForm serviceSelectionForm) {
     var modelPreferencesForm = serviceSelectionForm.getLlamaModelPreferencesForm();
+    var requestPreferencesForm = serviceSelectionForm.getLlamaRequestPreferencesForm();
     return serverPort != serviceSelectionForm.getLlamaServerPort()
         || contextSize != serviceSelectionForm.getContextSize()
         || threads != serviceSelectionForm.getThreads()
         || !additionalParameters.equals(serviceSelectionForm.getAdditionalParameters())
         || huggingFaceModel != modelPreferencesForm.getSelectedModel()
+        || topK != requestPreferencesForm.getTopK()
+        || topP != requestPreferencesForm.getTopP()
+        || minP != requestPreferencesForm.getMinP()
+        || repeatPenalty != requestPreferencesForm.getRepeatPenalty()
         || !promptTemplate.equals(modelPreferencesForm.getPromptTemplate())
         || useCustomModel != modelPreferencesForm.isUseCustomLlamaModel()
         || !customLlamaModelPath.equals(modelPreferencesForm.getCustomLlamaModelPath());
@@ -59,6 +68,11 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
     huggingFaceModel = modelPreferencesForm.getSelectedModel();
     useCustomModel = modelPreferencesForm.isUseCustomLlamaModel();
     promptTemplate = modelPreferencesForm.getPromptTemplate();
+    var requestPreferencesForm = serviceSelectionForm.getLlamaRequestPreferencesForm();
+    topK = requestPreferencesForm.getTopK();
+    topP = requestPreferencesForm.getTopP();
+    minP = requestPreferencesForm.getMinP();
+    repeatPenalty = requestPreferencesForm.getRepeatPenalty();
     serverPort = serviceSelectionForm.getLlamaServerPort();
     contextSize = serviceSelectionForm.getContextSize();
     threads = serviceSelectionForm.getThreads();
@@ -71,6 +85,11 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
     modelPreferencesForm.setCustomLlamaModelPath(customLlamaModelPath);
     modelPreferencesForm.setUseCustomLlamaModel(useCustomModel);
     modelPreferencesForm.setPromptTemplate(promptTemplate);
+    var requestPreferencesForm = serviceSelectionForm.getLlamaRequestPreferencesForm();
+    requestPreferencesForm.setTopK(topK);
+    requestPreferencesForm.setTopP(topP);
+    requestPreferencesForm.setMinP(minP);
+    requestPreferencesForm.setRepeatPenalty(repeatPenalty);
     serviceSelectionForm.setLlamaServerPort(serverPort);
     serviceSelectionForm.setContextSize(contextSize);
     serviceSelectionForm.setThreads(threads);
@@ -139,6 +158,38 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
 
   public void setAdditionalParameters(String additionalParameters) {
     this.additionalParameters = additionalParameters;
+  }
+
+  public int getTopK() {
+    return topK;
+  }
+
+  public void setTopK(int topK) {
+    this.topK = topK;
+  }
+
+  public double getTopP() {
+    return topP;
+  }
+
+  public void setTopP(double topP) {
+    this.topP = topP;
+  }
+
+  public double getMinP() {
+    return minP;
+  }
+
+  public void setMinP(double minP) {
+    this.minP = minP;
+  }
+
+  public double getRepeatPenalty() {
+    return repeatPenalty;
+  }
+
+  public void setRepeatPenalty(double repeatPenalty) {
+    this.repeatPenalty = repeatPenalty;
   }
 
   private static Integer getRandomAvailablePortOrDefault() {

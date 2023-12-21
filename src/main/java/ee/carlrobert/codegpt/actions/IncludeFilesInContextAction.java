@@ -188,7 +188,7 @@ public class IncludeFilesInContextAction extends AnAction {
         new Dimension(480, component.getPreferredSize().height + 48));
     dialogBuilder.setNorthPanel(FormBuilder.createFormBuilder()
         .addLabeledComponent(
-            CodeGPTBundle.get("action.includeFilesInContext.dialog.promptTemplate.label"),
+            CodeGPTBundle.get("shared.promptTemplate"),
             PanelFactory.panel(promptTemplateTextArea).withComment(
                     "<html><p>The template that will be used to create the final prompt. "
                         + "The <strong>{REPEATABLE_CONTEXT}</strong> placeholder must be included "

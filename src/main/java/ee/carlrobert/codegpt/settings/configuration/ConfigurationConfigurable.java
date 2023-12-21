@@ -36,10 +36,6 @@ public class ConfigurationConfigurable implements Configurable {
     return !configurationComponent.getTableData().equals(configuration.getTableData())
         || configurationComponent.getMaxTokens() != configuration.getMaxTokens()
         || configurationComponent.getTemperature() != configuration.getTemperature()
-        || configurationComponent.getTopK() != configuration.getTopK()
-        || configurationComponent.getTopP() != configuration.getTopP()
-        || configurationComponent.getMinP() != configuration.getMinP()
-        || configurationComponent.getRepeatPenalty() != configuration.getRepeatPenalty()
         || !configurationComponent.getSystemPrompt().equals(configuration.getSystemPrompt())
         || !configurationComponent.getCommitMessagePrompt()
         .equals(configuration.getCommitMessagePrompt())
@@ -59,10 +55,6 @@ public class ConfigurationConfigurable implements Configurable {
     configuration.setTableData(configurationComponent.getTableData());
     configuration.setMaxTokens(configurationComponent.getMaxTokens());
     configuration.setTemperature(configurationComponent.getTemperature());
-    configuration.setTopK(configurationComponent.getTopK());
-    configuration.setTopP(configurationComponent.getTopP());
-    configuration.setMinP(configurationComponent.getMinP());
-    configuration.setRepeatPenalty(configurationComponent.getRepeatPenalty());
     configuration.setSystemPrompt(configurationComponent.getSystemPrompt());
     configuration.setCommitMessagePrompt(configurationComponent.getCommitMessagePrompt());
     configuration.setCheckForPluginUpdates(configurationComponent.isCheckForPluginUpdates());
@@ -80,10 +72,6 @@ public class ConfigurationConfigurable implements Configurable {
     configurationComponent.setTableData(configuration.getTableData());
     configurationComponent.setMaxTokens(configuration.getMaxTokens());
     configurationComponent.setTemperature(configuration.getTemperature());
-    configurationComponent.setTopK(configuration.getTopK());
-    configurationComponent.setTopP(configuration.getTopP());
-    configurationComponent.setMinP(configuration.getMinP());
-    configurationComponent.setRepeatPenalty(configuration.getRepeatPenalty());
     configurationComponent.setSystemPrompt(configuration.getSystemPrompt());
     configurationComponent.setCommitMessagePrompt(configuration.getCommitMessagePrompt());
     configurationComponent.setCheckForPluginUpdates(configuration.isCheckForPluginUpdates());

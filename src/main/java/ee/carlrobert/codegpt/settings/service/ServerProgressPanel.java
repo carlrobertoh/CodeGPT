@@ -12,10 +12,8 @@ public class ServerProgressPanel extends JPanel {
   private final JBLabel label = new JBLabel();
 
   public ServerProgressPanel() {
-    super(new FlowLayout(FlowLayout.LEADING, 0, 0));
     setVisible(false);
     add(new AsyncProcessIcon("sign_in_spinner"));
-    add(Box.createHorizontalStrut(4));
     add(label);
   }
 

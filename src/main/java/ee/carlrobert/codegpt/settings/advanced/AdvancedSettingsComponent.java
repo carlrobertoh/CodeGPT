@@ -161,7 +161,7 @@ public class AdvancedSettingsComponent {
         false);
     var proxyPortPanel = UIUtil.createPanel(
         proxyPortField,
-        CodeGPTBundle.get("advancedSettingsConfigurable.proxy.portField.label"),
+        CodeGPTBundle.get("shared.port"),
         false);
     UIUtil.setEqualLabelWidths(proxyTypePanel, proxyHostPanel);
     UIUtil.setEqualLabelWidths(proxyPortPanel, proxyHostPanel);
