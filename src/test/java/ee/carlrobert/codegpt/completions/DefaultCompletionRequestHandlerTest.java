@@ -50,7 +50,7 @@ public class DefaultCompletionRequestHandlerTest extends IntegrationTest {
           jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "!")))));
     });
 
-    requestHandler.call(conversation, message, false);
+    requestHandler.call(new CallParameters(conversation, ConversationType.DEFAULT, message, false));
 
     await().atMost(5, SECONDS).until(() -> "Hello!".equals(message.getResponse()));
   }
@@ -68,7 +68,7 @@ public class DefaultCompletionRequestHandlerTest extends IntegrationTest {
           "/openai/deployments/TEST_DEPLOYMENT_ID/chat/completions");
       assertThat(request.getUri().getQuery()).isEqualTo("api-version=TEST_API_VERSION");
       assertThat(request.getHeaders().get("Api-key").get(0)).isEqualTo("TEST_API_KEY");
-      assertThat(request.getHeaders().get("X-application-name").get(0)).isEqualTo("CODEGPT");
+      assertThat(request.getHeaders().get("X-llm-application-tag").get(0)).isEqualTo("codegpt");
       assertThat(request.getBody())
           .extracting("messages")
           .isEqualTo(
@@ -86,7 +86,7 @@ public class DefaultCompletionRequestHandlerTest extends IntegrationTest {
     var message = new Message("TEST_PROMPT");
     var requestHandler = new CompletionRequestHandler(false, getRequestEventListener(message));
 
-    requestHandler.call(conversation, message, false);
+    requestHandler.call(new CallParameters(conversation, ConversationType.DEFAULT, message, false));
 
     await().atMost(5, SECONDS).until(() -> "Hello!".equals(message.getResponse()));
   }
@@ -105,7 +105,7 @@ public class DefaultCompletionRequestHandlerTest extends IntegrationTest {
           .isEqualTo("/codegpt/deployments/TEST_DEPLOYMENT_ID/completions");
       assertThat(request.getUri().getQuery()).isEqualTo("api-version=TEST_API_VERSION");
       assertThat(request.getHeaders().get("Api-key").get(0)).isEqualTo("TEST_API_KEY");
-      assertThat(request.getHeaders().get("X-application-name").get(0)).isEqualTo("CODEGPT");
+      assertThat(request.getHeaders().get("X-llm-application-tag").get(0)).isEqualTo("codegpt");
       assertThat(request.getBody())
           .extracting("messages")
           .isEqualTo(
@@ -123,7 +123,7 @@ public class DefaultCompletionRequestHandlerTest extends IntegrationTest {
     var message = new Message("TEST_PROMPT");
     var requestHandler = new CompletionRequestHandler(false, getRequestEventListener(message));
 
-    requestHandler.call(conversation, message, false);
+    requestHandler.call(new CallParameters(conversation, ConversationType.DEFAULT, message, false));
 
     await().atMost(5, SECONDS).until(() -> "Hello!".equals(message.getResponse()));
   }
@@ -173,7 +173,7 @@ public class DefaultCompletionRequestHandlerTest extends IntegrationTest {
           jsonMapResponse("youChatToken", "!"));
     });
 
-    requestHandler.call(conversation, message, false);
+    requestHandler.call(new CallParameters(conversation, ConversationType.DEFAULT, message, false));
 
     await().atMost(5, SECONDS).until(() -> "Hello!".equals(message.getResponse()));
   }
@@ -207,7 +207,7 @@ public class DefaultCompletionRequestHandlerTest extends IntegrationTest {
               e("stop", true)));
     });
 
-    requestHandler.call(conversation, message, false);
+    requestHandler.call(new CallParameters(conversation, ConversationType.DEFAULT, message, false));
 
     await().atMost(5, SECONDS).until(() -> "Hello!".equals(message.getResponse()));
   }
@@ -215,11 +215,7 @@ public class DefaultCompletionRequestHandlerTest extends IntegrationTest {
   private CompletionResponseEventListener getRequestEventListener(Message message) {
     return new CompletionResponseEventListener() {
       @Override
-      public void handleCompleted(
-          String fullMessage,
-          Message conversationMessage,
-          Conversation conversation,
-          boolean retry) {
+      public void handleCompleted(String fullMessage, CallParameters callParameters) {
         message.setResponse(fullMessage);
       }
     };

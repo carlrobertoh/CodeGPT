@@ -39,7 +39,7 @@ public class SelectedFilesAccordion extends JPanel {
     panel.setOpaque(false);
     panel.setVisible(false);
     panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-    panel.setBorder(JBUI.Borders.emptyBottom(4));
+    panel.setBorder(JBUI.Borders.empty(4, 0));
     referencedFilePaths.stream()
         .map(filePath -> LocalFileSystem.getInstance().findFileByPath(filePath))
         .filter(Objects::nonNull)

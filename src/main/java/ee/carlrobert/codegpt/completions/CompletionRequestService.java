@@ -1,18 +1,24 @@
 package ee.carlrobert.codegpt.completions;
 
+import static ee.carlrobert.codegpt.settings.service.ServiceType.LLAMA_CPP;
+import static ee.carlrobert.codegpt.settings.service.ServiceType.OPENAI;
+import static ee.carlrobert.codegpt.settings.service.ServiceType.YOU;
+
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
-import ee.carlrobert.codegpt.conversations.Conversation;
-import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
+import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
+import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
+import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
 import ee.carlrobert.llm.completion.CompletionEventListener;
+import java.util.List;
+import java.util.Optional;
 import okhttp3.sse.EventSource;
-import org.jetbrains.annotations.NotNull;
 
 @Service
 public final class CompletionRequestService {
@@ -25,44 +31,77 @@ public final class CompletionRequestService {
   }
 
   public EventSource getChatCompletionAsync(
-      @NotNull Conversation conversation,
-      @NotNull Message message,
-      boolean retry,
+      CallParameters callParameters,
       boolean useContextualSearch,
       CompletionEventListener eventListener) {
-    var requestProvider = new CompletionRequestProvider(conversation);
+    var requestProvider = new CompletionRequestProvider(callParameters.getConversation());
     switch (SettingsState.getInstance().getSelectedService()) {
       case OPENAI:
         var openAISettings = OpenAISettingsState.getInstance();
-        return CompletionClientProvider.getOpenAIClient().getChatCompletion(
+        return CompletionClientProvider.getOpenAIClient().getChatCompletionAsync(
             requestProvider.buildOpenAIChatCompletionRequest(
                 openAISettings.getModel(),
-                message,
-                retry,
+                callParameters,
                 useContextualSearch,
                 openAISettings.isUsingCustomPath() ? openAISettings.getPath() : null),
             eventListener);
       case AZURE:
         var azureSettings = AzureSettingsState.getInstance();
-        return CompletionClientProvider.getAzureClient().getChatCompletion(
+        return CompletionClientProvider.getAzureClient().getChatCompletionAsync(
             requestProvider.buildOpenAIChatCompletionRequest(
                 null,
-                message,
-                retry,
+                callParameters,
                 useContextualSearch,
                 azureSettings.isUsingCustomPath() ? azureSettings.getPath() : null),
             eventListener);
       case YOU:
-        return CompletionClientProvider.getYouClient().getChatCompletion(
-            requestProvider.buildYouCompletionRequest(message),
+        return CompletionClientProvider.getYouClient().getChatCompletionAsync(
+            requestProvider.buildYouCompletionRequest(callParameters.getMessage()),
             eventListener);
       case LLAMA_CPP:
-        return CompletionClientProvider.getLlamaClient().getChatCompletion(
-            requestProvider.buildLlamaCompletionRequest(message),
+        return CompletionClientProvider.getLlamaClient().getChatCompletionAsync(
+            requestProvider.buildLlamaCompletionRequest(
+                callParameters.getMessage(),
+                callParameters.getConversationType()),
             eventListener);
       default:
         throw new IllegalArgumentException();
     }
+  }
+
+  public void generateCommitMessageAsync(
+      String prompt,
+      CompletionEventListener eventListener) {
+    var request = new OpenAIChatCompletionRequest.Builder(List.of(
+        new OpenAIChatCompletionMessage("system",
+            ConfigurationState.getInstance().getCommitMessagePrompt()),
+        new OpenAIChatCompletionMessage("user", prompt)))
+        .setModel(OpenAISettingsState.getInstance().getModel())
+        .build();
+    var selectedService = SettingsState.getInstance().getSelectedService();
+    if (selectedService == ServiceType.OPENAI) {
+      CompletionClientProvider.getOpenAIClient().getChatCompletionAsync(request, eventListener);
+    }
+    if (selectedService == ServiceType.AZURE) {
+      CompletionClientProvider.getAzureClient().getChatCompletionAsync(request, eventListener);
+    }
+  }
+
+  public Optional<String> getLookupCompletion(String prompt) {
+    var selectedService = SettingsState.getInstance().getSelectedService();
+    if (selectedService == YOU || selectedService == LLAMA_CPP) {
+      return Optional.empty();
+    }
+
+    var request = CompletionRequestProvider.buildOpenAILookupCompletionRequest(prompt);
+    var response = selectedService == OPENAI
+        ? CompletionClientProvider.getOpenAIClient().getChatCompletion(request)
+        : CompletionClientProvider.getAzureClient().getChatCompletion(request);
+    return response
+        .getChoices()
+        .stream()
+        .findFirst()
+        .map(item -> item.getMessage().getContent());
   }
 
   public boolean isRequestAllowed() {

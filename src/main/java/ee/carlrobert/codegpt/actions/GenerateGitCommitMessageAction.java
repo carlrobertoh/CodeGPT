@@ -23,17 +23,13 @@ import com.intellij.openapi.vcs.ui.CommitMessage;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.Icons;
-import ee.carlrobert.codegpt.completions.CompletionClientProvider;
+import ee.carlrobert.codegpt.completions.CompletionRequestService;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
-import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
-import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
-import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
-import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.io.BufferedReader;
 import java.io.File;
@@ -59,7 +55,7 @@ public class GenerateGitCommitMessageAction extends AnAction {
   public void update(@NotNull AnActionEvent event) {
     var selectedService = SettingsState.getInstance().getSelectedService();
     if (selectedService == ServiceType.OPENAI || selectedService == ServiceType.AZURE) {
-      var filesSelected = !getCheckedFilePaths(event).isEmpty();
+      var filesSelected = !getReferencedFilePaths(event).isEmpty();
       var callAllowed = (selectedService == ServiceType.OPENAI
           && OpenAICredentialsManager.getInstance().isApiKeySet())
           || (selectedService == ServiceType.AZURE
@@ -82,7 +78,7 @@ public class GenerateGitCommitMessageAction extends AnAction {
       return;
     }
 
-    var gitDiff = getGitDiff(project, getCheckedFilePaths(event));
+    var gitDiff = getGitDiff(project, getReferencedFilePaths(event));
     var tokenCount = encodingManager.countTokens(gitDiff);
     if (tokenCount > 4096 && OverlayUtil.showTokenSoftLimitWarningDialog(tokenCount) != OK) {
       return;
@@ -91,25 +87,8 @@ public class GenerateGitCommitMessageAction extends AnAction {
     var editor = getCommitMessageEditor(event);
     if (editor != null) {
       ((EditorEx) editor).setCaretVisible(false);
-      generateMessage(project, editor, gitDiff);
-    }
-  }
-
-  private void generateMessage(Project project, Editor editor, String gitDiff) {
-    var request = new OpenAIChatCompletionRequest.Builder(List.of(
-        new OpenAIChatCompletionMessage("system",
-            ConfigurationState.getInstance().getCommitMessagePrompt()),
-        new OpenAIChatCompletionMessage("user", gitDiff)))
-        .setModel(OpenAISettingsState.getInstance().getModel())
-        .build();
-    var selectedService = SettingsState.getInstance().getSelectedService();
-    if (selectedService == ServiceType.OPENAI) {
-      CompletionClientProvider.getOpenAIClient()
-          .getChatCompletion(request, getEventListener(project, editor.getDocument()));
-    }
-    if (selectedService == ServiceType.AZURE) {
-      CompletionClientProvider.getAzureClient()
-          .getChatCompletion(request, getEventListener(project, editor.getDocument()));
+      CompletionRequestService.getInstance()
+          .generateCommitMessageAsync(gitDiff, getEventListener(project, editor.getDocument()));
     }
   }
 
@@ -166,7 +145,7 @@ public class GenerateGitCommitMessageAction extends AnAction {
     }
   }
 
-  private @NotNull List<String> getCheckedFilePaths(AnActionEvent event) {
+  private @NotNull List<String> getReferencedFilePaths(AnActionEvent event) {
     var changesBrowserBase = event.getData(ChangesBrowserBase.DATA_KEY);
     if (changesBrowserBase == null) {
       return List.of();

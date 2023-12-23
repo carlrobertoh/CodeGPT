@@ -30,7 +30,7 @@ import ee.carlrobert.codegpt.ui.checkbox.FileCheckboxTree;
 import ee.carlrobert.codegpt.ui.checkbox.PsiElementCheckboxTree;
 import ee.carlrobert.codegpt.ui.checkbox.VirtualFileCheckboxTree;
 import ee.carlrobert.codegpt.util.file.FileUtil;
-import ee.carlrobert.embedding.CheckedFile;
+import ee.carlrobert.embedding.ReferencedFile;
 import java.awt.Dimension;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -62,7 +62,7 @@ public class IncludeFilesInContextAction extends AnAction {
       throw new RuntimeException("Could not obtain file tree");
     }
 
-    var totalTokensLabel = new TotalTokensLabel(checkboxTree.getCheckedFiles());
+    var totalTokensLabel = new TotalTokensLabel(checkboxTree.getReferencedFiles());
     checkboxTree.addCheckboxTreeListener(new CheckboxTreeListener() {
       @Override
       public void nodeStateChanged(@NotNull CheckedTreeNode node) {
@@ -81,10 +81,10 @@ public class IncludeFilesInContextAction extends AnAction {
         totalTokensLabel,
         checkboxTree);
     if (show == OK_EXIT_CODE) {
-      project.putUserData(CodeGPTKeys.SELECTED_FILES, checkboxTree.getCheckedFiles());
+      project.putUserData(CodeGPTKeys.SELECTED_FILES, checkboxTree.getReferencedFiles());
       project.getMessageBus()
           .syncPublisher(IncludeFilesInContextNotifier.FILES_INCLUDED_IN_CONTEXT_TOPIC)
-          .filesIncluded(checkboxTree.getCheckedFiles());
+          .filesIncluded(checkboxTree.getReferencedFiles());
       includedFilesSettings.setPromptTemplate(promptTemplateTextArea.getText());
       includedFilesSettings.setRepeatableContext(repeatableContextTextArea.getText());
     }
@@ -111,9 +111,9 @@ public class IncludeFilesInContextAction extends AnAction {
     private int fileCount;
     private int totalTokens;
 
-    TotalTokensLabel(List<CheckedFile> checkedFiles) {
-      fileCount = checkedFiles.size();
-      totalTokens = calculateTotalTokens(checkedFiles);
+    TotalTokensLabel(List<ReferencedFile> referencedFiles) {
+      fileCount = referencedFiles.size();
+      totalTokens = calculateTotalTokens(referencedFiles);
       updateText();
     }
 
@@ -167,8 +167,8 @@ public class IncludeFilesInContextAction extends AnAction {
           FileUtil.convertLongValue(totalTokens)));
     }
 
-    private int calculateTotalTokens(List<CheckedFile> checkedFiles) {
-      return checkedFiles.stream()
+    private int calculateTotalTokens(List<ReferencedFile> referencedFiles) {
+      return referencedFiles.stream()
           .mapToInt(file -> encodingManager.countTokens(file.getFileContent()))
           .sum();
     }

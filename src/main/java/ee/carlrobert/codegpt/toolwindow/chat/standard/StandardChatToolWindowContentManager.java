@@ -11,6 +11,7 @@ import com.intellij.openapi.wm.ToolWindowAnchor;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.content.Content;
 import ee.carlrobert.codegpt.Icons;
+import ee.carlrobert.codegpt.completions.ConversationType;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
@@ -30,18 +31,22 @@ public final class StandardChatToolWindowContentManager {
   }
 
   public void sendMessage(Message message) {
+    sendMessage(message, ConversationType.DEFAULT);
+  }
+
+  public void sendMessage(Message message, ConversationType conversationType) {
     getToolWindow().show();
 
     if (ConfigurationState.getInstance().isCreateNewChatOnEachAction()
         || ConversationsState.getCurrentConversation() == null) {
-      createNewTabPanel().sendMessage(message);
+      createNewTabPanel().sendMessage(message, conversationType);
       return;
     }
 
     tryFindChatTabbedPane()
         .map(tabbedPane -> tabbedPane.tryFindActiveTabPanel().orElseGet(this::createNewTabPanel))
         .orElseGet(this::createNewTabPanel)
-        .sendMessage(message);
+        .sendMessage(message, conversationType);
   }
 
   public void displayConversation(@NotNull Conversation conversation) {

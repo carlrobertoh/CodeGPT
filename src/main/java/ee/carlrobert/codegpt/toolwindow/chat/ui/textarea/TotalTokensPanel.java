@@ -16,8 +16,7 @@ import ee.carlrobert.codegpt.CodeGPTKeys;
 import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.actions.IncludeFilesInContextNotifier;
 import ee.carlrobert.codegpt.conversations.Conversation;
-import ee.carlrobert.codegpt.indexes.CodebaseIndexingCompletedNotifier;
-import ee.carlrobert.embedding.CheckedFile;
+import ee.carlrobert.embedding.ReferencedFile;
 import java.awt.FlowLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -114,7 +113,7 @@ public class TotalTokensPanel extends JPanel {
     update();
   }
 
-  public void updateReferencedFilesTokens(List<CheckedFile> includedFiles) {
+  public void updateReferencedFilesTokens(List<ReferencedFile> includedFiles) {
     totalTokensDetails.setReferencedFilesTokens(includedFiles.stream()
         .mapToInt(file -> encodingManager.countTokens(file.getFileContent()))
         .sum());
@@ -123,7 +122,7 @@ public class TotalTokensPanel extends JPanel {
 
   private TotalTokensDetails createTokenDetails(
       Conversation conversation,
-      List<CheckedFile> includedFiles,
+      List<ReferencedFile> includedFiles,
       @Nullable String highlightedText) {
     var tokenDetails = new TotalTokensDetails(encodingManager);
     tokenDetails.setConversationTokens(encodingManager.countConversationTokens(conversation));

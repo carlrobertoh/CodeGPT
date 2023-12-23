@@ -34,9 +34,13 @@ public class CompletionRequestProviderTest extends IntegrationTest {
     conversation.addMessage(secondMessage);
 
     var request = new CompletionRequestProvider(conversation)
-        .buildOpenAIChatCompletionRequest(OpenAIChatCompletionModel.GPT_3_5.getCode(),
-            new Message("TEST_CHAT_COMPLETION_PROMPT"),
-            false,
+        .buildOpenAIChatCompletionRequest(
+            OpenAIChatCompletionModel.GPT_3_5.getCode(),
+            new CallParameters(
+                conversation,
+                ConversationType.DEFAULT,
+                new Message("TEST_CHAT_COMPLETION_PROMPT"),
+                false),
             false,
             null);
 
@@ -59,8 +63,15 @@ public class CompletionRequestProviderTest extends IntegrationTest {
     conversation.addMessage(secondMessage);
 
     var request = new CompletionRequestProvider(conversation)
-        .buildOpenAIChatCompletionRequest(OpenAIChatCompletionModel.GPT_3_5.getCode(),
-            new Message("TEST_CHAT_COMPLETION_PROMPT"), false);
+        .buildOpenAIChatCompletionRequest(
+            OpenAIChatCompletionModel.GPT_3_5.getCode(),
+            new CallParameters(
+                conversation,
+                ConversationType.DEFAULT,
+                new Message("TEST_CHAT_COMPLETION_PROMPT"),
+                false),
+            false,
+            null);
 
     assertThat(request.getMessages())
         .extracting("role", "content")
@@ -82,8 +93,15 @@ public class CompletionRequestProviderTest extends IntegrationTest {
     conversation.addMessage(secondMessage);
 
     var request = new CompletionRequestProvider(conversation)
-        .buildOpenAIChatCompletionRequest(OpenAIChatCompletionModel.GPT_3_5.getCode(),
-            secondMessage, true);
+        .buildOpenAIChatCompletionRequest(
+            OpenAIChatCompletionModel.GPT_3_5.getCode(),
+            new CallParameters(
+                conversation,
+                ConversationType.DEFAULT,
+                secondMessage,
+                true),
+            false,
+            null);
 
     assertThat(request.getMessages())
         .extracting("role", "content")
@@ -105,8 +123,15 @@ public class CompletionRequestProviderTest extends IntegrationTest {
     conversation.discardTokenLimits();
 
     var request = new CompletionRequestProvider(conversation)
-        .buildOpenAIChatCompletionRequest(OpenAIChatCompletionModel.GPT_3_5.getCode(),
-            new Message("TEST_CHAT_COMPLETION_PROMPT"), false);
+        .buildOpenAIChatCompletionRequest(
+            OpenAIChatCompletionModel.GPT_3_5.getCode(),
+            new CallParameters(
+                conversation,
+                ConversationType.DEFAULT,
+                new Message("TEST_CHAT_COMPLETION_PROMPT"),
+                false),
+            false,
+            null);
 
     assertThat(request.getMessages())
         .extracting("role", "content")
@@ -125,8 +150,15 @@ public class CompletionRequestProviderTest extends IntegrationTest {
 
     assertThrows(TotalUsageExceededException.class,
         () -> new CompletionRequestProvider(conversation)
-            .buildOpenAIChatCompletionRequest(OpenAIChatCompletionModel.GPT_3_5.getCode(),
-                createDummyMessage(100), false));
+            .buildOpenAIChatCompletionRequest(
+                OpenAIChatCompletionModel.GPT_3_5.getCode(),
+                new CallParameters(
+                    conversation,
+                    ConversationType.DEFAULT,
+                    createDummyMessage(100),
+                    false),
+                false,
+                null));
   }
 
   public void testContextualSearch() {
@@ -173,8 +205,15 @@ public class CompletionRequestProviderTest extends IntegrationTest {
     });
 
     var request = new CompletionRequestProvider(conversation)
-        .buildOpenAIChatCompletionRequest(OpenAIChatCompletionModel.GPT_3_5.getCode(),
-            new Message("TEST_CHAT_COMPLETION_PROMPT"), false, true, null);
+        .buildOpenAIChatCompletionRequest(
+            OpenAIChatCompletionModel.GPT_3_5.getCode(),
+            new CallParameters(
+                conversation,
+                ConversationType.DEFAULT,
+                new Message("TEST_CHAT_COMPLETION_PROMPT"),
+                false),
+            true,
+            null);
 
     assertThat(request.getModel()).isEqualTo("gpt-3.5-turbo");
     assertThat(request.getMessages().size()).isEqualTo(1);
