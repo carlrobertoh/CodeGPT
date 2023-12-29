@@ -15,7 +15,7 @@ import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
 import ee.carlrobert.codegpt.util.file.FileUtil;
-import ee.carlrobert.embedding.CheckedFile;
+import ee.carlrobert.embedding.ReferencedFile;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -67,15 +67,12 @@ public class EditorActionsUtil {
             message.setUserMessage(prompt.replace("{{selectedCode}}", ""));
             var toolWindowContentManager =
                 project.getService(StandardChatToolWindowContentManager.class);
-            var toolWindow = toolWindowContentManager.getToolWindow();
-            if (toolWindow != null) {
-              toolWindow.show();
-            }
+            toolWindowContentManager.getToolWindow().show();
 
             message.setReferencedFilePaths(
                 Stream.ofNullable(project.getUserData(CodeGPTKeys.SELECTED_FILES))
                     .flatMap(Collection::stream)
-                    .map(CheckedFile::getFilePath)
+                    .map(ReferencedFile::getFilePath)
                     .collect(toList()));
             toolWindowContentManager.sendMessage(message);
           }

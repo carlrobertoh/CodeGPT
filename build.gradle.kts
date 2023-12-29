@@ -38,7 +38,7 @@ intellij {
   pluginName.set(properties("pluginName"))
   version.set(properties("platformVersion"))
   type.set(properties("platformType"))
-  plugins.set(listOf())
+  plugins.set(listOf("java"))
 }
 
 changelog {

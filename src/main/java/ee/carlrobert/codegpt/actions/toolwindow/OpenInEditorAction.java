@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.actions.toolwindow;
 
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 import com.intellij.icons.AllIcons;
@@ -40,11 +41,11 @@ public class OpenInEditorAction extends AnAction {
       if (project != null && currentConversation != null) {
         var dateTimeStamp = currentConversation.getUpdatedOn()
             .format(DateTimeFormatter.ofPattern("yyyyMMddHHmm"));
-        var fileName = String.format("%s_%s.md", currentConversation.getModel(), dateTimeStamp);
+        var fileName = format("%s_%s.md", currentConversation.getModel(), dateTimeStamp);
         var fileContent = currentConversation
             .getMessages()
             .stream()
-            .map(it -> String.format("### User:\n%s\n### CodeGPT:\n%s\n", it.getPrompt(),
+            .map(it -> format("### User:\n%s\n### CodeGPT:\n%s\n", it.getPrompt(),
                 it.getResponse()))
             .collect(Collectors.joining());
         VirtualFile file = new LightVirtualFile(fileName, fileContent);

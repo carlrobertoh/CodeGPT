@@ -83,8 +83,4 @@ public class Conversation {
         .filter(message -> !message.getId().equals(messageId))
         .collect(toList()));
   }
-
-  public void removeMessages() {
-    messages.clear();
-  }
 }
