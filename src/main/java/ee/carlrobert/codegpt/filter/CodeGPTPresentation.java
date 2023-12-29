@@ -9,15 +9,15 @@ import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
 import ee.carlrobert.codegpt.Icons;
+import ee.carlrobert.codegpt.conversations.message.Message;
+import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
 import java.awt.Cursor;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
-import javax.swing.*;
-
-import ee.carlrobert.codegpt.conversations.message.Message;
-import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
+import javax.swing.Icon;
+import javax.swing.SwingUtilities;
 import org.jetbrains.annotations.NotNull;
 
 public class CodeGPTPresentation implements EditorCustomElementRenderer, InputHandler {
@@ -56,12 +56,12 @@ public class CodeGPTPresentation implements EditorCustomElementRenderer, InputHa
   }
 
   public int calcWidthInPixels(@NotNull Inlay inlay) {
-    return Icons.DefaultIcon.getIconWidth();
+    return Icons.Default.getIconWidth();
   }
 
   public void paint(@NotNull Inlay inlay, @NotNull Graphics g, @NotNull Rectangle r,
       @NotNull TextAttributes textAttributes) {
-    Icon consoleIcon = Icons.DefaultIcon;
+    Icon consoleIcon = Icons.Default;
     int curX = r.x + r.width / 2 - consoleIcon.getIconWidth() / 2;
     int curY = r.y + r.height / 2 - consoleIcon.getIconHeight() / 2;
     consoleIcon.paintIcon(inlay.getEditor().getComponent(), g, curX, curY);

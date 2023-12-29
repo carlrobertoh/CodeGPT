@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.toList;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
+import ee.carlrobert.codegpt.completions.CallParameters;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Optional;
 import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
@@ -60,13 +62,11 @@ public final class ConversationService {
     conversationsMapping.put(conversation.getClientCode(), conversations);
   }
 
-  public void saveMessage(
-      String response,
-      Message message,
-      Conversation conversation,
-      boolean retry) {
+  public void saveMessage(String response, CallParameters callParameters) {
+    var conversation = callParameters.getConversation();
+    var message = callParameters.getMessage();
     var conversationMessages = conversation.getMessages();
-    if (retry && !conversationMessages.isEmpty()) {
+    if (callParameters.isRetry() && !conversationMessages.isEmpty()) {
       var messageToBeSaved = conversationMessages.stream()
           .filter(item -> item.getId().equals(message.getId()))
           .findFirst().orElseThrow();
@@ -82,9 +82,7 @@ public final class ConversationService {
 
   public void saveMessage(@NotNull Conversation conversation, @NotNull Message message) {
     conversation.setUpdatedOn(LocalDateTime.now());
-    var iterator = conversationState.getConversationsMapping()
-        .get(conversation.getClientCode())
-        .listIterator();
+    var iterator = getIterator(conversation.getClientCode());
     while (iterator.hasNext()) {
       var next = iterator.next();
       next.setMessages(
@@ -102,9 +100,7 @@ public final class ConversationService {
 
   public void saveConversation(Conversation conversation) {
     conversation.setUpdatedOn(LocalDateTime.now());
-    var iterator = conversationState.getConversationsMapping()
-        .get(conversation.getClientCode())
-        .listIterator();
+    var iterator = getIterator(conversation.getClientCode());
     while (iterator.hasNext()) {
       var next = iterator.next();
       if (next.getId().equals(conversation.getId())) {
@@ -128,9 +124,7 @@ public final class ConversationService {
   }
 
   public void deleteConversation(Conversation conversation) {
-    var iterator = conversationState.getConversationsMapping()
-        .get(conversation.getClientCode())
-        .listIterator();
+    var iterator = getIterator(conversation.getClientCode());
     while (iterator.hasNext()) {
       var next = iterator.next();
       if (next.getId().equals(conversation.getId())) {
@@ -166,6 +160,12 @@ public final class ConversationService {
 
   public Optional<Conversation> getNextConversation() {
     return tryGetNextOrPreviousConversation(false);
+  }
+
+  private ListIterator<Conversation> getIterator(String clientCode) {
+    return conversationState.getConversationsMapping()
+        .get(clientCode)
+        .listIterator();
   }
 
   private Optional<Conversation> tryGetNextOrPreviousConversation(boolean isPrevious) {

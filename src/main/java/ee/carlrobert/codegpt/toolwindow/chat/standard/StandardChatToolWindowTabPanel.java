@@ -4,10 +4,11 @@ import static java.lang.String.format;
 
 import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.project.Project;
+import ee.carlrobert.codegpt.completions.ConversationType;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.state.YouSettingsState;
-import ee.carlrobert.codegpt.toolwindow.chat.BaseChatToolWindowTabPanel;
+import ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowTabPanel;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ChatMessageResponseBody;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ResponsePanel;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.UserMessagePanel;
@@ -17,7 +18,7 @@ import ee.carlrobert.codegpt.util.file.FileUtil;
 import javax.swing.JComponent;
 import org.jetbrains.annotations.NotNull;
 
-public class StandardChatToolWindowTabPanel extends BaseChatToolWindowTabPanel {
+public class StandardChatToolWindowTabPanel extends ChatToolWindowTabPanel {
 
   public StandardChatToolWindowTabPanel(
       @NotNull Project project,
@@ -49,7 +50,7 @@ public class StandardChatToolWindowTabPanel extends BaseChatToolWindowTabPanel {
           format("\n```%s\n%s\n```", fileExtension, editor.getSelectionModel().getSelectedText())));
       message.setUserMessage(action.getUserMessage());
 
-      sendMessage(message);
+      sendMessage(message, ConversationType.DEFAULT);
     });
   }
 
@@ -69,7 +70,7 @@ public class StandardChatToolWindowTabPanel extends BaseChatToolWindowTabPanel {
       var messagePanel = toolWindowScrollablePanel.addMessage(message.getId());
       messagePanel.add(new UserMessagePanel(project, message, this));
       messagePanel.add(new ResponsePanel()
-          .withReloadAction(() -> reloadMessage(message, conversation))
+          .withReloadAction(() -> reloadMessage(message, conversation, ConversationType.DEFAULT))
           .withDeleteAction(() -> removeMessage(message.getId(), conversation))
           .addContent(messageResponseBody));
     });

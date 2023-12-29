@@ -12,7 +12,7 @@ import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.JBUI.CurrentTheme.NotificationInfo;
 import ee.carlrobert.codegpt.CodeGPTKeys;
 import ee.carlrobert.codegpt.actions.IncludeFilesInContextNotifier;
-import ee.carlrobert.embedding.CheckedFile;
+import ee.carlrobert.embedding.ReferencedFile;
 import java.awt.BorderLayout;
 import java.nio.file.Paths;
 import java.util.List;
@@ -47,14 +47,14 @@ public class SelectedFilesNotification extends JPanel {
     }), BorderLayout.LINE_END);
   }
 
-  public void displaySelectedFilesNotification(@NotNull List<CheckedFile> checkedFiles) {
-    if (checkedFiles.isEmpty()) {
+  public void displaySelectedFilesNotification(@NotNull List<ReferencedFile> referencedFiles) {
+    if (referencedFiles.isEmpty()) {
       return;
     }
 
-    label.setText(checkedFiles.size() + " files selected");
-    var referencedFilePaths = checkedFiles.stream()
-        .map(CheckedFile::getFilePath)
+    label.setText(referencedFiles.size() + " files selected");
+    var referencedFilePaths = referencedFiles.stream()
+        .map(ReferencedFile::getFilePath)
         .collect(Collectors.toList());
     label.setToolTipText(getHtml(referencedFilePaths));
     setVisible(true);

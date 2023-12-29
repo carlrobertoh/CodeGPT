@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.settings.service;
 
+import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 
 import com.intellij.icons.AllIcons.Actions;
@@ -315,7 +316,7 @@ public class LlamaModelPreferencesForm {
       return "";
     }
 
-    return String.format("<html>"
+    return format("<html>"
         + "<p style=\"margin: 0\"><small>File Size: <strong>%.2f GB</strong></small></p>"
         + "<p style=\"margin: 0\"><small>Max RAM Required: <strong>%.2f GB</strong></small></p>"
         + "</html>", details.fileSize, details.maxRAMRequired);

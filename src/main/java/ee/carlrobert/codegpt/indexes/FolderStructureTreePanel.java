@@ -20,7 +20,7 @@ import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.AsyncProcessIcon;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.util.file.FileUtil;
-import ee.carlrobert.embedding.CheckedFile;
+import ee.carlrobert.embedding.ReferencedFile;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.MouseAdapter;
@@ -132,9 +132,9 @@ public class FolderStructureTreePanel {
     return panel;
   }
 
-  public List<CheckedFile> getCheckedFiles() {
+  public List<ReferencedFile> getReferencedFiles() {
     return getCheckedVirtualFiles().stream()
-        .map(item -> new CheckedFile(new File(item.getPath())))
+        .map(item -> new ReferencedFile(new File(item.getPath())))
         .collect(toList());
   }
 

@@ -5,6 +5,7 @@ import static com.intellij.openapi.ui.Messages.OK;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import ee.carlrobert.codegpt.EncodingManager;
+import ee.carlrobert.codegpt.completions.CallParameters;
 import ee.carlrobert.codegpt.completions.CompletionResponseEventListener;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationService;
@@ -118,12 +119,9 @@ abstract class ToolWindowCompletionResponseEventListener implements
   }
 
   @Override
-  public void handleCompleted(
-      String fullMessage,
-      Message message,
-      Conversation conversation,
-      boolean retry) {
-    conversationService.saveMessage(fullMessage, message, conversation, retry);
+  public void handleCompleted(String fullMessage, CallParameters callParameters) {
+    var message = callParameters.getMessage();
+    conversationService.saveMessage(fullMessage, callParameters);
 
     var serpResults = serpResultsMapping.get(message.getId());
     var containsResults = serpResults != null && !serpResults.isEmpty();
@@ -139,7 +137,7 @@ abstract class ToolWindowCompletionResponseEventListener implements
           responseContainer.displaySerpResults(serpResults);
         }
         totalTokensPanel.updateUserPromptTokens(userPromptTextArea.getText());
-        totalTokensPanel.updateConversationTokens(conversation);
+        totalTokensPanel.updateConversationTokens(callParameters.getConversation());
       } finally {
         stopStreaming(responseContainer);
       }

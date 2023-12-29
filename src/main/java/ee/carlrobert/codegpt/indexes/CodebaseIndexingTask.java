@@ -15,8 +15,8 @@ import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.completions.CompletionClientProvider;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.codegpt.util.file.FileUtil;
-import ee.carlrobert.embedding.CheckedFile;
 import ee.carlrobert.embedding.EmbeddingsService;
+import ee.carlrobert.embedding.ReferencedFile;
 import ee.carlrobert.vector.VectorStore;
 import java.util.List;
 import java.util.Map;
@@ -26,13 +26,13 @@ public class CodebaseIndexingTask extends Task.Backgroundable {
 
   private static final Logger LOG = Logger.getInstance(CodebaseIndexingTask.class);
   private final Project project;
-  private final List<CheckedFile> checkedFiles;
+  private final List<ReferencedFile> referencedFiles;
   private final EmbeddingsService embeddingsService;
 
-  public CodebaseIndexingTask(Project project, List<CheckedFile> checkedFiles) {
+  public CodebaseIndexingTask(Project project, List<ReferencedFile> referencedFiles) {
     super(project, CodeGPTBundle.get("codebaseIndexing.task.title"), true);
     this.project = project;
-    this.checkedFiles = checkedFiles;
+    this.referencedFiles = referencedFiles;
     this.embeddingsService = new EmbeddingsService(
         CompletionClientProvider.getOpenAIClient(),
         CodeGPTPlugin.getPluginBasePath());
@@ -49,7 +49,7 @@ public class CodebaseIndexingTask extends Task.Backgroundable {
 
     String fileContent;
     try {
-      fileContent = new ObjectMapper().writeValueAsString(Map.of("content", checkedFiles));
+      fileContent = new ObjectMapper().writeValueAsString(Map.of("content", referencedFiles));
     } catch (JsonProcessingException e) {
       throw new RuntimeException("Unable to serialize json file");
     }
@@ -63,7 +63,7 @@ public class CodebaseIndexingTask extends Task.Backgroundable {
     try {
       indicator.setFraction(0);
       List<Item<Object, double[]>> embeddings =
-          embeddingsService.createEmbeddings(checkedFiles, indicator);
+          embeddingsService.createEmbeddings(referencedFiles, indicator);
       VectorStore.getInstance(CodeGPTPlugin.getPluginBasePath()).save(embeddings);
       OverlayUtil.showNotification("Indexing completed", NotificationType.INFORMATION);
 

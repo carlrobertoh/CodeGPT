@@ -9,7 +9,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.impl.file.PsiDirectoryImpl;
 import com.intellij.ui.CheckedTreeNode;
-import ee.carlrobert.embedding.CheckedFile;
+import ee.carlrobert.embedding.ReferencedFile;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
@@ -23,7 +23,7 @@ public class PsiElementCheckboxTree extends FileCheckboxTree {
     setRootVisible(true);
   }
 
-  public List<CheckedFile> getCheckedFiles() {
+  public List<ReferencedFile> getReferencedFiles() {
     var checkedNodes = getCheckedNodes(
         PsiElement.class,
         node -> Optional.ofNullable(node.getContainingFile())
@@ -34,7 +34,8 @@ public class PsiElementCheckboxTree extends FileCheckboxTree {
     }
 
     return Arrays.stream(checkedNodes)
-        .map(item -> new CheckedFile(new File(item.getContainingFile().getVirtualFile().getPath())))
+        .map(item -> new ReferencedFile(
+            new File(item.getContainingFile().getVirtualFile().getPath())))
         .collect(toList());
   }
 
