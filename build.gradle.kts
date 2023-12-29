@@ -56,7 +56,7 @@ dependencies {
     // vulnerable transitive dependency
     exclude(group = "org.jsoup", module = "jsoup")
   }
-  implementation("org.jsoup:jsoup:1.17.1")
+  implementation("org.jsoup:jsoup:1.17.2")
   implementation("org.apache.commons:commons-text:1.11.0")
   implementation("com.knuddels:jtokkit:0.6.1")
 
