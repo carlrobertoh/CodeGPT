@@ -20,6 +20,7 @@ public class CompletionRequestHandler {
 
   private final StringBuilder messageBuilder = new StringBuilder();
   private final boolean useContextualSearch;
+  private final boolean includeSystemPrompt;
   private final CompletionResponseEventListener completionResponseEventListener;
   private SwingWorker<Void, String> swingWorker;
   private EventSource eventSource;
@@ -28,11 +29,21 @@ public class CompletionRequestHandler {
       boolean useContextualSearch,
       CompletionResponseEventListener completionResponseEventListener) {
     this.useContextualSearch = useContextualSearch;
+    this.includeSystemPrompt = true;
+    this.completionResponseEventListener = completionResponseEventListener;
+  }
+
+  public CompletionRequestHandler(
+      boolean useContextualSearch,
+      boolean includeSystemPrompt,
+      CompletionResponseEventListener completionResponseEventListener) {
+    this.useContextualSearch = useContextualSearch;
+    this.includeSystemPrompt = includeSystemPrompt;
     this.completionResponseEventListener = completionResponseEventListener;
   }
 
   public void call(Conversation conversation, Message message, boolean retry) {
-    swingWorker = new CompletionRequestWorker(conversation, message, retry);
+    swingWorker = new CompletionRequestWorker(conversation, message, retry, includeSystemPrompt);
     swingWorker.execute();
   }
 
@@ -47,10 +58,11 @@ public class CompletionRequestHandler {
       @NotNull Conversation conversation,
       @NotNull Message message,
       boolean retry,
+      boolean includeSystemPrompt,
       CompletionEventListener eventListener) {
     try {
       return CompletionRequestService.getInstance()
-          .getChatCompletionAsync(conversation, message, retry, useContextualSearch, eventListener);
+          .getChatCompletionAsync(conversation, message, retry, useContextualSearch, includeSystemPrompt, eventListener);
     } catch (Throwable ex) {
       handleCallException(ex);
       throw ex;
@@ -72,11 +84,13 @@ public class CompletionRequestHandler {
     private final Conversation conversation;
     private final Message message;
     private final boolean retry;
+    private final boolean includeSystemPrompt;
 
-    public CompletionRequestWorker(Conversation conversation, Message message, boolean retry) {
+    public CompletionRequestWorker(Conversation conversation, Message message, boolean retry, boolean includeSystemPrompt) {
       this.conversation = conversation;
       this.message = message;
       this.retry = retry;
+      this.includeSystemPrompt = includeSystemPrompt;
     }
 
     protected Void doInBackground() {
@@ -86,6 +100,7 @@ public class CompletionRequestHandler {
             conversation,
             message,
             retry,
+            includeSystemPrompt,
             new YouRequestCompletionEventListener());
       } catch (TotalUsageExceededException e) {
         completionResponseEventListener.handleTokensExceeded(conversation, message);

@@ -29,6 +29,7 @@ public final class CompletionRequestService {
       @NotNull Message message,
       boolean retry,
       boolean useContextualSearch,
+      boolean includeSystemPrompt,
       CompletionEventListener eventListener) {
     var requestProvider = new CompletionRequestProvider(conversation);
     switch (SettingsState.getInstance().getSelectedService()) {
@@ -40,6 +41,7 @@ public final class CompletionRequestService {
                 message,
                 retry,
                 useContextualSearch,
+                includeSystemPrompt,
                 openAISettings.isUsingCustomPath() ? openAISettings.getPath() : null),
             eventListener);
       case AZURE:
@@ -49,6 +51,7 @@ public final class CompletionRequestService {
                 null,
                 message,
                 retry,
+                includeSystemPrompt,
                 useContextualSearch,
                 azureSettings.isUsingCustomPath() ? azureSettings.getPath() : null),
             eventListener);

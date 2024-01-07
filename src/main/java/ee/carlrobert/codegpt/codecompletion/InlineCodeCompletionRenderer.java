@@ -1,22 +1,25 @@
 package ee.carlrobert.codegpt.codecompletion;
 
 import com.intellij.openapi.actionSystem.ActionManager;
-import com.intellij.openapi.actionSystem.KeyboardShortcut;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.command.WriteCommandAction;
+import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.EditorCustomElementRenderer;
+import com.intellij.openapi.editor.Inlay;
 import com.intellij.openapi.editor.colors.EditorFontType;
 import com.intellij.openapi.editor.event.*;
 import com.intellij.openapi.editor.ex.EditorEx;
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.command.WriteCommandAction;
-import com.intellij.openapi.editor.Inlay;
 import com.intellij.openapi.editor.markup.TextAttributes;
-import com.intellij.openapi.keymap.Keymap;
-import com.intellij.openapi.keymap.KeymapManager;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.ui.JBColor;
-import ee.carlrobert.codegpt.actions.editor.InsertInlineTextAction;
+import ee.carlrobert.codegpt.completions.CompletionRequestHandler;
+import ee.carlrobert.codegpt.conversations.Conversation;
+import ee.carlrobert.codegpt.conversations.ConversationService;
+import ee.carlrobert.codegpt.conversations.message.Message;
+import ee.carlrobert.codegpt.settings.service.FillInTheMiddle;
+import ee.carlrobert.codegpt.settings.state.SettingsState;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -28,9 +31,16 @@ import java.awt.geom.Rectangle2D;
 public class InlineCodeCompletionRenderer implements EditorCustomElementRenderer, DocumentListener, KeyListener, CaretListener, EditorMouseListener, SelectionListener {
     public static final Key<Inlay<InlineCodeCompletionRenderer>> INLAY_KEY = Key.create("codegpt.inlay");
     public static final String ACTION_ID = "InsertInlineTextAction";
-    public static final String INLINE_TEXT = "testing test";
+    public static final int MAX_OFFSET = 400;
+
     private Timer typingTimer;
+    private String inlayText = "";
+    private CompletionRequestHandler requestHandler;
+
     private final Editor editor;
+    private final ConversationService conversationService;
+    private final Conversation conversation;
+
 
     public InlineCodeCompletionRenderer(Editor editor) {
         this.editor = editor;
@@ -40,6 +50,10 @@ public class InlineCodeCompletionRenderer implements EditorCustomElementRenderer
         editor.getCaretModel().addCaretListener(this);
         editor.getSelectionModel().addSelectionListener(this);
         initTypingTimer();
+        this.conversationService = ConversationService.getInstance();
+        var completionCode = SettingsState.getInstance().getSelectedService().getCompletionCode() + ".inline";
+        this.conversation = conversationService.createConversation(completionCode);
+        conversationService.addConversation(this.conversation);
     }
 
     private void initTypingTimer() {
@@ -47,14 +61,24 @@ public class InlineCodeCompletionRenderer implements EditorCustomElementRenderer
             if (editor != null && !editor.isDisposed()) {
                 Inlay<InlineCodeCompletionRenderer> inlay = editor.getUserData(INLAY_KEY);
                 if (inlay == null) {
-                    createInlay();
+                    int offset = editor.getCaretModel().getOffset();
+                    Document document = editor.getDocument();
 
-                    ActionManager actionManager = ActionManager.getInstance();
-                    InsertInlineTextAction insertAction = new InsertInlineTextAction(INLAY_KEY, INLINE_TEXT);
-                    actionManager.registerAction(ACTION_ID, insertAction);
-
-                    Keymap keymap = KeymapManager.getInstance().getActiveKeymap();
-                    keymap.addShortcut(ACTION_ID, new KeyboardShortcut(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), null));
+                    int begin = Integer.max(0, offset - MAX_OFFSET);
+                    int end = Integer.min(document.getTextLength(), offset + MAX_OFFSET);
+                    if (begin == end) {
+                        return;
+                    }
+                    var before = document.getText(new TextRange(begin, offset));
+                    var after = document.getText(new TextRange(offset, end));
+                    FillInTheMiddle fim = SettingsState.getInstance().getSelectedService().getFillInTheMiddle();
+                    var message = new Message(fim.getPrefix() + before + fim.getSuffix() + after + fim.getMiddle());
+                    System.out.println("prompt: " + message.getPrompt());
+                    typingTimer.stop();
+                    requestHandler = new CompletionRequestHandler(
+                            false, false,
+                            new InlineCodeCompletionResponseEventListener( this));
+                    requestHandler.call(conversation, message, false);
                 }
             }
         }));
@@ -62,7 +86,8 @@ public class InlineCodeCompletionRenderer implements EditorCustomElementRenderer
         typingTimer.start();
     }
 
-    private void createInlay() {
+    void createInlay(String inlineCode) {
+        inlayText = inlineCode;
         WriteCommandAction.runWriteCommandAction(editor.getProject(), () -> {
             int offset = editor.getCaretModel().getOffset();
             Inlay<InlineCodeCompletionRenderer> inlay = editor.getInlayModel().addInlineElement(offset, true, this);
@@ -83,8 +108,15 @@ public class InlineCodeCompletionRenderer implements EditorCustomElementRenderer
         resetSuggestion();
     }
 
-    private void resetSuggestion() {
+    void restartTimer(){
         typingTimer.restart();
+    }
+
+    private void resetSuggestion() {
+        if (requestHandler != null) {
+            requestHandler.cancel();
+        }
+        restartTimer();
         ActionManager actionManager = ActionManager.getInstance();
         actionManager.unregisterAction(ACTION_ID);
         removeInlay();
@@ -97,6 +129,9 @@ public class InlineCodeCompletionRenderer implements EditorCustomElementRenderer
     }
 
     private void disableSuggestions() {
+        if (requestHandler != null) {
+            requestHandler.cancel();
+        }
         resetSuggestion();
         typingTimer.stop();
     }
@@ -134,7 +169,7 @@ public class InlineCodeCompletionRenderer implements EditorCustomElementRenderer
     @Override
     public int calcWidthInPixels(@NotNull Inlay inlay) {
         FontMetrics fontMetrics = editor.getContentComponent().getFontMetrics(editor.getColorsScheme().getFont(EditorFontType.PLAIN));
-        return fontMetrics.stringWidth(INLINE_TEXT);
+        return fontMetrics.stringWidth(inlayText);
     }
 
 
@@ -154,7 +189,7 @@ public class InlineCodeCompletionRenderer implements EditorCustomElementRenderer
         int ascent = editor.getAscent();
 
         // Draw the string with the custom attributes
-        g.drawString(INLINE_TEXT, (int) targetRegion.getX(), (int) targetRegion.getY() + ascent);
+        g.drawString(inlayText, (int) targetRegion.getX(), (int) targetRegion.getY() + ascent);
     }
 
 }

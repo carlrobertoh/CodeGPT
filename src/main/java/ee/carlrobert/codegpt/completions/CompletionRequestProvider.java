@@ -131,7 +131,7 @@ public class CompletionRequestProvider {
       String model,
       Message message,
       boolean retry) {
-    return buildOpenAIChatCompletionRequest(model, message, retry, false, null);
+    return buildOpenAIChatCompletionRequest(model, message, retry, false, true, null);
   }
 
   public OpenAIChatCompletionRequest buildOpenAIChatCompletionRequest(
@@ -139,9 +139,10 @@ public class CompletionRequestProvider {
       Message message,
       boolean retry,
       boolean useContextualSearch,
+      boolean includeSystemPrompt,
       @Nullable String overriddenPath) {
     var builder = new OpenAIChatCompletionRequest.Builder(
-        buildMessages(model, message, retry, useContextualSearch))
+        buildMessages(model, message, retry, useContextualSearch, includeSystemPrompt))
         .setModel(model)
         .setMaxTokens(ConfigurationState.getInstance().getMaxTokens())
         .setTemperature(ConfigurationState.getInstance().getTemperature());
@@ -156,23 +157,26 @@ public class CompletionRequestProvider {
   public List<OpenAIChatCompletionMessage> buildMessages(
       Message message,
       boolean retry,
-      boolean useContextualSearch) {
+      boolean useContextualSearch,
+      boolean includeSystemPrompt) {
     var messages = new ArrayList<OpenAIChatCompletionMessage>();
     if (useContextualSearch) {
       var prompt = embeddingsService.buildPromptWithContext(message.getPrompt());
       LOG.info("Retrieved context:\n" + prompt);
       messages.add(new OpenAIChatCompletionMessage("user", prompt));
     } else {
-      var systemPrompt = ConfigurationState.getInstance().getSystemPrompt();
-      messages.add(new OpenAIChatCompletionMessage("system",
-          systemPrompt.isEmpty() ? COMPLETION_SYSTEM_PROMPT : systemPrompt));
+      if (includeSystemPrompt) {
+        var systemPrompt = ConfigurationState.getInstance().getSystemPrompt();
+        messages.add(new OpenAIChatCompletionMessage("system",
+                systemPrompt.isEmpty() ? COMPLETION_SYSTEM_PROMPT : systemPrompt));
 
-      for (var prevMessage : conversation.getMessages()) {
-        if (retry && prevMessage.getId().equals(message.getId())) {
-          break;
+        for (var prevMessage : conversation.getMessages()) {
+          if (retry && prevMessage.getId().equals(message.getId())) {
+            break;
+          }
+          messages.add(new OpenAIChatCompletionMessage("user", prevMessage.getPrompt()));
+          messages.add(new OpenAIChatCompletionMessage("assistant", prevMessage.getResponse()));
         }
-        messages.add(new OpenAIChatCompletionMessage("user", prevMessage.getPrompt()));
-        messages.add(new OpenAIChatCompletionMessage("assistant", prevMessage.getResponse()));
       }
       messages.add(new OpenAIChatCompletionMessage("user", message.getPrompt()));
     }
@@ -183,8 +187,9 @@ public class CompletionRequestProvider {
       @Nullable String model,
       Message message,
       boolean retry,
-      boolean useContextualSearch) {
-    var messages = buildMessages(message, retry, useContextualSearch);
+      boolean useContextualSearch,
+      boolean includeSystemPrompt) {
+    var messages = buildMessages(message, retry, useContextualSearch, includeSystemPrompt);
 
     if (model == null || SettingsState.getInstance().getSelectedService() == ServiceType.YOU) {
       return messages;
