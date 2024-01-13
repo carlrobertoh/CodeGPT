@@ -38,7 +38,7 @@ intellij {
   pluginName.set(properties("pluginName"))
   version.set(properties("platformVersion"))
   type.set(properties("platformType"))
-  plugins.set(listOf())
+  plugins.set(listOf("java"))
 }
 
 changelog {
@@ -50,13 +50,13 @@ dependencies {
   implementation(project(":codegpt-core"))
   implementation(project(":codegpt-telemetry"))
 
-  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.16.0")
-  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.0")
+  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.16.1")
+  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.1")
   implementation("com.vladsch.flexmark:flexmark-all:0.64.8") {
     // vulnerable transitive dependency
     exclude(group = "org.jsoup", module = "jsoup")
   }
-  implementation("org.jsoup:jsoup:1.17.1")
+  implementation("org.jsoup:jsoup:1.17.2")
   implementation("org.apache.commons:commons-text:1.11.0")
   implementation("com.knuddels:jtokkit:0.6.1")
 

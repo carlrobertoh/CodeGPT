@@ -6,7 +6,7 @@ import com.intellij.icons.AllIcons;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.CheckedTreeNode;
 import com.intellij.util.PlatformIcons;
-import ee.carlrobert.embedding.CheckedFile;
+import ee.carlrobert.embedding.ReferencedFile;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
@@ -19,14 +19,14 @@ public class VirtualFileCheckboxTree extends FileCheckboxTree {
     super(createFileTypesRenderer(), createRootNode(rootFiles));
   }
 
-  public List<CheckedFile> getCheckedFiles() {
+  public List<ReferencedFile> getReferencedFiles() {
     var checkedNodes = getCheckedNodes(VirtualFile.class, Objects::nonNull);
     if (checkedNodes.length > 1000) {
       throw new RuntimeException("Too many files selected");
     }
 
     return Arrays.stream(checkedNodes)
-        .map(item -> new CheckedFile(new File(item.getPath())))
+        .map(item -> new ReferencedFile(new File(item.getPath())))
         .collect(toList());
   }
 

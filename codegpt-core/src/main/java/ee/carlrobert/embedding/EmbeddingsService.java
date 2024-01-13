@@ -64,16 +64,16 @@ public class EmbeddingsService {
   }
 
   public List<Item<Object, double[]>> createEmbeddings(
-      List<CheckedFile> checkedFiles,
+      List<ReferencedFile> referencedFiles,
       @Nullable ProgressIndicator indicator) {
     var words = new ArrayList<Item<Object, double[]>>();
-    for (int i = 0; i < checkedFiles.size(); i++) {
+    for (int i = 0; i < referencedFiles.size(); i++) {
       try {
-        var checkedFile = checkedFiles.get(i);
-        addEmbeddings(checkedFile, words);
+        var referencedFile = referencedFiles.get(i);
+        addEmbeddings(referencedFile, words);
 
         if (indicator != null) {
-          indicator.setFraction((double) i / checkedFiles.size());
+          indicator.setFraction((double) i / referencedFiles.size());
         }
       } catch (Throwable t) {
         // ignore
@@ -101,24 +101,26 @@ public class EmbeddingsService {
         .getContent();
   }
 
-  private void addEmbeddings(CheckedFile checkedFile, List<Item<Object, double[]>> prevEmbeddings) {
-    var fileExtension = checkedFile.getFileExtension();
+  private void addEmbeddings(
+      ReferencedFile referencedFile,
+      List<Item<Object, double[]>> prevEmbeddings) {
+    var fileExtension = referencedFile.getFileExtension();
     var codeSplitter = SplitterFactory.getCodeSplitter(fileExtension);
     if (codeSplitter != null) {
       var chunks = codeSplitter.split(
-          checkedFile.getFileName(),
-          checkedFile.getFileContent());
+          referencedFile.getFileName(),
+          referencedFile.getFileContent());
       var embeddings = openAIClient.getEmbeddings(chunks);
       for (int i = 0; i < chunks.size(); i++) {
         prevEmbeddings.add(
-            new Word(chunks.get(i), checkedFile.getFileName(), normalize(embeddings.get(i))));
+            new Word(chunks.get(i), referencedFile.getFileName(), normalize(embeddings.get(i))));
       }
     } else {
-      var chunks = splitText(checkedFile.getFileContent(), 400);
+      var chunks = splitText(referencedFile.getFileContent(), 400);
       var embeddings = getEmbeddings(chunks);
       for (int i = 0; i < chunks.size(); i++) {
         prevEmbeddings.add(
-            new Word(chunks.get(i), checkedFile.getFileName(), normalize(embeddings.get(i))));
+            new Word(chunks.get(i), referencedFile.getFileName(), normalize(embeddings.get(i))));
       }
     }
   }

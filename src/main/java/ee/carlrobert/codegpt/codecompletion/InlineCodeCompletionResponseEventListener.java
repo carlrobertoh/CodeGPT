@@ -6,6 +6,7 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.keymap.Keymap;
 import com.intellij.openapi.keymap.KeymapManager;
 import ee.carlrobert.codegpt.actions.editor.InsertInlineTextAction;
+import ee.carlrobert.codegpt.completions.CallParameters;
 import ee.carlrobert.codegpt.completions.CompletionResponseEventListener;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.message.Message;
@@ -47,18 +48,15 @@ public class InlineCodeCompletionResponseEventListener implements CompletionResp
     }
 
     @Override
-    public void handleCompleted(String fullMessage, Message message, Conversation conversation, boolean retry) {
-        System.out.println("response: " + message.getResponse());
+    public void handleCompleted(String fullMessage, CallParameters callParameters) {
         ApplicationManager.getApplication().invokeLater(() -> {
             ServiceType service = SettingsState.getInstance().getSelectedService();
             String inlineCode = fullMessage.replace(service.getFillInTheMiddle().getEot(),"");
             renderer.createInlay(inlineCode);
-
             InsertInlineTextAction insertAction = new InsertInlineTextAction(INLAY_KEY, inlineCode);
             ActionManager.getInstance().registerAction(ACTION_ID, insertAction);
             Keymap keymap = KeymapManager.getInstance().getActiveKeymap();
             keymap.addShortcut(ACTION_ID, new KeyboardShortcut(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), null));
-
             renderer.restartTimer();
         });
     }

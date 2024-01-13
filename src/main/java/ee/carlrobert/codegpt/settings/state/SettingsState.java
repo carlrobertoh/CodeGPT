@@ -1,5 +1,7 @@
 package ee.carlrobert.codegpt.settings.state;
 
+import static java.lang.String.format;
+
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
@@ -82,7 +84,7 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
         }
         var huggingFaceModel = llamaSettings.getHuggingFaceModel();
         var llamaModel = LlamaModel.findByHuggingFaceModel(huggingFaceModel);
-        return String.format(
+        return format(
             "%s %dB (Q%d)",
             llamaModel.getLabel(),
             huggingFaceModel.getParameterSize(),

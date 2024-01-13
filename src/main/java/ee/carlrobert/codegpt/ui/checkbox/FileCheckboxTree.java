@@ -6,7 +6,7 @@ import com.intellij.ui.CheckboxTree;
 import com.intellij.ui.CheckedTreeNode;
 import com.intellij.ui.ColoredTreeCellRenderer;
 import ee.carlrobert.codegpt.util.file.FileUtil;
-import ee.carlrobert.embedding.CheckedFile;
+import ee.carlrobert.embedding.ReferencedFile;
 import java.util.List;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,7 +16,7 @@ public abstract class FileCheckboxTree extends CheckboxTree {
     super(cellRenderer, node);
   }
 
-  public abstract List<CheckedFile> getCheckedFiles();
+  public abstract List<ReferencedFile> getReferencedFiles();
 
   protected static void updateFilePresentation(
       ColoredTreeCellRenderer textRenderer,

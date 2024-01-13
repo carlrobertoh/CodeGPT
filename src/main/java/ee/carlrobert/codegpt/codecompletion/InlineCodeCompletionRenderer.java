@@ -14,7 +14,9 @@ import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.ui.JBColor;
+import ee.carlrobert.codegpt.completions.CallParameters;
 import ee.carlrobert.codegpt.completions.CompletionRequestHandler;
+import ee.carlrobert.codegpt.completions.ConversationType;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
@@ -76,9 +78,10 @@ public class InlineCodeCompletionRenderer implements EditorCustomElementRenderer
                     System.out.println("prompt: " + message.getPrompt());
                     typingTimer.stop();
                     requestHandler = new CompletionRequestHandler(
-                            false, false,
+                            false,
                             new InlineCodeCompletionResponseEventListener( this));
-                    requestHandler.call(conversation, message, false);
+                    requestHandler.call(new CallParameters(conversation,
+                            ConversationType.INLINE_COMPLETION, message, false ));
                 }
             }
         }));

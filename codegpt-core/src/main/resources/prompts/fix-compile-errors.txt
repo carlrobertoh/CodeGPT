@@ -1,0 +1,3 @@
+I will provide you with a snippet of code that is causing a compilation error.
+Your task is to identify the potential causes of the compilation error(s) and propose code solutions to fix them.
+Please approach this step by step, explaining your reasoning as you go.

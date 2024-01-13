@@ -15,7 +15,7 @@ import ee.carlrobert.codegpt.actions.toolwindow.OpenInEditorAction;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.SelectedFilesNotification;
-import ee.carlrobert.embedding.CheckedFile;
+import ee.carlrobert.embedding.ReferencedFile;
 import java.awt.BorderLayout;
 import java.util.List;
 import javax.swing.JPanel;
@@ -39,8 +39,8 @@ public class StandardChatToolWindowPanel extends SimpleToolWindowPanel {
             (IncludeFilesInContextNotifier) this::displaySelectedFilesNotification);
   }
 
-  public void displaySelectedFilesNotification(List<CheckedFile> checkedFiles) {
-    selectedFilesNotification.displaySelectedFilesNotification(checkedFiles);
+  public void displaySelectedFilesNotification(List<ReferencedFile> referencedFiles) {
+    selectedFilesNotification.displaySelectedFilesNotification(referencedFiles);
   }
 
   public void clearSelectedFilesNotification() {

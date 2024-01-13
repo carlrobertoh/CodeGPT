@@ -51,10 +51,16 @@ The plugin provides several key features, such as:
   <img src="https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/chat-with-ai.png?raw=true" alt="animated" />
 </p>
 
-### Generate Commit Messages
+### Chat With Multiple Files
 
 <p align="center">
-  <img src="https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/generate-commit-message.png?raw=true" />
+  <img src="https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/include-in-context.png?raw=true" alt="animated" />
+</p>
+
+### Choose Between Different Providers
+
+<p align="center">
+  <img src="https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/model-selection.png?raw=true" />
 </p>
 
 ### Method Name Suggestions
@@ -63,10 +69,10 @@ The plugin provides several key features, such as:
   <img src="https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/method-name-suggestions.png?raw=true" />
 </p>
 
-### Choose Between Different Providers
+### Generate Commit Messages
 
 <p align="center">
-  <img src="https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/model-selection.png?raw=true" />
+  <img src="https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/generate-commit-message.png?raw=true" />
 </p>
 
 ### Other features
@@ -164,7 +170,7 @@ See the [open issues][open-issues] for a full list of proposed features (and kno
 
 ## License
 
-MIT © [Carl-Robert Linnupuu][portfolio]
+Apache 2.0 © [Carl-Robert Linnupuu][portfolio]
 
 If you found this project interesting, kindly rate it on the marketplace and don't forget to give it a star. Thanks again!
 <p align="right">(<a href="#readme-top">back to top</a>)</p>

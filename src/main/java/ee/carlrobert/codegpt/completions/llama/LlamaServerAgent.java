@@ -10,7 +10,6 @@ import com.intellij.execution.process.ProcessAdapter;
 import com.intellij.execution.process.ProcessEvent;
 import com.intellij.execution.process.ProcessListener;
 import com.intellij.execution.process.ProcessOutputType;
-import com.intellij.notification.NotificationType;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
@@ -20,7 +19,6 @@ import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.settings.service.ServerProgressPanel;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
-import ee.carlrobert.codegpt.ui.OverlayUtil;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -111,9 +109,7 @@ public final class LlamaServerAgent implements Disposable {
         if (errorLines.isEmpty()) {
           LOG.info(format("Server terminated with code %d", event.getExitCode()));
         } else {
-          var error = String.join("", errorLines);
-          OverlayUtil.showNotification(error, NotificationType.ERROR);
-          LOG.error(error);
+          LOG.info(String.join("", errorLines));
         }
 
         onServerTerminated.run();

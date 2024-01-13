@@ -1,0 +1,6 @@
+<idea-plugin>
+  <projectListeners>
+    <listener topic="com.intellij.openapi.compiler.CompilationStatusListener"
+      class="ee.carlrobert.codegpt.ProjectCompilationStatusListener" />
+  </projectListeners>
+</idea-plugin>

@@ -97,7 +97,8 @@ class ContextualChatToolWindowLandingPanel extends ResponsePanel {
             var folderStructureTreePanel = new FolderStructureTreePanel(project);
             var show = OverlayUtil.showFileStructureDialog(project, folderStructureTreePanel);
             if (show == OK_EXIT_CODE) {
-              new CodebaseIndexingTask(project, folderStructureTreePanel.getCheckedFiles()).run();
+              new CodebaseIndexingTask(project, folderStructureTreePanel.getReferencedFiles())
+                  .run();
             }
             break;
           default:

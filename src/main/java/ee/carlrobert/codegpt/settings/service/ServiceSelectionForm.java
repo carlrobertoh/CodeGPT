@@ -365,6 +365,10 @@ public class ServiceSelectionForm {
     return llamaServiceSectionPanel.getLlamaModelPreferencesForm();
   }
 
+  public LlamaRequestPreferencesForm getLlamaRequestPreferencesForm() {
+    return llamaServiceSectionPanel.getLlamaRequestPreferencesForm();
+  }
+
   public void setOpenAIPath(String path) {
     openAIPathField.setText(path);
   }
