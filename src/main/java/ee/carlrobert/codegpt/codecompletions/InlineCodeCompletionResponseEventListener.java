@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.codecompletion;
+package ee.carlrobert.codegpt.codecompletions;
 
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.KeyboardShortcut;
@@ -19,8 +19,8 @@ import javax.swing.*;
 import java.awt.event.KeyEvent;
 import java.util.List;
 
-import static ee.carlrobert.codegpt.codecompletion.InlineCodeCompletionRenderer.ACTION_ID;
-import static ee.carlrobert.codegpt.codecompletion.InlineCodeCompletionRenderer.INLAY_KEY;
+import static ee.carlrobert.codegpt.codecompletions.InlineCodeCompletionRenderer.ACTION_ID;
+import static ee.carlrobert.codegpt.codecompletions.InlineCodeCompletionRenderer.INLAY_KEY;
 
 public class InlineCodeCompletionResponseEventListener implements CompletionResponseEventListener {
 

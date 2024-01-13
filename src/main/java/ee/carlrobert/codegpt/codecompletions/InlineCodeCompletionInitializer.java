@@ -1,6 +1,5 @@
-package ee.carlrobert.codegpt.codecompletion;
+package ee.carlrobert.codegpt.codecompletions;
 
-import com.intellij.openapi.diagnostic.LogLevel;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.event.EditorFactoryEvent;

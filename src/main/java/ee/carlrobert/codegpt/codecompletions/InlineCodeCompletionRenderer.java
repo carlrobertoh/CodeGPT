@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.codecompletion;
+package ee.carlrobert.codegpt.codecompletions;
 
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.application.ApplicationManager;
@@ -29,6 +29,8 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.geom.Rectangle2D;
+
+import static ee.carlrobert.codegpt.util.file.FileUtil.getResourceContent;
 
 public class InlineCodeCompletionRenderer implements EditorCustomElementRenderer, DocumentListener, KeyListener, CaretListener, EditorMouseListener, SelectionListener {
     public static final Key<Inlay<InlineCodeCompletionRenderer>> INLAY_KEY = Key.create("codegpt.inlay");
@@ -74,8 +76,13 @@ public class InlineCodeCompletionRenderer implements EditorCustomElementRenderer
                     var before = document.getText(new TextRange(begin, offset));
                     var after = document.getText(new TextRange(offset, end));
                     FillInTheMiddle fim = SettingsState.getInstance().getSelectedService().getFillInTheMiddle();
-                    var message = new Message(fim.getPrefix() + before + fim.getSuffix() + after + fim.getMiddle());
-                    System.out.println("prompt: " + message.getPrompt());
+                    var message = new Message(
+                            getResourceContent("/prompts/inline-completion-prompt.txt")
+                                    .replace("{pre}", fim.getPrefix())
+                                    .replace("{codeBefore}", before)
+                                    .replace("{suf}", fim.getSuffix())
+                                    .replace("{codeAfter}", after)
+                                    .replace("{mid}", fim.getMiddle()));
                     typingTimer.stop();
                     requestHandler = new CompletionRequestHandler(
                             false,

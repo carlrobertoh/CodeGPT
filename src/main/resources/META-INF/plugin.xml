@@ -40,7 +40,7 @@
             factoryClass="ee.carlrobert.codegpt.toolwindow.ProjectToolWindowFactory"/>
         <notificationGroup id="CodeGPT Notification Group" displayType="BALLOON" key="notification.group.name"/>
 
-        <editorFactoryListener implementation="ee.carlrobert.codegpt.codecompletion.InlineCodeCompletionInitializer"/>
+        <editorFactoryListener implementation="ee.carlrobert.codegpt.codecompletions.InlineCodeCompletionInitializer"/>
     </extensions>
 
     <resource-bundle>messages.codegpt</resource-bundle>

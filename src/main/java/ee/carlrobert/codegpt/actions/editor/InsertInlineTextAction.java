@@ -9,7 +9,7 @@ import com.intellij.openapi.editor.Inlay;
 import com.intellij.openapi.editor.actionSystem.EditorAction;
 import com.intellij.openapi.editor.actionSystem.EditorActionHandler;
 import com.intellij.openapi.util.Key;
-import ee.carlrobert.codegpt.codecompletion.InlineCodeCompletionRenderer;
+import ee.carlrobert.codegpt.codecompletions.InlineCodeCompletionRenderer;
 import org.jetbrains.annotations.NotNull;
 
 public class InsertInlineTextAction extends EditorAction {
