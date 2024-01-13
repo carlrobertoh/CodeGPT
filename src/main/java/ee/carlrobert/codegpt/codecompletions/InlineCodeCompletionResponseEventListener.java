@@ -32,6 +32,7 @@ public class InlineCodeCompletionResponseEventListener implements CompletionResp
 
     @Override
     public void handleMessage(String message) {
+        System.out.println("jsonMapResponse(\"choices\", jsonArray(jsonMap(\"delta\", jsonMap(\"content\", \""+message+"\"))))");
         CompletionResponseEventListener.super.handleMessage(message);
     }
 
@@ -49,6 +50,9 @@ public class InlineCodeCompletionResponseEventListener implements CompletionResp
 
     @Override
     public void handleCompleted(String fullMessage, CallParameters callParameters) {
+
+        System.out.println("response");
+        System.out.println(fullMessage);
         ApplicationManager.getApplication().invokeLater(() -> {
             ServiceType service = SettingsState.getInstance().getSelectedService();
             String inlineCode = fullMessage.replace(service.getFillInTheMiddle().getEot(),"");

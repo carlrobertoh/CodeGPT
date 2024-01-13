@@ -20,6 +20,7 @@ import ee.carlrobert.codegpt.completions.ConversationType;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
+import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
 import ee.carlrobert.codegpt.settings.service.FillInTheMiddle;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import org.jetbrains.annotations.NotNull;
@@ -30,12 +31,10 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.geom.Rectangle2D;
 
-import static ee.carlrobert.codegpt.util.file.FileUtil.getResourceContent;
-
 public class InlineCodeCompletionRenderer implements EditorCustomElementRenderer, DocumentListener, KeyListener, CaretListener, EditorMouseListener, SelectionListener {
     public static final Key<Inlay<InlineCodeCompletionRenderer>> INLAY_KEY = Key.create("codegpt.inlay");
     public static final String ACTION_ID = "InsertInlineTextAction";
-    public static final int MAX_OFFSET = 400;
+    public static final int MAX_OFFSET = 400; // TODO: Add in settings? Always entire file?
 
     private Timer typingTimer;
     private String inlayText = "";
@@ -61,37 +60,26 @@ public class InlineCodeCompletionRenderer implements EditorCustomElementRenderer
     }
 
     private void initTypingTimer() {
-        typingTimer = new Timer(5000, e -> ApplicationManager.getApplication().invokeLater(() -> {
-            if (editor != null && !editor.isDisposed()) {
-                Inlay<InlineCodeCompletionRenderer> inlay = editor.getUserData(INLAY_KEY);
-                if (inlay == null) {
-                    int offset = editor.getCaretModel().getOffset();
-                    Document document = editor.getDocument();
-
-                    int begin = Integer.max(0, offset - MAX_OFFSET);
-                    int end = Integer.min(document.getTextLength(), offset + MAX_OFFSET);
-                    if (begin == end) {
-                        return;
+        typingTimer = new Timer(ConfigurationState.getInstance().getInlineDelay(),
+                e -> ApplicationManager.getApplication().invokeLater(() -> {
+                    if (editor != null && !editor.isDisposed()) {
+                        Inlay<InlineCodeCompletionRenderer> inlay = editor.getUserData(INLAY_KEY);
+                        if (inlay == null) {
+                            Document document = editor.getDocument();
+                            if(document.getText().isEmpty() || document.getText().isBlank()){
+                                return;
+                            }
+                            int offset = editor.getCaretModel().getOffset();
+                            var message = createFimMessage(offset, document);
+                            typingTimer.stop();
+                            requestHandler = new CompletionRequestHandler(
+                                    false,
+                                    new InlineCodeCompletionResponseEventListener(this));
+                            requestHandler.call(new CallParameters(conversation,
+                                    ConversationType.INLINE_COMPLETION, message, false));
+                        }
                     }
-                    var before = document.getText(new TextRange(begin, offset));
-                    var after = document.getText(new TextRange(offset, end));
-                    FillInTheMiddle fim = SettingsState.getInstance().getSelectedService().getFillInTheMiddle();
-                    var message = new Message(
-                            getResourceContent("/prompts/inline-completion-prompt.txt")
-                                    .replace("{pre}", fim.getPrefix())
-                                    .replace("{codeBefore}", before)
-                                    .replace("{suf}", fim.getSuffix())
-                                    .replace("{codeAfter}", after)
-                                    .replace("{mid}", fim.getMiddle()));
-                    typingTimer.stop();
-                    requestHandler = new CompletionRequestHandler(
-                            false,
-                            new InlineCodeCompletionResponseEventListener( this));
-                    requestHandler.call(new CallParameters(conversation,
-                            ConversationType.INLINE_COMPLETION, message, false ));
-                }
-            }
-        }));
+                }));
         typingTimer.setRepeats(true);
         typingTimer.start();
     }
@@ -118,7 +106,7 @@ public class InlineCodeCompletionRenderer implements EditorCustomElementRenderer
         resetSuggestion();
     }
 
-    void restartTimer(){
+    void restartTimer() {
         typingTimer.restart();
     }
 
@@ -202,4 +190,22 @@ public class InlineCodeCompletionRenderer implements EditorCustomElementRenderer
         g.drawString(inlayText, (int) targetRegion.getX(), (int) targetRegion.getY() + ascent);
     }
 
+    public String getInlayText() {
+        return inlayText;
+    }
+
+    private static Message createFimMessage(int offset, Document document) {
+        int begin = Integer.max(0, offset - MAX_OFFSET);
+        int end = Integer.min(document.getTextLength(), offset + MAX_OFFSET);
+        var before = document.getText(new TextRange(begin, offset));
+        var after = document.getText(new TextRange(offset, end));
+        FillInTheMiddle fim = SettingsState.getInstance().getSelectedService().getFillInTheMiddle();
+        return new Message(
+                ConfigurationState.getInstance().getInlineCompletionPrompt()
+                        .replace("{pre}", fim.getPrefix())
+                        .replace("{codeBefore}", before)
+                        .replace("{suf}", fim.getSuffix())
+                        .replace("{codeAfter}", after)
+                        .replace("{mid}", fim.getMiddle()));
+    }
 }

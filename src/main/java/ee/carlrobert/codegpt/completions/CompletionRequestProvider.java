@@ -52,6 +52,9 @@ public class CompletionRequestProvider {
   public static final String FIX_COMPILE_ERRORS_SYSTEM_PROMPT = getResourceContent(
       "/prompts/fix-compile-errors.txt");
 
+  public static final String INLINE_COMPLETION_PROMPT = getResourceContent(
+      "/prompts/inline-completion-prompt.txt");
+
   private final EncodingManager encodingManager = EncodingManager.getInstance();
   private final EmbeddingsService embeddingsService;
   private final Conversation conversation;

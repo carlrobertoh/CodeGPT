@@ -48,8 +48,10 @@ public class ConfigurationComponent {
   private final JBCheckBox autoFormattingCheckBox;
   private final JTextArea systemPromptTextArea;
   private final JTextArea commitMessagePromptTextArea;
+  private final JTextArea inlineCompletionPromptTextArea;
   private final IntegerField maxTokensField;
   private final JBTextField temperatureField;
+  private final JBTextField inlineDelayField;
 
   public ConfigurationComponent(Disposable parentDisposable, ConfigurationState configuration) {
     table = new JBTable(new DefaultTableModel(
@@ -68,7 +70,7 @@ public class ConfigurationComponent {
     temperatureField = new JBTextField(12);
     temperatureField.setText(String.valueOf(configuration.getTemperature()));
 
-    var temperatureFieldValidator = createInputValidator(parentDisposable, temperatureField);
+    var temperatureFieldValidator = createTemperatureInputValidator(parentDisposable, temperatureField);
     temperatureField.getDocument().addDocumentListener(new DocumentListener() {
       @Override
       public void insertUpdate(DocumentEvent e) {
@@ -106,6 +108,31 @@ public class ConfigurationComponent {
     commitMessagePromptTextArea.setLineWrap(true);
     commitMessagePromptTextArea.setBorder(JBUI.Borders.empty(8, 4));
 
+    inlineCompletionPromptTextArea = new JTextArea(configuration.getInlineCompletionPrompt(), 3, 60);
+    inlineCompletionPromptTextArea.setLineWrap(true);
+    inlineCompletionPromptTextArea.setBorder(JBUI.Borders.empty(8, 4));
+
+    inlineDelayField = new JBTextField(12);
+    inlineDelayField.setText(String.valueOf(configuration.getTemperature()));
+
+    var inlineDelayFieldValidator = createInlineDelayInputValidator(parentDisposable, inlineDelayField);
+    inlineDelayField.getDocument().addDocumentListener(new DocumentListener() {
+      @Override
+      public void insertUpdate(DocumentEvent e) {
+        inlineDelayFieldValidator.revalidate();
+      }
+
+      @Override
+      public void removeUpdate(DocumentEvent e) {
+        inlineDelayFieldValidator.revalidate();
+      }
+
+      @Override
+      public void changedUpdate(DocumentEvent e) {
+        inlineDelayFieldValidator.revalidate();
+      }
+    });
+
     checkForPluginUpdatesCheckBox = new JBCheckBox(
         CodeGPTBundle.get("configurationConfigurable.checkForPluginUpdates.label"),
         configuration.isCheckForPluginUpdates());
@@ -134,6 +161,10 @@ public class ConfigurationComponent {
         .addComponent(new TitledSeparator(
             CodeGPTBundle.get("configurationConfigurable.section.commitMessage.title")))
         .addComponent(createCommitMessageConfigurationForm())
+        .addComponentFillVertically(new JPanel(), 0)
+        .addComponent(new TitledSeparator(
+            CodeGPTBundle.get("configurationConfigurable.section.inlineCompletion.title")))
+        .addComponent(createInlineCompletionConfigurationForm())
         .addComponentFillVertically(new JPanel(), 0)
         .getPanel();
   }
@@ -227,7 +258,28 @@ public class ConfigurationComponent {
     return form;
   }
 
-  private ComponentValidator createInputValidator(
+  private JPanel createInlineCompletionConfigurationForm() {
+    var formBuilder = FormBuilder.createFormBuilder();
+    addAssistantFormLabeledComponent(
+        formBuilder,
+        "configurationConfigurable.section.inlineCompletion.systemPromptField.label",
+        "configurationConfigurable.section.inlineCompletion.systemPromptField.comment",
+        JBUI.Panels
+            .simplePanel(inlineCompletionPromptTextArea)
+            .withBorder(JBUI.Borders.customLine(
+                JBUI.CurrentTheme.CustomFrameDecorations.separatorForeground())));
+    formBuilder.addVerticalGap(8);
+    addAssistantFormLabeledComponent(
+            formBuilder,
+            "configurationConfigurable.section.inlineCompletion.delay.label",
+            "configurationConfigurable.section.inlineCompletion.delay.comment",
+            inlineDelayField);
+    var form = formBuilder.getPanel();
+    form.setBorder(JBUI.Borders.emptyLeft(16));
+    return form;
+  }
+
+  private ComponentValidator createTemperatureInputValidator(
       Disposable parentDisposable,
       JBTextField component) {
     var validator = new ComponentValidator(parentDisposable)
@@ -238,6 +290,33 @@ public class ConfigurationComponent {
             if (value > 1.0 || value < 0.0) {
               return new ValidationInfo(
                   CodeGPTBundle.get("validation.error.mustBeBetweenZeroAndOne"),
+                  component);
+            }
+          } catch (NumberFormatException e) {
+            return new ValidationInfo(
+                CodeGPTBundle.get("validation.error.mustBeNumber"),
+                component);
+          }
+
+          return null;
+        })
+        .andStartOnFocusLost()
+        .installOn(component);
+    validator.enableValidation();
+    return validator;
+  }
+
+  private ComponentValidator createInlineDelayInputValidator(
+      Disposable parentDisposable,
+      JBTextField component) {
+    var validator = new ComponentValidator(parentDisposable)
+        .withValidator(() -> {
+          var valueText = component.getText();
+          try {
+            var value = Integer.parseInt(valueText);
+            if (value <= 0) {
+              return new ValidationInfo(
+                  CodeGPTBundle.get("validation.error.mustBeGreaterThanZero"),
                   component);
             }
           } catch (NumberFormatException e) {
@@ -280,6 +359,22 @@ public class ConfigurationComponent {
     return commitMessagePromptTextArea.getText();
   }
 
+  public void setInlineCompletionPrompt(String inlineCompletionPrompt) {
+    inlineCompletionPromptTextArea.setText(inlineCompletionPrompt);
+  }
+
+  public String getInlineCompletionPrompt() {
+    return inlineCompletionPromptTextArea.getText();
+  }
+
+
+  public int getInlineDelay() {
+    return Integer.parseInt(inlineDelayField.getText());
+  }
+
+  public void setInlineDelay(int inlineDelay) {
+    inlineDelayField.setText(String.valueOf(inlineDelay));
+  }
   public double getTemperature() {
     return Double.parseDouble(temperatureField.getText());
   }
