@@ -3,11 +3,18 @@ package ee.carlrobert.codegpt.settings.service;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 
 public enum ServiceType {
-//  OPENAI("OPENAI", CodeGPTBundle.get("service.openai.title"), "chat.completion", new FillInTheMiddle("<|fim_prefix|", "<|fim_suffix|>","<|fim_middle|>", "<|endoftext|>")),
-  OPENAI("OPENAI", CodeGPTBundle.get("service.openai.title"), "chat.completion", new FillInTheMiddle("<PRE> ", "<SUF>"," <MID>", "<EOT>")),
-  AZURE("AZURE", CodeGPTBundle.get("service.azure.title"), "azure.chat.completion", new FillInTheMiddle("<|fim_prefix|", "<|fim_suffix|>","<|fim_middle|>", "<|endoftext|>")),
-  YOU("YOU", CodeGPTBundle.get("service.you.title"), "you.chat.completion", new FillInTheMiddle("", "TODO","", "")),
-  LLAMA_CPP("LLAMA_CPP", CodeGPTBundle.get("service.llama.title"), "llama.chat.completion", new FillInTheMiddle("<PRE> ", "<SUF>"," <MID>", "<EOT"));
+  //  OPENAI("OPENAI",
+  //    CodeGPTBundle.get("service.openai.title"), "chat.completion",
+  //    new FillInTheMiddle("<|fim_prefix|", "<|fim_suffix|>",
+  //        "<|fim_middle|>", "<|endoftext|>")),
+  OPENAI("OPENAI", CodeGPTBundle.get("service.openai.title"), "chat.completion",
+      new FillInTheMiddle("<PRE> ", "<SUF>", " <MID>", "<EOT>")),
+  AZURE("AZURE", CodeGPTBundle.get("service.azure.title"), "azure.chat.completion",
+      new FillInTheMiddle("<|fim_prefix|", "<|fim_suffix|>", "<|fim_middle|>", "<|endoftext|>")),
+  YOU("YOU", CodeGPTBundle.get("service.you.title"), "you.chat.completion",
+      new FillInTheMiddle("", "TODO", "", "")),
+  LLAMA_CPP("LLAMA_CPP", CodeGPTBundle.get("service.llama.title"), "llama.chat.completion",
+      new FillInTheMiddle("<PRE> ", "<SUF>", " <MID>", "<EOT"));
 
   private final String code;
   private final String label;

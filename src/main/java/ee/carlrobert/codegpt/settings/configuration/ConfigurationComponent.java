@@ -70,7 +70,8 @@ public class ConfigurationComponent {
     temperatureField = new JBTextField(12);
     temperatureField.setText(String.valueOf(configuration.getTemperature()));
 
-    var temperatureFieldValidator = createTemperatureInputValidator(parentDisposable, temperatureField);
+    var temperatureFieldValidator = createTemperatureInputValidator(parentDisposable,
+        temperatureField);
     temperatureField.getDocument().addDocumentListener(new DocumentListener() {
       @Override
       public void insertUpdate(DocumentEvent e) {
@@ -108,14 +109,16 @@ public class ConfigurationComponent {
     commitMessagePromptTextArea.setLineWrap(true);
     commitMessagePromptTextArea.setBorder(JBUI.Borders.empty(8, 4));
 
-    inlineCompletionPromptTextArea = new JTextArea(configuration.getInlineCompletionPrompt(), 3, 60);
+    inlineCompletionPromptTextArea = new JTextArea(configuration.getInlineCompletionPrompt(), 3,
+        60);
     inlineCompletionPromptTextArea.setLineWrap(true);
     inlineCompletionPromptTextArea.setBorder(JBUI.Borders.empty(8, 4));
 
     inlineDelayField = new JBTextField(12);
     inlineDelayField.setText(String.valueOf(configuration.getTemperature()));
 
-    var inlineDelayFieldValidator = createInlineDelayInputValidator(parentDisposable, inlineDelayField);
+    var inlineDelayFieldValidator = createInlineDelayInputValidator(parentDisposable,
+        inlineDelayField);
     inlineDelayField.getDocument().addDocumentListener(new DocumentListener() {
       @Override
       public void insertUpdate(DocumentEvent e) {
@@ -270,10 +273,10 @@ public class ConfigurationComponent {
                 JBUI.CurrentTheme.CustomFrameDecorations.separatorForeground())));
     formBuilder.addVerticalGap(8);
     addAssistantFormLabeledComponent(
-            formBuilder,
-            "configurationConfigurable.section.inlineCompletion.delay.label",
-            "configurationConfigurable.section.inlineCompletion.delay.comment",
-            inlineDelayField);
+        formBuilder,
+        "configurationConfigurable.section.inlineCompletion.delay.label",
+        "configurationConfigurable.section.inlineCompletion.delay.comment",
+        inlineDelayField);
     var form = formBuilder.getPanel();
     form.setBorder(JBUI.Borders.emptyLeft(16));
     return form;
@@ -375,6 +378,7 @@ public class ConfigurationComponent {
   public void setInlineDelay(int inlineDelay) {
     inlineDelayField.setText(String.valueOf(inlineDelay));
   }
+
   public double getTemperature() {
     return Double.parseDouble(temperatureField.getText());
   }

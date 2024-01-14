@@ -1,5 +1,9 @@
 package ee.carlrobert.codegpt.settings.configuration;
 
+import static ee.carlrobert.codegpt.completions.CompletionRequestProvider.COMPLETION_SYSTEM_PROMPT;
+import static ee.carlrobert.codegpt.completions.CompletionRequestProvider.GENERATE_COMMIT_MESSAGE_SYSTEM_PROMPT;
+import static ee.carlrobert.codegpt.completions.CompletionRequestProvider.INLINE_COMPLETION_PROMPT;
+
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
@@ -9,8 +13,6 @@ import ee.carlrobert.codegpt.actions.editor.EditorActionsUtil;
 import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import static ee.carlrobert.codegpt.completions.CompletionRequestProvider.*;
 
 @State(
     name = "CodeGPT_ConfigurationSettings_210",

@@ -13,29 +13,30 @@ import ee.carlrobert.codegpt.codecompletions.InlineCodeCompletionRenderer;
 import org.jetbrains.annotations.NotNull;
 
 public class InsertInlineTextAction extends EditorAction {
-    public InsertInlineTextAction(
-            Key<Inlay<InlineCodeCompletionRenderer>> inlayKey,
-            String text
-    ) {
-        super(new EditorActionHandler() {
-            @Override
-            protected void doExecute(@NotNull Editor editor, Caret caret, DataContext dataContext) {
-                ApplicationManager.getApplication().invokeLater(() -> {
-                    Inlay<InlineCodeCompletionRenderer> inlay = editor.getUserData(inlayKey);
-                    if (inlay != null) {
-                        WriteCommandAction.runWriteCommandAction(editor.getProject(), () -> {
-                            int offset = inlay.getOffset();
-                            editor.getDocument().insertString(offset, text);
-                            editor.getCaretModel().moveToOffset(offset + text.length());
-                            Inlay<InlineCodeCompletionRenderer> currentInlay = editor.getUserData(inlayKey);
-                            if (currentInlay != null) {
-                                currentInlay.dispose();
-                                editor.putUserData(inlayKey, null);
-                            }
-                        });
-                    }
-                });
-            }
+
+  public InsertInlineTextAction(
+      Key<Inlay<InlineCodeCompletionRenderer>> inlayKey,
+      String text
+  ) {
+    super(new EditorActionHandler() {
+      @Override
+      protected void doExecute(@NotNull Editor editor, Caret caret, DataContext dataContext) {
+        ApplicationManager.getApplication().invokeLater(() -> {
+          Inlay<InlineCodeCompletionRenderer> inlay = editor.getUserData(inlayKey);
+          if (inlay != null) {
+            WriteCommandAction.runWriteCommandAction(editor.getProject(), () -> {
+              int offset = inlay.getOffset();
+              editor.getDocument().insertString(offset, text);
+              editor.getCaretModel().moveToOffset(offset + text.length());
+              Inlay<InlineCodeCompletionRenderer> currentInlay = editor.getUserData(inlayKey);
+              if (currentInlay != null) {
+                currentInlay.dispose();
+                editor.putUserData(inlayKey, null);
+              }
+            });
+          }
         });
-    }
+      }
+    });
+  }
 }

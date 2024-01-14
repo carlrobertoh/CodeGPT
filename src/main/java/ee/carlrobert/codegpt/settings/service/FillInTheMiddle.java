@@ -1,31 +1,32 @@
 package ee.carlrobert.codegpt.settings.service;
 
 public class FillInTheMiddle {
-    private final String prefix;
-    private final String suffix;
-    private final String middle;
-    private final String eot;
 
-    public FillInTheMiddle(String prefix, String suffix, String middle, String eot) {
-        this.prefix = prefix;
-        this.suffix = suffix;
-        this.middle = middle;
-        this.eot = eot;
-    }
+  private final String prefix;
+  private final String suffix;
+  private final String middle;
+  private final String eot;
 
-    public String getPrefix() {
-        return prefix;
-    }
+  public FillInTheMiddle(String prefix, String suffix, String middle, String eot) {
+    this.prefix = prefix;
+    this.suffix = suffix;
+    this.middle = middle;
+    this.eot = eot;
+  }
 
-    public String getSuffix() {
-        return suffix;
-    }
+  public String getPrefix() {
+    return prefix;
+  }
 
-    public String getMiddle() {
-        return middle;
-    }
+  public String getSuffix() {
+    return suffix;
+  }
 
-    public String getEot() {
-        return eot;
-    }
+  public String getMiddle() {
+    return middle;
+  }
+
+  public String getEot() {
+    return eot;
+  }
 }
