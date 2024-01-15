@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt.codecompletions;
 
 import com.intellij.openapi.actionSystem.ActionManager;
+import com.intellij.openapi.actionSystem.KeyboardShortcut;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.Document;
@@ -17,11 +18,13 @@ import com.intellij.openapi.editor.event.SelectionEvent;
 import com.intellij.openapi.editor.event.SelectionListener;
 import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.openapi.editor.markup.TextAttributes;
+import com.intellij.openapi.keymap.KeymapManager;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.ui.JBColor;
+import ee.carlrobert.codegpt.actions.editor.InsertInlineTextAction;
 import ee.carlrobert.codegpt.completions.CallParameters;
-import ee.carlrobert.codegpt.completions.CompletionRequestHandler;
+import ee.carlrobert.codegpt.completions.CompletionRequestService;
 import ee.carlrobert.codegpt.completions.ConversationType;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationService;
@@ -35,6 +38,7 @@ import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.geom.Rectangle2D;
+import javax.swing.KeyStroke;
 import javax.swing.Timer;
 import org.jetbrains.annotations.NotNull;
 
@@ -44,12 +48,10 @@ public class InlineCodeCompletionRenderer implements EditorCustomElementRenderer
   public static final Key<Inlay<InlineCodeCompletionRenderer>> INLAY_KEY = Key.create(
       "codegpt.inlay");
   public static final String ACTION_ID = "InsertInlineTextAction";
-  public static final int MAX_OFFSET = 400; // TODO: Add in settings? Always entire file?
+  public static final int MAX_OFFSET = 4000; // TODO: Add in settings? Always entire file?
 
   private Timer typingTimer;
   private String inlayText = "";
-  private CompletionRequestHandler requestHandler;
-
   private final Editor editor;
   private final ConversationService conversationService;
   private final Conversation conversation;
@@ -83,11 +85,25 @@ public class InlineCodeCompletionRenderer implements EditorCustomElementRenderer
               int offset = editor.getCaretModel().getOffset();
               var message = createFimMessage(offset, document);
               typingTimer.stop();
-              requestHandler = new CompletionRequestHandler(
-                  false,
-                  new InlineCodeCompletionResponseEventListener(this));
-              requestHandler.call(new CallParameters(conversation,
-                  ConversationType.INLINE_COMPLETION, message, false));
+              ApplicationManager.getApplication().executeOnPooledThread(() -> {
+                var response = CompletionRequestService.getInstance()
+                    .getCodeCompletion(new CallParameters(conversation,
+                        ConversationType.INLINE_COMPLETION, message, false));
+                if (response != null) {
+                  var inlineCode = response.replace(
+                      SettingsState.getInstance().getSelectedService().getFillInTheMiddle()
+                          .getEot(), "");
+                  var insertAction = new InsertInlineTextAction(INLAY_KEY, inlineCode,
+                      InlineCodeCompletionRenderer.this::disableSuggestions);
+                  ActionManager.getInstance().registerAction(ACTION_ID, insertAction);
+                  var keymap = KeymapManager.getInstance().getActiveKeymap();
+                  keymap.addShortcut(ACTION_ID,
+                      new KeyboardShortcut(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), null));
+                  ApplicationManager.getApplication()
+                      .invokeLater(() -> createInlay(inlineCode));
+                }
+                restartTimer();
+              });
             }
           }
         }));
@@ -95,7 +111,7 @@ public class InlineCodeCompletionRenderer implements EditorCustomElementRenderer
     typingTimer.start();
   }
 
-  void createInlay(String inlineCode) {
+  private void createInlay(String inlineCode) {
     inlayText = inlineCode;
     WriteCommandAction.runWriteCommandAction(editor.getProject(), () -> {
       int offset = editor.getCaretModel().getOffset();
@@ -123,9 +139,6 @@ public class InlineCodeCompletionRenderer implements EditorCustomElementRenderer
   }
 
   private void resetSuggestion() {
-    if (requestHandler != null) {
-      requestHandler.cancel();
-    }
     restartTimer();
     ActionManager actionManager = ActionManager.getInstance();
     actionManager.unregisterAction(ACTION_ID);
@@ -139,9 +152,6 @@ public class InlineCodeCompletionRenderer implements EditorCustomElementRenderer
   }
 
   void disableSuggestions() {
-    if (requestHandler != null) {
-      requestHandler.cancel();
-    }
     resetSuggestion();
     typingTimer.stop();
   }

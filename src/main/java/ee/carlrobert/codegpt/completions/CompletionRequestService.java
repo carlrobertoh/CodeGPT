@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.completions;
 
+import static ee.carlrobert.codegpt.settings.service.ServiceType.AZURE;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.LLAMA_CPP;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.OPENAI;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.YOU;
@@ -13,12 +14,15 @@ import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
+import ee.carlrobert.llm.client.llama.completion.LlamaCompletionResponse;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
+import ee.carlrobert.llm.client.openai.completion.response.OpenAIChatCompletionResponse;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.util.List;
 import java.util.Optional;
 import okhttp3.sse.EventSource;
+import org.jetbrains.annotations.Nullable;
 
 @Service
 public final class CompletionRequestService {
@@ -69,6 +73,40 @@ public final class CompletionRequestService {
     }
   }
 
+  public @Nullable String getCodeCompletion(CallParameters callParameters) {
+    var requestProvider = new CompletionRequestProvider(callParameters.getConversation());
+    switch (SettingsState.getInstance().getSelectedService()) {
+      case OPENAI:
+        var openAISettings = OpenAISettingsState.getInstance();
+        OpenAIChatCompletionResponse chatCompletion = CompletionClientProvider.getOpenAIClient()
+            .getChatCompletion(
+                requestProvider.buildOpenAICodeCompletionRequest(
+                    openAISettings.getModel(),
+                    callParameters,
+                    openAISettings.isUsingCustomPath() ? openAISettings.getPath() : null));
+        return chatCompletion.getChoices().get(0).getMessage().getContent();
+      case AZURE:
+        var azureSettings = AzureSettingsState.getInstance();
+        OpenAIChatCompletionResponse azureResponse = CompletionClientProvider.getAzureClient()
+            .getChatCompletion(
+                requestProvider.buildOpenAICodeCompletionRequest(
+                    null,
+                    callParameters,
+                    azureSettings.isUsingCustomPath() ? azureSettings.getPath() : null));
+        return azureResponse.getChoices().get(0).getMessage().getContent();
+      // TODO: add YouClient.getChatCompletion() in llm-client
+      case LLAMA_CPP:
+        LlamaCompletionResponse llamaResponse = CompletionClientProvider.getLlamaClient()
+            .getChatCompletion(
+                requestProvider.buildLlamaCompletionRequest(
+                    callParameters.getMessage(),
+                    callParameters.getConversationType()));
+        return llamaResponse.getContent();
+      default:
+        throw new IllegalArgumentException();
+    }
+  }
+
   public void generateCommitMessageAsync(
       String prompt,
       CompletionEventListener eventListener) {
@@ -79,10 +117,10 @@ public final class CompletionRequestService {
         .setModel(OpenAISettingsState.getInstance().getModel())
         .build();
     var selectedService = SettingsState.getInstance().getSelectedService();
-    if (selectedService == ServiceType.OPENAI) {
+    if (selectedService == OPENAI) {
       CompletionClientProvider.getOpenAIClient().getChatCompletionAsync(request, eventListener);
     }
-    if (selectedService == ServiceType.AZURE) {
+    if (selectedService == AZURE) {
       CompletionClientProvider.getAzureClient().getChatCompletionAsync(request, eventListener);
     }
   }
@@ -106,7 +144,7 @@ public final class CompletionRequestService {
 
   public boolean isRequestAllowed() {
     var selectedService = SettingsState.getInstance().getSelectedService();
-    if (selectedService == ServiceType.AZURE) {
+    if (selectedService == AZURE) {
       return AzureCredentialsManager.getInstance().isCredentialSet();
     }
     if (selectedService == ServiceType.OPENAI) {

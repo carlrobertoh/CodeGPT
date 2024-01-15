@@ -145,22 +145,43 @@ public class CompletionRequestProvider {
     return requestBuilder.build();
   }
 
-  public OpenAIChatCompletionRequest buildOpenAIChatCompletionRequest(
+  private OpenAIChatCompletionRequest buildOpenAICompletionRequest(
       @Nullable String model,
       CallParameters callParameters,
       boolean useContextualSearch,
-      @Nullable String overriddenPath) {
+      @Nullable String overriddenPath,
+      boolean stream,
+      double temperature
+  ) {
     var builder = new OpenAIChatCompletionRequest.Builder(
         buildMessages(model, callParameters, useContextualSearch))
         .setModel(model)
         .setMaxTokens(ConfigurationState.getInstance().getMaxTokens())
-        .setTemperature(ConfigurationState.getInstance().getTemperature());
+        .setStream(stream)
+        .setTemperature(temperature);
 
     if (overriddenPath != null) {
       builder.setOverriddenPath(overriddenPath);
     }
 
     return (OpenAIChatCompletionRequest) builder.build();
+  }
+
+  public OpenAIChatCompletionRequest buildOpenAIChatCompletionRequest(
+      @Nullable String model,
+      CallParameters callParameters,
+      boolean useContextualSearch,
+      @Nullable String overriddenPath) {
+    return buildOpenAICompletionRequest(model, callParameters, useContextualSearch, overriddenPath,
+        true, ConfigurationState.getInstance().getTemperature());
+  }
+
+  public OpenAIChatCompletionRequest buildOpenAICodeCompletionRequest(
+      @Nullable String model,
+      CallParameters callParameters,
+      @Nullable String overriddenPath) {
+    return buildOpenAICompletionRequest(model, callParameters, false, overriddenPath,
+        false, 0.0);
   }
 
   public List<OpenAIChatCompletionMessage> buildMessages(

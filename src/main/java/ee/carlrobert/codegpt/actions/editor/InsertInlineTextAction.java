@@ -16,7 +16,8 @@ public class InsertInlineTextAction extends EditorAction {
 
   public InsertInlineTextAction(
       Key<Inlay<InlineCodeCompletionRenderer>> inlayKey,
-      String text
+      String text,
+      Runnable disableInlineCompletion
   ) {
     super(new EditorActionHandler() {
       @Override
@@ -33,6 +34,7 @@ public class InsertInlineTextAction extends EditorAction {
                 currentInlay.dispose();
                 editor.putUserData(inlayKey, null);
               }
+              disableInlineCompletion.run();
             });
           }
         });

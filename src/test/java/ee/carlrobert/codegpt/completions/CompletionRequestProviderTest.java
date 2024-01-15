@@ -233,6 +233,34 @@ public class CompletionRequestProviderTest extends IntegrationTest {
                 + "Helpful answer in Markdown format:");
   }
 
+
+  public void testCodeCompletionRequest() {
+    var conversation = ConversationService.getInstance().startConversation();
+    var firstMessage = createDummyMessage(500);
+    var secondMessage = createDummyMessage(250);
+    conversation.addMessage(firstMessage);
+    conversation.addMessage(secondMessage);
+
+    var request = new CompletionRequestProvider(conversation)
+        .buildOpenAICodeCompletionRequest(
+            OpenAIChatCompletionModel.GPT_3_5.getCode(),
+            new CallParameters(
+                conversation,
+                ConversationType.INLINE_COMPLETION,
+                new Message("TEST_CHAT_COMPLETION_PROMPT"),
+                false),
+            null);
+
+    assertThat(request.getMessages())
+        .extracting("role", "content")
+        .containsExactly(
+            tuple("user", "TEST_PROMPT"),
+            tuple("assistant", firstMessage.getResponse()),
+            tuple("user", "TEST_PROMPT"),
+            tuple("assistant", secondMessage.getResponse()),
+            tuple("user", "TEST_CHAT_COMPLETION_PROMPT"));
+  }
+
   private Message createDummyMessage(int tokenSize) {
     return createDummyMessage("TEST_PROMPT", tokenSize);
   }
