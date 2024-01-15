@@ -9,6 +9,8 @@
     <projectListeners>
         <listener topic="com.intellij.codeInsight.lookup.LookupManagerListener"
                   class="ee.carlrobert.codegpt.completions.MethodNameLookupListener"/>
+        <listener topic="com.intellij.codeInsight.daemon.impl.EditorTrackerListener"
+          class="ee.carlrobert.codegpt.codecompletions.InlineCodeCompletionEditorTrackListener"/>
     </projectListeners>
 
     <extensions defaultExtensionNs="com.intellij">
@@ -39,8 +41,6 @@
         <toolWindow id="CodeGPT" icon="ee.carlrobert.codegpt.Icons.DefaultSmall" anchor="right"
             factoryClass="ee.carlrobert.codegpt.toolwindow.ProjectToolWindowFactory"/>
         <notificationGroup id="CodeGPT Notification Group" displayType="BALLOON" key="notification.group.name"/>
-
-        <editorFactoryListener implementation="ee.carlrobert.codegpt.codecompletions.InlineCodeCompletionInitializer"/>
     </extensions>
 
     <resource-bundle>messages.codegpt</resource-bundle>

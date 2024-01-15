@@ -138,7 +138,7 @@ public class InlineCodeCompletionRenderer implements EditorCustomElementRenderer
     }
   }
 
-  private void disableSuggestions() {
+  void disableSuggestions() {
     if (requestHandler != null) {
       requestHandler.cancel();
     }
