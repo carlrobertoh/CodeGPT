@@ -31,6 +31,7 @@ import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
 import ee.carlrobert.codegpt.settings.service.FillInTheMiddle;
+import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -224,6 +225,10 @@ public class InlineCodeCompletionRenderer implements EditorCustomElementRenderer
     int end = Integer.min(document.getTextLength(), offset + MAX_OFFSET);
     var before = document.getText(new TextRange(begin, offset));
     var after = document.getText(new TextRange(offset, end));
+    if (SettingsState.getInstance().getSelectedService() == ServiceType.LLAMA_CPP) {
+      // Use Messages prompt as input_prefix and response field as input_suffix
+      return new Message(before, after);
+    }
     FillInTheMiddle fim = SettingsState.getInstance().getSelectedService().getFillInTheMiddle();
     return new Message(
         ConfigurationState.getInstance().getInlineCompletionPrompt()

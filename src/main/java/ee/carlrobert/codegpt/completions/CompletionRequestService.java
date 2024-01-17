@@ -97,10 +97,7 @@ public final class CompletionRequestService {
       // TODO: add YouClient.getChatCompletion() in llm-client
       case LLAMA_CPP:
         LlamaCompletionResponse llamaResponse = CompletionClientProvider.getLlamaClient()
-            .getChatCompletion(
-                requestProvider.buildLlamaCompletionRequest(
-                    callParameters.getMessage(),
-                    callParameters.getConversationType()));
+            .getInfill(requestProvider.buildLlamaInfillRequest(callParameters.getMessage()));
         return llamaResponse.getContent();
       default:
         throw new IllegalArgumentException();

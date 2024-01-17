@@ -26,6 +26,8 @@ import ee.carlrobert.codegpt.telemetry.core.service.UserId;
 import ee.carlrobert.embedding.EmbeddingsService;
 import ee.carlrobert.embedding.ReferencedFile;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
+import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest.Builder;
+import ee.carlrobert.llm.client.llama.completion.LlamaInfillRequest;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import ee.carlrobert.llm.client.openai.completion.OpenAICompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
@@ -128,6 +130,22 @@ public class CompletionRequestProvider {
         .setMin_p(settings.getMinP())
         .setRepeat_penalty(settings.getRepeatPenalty())
         .build();
+  }
+
+  public LlamaInfillRequest buildLlamaInfillRequest(Message message) {
+    var settings = LlamaSettingsState.getInstance();
+    var configuration = ConfigurationState.getInstance();
+    String prefix = message.getPrompt();
+    String suffix = message.getResponse();
+    return new LlamaInfillRequest(new Builder("")
+        .setN_predict(configuration.getMaxTokens())
+        .setTemperature(configuration.getTemperature())
+        .setTop_k(settings.getTopK())
+        .setTop_p(settings.getTopP())
+        .setMin_p(settings.getMinP())
+        .setRepeat_penalty(settings.getRepeatPenalty())
+        .setStream(false)
+        .setStop(List.of("  <EOT>", "<EOT>")), prefix, suffix);
   }
 
   public YouCompletionRequest buildYouCompletionRequest(Message message) {
