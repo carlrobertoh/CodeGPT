@@ -94,7 +94,6 @@ public final class CompletionRequestService {
                     callParameters,
                     azureSettings.isUsingCustomPath() ? azureSettings.getPath() : null));
         return azureResponse.getChoices().get(0).getMessage().getContent();
-      // TODO: add YouClient.getChatCompletion() in llm-client
       case LLAMA_CPP:
         LlamaCompletionResponse llamaResponse = CompletionClientProvider.getLlamaClient()
             .getInfill(requestProvider.buildLlamaInfillRequest(callParameters.getMessage()));

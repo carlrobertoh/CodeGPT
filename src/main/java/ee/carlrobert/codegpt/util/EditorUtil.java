@@ -106,7 +106,7 @@ public final class EditorUtil {
         })));
   }
 
-  private static void reformatDocument(
+  public static void reformatDocument(
       @NotNull Project project,
       @NotNull Document document,
       int startOffset,
