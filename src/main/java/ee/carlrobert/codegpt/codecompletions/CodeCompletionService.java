@@ -43,10 +43,12 @@ import ee.carlrobert.codegpt.util.EditorUtil;
 import java.awt.event.KeyEvent;
 import java.util.List;
 import java.util.Optional;
+import javax.annotation.ParametersAreNonnullByDefault;
 import javax.swing.KeyStroke;
 import org.jetbrains.annotations.NotNull;
 
 @Service
+@ParametersAreNonnullByDefault
 public final class CodeCompletionService {
 
   public static final String BLOCK_ELEMENT_ACTION_ID = "InsertBlockElementAction";
@@ -62,7 +64,7 @@ public final class CodeCompletionService {
     return ApplicationManager.getApplication().getService(CodeCompletionService.class);
   }
 
-  public void triggerCodeCompletion(@NotNull Editor editor, Runnable stopTimer) {
+  public void triggerCodeCompletion(Editor editor, Runnable stopTimer) {
     Project project = editor.getProject();
     Document document = editor.getDocument();
     if (project == null || document.getText().isBlank()) {
@@ -76,9 +78,8 @@ public final class CodeCompletionService {
       stopTimer.run();
       var application = ApplicationManager.getApplication();
       application.executeOnPooledThread(() -> {
-        application.invokeLater(
-            () -> addInlay(fetchCodeCompletion(psiFile, caretOffset, editor.getDocument()),
-                editor, stopTimer));
+        var response = fetchCodeCompletion(psiFile, caretOffset, editor.getDocument());
+        addInlay(response, editor, stopTimer);
       });
     }
   }
@@ -123,8 +124,7 @@ public final class CodeCompletionService {
    * @return Completion String
    */
   @RequiresBackgroundThread
-  private String fetchCodeCompletion(PsiFile psiFile, int offsetInFile,
-      @NotNull Document document) {
+  private String fetchCodeCompletion(PsiFile psiFile, int offsetInFile, Document document) {
     return ReadAction.compute(() -> {
           Message message = tryFindEnclosingPsiElement(List.of(PsiMethod.class, PsiClass.class),
               psiFile, offsetInFile)
@@ -222,7 +222,6 @@ public final class CodeCompletionService {
         actionId,
         new KeyboardShortcut(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), null));
   }
-
 
   private static Message createFimMessage(int offsetInFile, Document document,
       TextRange contextRange) {
