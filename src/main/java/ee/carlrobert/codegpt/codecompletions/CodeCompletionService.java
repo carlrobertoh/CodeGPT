@@ -128,10 +128,8 @@ public final class CodeCompletionService {
     return ReadAction.compute(() -> {
           Message message = tryFindEnclosingPsiElement(List.of(PsiMethod.class, PsiClass.class),
               psiFile, offsetInFile)
-              .map(psiElement -> {
-                int offsetInPsiElement = offsetInFile - psiElement.getNode().getStartOffset();
-                return createFimMessage(offsetInPsiElement, psiElement.getText());
-              })
+              .map(
+                  psiElement -> createFimMessage(offsetInFile, document, psiElement.getTextRange()))
               .orElse(createFimMessage(offsetInFile, document));
           return CompletionRequestService.getInstance().getCodeCompletion(new CallParameters(
               ConversationService.getInstance().startConversation(),
@@ -226,34 +224,38 @@ public final class CodeCompletionService {
   }
 
 
-  private static Message createFimMessage(int offset, String text) {
-    int begin = Integer.max(0, offset - MAX_OFFSET);
-    int end = Integer.min(text.length(), offset + MAX_OFFSET);
-    var before = text.substring(begin, offset);
-    var after = text.substring(offset, end);
-    return createFimMessage(before, after);
+  private static Message createFimMessage(int offsetInFile, Document document,
+      TextRange contextRange) {
+    int begin = contextRange.getStartOffset();
+    int end = contextRange.getEndOffset();
+    return createFimMessage(document,
+        new TextRange(begin, offsetInFile),
+        new TextRange(offsetInFile, end));
   }
 
-  private static Message createFimMessage(int offset, Document document) {
-    int begin = Integer.max(0, offset - MAX_OFFSET);
-    int end = Integer.min(document.getTextLength(), offset + MAX_OFFSET);
-    var before = document.getText(new TextRange(begin, offset));
-    var after = document.getText(new TextRange(offset, end));
-    return createFimMessage(before, after);
+  private static Message createFimMessage(int offsetInFile, Document document) {
+    int begin = Integer.max(0, offsetInFile - MAX_OFFSET);
+    int end = Integer.min(document.getTextLength(), offsetInFile + MAX_OFFSET);
+    return createFimMessage(document,
+        new TextRange(begin, offsetInFile),
+        new TextRange(offsetInFile, end));
   }
 
-  private static Message createFimMessage(String before, String after) {
+  private static Message createFimMessage(Document document, TextRange prefixRange,
+      TextRange suffixRange) {
+    String prefix = document.getText(prefixRange);
+    String suffix = document.getText(suffixRange);
     if (SettingsState.getInstance().getSelectedService() == ServiceType.LLAMA_CPP) {
       // Use Messages prompt as input_prefix and response field as input_suffix
-      return new Message(before, after);
+      return new Message(prefix, suffix);
     }
     FillInTheMiddle fim = SettingsState.getInstance().getSelectedService().getFillInTheMiddle();
     return new Message(
         ConfigurationState.getInstance().getInlineCompletionPrompt()
             .replace("{pre}", fim.getPrefix())
-            .replace("{codeBefore}", before)
+            .replace("{codeBefore}", prefix)
             .replace("{suf}", fim.getSuffix())
-            .replace("{codeAfter}", after)
+            .replace("{codeAfter}", suffix)
             .replace("{mid}", fim.getMiddle()));
   }
 }
