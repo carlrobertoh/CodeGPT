@@ -3,29 +3,19 @@ package ee.carlrobert.codegpt.settings.service;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 
 public enum ServiceType {
-  //  OPENAI("OPENAI",
-  //    CodeGPTBundle.get("service.openai.title"), "chat.completion",
-  //    new FillInTheMiddle("<|fim_prefix|", "<|fim_suffix|>",
-  //        "<|fim_middle|>", "<|endoftext|>")),
-  OPENAI("OPENAI", CodeGPTBundle.get("service.openai.title"), "chat.completion",
-      new FillInTheMiddle("<PRE> ", "<SUF>", " <MID>", "<EOT>")),
-  AZURE("AZURE", CodeGPTBundle.get("service.azure.title"), "azure.chat.completion",
-      new FillInTheMiddle("<|fim_prefix|", "<|fim_suffix|>", "<|fim_middle|>", "<|endoftext|>")),
-  YOU("YOU", CodeGPTBundle.get("service.you.title"), "you.chat.completion",
-      new FillInTheMiddle("", "TODO", "", "")),
-  LLAMA_CPP("LLAMA_CPP", CodeGPTBundle.get("service.llama.title"), "llama.chat.completion",
-      new FillInTheMiddle("<PRE> ", "<SUF>", " <MID>", "<EOT"));
+  OPENAI("OPENAI", CodeGPTBundle.get("service.openai.title"), "chat.completion"),
+  AZURE("AZURE", CodeGPTBundle.get("service.azure.title"), "azure.chat.completion"),
+  YOU("YOU", CodeGPTBundle.get("service.you.title"), "you.chat.completion"),
+  LLAMA_CPP("LLAMA_CPP", CodeGPTBundle.get("service.llama.title"), "llama.chat.completion");
 
   private final String code;
   private final String label;
   private final String completionCode;
-  private final FillInTheMiddle fillInTheMiddle;
 
-  ServiceType(String code, String label, String completionCode, FillInTheMiddle fillInTheMiddle) {
+  ServiceType(String code, String label, String completionCode) {
     this.code = code;
     this.label = label;
     this.completionCode = completionCode;
-    this.fillInTheMiddle = fillInTheMiddle;
   }
 
   public String getCode() {
@@ -38,10 +28,6 @@ public enum ServiceType {
 
   public String getCompletionCode() {
     return completionCode;
-  }
-
-  public FillInTheMiddle getFillInTheMiddle() {
-    return fillInTheMiddle;
   }
 
   @Override

@@ -7,6 +7,8 @@ import static ee.carlrobert.codegpt.settings.service.ServiceType.YOU;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
+import ee.carlrobert.codegpt.codecompletions.CodeCompletionRequestProvider;
+import ee.carlrobert.codegpt.codecompletions.InfillRequestDetails;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
@@ -14,7 +16,6 @@ import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
-import ee.carlrobert.llm.client.llama.completion.LlamaCompletionResponse;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.response.OpenAIChatCompletionResponse;
@@ -73,31 +74,29 @@ public final class CompletionRequestService {
     }
   }
 
-  public @Nullable String getCodeCompletion(CallParameters callParameters) {
-    var requestProvider = new CompletionRequestProvider(callParameters.getConversation());
+  public @Nullable String getCodeCompletion(InfillRequestDetails details) {
+    var requestProvider = new CodeCompletionRequestProvider(details);
     switch (SettingsState.getInstance().getSelectedService()) {
       case OPENAI:
         var openAISettings = OpenAISettingsState.getInstance();
         OpenAIChatCompletionResponse chatCompletion = CompletionClientProvider.getOpenAIClient()
             .getChatCompletion(
-                requestProvider.buildOpenAICodeCompletionRequest(
+                requestProvider.buildOpenAIRequest(
                     openAISettings.getModel(),
-                    callParameters,
                     openAISettings.isUsingCustomPath() ? openAISettings.getPath() : null));
         return chatCompletion.getChoices().get(0).getMessage().getContent();
       case AZURE:
         var azureSettings = AzureSettingsState.getInstance();
         OpenAIChatCompletionResponse azureResponse = CompletionClientProvider.getAzureClient()
             .getChatCompletion(
-                requestProvider.buildOpenAICodeCompletionRequest(
+                requestProvider.buildOpenAIRequest(
                     null,
-                    callParameters,
                     azureSettings.isUsingCustomPath() ? azureSettings.getPath() : null));
         return azureResponse.getChoices().get(0).getMessage().getContent();
       case LLAMA_CPP:
-        LlamaCompletionResponse llamaResponse = CompletionClientProvider.getLlamaClient()
-            .getInfill(requestProvider.buildLlamaInfillRequest(callParameters.getMessage()));
-        return llamaResponse.getContent();
+        return CompletionClientProvider.getLlamaClient()
+            .getInfill(requestProvider.buildLlamaRequest())
+            .getContent();
       default:
         throw new IllegalArgumentException();
     }

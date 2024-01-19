@@ -30,15 +30,7 @@ import com.intellij.psi.PsiMethod;
 import com.intellij.util.concurrency.annotations.RequiresBackgroundThread;
 import com.intellij.util.concurrency.annotations.RequiresReadLock;
 import com.intellij.util.concurrency.annotations.RequiresWriteLock;
-import ee.carlrobert.codegpt.completions.CallParameters;
 import ee.carlrobert.codegpt.completions.CompletionRequestService;
-import ee.carlrobert.codegpt.completions.ConversationType;
-import ee.carlrobert.codegpt.conversations.ConversationService;
-import ee.carlrobert.codegpt.conversations.message.Message;
-import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
-import ee.carlrobert.codegpt.settings.service.FillInTheMiddle;
-import ee.carlrobert.codegpt.settings.service.ServiceType;
-import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.util.EditorUtil;
 import java.awt.event.KeyEvent;
 import java.util.List;
@@ -74,10 +66,10 @@ public final class CodeCompletionService {
     int caretOffset = editor.getCaretModel().getOffset();
     PsiFile psiFile = PsiDocumentManager.getInstance(project).getPsiFile(document);
     if (psiFile != null) {
-      // TODO should cancel current completion request, if present
+      // TODO: Should cancel current completion request, if present
       stopTimer.run();
-      var application = ApplicationManager.getApplication();
-      application.executeOnPooledThread(() -> {
+
+      ApplicationManager.getApplication().executeOnPooledThread(() -> {
         var response = fetchCodeCompletion(psiFile, caretOffset, editor.getDocument());
         addInlay(response, editor, stopTimer);
       });
@@ -125,19 +117,19 @@ public final class CodeCompletionService {
    */
   @RequiresBackgroundThread
   private String fetchCodeCompletion(PsiFile psiFile, int offsetInFile, Document document) {
-    return ReadAction.compute(() -> {
-          Message message = tryFindEnclosingPsiElement(List.of(PsiMethod.class, PsiClass.class),
-              psiFile, offsetInFile)
-              .map(
-                  psiElement -> createFimMessage(offsetInFile, document, psiElement.getTextRange()))
-              .orElse(createFimMessage(offsetInFile, document));
-          return CompletionRequestService.getInstance().getCodeCompletion(new CallParameters(
-              ConversationService.getInstance().startConversation(),
-              ConversationType.INLINE_COMPLETION,
-              message,
-              false));
-        }
-    );
+    InfillRequestDetails requestDetails = ReadAction.compute(() -> tryFindEnclosingPsiElement(
+        List.of(PsiMethod.class, PsiClass.class),
+        psiFile, offsetInFile)
+        .map(psiElement -> {
+          var textRange = psiElement.getTextRange();
+          return createInfillRequest(
+              document,
+              offsetInFile,
+              textRange.getStartOffset(),
+              textRange.getEndOffset());
+        })
+        .orElse(createInfillRequest(offsetInFile, document)));
+    return CompletionRequestService.getInstance().getCodeCompletion(requestDetails);
   }
 
   @RequiresReadLock
@@ -223,38 +215,19 @@ public final class CodeCompletionService {
         new KeyboardShortcut(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), null));
   }
 
-  private static Message createFimMessage(int offsetInFile, Document document,
-      TextRange contextRange) {
-    int begin = contextRange.getStartOffset();
-    int end = contextRange.getEndOffset();
-    return createFimMessage(document,
-        new TextRange(begin, offsetInFile),
-        new TextRange(offsetInFile, end));
-  }
-
-  private static Message createFimMessage(int offsetInFile, Document document) {
+  private static InfillRequestDetails createInfillRequest(int offsetInFile, Document document) {
     int begin = Integer.max(0, offsetInFile - MAX_OFFSET);
     int end = Integer.min(document.getTextLength(), offsetInFile + MAX_OFFSET);
-    return createFimMessage(document,
-        new TextRange(begin, offsetInFile),
-        new TextRange(offsetInFile, end));
+    return createInfillRequest(document, offsetInFile, begin, end);
   }
 
-  private static Message createFimMessage(Document document, TextRange prefixRange,
-      TextRange suffixRange) {
-    String prefix = document.getText(prefixRange);
-    String suffix = document.getText(suffixRange);
-    if (SettingsState.getInstance().getSelectedService() == ServiceType.LLAMA_CPP) {
-      // Use Messages prompt as input_prefix and response field as input_suffix
-      return new Message(prefix, suffix);
-    }
-    FillInTheMiddle fim = SettingsState.getInstance().getSelectedService().getFillInTheMiddle();
-    return new Message(
-        ConfigurationState.getInstance().getInlineCompletionPrompt()
-            .replace("{pre}", fim.getPrefix())
-            .replace("{codeBefore}", prefix)
-            .replace("{suf}", fim.getSuffix())
-            .replace("{codeAfter}", suffix)
-            .replace("{mid}", fim.getMiddle()));
+  private static InfillRequestDetails createInfillRequest(
+      Document document,
+      int caretOffset,
+      int start,
+      int end) {
+    return new InfillRequestDetails(
+        document.getText(new TextRange(start, caretOffset)),
+        document.getText(new TextRange(caretOffset, end)));
   }
 }

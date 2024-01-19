@@ -24,7 +24,7 @@ public class ConfigurationState implements PersistentStateComponent<Configuratio
   private String inlineCompletionPrompt = INLINE_COMPLETION_PROMPT;
   private int maxTokens = 1000;
   private double temperature = 0.1;
-  private int inlineDelay = 5000;
+  private int inlineDelay = 1500;
   private boolean checkForPluginUpdates = true;
   private boolean createNewChatOnEachAction;
   private boolean ignoreGitCommitTokenLimit;
