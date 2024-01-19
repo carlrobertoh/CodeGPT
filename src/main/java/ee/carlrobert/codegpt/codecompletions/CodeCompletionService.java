@@ -27,6 +27,7 @@ import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiMethod;
+import com.intellij.psi.PsiWhiteSpace;
 import com.intellij.util.concurrency.annotations.RequiresBackgroundThread;
 import com.intellij.util.concurrency.annotations.RequiresReadLock;
 import com.intellij.util.concurrency.annotations.RequiresWriteLock;
@@ -66,14 +67,21 @@ public final class CodeCompletionService {
     int caretOffset = editor.getCaretModel().getOffset();
     PsiFile psiFile = PsiDocumentManager.getInstance(project).getPsiFile(document);
     if (psiFile != null) {
-      // TODO: Should cancel current completion request, if present
-      stopTimer.run();
-
-      ApplicationManager.getApplication().executeOnPooledThread(() -> {
-        var response = fetchCodeCompletion(psiFile, caretOffset, editor.getDocument());
-        addInlay(response, editor, stopTimer);
-      });
+      PsiElement elementAtCaret = ReadAction.compute(() -> psiFile.findElementAt(caretOffset));
+      if (isCompletionAllowed(elementAtCaret)) {
+        // TODO: Should cancel current completion request, if present
+        stopTimer.run();
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+          var response = fetchCodeCompletion(elementAtCaret, caretOffset,
+              editor.getDocument());
+          addInlay(response, editor, stopTimer);
+        });
+      }
     }
+  }
+
+  private boolean isCompletionAllowed(PsiElement elementAtCaret) {
+    return elementAtCaret instanceof PsiWhiteSpace;
   }
 
   @RequiresWriteLock
@@ -109,17 +117,17 @@ public final class CodeCompletionService {
    * {@code offsetInFile} and only uses their content instead of the entire file's content. If no
    * such enclosing {@link PsiElement} can be found, the file's entire content is used instead.
    *
-   * @param psiFile      File to determine what text content to use.
+   * @param elementAtCaret PsiElement at caret
    * @param offsetInFile Global offset in the file.
    * @param document     If the offset is not enclosed in a {@link PsiMethod} nor a
    *                     {@link PsiClass}, the entire file content is used for completion.
    * @return Completion String
    */
   @RequiresBackgroundThread
-  private String fetchCodeCompletion(PsiFile psiFile, int offsetInFile, Document document) {
-    InfillRequestDetails requestDetails = ReadAction.compute(() -> tryFindEnclosingPsiElement(
-        List.of(PsiMethod.class, PsiClass.class),
-        psiFile, offsetInFile)
+  private String fetchCodeCompletion(PsiElement elementAtCaret, int offsetInFile,
+      Document document) {
+    InfillRequestDetails requestDetails = tryFindEnclosingPsiElement(
+        List.of(PsiMethod.class, PsiClass.class), elementAtCaret)
         .map(psiElement -> {
           var textRange = psiElement.getTextRange();
           return createInfillRequest(
@@ -128,24 +136,26 @@ public final class CodeCompletionService {
               textRange.getStartOffset(),
               textRange.getEndOffset());
         })
-        .orElse(createInfillRequest(offsetInFile, document)));
+        .orElse(createInfillRequest(offsetInFile, document));
     return CompletionRequestService.getInstance().getCodeCompletion(requestDetails);
   }
 
   @RequiresReadLock
   private Optional<PsiElement> tryFindEnclosingPsiElement(
       List<Class<? extends PsiElement>> types,
-      PsiFile psiFile, int caretOffset) {
-    PsiElement elementAtCaret = psiFile.findElementAt(caretOffset);
-    while (elementAtCaret != null) {
-      for (Class<? extends PsiElement> type : types) {
-        if (type.isInstance(elementAtCaret)) {
-          return Optional.of(elementAtCaret);
+      PsiElement elementAtCaret) {
+    return ReadAction.compute(() -> {
+      var element = elementAtCaret;
+      while (element != null) {
+        for (Class<? extends PsiElement> type : types) {
+          if (type.isInstance(element)) {
+            return Optional.of(element);
+          }
         }
+        element = element.getParent();
       }
-      elementAtCaret = elementAtCaret.getParent();
-    }
-    return Optional.empty();
+      return Optional.empty();
+    });
   }
 
   private void addInlay(String inlayText, Editor editor, Runnable stopTimer) {
