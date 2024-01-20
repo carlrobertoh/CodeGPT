@@ -16,6 +16,8 @@ import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
+
+import java.nio.file.Paths;
 import java.util.List;
 import javax.swing.Icon;
 import javax.swing.JComponent;
@@ -67,7 +69,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
     actionGroup.addSeparator();
     actionGroup.add(createModelAction(
         ServiceType.LLAMA_CPP,
-        getSelectedHuggingFace(),
+        getSelectedModel(),
         Icons.Llama,
         presentation));
     actionGroup.addSeparator();
@@ -97,11 +99,20 @@ public class ModelComboBoxAction extends ComboBoxAction {
         templatePresentation.setText("You.com");
         break;
       case LLAMA_CPP:
-        templatePresentation.setText(getSelectedHuggingFace());
+        templatePresentation.setText(getSelectedModel());
         templatePresentation.setIcon(Icons.Llama);
         break;
       default:
     }
+  }
+
+  private String getSelectedModel() {
+    var llamaSettings = LlamaSettingsState.getInstance();
+    if (llamaSettings.isUseCustomModel()) {
+      var model_path = llamaSettings.getCustomLlamaModelPath();
+      return Paths.get(model_path).getFileName().toString();
+    }
+    return getSelectedHuggingFace();
   }
 
   private String getSelectedHuggingFace() {
