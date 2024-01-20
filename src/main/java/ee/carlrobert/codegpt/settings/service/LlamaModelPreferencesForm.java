@@ -160,6 +160,8 @@ public class LlamaModelPreferencesForm {
     modelComboBox.setEnabled(enabled);
     modelSizeComboBox.setEnabled(enabled);
     huggingFaceModelComboBox.setEnabled(enabled);
+    promptTemplateComboBox.setEnabled(enabled);
+    browsableCustomModelTextField.setEnabled(enabled);
   }
 
   public TextFieldWithBrowseButton getBrowsableCustomModelTextField() {
