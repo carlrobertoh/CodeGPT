@@ -1,6 +1,9 @@
 package ee.carlrobert.codegpt.codecompletions;
 
+import static ee.carlrobert.codegpt.CodeGPTKeys.MULTI_LINE_INLAY;
+import static ee.carlrobert.codegpt.CodeGPTKeys.SINGLE_LINE_INLAY;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.AnAction;
@@ -11,15 +14,14 @@ import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.editor.CaretModel;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.EditorCustomElementRenderer;
 import com.intellij.openapi.editor.Inlay;
+import com.intellij.openapi.editor.InlayModel;
 import com.intellij.openapi.editor.VisualPosition;
 import com.intellij.openapi.keymap.KeymapManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiClass;
@@ -29,6 +31,7 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiWhiteSpace;
 import com.intellij.util.concurrency.annotations.RequiresBackgroundThread;
+import com.intellij.util.concurrency.annotations.RequiresEdt;
 import com.intellij.util.concurrency.annotations.RequiresReadLock;
 import com.intellij.util.concurrency.annotations.RequiresWriteLock;
 import ee.carlrobert.codegpt.completions.CompletionRequestService;
@@ -44,8 +47,7 @@ import org.jetbrains.annotations.NotNull;
 @ParametersAreNonnullByDefault
 public final class CodeCompletionService {
 
-  public static final String BLOCK_ELEMENT_ACTION_ID = "InsertBlockElementAction";
-  public static final String INLINE_ELEMENT_ACTION_ID = "InsertInlineElementAction";
+  public static final String APPLY_INLAY_ACTION_ID = "ApplyInlayAction";
   public static final int MAX_OFFSET = 4000;
 
   private static final Logger LOG = Logger.getInstance(CodeCompletionService.class);
@@ -57,7 +59,7 @@ public final class CodeCompletionService {
     return ApplicationManager.getApplication().getService(CodeCompletionService.class);
   }
 
-  public void triggerCodeCompletion(Editor editor, Runnable stopTimer) {
+  public void triggerCodeCompletion(Editor editor) {
     Project project = editor.getProject();
     Document document = editor.getDocument();
     if (project == null || document.getText().isBlank()) {
@@ -70,11 +72,14 @@ public final class CodeCompletionService {
       PsiElement elementAtCaret = ReadAction.compute(() -> psiFile.findElementAt(caretOffset));
       if (isCompletionAllowed(elementAtCaret)) {
         // TODO: Should cancel current completion request, if present
-        stopTimer.run();
-        ApplicationManager.getApplication().executeOnPooledThread(() -> {
-          var response = fetchCodeCompletion(elementAtCaret, caretOffset,
-              editor.getDocument());
-          addInlay(response, editor, stopTimer);
+        var application = ApplicationManager.getApplication();
+        application.executeOnPooledThread(() -> {
+          try {
+            var response = fetchCodeCompletion(elementAtCaret, caretOffset, editor.getDocument());
+            application.invokeLater(() -> addInlays(editor, response));
+          } catch (Exception e) {
+            LOG.warn("Code completion failed", e);
+          }
         });
       }
     }
@@ -85,30 +90,45 @@ public final class CodeCompletionService {
   }
 
   @RequiresWriteLock
-  private void applyCompletion(
-      @NotNull Editor editor,
-      Key<Inlay<EditorCustomElementRenderer>> inlayKey,
-      String text) {
+  private void applyCompletion(Editor editor, String text) {
     if (editor.isDisposed()) {
       LOG.warn("Editor is already disposed");
       return;
     }
 
-    Inlay<EditorCustomElementRenderer> inlay = editor.getUserData(inlayKey);
-    if (inlay != null) {
-      int offset = inlay.getOffset();
-      var document = editor.getDocument();
-
-      document.insertString(offset, text);
-      editor.getCaretModel().moveToOffset(offset + text.length());
-      EditorUtil.reformatDocument(
-          requireNonNull(editor.getProject()),
-          document,
-          offset,
-          offset + text.length());
-      inlay.dispose();
-      editor.putUserData(inlayKey, null);
+    var inlayKeys = List.of(SINGLE_LINE_INLAY, MULTI_LINE_INLAY);
+    for (var key : inlayKeys) {
+      Inlay<EditorCustomElementRenderer> inlay = editor.getUserData(key);
+      if (inlay != null) {
+        applyCompletion(editor, text, inlay.getOffset());
+        disposeEditorInlays(editor, inlayKeys);
+        return;
+      }
     }
+  }
+
+  private void disposeEditorInlays(
+      Editor editor,
+      List<Key<Inlay<EditorCustomElementRenderer>>> inlayKeys) {
+    inlayKeys.forEach(key -> {
+      Inlay<EditorCustomElementRenderer> inlay = editor.getUserData(key);
+      if (inlay != null) {
+        inlay.dispose();
+        editor.putUserData(key, null);
+      }
+    });
+  }
+
+  @RequiresWriteLock
+  private void applyCompletion(Editor editor, String text, int offset) {
+    Document document = editor.getDocument();
+    document.insertString(offset, text);
+    editor.getCaretModel().moveToOffset(offset + text.length());
+    EditorUtil.reformatDocument(
+        requireNonNull(editor.getProject()),
+        document,
+        offset,
+        offset + text.length());
   }
 
   /**
@@ -118,13 +138,15 @@ public final class CodeCompletionService {
    * such enclosing {@link PsiElement} can be found, the file's entire content is used instead.
    *
    * @param elementAtCaret PsiElement at caret
-   * @param offsetInFile Global offset in the file.
-   * @param document     If the offset is not enclosed in a {@link PsiMethod} nor a
-   *                     {@link PsiClass}, the entire file content is used for completion.
+   * @param offsetInFile   Global offset in the file.
+   * @param document       If the offset is not enclosed in a {@link PsiMethod} nor a
+   *                       {@link PsiClass}, the entire file content is used for completion.
    * @return Completion String
    */
   @RequiresBackgroundThread
-  private String fetchCodeCompletion(PsiElement elementAtCaret, int offsetInFile,
+  private String fetchCodeCompletion(
+      PsiElement elementAtCaret,
+      int offsetInFile,
       Document document) {
     InfillRequestDetails requestDetails = tryFindEnclosingPsiElement(
         List.of(PsiMethod.class, PsiClass.class), elementAtCaret)
@@ -154,74 +176,57 @@ public final class CodeCompletionService {
         }
         element = element.getParent();
       }
+
       return Optional.empty();
     });
   }
 
-  private void addInlay(String inlayText, Editor editor, Runnable stopTimer) {
-    try {
-      var project = editor.getProject();
-      var inlayKey = WriteCommandAction.runWriteCommandAction(
-          project,
-          (Computable<Key<Inlay<EditorCustomElementRenderer>>>) () -> addInlay(inlayText, editor));
-      Runnable applyCompletion =
-          () -> {
-            WriteCommandAction.runWriteCommandAction(project, () ->
-                CodeCompletionService.getInstance().applyCompletion(editor, inlayKey, inlayText));
-            stopTimer.run();
-          };
-      if (inlayKey.equals(InlayInlineElementRenderer.INLAY_KEY)) {
-        registerInlayAction(INLINE_ELEMENT_ACTION_ID, applyCompletion);
-        return;
-      }
-      registerInlayAction(BLOCK_ELEMENT_ACTION_ID, applyCompletion);
-    } finally {
-      stopTimer.run();
-    }
-  }
-
-  @RequiresWriteLock
-  private Key<Inlay<EditorCustomElementRenderer>> addInlay(String inlayText, Editor editor) {
-    CaretModel caretModel = editor.getCaretModel();
-    VisualPosition visualCaretPosition = caretModel.getVisualPosition();
+  @RequiresEdt
+  private void addInlays(Editor editor, String inlayText) {
+    VisualPosition visualCaretPosition = editor.getCaretModel().getVisualPosition();
     int caretOffset = editor.visualPositionToOffset(visualCaretPosition);
-    return addInlay(inlayText, editor, caretOffset);
-  }
+    List<String> linesList = inlayText.lines().collect(toList());
+    String firstLine = linesList.get(0);
+    String restOfLines = linesList.size() > 1
+        ? String.join("\n", linesList.subList(1, linesList.size()))
+        : null;
+    InlayModel inlayModel = editor.getInlayModel();
 
-  private Key<Inlay<EditorCustomElementRenderer>> addInlay(
-      String inlayText,
-      Editor editor,
-      int offset) {
-    var inlayModel = editor.getInlayModel();
-    if (inlayText.lines().count() == 1) {
-      editor.putUserData(
-          InlayInlineElementRenderer.INLAY_KEY,
-          inlayModel.addInlineElement(offset, true, new InlayInlineElementRenderer(inlayText)));
-      return InlayInlineElementRenderer.INLAY_KEY;
+    if (!firstLine.isEmpty()) {
+      editor.putUserData(SINGLE_LINE_INLAY, inlayModel.addInlineElement(
+          caretOffset,
+          true,
+          Integer.MAX_VALUE,
+          new InlayInlineElementRenderer(firstLine)));
     }
 
-    editor.putUserData(
-        InlayBlockElementRenderer.INLAY_KEY,
-        inlayModel.addBlockElement(
-            offset,
-            true,
-            false,
-            0,
-            new InlayBlockElementRenderer(inlayText)));
-    return InlayBlockElementRenderer.INLAY_KEY;
+    if (restOfLines != null && !restOfLines.isEmpty()) {
+      editor.putUserData(MULTI_LINE_INLAY, inlayModel.addBlockElement(
+          caretOffset,
+          true,
+          false,
+          Integer.MAX_VALUE,
+          new InlayBlockElementRenderer(restOfLines)));
+    }
+
+    registerApplyCompletionAction(editor, inlayText);
   }
 
-  private void registerInlayAction(String actionId, Runnable applyCompletionListener) {
-    ActionManager.getInstance().registerAction(
-        actionId,
+  private void registerApplyCompletionAction(Editor editor, String inlayText) {
+    var actionManager = ActionManager.getInstance();
+    actionManager.registerAction(
+        APPLY_INLAY_ACTION_ID,
         new AnAction() {
           @Override
           public void actionPerformed(@NotNull AnActionEvent e) {
-            ApplicationManager.getApplication().invokeLater(applyCompletionListener);
+            actionManager.unregisterAction(CodeCompletionService.APPLY_INLAY_ACTION_ID);
+            WriteCommandAction.runWriteCommandAction(
+                editor.getProject(),
+                () -> applyCompletion(editor, inlayText));
           }
         });
     KeymapManager.getInstance().getActiveKeymap().addShortcut(
-        actionId,
+        APPLY_INLAY_ACTION_ID,
         new KeyboardShortcut(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), null));
   }
 

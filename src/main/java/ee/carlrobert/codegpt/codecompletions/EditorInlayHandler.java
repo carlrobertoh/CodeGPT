@@ -1,5 +1,9 @@
 package ee.carlrobert.codegpt.codecompletions;
 
+import static ee.carlrobert.codegpt.CodeGPTKeys.MULTI_LINE_INLAY;
+import static ee.carlrobert.codegpt.CodeGPTKeys.SINGLE_LINE_INLAY;
+
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.Editor;
@@ -15,33 +19,40 @@ import com.intellij.openapi.editor.event.SelectionEvent;
 import com.intellij.openapi.editor.event.SelectionListener;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.TextRange;
+import ee.carlrobert.codegpt.CodeGPTKeys;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.stream.Stream;
 import javax.swing.Timer;
 import org.jetbrains.annotations.NotNull;
 
-public class EditorInlayHandler {
+public class EditorInlayHandler implements Disposable {
 
+  private final Editor editor;
   private Timer typingTimer;
 
   public EditorInlayHandler(Editor editor) {
-    initTypingTimer(editor);
-    addResetSuggestionListeners(editor);
+    this.editor = editor;
+    initTypingTimer();
+    addResetSuggestionListeners();
   }
 
-  public void disableSuggestions(Editor editor) {
-    resetSuggestion(editor);
+  @Override
+  public void dispose() {
+    ActionManager.getInstance().unregisterAction(CodeCompletionService.APPLY_INLAY_ACTION_ID);
+    disposeInlay(SINGLE_LINE_INLAY);
+    disposeInlay(CodeGPTKeys.MULTI_LINE_INLAY);
+  }
+
+  private void disableSuggestions() {
+    resetSuggestion();
     typingTimer.stop();
   }
 
-  private void resetSuggestion(Editor editor) {
+  private void resetSuggestion() {
     typingTimer.restart();
-    ActionManager actionManager = ActionManager.getInstance();
-    actionManager.unregisterAction(CodeCompletionService.INLINE_ELEMENT_ACTION_ID);
-    actionManager.unregisterAction(CodeCompletionService.BLOCK_ELEMENT_ACTION_ID);
-    disposeInlay(editor, InlayInlineElementRenderer.INLAY_KEY);
-    disposeInlay(editor, InlayBlockElementRenderer.INLAY_KEY);
+    dispose();
   }
 
   private void enableSuggestions() {
@@ -50,7 +61,7 @@ public class EditorInlayHandler {
     }
   }
 
-  private void disposeInlay(Editor editor, Key<Inlay<EditorCustomElementRenderer>> inlayKey) {
+  private void disposeInlay(Key<Inlay<EditorCustomElementRenderer>> inlayKey) {
     Inlay<EditorCustomElementRenderer> inlay = editor.getUserData(inlayKey);
     if (inlay != null) {
       WriteCommandAction.runWriteCommandAction(editor.getProject(), inlay::dispose);
@@ -58,43 +69,50 @@ public class EditorInlayHandler {
     }
   }
 
-  private void initTypingTimer(Editor editor) {
+  private void initTypingTimer() {
     typingTimer = new Timer(
         ConfigurationState.getInstance().getInlineDelay(),
-        e -> CodeCompletionService.getInstance()
-            .triggerCodeCompletion(editor, () -> typingTimer.stop()));
+        e -> {
+          if (Stream.of(SINGLE_LINE_INLAY, MULTI_LINE_INLAY)
+              .anyMatch(it -> editor.getUserData(it) != null)) {
+            return;
+          }
+
+          ((Timer) e.getSource()).stop();
+          CodeCompletionService.getInstance().triggerCodeCompletion(editor);
+        });
     typingTimer.setRepeats(true);
     typingTimer.start();
   }
 
-  private void addResetSuggestionListeners(Editor editor) {
+  private void addResetSuggestionListeners() {
     editor.getDocument().addDocumentListener(new DocumentListener() {
       @Override
       public void beforeDocumentChange(@NotNull DocumentEvent event) {
-        resetSuggestion(editor);
+        resetSuggestion();
       }
     });
     editor.getContentComponent().addKeyListener(new KeyAdapter() {
       @Override
       public void keyTyped(KeyEvent e) {
-        resetSuggestion(editor);
+        resetSuggestion();
       }
 
       @Override
       public void keyPressed(KeyEvent e) {
-        resetSuggestion(editor);
+        resetSuggestion();
       }
     });
     editor.addEditorMouseListener(new EditorMouseListener() {
       @Override
       public void mouseClicked(@NotNull EditorMouseEvent event) {
-        resetSuggestion(editor);
+        resetSuggestion();
       }
     });
     editor.getCaretModel().addCaretListener(new CaretListener() {
       @Override
       public void caretPositionChanged(@NotNull CaretEvent event) {
-        resetSuggestion(editor);
+        resetSuggestion();
       }
     });
     editor.getSelectionModel().addSelectionListener(new SelectionListener() {
@@ -103,7 +121,7 @@ public class EditorInlayHandler {
         TextRange range = e.getNewRange();
         int rangeLength = range.getLength();
         if (rangeLength != 0) {
-          disableSuggestions(editor);
+          disableSuggestions();
         } else {
           enableSuggestions();
         }

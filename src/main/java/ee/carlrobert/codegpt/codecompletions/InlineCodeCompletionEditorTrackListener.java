@@ -25,9 +25,6 @@ public class InlineCodeCompletionEditorTrackListener implements EditorTrackerLis
         .collect(toList());
     newEditors.forEach(editor ->
         completionRenderers.put(editor, new EditorInlayHandler(editor)));
-    inactiveEditors.forEach(editor -> {
-      EditorInlayHandler completionRenderer = completionRenderers.remove(editor);
-      completionRenderer.disableSuggestions(editor);
-    });
+    inactiveEditors.forEach(editor -> completionRenderers.remove(editor).dispose());
   }
 }

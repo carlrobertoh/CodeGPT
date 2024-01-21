@@ -23,7 +23,6 @@ import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.util.List;
 import java.util.Optional;
 import okhttp3.sse.EventSource;
-import org.jetbrains.annotations.Nullable;
 
 @Service
 public final class CompletionRequestService {
@@ -74,7 +73,7 @@ public final class CompletionRequestService {
     }
   }
 
-  public @Nullable String getCodeCompletion(InfillRequestDetails details) {
+  public String getCodeCompletion(InfillRequestDetails details) {
     var requestProvider = new CodeCompletionRequestProvider(details);
     switch (SettingsState.getInstance().getSelectedService()) {
       case OPENAI:
@@ -98,7 +97,7 @@ public final class CompletionRequestService {
             .getInfill(requestProvider.buildLlamaRequest())
             .getContent();
       default:
-        throw new IllegalArgumentException();
+        throw new IllegalArgumentException("Code completion not supported for selected service");
     }
   }
 
