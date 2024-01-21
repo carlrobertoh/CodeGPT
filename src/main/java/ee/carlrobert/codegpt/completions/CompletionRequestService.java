@@ -18,7 +18,6 @@ import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
-import ee.carlrobert.llm.client.openai.completion.response.OpenAIChatCompletionResponse;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.util.List;
 import java.util.Optional;
@@ -73,29 +72,30 @@ public final class CompletionRequestService {
     }
   }
 
-  public String getCodeCompletion(InfillRequestDetails details) {
-    var requestProvider = new CodeCompletionRequestProvider(details);
+  public EventSource getCodeCompletionAsync(
+      InfillRequestDetails requestDetails,
+      CompletionEventListener eventListener) {
+    var requestProvider = new CodeCompletionRequestProvider(requestDetails);
     switch (SettingsState.getInstance().getSelectedService()) {
       case OPENAI:
         var openAISettings = OpenAISettingsState.getInstance();
-        OpenAIChatCompletionResponse chatCompletion = CompletionClientProvider.getOpenAIClient()
-            .getChatCompletion(
+        return CompletionClientProvider.getOpenAIClient()
+            .getChatCompletionAsync(
                 requestProvider.buildOpenAIRequest(
                     openAISettings.getModel(),
-                    openAISettings.isUsingCustomPath() ? openAISettings.getPath() : null));
-        return chatCompletion.getChoices().get(0).getMessage().getContent();
+                    openAISettings.isUsingCustomPath() ? openAISettings.getPath() : null),
+                eventListener);
       case AZURE:
         var azureSettings = AzureSettingsState.getInstance();
-        OpenAIChatCompletionResponse azureResponse = CompletionClientProvider.getAzureClient()
-            .getChatCompletion(
+        return CompletionClientProvider.getAzureClient()
+            .getChatCompletionAsync(
                 requestProvider.buildOpenAIRequest(
                     null,
-                    azureSettings.isUsingCustomPath() ? azureSettings.getPath() : null));
-        return azureResponse.getChoices().get(0).getMessage().getContent();
+                    azureSettings.isUsingCustomPath() ? azureSettings.getPath() : null),
+                eventListener);
       case LLAMA_CPP:
         return CompletionClientProvider.getLlamaClient()
-            .getInfill(requestProvider.buildLlamaRequest())
-            .getContent();
+            .getInfillAsync(requestProvider.buildLlamaRequest(), eventListener);
       default:
         throw new IllegalArgumentException("Code completion not supported for selected service");
     }

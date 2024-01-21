@@ -5,7 +5,11 @@ import static ee.carlrobert.codegpt.CodeGPTKeys.SINGLE_LINE_INLAY;
 
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.ActionManager;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.command.WriteCommandAction;
+import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.EditorCustomElementRenderer;
 import com.intellij.openapi.editor.Inlay;
@@ -17,18 +21,29 @@ import com.intellij.openapi.editor.event.EditorMouseEvent;
 import com.intellij.openapi.editor.event.EditorMouseListener;
 import com.intellij.openapi.editor.event.SelectionEvent;
 import com.intellij.openapi.editor.event.SelectionListener;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.TextRange;
-import ee.carlrobert.codegpt.CodeGPTKeys;
+import com.intellij.psi.PsiDocumentManager;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
+import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
+import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 import javax.swing.Timer;
+import okhttp3.sse.EventSource;
 import org.jetbrains.annotations.NotNull;
 
 public class EditorInlayHandler implements Disposable {
 
+  private static final Logger LOG = Logger.getInstance(EditorInlayHandler.class);
+
+  private final AtomicReference<EventSource> currentCall = new AtomicReference<>();
+  private final CodeCompletionService codeCompletionService = CodeCompletionService.getInstance();
   private final Editor editor;
   private Timer typingTimer;
 
@@ -40,9 +55,14 @@ public class EditorInlayHandler implements Disposable {
 
   @Override
   public void dispose() {
+    var previousCall = currentCall.get();
+    if (previousCall != null) {
+      previousCall.cancel();
+    }
+
     ActionManager.getInstance().unregisterAction(CodeCompletionService.APPLY_INLAY_ACTION_ID);
     disposeInlay(SINGLE_LINE_INLAY);
-    disposeInlay(CodeGPTKeys.MULTI_LINE_INLAY);
+    disposeInlay(MULTI_LINE_INLAY);
   }
 
   private void disableSuggestions() {
@@ -79,10 +99,54 @@ public class EditorInlayHandler implements Disposable {
           }
 
           ((Timer) e.getSource()).stop();
-          CodeCompletionService.getInstance().triggerCodeCompletion(editor);
+          triggerCodeCompletion(editor);
         });
     typingTimer.setRepeats(true);
     typingTimer.start();
+  }
+
+  private void triggerCodeCompletion(Editor editor) {
+    Project project = editor.getProject();
+    Document document = editor.getDocument();
+
+    if (project == null || document.getText().isBlank()) {
+      return;
+    }
+
+    int caretOffset = editor.getCaretModel().getOffset();
+    PsiFile psiFile = PsiDocumentManager.getInstance(project).getPsiFile(document);
+    if (psiFile != null) {
+      PsiElement elementAtCaret = ReadAction.compute(() -> psiFile.findElementAt(caretOffset));
+      if (codeCompletionService.isCompletionAllowed(elementAtCaret)) {
+        var application = ApplicationManager.getApplication();
+        application.executeOnPooledThread(() -> {
+          var call = codeCompletionService.fetchCodeCompletion(
+              elementAtCaret,
+              caretOffset,
+              editor.getDocument(),
+              new CompletionEventListener() {
+                @Override
+                public void onComplete(StringBuilder messageBuilder) {
+                  var inlayText = messageBuilder.toString();
+                  if (!inlayText.isEmpty()) {
+                    application.invokeLater(() ->
+                        codeCompletionService.addInlays(
+                            editor,
+                            caretOffset,
+                            inlayText,
+                            () -> dispose()));
+                  }
+                }
+
+                @Override
+                public void onError(ErrorDetails error, Throwable ex) {
+                  LOG.error(error.getMessage(), ex);
+                }
+              });
+          currentCall.set(call);
+        });
+      }
+    }
   }
 
   private void addResetSuggestionListeners() {

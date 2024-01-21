@@ -51,7 +51,7 @@ public class CodeCompletionRequestProvider {
         .setTop_p(settings.getTopP())
         .setMin_p(settings.getMinP())
         .setRepeat_penalty(settings.getRepeatPenalty())
-        .setStream(false)
+        .setStream(true)
         .setStop(List.of("  <EOT>", "<EOT>")), details.getPrefix(), details.getSuffix());
   }
 }
