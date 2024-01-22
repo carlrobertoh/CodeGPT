@@ -31,6 +31,7 @@ public class ConfigurationState implements PersistentStateComponent<Configuratio
   private boolean methodNameGenerationEnabled = true;
   private boolean captureCompileErrors = true;
   private boolean autoFormattingEnabled = true;
+  private boolean codeCompletionsEnabled;
   private Map<String, String> tableData = EditorActionsUtil.DEFAULT_ACTIONS;
 
   public static ConfigurationState getInstance() {
@@ -150,5 +151,13 @@ public class ConfigurationState implements PersistentStateComponent<Configuratio
 
   public void setAutoFormattingEnabled(boolean autoFormattingEnabled) {
     this.autoFormattingEnabled = autoFormattingEnabled;
+  }
+
+  public boolean isCodeCompletionsEnabled() {
+    return codeCompletionsEnabled;
+  }
+
+  public void setCodeCompletionsEnabled(boolean codeCompletionsEnabled) {
+    this.codeCompletionsEnabled = codeCompletionsEnabled;
   }
 }

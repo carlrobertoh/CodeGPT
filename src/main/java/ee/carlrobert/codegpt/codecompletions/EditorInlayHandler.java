@@ -2,6 +2,7 @@ package ee.carlrobert.codegpt.codecompletions;
 
 import static ee.carlrobert.codegpt.CodeGPTKeys.MULTI_LINE_INLAY;
 import static ee.carlrobert.codegpt.CodeGPTKeys.SINGLE_LINE_INLAY;
+import static ee.carlrobert.codegpt.settings.service.ServiceType.LLAMA_CPP;
 
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.ActionManager;
@@ -28,6 +29,7 @@ import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
+import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.awt.event.KeyAdapter;
@@ -93,8 +95,15 @@ public class EditorInlayHandler implements Disposable {
     typingTimer = new Timer(
         ConfigurationState.getInstance().getInlineDelay(),
         e -> {
-          if (Stream.of(SINGLE_LINE_INLAY, MULTI_LINE_INLAY)
-              .anyMatch(it -> editor.getUserData(it) != null)) {
+          if (!ConfigurationState.getInstance().isCodeCompletionsEnabled()) {
+            return;
+          }
+          var inlayAlreadyExists = Stream.of(SINGLE_LINE_INLAY, MULTI_LINE_INLAY)
+              .anyMatch(it -> editor.getUserData(it) != null);
+          if (inlayAlreadyExists) {
+            return;
+          }
+          if (!LLAMA_CPP.equals(SettingsState.getInstance().getSelectedService())) {
             return;
           }
 
