@@ -138,13 +138,13 @@ public class ModelComboBoxAction extends ComboBoxAction {
       Icon icon,
       Presentation comboBoxPresentation) {
     settings.setSelectedService(serviceType);
-    comboBoxPresentation.setIcon(icon);
-    comboBoxPresentation.setText(label);
 
     var currentConversation = ConversationsState.getCurrentConversation();
     if (currentConversation != null && !currentConversation.getMessages().isEmpty()) {
       onAddNewTab.run();
     } else {
+      comboBoxPresentation.setIcon(icon);
+      comboBoxPresentation.setText(label);
       ConversationService.getInstance().startConversation();
     }
   }
