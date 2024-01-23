@@ -4,6 +4,8 @@ import static ee.carlrobert.codegpt.CodeGPTKeys.MULTI_LINE_INLAY;
 import static ee.carlrobert.codegpt.CodeGPTKeys.SINGLE_LINE_INLAY;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.LLAMA_CPP;
 
+import com.intellij.notification.NotificationType;
+import com.intellij.notification.Notifications;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.application.ApplicationManager;
@@ -28,8 +30,11 @@ import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
+import ee.carlrobert.codegpt.CodeGPTBundle;
+import ee.carlrobert.codegpt.actions.OpenSettingsAction;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
+import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.awt.event.KeyAdapter;
@@ -149,7 +154,12 @@ public class EditorInlayHandler implements Disposable {
 
                 @Override
                 public void onError(ErrorDetails error, Throwable ex) {
-                  LOG.error(error.getMessage(), ex);
+                  LOG.warn(error.getMessage(), ex);
+                  Notifications.Bus.notify(OverlayUtil.getDefaultNotification(
+                          String.format(CodeGPTBundle.get("notification.completionError.description"),
+                              ex.getMessage()),
+                          NotificationType.ERROR)
+                      .addAction(new OpenSettingsAction()));
                 }
               });
           currentCall.set(call);
