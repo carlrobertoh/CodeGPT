@@ -78,16 +78,14 @@ public final class CodeCompletionService {
       int offsetInFile,
       Document document,
       CompletionEventListener eventListener) {
-    InfillRequestDetails requestDetails = tryFindEnclosingPsiElement(
+    InfillRequestDetails requestDetails = tryFindEnclosingElement(
         List.of(PsiMethod.class, PsiClass.class), elementAtCaret)
-        .map(psiElement -> {
-          var textRange = psiElement.getTextRange();
-          return createInfillRequest(
+        .map(textRange -> createInfillRequest(
               document,
               offsetInFile,
               textRange.getStartOffset(),
-              textRange.getEndOffset());
-        })
+            textRange.getEndOffset())
+        )
         .orElse(createInfillRequest(offsetInFile, document));
     return CompletionRequestService.getInstance()
         .getCodeCompletionAsync(requestDetails, eventListener);
@@ -153,7 +151,7 @@ public final class CodeCompletionService {
   }
 
   @RequiresReadLock
-  private Optional<PsiElement> tryFindEnclosingPsiElement(
+  private Optional<TextRange> tryFindEnclosingElement(
       List<Class<? extends PsiElement>> types,
       PsiElement elementAtCaret) {
     return ReadAction.compute(() -> {
@@ -161,7 +159,7 @@ public final class CodeCompletionService {
       while (element != null) {
         for (Class<? extends PsiElement> type : types) {
           if (type.isInstance(element)) {
-            return Optional.of(element);
+            return Optional.of(element.getTextRange());
           }
         }
         element = element.getParent();

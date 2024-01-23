@@ -5,12 +5,14 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.StartupActivity;
 import ee.carlrobert.codegpt.actions.editor.EditorActionsUtil;
+import ee.carlrobert.codegpt.codecompletions.InlineCodeCompletionEditorTrackListener;
 import ee.carlrobert.codegpt.completions.you.YouUserManager;
 import ee.carlrobert.codegpt.completions.you.auth.AuthenticationHandler;
 import ee.carlrobert.codegpt.completions.you.auth.YouAuthenticationError;
 import ee.carlrobert.codegpt.completions.you.auth.YouAuthenticationService;
 import ee.carlrobert.codegpt.completions.you.auth.response.YouAuthenticationResponse;
 import ee.carlrobert.codegpt.credentials.YouCredentialsManager;
+import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import org.jetbrains.annotations.NotNull;
@@ -22,7 +24,9 @@ public class PluginStartupActivity implements StartupActivity {
   @Override
   public void runActivity(@NotNull Project project) {
     EditorActionsUtil.refreshActions();
-
+    if (ConfigurationState.getInstance().isCodeCompletionsEnabled()) {
+      InlineCodeCompletionEditorTrackListener.register(project);
+    }
     var authenticationResponse = YouUserManager.getInstance().getAuthenticationResponse();
     if (authenticationResponse == null) {
       handleYouServiceAuthentication();

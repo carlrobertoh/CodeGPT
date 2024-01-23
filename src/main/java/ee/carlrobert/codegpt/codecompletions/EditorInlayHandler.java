@@ -72,7 +72,7 @@ public class EditorInlayHandler implements Disposable {
     disposeInlay(MULTI_LINE_INLAY);
   }
 
-  private void disableSuggestions() {
+  void disableSuggestions() {
     resetSuggestion();
     typingTimer.stop();
   }
@@ -100,9 +100,6 @@ public class EditorInlayHandler implements Disposable {
     typingTimer = new Timer(
         ConfigurationState.getInstance().getInlineDelay(),
         e -> {
-          if (!ConfigurationState.getInstance().isCodeCompletionsEnabled()) {
-            return;
-          }
           var inlayAlreadyExists = Stream.of(SINGLE_LINE_INLAY, MULTI_LINE_INLAY)
               .anyMatch(it -> editor.getUserData(it) != null);
           if (inlayAlreadyExists) {
@@ -156,10 +153,11 @@ public class EditorInlayHandler implements Disposable {
                 public void onError(ErrorDetails error, Throwable ex) {
                   LOG.warn(error.getMessage(), ex);
                   Notifications.Bus.notify(OverlayUtil.getDefaultNotification(
-                          String.format(CodeGPTBundle.get("notification.completionError.description"),
+                          String.format(
+                              CodeGPTBundle.get("notification.completionError.description"),
                               ex.getMessage()),
                           NotificationType.ERROR)
-                      .addAction(new OpenSettingsAction()));
+                      .addAction(new OpenSettingsAction()), editor.getProject());
                 }
               });
           currentCall.set(call);
@@ -168,14 +166,23 @@ public class EditorInlayHandler implements Disposable {
     }
   }
 
+  private DocumentListener documentListener;
+  private KeyAdapter keyListener;
+  private EditorMouseListener mouseListener;
+  private CaretListener caretListener;
+  private SelectionListener selectionListener;
+
   private void addResetSuggestionListeners() {
-    editor.getDocument().addDocumentListener(new DocumentListener() {
+    removeResetSuggestionListeners();
+    documentListener = new DocumentListener() {
       @Override
       public void beforeDocumentChange(@NotNull DocumentEvent event) {
         resetSuggestion();
       }
-    });
-    editor.getContentComponent().addKeyListener(new KeyAdapter() {
+    };
+    editor.getDocument().addDocumentListener(documentListener);
+
+    keyListener = new KeyAdapter() {
       @Override
       public void keyTyped(KeyEvent e) {
         resetSuggestion();
@@ -185,20 +192,26 @@ public class EditorInlayHandler implements Disposable {
       public void keyPressed(KeyEvent e) {
         resetSuggestion();
       }
-    });
-    editor.addEditorMouseListener(new EditorMouseListener() {
+    };
+    editor.getContentComponent().addKeyListener(keyListener);
+
+    mouseListener = new EditorMouseListener() {
       @Override
       public void mouseClicked(@NotNull EditorMouseEvent event) {
         resetSuggestion();
       }
-    });
-    editor.getCaretModel().addCaretListener(new CaretListener() {
+    };
+    editor.addEditorMouseListener(mouseListener);
+
+    caretListener = new CaretListener() {
       @Override
       public void caretPositionChanged(@NotNull CaretEvent event) {
         resetSuggestion();
       }
-    });
-    editor.getSelectionModel().addSelectionListener(new SelectionListener() {
+    };
+    editor.getCaretModel().addCaretListener(caretListener);
+
+    selectionListener = new SelectionListener() {
       @Override
       public void selectionChanged(@NotNull SelectionEvent e) {
         TextRange range = e.getNewRange();
@@ -209,6 +222,25 @@ public class EditorInlayHandler implements Disposable {
           enableSuggestions();
         }
       }
-    });
+    };
+    editor.getSelectionModel().addSelectionListener(selectionListener);
+  }
+
+  void removeResetSuggestionListeners() {
+    if (documentListener != null) {
+      editor.getDocument().removeDocumentListener(documentListener);
+    }
+    if (keyListener != null) {
+      editor.getContentComponent().removeKeyListener(keyListener);
+    }
+    if (mouseListener != null) {
+      editor.removeEditorMouseListener(mouseListener);
+    }
+    if (caretListener != null) {
+      editor.getCaretModel().removeCaretListener(caretListener);
+    }
+    if (selectionListener != null) {
+      editor.getSelectionModel().removeSelectionListener(selectionListener);
+    }
   }
 }

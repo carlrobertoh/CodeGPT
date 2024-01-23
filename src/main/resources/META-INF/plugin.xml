@@ -9,8 +9,6 @@
     <projectListeners>
         <listener topic="com.intellij.codeInsight.lookup.LookupManagerListener"
                   class="ee.carlrobert.codegpt.completions.MethodNameLookupListener"/>
-        <listener topic="com.intellij.codeInsight.daemon.impl.EditorTrackerListener"
-          class="ee.carlrobert.codegpt.codecompletions.InlineCodeCompletionEditorTrackListener"/>
     </projectListeners>
 
     <extensions defaultExtensionNs="com.intellij">
