@@ -1,9 +1,11 @@
 package ee.carlrobert.codegpt;
 
 import com.intellij.notification.NotificationType;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.StartupActivity;
+import ee.carlrobert.codegpt.actions.CodeCompletionEnabledListener;
 import ee.carlrobert.codegpt.actions.editor.EditorActionsUtil;
 import ee.carlrobert.codegpt.codecompletions.InlineCodeCompletionEditorTrackListener;
 import ee.carlrobert.codegpt.completions.you.YouUserManager;
@@ -24,12 +26,19 @@ public class PluginStartupActivity implements StartupActivity {
   @Override
   public void runActivity(@NotNull Project project) {
     EditorActionsUtil.refreshActions();
-    if (ConfigurationState.getInstance().isCodeCompletionsEnabled()) {
-      InlineCodeCompletionEditorTrackListener.register(project);
-    }
+    setupCodeCompletion(project);
     var authenticationResponse = YouUserManager.getInstance().getAuthenticationResponse();
     if (authenticationResponse == null) {
       handleYouServiceAuthentication();
+    }
+  }
+
+  private void setupCodeCompletion(@NotNull Project project) {
+    new InlineCodeCompletionEditorTrackListener(project);
+    if (ConfigurationState.getInstance().isCodeCompletionsEnabled()) {
+      ApplicationManager.getApplication()
+          .getMessageBus().syncPublisher(CodeCompletionEnabledListener.TOPIC)
+          .onCodeCompletionsEnabledChange(true);
     }
   }
 

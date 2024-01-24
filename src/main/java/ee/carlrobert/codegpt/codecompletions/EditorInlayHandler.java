@@ -62,24 +62,28 @@ public class EditorInlayHandler implements Disposable {
 
   @Override
   public void dispose() {
+    disableSuggestions();
+    removeResetSuggestionListeners();
+  }
+
+  private void disableSuggestions() {
     var previousCall = currentCall.get();
     if (previousCall != null) {
       previousCall.cancel();
     }
+    disposeInlays();
+    typingTimer.stop();
+  }
 
+  private void disposeInlays() {
     ActionManager.getInstance().unregisterAction(CodeCompletionService.APPLY_INLAY_ACTION_ID);
     disposeInlay(SINGLE_LINE_INLAY);
     disposeInlay(MULTI_LINE_INLAY);
   }
 
-  void disableSuggestions() {
-    resetSuggestion();
-    typingTimer.stop();
-  }
-
   private void resetSuggestion() {
+    disableSuggestions();
     typingTimer.restart();
-    dispose();
   }
 
   private void enableSuggestions() {
@@ -145,7 +149,7 @@ public class EditorInlayHandler implements Disposable {
                             editor,
                             caretOffset,
                             inlayText,
-                            () -> dispose()));
+                            () -> disposeInlays()));
                   }
                 }
 
@@ -172,7 +176,7 @@ public class EditorInlayHandler implements Disposable {
   private CaretListener caretListener;
   private SelectionListener selectionListener;
 
-  private void addResetSuggestionListeners() {
+  void addResetSuggestionListeners() {
     removeResetSuggestionListeners();
     documentListener = new DocumentListener() {
       @Override
@@ -226,7 +230,7 @@ public class EditorInlayHandler implements Disposable {
     editor.getSelectionModel().addSelectionListener(selectionListener);
   }
 
-  void removeResetSuggestionListeners() {
+  private void removeResetSuggestionListeners() {
     if (documentListener != null) {
       editor.getDocument().removeDocumentListener(documentListener);
     }
