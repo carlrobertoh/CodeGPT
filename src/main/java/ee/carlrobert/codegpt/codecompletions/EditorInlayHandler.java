@@ -24,6 +24,7 @@ import com.intellij.openapi.editor.event.EditorMouseEvent;
 import com.intellij.openapi.editor.event.EditorMouseListener;
 import com.intellij.openapi.editor.event.SelectionEvent;
 import com.intellij.openapi.editor.event.SelectionListener;
+import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.TextRange;
@@ -134,6 +135,16 @@ public class EditorInlayHandler implements Disposable {
       PsiElement elementAtCaret = ReadAction.compute(() -> psiFile.findElementAt(caretOffset));
       if (codeCompletionService.isCompletionAllowed(elementAtCaret)) {
         var application = ApplicationManager.getApplication();
+        final BackgroundableProcessIndicator progressIndicator = new BackgroundableProcessIndicator(
+            project, CodeGPTBundle.get("inlineCompletion.progress.title"), null,
+            null, true) {
+          @Override
+          protected void onRunningChange() {
+            if (isCanceled()) {
+              disableSuggestions();
+            }
+          }
+        };
         application.executeOnPooledThread(() -> {
           var call = codeCompletionService.fetchCodeCompletion(
               elementAtCaret,
@@ -142,6 +153,11 @@ public class EditorInlayHandler implements Disposable {
               new CompletionEventListener() {
                 @Override
                 public void onComplete(StringBuilder messageBuilder) {
+                  progressIndicator.processFinish();
+                  // If CompletionEventSourceListener is cancelled, onComplete is still called
+                  if (progressIndicator.isCanceled()) {
+                    return;
+                  }
                   var inlayText = messageBuilder.toString();
                   if (!inlayText.isEmpty()) {
                     application.invokeLater(() ->
@@ -155,6 +171,7 @@ public class EditorInlayHandler implements Disposable {
 
                 @Override
                 public void onError(ErrorDetails error, Throwable ex) {
+                  progressIndicator.processFinish();
                   LOG.warn(error.getMessage(), ex);
                   Notifications.Bus.notify(OverlayUtil.getDefaultNotification(
                           String.format(
@@ -165,6 +182,7 @@ public class EditorInlayHandler implements Disposable {
                 }
               });
           currentCall.set(call);
+          progressIndicator.start();
         });
       }
     }
