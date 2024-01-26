@@ -11,20 +11,10 @@ import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 import org.jetbrains.annotations.NotNull;
 
-public class InlayInlineElementRenderer implements EditorCustomElementRenderer {
+public class InlayInlineElementRenderer extends InlayElementRenderer {
 
-  private final String inlayText;
-
-  public InlayInlineElementRenderer(String inlayText) {
-    this.inlayText = inlayText;
-  }
-
-  @Override
-  public int calcWidthInPixels(@NotNull Inlay inlay) {
-    var editor = inlay.getEditor();
-    return editor.getContentComponent()
-        .getFontMetrics(editor.getColorsScheme().getFont(EditorFontType.PLAIN))
-        .stringWidth(inlayText);
+  protected InlayInlineElementRenderer(String inlayText) {
+    super(inlayText);
   }
 
   @Override
