@@ -432,4 +432,20 @@ public class ServiceSelectionForm {
   public void setAdditionalParameters(String additionalParameters) {
     llamaServiceSectionPanel.setAdditionalParameters(additionalParameters);
   }
+
+  public void setUseCustomLlamaServer(boolean useCustomLlamaServer) {
+    llamaServiceSectionPanel.setIsUseCustomServer(useCustomLlamaServer);
+  }
+
+  public boolean isUseCustomLlamaServer() {
+    return llamaServiceSectionPanel.isUseCustomServer();
+  }
+
+  public void setCustomLlamaServerPath(String serverPath) {
+    llamaServiceSectionPanel.setCustomServerPath(serverPath);
+  }
+
+  public String getCustomLlamaServerPath() {
+    return llamaServiceSectionPanel.getCustomServerPath();
+  }
 }

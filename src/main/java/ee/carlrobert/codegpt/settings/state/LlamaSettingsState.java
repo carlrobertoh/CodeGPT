@@ -17,6 +17,8 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
 
   private boolean useCustomModel;
   private String customLlamaModelPath = "";
+  private boolean useCustomServer;
+  private String customLlamaServerPath = "";
   private HuggingFaceModel huggingFaceModel = HuggingFaceModel.CODE_LLAMA_7B_Q4;
   private PromptTemplate promptTemplate = PromptTemplate.LLAMA;
   private Integer serverPort = getRandomAvailablePortOrDefault();
@@ -51,6 +53,8 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
     return serverPort != serviceSelectionForm.getLlamaServerPort()
         || contextSize != serviceSelectionForm.getContextSize()
         || threads != serviceSelectionForm.getThreads()
+        || useCustomServer != serviceSelectionForm.isUseCustomLlamaServer()
+        || !customLlamaServerPath.equals(serviceSelectionForm.getCustomLlamaServerPath())
         || !additionalParameters.equals(serviceSelectionForm.getAdditionalParameters())
         || huggingFaceModel != modelPreferencesForm.getSelectedModel()
         || topK != requestPreferencesForm.getTopK()
@@ -76,6 +80,8 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
     serverPort = serviceSelectionForm.getLlamaServerPort();
     contextSize = serviceSelectionForm.getContextSize();
     threads = serviceSelectionForm.getThreads();
+    useCustomServer = serviceSelectionForm.isUseCustomLlamaServer();
+    customLlamaServerPath = serviceSelectionForm.getCustomLlamaServerPath();
     additionalParameters = serviceSelectionForm.getAdditionalParameters();
   }
 
@@ -93,7 +99,25 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
     serviceSelectionForm.setLlamaServerPort(serverPort);
     serviceSelectionForm.setContextSize(contextSize);
     serviceSelectionForm.setThreads(threads);
+    serviceSelectionForm.setUseCustomLlamaServer(useCustomServer);
+    serviceSelectionForm.setCustomLlamaServerPath(customLlamaServerPath);
     serviceSelectionForm.setAdditionalParameters(additionalParameters);
+  }
+
+  public boolean isUseCustomServer() {
+    return useCustomServer;
+  }
+
+  public void setUseCustomServer(boolean useCustomServer) {
+    this.useCustomServer = useCustomServer;
+  }
+
+  public String getCustomLlamaServerPath() {
+    return customLlamaServerPath;
+  }
+
+  public void setCustomLlamaServerPath(String customLlamaServerPath) {
+    this.customLlamaServerPath = customLlamaServerPath;
   }
 
   public boolean isUseCustomModel() {
