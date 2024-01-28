@@ -27,7 +27,6 @@ import ee.carlrobert.embedding.EmbeddingsService;
 import ee.carlrobert.embedding.ReferencedFile;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
-import ee.carlrobert.llm.client.openai.completion.OpenAICompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
 import ee.carlrobert.llm.client.you.completion.YouCompletionRequest;
@@ -80,7 +79,7 @@ public class CompletionRequestProvider {
         .replace("{QUESTION}", userPrompt);
   }
 
-  public static OpenAICompletionRequest buildOpenAILookupCompletionRequest(
+  public static OpenAIChatCompletionRequest buildOpenAILookupCompletionRequest(
       String context) {
     return new OpenAIChatCompletionRequest.Builder(
         List.of(
@@ -103,9 +102,14 @@ public class CompletionRequestProvider {
       Message message,
       ConversationType conversationType) {
     var settings = LlamaSettingsState.getInstance();
-    var promptTemplate = settings.isUseCustomModel()
-        ? settings.getPromptTemplate()
-        : LlamaModel.findByHuggingFaceModel(settings.getHuggingFaceModel()).getPromptTemplate();
+    PromptTemplate promptTemplate;
+    if (settings.isRunLocalServer()) {
+      promptTemplate = settings.isUseCustomModel()
+          ? settings.getLocalModelPromptTemplate()
+          : LlamaModel.findByHuggingFaceModel(settings.getHuggingFaceModel()).getPromptTemplate();
+    } else {
+      promptTemplate = settings.getRemoteModelPromptTemplate();
+    }
 
     var systemPrompt = COMPLETION_SYSTEM_PROMPT;
     if (conversationType == ConversationType.FIX_COMPILE_ERRORS) {

@@ -5,6 +5,7 @@ import static java.lang.String.format;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.completions.you.YouUserManager;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
+import ee.carlrobert.codegpt.credentials.LlamaCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.advanced.AdvancedSettingsState;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
@@ -13,6 +14,7 @@ import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.llm.client.azure.AzureClient;
 import ee.carlrobert.llm.client.azure.AzureCompletionRequestParams;
 import ee.carlrobert.llm.client.llama.LlamaClient;
+import ee.carlrobert.llm.client.llama.LlamaClient.Builder;
 import ee.carlrobert.llm.client.openai.OpenAIClient;
 import ee.carlrobert.llm.client.you.UTMParameters;
 import ee.carlrobert.llm.client.you.YouClient;
@@ -72,9 +74,17 @@ public class CompletionClientProvider {
   }
 
   public static LlamaClient getLlamaClient() {
-    return new LlamaClient.Builder()
-        .setPort(LlamaSettingsState.getInstance().getServerPort())
-        .build(getDefaultClientBuilder());
+    LlamaSettingsState llamaSettingsState = LlamaSettingsState.getInstance();
+    Builder builder = new Builder()
+        .setPort(llamaSettingsState.getServerPort());
+    if (!llamaSettingsState.isRunLocalServer()) {
+      builder.setHost(llamaSettingsState.getBaseHost());
+      String apiKey = LlamaCredentialsManager.getInstance().getApiKey();
+      if (apiKey != null && !apiKey.isBlank()) {
+        builder.setApiKey(apiKey);
+      }
+    }
+    return builder.build(getDefaultClientBuilder());
   }
 
   private static OkHttpClient.Builder getDefaultClientBuilder() {

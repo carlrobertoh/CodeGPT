@@ -14,6 +14,7 @@ import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
+import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
 import ee.carlrobert.codegpt.completions.you.auth.AuthenticationNotifier;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
@@ -361,6 +362,10 @@ public class ServiceSelectionForm {
     return displayWebSearchResultsCheckBox.isSelected();
   }
 
+  public LlamaServerPreferencesForm getLlamaServerPreferencesForm() {
+    return llamaServiceSectionPanel.getLlamaServerPreferencesForm();
+  }
+
   public LlamaModelPreferencesForm getLlamaModelPreferencesForm() {
     return llamaServiceSectionPanel.getLlamaModelPreferencesForm();
   }
@@ -383,6 +388,22 @@ public class ServiceSelectionForm {
 
   public String getAzurePath() {
     return azurePathField.getText();
+  }
+
+  public void setLlamaRunLocalServer(boolean runLocalServer) {
+    llamaServiceSectionPanel.setRunLocalServer(runLocalServer);
+  }
+
+  public boolean isLlamaRunLocalServer() {
+    return llamaServiceSectionPanel.isRunLocalServer();
+  }
+
+  public void setLlamaBaseHost(String baseHost) {
+    llamaServiceSectionPanel.setBaseHost(baseHost);
+  }
+
+  public String getLlamaBaseHost() {
+    return llamaServiceSectionPanel.getBaseHost();
   }
 
   public void setLlamaServerPort(int serverPort) {
@@ -431,5 +452,13 @@ public class ServiceSelectionForm {
 
   public void setAdditionalParameters(String additionalParameters) {
     llamaServiceSectionPanel.setAdditionalParameters(additionalParameters);
+  }
+
+  public PromptTemplate getLlamaPromptTemplate() {
+    return getLlamaServerPreferencesForm().getPromptTemplate();
+  }
+
+  public void setLlamaPromptTemplate(PromptTemplate promptTemplate) {
+    getLlamaServerPreferencesForm().setPromptTemplate(promptTemplate);
   }
 }

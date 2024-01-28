@@ -6,6 +6,7 @@ import com.intellij.openapi.util.Disposer;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
+import ee.carlrobert.codegpt.credentials.LlamaCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
@@ -75,6 +76,8 @@ public class SettingsConfigurable implements Configurable {
     AzureCredentialsManager.getInstance().setApiKey(serviceSelectionForm.getAzureOpenAIApiKey());
     AzureCredentialsManager.getInstance()
         .setAzureActiveDirectoryToken(serviceSelectionForm.getAzureActiveDirectoryToken());
+    LlamaCredentialsManager.getInstance()
+        .setApiKey(serviceSelectionForm.getLlamaServerPreferencesForm().getApiKey());
 
     var settings = SettingsState.getInstance();
     settings.setDisplayName(settingsComponent.getDisplayName());

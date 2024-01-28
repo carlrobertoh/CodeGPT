@@ -28,24 +28,20 @@ import ee.carlrobert.codegpt.completions.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaServerAgent;
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
-import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
+import ee.carlrobert.codegpt.ui.PromptTemplateWrapper;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.io.File;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import org.apache.commons.text.StringEscapeUtils;
 import org.jetbrains.annotations.NotNull;
 
 public class LlamaModelPreferencesForm {
@@ -73,14 +69,13 @@ public class LlamaModelPreferencesForm {
   private final JBLabel modelExistsIcon;
   private final DefaultComboBoxModel<HuggingFaceModel> huggingFaceComboBoxModel;
   private final JBLabel helpIcon;
-  private final JBLabel promptTemplateHelpIcon;
   private final JPanel downloadModelActionLinkWrapper;
   private final JBLabel progressLabel;
   private final JBLabel modelDetailsLabel;
-  private final ComboBox<PromptTemplate> promptTemplateComboBox;
   private final CardLayout cardLayout;
   private final JBRadioButton predefinedModelRadioButton;
   private final JBRadioButton customModelRadioButton;
+  private final PromptTemplateWrapper localPromptTemplateWrapper;
 
   public LlamaModelPreferencesForm() {
     cardLayout = new CardLayout();
@@ -91,7 +86,6 @@ public class LlamaModelPreferencesForm {
     var llamaSettings = LlamaSettingsState.getInstance();
     modelExistsIcon.setVisible(isModelExists(llamaSettings.getHuggingFaceModel()));
     helpIcon = new JBLabel(General.ContextHelp);
-    promptTemplateHelpIcon = new JBLabel(General.ContextHelp);
     huggingFaceComboBoxModel = new DefaultComboBoxModel<>();
     var llm = llamaSettings.getHuggingFaceModel();
     var llamaModel = LlamaModel.findByHuggingFaceModel(llm);
@@ -135,14 +129,9 @@ public class LlamaModelPreferencesForm {
     browsableCustomModelTextField = createBrowsableCustomModelTextField(
         !llamaServerAgent.isServerRunning());
     browsableCustomModelTextField.setText(llamaSettings.getCustomLlamaModelPath());
-    promptTemplateComboBox = new ComboBox<>(new EnumComboBoxModel<>(PromptTemplate.class));
-    promptTemplateComboBox.setSelectedItem(llamaSettings.getPromptTemplate());
-    promptTemplateComboBox.setEnabled(!llamaServerAgent.isServerRunning());
-    promptTemplateComboBox.addItemListener(item -> {
-      var template = (PromptTemplate) item.getItem();
-      updatePromptTemplateHelpTooltip(template);
-    });
-    updatePromptTemplateHelpTooltip(llamaSettings.getPromptTemplate());
+    localPromptTemplateWrapper = new PromptTemplateWrapper(
+        llamaSettings.getLocalModelPromptTemplate(),
+        !llamaServerAgent.isServerRunning());
     predefinedModelRadioButton = new JBRadioButton("Use pre-defined model",
         !llamaSettings.isUseCustomModel());
     customModelRadioButton = new JBRadioButton("Use custom model",
@@ -195,11 +184,11 @@ public class LlamaModelPreferencesForm {
   }
 
   public void setPromptTemplate(PromptTemplate promptTemplate) {
-    promptTemplateComboBox.setSelectedItem(promptTemplate);
+    localPromptTemplateWrapper.setPromptTemplate(promptTemplate);
   }
 
   public PromptTemplate getPromptTemplate() {
-    return promptTemplateComboBox.getItem();
+    return localPromptTemplateWrapper.getPrompTemplate();
   }
 
   public String getActualModelPath() {
@@ -246,23 +235,14 @@ public class LlamaModelPreferencesForm {
         CodeGPTBundle.get("settingsConfigurable.service.llama.customModelPath.comment"),
         true);
     customModelHelpText.setBorder(JBUI.Borders.empty(0, 4));
-    var promptTemplateHelpText = ComponentPanelBuilder.createCommentComponent(
-        CodeGPTBundle.get("settingsConfigurable.service.llama.promptTemplate.comment"),
-        true);
-    promptTemplateHelpText.setBorder(JBUI.Borders.empty(0, 4));
-
-    var promptTemplateWrapper = new JPanel(new FlowLayout(FlowLayout.LEADING, 0, 0));
-    promptTemplateWrapper.add(promptTemplateComboBox);
-    promptTemplateWrapper.add(Box.createHorizontalStrut(8));
-    promptTemplateWrapper.add(promptTemplateHelpIcon);
 
     return FormBuilder.createFormBuilder()
         .addLabeledComponent(
             CodeGPTBundle.get("settingsConfigurable.service.llama.customModelPath.label"),
             browsableCustomModelTextField)
         .addComponentToRightColumn(customModelHelpText)
-        .addLabeledComponent(CodeGPTBundle.get("shared.promptTemplate"), promptTemplateWrapper)
-        .addComponentToRightColumn(promptTemplateHelpText)
+        .addLabeledComponent(CodeGPTBundle.get("shared.promptTemplate"), localPromptTemplateWrapper)
+        .addComponentToRightColumn(localPromptTemplateWrapper.getPromptTemplateHelpText())
         .addVerticalGap(4)
         .addComponentFillVertically(new JPanel(), 0)
         .getPanel();
@@ -502,23 +482,6 @@ public class LlamaModelPreferencesForm {
             CodeGPTBundle.get("settingsConfigurable.service.llama.linkToModel.label"),
             model.getHuggingFaceURL())
         .installOn(helpIcon);
-  }
-
-  private void updatePromptTemplateHelpTooltip(PromptTemplate template) {
-    promptTemplateHelpIcon.setToolTipText(null);
-
-    var prompt = template.buildPrompt(
-        "SYSTEM_PROMPT",
-        "USER_PROMPT",
-        List.of(new Message("PREV_PROMPT", "PREV_RESPONSE")));
-    var htmlDescription = Arrays.stream(prompt.split("\n"))
-        .map(StringEscapeUtils::escapeHtml4)
-        .collect(Collectors.joining("<br>"));
-
-    new HelpTooltip()
-        .setTitle(template.toString())
-        .setDescription("<html><p>" + htmlDescription + "</p></html>")
-        .installOn(promptTemplateHelpIcon);
   }
 
   private static class ModelDetails {
