@@ -15,6 +15,7 @@ import ee.carlrobert.llm.client.azure.AzureClient;
 import ee.carlrobert.llm.client.azure.AzureCompletionRequestParams;
 import ee.carlrobert.llm.client.llama.LlamaClient;
 import ee.carlrobert.llm.client.llama.LlamaClient.Builder;
+import ee.carlrobert.llm.client.ollama.OllamaClient;
 import ee.carlrobert.llm.client.openai.OpenAIClient;
 import ee.carlrobert.llm.client.you.UTMParameters;
 import ee.carlrobert.llm.client.you.YouClient;
@@ -85,6 +86,12 @@ public class CompletionClientProvider {
       }
     }
     return builder.build(getDefaultClientBuilder());
+  }
+
+  public static OllamaClient getOllamaClient() {
+    return new OllamaClient.Builder()
+        .setPort(LlamaSettingsState.getInstance().getServerPort())
+        .build(getDefaultClientBuilder());
   }
 
   private static OkHttpClient.Builder getDefaultClientBuilder() {
