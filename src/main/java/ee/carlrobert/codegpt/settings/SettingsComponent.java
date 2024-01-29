@@ -37,6 +37,7 @@ public class SettingsComponent {
     cards.add(serviceSelectionForm.getAzureServiceSectionPanel(), ServiceType.AZURE.getCode());
     cards.add(serviceSelectionForm.getYouServiceSectionPanel(), ServiceType.YOU.getCode());
     cards.add(serviceSelectionForm.getLlamaServiceSectionPanel(), ServiceType.LLAMA_CPP.getCode());
+//    cards.add(serviceSelectionForm.getOllamaServiceSectionPanel(), ServiceType.OLLAMA.getCode());
     var serviceComboBoxModel = new DefaultComboBoxModel<ServiceType>();
     serviceComboBoxModel.addAll(Arrays.stream(ServiceType.values())
         .filter(it -> ServiceType.LLAMA_CPP != it || SystemInfoRt.isUnix)

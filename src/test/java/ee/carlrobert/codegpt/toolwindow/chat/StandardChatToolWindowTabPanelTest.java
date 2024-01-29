@@ -2,7 +2,7 @@ package ee.carlrobert.codegpt.toolwindow.chat;
 
 import static ee.carlrobert.codegpt.completions.CompletionRequestProvider.COMPLETION_SYSTEM_PROMPT;
 import static ee.carlrobert.codegpt.completions.CompletionRequestProvider.FIX_COMPILE_ERRORS_SYSTEM_PROMPT;
-import static ee.carlrobert.codegpt.completions.llama.PromptTemplate.LLAMA;
+import static ee.carlrobert.codegpt.completions.PromptTemplate.LLAMA;
 import static ee.carlrobert.llm.client.util.JSONUtil.e;
 import static ee.carlrobert.llm.client.util.JSONUtil.jsonArray;
 import static ee.carlrobert.llm.client.util.JSONUtil.jsonMap;
@@ -15,7 +15,7 @@ import static org.awaitility.Awaitility.await;
 import ee.carlrobert.codegpt.CodeGPTKeys;
 import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.completions.ConversationType;
-import ee.carlrobert.codegpt.completions.HuggingFaceModel;
+import ee.carlrobert.codegpt.completions.llama.LlamaHuggingFaceModel;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
@@ -269,8 +269,8 @@ public class StandardChatToolWindowTabPanelTest extends IntegrationTest {
     configurationState.setMaxTokens(1000);
     configurationState.setTemperature(0.1);
     var llamaSettings = LlamaSettingsState.getInstance();
-    llamaSettings.setUseCustomModel(false);
-    llamaSettings.setHuggingFaceModel(HuggingFaceModel.CODE_LLAMA_7B_Q4);
+    llamaSettings.setLocalUseCustomModel(false);
+    llamaSettings.setHuggingFaceModel(LlamaHuggingFaceModel.CODE_LLAMA_7B_Q4);
     llamaSettings.setTopK(30);
     llamaSettings.setTopP(0.8);
     llamaSettings.setMinP(0.03);

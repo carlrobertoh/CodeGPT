@@ -8,7 +8,7 @@ import com.intellij.ui.EnumComboBoxModel;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
-import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
+import ee.carlrobert.codegpt.completions.PromptTemplate;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import java.awt.FlowLayout;
 import java.util.Arrays;

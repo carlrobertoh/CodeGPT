@@ -1,10 +1,10 @@
 package ee.carlrobert.codegpt.settings.state;
 
-import static ee.carlrobert.codegpt.completions.HuggingFaceModel.CODE_LLAMA_7B_Q3;
+import static ee.carlrobert.codegpt.completions.llama.LlamaHuggingFaceModel.CODE_LLAMA_7B_Q3;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
-import ee.carlrobert.codegpt.completions.HuggingFaceModel;
+import ee.carlrobert.codegpt.completions.llama.LlamaHuggingFaceModel;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 
@@ -48,7 +48,7 @@ public class SettingsStateTest extends BasePlatformTestCase {
 
   public void testLlamaSettingsModelPathSync() {
     var llamaSettings = LlamaSettingsState.getInstance();
-    llamaSettings.setHuggingFaceModel(HuggingFaceModel.WIZARD_CODER_PYTHON_7B_Q3);
+    llamaSettings.setHuggingFaceModel(LlamaHuggingFaceModel.WIZARD_CODER_PYTHON_7B_Q3);
     var conversation = new Conversation();
     conversation.setModel("TEST_LLAMA_MODEL_PATH");
     conversation.setClientCode("llama.chat.completion");
@@ -58,12 +58,12 @@ public class SettingsStateTest extends BasePlatformTestCase {
 
     assertThat(settings.getSelectedService()).isEqualTo(ServiceType.LLAMA_CPP);
     assertThat(llamaSettings.getCustomLlamaModelPath()).isEqualTo("TEST_LLAMA_MODEL_PATH");
-    assertThat(llamaSettings.isUseCustomModel()).isTrue();
+    assertThat(llamaSettings.isLocalUseCustomModel()).isTrue();
   }
 
   public void testLlamaSettingsHuggingFaceModelSync() {
     var llamaSettings = LlamaSettingsState.getInstance();
-    llamaSettings.setHuggingFaceModel(HuggingFaceModel.WIZARD_CODER_PYTHON_7B_Q3);
+    llamaSettings.setHuggingFaceModel(LlamaHuggingFaceModel.WIZARD_CODER_PYTHON_7B_Q3);
     var conversation = new Conversation();
     conversation.setModel("CODE_LLAMA_7B_Q3");
     conversation.setClientCode("llama.chat.completion");
@@ -73,6 +73,6 @@ public class SettingsStateTest extends BasePlatformTestCase {
 
     assertThat(settings.getSelectedService()).isEqualTo(ServiceType.LLAMA_CPP);
     assertThat(llamaSettings.getHuggingFaceModel()).isEqualTo(CODE_LLAMA_7B_Q3);
-    assertThat(llamaSettings.isUseCustomModel()).isFalse();
+    assertThat(llamaSettings.isLocalUseCustomModel()).isFalse();
   }
 }

@@ -9,13 +9,13 @@ import ee.carlrobert.codegpt.credentials.LlamaCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.advanced.AdvancedSettingsState;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
+import ee.carlrobert.codegpt.settings.state.CommonSettings;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.llm.client.azure.AzureClient;
 import ee.carlrobert.llm.client.azure.AzureCompletionRequestParams;
 import ee.carlrobert.llm.client.llama.LlamaClient;
 import ee.carlrobert.llm.client.llama.LlamaClient.Builder;
-import ee.carlrobert.llm.client.ollama.OllamaClient;
 import ee.carlrobert.llm.client.openai.OpenAIClient;
 import ee.carlrobert.llm.client.you.UTMParameters;
 import ee.carlrobert.llm.client.you.YouClient;
@@ -76,23 +76,26 @@ public class CompletionClientProvider {
 
   public static LlamaClient getLlamaClient() {
     LlamaSettingsState llamaSettingsState = LlamaSettingsState.getInstance();
-    Builder builder = new Builder()
-        .setPort(llamaSettingsState.getServerPort());
-    if (!llamaSettingsState.isRunLocalServer()) {
-      builder.setHost(llamaSettingsState.getBaseHost());
-      String apiKey = LlamaCredentialsManager.getInstance().getApiKey();
-      if (apiKey != null && !apiKey.isBlank()) {
-        builder.setApiKey(apiKey);
-      }
+
+    Builder builder = new Builder();
+    if(llamaSettingsState.isRunLocalServer()){
+      builder.setPort(llamaSettingsState.getLocalSettings().getServerPort());
+    } else {
+      builder.setHost(llamaSettingsState.getRemoteSettings().getBaseHost());
+    }
+    // TODO differentiate between local/remote apiKey
+    String apiKey = LlamaCredentialsManager.getInstance().getApiKey();
+    if (apiKey != null && !apiKey.isBlank()) {
+      builder.setApiKey(apiKey);
     }
     return builder.build(getDefaultClientBuilder());
   }
 
-  public static OllamaClient getOllamaClient() {
-    return new OllamaClient.Builder()
-        .setPort(LlamaSettingsState.getInstance().getServerPort())
-        .build(getDefaultClientBuilder());
-  }
+//  public static OllamaClient getOllamaClient() {
+//    return new OllamaClient.Builder()
+//        .setPort(LlamaSettingsState.getInstance().getServerPort())
+//        .build(getDefaultClientBuilder());
+//  }
 
   private static OkHttpClient.Builder getDefaultClientBuilder() {
     OkHttpClient.Builder builder = new OkHttpClient.Builder();

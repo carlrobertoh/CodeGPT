@@ -5,6 +5,7 @@ import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
+import ee.carlrobert.codegpt.settings.state.LocalSettings;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 
@@ -33,6 +34,9 @@ public interface ShortcutsTestMixin {
 
   default void useLlamaService() {
     SettingsState.getInstance().setSelectedService(ServiceType.LLAMA_CPP);
-    LlamaSettingsState.getInstance().setServerPort(null);
+    LlamaSettingsState llamaSettingsState = LlamaSettingsState.getInstance();
+    llamaSettingsState.setRunLocalServer(true);
+    var localSettings = llamaSettingsState.getLocalSettings();
+    localSettings.setServerPort(null);
   }
 }

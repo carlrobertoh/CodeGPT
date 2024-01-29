@@ -130,7 +130,7 @@ public final class LlamaServerAgent implements Disposable {
             if ("HTTP server listening".equals(serverMessage.getMessage())) {
               LOG.info("Server up and running!");
 
-              LlamaSettingsState.getInstance().setServerPort(port);
+              LlamaSettingsState.getInstance().getLocalSettings().setServerPort(port);
               onSuccess.run();
             }
           } catch (Exception ignore) {

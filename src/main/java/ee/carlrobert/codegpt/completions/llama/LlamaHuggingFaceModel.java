@@ -1,11 +1,12 @@
-package ee.carlrobert.codegpt.completions;
+package ee.carlrobert.codegpt.completions.llama;
 
 import static java.lang.String.format;
 
+import ee.carlrobert.codegpt.completions.LlmModel;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-public enum HuggingFaceModel {
+public enum LlamaHuggingFaceModel implements LlmModel {
 
   CODE_LLAMA_7B_Q3(7, 3, "CodeLlama-7B-Instruct-GGUF"),
   CODE_LLAMA_7B_Q4(7, 4, "CodeLlama-7B-Instruct-GGUF"),
@@ -49,16 +50,18 @@ public enum HuggingFaceModel {
   private final int quantization;
   private final String modelName;
 
-  HuggingFaceModel(int parameterSize, int quantization, String modelName) {
+  LlamaHuggingFaceModel(int parameterSize, int quantization, String modelName) {
     this.parameterSize = parameterSize;
     this.quantization = quantization;
     this.modelName = modelName;
   }
 
+  @Override
   public int getParameterSize() {
     return parameterSize;
   }
 
+  @Override
   public int getQuantization() {
     return quantization;
   }
@@ -67,14 +70,18 @@ public enum HuggingFaceModel {
     return name();
   }
 
-  public String getFileName() {
+  /**
+   * Filename of the HuggingFaceModel
+   */
+  @Override
+  public String getId() {
     return modelName.toLowerCase().replace("-gguf", format(".Q%d_K_M.gguf", quantization));
   }
 
   public URL getFileURL() {
     try {
       return new URL(
-          format("https://huggingface.co/TheBloke/%s/resolve/main/%s", modelName, getFileName()));
+          format("https://huggingface.co/TheBloke/%s/resolve/main/%s", modelName, getId()));
     } catch (MalformedURLException ex) {
       throw new RuntimeException(ex);
     }

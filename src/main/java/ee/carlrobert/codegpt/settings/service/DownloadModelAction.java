@@ -10,7 +10,7 @@ import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import ee.carlrobert.codegpt.CodeGPTBundle;
-import ee.carlrobert.codegpt.completions.HuggingFaceModel;
+import ee.carlrobert.codegpt.completions.llama.LlamaHuggingFaceModel;
 import ee.carlrobert.codegpt.util.DownloadingUtil;
 import ee.carlrobert.codegpt.util.file.FileUtil;
 import java.io.IOException;
@@ -31,14 +31,14 @@ public class DownloadModelAction extends AnAction {
   private final Runnable onDownloaded;
   private final Consumer<Exception> onFailed;
   private final Consumer<String> onUpdateProgress;
-  private final DefaultComboBoxModel<HuggingFaceModel> comboBoxModel;
+  private final DefaultComboBoxModel<LlamaHuggingFaceModel> comboBoxModel;
 
   public DownloadModelAction(
       Consumer<ProgressIndicator> onDownload,
       Runnable onDownloaded,
       Consumer<Exception> onFailed,
       Consumer<String> onUpdateProgress,
-      DefaultComboBoxModel<HuggingFaceModel> comboBoxModel) {
+      DefaultComboBoxModel<LlamaHuggingFaceModel> comboBoxModel) {
     this.onDownload = onDownload;
     this.onDownloaded = onDownloaded;
     this.onFailed = onFailed;
@@ -62,7 +62,7 @@ public class DownloadModelAction extends AnAction {
 
     @Override
     public void run(@NotNull ProgressIndicator indicator) {
-      var model = (HuggingFaceModel) comboBoxModel.getSelectedItem();
+      var model = (LlamaHuggingFaceModel) comboBoxModel.getSelectedItem();
       URL url = model.getFileURL();
       ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
       ScheduledFuture<?> progressUpdateScheduler = null;
@@ -74,7 +74,7 @@ public class DownloadModelAction extends AnAction {
         indicator.setText(format(
             CodeGPTBundle.get(
                 "settingsConfigurable.service.llama.progress.downloadingModelIndicator.text"),
-            model.getFileName()));
+            model.getId()));
 
         long fileSize = url.openConnection().getContentLengthLong();
         long[] bytesRead = {0};
@@ -86,7 +86,7 @@ public class DownloadModelAction extends AnAction {
                     fileSize,
                     bytesRead[0])),
             0, 1, TimeUnit.SECONDS);
-        FileUtil.copyFileWithProgress(model.getFileName(), url, bytesRead, fileSize, indicator);
+        FileUtil.copyFileWithProgress(model.getId(), url, bytesRead, fileSize, indicator);
       } catch (IOException ex) {
         LOG.error("Unable to open connection", ex);
         onFailed.accept(ex);

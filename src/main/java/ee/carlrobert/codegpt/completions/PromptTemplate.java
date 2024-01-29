@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.completions.llama;
+package ee.carlrobert.codegpt.completions;
 
 import ee.carlrobert.codegpt.conversations.message.Message;
 import java.util.List;

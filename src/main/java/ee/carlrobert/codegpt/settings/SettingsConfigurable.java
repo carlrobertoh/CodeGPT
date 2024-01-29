@@ -77,7 +77,7 @@ public class SettingsConfigurable implements Configurable {
     AzureCredentialsManager.getInstance()
         .setAzureActiveDirectoryToken(serviceSelectionForm.getAzureActiveDirectoryToken());
     LlamaCredentialsManager.getInstance()
-        .setApiKey(serviceSelectionForm.getLlamaServerPreferencesForm().getApiKey());
+        .setApiKey(serviceSelectionForm.getLlamaServerPreferencesForm().getUsedApiKey());
 
     var settings = SettingsState.getInstance();
     settings.setDisplayName(settingsComponent.getDisplayName());

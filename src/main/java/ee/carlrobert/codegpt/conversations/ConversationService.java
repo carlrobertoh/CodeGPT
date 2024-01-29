@@ -196,9 +196,7 @@ public final class ConversationService {
         return "YouCode";
       case LLAMA_CPP:
         var llamaSettings = LlamaSettingsState.getInstance();
-        return llamaSettings.isUseCustomModel()
-            ? llamaSettings.getCustomLlamaModelPath()
-            : llamaSettings.getHuggingFaceModel().getCode();
+        return llamaSettings.getLocalModelPath();
       default:
         throw new RuntimeException("Could not find corresponding service mapping");
     }

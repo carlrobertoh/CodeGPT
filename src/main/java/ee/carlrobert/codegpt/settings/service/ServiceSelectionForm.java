@@ -14,7 +14,7 @@ import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
-import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
+import ee.carlrobert.codegpt.completions.PromptTemplate;
 import ee.carlrobert.codegpt.completions.you.auth.AuthenticationNotifier;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
@@ -59,6 +59,7 @@ public class ServiceSelectionForm {
   private final JBCheckBox displayWebSearchResultsCheckBox;
 
   private final LlamaServiceSelectionForm llamaServiceSectionPanel;
+//  private final OllamaServiceSelectionForm ollamaServiceSectionPanel;
 
   public ServiceSelectionForm(Disposable parentDisposable) {
     this.parentDisposable = parentDisposable;
@@ -114,6 +115,7 @@ public class ServiceSelectionForm {
     azureServiceSectionPanel = createAzureServiceSectionPanel();
     youServiceSectionPanel = createYouServiceSectionPanel();
     llamaServiceSectionPanel = new LlamaServiceSelectionForm();
+//    ollamaServiceSectionPanel = new OllamaServiceSelectionForm();
 
     registerPanelsVisibility(azureSettings);
     registerRadioButtons();
@@ -366,13 +368,22 @@ public class ServiceSelectionForm {
     return llamaServiceSectionPanel.getLlamaServerPreferencesForm();
   }
 
-  public LlamaModelPreferencesForm getLlamaModelPreferencesForm() {
-    return llamaServiceSectionPanel.getLlamaModelPreferencesForm();
-  }
-
   public LlamaRequestPreferencesForm getLlamaRequestPreferencesForm() {
     return llamaServiceSectionPanel.getLlamaRequestPreferencesForm();
   }
+  
+//  public OllamaServerPreferencesForm getOllamaServerPreferencesForm() {
+//    return ollamaServiceSectionPanel.getOllamaServerPreferencesForm();
+//  }
+//
+//  public OllamaModelPreferencesForm getOllamaModelPreferencesForm() {
+//    return ollamaServiceSectionPanel.getOllamaModelPreferencesForm();
+//  }
+  
+//TODO
+//  public OllamaRequestPreferencesForm getOllamaRequestPreferencesForm() {
+//    return ollamaServiceSectionPanel.getOllamaRequestPreferencesForm();
+//  }
 
   public void setOpenAIPath(String path) {
     openAIPathField.setText(path);
@@ -388,30 +399,6 @@ public class ServiceSelectionForm {
 
   public String getAzurePath() {
     return azurePathField.getText();
-  }
-
-  public void setLlamaRunLocalServer(boolean runLocalServer) {
-    llamaServiceSectionPanel.setRunLocalServer(runLocalServer);
-  }
-
-  public boolean isLlamaRunLocalServer() {
-    return llamaServiceSectionPanel.isRunLocalServer();
-  }
-
-  public void setLlamaBaseHost(String baseHost) {
-    llamaServiceSectionPanel.setBaseHost(baseHost);
-  }
-
-  public String getLlamaBaseHost() {
-    return llamaServiceSectionPanel.getBaseHost();
-  }
-
-  public void setLlamaServerPort(int serverPort) {
-    llamaServiceSectionPanel.setServerPort(serverPort);
-  }
-
-  public int getLlamaServerPort() {
-    return llamaServiceSectionPanel.getServerPort();
   }
 
   public JPanel getOpenAIServiceSectionPanel() {
@@ -430,35 +417,7 @@ public class ServiceSelectionForm {
     return llamaServiceSectionPanel;
   }
 
-  public int getContextSize() {
-    return llamaServiceSectionPanel.getContextSize();
-  }
-
-  public void setContextSize(int contextSize) {
-    llamaServiceSectionPanel.setContextSize(contextSize);
-  }
-
-  public int getThreads() {
-    return llamaServiceSectionPanel.getThreads();
-  }
-
-  public void setThreads(int threads) {
-    llamaServiceSectionPanel.setThreads(threads);
-  }
-
-  public String getAdditionalParameters() {
-    return llamaServiceSectionPanel.getAdditionalParameters();
-  }
-
-  public void setAdditionalParameters(String additionalParameters) {
-    llamaServiceSectionPanel.setAdditionalParameters(additionalParameters);
-  }
-
-  public PromptTemplate getLlamaPromptTemplate() {
-    return getLlamaServerPreferencesForm().getPromptTemplate();
-  }
-
-  public void setLlamaPromptTemplate(PromptTemplate promptTemplate) {
-    getLlamaServerPreferencesForm().setPromptTemplate(promptTemplate);
-  }
+//  public OllamaServiceSelectionForm getOllamaServiceSectionPanel() {
+//    return ollamaServiceSectionPanel;
+//  }
 }

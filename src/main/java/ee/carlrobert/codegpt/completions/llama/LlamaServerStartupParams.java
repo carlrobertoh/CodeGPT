@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.completions.llama;
 
+import ee.carlrobert.codegpt.settings.state.LocalSettings;
 import java.util.List;
 
 public class LlamaServerStartupParams {
@@ -12,15 +13,12 @@ public class LlamaServerStartupParams {
 
   public LlamaServerStartupParams(
       String modelPath,
-      int contextLength,
-      int threads,
-      int port,
-      List<String> additionalParameters) {
+      LlamaLocalSettings localSettings) {
     this.modelPath = modelPath;
-    this.contextLength = contextLength;
-    this.threads = threads;
-    this.port = port;
-    this.additionalParameters = additionalParameters;
+    this.contextLength = localSettings.getContextSize();
+    this.threads = localSettings.getThreads();
+    this.port = localSettings.getServerPort();
+    this.additionalParameters = localSettings.getListOfAdditionalParameters();
   }
 
   public String getModelPath() {

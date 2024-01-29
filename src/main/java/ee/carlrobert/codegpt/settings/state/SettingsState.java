@@ -7,7 +7,8 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
-import ee.carlrobert.codegpt.completions.HuggingFaceModel;
+import ee.carlrobert.codegpt.completions.LlmModel;
+import ee.carlrobert.codegpt.completions.llama.LlamaHuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
@@ -51,12 +52,12 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
       setSelectedService(ServiceType.LLAMA_CPP);
       var llamaSettings = LlamaSettingsState.getInstance();
       try {
-        var huggingFaceModel = HuggingFaceModel.valueOf(conversation.getModel());
-        llamaSettings.setHuggingFaceModel(huggingFaceModel);
-        llamaSettings.setUseCustomModel(false);
+        var huggingFaceModel = LlamaHuggingFaceModel.valueOf(conversation.getModel());
+        llamaSettings.setLocalModel(huggingFaceModel);
+        llamaSettings.setLocalUseCustomModel(false);
       } catch (IllegalArgumentException ignore) {
-        llamaSettings.setCustomLlamaModelPath(conversation.getModel());
-        llamaSettings.setUseCustomModel(true);
+        llamaSettings.setLocalModel(conversation.getModel());
+        llamaSettings.setLocalUseCustomModel(true);
       }
     }
     if ("you.chat.completion".equals(clientCode)) {
@@ -74,15 +75,15 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
         return "YouCode";
       case LLAMA_CPP:
         var llamaSettings = LlamaSettingsState.getInstance();
-        if (llamaSettings.isUseCustomModel()) {
-          var filePath = llamaSettings.getCustomLlamaModelPath();
+        if (llamaSettings.isLocalUseCustomModel()) {
+          var filePath = llamaSettings.getLocalModelPath();
           int lastSeparatorIndex = filePath.lastIndexOf('/');
           if (lastSeparatorIndex == -1) {
             return filePath;
           }
           return filePath.substring(lastSeparatorIndex + 1);
         }
-        var huggingFaceModel = llamaSettings.getHuggingFaceModel();
+        var huggingFaceModel = llamaSettings.getLocalModel();
         var llamaModel = LlamaModel.findByHuggingFaceModel(huggingFaceModel);
         return format(
             "%s %dB (Q%d)",

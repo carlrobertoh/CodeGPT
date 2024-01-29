@@ -9,8 +9,8 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.EncodingManager;
+import ee.carlrobert.codegpt.completions.llama.LlamaHuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
-import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.conversations.message.Message;
@@ -18,7 +18,9 @@ import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.IncludedFilesSettingsState;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
+import ee.carlrobert.codegpt.settings.state.LocalSettings;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
+import ee.carlrobert.codegpt.settings.state.RemoteSettings;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.settings.state.YouSettingsState;
 import ee.carlrobert.codegpt.telemetry.core.configuration.TelemetryConfiguration;
@@ -104,11 +106,13 @@ public class CompletionRequestProvider {
     var settings = LlamaSettingsState.getInstance();
     PromptTemplate promptTemplate;
     if (settings.isRunLocalServer()) {
-      promptTemplate = settings.isUseCustomModel()
-          ? settings.getLocalModelPromptTemplate()
-          : LlamaModel.findByHuggingFaceModel(settings.getHuggingFaceModel()).getPromptTemplate();
+      var localSettings = settings.getLocalSettings();
+      promptTemplate = localSettings.isUseCustomModel()
+          ? localSettings.getPromptTemplate()
+          : LlamaModel.findByHuggingFaceModel(localSettings.getLlModel()).getPromptTemplate();
     } else {
-      promptTemplate = settings.getRemoteModelPromptTemplate();
+      RemoteSettings remoteSettings = settings.getRemoteSettings();
+      promptTemplate = remoteSettings.getPromptTemplate();
     }
 
     var systemPrompt = COMPLETION_SYSTEM_PROMPT;
@@ -130,6 +134,42 @@ public class CompletionRequestProvider {
         .setRepeat_penalty(settings.getRepeatPenalty())
         .build();
   }
+
+//  public OllamaCompletionRequest buildOLlamaCompletionRequest(
+//      Message message,
+//      ConversationType conversationType) {
+//    var settings = OllamaSettingsState.getInstance();
+//    PromptTemplate promptTemplate;
+//    String model;
+//    if (settings.isRunLocalServer()) {
+//      promptTemplate = settings.isUseCustomModel()
+//          ? settings.getLocalModelPromptTemplate()
+//          : OllamaModel.findByOllamaHuggingFaceModel(settings.getHuggingFaceModel()).getPromptTemplate();
+//    } else {
+//      promptTemplate = settings.getRemoteModelPromptTemplate();
+//    }
+//
+//    model = settings.isUseCustomModel() ? settings.getCustomModel() : settings.getHuggingFaceModel().getModelTag();
+//    var systemPrompt = COMPLETION_SYSTEM_PROMPT;
+//    if (conversationType == ConversationType.FIX_COMPILE_ERRORS) {
+//      systemPrompt = FIX_COMPILE_ERRORS_SYSTEM_PROMPT;
+//    }
+//
+//    var prompt = promptTemplate.buildPrompt(
+//        systemPrompt,
+//        message.getPrompt(),
+//        conversation.getMessages());
+//    var configuration = ConfigurationState.getInstance();
+//    return new OllamaCompletionRequest.Builder(model, prompt)
+//        .setOptions(Map.of(
+//            "num_predict",configuration.getMaxTokens(),
+//            "temperature", configuration.getTemperature(),
+//            "top_k", settings.getTopK(),
+//            "top_p", settings.getTopP(),
+//            "repeat_penalty", settings.getRepeatPenalty()
+//            ))
+//        .build();
+//  }
 
   public YouCompletionRequest buildYouCompletionRequest(Message message) {
     var requestBuilder = new YouCompletionRequest.Builder(message.getPrompt())

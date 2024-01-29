@@ -23,74 +23,12 @@ public class LlamaServiceSelectionForm extends JPanel {
     init();
   }
 
-  public void setRunLocalServer(boolean runLocalServer) {
-    llamaServerPreferencesForm.setRunLocalServer(runLocalServer);
-  }
-
-  public boolean isRunLocalServer() {
-    return llamaServerPreferencesForm.isRunLocalServer();
-  }
-
-  public void setBaseHost(String baseHost) {
-    llamaServerPreferencesForm.setBaseHost(baseHost);
-  }
-
-  public String getBaseHost() {
-    return llamaServerPreferencesForm.getBaseHost();
-  }
-
-  public void setServerPort(int serverPort) {
-    llamaServerPreferencesForm.setServerPort(serverPort);
-  }
-
-  public int getServerPort() {
-    return llamaServerPreferencesForm.getServerPort();
-  }
-
   public LlamaServerPreferencesForm getLlamaServerPreferencesForm() {
     return llamaServerPreferencesForm;
   }
 
-  public LlamaModelPreferencesForm getLlamaModelPreferencesForm() {
-    return llamaServerPreferencesForm.getLlamaModelPreferencesForm();
-  }
-
   public LlamaRequestPreferencesForm getLlamaRequestPreferencesForm() {
     return llamaRequestPreferencesForm;
-  }
-
-  public int getContextSize() {
-    return llamaServerPreferencesForm.getContextSize();
-  }
-
-  public void setContextSize(int contextSize) {
-    llamaServerPreferencesForm.setContextSize(contextSize);
-  }
-
-  public void setThreads(int threads) {
-    llamaServerPreferencesForm.setThreads(threads);
-  }
-
-  public int getThreads() {
-    return llamaServerPreferencesForm.getThreads();
-  }
-
-  public void setAdditionalParameters(String additionalParameters) {
-    llamaServerPreferencesForm.setAdditionalParameters(additionalParameters);
-  }
-
-  public String getAdditionalParameters() {
-    return llamaServerPreferencesForm.getAdditionalParameters();
-  }
-
-  public List<String> getListOfAdditionalParameters() {
-    if (llamaServerPreferencesForm.getAdditionalParameters().trim().isEmpty()) {
-      return Collections.emptyList();
-    }
-    var parameters = llamaServerPreferencesForm.getAdditionalParameters().split(",");
-    return Arrays.stream(parameters)
-        .map(String::trim)
-        .collect(toList());
   }
 
   private void init() {

@@ -1,9 +1,9 @@
 package ee.carlrobert.codegpt.completions;
 
-import static ee.carlrobert.codegpt.completions.llama.PromptTemplate.ALPACA;
-import static ee.carlrobert.codegpt.completions.llama.PromptTemplate.CHAT_ML;
-import static ee.carlrobert.codegpt.completions.llama.PromptTemplate.LLAMA;
-import static ee.carlrobert.codegpt.completions.llama.PromptTemplate.TORA;
+import static ee.carlrobert.codegpt.completions.PromptTemplate.ALPACA;
+import static ee.carlrobert.codegpt.completions.PromptTemplate.CHAT_ML;
+import static ee.carlrobert.codegpt.completions.PromptTemplate.LLAMA;
+import static ee.carlrobert.codegpt.completions.PromptTemplate.TORA;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ee.carlrobert.codegpt.conversations.message.Message;
