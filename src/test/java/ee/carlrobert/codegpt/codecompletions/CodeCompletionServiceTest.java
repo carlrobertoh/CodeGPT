@@ -33,26 +33,23 @@ public class CodeCompletionServiceTest extends IntegrationTest {
 
   public void testFetchCodeCompletionLlama() {
     useLlamaService();
-    var codeCompletionService = CodeCompletionService.getInstance();
+    var codeCompletionService = CodeCompletionService.getInstance(getProject());
     String fileContents = getResourceContent(
         "/codecompletions/code-completion-file.txt");
     PsiFile psiFile = myFixture.configureByText("CompletionTest.java", fileContents);
     Editor editor = myFixture.getEditor();
     Document document = editor.getDocument();
     editor.getCaretModel().moveToVisualPosition(cursorPosition);
-    var prefix = "public static int gcd(int x, int y){\n"
-        + "";
+    var prefix = "public static int gcd(int x, int y){\n";
     var suffix = "\n"
         + "    }";
     var expectedCompletion = "return xyz;";
     expectLlama((StreamHttpExchange) request -> {
-      assertThat(request.getUri().getPath()).isEqualTo("/infill");
+      assertThat(request.getUri().getPath()).isEqualTo("/completion");
       assertThat(request.getMethod()).isEqualTo("POST");
       assertThat(request.getBody())
-          .extracting(
-              "input_prefix",
-              "input_suffix")
-          .containsExactly(prefix, suffix);
+          .extracting("prompt")
+          .isEqualTo(InfillPromptTemplate.LLAMA.buildPrompt(prefix, suffix));
       return List.of(jsonMapResponse(e("content", expectedCompletion), e("stop", true)));
     });
 
@@ -79,16 +76,12 @@ public class CodeCompletionServiceTest extends IntegrationTest {
     var expectedInlay = "        return xyz;";
     int caretOffset = editor.getCaretModel().getOffset();
 
-    AtomicReference<Boolean> onApplyCalled = new AtomicReference<>(false);
-    Runnable onApply = () -> onApplyCalled.set(true);
-
-    codeCompletionService.addInlays(editor, caretOffset, expectedInlay, onApply);
+    codeCompletionService.addInlays(editor, caretOffset, expectedInlay);
 
     checkInlay(editor.getUserData(SINGLE_LINE_INLAY), InlayInlineElementRenderer.class,
         expectedInlay, caretOffset);
     checkPerformInlayAction(editor.getDocument(), cursorPosition.line, cursorPosition.line,
         expectedInlay);
-    assertTrue(onApplyCalled.get());
     ActionManager.getInstance().unregisterAction(APPLY_INLAY_ACTION_ID);
   }
 
@@ -99,10 +92,7 @@ public class CodeCompletionServiceTest extends IntegrationTest {
     var expectedInlay = "        int z = 1;\n        z = 2 + 3;\n        return xyz;";
     int caretOffset = editor.getCaretModel().getOffset();
 
-    AtomicReference<Boolean> onApplyCalled = new AtomicReference<>(false);
-    Runnable onApply = () -> onApplyCalled.set(true);
-
-    codeCompletionService.addInlays(editor, caretOffset, expectedInlay, onApply);
+    codeCompletionService.addInlays(editor, caretOffset, expectedInlay);
 
     // First line of inlay
     checkInlay(editor.getUserData(SINGLE_LINE_INLAY), InlayInlineElementRenderer.class,
@@ -112,13 +102,12 @@ public class CodeCompletionServiceTest extends IntegrationTest {
         expectedInlay.substring(expectedInlay.indexOf("\n") + 1), caretOffset);
     checkPerformInlayAction(editor.getDocument(), cursorPosition.line, cursorPosition.line + 2,
         expectedInlay);
-    assertTrue(onApplyCalled.get());
     ActionManager.getInstance().unregisterAction(APPLY_INLAY_ACTION_ID);
   }
 
   private CodeCompletionService setupTestCodeCompletion() {
     useLlamaService();
-    var codeCompletionService = CodeCompletionService.getInstance();
+    var codeCompletionService = CodeCompletionService.getInstance(getProject());
     String fileContents = getResourceContent(
         "/codecompletions/code-completion-file.txt");
     myFixture.configureByText("CompletionTest.java", fileContents);
