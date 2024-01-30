@@ -27,7 +27,6 @@ import ee.carlrobert.embedding.EmbeddingsService;
 import ee.carlrobert.embedding.ReferencedFile;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
-import ee.carlrobert.llm.client.openai.completion.OpenAICompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
 import ee.carlrobert.llm.client.you.completion.YouCompletionRequest;
@@ -51,6 +50,9 @@ public class CompletionRequestProvider {
 
   public static final String FIX_COMPILE_ERRORS_SYSTEM_PROMPT = getResourceContent(
       "/prompts/fix-compile-errors.txt");
+
+  public static final String INLINE_COMPLETION_PROMPT = getResourceContent(
+      "/prompts/inline-completion-prompt.txt");
 
   private final EncodingManager encodingManager = EncodingManager.getInstance();
   private final EmbeddingsService embeddingsService;
@@ -80,7 +82,7 @@ public class CompletionRequestProvider {
         .replace("{QUESTION}", userPrompt);
   }
 
-  public static OpenAICompletionRequest buildOpenAILookupCompletionRequest(
+  public static OpenAIChatCompletionRequest buildOpenAILookupCompletionRequest(
       String context) {
     return new OpenAIChatCompletionRequest.Builder(
         List.of(
@@ -147,17 +149,19 @@ public class CompletionRequestProvider {
       CallParameters callParameters,
       boolean useContextualSearch,
       @Nullable String overriddenPath) {
+
     var builder = new OpenAIChatCompletionRequest.Builder(
         buildMessages(model, callParameters, useContextualSearch))
         .setModel(model)
         .setMaxTokens(ConfigurationState.getInstance().getMaxTokens())
+        .setStream(true)
         .setTemperature(ConfigurationState.getInstance().getTemperature());
 
     if (overriddenPath != null) {
       builder.setOverriddenPath(overriddenPath);
     }
 
-    return (OpenAIChatCompletionRequest) builder.build();
+    return builder.build();
   }
 
   public List<OpenAIChatCompletionMessage> buildMessages(

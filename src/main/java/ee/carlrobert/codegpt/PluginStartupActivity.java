@@ -22,7 +22,6 @@ public class PluginStartupActivity implements StartupActivity {
   @Override
   public void runActivity(@NotNull Project project) {
     EditorActionsUtil.refreshActions();
-
     var authenticationResponse = YouUserManager.getInstance().getAuthenticationResponse();
     if (authenticationResponse == null) {
       handleYouServiceAuthentication();

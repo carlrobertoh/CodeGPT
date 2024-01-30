@@ -5,6 +5,7 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
+import ee.carlrobert.codegpt.codecompletions.InfillPromptTemplate;
 import ee.carlrobert.codegpt.completions.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
 import ee.carlrobert.codegpt.settings.service.ServiceSelectionForm;
@@ -21,6 +22,7 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
   private String customLlamaServerPath = "";
   private HuggingFaceModel huggingFaceModel = HuggingFaceModel.CODE_LLAMA_7B_Q4;
   private PromptTemplate promptTemplate = PromptTemplate.LLAMA;
+  private InfillPromptTemplate infillPromptTemplate = InfillPromptTemplate.LLAMA;
   private Integer serverPort = getRandomAvailablePortOrDefault();
   private int contextSize = 2048;
   private int threads = 8;
@@ -214,6 +216,14 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
 
   public void setRepeatPenalty(double repeatPenalty) {
     this.repeatPenalty = repeatPenalty;
+  }
+
+  public InfillPromptTemplate getInfillPromptTemplate() {
+    return infillPromptTemplate;
+  }
+
+  public void setInfillPromptTemplate(InfillPromptTemplate infillPromptTemplate) {
+    this.infillPromptTemplate = infillPromptTemplate;
   }
 
   private static Integer getRandomAvailablePortOrDefault() {
