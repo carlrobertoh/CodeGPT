@@ -57,9 +57,10 @@ public final class CodeCompletionService implements Disposable {
 
   private static final Logger LOG = Logger.getInstance(CodeCompletionService.class);
 
-  private final CallDebouncer callDebouncer = new CallDebouncer();
+  private final CallDebouncer callDebouncer;
 
-  private CodeCompletionService() {
+  private CodeCompletionService(Project project) {
+    this.callDebouncer = new CallDebouncer(project);
     ApplicationManager.getApplication()
         .getMessageBus()
         .connect()
@@ -106,11 +107,11 @@ public final class CodeCompletionService implements Disposable {
 
     callDebouncer.debounce(
         Void.class,
-        () -> completionService.fetchCodeCompletion(
+        (progressIndicator) -> completionService.fetchCodeCompletion(
             elementAtCaret,
             offset,
             document,
-            new CodeCompletionEventListener(editor, offset)),
+            new CodeCompletionEventListener(editor, offset, progressIndicator)),
         500,
         TimeUnit.MILLISECONDS);
   }

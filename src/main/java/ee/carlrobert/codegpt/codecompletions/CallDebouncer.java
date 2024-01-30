@@ -1,5 +1,11 @@
 package ee.carlrobert.codegpt.codecompletions;
 
+import static ee.carlrobert.codegpt.settings.service.ServiceType.LLAMA_CPP;
+
+import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator;
+import com.intellij.openapi.project.Project;
+import ee.carlrobert.codegpt.CodeGPTBundle;
+import ee.carlrobert.codegpt.settings.state.SettingsState;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -10,9 +16,14 @@ import okhttp3.sse.EventSource;
 
 public class CallDebouncer {
 
+  private final Project project;
   private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
   private final ConcurrentHashMap<Object, Future<?>> delayedMap = new ConcurrentHashMap<>();
   private final AtomicReference<EventSource> currentCall = new AtomicReference<>();
+
+  public CallDebouncer(Project project) {
+    this.project = project;
+  }
 
   /**
    * Implements a debounce mechanism for {@code callable} with a specified {@code delay}. This means
@@ -24,7 +35,10 @@ public class CallDebouncer {
     Future<?> prev = delayedMap.put(key, scheduler.schedule(() -> {
       try {
         cancelPreviousCall();
-        currentCall.set(runnable.call());
+        var progressIndicator = LLAMA_CPP.equals(SettingsState.getInstance().getSelectedService())
+            ? createProgressIndicator()
+            : null;
+        currentCall.set(runnable.call(progressIndicator));
       } finally {
         delayedMap.remove(key);
       }
@@ -45,5 +59,18 @@ public class CallDebouncer {
     if (call != null) {
       call.cancel();
     }
+  }
+
+  private BackgroundableProcessIndicator createProgressIndicator() {
+    return new BackgroundableProcessIndicator(project,
+        CodeGPTBundle.get("codeCompletion.progress.title"), null, null, true) {
+      @Override
+      protected void onRunningChange() {
+        if (isCanceled()) {
+          cancelPreviousCall();
+          CodeGPTEditorManager.getInstance().disposeAllInlays(project);
+        }
+      }
+    };
   }
 }
