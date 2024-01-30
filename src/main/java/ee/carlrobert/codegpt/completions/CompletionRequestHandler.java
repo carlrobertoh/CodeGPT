@@ -110,6 +110,11 @@ public class CompletionRequestHandler {
       }
 
       @Override
+      public void onCancelled(StringBuilder messageBuilder) {
+        completionResponseEventListener.handleCompleted(messageBuilder.toString(), callParameters);
+      }
+
+      @Override
       public void onError(ErrorDetails error, Throwable ex) {
         try {
           completionResponseEventListener.handleError(error, ex);

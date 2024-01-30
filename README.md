@@ -164,6 +164,11 @@ git submodule update
 ./gradlew runIde -Penv=win-arm64
 ```
 
+**Tailing logs**
+```shell
+tail -f build/idea-sandbox/system/log/idea.log
+```
+
 ## Issues
 
 See the [open issues][open-issues] for a full list of proposed features (and known issues).

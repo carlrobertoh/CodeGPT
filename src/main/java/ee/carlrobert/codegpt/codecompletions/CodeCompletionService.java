@@ -1,10 +1,12 @@
 package ee.carlrobert.codegpt.codecompletions;
 
+import static com.intellij.openapi.components.Service.Level.PROJECT;
 import static ee.carlrobert.codegpt.CodeGPTKeys.MULTI_LINE_INLAY;
 import static ee.carlrobert.codegpt.CodeGPTKeys.SINGLE_LINE_INLAY;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -20,44 +22,97 @@ import com.intellij.openapi.editor.EditorCustomElementRenderer;
 import com.intellij.openapi.editor.Inlay;
 import com.intellij.openapi.editor.InlayModel;
 import com.intellij.openapi.keymap.KeymapManager;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiWhiteSpace;
 import com.intellij.util.concurrency.annotations.RequiresBackgroundThread;
 import com.intellij.util.concurrency.annotations.RequiresEdt;
 import com.intellij.util.concurrency.annotations.RequiresReadLock;
 import com.intellij.util.concurrency.annotations.RequiresWriteLock;
+import ee.carlrobert.codegpt.actions.CodeCompletionEnabledListener;
 import ee.carlrobert.codegpt.completions.CompletionRequestService;
+import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
 import ee.carlrobert.codegpt.util.EditorUtil;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.awt.event.KeyEvent;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import javax.annotation.ParametersAreNonnullByDefault;
 import javax.swing.KeyStroke;
 import okhttp3.sse.EventSource;
 import org.jetbrains.annotations.NotNull;
 
-@Service
+@Service(PROJECT)
 @ParametersAreNonnullByDefault
-public final class CodeCompletionService {
+public final class CodeCompletionService implements Disposable {
 
   public static final String APPLY_INLAY_ACTION_ID = "ApplyInlayAction";
   public static final int MAX_OFFSET = 4000;
 
   private static final Logger LOG = Logger.getInstance(CodeCompletionService.class);
 
+  private final CallDebouncer callDebouncer = new CallDebouncer();
+
   private CodeCompletionService() {
+    ApplicationManager.getApplication()
+        .getMessageBus()
+        .connect()
+        .subscribe(
+            CodeCompletionEnabledListener.TOPIC,
+            (CodeCompletionEnabledListener) (completionsEnabled) -> {
+              if (!completionsEnabled) {
+                callDebouncer.cancelPreviousCall();
+              }
+            });
   }
 
-  public static CodeCompletionService getInstance() {
-    return ApplicationManager.getApplication().getService(CodeCompletionService.class);
+  public static CodeCompletionService getInstance(Project project) {
+    return project.getService(CodeCompletionService.class);
   }
 
   public boolean isCompletionAllowed(PsiElement elementAtCaret) {
     return elementAtCaret instanceof PsiWhiteSpace;
+  }
+
+  public void handleCompletions(Editor editor, int offset) {
+    Project project = editor.getProject();
+    if (project == null
+        || project.isDisposed()
+        || !ConfigurationState.getInstance().isCodeCompletionsEnabled()
+        || !EditorUtil.isSelectedEditor(editor)
+        || editor.isViewer()
+        || editor.isOneLineMode()
+    ) {
+      return;
+    }
+
+    var document = editor.getDocument();
+    PsiFile psiFile = PsiDocumentManager.getInstance(project).getPsiFile(document);
+    if (psiFile == null) {
+      return;
+    }
+
+    PsiElement elementAtCaret = ReadAction.compute(() -> psiFile.findElementAt(offset));
+    var completionService = CodeCompletionService.getInstance(project);
+    if (!completionService.isCompletionAllowed(elementAtCaret)) {
+      return;
+    }
+
+    callDebouncer.debounce(
+        Void.class,
+        () -> completionService.fetchCodeCompletion(
+            elementAtCaret,
+            offset,
+            document,
+            new CodeCompletionEventListener(editor, offset)),
+        500,
+        TimeUnit.MILLISECONDS);
   }
 
   /**
@@ -78,21 +133,21 @@ public final class CodeCompletionService {
       int offsetInFile,
       Document document,
       CompletionEventListener eventListener) {
-    InfillRequestDetails requestDetails = tryFindEnclosingElement(
+    InfillRequestDetails requestDetails = tryFindEnclosingPsiElementTextRange(
         List.of(PsiMethod.class, PsiClass.class), elementAtCaret)
         .map(textRange -> createInfillRequest(
-              document,
-              offsetInFile,
-              textRange.getStartOffset(),
+            document,
+            offsetInFile,
+            textRange.getStartOffset(),
             textRange.getEndOffset())
         )
-        .orElse(createInfillRequest(offsetInFile, document));
+        .orElse(createInfillRequest(document, offsetInFile));
     return CompletionRequestService.getInstance()
         .getCodeCompletionAsync(requestDetails, eventListener);
   }
 
   @RequiresEdt
-  public void addInlays(Editor editor, int caretOffset, String inlayText, Runnable onApply) {
+  public void addInlays(Editor editor, int caretOffset, String inlayText) {
     List<String> linesList = inlayText.lines().collect(toList());
     String firstLine = linesList.get(0);
     String restOfLines = linesList.size() > 1
@@ -117,11 +172,13 @@ public final class CodeCompletionService {
           new InlayBlockElementRenderer(restOfLines)));
     }
 
-    registerApplyCompletionAction(editor, inlayText, onApply);
+    registerApplyCompletionAction(() -> WriteCommandAction.runWriteCommandAction(
+        editor.getProject(),
+        () -> applyCompletion(editor, inlayText)));
   }
 
   @RequiresWriteLock
-  private void applyCompletion(Editor editor, String text, Runnable onApply) {
+  private void applyCompletion(Editor editor, String text) {
     if (editor.isDisposed()) {
       LOG.warn("Editor is already disposed");
       return;
@@ -132,7 +189,7 @@ public final class CodeCompletionService {
       Inlay<EditorCustomElementRenderer> inlay = editor.getUserData(key);
       if (inlay != null) {
         applyCompletion(editor, text, inlay.getOffset());
-        onApply.run();
+        CodeGPTEditorManager.getInstance().disposeEditorInlays(editor);
         return;
       }
     }
@@ -151,7 +208,7 @@ public final class CodeCompletionService {
   }
 
   @RequiresReadLock
-  private Optional<TextRange> tryFindEnclosingElement(
+  private Optional<TextRange> tryFindEnclosingPsiElementTextRange(
       List<Class<? extends PsiElement>> types,
       PsiElement elementAtCaret) {
     return ReadAction.compute(() -> {
@@ -169,16 +226,19 @@ public final class CodeCompletionService {
     });
   }
 
-  private void registerApplyCompletionAction(Editor editor, String inlayText, Runnable onApply) {
+  @Override
+  public void dispose() {
+    callDebouncer.shutdown();
+  }
+
+  private void registerApplyCompletionAction(Runnable onApply) {
     var actionManager = ActionManager.getInstance();
     actionManager.registerAction(
         APPLY_INLAY_ACTION_ID,
         new AnAction() {
           @Override
           public void actionPerformed(@NotNull AnActionEvent e) {
-            WriteCommandAction.runWriteCommandAction(
-                editor.getProject(),
-                () -> applyCompletion(editor, inlayText, onApply));
+            onApply.run();
           }
         });
     KeymapManager.getInstance().getActiveKeymap().addShortcut(
@@ -186,7 +246,7 @@ public final class CodeCompletionService {
         new KeyboardShortcut(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), null));
   }
 
-  private static InfillRequestDetails createInfillRequest(int offsetInFile, Document document) {
+  private static InfillRequestDetails createInfillRequest(Document document, int offsetInFile) {
     int begin = Integer.max(0, offsetInFile - MAX_OFFSET);
     int end = Integer.min(document.getTextLength(), offsetInFile + MAX_OFFSET);
     return createInfillRequest(document, offsetInFile, begin, end);

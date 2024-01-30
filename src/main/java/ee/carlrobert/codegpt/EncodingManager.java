@@ -48,7 +48,7 @@ public final class EncodingManager {
     try {
       return encoding.countTokens(text);
     } catch (Exception ex) {
-      LOG.error(ex);
+      LOG.warn(ex);
       return 0;
     }
   }

@@ -27,7 +27,6 @@ import ee.carlrobert.embedding.EmbeddingsService;
 import ee.carlrobert.embedding.ReferencedFile;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
-import ee.carlrobert.llm.client.openai.completion.OpenAICompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
 import ee.carlrobert.llm.client.you.completion.YouCompletionRequest;
@@ -83,7 +82,7 @@ public class CompletionRequestProvider {
         .replace("{QUESTION}", userPrompt);
   }
 
-  public static OpenAICompletionRequest buildOpenAILookupCompletionRequest(
+  public static OpenAIChatCompletionRequest buildOpenAILookupCompletionRequest(
       String context) {
     return new OpenAIChatCompletionRequest.Builder(
         List.of(
@@ -162,7 +161,7 @@ public class CompletionRequestProvider {
       builder.setOverriddenPath(overriddenPath);
     }
 
-    return (OpenAIChatCompletionRequest) builder.build();
+    return builder.build();
   }
 
   public List<OpenAIChatCompletionMessage> buildMessages(

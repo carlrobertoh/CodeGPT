@@ -12,7 +12,6 @@ import ee.carlrobert.codegpt.codecompletions.InfillRequestDetails;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
-import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
@@ -78,24 +77,11 @@ public final class CompletionRequestService {
     var requestProvider = new CodeCompletionRequestProvider(requestDetails);
     switch (SettingsState.getInstance().getSelectedService()) {
       case OPENAI:
-        var openAISettings = OpenAISettingsState.getInstance();
         return CompletionClientProvider.getOpenAIClient()
-            .getChatCompletionAsync(
-                requestProvider.buildOpenAIRequest(
-                    openAISettings.getModel(),
-                    openAISettings.isUsingCustomPath() ? openAISettings.getPath() : null),
-                eventListener);
-      case AZURE:
-        var azureSettings = AzureSettingsState.getInstance();
-        return CompletionClientProvider.getAzureClient()
-            .getChatCompletionAsync(
-                requestProvider.buildOpenAIRequest(
-                    null,
-                    azureSettings.isUsingCustomPath() ? azureSettings.getPath() : null),
-                eventListener);
+            .getCompletionAsync(requestProvider.buildOpenAIRequest(), eventListener);
       case LLAMA_CPP:
         return CompletionClientProvider.getLlamaClient()
-            .getInfillAsync(requestProvider.buildLlamaRequest(), eventListener);
+            .getChatCompletionAsync(requestProvider.buildLlamaRequest(), eventListener);
       default:
         throw new IllegalArgumentException("Code completion not supported for selected service");
     }
@@ -141,7 +127,7 @@ public final class CompletionRequestService {
     if (selectedService == AZURE) {
       return AzureCredentialsManager.getInstance().isCredentialSet();
     }
-    if (selectedService == ServiceType.OPENAI) {
+    if (selectedService == OPENAI) {
       return OpenAICredentialsManager.getInstance().isApiKeySet();
     }
     return true;
