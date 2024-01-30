@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.settings.service;
 
+import static ee.carlrobert.codegpt.ui.UIUtil.createRadioButtonsPanel;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 
@@ -151,7 +152,8 @@ public class LlamaModelPreferencesForm {
 
   public JPanel getForm() {
     JPanel finalPanel = new JPanel(new BorderLayout());
-    finalPanel.add(createRadioButtonsPanel(), BorderLayout.NORTH);
+    finalPanel.add(createRadioButtonsPanel(predefinedModelRadioButton, customModelRadioButton),
+        BorderLayout.NORTH);
     finalPanel.add(createFormPanelCards(), BorderLayout.CENTER);
     return finalPanel;
   }
@@ -225,20 +227,6 @@ public class LlamaModelPreferencesForm {
         cardLayout.show(formPanelCards, CUSTOM_MODEL_FORM_CARD_CODE));
 
     return formPanelCards;
-  }
-
-  private JPanel createRadioButtonsPanel() {
-    var buttonGroup = new ButtonGroup();
-    buttonGroup.add(predefinedModelRadioButton);
-    buttonGroup.add(customModelRadioButton);
-
-    var radioPanel = new JPanel();
-    radioPanel.setLayout(new BoxLayout(radioPanel, BoxLayout.PAGE_AXIS));
-    radioPanel.add(predefinedModelRadioButton);
-    radioPanel.add(Box.createVerticalStrut(4));
-    radioPanel.add(customModelRadioButton);
-    radioPanel.add(Box.createVerticalStrut(8));
-    return radioPanel;
   }
 
   private JPanel createCustomModelForm() {

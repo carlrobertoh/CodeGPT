@@ -6,6 +6,7 @@ import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.ScrollPaneFactory;
+import com.intellij.ui.components.JBRadioButton;
 import com.intellij.ui.components.JBTextArea;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
@@ -14,6 +15,9 @@ import java.awt.Dimension;
 import java.net.URISyntaxException;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -103,6 +107,19 @@ public class UIUtil {
     textArea.getInputMap().put(KeyStroke.getKeyStroke("shift ENTER"), "insert-break");
     textArea.getInputMap().put(KeyStroke.getKeyStroke("ENTER"), "text-submit");
     textArea.getActionMap().put("text-submit", onSubmit);
+  }
+
+  public static JPanel createRadioButtonsPanel(JBRadioButton... radioButtons) {
+    var buttonGroup = new ButtonGroup();
+    var radioPanel = new JPanel();
+    radioPanel.setLayout(new BoxLayout(radioPanel, BoxLayout.PAGE_AXIS));
+    for (int i = 0; i < radioButtons.length; i++) {
+      JBRadioButton radioButton = radioButtons[i];
+      buttonGroup.add(radioButton);
+      radioPanel.add(radioButton);
+      radioPanel.add(Box.createVerticalStrut(i == radioButtons.length - 1 ? 8 : 4));
+    }
+    return radioPanel;
   }
 }
 

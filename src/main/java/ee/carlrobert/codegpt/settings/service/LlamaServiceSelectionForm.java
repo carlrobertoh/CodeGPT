@@ -1,15 +1,20 @@
 package ee.carlrobert.codegpt.settings.service;
 
+import static ee.carlrobert.codegpt.ui.UIUtil.createRadioButtonsPanel;
 import static java.util.stream.Collectors.toList;
 
 import com.intellij.icons.AllIcons.Actions;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.ui.MessageType;
+import com.intellij.openapi.ui.TextBrowseFolderListener;
+import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.ui.panel.ComponentPanelBuilder;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.ui.PortField;
 import com.intellij.ui.TitledSeparator;
 import com.intellij.ui.components.JBLabel;
+import com.intellij.ui.components.JBRadioButton;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.ui.components.fields.IntegerField;
 import com.intellij.util.ui.FormBuilder;
@@ -22,6 +27,7 @@ import ee.carlrobert.codegpt.completions.llama.LlamaServerStartupParams;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import java.awt.BorderLayout;
+import java.awt.CardLayout;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
@@ -34,12 +40,19 @@ import javax.swing.SwingConstants;
 
 public class LlamaServiceSelectionForm extends JPanel {
 
+  private static final String BUNDLED_SERVER_FORM_CARD_CODE = "BundledServerSettings";
+  private static final String CUSTOM_SERVER_FORM_CARD_CODE = "CustomServerSettings";
+
   private final LlamaModelPreferencesForm llamaModelPreferencesForm;
   private final LlamaRequestPreferencesForm llamaRequestPreferencesForm;
   private final PortField portField;
   private final IntegerField maxTokensField;
   private final IntegerField threadsField;
   private final JBTextField additionalParametersField;
+  private final CardLayout cardLayout;
+  private final JBRadioButton bundledServerRadioButton;
+  private final JBRadioButton customServerRadioButton;
+  private final TextFieldWithBrowseButton browsableCustomServerTextField;
 
   public LlamaServiceSelectionForm() {
     var llamaServerAgent =
@@ -65,6 +78,15 @@ public class LlamaServiceSelectionForm extends JPanel {
     additionalParametersField = new JBTextField(llamaSettings.getAdditionalParameters(), 30);
     additionalParametersField.setEnabled(!serverRunning);
 
+    cardLayout = new CardLayout();
+    bundledServerRadioButton = new JBRadioButton("Use bundled server",
+        !llamaSettings.isUseCustomServer());
+    customServerRadioButton = new JBRadioButton("Use custom server",
+        llamaSettings.isUseCustomServer());
+    browsableCustomServerTextField = createBrowsableCustomServerTextField(
+        !llamaServerAgent.isServerRunning());
+    browsableCustomServerTextField.setText(llamaSettings.getCustomLlamaServerPath());
+
     init(llamaServerAgent);
   }
 
@@ -87,6 +109,12 @@ public class LlamaServiceSelectionForm extends JPanel {
   private JComponent withEmptyLeftBorder(JComponent component) {
     component.setBorder(JBUI.Borders.emptyLeft(16));
     return component;
+  }
+
+  public String getActualServerPath() {
+    return isUseCustomServer()
+        ? getCustomServerPath()
+        : CodeGPTPlugin.getLlamaSourcePath() + File.separator + "server";
   }
 
   public int getContextSize() {
@@ -123,6 +151,22 @@ public class LlamaServiceSelectionForm extends JPanel {
         .collect(toList());
   }
 
+  public void setIsUseCustomServer(boolean useCustomServer) {
+    customServerRadioButton.setSelected(useCustomServer);
+  }
+
+  public boolean isUseCustomServer() {
+    return customServerRadioButton.isSelected();
+  }
+
+  public void setCustomServerPath(String customServerPath) {
+    browsableCustomServerTextField.setText(customServerPath);
+  }
+
+  public String getCustomServerPath() {
+    return browsableCustomServerTextField.getText();
+  }
+
   private void init(LlamaServerAgent llamaServerAgent) {
     var serverProgressPanel = new ServerProgressPanel();
     serverProgressPanel.setBorder(JBUI.Borders.emptyRight(16));
@@ -134,6 +178,7 @@ public class LlamaServiceSelectionForm extends JPanel {
         .addComponent(new TitledSeparator(
             CodeGPTBundle.get("settingsConfigurable.service.llama.serverPreferences.title")))
         .addComponent(withEmptyLeftBorder(FormBuilder.createFormBuilder()
+            .addComponent(getForm())
             .addLabeledComponent(
                 CodeGPTBundle.get("shared.port"),
                 JBUI.Panels.simplePanel()
@@ -165,6 +210,60 @@ public class LlamaServiceSelectionForm extends JPanel {
         .getPanel());
   }
 
+  public JPanel getForm() {
+    JPanel finalPanel = new JPanel(new BorderLayout());
+    finalPanel.add(createRadioButtonsPanel(bundledServerRadioButton, customServerRadioButton),
+        BorderLayout.NORTH);
+    finalPanel.add(createFormPanelCards(), BorderLayout.CENTER);
+    return finalPanel;
+  }
+
+  private JPanel createFormPanelCards() {
+    var formPanelCards = new JPanel(cardLayout);
+    formPanelCards.setBorder(JBUI.Borders.emptyLeft(16));
+    formPanelCards.add(new JPanel(), BUNDLED_SERVER_FORM_CARD_CODE);
+    formPanelCards.add(createCustomServerForm(), CUSTOM_SERVER_FORM_CARD_CODE);
+    cardLayout.show(
+        formPanelCards,
+        bundledServerRadioButton.isSelected()
+            ? BUNDLED_SERVER_FORM_CARD_CODE
+            : CUSTOM_SERVER_FORM_CARD_CODE);
+
+    bundledServerRadioButton.addActionListener(e ->
+        cardLayout.show(formPanelCards, BUNDLED_SERVER_FORM_CARD_CODE));
+    customServerRadioButton.addActionListener(e ->
+        cardLayout.show(formPanelCards, CUSTOM_SERVER_FORM_CARD_CODE));
+
+    return formPanelCards;
+  }
+
+  private JPanel createCustomServerForm() {
+    var customModelHelpText = ComponentPanelBuilder.createCommentComponent(
+        CodeGPTBundle.get("settingsConfigurable.service.llama.customServerPath.comment"),
+        true);
+    customModelHelpText.setBorder(JBUI.Borders.empty(0, 4));
+
+    return FormBuilder.createFormBuilder()
+        .addLabeledComponent(
+            CodeGPTBundle.get("settingsConfigurable.service.llama.customServerPath.label"),
+            browsableCustomServerTextField)
+        .addComponentToRightColumn(customModelHelpText)
+        .addVerticalGap(4)
+        .addComponentFillVertically(new JPanel(), 0)
+        .getPanel();
+  }
+
+  private TextFieldWithBrowseButton createBrowsableCustomServerTextField(boolean enabled) {
+    var browseButton = new TextFieldWithBrowseButton();
+    browseButton.setEnabled(enabled);
+
+    var fileChooserDescriptor = FileChooserDescriptorFactory.createSingleFileDescriptor();
+    fileChooserDescriptor.setForcedToUseIdeaFileChooser(true);
+    fileChooserDescriptor.setHideIgnored(false);
+    browseButton.addBrowseFolderListener(new TextBrowseFolderListener(fileChooserDescriptor));
+    return browseButton;
+  }
+
   private JLabel createComment(String messageKey) {
     var comment = ComponentPanelBuilder.createCommentComponent(
         CodeGPTBundle.get(messageKey), true);
@@ -193,6 +292,8 @@ public class LlamaServiceSelectionForm extends JPanel {
         disableForm(serverButton, serverProgressPanel);
         llamaServerAgent.startAgent(
             new LlamaServerStartupParams(
+                getActualServerPath(),
+                isUseCustomServer(),
                 llamaModelPreferencesForm.getActualModelPath(),
                 getContextSize(),
                 getThreads(),
