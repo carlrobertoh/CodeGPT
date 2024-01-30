@@ -17,30 +17,10 @@ import java.util.Comparator;
 import java.util.List;
 import org.jetbrains.annotations.NotNull;
 
-public class InlayBlockElementRenderer implements EditorCustomElementRenderer {
+public class InlayBlockElementRenderer extends InlayElementRenderer {
 
-  private final String inlayText;
-
-  public InlayBlockElementRenderer(String inlayText) {
-    this.inlayText = inlayText;
-  }
-
-  @Override
-  public int calcHeightInPixels(@NotNull Inlay inlay) {
-    int lineHeight = inlay.getEditor().getLineHeight();
-    int linesCount = (int) inlayText.lines().count();
-    return lineHeight * linesCount;
-  }
-
-  @Override
-  public int calcWidthInPixels(@NotNull Inlay inlay) {
-    var longestLine = inlayText.lines()
-        .max(Comparator.comparingInt(String::length))
-        .orElse("");
-    var editor = inlay.getEditor();
-    return editor.getContentComponent()
-        .getFontMetrics(editor.getColorsScheme().getFont(EditorFontType.PLAIN))
-        .stringWidth(longestLine);
+  protected InlayBlockElementRenderer(String inlayText) {
+    super(inlayText);
   }
 
   @Override
