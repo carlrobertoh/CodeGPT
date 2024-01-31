@@ -8,32 +8,33 @@ import com.intellij.ui.EnumComboBoxModel;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
-import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
-import ee.carlrobert.codegpt.conversations.message.Message;
 import java.awt.FlowLayout;
 import java.util.Arrays;
-import java.util.List;
 import java.util.stream.Collectors;
 import javax.swing.Box;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import org.apache.commons.text.StringEscapeUtils;
 
-public class PromptTemplateWrapper extends JPanel {
+public abstract class BasePromptTemplatePanel<T extends Enum<T>> extends JPanel {
 
   private final JBLabel promptTemplateHelpIcon;
-  private final ComboBox<PromptTemplate> promptTemplateComboBox;
+  protected final ComboBox<T> promptTemplateComboBox;
   private final JLabel promptTemplateHelpText;
+  private final Class<T> enumClass;
 
-  public PromptTemplateWrapper(PromptTemplate initiallySelectedTemplate, boolean enabled) {
+  public BasePromptTemplatePanel(
+      Class<T> enumClass,
+      T initiallySelectedTemplate,
+      boolean enabled,
+      String helpTextKey) {
     super(new FlowLayout(FlowLayout.LEADING, 0, 0));
-    promptTemplateComboBox = new ComboBox<>(new EnumComboBoxModel<>(PromptTemplate.class));
+    this.enumClass = enumClass;
+    promptTemplateComboBox = new ComboBox<>(new EnumComboBoxModel<>(enumClass));
     promptTemplateComboBox.setSelectedItem(initiallySelectedTemplate);
     promptTemplateComboBox.setEnabled(enabled);
-    promptTemplateComboBox.addItemListener(item -> {
-      var template = (PromptTemplate) item.getItem();
-      updatePromptTemplateHelpTooltip(template);
-    });
+    promptTemplateComboBox.addItemListener(
+        item -> updatePromptTemplateHelpTooltip(enumClass.cast(item.getItem())));
     add(promptTemplateComboBox);
     add(Box.createHorizontalStrut(8));
 
@@ -41,32 +42,34 @@ public class PromptTemplateWrapper extends JPanel {
     add(promptTemplateHelpIcon);
 
     promptTemplateHelpText = ComponentPanelBuilder.createCommentComponent(
-        CodeGPTBundle.get("settingsConfigurable.service.llama.promptTemplate.comment"),
+        CodeGPTBundle.get(helpTextKey),
         true);
     promptTemplateHelpText.setBorder(JBUI.Borders.empty(0, 4));
     updatePromptTemplateHelpTooltip(initiallySelectedTemplate);
   }
 
-  public void setPromptTemplate(PromptTemplate promptTemplate) {
+  public void setPromptTemplate(T promptTemplate) {
     promptTemplateComboBox.setSelectedItem(promptTemplate);
   }
 
-  public PromptTemplate getPrompTemplate() {
-    return (PromptTemplate) promptTemplateComboBox.getSelectedItem();
+  public T getPromptTemplate() {
+    Object selectedItem = promptTemplateComboBox.getSelectedItem();
+    if (!enumClass.isInstance(selectedItem)) {
+      throw new IllegalStateException("Selected item is not an instance of the expected type.");
+    }
+    return enumClass.cast(selectedItem);
   }
 
   public JLabel getPromptTemplateHelpText() {
     return promptTemplateHelpText;
   }
 
-  private void updatePromptTemplateHelpTooltip(PromptTemplate template) {
+  protected abstract String buildPromptDescription(T template);
+
+  private void updatePromptTemplateHelpTooltip(T template) {
     promptTemplateHelpIcon.setToolTipText(null);
 
-    var prompt = template.buildPrompt(
-        "SYSTEM_PROMPT",
-        "USER_PROMPT",
-        List.of(new Message("PREV_PROMPT", "PREV_RESPONSE")));
-    var htmlDescription = Arrays.stream(prompt.split("\n"))
+    var htmlDescription = Arrays.stream(buildPromptDescription(template).split("\n"))
         .map(StringEscapeUtils::escapeHtml4)
         .collect(Collectors.joining("<br>"));
 

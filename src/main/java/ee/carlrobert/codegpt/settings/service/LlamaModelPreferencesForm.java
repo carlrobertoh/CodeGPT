@@ -24,12 +24,14 @@ import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
+import ee.carlrobert.codegpt.codecompletions.InfillPromptTemplate;
 import ee.carlrobert.codegpt.completions.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaServerAgent;
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
-import ee.carlrobert.codegpt.ui.PromptTemplateWrapper;
+import ee.carlrobert.codegpt.ui.ChatPromptTemplatePanel;
+import ee.carlrobert.codegpt.ui.InfillPromptTemplatePanel;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Dimension;
@@ -75,7 +77,8 @@ public class LlamaModelPreferencesForm {
   private final CardLayout cardLayout;
   private final JBRadioButton predefinedModelRadioButton;
   private final JBRadioButton customModelRadioButton;
-  private final PromptTemplateWrapper localPromptTemplateWrapper;
+  private final ChatPromptTemplatePanel localPromptTemplatePanel;
+  private final InfillPromptTemplatePanel infillPromptTemplatePanel;
 
   public LlamaModelPreferencesForm() {
     cardLayout = new CardLayout();
@@ -129,13 +132,17 @@ public class LlamaModelPreferencesForm {
     browsableCustomModelTextField = createBrowsableCustomModelTextField(
         !llamaServerAgent.isServerRunning());
     browsableCustomModelTextField.setText(llamaSettings.getCustomLlamaModelPath());
-    localPromptTemplateWrapper = new PromptTemplateWrapper(
+    localPromptTemplatePanel = new ChatPromptTemplatePanel(
         llamaSettings.getLocalModelPromptTemplate(),
         !llamaServerAgent.isServerRunning());
     predefinedModelRadioButton = new JBRadioButton("Use pre-defined model",
         !llamaSettings.isUseCustomModel());
     customModelRadioButton = new JBRadioButton("Use custom model",
         llamaSettings.isUseCustomModel());
+    infillPromptTemplatePanel = new InfillPromptTemplatePanel(
+        llamaSettings.getLocalModelInfillPromptTemplate(),
+        !llamaServerAgent.isServerRunning()
+    );
   }
 
   public JPanel getForm() {
@@ -184,11 +191,19 @@ public class LlamaModelPreferencesForm {
   }
 
   public void setPromptTemplate(PromptTemplate promptTemplate) {
-    localPromptTemplateWrapper.setPromptTemplate(promptTemplate);
+    localPromptTemplatePanel.setPromptTemplate(promptTemplate);
   }
 
   public PromptTemplate getPromptTemplate() {
-    return localPromptTemplateWrapper.getPrompTemplate();
+    return localPromptTemplatePanel.getPromptTemplate();
+  }
+
+  public void setInfillPromptTemplate(InfillPromptTemplate promptTemplate) {
+    infillPromptTemplatePanel.setPromptTemplate(promptTemplate);
+  }
+
+  public InfillPromptTemplate getInfillPromptTemplate() {
+    return infillPromptTemplatePanel.getPromptTemplate();
   }
 
   public String getActualModelPath() {
@@ -241,8 +256,11 @@ public class LlamaModelPreferencesForm {
             CodeGPTBundle.get("settingsConfigurable.service.llama.customModelPath.label"),
             browsableCustomModelTextField)
         .addComponentToRightColumn(customModelHelpText)
-        .addLabeledComponent(CodeGPTBundle.get("shared.promptTemplate"), localPromptTemplateWrapper)
-        .addComponentToRightColumn(localPromptTemplateWrapper.getPromptTemplateHelpText())
+        .addLabeledComponent(CodeGPTBundle.get("shared.promptTemplate"), localPromptTemplatePanel)
+        .addComponentToRightColumn(localPromptTemplatePanel.getPromptTemplateHelpText())
+        .addLabeledComponent(CodeGPTBundle.get("shared.infillPromptTemplate"),
+            infillPromptTemplatePanel)
+        .addComponentToRightColumn(infillPromptTemplatePanel.getPromptTemplateHelpText())
         .addVerticalGap(4)
         .addComponentFillVertically(new JPanel(), 0)
         .getPanel();

@@ -1,15 +1,11 @@
 package ee.carlrobert.codegpt.settings.service;
 
 import static ee.carlrobert.codegpt.ui.UIUtil.withEmptyLeftBorder;
-import static java.util.stream.Collectors.toList;
 
 import com.intellij.ui.TitledSeparator;
 import com.intellij.util.ui.FormBuilder;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import java.awt.BorderLayout;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import javax.swing.JPanel;
 
 public class LlamaServiceSelectionForm extends JPanel {
@@ -81,16 +77,6 @@ public class LlamaServiceSelectionForm extends JPanel {
 
   public String getAdditionalParameters() {
     return llamaServerPreferencesForm.getAdditionalParameters();
-  }
-
-  public List<String> getListOfAdditionalParameters() {
-    if (llamaServerPreferencesForm.getAdditionalParameters().trim().isEmpty()) {
-      return Collections.emptyList();
-    }
-    var parameters = llamaServerPreferencesForm.getAdditionalParameters().split(",");
-    return Arrays.stream(parameters)
-        .map(String::trim)
-        .collect(toList());
   }
 
   private void init() {

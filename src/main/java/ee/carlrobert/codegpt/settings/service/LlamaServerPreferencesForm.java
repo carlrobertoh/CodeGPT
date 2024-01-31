@@ -21,14 +21,16 @@ import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
+import ee.carlrobert.codegpt.codecompletions.InfillPromptTemplate;
 import ee.carlrobert.codegpt.completions.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaServerAgent;
 import ee.carlrobert.codegpt.completions.llama.LlamaServerStartupParams;
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
 import ee.carlrobert.codegpt.credentials.LlamaCredentialsManager;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
+import ee.carlrobert.codegpt.ui.ChatPromptTemplatePanel;
+import ee.carlrobert.codegpt.ui.InfillPromptTemplatePanel;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
-import ee.carlrobert.codegpt.ui.PromptTemplateWrapper;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import ee.carlrobert.codegpt.ui.UIUtil.RadioButtonWithLayout;
 import java.io.File;
@@ -56,11 +58,11 @@ public class LlamaServerPreferencesForm {
   private final IntegerField maxTokensField;
   private final IntegerField threadsField;
   private final JBTextField additionalParametersField;
-  private final PromptTemplateWrapper remotePromptTemplateWrapper;
+  private final ChatPromptTemplatePanel remotePromptTemplatePanel;
+  private final InfillPromptTemplatePanel infillPromptTemplatePanel;
 
   public LlamaServerPreferencesForm() {
     var llamaSettings = LlamaSettingsState.getInstance();
-
     var llamaServerAgent =
         ApplicationManager.getApplication().getService(LlamaServerAgent.class);
     var serverRunning = llamaServerAgent.isServerRunning();
@@ -91,8 +93,11 @@ public class LlamaServerPreferencesForm {
     useExistingServerRadioButton = new JBRadioButton("Use remote server",
         !llamaSettings.isRunLocalServer());
 
-    remotePromptTemplateWrapper = new PromptTemplateWrapper(
+    remotePromptTemplatePanel = new ChatPromptTemplatePanel(
         llamaSettings.getRemoteModelPromptTemplate(), true);
+    infillPromptTemplatePanel = new InfillPromptTemplatePanel(
+        llamaSettings.getRemoteModelInfillPromptTemplate(), true
+    );
   }
 
   public JPanel getForm() {
@@ -123,8 +128,11 @@ public class LlamaServerPreferencesForm {
         .addComponentToRightColumn(
             createComment("settingsConfigurable.service.llama.baseHost.comment"))
         .addLabeledComponent(CodeGPTBundle.get("shared.promptTemplate"),
-            remotePromptTemplateWrapper)
-        .addComponentToRightColumn(remotePromptTemplateWrapper.getPromptTemplateHelpText())
+            remotePromptTemplatePanel)
+        .addComponentToRightColumn(remotePromptTemplatePanel.getPromptTemplateHelpText())
+        .addLabeledComponent(CodeGPTBundle.get("shared.infillPromptTemplate"),
+            infillPromptTemplatePanel)
+        .addComponentToRightColumn(infillPromptTemplatePanel.getPromptTemplateHelpText())
         .addComponent(new TitledSeparator(
             CodeGPTBundle.get("settingsConfigurable.shared.authentication.title")))
         .addComponent(withEmptyLeftBorder(apiKeyFieldPanel))
@@ -348,7 +356,7 @@ public class LlamaServerPreferencesForm {
 
   public PromptTemplate getPromptTemplate() {
     return isRunLocalServer() ? llamaModelPreferencesForm.getPromptTemplate()
-        : remotePromptTemplateWrapper.getPrompTemplate();
+        : remotePromptTemplatePanel.getPromptTemplate();
   }
 
   public void setApiKey(String apiKey) {
@@ -360,6 +368,14 @@ public class LlamaServerPreferencesForm {
   }
 
   public void setPromptTemplate(PromptTemplate promptTemplate) {
-    remotePromptTemplateWrapper.setPromptTemplate(promptTemplate);
+    remotePromptTemplatePanel.setPromptTemplate(promptTemplate);
+  }
+
+  public void setInfillPromptTemplate(InfillPromptTemplate promptTemplate) {
+    infillPromptTemplatePanel.setPromptTemplate(promptTemplate);
+  }
+
+  public InfillPromptTemplate getInfillPromptTemplate() {
+    return infillPromptTemplatePanel.getPromptTemplate();
   }
 }

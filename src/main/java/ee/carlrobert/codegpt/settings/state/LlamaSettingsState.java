@@ -23,8 +23,9 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
   private HuggingFaceModel huggingFaceModel = HuggingFaceModel.CODE_LLAMA_7B_Q4;
   private PromptTemplate localModelPromptTemplate = PromptTemplate.LLAMA;
   private PromptTemplate remoteModelPromptTemplate = PromptTemplate.LLAMA;
-  private InfillPromptTemplate infillPromptTemplate = InfillPromptTemplate.LLAMA;
-  private String baseHost = "http://localhost";
+  private InfillPromptTemplate localModelInfillPromptTemplate = InfillPromptTemplate.LLAMA;
+  private InfillPromptTemplate remoteModelInfillPromptTemplate = InfillPromptTemplate.LLAMA;
+  private String baseHost = "http://localhost:8080";
   private Integer serverPort = getRandomAvailablePortOrDefault();
   private int contextSize = 2048;
   private int threads = 8;
@@ -54,11 +55,15 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
   public boolean isModified(ServiceSelectionForm serviceSelectionForm) {
     var modelPreferencesForm = serviceSelectionForm.getLlamaModelPreferencesForm();
     var requestPreferencesForm = serviceSelectionForm.getLlamaRequestPreferencesForm();
+    var serverPreferencesForm = serviceSelectionForm.getLlamaServerPreferencesForm();
 
     return !serviceSelectionForm.getLlamaServerPreferencesForm().getApiKey()
         .equals(LlamaCredentialsManager.getInstance().getApiKey())
         || runLocalServer != serviceSelectionForm.isLlamaRunLocalServer()
+        || !localModelPromptTemplate.equals(modelPreferencesForm.getPromptTemplate())
         || !remoteModelPromptTemplate.equals(serviceSelectionForm.getLlamaPromptTemplate())
+        || localModelInfillPromptTemplate != modelPreferencesForm.getInfillPromptTemplate()
+        || remoteModelInfillPromptTemplate != serverPreferencesForm.getInfillPromptTemplate()
         || !baseHost.equals(serviceSelectionForm.getLlamaBaseHost())
         || serverPort != serviceSelectionForm.getLlamaServerPort()
         || contextSize != serviceSelectionForm.getContextSize()
@@ -69,7 +74,6 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
         || topP != requestPreferencesForm.getTopP()
         || minP != requestPreferencesForm.getMinP()
         || repeatPenalty != requestPreferencesForm.getRepeatPenalty()
-        || !localModelPromptTemplate.equals(modelPreferencesForm.getPromptTemplate())
         || useCustomModel != modelPreferencesForm.isUseCustomLlamaModel()
         || !customLlamaModelPath.equals(modelPreferencesForm.getCustomLlamaModelPath());
   }
@@ -82,6 +86,9 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
     useCustomModel = modelPreferencesForm.isUseCustomLlamaModel();
     localModelPromptTemplate = modelPreferencesForm.getPromptTemplate();
     remoteModelPromptTemplate = serviceSelectionForm.getLlamaPromptTemplate();
+    localModelInfillPromptTemplate = modelPreferencesForm.getInfillPromptTemplate();
+    remoteModelInfillPromptTemplate =
+        serviceSelectionForm.getLlamaServerPreferencesForm().getInfillPromptTemplate();
     var requestPreferencesForm = serviceSelectionForm.getLlamaRequestPreferencesForm();
     topK = requestPreferencesForm.getTopK();
     topP = requestPreferencesForm.getTopP();
@@ -101,6 +108,7 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
     modelPreferencesForm.setCustomLlamaModelPath(customLlamaModelPath);
     modelPreferencesForm.setUseCustomLlamaModel(useCustomModel);
     modelPreferencesForm.setPromptTemplate(localModelPromptTemplate);
+    modelPreferencesForm.setInfillPromptTemplate(localModelInfillPromptTemplate);
     var requestPreferencesForm = serviceSelectionForm.getLlamaRequestPreferencesForm();
     requestPreferencesForm.setTopK(topK);
     requestPreferencesForm.setTopP(topP);
@@ -113,8 +121,10 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
     serviceSelectionForm.setContextSize(contextSize);
     serviceSelectionForm.setThreads(threads);
     serviceSelectionForm.setAdditionalParameters(additionalParameters);
-    serviceSelectionForm.getLlamaServerPreferencesForm().setApiKey(
-        LlamaCredentialsManager.getInstance().getApiKey());
+
+    var llamaServerPreferencesForm = serviceSelectionForm.getLlamaServerPreferencesForm();
+    llamaServerPreferencesForm.setInfillPromptTemplate(remoteModelInfillPromptTemplate);
+    llamaServerPreferencesForm.setApiKey(LlamaCredentialsManager.getInstance().getApiKey());
   }
 
   public boolean isUseCustomModel() {
@@ -148,6 +158,24 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
   public void setLocalModelPromptTemplate(
       PromptTemplate localModelPromptTemplate) {
     this.localModelPromptTemplate = localModelPromptTemplate;
+  }
+
+  public InfillPromptTemplate getLocalModelInfillPromptTemplate() {
+    return localModelInfillPromptTemplate;
+  }
+
+  public void setLocalModelInfillPromptTemplate(
+      InfillPromptTemplate localModelInfillPromptTemplate) {
+    this.localModelInfillPromptTemplate = localModelInfillPromptTemplate;
+  }
+
+  public InfillPromptTemplate getRemoteModelInfillPromptTemplate() {
+    return remoteModelInfillPromptTemplate;
+  }
+
+  public void setRemoteModelInfillPromptTemplate(
+      InfillPromptTemplate remoteModelInfillPromptTemplate) {
+    this.remoteModelInfillPromptTemplate = remoteModelInfillPromptTemplate;
   }
 
   public boolean isRunLocalServer() {
@@ -237,14 +265,6 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
 
   public void setRepeatPenalty(double repeatPenalty) {
     this.repeatPenalty = repeatPenalty;
-  }
-
-  public InfillPromptTemplate getInfillPromptTemplate() {
-    return infillPromptTemplate;
-  }
-
-  public void setInfillPromptTemplate(InfillPromptTemplate infillPromptTemplate) {
-    this.infillPromptTemplate = infillPromptTemplate;
   }
 
   private static Integer getRandomAvailablePortOrDefault() {
