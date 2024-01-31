@@ -5,6 +5,7 @@ import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.completions.PromptTemplate;
+import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.llama.CommonSettings;
 import ee.carlrobert.codegpt.ui.PromptTemplateWrapper;
 import javax.swing.JPanel;
@@ -12,16 +13,17 @@ import javax.swing.JPanel;
 public class RemoteModelPreferencesForm {
 
   private final PromptTemplateWrapper promptTemplateWrapper;
-  private final String bundlePrefix;
+  private final ServiceType serviceType;
 
-  public RemoteModelPreferencesForm(CommonSettings settings, String bundlePrefix) {
-    this.bundlePrefix = bundlePrefix;
+  public RemoteModelPreferencesForm(CommonSettings settings, ServiceType serviceType) {
+    this.serviceType = serviceType;
     promptTemplateWrapper = new PromptTemplateWrapper(settings.getPromptTemplate(), true);
   }
 
   public JPanel getForm() {
     var customModelHelpText = ComponentPanelBuilder.createCommentComponent(
-        CodeGPTBundle.get(String.format("settingsConfigurable.service.%s.customModelPath.comment", bundlePrefix)),
+        CodeGPTBundle.get(String.format("settingsConfigurable.service.%s.customModelPath.comment",
+            serviceType.getBundlePrefix())),
         true);
     customModelHelpText.setBorder(JBUI.Borders.empty(0, 4));
 

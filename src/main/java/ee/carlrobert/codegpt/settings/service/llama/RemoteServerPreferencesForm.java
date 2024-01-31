@@ -10,6 +10,7 @@ import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.credentials.ServiceCredentialsManager;
+import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.llama.RemoteSettings;
 import javax.swing.JComponent;
 
@@ -20,12 +21,12 @@ public class RemoteServerPreferencesForm {
 
   private final JBTextField baseHostField;
   private final RemoteModelPreferencesForm remoteModelPreferencesForm;
-  private final String servicePrefix;
+  private final ServiceType servicePrefix;
   private JBPasswordField apiKeyField;
 
   private final ServiceCredentialsManager credentialsManager;
 
-  public RemoteServerPreferencesForm(RemoteSettings settings, String servicePrefix) {
+  public RemoteServerPreferencesForm(RemoteSettings settings, ServiceType servicePrefix) {
     this.credentialsManager = settings.getCredentialsManager();
     this.servicePrefix = servicePrefix;
     baseHostField = new JBTextField(settings.getBaseHost(), 30);

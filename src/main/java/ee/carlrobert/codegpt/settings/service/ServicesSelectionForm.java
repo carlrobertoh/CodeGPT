@@ -141,7 +141,7 @@ public class ServicesSelectionForm {
     var settings = LlamaCppSettingsState.getInstance();
     return new ServiceFormPanel(
         new ServerPreferencesForm(settings,
-            ApplicationManager.getApplication().getService(LlamaServerAgent.class), "llama") {
+            ApplicationManager.getApplication().getService(LlamaServerAgent.class), ServiceType.LLAMA_CPP) {
           @Override
           public boolean isModelExists(HuggingFaceModel model) {
             return FileUtil.exists(
@@ -154,7 +154,7 @@ public class ServicesSelectionForm {
     var settings = OllamaSettingsState.getInstance();
     return new ServiceFormPanel(
          new ServerPreferencesForm(settings,
-            ApplicationManager.getApplication().getService(OllamaServerAgent.class), "ollama") {
+            ApplicationManager.getApplication().getService(OllamaServerAgent.class), ServiceType.OLLAMA) {
           @Override
           public boolean isModelExists(HuggingFaceModel model) {
             return true;

@@ -6,6 +6,7 @@ import com.intellij.ui.components.JBRadioButton;
 import com.intellij.util.ui.FormBuilder;
 import ee.carlrobert.codegpt.completions.ServerAgent;
 import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
+import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.llama.LocalSettings;
 import ee.carlrobert.codegpt.settings.state.llama.RemoteSettings;
 import ee.carlrobert.codegpt.ui.UIUtil.RadioButtonWithLayout;
@@ -30,7 +31,7 @@ public abstract class ServerPreferencesForm {
   private final ServerAgent serverAgent;
 
   public ServerPreferencesForm(ServiceSettingsState serviceSettingsState, ServerAgent serverAgent,
-      String servicePrefix) {
+      ServiceType servicePrefix) {
     this.serverAgent = serverAgent;
     runLocalServerRadioButton = new JBRadioButton("Run local server",
         serviceSettingsState.isRunLocalServer());
