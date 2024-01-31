@@ -132,10 +132,10 @@ public class UIUtil {
       radioPanel.add(radioButton);
       radioPanel.add(Box.createVerticalStrut(i == radioButtons.size() - 1 ? 8 : 4));
     }
-    return radioPanel;
+    return withEmptyLeftBorder(radioPanel);
   }
 
-  public static JComponent withEmptyLeftBorder(JComponent component) {
+  public static <T extends JComponent> T withEmptyLeftBorder(T component) {
     component.setBorder(JBUI.Borders.emptyLeft(16));
     return component;
   }
@@ -164,7 +164,8 @@ public class UIUtil {
    * @param initialLayout Key of {@code layouts} entry to be initially shown
    * @return Panel with the RadioButton group
    */
-  public static JPanel createRadioButtonGroupLayouts(Map<String, RadioButtonWithLayout> layouts,
+  public static JPanel createRadioButtonGroupLayouts(
+      Map<String, RadioButtonWithLayout> layouts,
       String initialLayout) {
     CardLayout cardlayout = new CardLayout() {
       @Override
@@ -183,8 +184,6 @@ public class UIUtil {
     };
 
     var formPanelCards = new JPanel(cardlayout);
-    formPanelCards.setBorder(JBUI.Borders.emptyLeft(16));
-
     for (Entry<String, RadioButtonWithLayout> layout : layouts.entrySet()) {
       RadioButtonWithLayout value = layout.getValue();
       Component component = value.getComponent();

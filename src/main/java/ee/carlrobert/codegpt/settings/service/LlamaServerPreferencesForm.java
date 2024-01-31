@@ -88,7 +88,7 @@ public class LlamaServerPreferencesForm {
     llamaModelPreferencesForm = new LlamaModelPreferencesForm();
     runLocalServerRadioButton = new JBRadioButton("Run local server",
         llamaSettings.isRunLocalServer());
-    useExistingServerRadioButton = new JBRadioButton("Use existing server",
+    useExistingServerRadioButton = new JBRadioButton("Use remote server",
         !llamaSettings.isRunLocalServer());
 
     remotePromptTemplateWrapper = new PromptTemplateWrapper(
@@ -138,31 +138,34 @@ public class LlamaServerPreferencesForm {
         .addComponent(new TitledSeparator(
             CodeGPTBundle.get("settingsConfigurable.service.llama.modelPreferences.title")))
         .addComponent(withEmptyLeftBorder(llamaModelPreferencesForm.getForm()))
-        .addVerticalGap(8)
-        .addLabeledComponent(
-            CodeGPTBundle.get("shared.port"),
-            JBUI.Panels.simplePanel()
-                .addToLeft(portField)
-                .addToRight(JBUI.Panels.simplePanel()
-                    .addToCenter(serverProgressPanel)
-                    .addToRight(getServerButton(llamaServerAgent, serverProgressPanel))))
-        .addVerticalGap(4)
-        .addLabeledComponent(
-            CodeGPTBundle.get("settingsConfigurable.service.llama.contextSize.label"),
-            maxTokensField)
-        .addComponentToRightColumn(
-            createComment("settingsConfigurable.service.llama.contextSize.comment"))
-        .addLabeledComponent(
-            CodeGPTBundle.get("settingsConfigurable.service.llama.threads.label"),
-            threadsField)
-        .addComponentToRightColumn(
-            createComment("settingsConfigurable.service.llama.threads.comment"))
-        .addLabeledComponent(
-            CodeGPTBundle.get("settingsConfigurable.service.llama.additionalParameters.label"),
-            additionalParametersField)
-        .addComponentToRightColumn(
-            createComment("settingsConfigurable.service.llama.additionalParameters.comment"))
-        .addVerticalGap(8)
+        .addComponent(new TitledSeparator("Server Configuration"))
+        .addComponent(withEmptyLeftBorder(FormBuilder.createFormBuilder()
+            .addLabeledComponent(
+                CodeGPTBundle.get("shared.port"),
+                JBUI.Panels.simplePanel()
+                    .addToLeft(portField)
+                    .addToRight(JBUI.Panels.simplePanel()
+                        .addToCenter(serverProgressPanel)
+                        .addToRight(getServerButton(llamaServerAgent, serverProgressPanel))))
+            .addVerticalGap(4)
+            .addLabeledComponent(
+                CodeGPTBundle.get("settingsConfigurable.service.llama.contextSize.label"),
+                maxTokensField)
+            .addComponentToRightColumn(
+                createComment("settingsConfigurable.service.llama.contextSize.comment"))
+            .addLabeledComponent(
+                CodeGPTBundle.get("settingsConfigurable.service.llama.threads.label"),
+                threadsField)
+            .addComponentToRightColumn(
+                createComment("settingsConfigurable.service.llama.threads.comment"))
+            .addLabeledComponent(
+                CodeGPTBundle.get("settingsConfigurable.service.llama.additionalParameters.label"),
+                additionalParametersField)
+            .addComponentToRightColumn(
+                createComment("settingsConfigurable.service.llama.additionalParameters.comment"))
+            .addVerticalGap(4)
+            .addComponentFillVertically(new JPanel(), 0)
+            .getPanel()))
         .getPanel());
   }
 
