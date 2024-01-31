@@ -1,6 +1,6 @@
 package ee.carlrobert.codegpt.completions;
 
-import static ee.carlrobert.codegpt.settings.service.ServiceType.LLAMA_CPP;
+import static ee.carlrobert.codegpt.settings.service.ServiceType.LLAMA;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.OPENAI;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.YOU;
 
@@ -58,18 +58,11 @@ public final class CompletionRequestService {
         return CompletionClientProvider.getYouClient().getChatCompletionAsync(
             requestProvider.buildYouCompletionRequest(callParameters.getMessage()),
             eventListener);
-      case LLAMA_CPP:
+      case LLAMA:
         return CompletionClientProvider.getLlamaClient().getChatCompletionAsync(
             requestProvider.buildLlamaCompletionRequest(
                 callParameters.getMessage(),
                 callParameters.getConversationType()),
-            eventListener);
-      case OLLAMA:
-        return CompletionClientProvider.getOllamaClient().getChatCompletionAsync(
-            requestProvider.buildOLlamaCompletionRequest(
-                callParameters.getMessage(),
-                callParameters.getConversationType(),
-                true),
             eventListener);
       default:
         throw new IllegalArgumentException();
@@ -96,7 +89,7 @@ public final class CompletionRequestService {
 
   public Optional<String> getLookupCompletion(String prompt) {
     var selectedService = SettingsState.getInstance().getSelectedService();
-    if (selectedService == YOU || selectedService == LLAMA_CPP) {
+    if (selectedService == YOU || selectedService == LLAMA) {
       return Optional.empty();
     }
 

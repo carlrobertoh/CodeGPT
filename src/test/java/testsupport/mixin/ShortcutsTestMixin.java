@@ -32,7 +32,7 @@ public interface ShortcutsTestMixin {
   }
 
   default void useLlamaService() {
-    SettingsState.getInstance().setSelectedService(ServiceType.LLAMA_CPP);
+    SettingsState.getInstance().setSelectedService(ServiceType.LLAMA);
     LlamaCppSettingsState llamaCppSettingsState = LlamaCppSettingsState.getInstance();
     llamaCppSettingsState.setRunLocalServer(true);
     var localSettings = llamaCppSettingsState.getLocalSettings();

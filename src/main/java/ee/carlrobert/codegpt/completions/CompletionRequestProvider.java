@@ -20,13 +20,11 @@ import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.settings.state.YouSettingsState;
 import ee.carlrobert.codegpt.settings.state.llama.cpp.LlamaCppSettingsState;
 import ee.carlrobert.codegpt.settings.state.llama.RequestSettings;
-import ee.carlrobert.codegpt.settings.state.llama.ollama.OllamaSettingsState;
 import ee.carlrobert.codegpt.telemetry.core.configuration.TelemetryConfiguration;
 import ee.carlrobert.codegpt.telemetry.core.service.UserId;
 import ee.carlrobert.embedding.EmbeddingsService;
 import ee.carlrobert.embedding.ReferencedFile;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
-import ee.carlrobert.llm.client.ollama.completion.OllamaCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
@@ -34,7 +32,6 @@ import ee.carlrobert.llm.client.you.completion.YouCompletionRequest;
 import ee.carlrobert.llm.client.you.completion.YouCompletionRequestMessage;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.UUID;
@@ -124,40 +121,6 @@ public class CompletionRequestProvider {
         .setTop_p(requestSettings.getTopP())
         .setMin_p(requestSettings.getMinP())
         .setRepeat_penalty(requestSettings.getRepeatPenalty())
-        .build();
-  }
-
-  public OllamaCompletionRequest buildOLlamaCompletionRequest(
-      Message message,
-      ConversationType conversationType,
-      boolean isStream) {
-    var settings = OllamaSettingsState.getInstance();
-    PromptTemplate promptTemplate;
-    String model;
-
-    promptTemplate = settings.getActualPromptTemplate();
-    model = settings.getLocalActualModel();
-
-    var systemPrompt = COMPLETION_SYSTEM_PROMPT;
-    if (conversationType == ConversationType.FIX_COMPILE_ERRORS) {
-      systemPrompt = FIX_COMPILE_ERRORS_SYSTEM_PROMPT;
-    }
-
-    var prompt = promptTemplate.buildPrompt(
-        systemPrompt,
-        message.getPrompt(),
-        conversation.getMessages());
-    var configuration = ConfigurationState.getInstance();
-    RequestSettings requestSettings = settings.getRequestSettings();
-    return new OllamaCompletionRequest.Builder(model, prompt)
-        .setOptions(Map.of(
-            "num_predict",configuration.getMaxTokens(),
-            "temperature", configuration.getTemperature(),
-            "top_k", requestSettings.getTopK(),
-            "top_p", requestSettings.getTopP(),
-            "repeat_penalty", requestSettings.getRepeatPenalty()
-            ))
-        .setStream(isStream)
         .build();
   }
 

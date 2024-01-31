@@ -26,11 +26,11 @@ public class RemoteServerPreferencesForm {
 
   private final ServiceCredentialsManager credentialsManager;
 
-  public RemoteServerPreferencesForm(RemoteSettings settings, ServiceType servicePrefix) {
+  public RemoteServerPreferencesForm(RemoteSettings settings, ServiceType serviceType) {
     this.credentialsManager = settings.getCredentialsManager();
-    this.servicePrefix = servicePrefix;
+    this.servicePrefix = serviceType;
     baseHostField = new JBTextField(settings.getBaseHost(), 30);
-    remoteModelPreferencesForm = new RemoteModelPreferencesForm(settings, servicePrefix);
+    remoteModelPreferencesForm = new RemoteModelPreferencesForm(settings, serviceType);
     if (credentialsManager.providesApiKey()) {
       apiKeyField = new JBPasswordField();
       apiKeyField.setColumns(30);
@@ -45,7 +45,7 @@ public class RemoteServerPreferencesForm {
             baseHostField)
         .addComponentToRightColumn(
             createComment(
-                String.format("settingsConfigurable.service.%s.baseHost.comment", servicePrefix)))
+                String.format("settingsConfigurable.service.%s.baseHost.comment", servicePrefix.getBundlePrefix())))
         .addComponent(new TitledSeparator(
             CodeGPTBundle.get("settingsConfigurable.service.ollama.modelPreferences.title")))
         .addComponent(withEmptyLeftBorder(remoteModelPreferencesForm.getForm()));

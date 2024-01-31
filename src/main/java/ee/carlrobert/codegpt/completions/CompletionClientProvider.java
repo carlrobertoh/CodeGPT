@@ -12,12 +12,10 @@ import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.llama.cpp.LlamaCppSettingsState;
 import ee.carlrobert.codegpt.settings.state.llama.LocalSettings;
 import ee.carlrobert.codegpt.settings.state.llama.RemoteSettings;
-import ee.carlrobert.codegpt.settings.state.llama.ollama.OllamaSettingsState;
 import ee.carlrobert.llm.client.azure.AzureClient;
 import ee.carlrobert.llm.client.azure.AzureCompletionRequestParams;
 import ee.carlrobert.llm.client.llama.LlamaClient;
 import ee.carlrobert.llm.client.llama.LlamaClient.Builder;
-import ee.carlrobert.llm.client.ollama.OllamaClient;
 import ee.carlrobert.llm.client.openai.OpenAIClient;
 import ee.carlrobert.llm.client.you.UTMParameters;
 import ee.carlrobert.llm.client.you.YouClient;
@@ -92,17 +90,6 @@ public class CompletionClientProvider {
     }
     if (apiKey != null && !apiKey.isBlank()) {
       builder.setApiKey(apiKey);
-    }
-    return builder.build(getDefaultClientBuilder());
-  }
-
-  public static OllamaClient getOllamaClient() {
-    OllamaSettingsState ollamaSettingsState = OllamaSettingsState.getInstance();
-    OllamaClient.Builder builder = new OllamaClient.Builder();
-    if (ollamaSettingsState.isRunLocalServer()) {
-      builder.setPort(ollamaSettingsState.getLocalSettings().getServerPort());
-    } else {
-      builder.setHost(ollamaSettingsState.getRemoteSettings().getBaseHost());
     }
     return builder.build(getDefaultClientBuilder());
   }

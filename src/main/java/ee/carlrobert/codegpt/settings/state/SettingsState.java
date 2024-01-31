@@ -49,7 +49,7 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
       setSelectedService(ServiceType.AZURE);
     }
     if ("llama.chat.completion".equals(clientCode)) {
-      setSelectedService(ServiceType.LLAMA_CPP);
+      setSelectedService(ServiceType.LLAMA);
       var llamaSettings = LlamaCppSettingsState.getInstance();
       try {
         var huggingFaceModel = HuggingFaceModel.valueOf(conversation.getModel());
@@ -73,7 +73,7 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
         return AzureSettingsState.getInstance().getDeploymentId();
       case YOU:
         return "YouCode";
-      case LLAMA_CPP:
+      case LLAMA:
         var llamaSettings = LlamaCppSettingsState.getInstance();
         if (llamaSettings.isLocalUseCustomModel()) {
           var filePath = llamaSettings.getLocalModelPath();

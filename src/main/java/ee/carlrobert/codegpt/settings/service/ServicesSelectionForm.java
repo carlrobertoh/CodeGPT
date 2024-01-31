@@ -18,7 +18,6 @@ import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaServerAgent;
-import ee.carlrobert.codegpt.completions.ollama.OllamaServerAgent;
 import ee.carlrobert.codegpt.completions.you.auth.AuthenticationNotifier;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
@@ -29,7 +28,6 @@ import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.YouSettingsState;
 import ee.carlrobert.codegpt.settings.state.llama.cpp.LlamaCppSettingsState;
-import ee.carlrobert.codegpt.settings.state.llama.ollama.OllamaSettingsState;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import java.io.File;
@@ -69,7 +67,6 @@ public class ServicesSelectionForm {
   private final JBCheckBox displayWebSearchResultsCheckBox;
 
   private ServiceFormPanel llamaServiceSectionPanel;
-  private ServiceFormPanel ollamaServiceSectionPanel;
 
   public ServicesSelectionForm(Disposable parentDisposable) {
     this.parentDisposable = parentDisposable;
@@ -125,7 +122,6 @@ public class ServicesSelectionForm {
     azureServiceSectionPanel = createAzureServiceSectionPanel();
     youServiceSectionPanel = createYouServiceSectionPanel();
     llamaServiceSectionPanel = createLlamaServiceSectionPanel();
-    ollamaServiceSectionPanel = createOllamaServiceSectionPanel();
 
     registerPanelsVisibility(azureSettings);
     registerRadioButtons();
@@ -141,23 +137,11 @@ public class ServicesSelectionForm {
     var settings = LlamaCppSettingsState.getInstance();
     return new ServiceFormPanel(
         new ServerPreferencesForm(settings,
-            ApplicationManager.getApplication().getService(LlamaServerAgent.class), ServiceType.LLAMA_CPP) {
+            ApplicationManager.getApplication().getService(LlamaServerAgent.class), ServiceType.LLAMA) {
           @Override
           public boolean isModelExists(HuggingFaceModel model) {
             return FileUtil.exists(
                 CodeGPTPlugin.getLlamaModelsPath() + File.separator + model.getModelFileName());
-          }
-        }, settings.getRequestSettings());
-  }
-
-  private ServiceFormPanel createOllamaServiceSectionPanel() {
-    var settings = OllamaSettingsState.getInstance();
-    return new ServiceFormPanel(
-         new ServerPreferencesForm(settings,
-            ApplicationManager.getApplication().getService(OllamaServerAgent.class), ServiceType.OLLAMA) {
-          @Override
-          public boolean isModelExists(HuggingFaceModel model) {
-            return true;
           }
         }, settings.getRequestSettings());
   }
@@ -407,14 +391,6 @@ public class ServicesSelectionForm {
     return llamaServiceSectionPanel.getRequestPreferencesForm();
   }
 
-  public ServerPreferencesForm getOllamaServerPreferencesForm() {
-    return ollamaServiceSectionPanel.getServerPreferencesForm();
-  }
-
-  public RequestPreferencesForm getOllamaRequestPreferencesForm() {
-    return ollamaServiceSectionPanel.getRequestPreferencesForm();
-  }
-
   public void setOpenAIPath(String path) {
     openAIPathField.setText(path);
   }
@@ -447,7 +423,4 @@ public class ServicesSelectionForm {
     return llamaServiceSectionPanel;
   }
 
-  public JPanel getOllamaServiceSectionPanel() {
-    return ollamaServiceSectionPanel;
-  }
 }

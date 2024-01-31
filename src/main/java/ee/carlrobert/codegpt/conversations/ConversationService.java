@@ -11,7 +11,6 @@ import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.settings.state.llama.cpp.LlamaCppSettingsState;
-import ee.carlrobert.codegpt.settings.state.llama.ollama.OllamaSettingsState;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -195,12 +194,9 @@ public final class ConversationService {
         return AzureSettingsState.getInstance().getDeploymentId();
       case YOU:
         return "YouCode";
-      case LLAMA_CPP:
+      case LLAMA:
         var llamaSettings = LlamaCppSettingsState.getInstance();
         return llamaSettings.getLocalModelPath();
-      case OLLAMA:
-        var ollamaSettings = OllamaSettingsState.getInstance();
-        return ollamaSettings.getLocalModelTag();
       default:
         throw new RuntimeException("Could not find corresponding service mapping");
     }

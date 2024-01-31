@@ -66,7 +66,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
         createModelAction(ServiceType.AZURE, "Azure OpenAI", Icons.Azure, presentation));
     actionGroup.addSeparator();
     actionGroup.add(createModelAction(
-        ServiceType.LLAMA_CPP,
+        ServiceType.LLAMA,
         getSelectedHuggingFace(),
         Icons.Llama,
         presentation));
@@ -97,7 +97,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
         templatePresentation.setIcon(Icons.YouSmall);
         templatePresentation.setText("You.com");
         break;
-      case LLAMA_CPP:
+      case LLAMA:
         templatePresentation.setText(getSelectedHuggingFace());
         templatePresentation.setIcon(Icons.Llama);
         break;
