@@ -11,7 +11,10 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.EditorFactory;
 import com.intellij.openapi.editor.EditorKind;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
+import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
+import com.intellij.openapi.fileEditor.TextEditor;
+import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.codeStyle.CodeStyleManager;
@@ -79,6 +82,23 @@ public final class EditorUtil {
     return null;
   }
 
+  public static boolean isSelectedEditor(Editor editor) {
+    Project project = editor.getProject();
+    if (project != null && !project.isDisposed()) {
+      FileEditorManager editorManager = FileEditorManager.getInstance(project);
+      if (editorManager == null) {
+        return false;
+      }
+      if (editorManager instanceof FileEditorManagerImpl) {
+        Editor current = ((FileEditorManagerImpl) editorManager).getSelectedTextEditor(true);
+        return current != null && current.equals(editor);
+      }
+      FileEditor current = editorManager.getSelectedEditor();
+      return current instanceof TextEditor && editor.equals(((TextEditor) current).getEditor());
+    }
+    return false;
+  }
+
   public static boolean isMainEditorTextSelected(@NotNull Project project) {
     return hasSelection(getSelectedEditor(project));
   }
@@ -106,7 +126,7 @@ public final class EditorUtil {
         })));
   }
 
-  private static void reformatDocument(
+  public static void reformatDocument(
       @NotNull Project project,
       @NotNull Document document,
       int startOffset,

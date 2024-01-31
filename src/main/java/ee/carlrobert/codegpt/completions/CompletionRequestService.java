@@ -1,15 +1,17 @@
 package ee.carlrobert.codegpt.completions;
 
+import static ee.carlrobert.codegpt.settings.service.ServiceType.AZURE;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.LLAMA_CPP;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.OPENAI;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.YOU;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
+import ee.carlrobert.codegpt.codecompletions.CodeCompletionRequestProvider;
+import ee.carlrobert.codegpt.codecompletions.InfillRequestDetails;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
-import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
@@ -69,6 +71,22 @@ public final class CompletionRequestService {
     }
   }
 
+  public EventSource getCodeCompletionAsync(
+      InfillRequestDetails requestDetails,
+      CompletionEventListener eventListener) {
+    var requestProvider = new CodeCompletionRequestProvider(requestDetails);
+    switch (SettingsState.getInstance().getSelectedService()) {
+      case OPENAI:
+        return CompletionClientProvider.getOpenAIClient()
+            .getCompletionAsync(requestProvider.buildOpenAIRequest(), eventListener);
+      case LLAMA_CPP:
+        return CompletionClientProvider.getLlamaClient()
+            .getChatCompletionAsync(requestProvider.buildLlamaRequest(), eventListener);
+      default:
+        throw new IllegalArgumentException("Code completion not supported for selected service");
+    }
+  }
+
   public void generateCommitMessageAsync(
       String prompt,
       CompletionEventListener eventListener) {
@@ -79,10 +97,10 @@ public final class CompletionRequestService {
         .setModel(OpenAISettingsState.getInstance().getModel())
         .build();
     var selectedService = SettingsState.getInstance().getSelectedService();
-    if (selectedService == ServiceType.OPENAI) {
+    if (selectedService == OPENAI) {
       CompletionClientProvider.getOpenAIClient().getChatCompletionAsync(request, eventListener);
     }
-    if (selectedService == ServiceType.AZURE) {
+    if (selectedService == AZURE) {
       CompletionClientProvider.getAzureClient().getChatCompletionAsync(request, eventListener);
     }
   }
@@ -106,10 +124,10 @@ public final class CompletionRequestService {
 
   public boolean isRequestAllowed() {
     var selectedService = SettingsState.getInstance().getSelectedService();
-    if (selectedService == ServiceType.AZURE) {
+    if (selectedService == AZURE) {
       return AzureCredentialsManager.getInstance().isCredentialSet();
     }
-    if (selectedService == ServiceType.OPENAI) {
+    if (selectedService == OPENAI) {
       return OpenAICredentialsManager.getInstance().isApiKeySet();
     }
     return true;

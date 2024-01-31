@@ -36,9 +36,12 @@
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.configuration.ConfigurationState"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.advanced.AdvancedSettingsState"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.conversations.ConversationsState"/>
+        <editorFactoryListener implementation="ee.carlrobert.codegpt.codecompletions.CodeGPTEditorListener"/>
         <toolWindow id="CodeGPT" icon="ee.carlrobert.codegpt.Icons.DefaultSmall" anchor="right"
             factoryClass="ee.carlrobert.codegpt.toolwindow.ProjectToolWindowFactory"/>
         <notificationGroup id="CodeGPT Notification Group" displayType="BALLOON" key="notification.group.name"/>
+        <statusBarWidgetFactory order="first" id="ee.carlrobert.codegpt.statusbar.widget"
+          implementation="ee.carlrobert.codegpt.statusbar.CodeGPTStatusBarWidgetFactory"/>
     </extensions>
 
     <resource-bundle>messages.codegpt</resource-bundle>
@@ -70,6 +73,30 @@
               anchor="before"/>
             <separator/>
         </group>
+
+        <action id="codegpt.openSettings"
+          class="ee.carlrobert.codegpt.actions.OpenSettingsAction">
+            <override-text place="MainMenu" text="Open Settings"/>
+            <override-text place="popup" use-text-of-place="MainMenu"/>
+        </action>
+        <action id="codegpt.enableCompletions"
+          class="ee.carlrobert.codegpt.actions.EnableCompletionsAction">
+            <override-text place="MainMenu" text="Enable Completions"/>
+            <override-text place="popup" use-text-of-place="MainMenu"/>
+        </action>
+        <action id="codegpt.disableCompletions"
+          class="ee.carlrobert.codegpt.actions.DisableCompletionsAction">
+            <override-text place="MainMenu" text="Disable Completions"/>
+            <override-text place="popup" use-text-of-place="MainMenu"/>
+        </action>
+
+        <group id="codegpt.statusBarPopup">
+            <reference id="codegpt.openSettings" />
+            <separator/>
+            <reference id="codegpt.disableCompletions" />
+            <reference id="codegpt.enableCompletions" />
+        </group>
+
         <group id="CodeGPT.GenerateGitCommitMessageGroup">
             <add-to-group group-id="Vcs.MessageActionGroup" anchor="first"/>
             <action

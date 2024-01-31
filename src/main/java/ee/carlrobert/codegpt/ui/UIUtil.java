@@ -121,6 +121,7 @@ public class UIUtil {
     textArea.getActionMap().put("text-submit", onSubmit);
   }
 
+
   public static JPanel createRadioButtonsPanel(List<JBRadioButton> radioButtons) {
     var buttonGroup = new ButtonGroup();
     var radioPanel = new JPanel();

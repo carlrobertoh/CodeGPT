@@ -51,6 +51,9 @@ public class CompletionRequestProvider {
   public static final String FIX_COMPILE_ERRORS_SYSTEM_PROMPT = getResourceContent(
       "/prompts/fix-compile-errors.txt");
 
+  public static final String INLINE_COMPLETION_PROMPT = getResourceContent(
+      "/prompts/inline-completion-prompt.txt");
+
   private final EncodingManager encodingManager = EncodingManager.getInstance();
   private final EmbeddingsService embeddingsService;
   private final Conversation conversation;
@@ -151,17 +154,19 @@ public class CompletionRequestProvider {
       CallParameters callParameters,
       boolean useContextualSearch,
       @Nullable String overriddenPath) {
+
     var builder = new OpenAIChatCompletionRequest.Builder(
         buildMessages(model, callParameters, useContextualSearch))
         .setModel(model)
         .setMaxTokens(ConfigurationState.getInstance().getMaxTokens())
+        .setStream(true)
         .setTemperature(ConfigurationState.getInstance().getTemperature());
 
     if (overriddenPath != null) {
       builder.setOverriddenPath(overriddenPath);
     }
 
-    return (OpenAIChatCompletionRequest) builder.build();
+    return builder.build();
   }
 
   public List<OpenAIChatCompletionMessage> buildMessages(

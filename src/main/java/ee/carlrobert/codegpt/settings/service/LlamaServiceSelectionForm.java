@@ -104,6 +104,4 @@ public class LlamaServiceSelectionForm extends JPanel {
         .addComponentFillVertically(new JPanel(), 0)
         .getPanel());
   }
-
-
 }

@@ -5,6 +5,7 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
+import ee.carlrobert.codegpt.codecompletions.InfillPromptTemplate;
 import ee.carlrobert.codegpt.completions.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
 import ee.carlrobert.codegpt.credentials.LlamaCredentialsManager;
@@ -22,6 +23,7 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
   private HuggingFaceModel huggingFaceModel = HuggingFaceModel.CODE_LLAMA_7B_Q4;
   private PromptTemplate localModelPromptTemplate = PromptTemplate.LLAMA;
   private PromptTemplate remoteModelPromptTemplate = PromptTemplate.LLAMA;
+  private InfillPromptTemplate infillPromptTemplate = InfillPromptTemplate.LLAMA;
   private String baseHost = "http://localhost";
   private Integer serverPort = getRandomAvailablePortOrDefault();
   private int contextSize = 2048;
@@ -79,6 +81,7 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
     huggingFaceModel = modelPreferencesForm.getSelectedModel();
     useCustomModel = modelPreferencesForm.isUseCustomLlamaModel();
     localModelPromptTemplate = modelPreferencesForm.getPromptTemplate();
+    remoteModelPromptTemplate = serviceSelectionForm.getLlamaPromptTemplate();
     var requestPreferencesForm = serviceSelectionForm.getLlamaRequestPreferencesForm();
     topK = requestPreferencesForm.getTopK();
     topP = requestPreferencesForm.getTopP();
@@ -87,7 +90,6 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
     runLocalServer = serviceSelectionForm.isLlamaRunLocalServer();
     baseHost = serviceSelectionForm.getLlamaBaseHost();
     serverPort = serviceSelectionForm.getLlamaServerPort();
-    remoteModelPromptTemplate = serviceSelectionForm.getLlamaPromptTemplate();
     contextSize = serviceSelectionForm.getContextSize();
     threads = serviceSelectionForm.getThreads();
     additionalParameters = serviceSelectionForm.getAdditionalParameters();
@@ -235,6 +237,14 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
 
   public void setRepeatPenalty(double repeatPenalty) {
     this.repeatPenalty = repeatPenalty;
+  }
+
+  public InfillPromptTemplate getInfillPromptTemplate() {
+    return infillPromptTemplate;
+  }
+
+  public void setInfillPromptTemplate(InfillPromptTemplate infillPromptTemplate) {
+    this.infillPromptTemplate = infillPromptTemplate;
   }
 
   private static Integer getRandomAvailablePortOrDefault() {
