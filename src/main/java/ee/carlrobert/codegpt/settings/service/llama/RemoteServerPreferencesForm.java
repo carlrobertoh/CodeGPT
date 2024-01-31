@@ -11,11 +11,11 @@ import com.intellij.util.ui.FormBuilder;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.credentials.ServiceCredentialsManager;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
-import ee.carlrobert.codegpt.settings.state.llama.RemoteSettings;
+import ee.carlrobert.codegpt.settings.state.llama.LlamaRemoteSettings;
 import javax.swing.JComponent;
 
 /**
- * Form containing fields for all {@link RemoteSettings}
+ * Form containing fields for all {@link LlamaRemoteSettings}
  */
 public class RemoteServerPreferencesForm {
 
@@ -26,7 +26,7 @@ public class RemoteServerPreferencesForm {
 
   private final ServiceCredentialsManager credentialsManager;
 
-  public RemoteServerPreferencesForm(RemoteSettings settings, ServiceType serviceType) {
+  public RemoteServerPreferencesForm(LlamaRemoteSettings settings, ServiceType serviceType) {
     this.credentialsManager = settings.getCredentialsManager();
     this.servicePrefix = serviceType;
     baseHostField = new JBTextField(settings.getBaseHost(), 30);
@@ -61,7 +61,7 @@ public class RemoteServerPreferencesForm {
     baseHostField.setEnabled(enabled);
   }
 
-  public void setRemoteSettings(RemoteSettings settings) {
+  public void setRemoteSettings(LlamaRemoteSettings settings) {
     remoteModelPreferencesForm.setPromptTemplate(settings.getPromptTemplate());
     baseHostField.setText(settings.getBaseHost());
     ServiceCredentialsManager credentialsManager = settings.getCredentialsManager();
@@ -70,8 +70,8 @@ public class RemoteServerPreferencesForm {
     }
   }
 
-  public RemoteSettings getRemoteSettings() {
-    RemoteSettings remoteSettings = new RemoteSettings(
+  public LlamaRemoteSettings getRemoteSettings() {
+    LlamaRemoteSettings remoteSettings = new LlamaRemoteSettings(
         remoteModelPreferencesForm.getPromptTemplate(),
         baseHostField.getText()
     );

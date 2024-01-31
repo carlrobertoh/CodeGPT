@@ -11,7 +11,7 @@ import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.settings.state.YouSettingsState;
-import ee.carlrobert.codegpt.settings.state.llama.cpp.LlamaCppSettingsState;
+import ee.carlrobert.codegpt.settings.state.llama.LlamaSettingsStateLlama;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
 import ee.carlrobert.codegpt.util.ApplicationUtil;
@@ -50,7 +50,7 @@ public class SettingsConfigurable implements Configurable {
     var settings = SettingsState.getInstance();
     var openAISettings = OpenAISettingsState.getInstance();
     var azureSettings = AzureSettingsState.getInstance();
-    var llamaSettings = LlamaCppSettingsState.getInstance();
+    var llamaSettings = LlamaSettingsStateLlama.getInstance();
 
     var serviceSelectionForm = settingsComponent.getServiceSelectionForm();
     return !settingsComponent.getDisplayName().equals(settings.getDisplayName())
@@ -85,7 +85,7 @@ public class SettingsConfigurable implements Configurable {
     var openAISettings = OpenAISettingsState.getInstance();
     openAISettings.apply(serviceSelectionForm);
     azureSettings.apply(serviceSelectionForm);
-    LlamaCppSettingsState.getInstance().apply(serviceSelectionForm.getLlamaServerPreferencesForm(),
+    LlamaSettingsStateLlama.getInstance().apply(serviceSelectionForm.getLlamaServerPreferencesForm(),
         serviceSelectionForm.getLlamaRequestPreferencesForm());
     YouSettingsState.getInstance()
         .setDisplayWebSearchResults(serviceSelectionForm.isDisplayWebSearchResults());
@@ -113,7 +113,7 @@ public class SettingsConfigurable implements Configurable {
 
     OpenAISettingsState.getInstance().reset(serviceSelectionForm);
     AzureSettingsState.getInstance().reset(serviceSelectionForm);
-    LlamaCppSettingsState.getInstance().reset(serviceSelectionForm.getLlamaServerPreferencesForm(),
+    LlamaSettingsStateLlama.getInstance().reset(serviceSelectionForm.getLlamaServerPreferencesForm(),
         serviceSelectionForm.getLlamaRequestPreferencesForm());
 
     serviceSelectionForm.setDisplayWebSearchResults(

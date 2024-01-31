@@ -27,7 +27,7 @@ import ee.carlrobert.codegpt.settings.service.llama.ServiceFormPanel;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.YouSettingsState;
-import ee.carlrobert.codegpt.settings.state.llama.cpp.LlamaCppSettingsState;
+import ee.carlrobert.codegpt.settings.state.llama.LlamaSettingsStateLlama;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import java.io.File;
@@ -66,7 +66,7 @@ public class ServicesSelectionForm {
   private final JPanel youServiceSectionPanel;
   private final JBCheckBox displayWebSearchResultsCheckBox;
 
-  private ServiceFormPanel llamaServiceSectionPanel;
+  private final ServiceFormPanel llamaServiceSectionPanel;
 
   public ServicesSelectionForm(Disposable parentDisposable) {
     this.parentDisposable = parentDisposable;
@@ -134,7 +134,7 @@ public class ServicesSelectionForm {
   }
 
   private ServiceFormPanel createLlamaServiceSectionPanel() {
-    var settings = LlamaCppSettingsState.getInstance();
+    var settings = LlamaSettingsStateLlama.getInstance();
     return new ServiceFormPanel(
         new ServerPreferencesForm(settings,
             ApplicationManager.getApplication().getService(LlamaServerAgent.class), ServiceType.LLAMA) {

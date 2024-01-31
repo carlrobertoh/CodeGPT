@@ -22,14 +22,14 @@ import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
 import ee.carlrobert.codegpt.credentials.ServiceCredentialsManager;
 import ee.carlrobert.codegpt.ui.ComponentWithStringValue;
 import ee.carlrobert.codegpt.settings.service.ServerProgressPanel;
-import ee.carlrobert.codegpt.settings.state.llama.LocalSettings;
+import ee.carlrobert.codegpt.settings.state.llama.LlamaLocalSettings;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.SwingConstants;
 
 /**
- * Form containing fields for all {@link LocalSettings}
+ * Form containing fields for all {@link LlamaLocalSettings}
  */
 public abstract class LocalServerPreferencesForm {
 
@@ -42,7 +42,7 @@ public abstract class LocalServerPreferencesForm {
 
   private final ServiceCredentialsManager credentialsManager;
 
-  public LocalServerPreferencesForm(LocalSettings settings, ServerAgent serverAgent) {
+  public LocalServerPreferencesForm(LlamaLocalSettings settings, ServerAgent serverAgent) {
     this.credentialsManager = settings.getCredentialsManager();
     var serverRunning = serverAgent.isServerRunning();
     portField = new PortField(settings.getServerPort());
@@ -95,7 +95,7 @@ public abstract class LocalServerPreferencesForm {
 
   protected abstract boolean isModelExists(HuggingFaceModel model);
 
-  public void setLocalSettings(LocalSettings settings) {
+  public void setLocalSettings(LlamaLocalSettings settings) {
     localModelPreferencesForm.setSelectedModel(settings.getLlModel());
     localModelPreferencesForm.setCustomModel(settings.getCustomModel());
     localModelPreferencesForm.setUseCustomModel(settings.isUseCustomModel());
@@ -256,8 +256,8 @@ public abstract class LocalServerPreferencesForm {
     additionalParametersField.setEnabled(enabled);
   }
 
-  public LocalSettings getLocalSettings() {
-    LocalSettings localSettings = new LocalSettings(
+  public LlamaLocalSettings getLocalSettings() {
+    LlamaLocalSettings localSettings = new LlamaLocalSettings(
         localModelPreferencesForm.isUseCustomModel(),
         localModelPreferencesForm.getCustomModel(),
         localModelPreferencesForm.getSelectedModel(),

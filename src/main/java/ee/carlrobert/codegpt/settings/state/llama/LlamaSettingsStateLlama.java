@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.settings.state.llama.cpp;
+package ee.carlrobert.codegpt.settings.state.llama;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
@@ -10,30 +10,30 @@ import ee.carlrobert.codegpt.completions.PromptTemplate;
 import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.credentials.LlamaCppCredentialsManager;
-import ee.carlrobert.codegpt.settings.service.llama.ServiceSettingsState;
 import org.jetbrains.annotations.NotNull;
 
 @State(name = "CodeGPT_LlamaSettings", storages = @Storage("CodeGPT_CodeGPT_LlamaSettings.xml"))
-public class LlamaCppSettingsState extends ServiceSettingsState implements PersistentStateComponent<LlamaCppSettingsState> {
+public class LlamaSettingsStateLlama extends
+    LlamaServiceSettingsState implements PersistentStateComponent<LlamaSettingsStateLlama> {
 
-  public LlamaCppSettingsState() {
+  public LlamaSettingsStateLlama() {
   }
 
-  public static LlamaCppSettingsState getInstance() {
-    LlamaCppSettingsState service = ApplicationManager.getApplication()
-        .getService(LlamaCppSettingsState.class);
+  public static LlamaSettingsStateLlama getInstance() {
+    LlamaSettingsStateLlama service = ApplicationManager.getApplication()
+        .getService(LlamaSettingsStateLlama.class);
     service.localSettings.setCredentialsManager(new LlamaCppCredentialsManager("LOCAL"));
     service.remoteSettings.setCredentialsManager(new LlamaCppCredentialsManager("REMOTE"));
     return service;
   }
 
   @Override
-  public LlamaCppSettingsState getState() {
+  public LlamaSettingsStateLlama getState() {
     return this;
   }
 
   @Override
-  public void loadState(@NotNull LlamaCppSettingsState state) {
+  public void loadState(@NotNull LlamaSettingsStateLlama state) {
     XmlSerializerUtil.copyBean(state, this);
   }
 

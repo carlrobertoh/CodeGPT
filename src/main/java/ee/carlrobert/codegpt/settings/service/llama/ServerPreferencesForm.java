@@ -7,8 +7,9 @@ import com.intellij.util.ui.FormBuilder;
 import ee.carlrobert.codegpt.completions.ServerAgent;
 import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
-import ee.carlrobert.codegpt.settings.state.llama.LocalSettings;
-import ee.carlrobert.codegpt.settings.state.llama.RemoteSettings;
+import ee.carlrobert.codegpt.settings.state.llama.LlamaLocalSettings;
+import ee.carlrobert.codegpt.settings.state.llama.LlamaRemoteSettings;
+import ee.carlrobert.codegpt.settings.state.llama.LlamaServiceSettingsState;
 import ee.carlrobert.codegpt.ui.UIUtil.RadioButtonWithLayout;
 import java.util.Map;
 import javax.swing.JPanel;
@@ -30,23 +31,23 @@ public abstract class ServerPreferencesForm {
   private final RemoteServerPreferencesForm remoteServerPreferencesForm;
   private final ServerAgent serverAgent;
 
-  public ServerPreferencesForm(ServiceSettingsState serviceSettingsState, ServerAgent serverAgent,
+  public ServerPreferencesForm(LlamaServiceSettingsState llamaServiceSettingsState, ServerAgent serverAgent,
       ServiceType servicePrefix) {
     this.serverAgent = serverAgent;
     runLocalServerRadioButton = new JBRadioButton("Run local server",
-        serviceSettingsState.isRunLocalServer());
+        llamaServiceSettingsState.isRunLocalServer());
     useExistingServerRadioButton = new JBRadioButton("Use existing server",
-        !serviceSettingsState.isRunLocalServer());
+        !llamaServiceSettingsState.isRunLocalServer());
 
     localServerPreferencesForm = new LocalServerPreferencesForm(
-        serviceSettingsState.getLocalSettings(), serverAgent) {
+        llamaServiceSettingsState.getLocalSettings(), serverAgent) {
       @Override
       protected boolean isModelExists(HuggingFaceModel model) {
         return ServerPreferencesForm.this.isModelExists(model);
       }
     };
     remoteServerPreferencesForm = new RemoteServerPreferencesForm(
-        serviceSettingsState.getRemoteSettings(), servicePrefix);
+        llamaServiceSettingsState.getRemoteSettings(), servicePrefix);
   }
 
   public abstract boolean isModelExists(HuggingFaceModel model);
@@ -85,19 +86,19 @@ public abstract class ServerPreferencesForm {
     return runLocalServerRadioButton.isSelected();
   }
 
-  public void setRemoteSettings(RemoteSettings remoteSettings) {
+  public void setRemoteSettings(LlamaRemoteSettings remoteSettings) {
     remoteServerPreferencesForm.setRemoteSettings(remoteSettings);
   }
 
-  public RemoteSettings getRemoteSettings() {
+  public LlamaRemoteSettings getRemoteSettings() {
     return remoteServerPreferencesForm.getRemoteSettings();
   }
 
-  public void setLocalSettings(LocalSettings localSettings) {
+  public void setLocalSettings(LlamaLocalSettings localSettings) {
     localServerPreferencesForm.setLocalSettings(localSettings);
   }
 
-  public LocalSettings getLocalSettings() {
+  public LlamaLocalSettings getLocalSettings() {
     return localServerPreferencesForm.getLocalSettings();
   }
 

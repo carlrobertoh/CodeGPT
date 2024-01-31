@@ -9,9 +9,9 @@ import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.advanced.AdvancedSettingsState;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
-import ee.carlrobert.codegpt.settings.state.llama.cpp.LlamaCppSettingsState;
-import ee.carlrobert.codegpt.settings.state.llama.LocalSettings;
-import ee.carlrobert.codegpt.settings.state.llama.RemoteSettings;
+import ee.carlrobert.codegpt.settings.state.llama.LlamaSettingsStateLlama;
+import ee.carlrobert.codegpt.settings.state.llama.LlamaLocalSettings;
+import ee.carlrobert.codegpt.settings.state.llama.LlamaRemoteSettings;
 import ee.carlrobert.llm.client.azure.AzureClient;
 import ee.carlrobert.llm.client.azure.AzureCompletionRequestParams;
 import ee.carlrobert.llm.client.llama.LlamaClient;
@@ -75,16 +75,16 @@ public class CompletionClientProvider {
   }
 
   public static LlamaClient getLlamaClient() {
-    LlamaCppSettingsState llamaCppSettingsState = LlamaCppSettingsState.getInstance();
+    LlamaSettingsStateLlama llamaSettingsState = LlamaSettingsStateLlama.getInstance();
 
     Builder builder = new Builder();
     String apiKey;
-    if(llamaCppSettingsState.isRunLocalServer()){
-      LocalSettings localSettings = llamaCppSettingsState.getLocalSettings();
+    if(llamaSettingsState.isRunLocalServer()){
+      LlamaLocalSettings localSettings = llamaSettingsState.getLocalSettings();
       builder.setPort(localSettings.getServerPort());
       apiKey = localSettings.getCredentialsManager().getApiKey();
     } else {
-      RemoteSettings remoteSettings = llamaCppSettingsState.getRemoteSettings();
+      LlamaRemoteSettings remoteSettings = llamaSettingsState.getRemoteSettings();
       builder.setHost(remoteSettings.getBaseHost());
       apiKey = remoteSettings.getCredentialsManager().getApiKey();
     }

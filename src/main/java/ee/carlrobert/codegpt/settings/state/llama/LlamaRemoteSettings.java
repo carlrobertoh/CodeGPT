@@ -3,16 +3,16 @@ package ee.carlrobert.codegpt.settings.state.llama;
 import ee.carlrobert.codegpt.completions.PromptTemplate;
 
 /**
- * All settings for using an existing remote server
+ * All settings for using an existing remote Llama server
  */
-public class RemoteSettings extends CommonSettings {
+public class LlamaRemoteSettings extends LlamaCommonSettings {
 
   private String baseHost = "http://localhost:8080";
 
-  public RemoteSettings() {
+  public LlamaRemoteSettings() {
   }
 
-  public RemoteSettings(PromptTemplate promptTemplate, String baseHost) {
+  public LlamaRemoteSettings(PromptTemplate promptTemplate, String baseHost) {
     super(promptTemplate);
     this.baseHost = baseHost;
   }
@@ -25,7 +25,7 @@ public class RemoteSettings extends CommonSettings {
     this.baseHost = baseHost;
   }
 
-  public boolean isModified(RemoteSettings remoteSettings, String apiKey) {
+  public boolean isModified(LlamaRemoteSettings remoteSettings, String apiKey) {
     return super.isModified(remoteSettings, apiKey)
         || !baseHost.equals(remoteSettings.getBaseHost());
   }

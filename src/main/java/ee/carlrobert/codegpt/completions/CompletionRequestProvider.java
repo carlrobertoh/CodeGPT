@@ -18,8 +18,8 @@ import ee.carlrobert.codegpt.settings.state.IncludedFilesSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.settings.state.YouSettingsState;
-import ee.carlrobert.codegpt.settings.state.llama.cpp.LlamaCppSettingsState;
-import ee.carlrobert.codegpt.settings.state.llama.RequestSettings;
+import ee.carlrobert.codegpt.settings.state.llama.LlamaSettingsStateLlama;
+import ee.carlrobert.codegpt.settings.state.llama.LlamaRequestSettings;
 import ee.carlrobert.codegpt.telemetry.core.configuration.TelemetryConfiguration;
 import ee.carlrobert.codegpt.telemetry.core.service.UserId;
 import ee.carlrobert.embedding.EmbeddingsService;
@@ -100,7 +100,7 @@ public class CompletionRequestProvider {
   public LlamaCompletionRequest buildLlamaCompletionRequest(
       Message message,
       ConversationType conversationType) {
-    var settings = LlamaCppSettingsState.getInstance();
+    var settings = LlamaSettingsStateLlama.getInstance();
     PromptTemplate promptTemplate = settings.getActualPromptTemplate();
 
     var systemPrompt = COMPLETION_SYSTEM_PROMPT;
@@ -113,14 +113,14 @@ public class CompletionRequestProvider {
         message.getPrompt(),
         conversation.getMessages());
     var configuration = ConfigurationState.getInstance();
-    RequestSettings requestSettings = settings.getRequestSettings();
+    LlamaRequestSettings llamaRequestSettings = settings.getRequestSettings();
     return new LlamaCompletionRequest.Builder(prompt)
         .setN_predict(configuration.getMaxTokens())
         .setTemperature(configuration.getTemperature())
-        .setTop_k(requestSettings.getTopK())
-        .setTop_p(requestSettings.getTopP())
-        .setMin_p(requestSettings.getMinP())
-        .setRepeat_penalty(requestSettings.getRepeatPenalty())
+        .setTop_k(llamaRequestSettings.getTopK())
+        .setTop_p(llamaRequestSettings.getTopP())
+        .setMin_p(llamaRequestSettings.getMinP())
+        .setRepeat_penalty(llamaRequestSettings.getRepeatPenalty())
         .build();
   }
 

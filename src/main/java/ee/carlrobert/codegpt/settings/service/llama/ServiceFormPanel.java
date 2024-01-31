@@ -5,7 +5,7 @@ import static ee.carlrobert.codegpt.ui.UIUtil.withEmptyLeftBorder;
 import com.intellij.ui.TitledSeparator;
 import com.intellij.util.ui.FormBuilder;
 import ee.carlrobert.codegpt.CodeGPTBundle;
-import ee.carlrobert.codegpt.settings.state.llama.RequestSettings;
+import ee.carlrobert.codegpt.settings.state.llama.LlamaRequestSettings;
 import java.awt.BorderLayout;
 import javax.swing.JPanel;
 
@@ -15,9 +15,9 @@ public class ServiceFormPanel extends JPanel {
   private final RequestPreferencesForm requestPreferencesForm;
 
   public ServiceFormPanel(ServerPreferencesForm serverPreferencesForm,
-      RequestSettings requestSettings) {
+      LlamaRequestSettings llamaRequestSettings) {
     this.serverPreferencesForm = serverPreferencesForm;
-    requestPreferencesForm = new RequestPreferencesForm(requestSettings);
+    requestPreferencesForm = new RequestPreferencesForm(llamaRequestSettings);
     init();
   }
 

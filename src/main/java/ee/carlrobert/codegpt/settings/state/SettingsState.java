@@ -11,7 +11,7 @@ import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
-import ee.carlrobert.codegpt.settings.state.llama.cpp.LlamaCppSettingsState;
+import ee.carlrobert.codegpt.settings.state.llama.LlamaSettingsStateLlama;
 import org.jetbrains.annotations.NotNull;
 
 @State(name = "CodeGPT_GeneralSettings_210", storages = @Storage("CodeGPT_GeneralSettings_210.xml"))
@@ -50,7 +50,7 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
     }
     if ("llama.chat.completion".equals(clientCode)) {
       setSelectedService(ServiceType.LLAMA);
-      var llamaSettings = LlamaCppSettingsState.getInstance();
+      var llamaSettings = LlamaSettingsStateLlama.getInstance();
       try {
         var huggingFaceModel = HuggingFaceModel.valueOf(conversation.getModel());
         llamaSettings.setLocalModel(huggingFaceModel);
@@ -74,7 +74,7 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
       case YOU:
         return "YouCode";
       case LLAMA:
-        var llamaSettings = LlamaCppSettingsState.getInstance();
+        var llamaSettings = LlamaSettingsStateLlama.getInstance();
         if (llamaSettings.isLocalUseCustomModel()) {
           var filePath = llamaSettings.getLocalModelPath();
           int lastSeparatorIndex = filePath.lastIndexOf('/');

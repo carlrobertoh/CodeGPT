@@ -1,15 +1,14 @@
-package ee.carlrobert.codegpt.settings.service.llama;
+package ee.carlrobert.codegpt.settings.state.llama;
 
-import ee.carlrobert.codegpt.settings.state.llama.LocalSettings;
-import ee.carlrobert.codegpt.settings.state.llama.RemoteSettings;
-import ee.carlrobert.codegpt.settings.state.llama.RequestSettings;
+import ee.carlrobert.codegpt.settings.service.llama.RequestPreferencesForm;
+import ee.carlrobert.codegpt.settings.service.llama.ServerPreferencesForm;
 
-public class ServiceSettingsState {
+public class LlamaServiceSettingsState {
 
   protected boolean runLocalServer = true;
-  protected LocalSettings localSettings = new LocalSettings();
-  protected RemoteSettings remoteSettings = new RemoteSettings();
-  protected RequestSettings requestSettings = new RequestSettings();
+  protected LlamaLocalSettings localSettings = new LlamaLocalSettings();
+  protected LlamaRemoteSettings remoteSettings = new LlamaRemoteSettings();
+  protected LlamaRequestSettings llamaRequestSettings = new LlamaRequestSettings();
 
   public boolean isRunLocalServer() {
     return runLocalServer;
@@ -19,13 +18,14 @@ public class ServiceSettingsState {
     this.runLocalServer = runLocalServer;
   }
 
-  public boolean isModified(ServerPreferencesForm serverPreferencesForm ,RequestPreferencesForm requestPreferencesForm) {
+  public boolean isModified(ServerPreferencesForm serverPreferencesForm ,
+      RequestPreferencesForm requestPreferencesForm) {
     return localSettings.isModified(serverPreferencesForm.getLocalSettings(),
         serverPreferencesForm.getLocalApiKey())
         || remoteSettings.isModified(serverPreferencesForm.getRemoteSettings(),
         serverPreferencesForm.getRemoteApikey())
         || runLocalServer != serverPreferencesForm.isRunLocalServer()
-        || requestSettings.isModified(requestPreferencesForm.getRequestSettings());
+        || llamaRequestSettings.isModified(requestPreferencesForm.getRequestSettings());
   }
 
   public void apply(ServerPreferencesForm serverPreferencesForm,
@@ -35,7 +35,7 @@ public class ServiceSettingsState {
     localSettings.getCredentialsManager().apply(serverPreferencesForm.getLocalApiKey());
     remoteSettings = serverPreferencesForm.getRemoteSettings();
     remoteSettings.getCredentialsManager().apply(serverPreferencesForm.getRemoteApikey());
-    requestSettings = requestPreferencesForm.getRequestSettings();
+    llamaRequestSettings = requestPreferencesForm.getRequestSettings();
   }
 
   public void reset(ServerPreferencesForm serverPreferencesForm,
@@ -43,34 +43,34 @@ public class ServiceSettingsState {
     serverPreferencesForm.setRemoteSettings(remoteSettings);
     serverPreferencesForm.setLocalSettings(localSettings);
     serverPreferencesForm.setRunLocalServer(runLocalServer);
-    requestPreferencesForm.setTopK(requestSettings.getTopK());
-    requestPreferencesForm.setTopP(requestSettings.getTopP());
-    requestPreferencesForm.setMinP(requestSettings.getMinP());
-    requestPreferencesForm.setRepeatPenalty(requestSettings.getRepeatPenalty());
+    requestPreferencesForm.setTopK(llamaRequestSettings.getTopK());
+    requestPreferencesForm.setTopP(llamaRequestSettings.getTopP());
+    requestPreferencesForm.setMinP(llamaRequestSettings.getMinP());
+    requestPreferencesForm.setRepeatPenalty(llamaRequestSettings.getRepeatPenalty());
   }
 
-  public LocalSettings getLocalSettings() {
+  public LlamaLocalSettings getLocalSettings() {
     return localSettings;
   }
 
-  public void setLocalSettings(LocalSettings localSettings) {
+  public void setLocalSettings(LlamaLocalSettings localSettings) {
     this.localSettings = localSettings;
   }
 
-  public RemoteSettings getRemoteSettings() {
+  public LlamaRemoteSettings getRemoteSettings() {
     return remoteSettings;
   }
 
-  public void setRemoteSettings(RemoteSettings remoteSettings) {
+  public void setRemoteSettings(LlamaRemoteSettings remoteSettings) {
     this.remoteSettings = remoteSettings;
   }
 
-  public RequestSettings getRequestSettings() {
-    return requestSettings;
+  public LlamaRequestSettings getRequestSettings() {
+    return llamaRequestSettings;
   }
 
   public void setRequestSettings(
-      RequestSettings requestSettings) {
-    this.requestSettings = requestSettings;
+      LlamaRequestSettings llamaRequestSettings) {
+    this.llamaRequestSettings = llamaRequestSettings;
   }
 }

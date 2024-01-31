@@ -1,7 +1,7 @@
 package ee.carlrobert.codegpt.completions;
 
 import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
-import ee.carlrobert.codegpt.settings.state.llama.LocalSettings;
+import ee.carlrobert.codegpt.settings.state.llama.LlamaLocalSettings;
 import java.util.List;
 
 public class ServerStartupParams {
@@ -16,7 +16,7 @@ public class ServerStartupParams {
 
   public ServerStartupParams(
       boolean useCustomModel, String customModelId,
-      HuggingFaceModel selectedModel, LocalSettings localSettings) {
+      HuggingFaceModel selectedModel, LlamaLocalSettings localSettings) {
     this.useCustomModel = useCustomModel;
     this.customModelId = customModelId;
     this.selectedModel = selectedModel;

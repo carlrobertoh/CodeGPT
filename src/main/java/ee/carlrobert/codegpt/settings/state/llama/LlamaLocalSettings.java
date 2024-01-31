@@ -11,9 +11,9 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * All settings necessary for running a server locally
+ * All settings necessary for running a Llama server locally
  */
-public class LocalSettings extends CommonSettings {
+public class LlamaLocalSettings extends LlamaCommonSettings {
 
   private Integer serverPort = getRandomAvailablePortOrDefault();
   private int contextSize = 2048;
@@ -24,10 +24,10 @@ public class LocalSettings extends CommonSettings {
   private String customModel = "";
   private HuggingFaceModel llmModel = HuggingFaceModel.CODE_LLAMA_7B_Q4;
 
-  public LocalSettings() {
+  public LlamaLocalSettings() {
   }
 
-  public LocalSettings(boolean useCustomModel, String customModel,
+  public LlamaLocalSettings(boolean useCustomModel, String customModel,
       HuggingFaceModel llmModel,
       PromptTemplate promptTemplate, Integer serverPort, int contextSize, int threads,
       String additionalCompileParameters) {
@@ -41,7 +41,7 @@ public class LocalSettings extends CommonSettings {
     this.additionalCompileParameters = additionalCompileParameters;
   }
 
-  public boolean isModified(LocalSettings localSettings, String apiKey) {
+  public boolean isModified(LlamaLocalSettings localSettings, String apiKey) {
     return super.isModified(localSettings, apiKey)
         || useCustomModel != isUseCustomModel()
         || !customModel.equals(getCustomModel())

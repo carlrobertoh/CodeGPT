@@ -6,7 +6,7 @@ import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.completions.PromptTemplate;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
-import ee.carlrobert.codegpt.settings.state.llama.CommonSettings;
+import ee.carlrobert.codegpt.settings.state.llama.LlamaCommonSettings;
 import ee.carlrobert.codegpt.ui.PromptTemplateWrapper;
 import javax.swing.JPanel;
 
@@ -15,7 +15,7 @@ public class RemoteModelPreferencesForm {
   private final PromptTemplateWrapper promptTemplateWrapper;
   private final ServiceType serviceType;
 
-  public RemoteModelPreferencesForm(CommonSettings settings, ServiceType serviceType) {
+  public RemoteModelPreferencesForm(LlamaCommonSettings settings, ServiceType serviceType) {
     this.serviceType = serviceType;
     promptTemplateWrapper = new PromptTemplateWrapper(settings.getPromptTemplate(), true);
   }

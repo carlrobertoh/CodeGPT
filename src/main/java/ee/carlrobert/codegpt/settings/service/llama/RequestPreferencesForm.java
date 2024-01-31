@@ -6,12 +6,12 @@ import com.intellij.ui.components.fields.IntegerField;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
-import ee.carlrobert.codegpt.settings.state.llama.RequestSettings;
+import ee.carlrobert.codegpt.settings.state.llama.LlamaRequestSettings;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 /**
- * Form containing fields for all {@link RequestSettings}
+ * Form containing fields for all {@link LlamaRequestSettings}
  */
 public class RequestPreferencesForm {
 
@@ -20,7 +20,7 @@ public class RequestPreferencesForm {
   private final JBTextField minPField;
   private final JBTextField repeatPenaltyField;
 
-  public RequestPreferencesForm(RequestSettings settings) {
+  public RequestPreferencesForm(LlamaRequestSettings settings) {
     topKField = new IntegerField();
     topKField.setColumns(12);
     topKField.setValue(settings.getTopK());
@@ -97,8 +97,8 @@ public class RequestPreferencesForm {
     return comment;
   }
 
-  public RequestSettings getRequestSettings(){
-    return new RequestSettings(
+  public LlamaRequestSettings getRequestSettings(){
+    return new LlamaRequestSettings(
         topKField.getValue(),
         Double.parseDouble(topPField.getText()),
         Double.parseDouble(minPField.getText()),

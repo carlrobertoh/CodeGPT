@@ -19,9 +19,9 @@ import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
-import ee.carlrobert.codegpt.settings.state.llama.cpp.LlamaCppSettingsState;
-import ee.carlrobert.codegpt.settings.state.llama.LocalSettings;
-import ee.carlrobert.codegpt.settings.state.llama.RequestSettings;
+import ee.carlrobert.codegpt.settings.state.llama.LlamaSettingsStateLlama;
+import ee.carlrobert.codegpt.settings.state.llama.LlamaLocalSettings;
+import ee.carlrobert.codegpt.settings.state.llama.LlamaRequestSettings;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowTabPanel;
 import ee.carlrobert.embedding.ReferencedFile;
 import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange;
@@ -270,15 +270,15 @@ public class StandardChatToolWindowTabPanelTest extends IntegrationTest {
     configurationState.setSystemPrompt(COMPLETION_SYSTEM_PROMPT);
     configurationState.setMaxTokens(1000);
     configurationState.setTemperature(0.1);
-    var llamaSettings = LlamaCppSettingsState.getInstance();
+    var llamaSettings = LlamaSettingsStateLlama.getInstance();
     llamaSettings.setLocalUseCustomModel(false);
-    LocalSettings localSettings = llamaSettings.getLocalSettings();
+    LlamaLocalSettings localSettings = llamaSettings.getLocalSettings();
     localSettings.setLlmModel(HuggingFaceModel.CODE_LLAMA_7B_Q4);
-    RequestSettings requestSettings = llamaSettings.getRequestSettings();
-    requestSettings.setTopK(30);
-    requestSettings.setTopP(0.8);
-    requestSettings.setMinP(0.03);
-    requestSettings.setRepeatPenalty(1.3);
+    LlamaRequestSettings llamaRequestSettings = llamaSettings.getRequestSettings();
+    llamaRequestSettings.setTopK(30);
+    llamaRequestSettings.setTopP(0.8);
+    llamaRequestSettings.setMinP(0.03);
+    llamaRequestSettings.setRepeatPenalty(1.3);
     var message = new Message("TEST_PROMPT");
     var conversation = ConversationService.getInstance().startConversation();
     var panel = new StandardChatToolWindowTabPanel(getProject(), conversation);
@@ -302,10 +302,10 @@ public class StandardChatToolWindowTabPanelTest extends IntegrationTest {
               configurationState.getMaxTokens(),
               true,
               configurationState.getTemperature(),
-              requestSettings.getTopK(),
-              requestSettings.getTopP(),
-              requestSettings.getMinP(),
-              requestSettings.getRepeatPenalty());
+              llamaRequestSettings.getTopK(),
+              llamaRequestSettings.getTopP(),
+              llamaRequestSettings.getMinP(),
+              llamaRequestSettings.getRepeatPenalty());
       return List.of(
           jsonMapResponse("content", "Hel"),
           jsonMapResponse("content", "lo!"),

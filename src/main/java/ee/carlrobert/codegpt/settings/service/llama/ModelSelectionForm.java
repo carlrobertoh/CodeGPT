@@ -28,7 +28,7 @@ import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaServerAgent;
 import ee.carlrobert.codegpt.ui.ComponentWithStringValue;
-import ee.carlrobert.codegpt.settings.state.llama.LocalSettings;
+import ee.carlrobert.codegpt.settings.state.llama.LlamaLocalSettings;
 import ee.carlrobert.codegpt.ui.PromptTemplateWrapper;
 import ee.carlrobert.codegpt.ui.UIUtil.RadioButtonWithLayout;
 import java.awt.BorderLayout;
@@ -76,9 +76,9 @@ public abstract class ModelSelectionForm {
   private final DefaultComboBoxModel<LlmModel> huggingFaceComboBoxModel;
   private final PromptTemplateWrapper promptTemplateWrapper;
 
-  protected final LocalSettings settings;
+  protected final LlamaLocalSettings settings;
 
-  public ModelSelectionForm(LocalSettings settings) {
+  public ModelSelectionForm(LlamaLocalSettings settings) {
     this.settings = settings;
     predefinedModelRadioButton = new JBRadioButton("Use pre-defined model",
         !settings.isUseCustomModel());
