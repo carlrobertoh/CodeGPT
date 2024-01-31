@@ -6,13 +6,13 @@ import com.intellij.openapi.util.Disposer;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
-import ee.carlrobert.codegpt.credentials.LlamaCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.settings.state.YouSettingsState;
+import ee.carlrobert.codegpt.settings.state.llama.cpp.LlamaCppSettingsState;
+import ee.carlrobert.codegpt.settings.state.llama.ollama.OllamaSettingsState;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
 import ee.carlrobert.codegpt.util.ApplicationUtil;
@@ -51,7 +51,8 @@ public class SettingsConfigurable implements Configurable {
     var settings = SettingsState.getInstance();
     var openAISettings = OpenAISettingsState.getInstance();
     var azureSettings = AzureSettingsState.getInstance();
-    var llamaSettings = LlamaSettingsState.getInstance();
+    var llamaSettings = LlamaCppSettingsState.getInstance();
+    var ollamaSettings = OllamaSettingsState.getInstance();
 
     var serviceSelectionForm = settingsComponent.getServiceSelectionForm();
     return !settingsComponent.getDisplayName().equals(settings.getDisplayName())
@@ -60,7 +61,11 @@ public class SettingsConfigurable implements Configurable {
         || azureSettings.isModified(serviceSelectionForm)
         || serviceSelectionForm.isDisplayWebSearchResults()
         != YouSettingsState.getInstance().isDisplayWebSearchResults()
-        || llamaSettings.isModified(serviceSelectionForm);
+        || llamaSettings.isModified(serviceSelectionForm.getLlamaServerPreferencesForm(),
+        serviceSelectionForm.getLlamaRequestPreferencesForm())
+        || ollamaSettings.isModified(serviceSelectionForm.getOllamaServerPreferencesForm(),
+        serviceSelectionForm.getOllamaRequestPreferencesForm())
+        ;
   }
 
   @Override
@@ -76,8 +81,6 @@ public class SettingsConfigurable implements Configurable {
     AzureCredentialsManager.getInstance().setApiKey(serviceSelectionForm.getAzureOpenAIApiKey());
     AzureCredentialsManager.getInstance()
         .setAzureActiveDirectoryToken(serviceSelectionForm.getAzureActiveDirectoryToken());
-    LlamaCredentialsManager.getInstance()
-        .setApiKey(serviceSelectionForm.getLlamaServerPreferencesForm().getUsedApiKey());
 
     var settings = SettingsState.getInstance();
     settings.setDisplayName(settingsComponent.getDisplayName());
@@ -87,7 +90,10 @@ public class SettingsConfigurable implements Configurable {
     var openAISettings = OpenAISettingsState.getInstance();
     openAISettings.apply(serviceSelectionForm);
     azureSettings.apply(serviceSelectionForm);
-    LlamaSettingsState.getInstance().apply(serviceSelectionForm);
+    LlamaCppSettingsState.getInstance().apply(serviceSelectionForm.getLlamaServerPreferencesForm(),
+        serviceSelectionForm.getLlamaRequestPreferencesForm());
+    OllamaSettingsState.getInstance().apply(serviceSelectionForm.getOllamaServerPreferencesForm(),
+        serviceSelectionForm.getOllamaRequestPreferencesForm());
     YouSettingsState.getInstance()
         .setDisplayWebSearchResults(serviceSelectionForm.isDisplayWebSearchResults());
 
@@ -114,7 +120,10 @@ public class SettingsConfigurable implements Configurable {
 
     OpenAISettingsState.getInstance().reset(serviceSelectionForm);
     AzureSettingsState.getInstance().reset(serviceSelectionForm);
-    LlamaSettingsState.getInstance().reset(serviceSelectionForm);
+    LlamaCppSettingsState.getInstance().reset(serviceSelectionForm.getLlamaServerPreferencesForm(),
+        serviceSelectionForm.getLlamaRequestPreferencesForm());
+    OllamaSettingsState.getInstance().reset(serviceSelectionForm.getOllamaServerPreferencesForm(),
+        serviceSelectionForm.getOllamaRequestPreferencesForm());
 
     serviceSelectionForm.setDisplayWebSearchResults(
         YouSettingsState.getInstance().isDisplayWebSearchResults());

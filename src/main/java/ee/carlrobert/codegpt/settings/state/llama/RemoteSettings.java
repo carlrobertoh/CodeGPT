@@ -1,7 +1,10 @@
-package ee.carlrobert.codegpt.settings.state;
+package ee.carlrobert.codegpt.settings.state.llama;
 
 import ee.carlrobert.codegpt.completions.PromptTemplate;
 
+/**
+ * All settings for using an existing remote server
+ */
 public class RemoteSettings extends CommonSettings {
 
   private String baseHost = "http://localhost:8080";
@@ -22,8 +25,8 @@ public class RemoteSettings extends CommonSettings {
     this.baseHost = baseHost;
   }
 
-  public boolean isModified(RemoteSettings remoteSettings) {
-    return super.isModified(remoteSettings)
+  public boolean isModified(RemoteSettings remoteSettings, String apiKey) {
+    return super.isModified(remoteSettings, apiKey)
         || !baseHost.equals(remoteSettings.getBaseHost());
   }
 }

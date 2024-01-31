@@ -6,7 +6,7 @@ import com.intellij.openapi.components.Service;
 import org.jetbrains.annotations.Nullable;
 
 @Service
-public final class OpenAICredentialsManager {
+public final class OpenAICredentialsManager extends ServiceCredentialsManager {
 
   private static final CredentialAttributes openAIApiKeyCredentialAttributes =
       CredentialsUtil.createCredentialAttributes("OPENAI_API_KEY");
@@ -25,7 +25,7 @@ public final class OpenAICredentialsManager {
     return openAIApiKey != null && !openAIApiKey.isEmpty();
   }
 
-  public @Nullable String getApiKey() {
+  public String getApiKey() {
     return openAIApiKey;
   }
 

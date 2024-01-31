@@ -6,7 +6,7 @@ import com.intellij.openapi.components.Service;
 import org.jetbrains.annotations.Nullable;
 
 @Service
-public final class YouCredentialsManager {
+public final class YouCredentialsManager extends ServiceCredentialsManager {
 
   private static final CredentialAttributes accountPasswordCredentialAttributes =
       CredentialsUtil.createCredentialAttributes("ACCOUNT_PASSWORD");
@@ -15,6 +15,16 @@ public final class YouCredentialsManager {
 
   private YouCredentialsManager() {
     accountPassword = CredentialsUtil.getPassword(accountPasswordCredentialAttributes);
+  }
+
+  @Override
+  public @Nullable String getApiKey() {
+    return getAccountPassword();
+  }
+
+  @Override
+  public void setApiKey(String apiKey) {
+    setAccountPassword(apiKey);
   }
 
   public static YouCredentialsManager getInstance() {

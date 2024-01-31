@@ -1,17 +1,19 @@
-package ee.carlrobert.codegpt.settings.state;
+package ee.carlrobert.codegpt.settings.state.llama;
 
 import static java.util.stream.Collectors.toList;
 
-import ee.carlrobert.codegpt.completions.LlmModel;
 import ee.carlrobert.codegpt.completions.PromptTemplate;
-import ee.carlrobert.codegpt.completions.llama.LlamaLocalSettings;
+import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class LocalSettings<T extends LlmModel> extends CommonSettings {
+/**
+ * All settings necessary for running a server locally
+ */
+public class LocalSettings extends CommonSettings {
 
   private Integer serverPort = getRandomAvailablePortOrDefault();
   private int contextSize = 2048;
@@ -20,14 +22,13 @@ public class LocalSettings<T extends LlmModel> extends CommonSettings {
 
   private boolean useCustomModel = false;
   private String customModel = "";
-  private T llmModel;
+  private HuggingFaceModel llmModel = HuggingFaceModel.CODE_LLAMA_7B_Q4;
 
-  public LocalSettings(T defaultLlmModel) {
-    this.llmModel = defaultLlmModel;
+  public LocalSettings() {
   }
 
   public LocalSettings(boolean useCustomModel, String customModel,
-      T llmModel,
+      HuggingFaceModel llmModel,
       PromptTemplate promptTemplate, Integer serverPort, int contextSize, int threads,
       String additionalCompileParameters) {
     super(promptTemplate);
@@ -40,9 +41,8 @@ public class LocalSettings<T extends LlmModel> extends CommonSettings {
     this.additionalCompileParameters = additionalCompileParameters;
   }
 
-
-  public boolean isModified(LlamaLocalSettings localSettings) {
-    return super.isModified(localSettings)
+  public boolean isModified(LocalSettings localSettings, String apiKey) {
+    return super.isModified(localSettings, apiKey)
         || useCustomModel != isUseCustomModel()
         || !customModel.equals(getCustomModel())
         || !llmModel.equals(getLlModel())
@@ -118,11 +118,11 @@ public class LocalSettings<T extends LlmModel> extends CommonSettings {
     this.customModel = customModel;
   }
 
-  public T getLlModel() {
+  public HuggingFaceModel getLlModel() {
     return llmModel;
   }
 
-  public void setLlmModel(T llamaHuggingFaceModel) {
+  public void setLlmModel(HuggingFaceModel llamaHuggingFaceModel) {
     this.llmModel = llamaHuggingFaceModel;
   }
 

@@ -6,7 +6,7 @@ import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
-import ee.carlrobert.codegpt.settings.service.ServiceSelectionForm;
+import ee.carlrobert.codegpt.settings.service.ServicesSelectionForm;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import org.jetbrains.annotations.NotNull;
 
@@ -35,28 +35,27 @@ public class OpenAISettingsState implements PersistentStateComponent<OpenAISetti
     XmlSerializerUtil.copyBean(state, this);
   }
 
-  public boolean isModified(ServiceSelectionForm serviceSelectionForm) {
-    return !serviceSelectionForm.getOpenAIApiKey()
-        .equals(OpenAICredentialsManager.getInstance().getApiKey())
-        || !serviceSelectionForm.getOpenAIOrganization().equals(organization)
-        || !serviceSelectionForm.getOpenAIBaseHost().equals(baseHost)
-        || !serviceSelectionForm.getOpenAIPath().equals(path)
-        || !serviceSelectionForm.getOpenAIModel().equals(model);
+  public boolean isModified(ServicesSelectionForm servicesSelectionForm) {
+    return OpenAICredentialsManager.getInstance().isModified(servicesSelectionForm.getOpenAIApiKey())
+        || !servicesSelectionForm.getOpenAIOrganization().equals(organization)
+        || !servicesSelectionForm.getOpenAIBaseHost().equals(baseHost)
+        || !servicesSelectionForm.getOpenAIPath().equals(path)
+        || !servicesSelectionForm.getOpenAIModel().equals(model);
   }
 
-  public void apply(ServiceSelectionForm serviceSelectionForm) {
-    organization = serviceSelectionForm.getOpenAIOrganization();
-    baseHost = serviceSelectionForm.getOpenAIBaseHost();
-    path = serviceSelectionForm.getOpenAIPath();
-    model = serviceSelectionForm.getOpenAIModel();
+  public void apply(ServicesSelectionForm servicesSelectionForm) {
+    organization = servicesSelectionForm.getOpenAIOrganization();
+    baseHost = servicesSelectionForm.getOpenAIBaseHost();
+    path = servicesSelectionForm.getOpenAIPath();
+    model = servicesSelectionForm.getOpenAIModel();
   }
 
-  public void reset(ServiceSelectionForm serviceSelectionForm) {
-    serviceSelectionForm.setOpenAIApiKey(OpenAICredentialsManager.getInstance().getApiKey());
-    serviceSelectionForm.setOpenAIOrganization(organization);
-    serviceSelectionForm.setOpenAIBaseHost(baseHost);
-    serviceSelectionForm.setOpenAIPath(path);
-    serviceSelectionForm.setOpenAIModel(model);
+  public void reset(ServicesSelectionForm servicesSelectionForm) {
+    servicesSelectionForm.setOpenAIApiKey(OpenAICredentialsManager.getInstance().getApiKey());
+    servicesSelectionForm.setOpenAIOrganization(organization);
+    servicesSelectionForm.setOpenAIBaseHost(baseHost);
+    servicesSelectionForm.setOpenAIPath(path);
+    servicesSelectionForm.setOpenAIModel(model);
   }
 
   public boolean isUsingCustomPath() {

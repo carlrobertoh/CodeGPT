@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.settings.service;
+package ee.carlrobert.codegpt.settings.service.llama;
 
 import com.intellij.openapi.ui.panel.ComponentPanelBuilder;
 import com.intellij.ui.components.JBTextField;
@@ -6,28 +6,30 @@ import com.intellij.ui.components.fields.IntegerField;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
+import ee.carlrobert.codegpt.settings.state.llama.RequestSettings;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-public class LlamaRequestPreferencesForm {
+/**
+ * Form containing fields for all {@link RequestSettings}
+ */
+public class RequestPreferencesForm {
 
   private final IntegerField topKField;
   private final JBTextField topPField;
   private final JBTextField minPField;
   private final JBTextField repeatPenaltyField;
 
-  public LlamaRequestPreferencesForm() {
-    var llamaSettings = LlamaSettingsState.getInstance();
+  public RequestPreferencesForm(RequestSettings settings) {
     topKField = new IntegerField();
     topKField.setColumns(12);
-    topKField.setValue(llamaSettings.getTopK());
+    topKField.setValue(settings.getTopK());
     topPField = new JBTextField(12);
-    topPField.setText(String.valueOf(llamaSettings.getTopP()));
+    topPField.setText(String.valueOf(settings.getTopP()));
     minPField = new JBTextField(12);
-    minPField.setText(String.valueOf(llamaSettings.getMinP()));
+    minPField.setText(String.valueOf(settings.getMinP()));
     repeatPenaltyField = new JBTextField(12);
-    repeatPenaltyField.setText(String.valueOf(llamaSettings.getRepeatPenalty()));
+    repeatPenaltyField.setText(String.valueOf(settings.getRepeatPenalty()));
   }
 
   public JPanel getForm() {
@@ -93,5 +95,13 @@ public class LlamaRequestPreferencesForm {
         CodeGPTBundle.get(messageKey), true);
     comment.setBorder(JBUI.Borders.empty(0, 4));
     return comment;
+  }
+
+  public RequestSettings getRequestSettings(){
+    return new RequestSettings(
+        topKField.getValue(),
+        Double.parseDouble(topPField.getText()),
+        Double.parseDouble(minPField.getText()),
+        Double.parseDouble(repeatPenaltyField.getText()));
   }
 }

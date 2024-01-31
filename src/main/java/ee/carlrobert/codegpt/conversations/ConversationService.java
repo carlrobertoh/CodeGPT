@@ -8,9 +8,10 @@ import ee.carlrobert.codegpt.completions.CallParameters;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
+import ee.carlrobert.codegpt.settings.state.llama.cpp.LlamaCppSettingsState;
+import ee.carlrobert.codegpt.settings.state.llama.ollama.OllamaSettingsState;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -195,8 +196,11 @@ public final class ConversationService {
       case YOU:
         return "YouCode";
       case LLAMA_CPP:
-        var llamaSettings = LlamaSettingsState.getInstance();
+        var llamaSettings = LlamaCppSettingsState.getInstance();
         return llamaSettings.getLocalModelPath();
+      case OLLAMA:
+        var ollamaSettings = OllamaSettingsState.getInstance();
+        return ollamaSettings.getLocalModelTag();
       default:
         throw new RuntimeException("Could not find corresponding service mapping");
     }

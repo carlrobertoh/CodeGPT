@@ -9,25 +9,24 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.EncodingManager;
-import ee.carlrobert.codegpt.completions.llama.LlamaHuggingFaceModel;
-import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.IncludedFilesSettingsState;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
-import ee.carlrobert.codegpt.settings.state.LocalSettings;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
-import ee.carlrobert.codegpt.settings.state.RemoteSettings;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.settings.state.YouSettingsState;
+import ee.carlrobert.codegpt.settings.state.llama.cpp.LlamaCppSettingsState;
+import ee.carlrobert.codegpt.settings.state.llama.RequestSettings;
+import ee.carlrobert.codegpt.settings.state.llama.ollama.OllamaSettingsState;
 import ee.carlrobert.codegpt.telemetry.core.configuration.TelemetryConfiguration;
 import ee.carlrobert.codegpt.telemetry.core.service.UserId;
 import ee.carlrobert.embedding.EmbeddingsService;
 import ee.carlrobert.embedding.ReferencedFile;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
+import ee.carlrobert.llm.client.ollama.completion.OllamaCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
@@ -35,6 +34,7 @@ import ee.carlrobert.llm.client.you.completion.YouCompletionRequest;
 import ee.carlrobert.llm.client.you.completion.YouCompletionRequestMessage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.UUID;
@@ -103,17 +103,8 @@ public class CompletionRequestProvider {
   public LlamaCompletionRequest buildLlamaCompletionRequest(
       Message message,
       ConversationType conversationType) {
-    var settings = LlamaSettingsState.getInstance();
-    PromptTemplate promptTemplate;
-    if (settings.isRunLocalServer()) {
-      var localSettings = settings.getLocalSettings();
-      promptTemplate = localSettings.isUseCustomModel()
-          ? localSettings.getPromptTemplate()
-          : LlamaModel.findByHuggingFaceModel(localSettings.getLlModel()).getPromptTemplate();
-    } else {
-      RemoteSettings remoteSettings = settings.getRemoteSettings();
-      promptTemplate = remoteSettings.getPromptTemplate();
-    }
+    var settings = LlamaCppSettingsState.getInstance();
+    PromptTemplate promptTemplate = settings.getActualPromptTemplate();
 
     var systemPrompt = COMPLETION_SYSTEM_PROMPT;
     if (conversationType == ConversationType.FIX_COMPILE_ERRORS) {
@@ -125,51 +116,50 @@ public class CompletionRequestProvider {
         message.getPrompt(),
         conversation.getMessages());
     var configuration = ConfigurationState.getInstance();
+    RequestSettings requestSettings = settings.getRequestSettings();
     return new LlamaCompletionRequest.Builder(prompt)
         .setN_predict(configuration.getMaxTokens())
         .setTemperature(configuration.getTemperature())
-        .setTop_k(settings.getTopK())
-        .setTop_p(settings.getTopP())
-        .setMin_p(settings.getMinP())
-        .setRepeat_penalty(settings.getRepeatPenalty())
+        .setTop_k(requestSettings.getTopK())
+        .setTop_p(requestSettings.getTopP())
+        .setMin_p(requestSettings.getMinP())
+        .setRepeat_penalty(requestSettings.getRepeatPenalty())
         .build();
   }
 
-//  public OllamaCompletionRequest buildOLlamaCompletionRequest(
-//      Message message,
-//      ConversationType conversationType) {
-//    var settings = OllamaSettingsState.getInstance();
-//    PromptTemplate promptTemplate;
-//    String model;
-//    if (settings.isRunLocalServer()) {
-//      promptTemplate = settings.isUseCustomModel()
-//          ? settings.getLocalModelPromptTemplate()
-//          : OllamaModel.findByOllamaHuggingFaceModel(settings.getHuggingFaceModel()).getPromptTemplate();
-//    } else {
-//      promptTemplate = settings.getRemoteModelPromptTemplate();
-//    }
-//
-//    model = settings.isUseCustomModel() ? settings.getCustomModel() : settings.getHuggingFaceModel().getModelTag();
-//    var systemPrompt = COMPLETION_SYSTEM_PROMPT;
-//    if (conversationType == ConversationType.FIX_COMPILE_ERRORS) {
-//      systemPrompt = FIX_COMPILE_ERRORS_SYSTEM_PROMPT;
-//    }
-//
-//    var prompt = promptTemplate.buildPrompt(
-//        systemPrompt,
-//        message.getPrompt(),
-//        conversation.getMessages());
-//    var configuration = ConfigurationState.getInstance();
-//    return new OllamaCompletionRequest.Builder(model, prompt)
-//        .setOptions(Map.of(
-//            "num_predict",configuration.getMaxTokens(),
-//            "temperature", configuration.getTemperature(),
-//            "top_k", settings.getTopK(),
-//            "top_p", settings.getTopP(),
-//            "repeat_penalty", settings.getRepeatPenalty()
-//            ))
-//        .build();
-//  }
+  public OllamaCompletionRequest buildOLlamaCompletionRequest(
+      Message message,
+      ConversationType conversationType,
+      boolean isStream) {
+    var settings = OllamaSettingsState.getInstance();
+    PromptTemplate promptTemplate;
+    String model;
+
+    promptTemplate = settings.getActualPromptTemplate();
+    model = settings.getLocalActualModel();
+
+    var systemPrompt = COMPLETION_SYSTEM_PROMPT;
+    if (conversationType == ConversationType.FIX_COMPILE_ERRORS) {
+      systemPrompt = FIX_COMPILE_ERRORS_SYSTEM_PROMPT;
+    }
+
+    var prompt = promptTemplate.buildPrompt(
+        systemPrompt,
+        message.getPrompt(),
+        conversation.getMessages());
+    var configuration = ConfigurationState.getInstance();
+    RequestSettings requestSettings = settings.getRequestSettings();
+    return new OllamaCompletionRequest.Builder(model, prompt)
+        .setOptions(Map.of(
+            "num_predict",configuration.getMaxTokens(),
+            "temperature", configuration.getTemperature(),
+            "top_k", requestSettings.getTopK(),
+            "top_p", requestSettings.getTopP(),
+            "repeat_penalty", requestSettings.getRepeatPenalty()
+            ))
+        .setStream(isStream)
+        .build();
+  }
 
   public YouCompletionRequest buildYouCompletionRequest(Message message) {
     var requestBuilder = new YouCompletionRequest.Builder(message.getPrompt())

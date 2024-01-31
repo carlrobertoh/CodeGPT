@@ -4,6 +4,7 @@ import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.ui.ComboBox;
+import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.ui.EnumComboBoxModel;
 import com.intellij.ui.TitledSeparator;
 import com.intellij.ui.components.JBCheckBox;
@@ -14,24 +15,33 @@ import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
-import ee.carlrobert.codegpt.completions.PromptTemplate;
+import ee.carlrobert.codegpt.CodeGPTPlugin;
+import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
+import ee.carlrobert.codegpt.completions.llama.LlamaServerAgent;
+import ee.carlrobert.codegpt.completions.ollama.OllamaServerAgent;
 import ee.carlrobert.codegpt.completions.you.auth.AuthenticationNotifier;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
+import ee.carlrobert.codegpt.settings.service.llama.RequestPreferencesForm;
+import ee.carlrobert.codegpt.settings.service.llama.ServerPreferencesForm;
+import ee.carlrobert.codegpt.settings.service.llama.ServiceFormPanel;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.YouSettingsState;
+import ee.carlrobert.codegpt.settings.state.llama.cpp.LlamaCppSettingsState;
+import ee.carlrobert.codegpt.settings.state.llama.ollama.OllamaSettingsState;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 import javax.swing.ButtonGroup;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
-public class ServiceSelectionForm {
+public class ServicesSelectionForm {
 
-  private static final Logger LOG = Logger.getInstance(ServiceSelectionForm.class);
+  private static final Logger LOG = Logger.getInstance(ServicesSelectionForm.class);
 
   private final Disposable parentDisposable;
 
@@ -58,10 +68,10 @@ public class ServiceSelectionForm {
   private final JPanel youServiceSectionPanel;
   private final JBCheckBox displayWebSearchResultsCheckBox;
 
-  private final LlamaServiceSelectionForm llamaServiceSectionPanel;
-//  private final OllamaServiceSelectionForm ollamaServiceSectionPanel;
+  private ServiceFormPanel llamaServiceSectionPanel;
+  private ServiceFormPanel ollamaServiceSectionPanel;
 
-  public ServiceSelectionForm(Disposable parentDisposable) {
+  public ServicesSelectionForm(Disposable parentDisposable) {
     this.parentDisposable = parentDisposable;
     openAIApiKeyField = new JBPasswordField();
     openAIApiKeyField.setColumns(30);
@@ -114,8 +124,8 @@ public class ServiceSelectionForm {
     openAIServiceSectionPanel = createOpenAIServiceSectionPanel();
     azureServiceSectionPanel = createAzureServiceSectionPanel();
     youServiceSectionPanel = createYouServiceSectionPanel();
-    llamaServiceSectionPanel = new LlamaServiceSelectionForm();
-//    ollamaServiceSectionPanel = new OllamaServiceSelectionForm();
+    llamaServiceSectionPanel = createLlamaServiceSectionPanel();
+    ollamaServiceSectionPanel = createOllamaServiceSectionPanel();
 
     registerPanelsVisibility(azureSettings);
     registerRadioButtons();
@@ -125,6 +135,31 @@ public class ServiceSelectionForm {
         .connect()
         .subscribe(AuthenticationNotifier.AUTHENTICATION_TOPIC,
             (AuthenticationNotifier) () -> displayWebSearchResultsCheckBox.setEnabled(true));
+  }
+
+  private ServiceFormPanel createLlamaServiceSectionPanel() {
+    var settings = LlamaCppSettingsState.getInstance();
+    return new ServiceFormPanel(
+        new ServerPreferencesForm(settings,
+            ApplicationManager.getApplication().getService(LlamaServerAgent.class), "llama") {
+          @Override
+          public boolean isModelExists(HuggingFaceModel model) {
+            return FileUtil.exists(
+                CodeGPTPlugin.getLlamaModelsPath() + File.separator + model.getModelFileName());
+          }
+        }, settings.getRequestSettings());
+  }
+
+  private ServiceFormPanel createOllamaServiceSectionPanel() {
+    var settings = OllamaSettingsState.getInstance();
+    return new ServiceFormPanel(
+         new ServerPreferencesForm(settings,
+            ApplicationManager.getApplication().getService(OllamaServerAgent.class), "ollama") {
+          @Override
+          public boolean isModelExists(HuggingFaceModel model) {
+            return true;
+          }
+        }, settings.getRequestSettings());
   }
 
   private JPanel createOpenAIServiceSectionPanel() {
@@ -364,26 +399,21 @@ public class ServiceSelectionForm {
     return displayWebSearchResultsCheckBox.isSelected();
   }
 
-  public LlamaServerPreferencesForm getLlamaServerPreferencesForm() {
-    return llamaServiceSectionPanel.getLlamaServerPreferencesForm();
+  public ServerPreferencesForm getLlamaServerPreferencesForm() {
+    return llamaServiceSectionPanel.getServerPreferencesForm();
   }
 
-  public LlamaRequestPreferencesForm getLlamaRequestPreferencesForm() {
-    return llamaServiceSectionPanel.getLlamaRequestPreferencesForm();
+  public RequestPreferencesForm getLlamaRequestPreferencesForm() {
+    return llamaServiceSectionPanel.getRequestPreferencesForm();
   }
-  
-//  public OllamaServerPreferencesForm getOllamaServerPreferencesForm() {
-//    return ollamaServiceSectionPanel.getOllamaServerPreferencesForm();
-//  }
-//
-//  public OllamaModelPreferencesForm getOllamaModelPreferencesForm() {
-//    return ollamaServiceSectionPanel.getOllamaModelPreferencesForm();
-//  }
-  
-//TODO
-//  public OllamaRequestPreferencesForm getOllamaRequestPreferencesForm() {
-//    return ollamaServiceSectionPanel.getOllamaRequestPreferencesForm();
-//  }
+
+  public ServerPreferencesForm getOllamaServerPreferencesForm() {
+    return ollamaServiceSectionPanel.getServerPreferencesForm();
+  }
+
+  public RequestPreferencesForm getOllamaRequestPreferencesForm() {
+    return ollamaServiceSectionPanel.getRequestPreferencesForm();
+  }
 
   public void setOpenAIPath(String path) {
     openAIPathField.setText(path);
@@ -417,7 +447,7 @@ public class ServiceSelectionForm {
     return llamaServiceSectionPanel;
   }
 
-//  public OllamaServiceSelectionForm getOllamaServiceSectionPanel() {
-//    return ollamaServiceSectionPanel;
-//  }
+  public JPanel getOllamaServiceSectionPanel() {
+    return ollamaServiceSectionPanel;
+  }
 }

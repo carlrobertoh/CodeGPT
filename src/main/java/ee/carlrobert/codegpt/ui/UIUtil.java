@@ -7,8 +7,11 @@ import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
 import com.intellij.openapi.ui.panel.ComponentPanelBuilder;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.ScrollPaneFactory;
+import com.intellij.ui.TitledSeparator;
+import com.intellij.ui.components.JBPasswordField;
 import com.intellij.ui.components.JBRadioButton;
 import com.intellij.ui.components.JBTextArea;
+import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
@@ -214,6 +217,21 @@ public class UIUtil {
     public Component getComponent() {
       return layout;
     }
+  }
+
+  public static void addApiKeyPanel(String initialApiKey, FormBuilder formBuilder, JBPasswordField apiKeyField) {
+    apiKeyField.setColumns(30);
+    apiKeyField.setText(initialApiKey);
+    var apiKeyFieldPanel = UI.PanelFactory.panel(apiKeyField)
+        .withLabel(CodeGPTBundle.get("settingsConfigurable.shared.apiKey.label"))
+        .resizeX(false)
+        .withComment(
+            CodeGPTBundle.get("settingsConfigurable.shared.apiKey.comment"))
+        .withCommentHyperlinkListener(UIUtil::handleHyperlinkClicked)
+        .createPanel();
+    formBuilder.addComponent(new TitledSeparator(
+            CodeGPTBundle.get("settingsConfigurable.shared.authentication.title")))
+        .addComponent(withEmptyLeftBorder(apiKeyFieldPanel));
   }
 }
 

@@ -10,7 +10,7 @@ import com.intellij.openapi.util.SystemInfoRt;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
 import ee.carlrobert.codegpt.CodeGPTBundle;
-import ee.carlrobert.codegpt.settings.service.ServiceSelectionForm;
+import ee.carlrobert.codegpt.settings.service.ServicesSelectionForm;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
@@ -25,19 +25,19 @@ public class SettingsComponent {
   private final JPanel mainPanel;
   private final JBTextField displayNameField;
   private final ComboBox<ServiceType> serviceComboBox;
-  private final ServiceSelectionForm serviceSelectionForm;
+  private final ServicesSelectionForm servicesSelectionForm;
 
   public SettingsComponent(Disposable parentDisposable, SettingsState settings) {
     displayNameField = new JBTextField(settings.getDisplayName(), 20);
 
-    serviceSelectionForm = new ServiceSelectionForm(parentDisposable);
+    servicesSelectionForm = new ServicesSelectionForm(parentDisposable);
     var cardLayout = new CardLayout();
     var cards = new JPanel(cardLayout);
-    cards.add(serviceSelectionForm.getOpenAIServiceSectionPanel(), ServiceType.OPENAI.getCode());
-    cards.add(serviceSelectionForm.getAzureServiceSectionPanel(), ServiceType.AZURE.getCode());
-    cards.add(serviceSelectionForm.getYouServiceSectionPanel(), ServiceType.YOU.getCode());
-    cards.add(serviceSelectionForm.getLlamaServiceSectionPanel(), ServiceType.LLAMA_CPP.getCode());
-//    cards.add(serviceSelectionForm.getOllamaServiceSectionPanel(), ServiceType.OLLAMA.getCode());
+    cards.add(servicesSelectionForm.getOpenAIServiceSectionPanel(), ServiceType.OPENAI.getCode());
+    cards.add(servicesSelectionForm.getAzureServiceSectionPanel(), ServiceType.AZURE.getCode());
+    cards.add(servicesSelectionForm.getYouServiceSectionPanel(), ServiceType.YOU.getCode());
+    cards.add(servicesSelectionForm.getLlamaServiceSectionPanel(), ServiceType.LLAMA_CPP.getCode());
+    cards.add(servicesSelectionForm.getOllamaServiceSectionPanel(), ServiceType.OLLAMA.getCode());
     var serviceComboBoxModel = new DefaultComboBoxModel<ServiceType>();
     serviceComboBoxModel.addAll(Arrays.stream(ServiceType.values())
         .filter(it -> ServiceType.LLAMA_CPP != it || SystemInfoRt.isUnix)
@@ -80,8 +80,8 @@ public class SettingsComponent {
     return displayNameField;
   }
 
-  public ServiceSelectionForm getServiceSelectionForm() {
-    return serviceSelectionForm;
+  public ServicesSelectionForm getServiceSelectionForm() {
+    return servicesSelectionForm;
   }
 
   public String getDisplayName() {

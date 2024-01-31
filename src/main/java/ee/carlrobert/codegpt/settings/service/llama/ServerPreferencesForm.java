@@ -1,19 +1,23 @@
-package ee.carlrobert.codegpt.settings.service;
+package ee.carlrobert.codegpt.settings.service.llama;
 
 import static ee.carlrobert.codegpt.ui.UIUtil.createForm;
 
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.ui.components.JBRadioButton;
-import ee.carlrobert.codegpt.completions.llama.LlamaLocalSettings;
-import ee.carlrobert.codegpt.completions.llama.LlamaServerAgent;
-import ee.carlrobert.codegpt.credentials.LlamaCredentialsManager;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
-import ee.carlrobert.codegpt.settings.state.RemoteSettings;
+import com.intellij.util.ui.FormBuilder;
+import ee.carlrobert.codegpt.completions.ServerAgent;
+import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
+import ee.carlrobert.codegpt.settings.state.llama.LocalSettings;
+import ee.carlrobert.codegpt.settings.state.llama.RemoteSettings;
 import ee.carlrobert.codegpt.ui.UIUtil.RadioButtonWithLayout;
 import java.util.Map;
 import javax.swing.JPanel;
 
-public class LlamaServerPreferencesForm {
+/**
+ * Form containing {@link JBRadioButton} to toggle between  running a server locally
+ * ({@link LocalServerPreferencesForm}) or using an existing server
+ * ({@link RemoteServerPreferencesForm})
+ */
+public abstract class ServerPreferencesForm {
 
   private static final String RUN_LOCAL_SERVER_FORM_CARD_CODE = "RunLocalServerSettings";
   private static final String USE_EXISTING_SERVER_FORM_CARD_CODE = "UseExistingServerSettings";
@@ -21,28 +25,41 @@ public class LlamaServerPreferencesForm {
   private final JBRadioButton runLocalServerRadioButton;
   private final JBRadioButton useExistingServerRadioButton;
 
-  private final LlamaLocalServerPreferencesForm localServerPreferencesForm;
-  private final LlamaRemoteServerPreferencesForm remoteServerPreferencesForm;
+  private final LocalServerPreferencesForm localServerPreferencesForm;
+  private final RemoteServerPreferencesForm remoteServerPreferencesForm;
+  private final ServerAgent serverAgent;
 
-
-  public LlamaServerPreferencesForm() {
-    var llamaSettings = LlamaSettingsState.getInstance();
+  public ServerPreferencesForm(ServiceSettingsState serviceSettingsState, ServerAgent serverAgent,
+      String servicePrefix) {
+    this.serverAgent = serverAgent;
     runLocalServerRadioButton = new JBRadioButton("Run local server",
-        llamaSettings.isRunLocalServer());
+        serviceSettingsState.isRunLocalServer());
     useExistingServerRadioButton = new JBRadioButton("Use existing server",
-        !llamaSettings.isRunLocalServer());
+        !serviceSettingsState.isRunLocalServer());
 
-    localServerPreferencesForm = new LlamaLocalServerPreferencesForm();
-    remoteServerPreferencesForm = new LlamaRemoteServerPreferencesForm();
+    localServerPreferencesForm = new LocalServerPreferencesForm(
+        serviceSettingsState.getLocalSettings(), serverAgent) {
+      @Override
+      protected boolean isModelExists(HuggingFaceModel model) {
+        return ServerPreferencesForm.this.isModelExists(model);
+      }
+    };
+    remoteServerPreferencesForm = new RemoteServerPreferencesForm(
+        serviceSettingsState.getRemoteSettings(), servicePrefix);
+  }
 
+  public abstract boolean isModelExists(HuggingFaceModel model);
+
+  public void addAdditionalLocalFields(FormBuilder formBuilder) {
+  }
+
+  public void addAdditionalRemoteFields(FormBuilder formBuilder) {
   }
 
   public JPanel getForm() {
-    var llamaServerAgent =
-        ApplicationManager.getApplication().getService(LlamaServerAgent.class);
     return createForm(Map.of(
         RUN_LOCAL_SERVER_FORM_CARD_CODE, new RadioButtonWithLayout(runLocalServerRadioButton,
-            localServerPreferencesForm.getForm(llamaServerAgent)),
+            localServerPreferencesForm.getForm(serverAgent)),
         USE_EXISTING_SERVER_FORM_CARD_CODE, new RadioButtonWithLayout(useExistingServerRadioButton,
             remoteServerPreferencesForm.getForm())
     ), runLocalServerRadioButton.isSelected()
@@ -75,16 +92,19 @@ public class LlamaServerPreferencesForm {
     return remoteServerPreferencesForm.getRemoteSettings();
   }
 
-  public void setLocalSettings(LlamaLocalSettings localSettings) {
+  public void setLocalSettings(LocalSettings localSettings) {
     localServerPreferencesForm.setLocalSettings(localSettings);
   }
 
-  public LlamaLocalSettings getLocalSettings() {
+  public LocalSettings getLocalSettings() {
     return localServerPreferencesForm.getLocalSettings();
   }
 
-  public String getUsedApiKey() {
-    // TODO: differentiate between local/remote apiKey
-    return LlamaCredentialsManager.getInstance().getApiKey();
+  public String getLocalApiKey() {
+    return localServerPreferencesForm.getApiKey();
+  }
+
+  public String getRemoteApikey() {
+    return remoteServerPreferencesForm.getApiKey();
   }
 }

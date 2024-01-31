@@ -1,27 +1,27 @@
-package ee.carlrobert.codegpt.settings.service;
+package ee.carlrobert.codegpt.settings.service.llama;
 
 import com.intellij.openapi.ui.panel.ComponentPanelBuilder;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.completions.PromptTemplate;
-import ee.carlrobert.codegpt.settings.state.CommonSettings;
+import ee.carlrobert.codegpt.settings.state.llama.CommonSettings;
 import ee.carlrobert.codegpt.ui.PromptTemplateWrapper;
 import javax.swing.JPanel;
 
-public class LlamaRemoteModelPreferencesForm {
+public class RemoteModelPreferencesForm {
 
   private final PromptTemplateWrapper promptTemplateWrapper;
-  private final CommonSettings settings;
+  private final String bundlePrefix;
 
-  public LlamaRemoteModelPreferencesForm(CommonSettings settings) {
-    this.settings = settings;
+  public RemoteModelPreferencesForm(CommonSettings settings, String bundlePrefix) {
+    this.bundlePrefix = bundlePrefix;
     promptTemplateWrapper = new PromptTemplateWrapper(settings.getPromptTemplate(), true);
   }
 
   public JPanel getForm() {
     var customModelHelpText = ComponentPanelBuilder.createCommentComponent(
-        CodeGPTBundle.get("settingsConfigurable.service.llama.customModelPath.comment"),
+        CodeGPTBundle.get(String.format("settingsConfigurable.service.%s.customModelPath.comment", bundlePrefix)),
         true);
     customModelHelpText.setBorder(JBUI.Borders.empty(0, 4));
 

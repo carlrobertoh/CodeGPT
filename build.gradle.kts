@@ -77,6 +77,8 @@ tasks.register<Copy>("copyLlamaSubmodule") {
   dependsOn("updateSubmodules")
   from(layout.projectDirectory.file("src/main/cpp/llama.cpp"))
   into(layout.buildDirectory.dir("idea-sandbox/plugins/CodeGPT/llama.cpp"))
+  inputs.dir(layout.projectDirectory.file("src/main/cpp/llama.cpp"))
+  outputs.dir(layout.buildDirectory.dir("idea-sandbox/plugins/CodeGPT/llama.cpp"))
 }
 
 tasks {
@@ -148,6 +150,7 @@ tasks {
   }
 
   runIde {
+    dependsOn("copyLlamaSubmodule")
     enabled = true
     environment("ENVIRONMENT", "LOCAL")
   }

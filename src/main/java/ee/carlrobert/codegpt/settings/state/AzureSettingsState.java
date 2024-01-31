@@ -6,7 +6,7 @@ import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
-import ee.carlrobert.codegpt.settings.service.ServiceSelectionForm;
+import ee.carlrobert.codegpt.settings.service.ServicesSelectionForm;
 import org.jetbrains.annotations.NotNull;
 
 @State(name = "CodeGPT_AzureSettings_210", storages = @Storage("CodeGPT_AzureSettings_210.xml"))
@@ -36,48 +36,46 @@ public class AzureSettingsState implements PersistentStateComponent<AzureSetting
     XmlSerializerUtil.copyBean(state, this);
   }
 
-  public boolean isModified(ServiceSelectionForm serviceSelectionForm) {
-    var credentialsManager = AzureCredentialsManager.getInstance();
-    return serviceSelectionForm.isAzureActiveDirectoryAuthenticationSelected()
+  public boolean isModified(ServicesSelectionForm servicesSelectionForm) {
+    return servicesSelectionForm.isAzureActiveDirectoryAuthenticationSelected()
         != isUseAzureActiveDirectoryAuthentication()
-        || serviceSelectionForm.isAzureApiKeyAuthenticationSelected()
+        || servicesSelectionForm.isAzureApiKeyAuthenticationSelected()
         != isUseAzureApiKeyAuthentication()
-        || !serviceSelectionForm.getAzureActiveDirectoryToken()
-        .equals(credentialsManager.getAzureActiveDirectoryToken())
-        || !serviceSelectionForm.getAzureOpenAIApiKey()
-        .equals(credentialsManager.getAzureOpenAIApiKey())
-        || !serviceSelectionForm.getAzureResourceName().equals(resourceName)
-        || !serviceSelectionForm.getAzureDeploymentId().equals(deploymentId)
-        || !serviceSelectionForm.getAzureApiVersion().equals(apiVersion)
-        || !serviceSelectionForm.getAzureBaseHost().equals(baseHost)
-        || !serviceSelectionForm.getAzurePath().equals(path);
+        || AzureCredentialsManager.getInstance()
+        .isModified(servicesSelectionForm.getAzureOpenAIApiKey(),
+            servicesSelectionForm.getAzureActiveDirectoryToken())
+        || !servicesSelectionForm.getAzureResourceName().equals(resourceName)
+        || !servicesSelectionForm.getAzureDeploymentId().equals(deploymentId)
+        || !servicesSelectionForm.getAzureApiVersion().equals(apiVersion)
+        || !servicesSelectionForm.getAzureBaseHost().equals(baseHost)
+        || !servicesSelectionForm.getAzurePath().equals(path);
   }
 
-  public void apply(ServiceSelectionForm serviceSelectionForm) {
+  public void apply(ServicesSelectionForm servicesSelectionForm) {
     useAzureActiveDirectoryAuthentication =
-        serviceSelectionForm.isAzureActiveDirectoryAuthenticationSelected();
-    useAzureApiKeyAuthentication = serviceSelectionForm.isAzureApiKeyAuthenticationSelected();
+        servicesSelectionForm.isAzureActiveDirectoryAuthenticationSelected();
+    useAzureApiKeyAuthentication = servicesSelectionForm.isAzureApiKeyAuthenticationSelected();
 
-    resourceName = serviceSelectionForm.getAzureResourceName();
-    deploymentId = serviceSelectionForm.getAzureDeploymentId();
-    apiVersion = serviceSelectionForm.getAzureApiVersion();
-    baseHost = serviceSelectionForm.getAzureBaseHost();
-    path = serviceSelectionForm.getAzurePath();
+    resourceName = servicesSelectionForm.getAzureResourceName();
+    deploymentId = servicesSelectionForm.getAzureDeploymentId();
+    apiVersion = servicesSelectionForm.getAzureApiVersion();
+    baseHost = servicesSelectionForm.getAzureBaseHost();
+    path = servicesSelectionForm.getAzurePath();
   }
 
-  public void reset(ServiceSelectionForm serviceSelectionForm) {
-    serviceSelectionForm.setAzureApiKey(
+  public void reset(ServicesSelectionForm servicesSelectionForm) {
+    servicesSelectionForm.setAzureApiKey(
         AzureCredentialsManager.getInstance().getAzureOpenAIApiKey());
-    serviceSelectionForm.setAzureActiveDirectoryToken(
+    servicesSelectionForm.setAzureActiveDirectoryToken(
         AzureCredentialsManager.getInstance().getAzureActiveDirectoryToken());
-    serviceSelectionForm.setAzureApiKeyAuthenticationSelected(useAzureApiKeyAuthentication);
-    serviceSelectionForm.setAzureActiveDirectoryAuthenticationSelected(
+    servicesSelectionForm.setAzureApiKeyAuthenticationSelected(useAzureApiKeyAuthentication);
+    servicesSelectionForm.setAzureActiveDirectoryAuthenticationSelected(
         useAzureActiveDirectoryAuthentication);
-    serviceSelectionForm.setAzureResourceName(resourceName);
-    serviceSelectionForm.setAzureDeploymentId(deploymentId);
-    serviceSelectionForm.setAzureApiVersion(apiVersion);
-    serviceSelectionForm.setAzureBaseHost(baseHost);
-    serviceSelectionForm.setAzurePath(path);
+    servicesSelectionForm.setAzureResourceName(resourceName);
+    servicesSelectionForm.setAzureDeploymentId(deploymentId);
+    servicesSelectionForm.setAzureApiVersion(apiVersion);
+    servicesSelectionForm.setAzureBaseHost(baseHost);
+    servicesSelectionForm.setAzurePath(path);
   }
 
   public boolean isUsingCustomPath() {

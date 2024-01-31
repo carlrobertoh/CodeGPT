@@ -8,14 +8,13 @@ import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.actionSystem.ex.ComboBoxAction;
 import ee.carlrobert.codegpt.Icons;
-import ee.carlrobert.codegpt.completions.LlmModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
+import ee.carlrobert.codegpt.settings.state.llama.cpp.LlamaCppSettingsState;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import java.util.List;
 import javax.swing.Icon;
@@ -71,6 +70,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
         getSelectedHuggingFace(),
         Icons.Llama,
         presentation));
+    // TODO add Ollama
     actionGroup.addSeparator();
     actionGroup.add(createModelAction(ServiceType.YOU, "You.com", Icons.YouSmall, presentation));
     return actionGroup;
@@ -106,7 +106,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
   }
 
   private String getSelectedHuggingFace() {
-    var huggingFaceModel = LlamaSettingsState.getInstance().getLocalModel();
+    var huggingFaceModel = LlamaCppSettingsState.getInstance().getLocalModel();
     return format(
         "%s %dB (Q%d)",
         LlamaModel.findByHuggingFaceModel(huggingFaceModel).getLabel(),
