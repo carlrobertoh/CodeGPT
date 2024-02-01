@@ -19,7 +19,7 @@ import javax.swing.JPanel;
  * ({@link LocalServerPreferencesForm}) or using an existing server
  * ({@link RemoteServerPreferencesForm})
  */
-public abstract class ServerPreferencesForm {
+public abstract class LlamaServerPreferencesForm {
 
   private static final String RUN_LOCAL_SERVER_FORM_CARD_CODE = "RunLocalServerSettings";
   private static final String USE_EXISTING_SERVER_FORM_CARD_CODE = "UseExistingServerSettings";
@@ -31,7 +31,7 @@ public abstract class ServerPreferencesForm {
   private final RemoteServerPreferencesForm remoteServerPreferencesForm;
   private final ServerAgent serverAgent;
 
-  public ServerPreferencesForm(LlamaServiceSettingsState llamaServiceSettingsState, ServerAgent serverAgent,
+  public LlamaServerPreferencesForm(LlamaServiceSettingsState llamaServiceSettingsState, ServerAgent serverAgent,
       ServiceType servicePrefix) {
     this.serverAgent = serverAgent;
     runLocalServerRadioButton = new JBRadioButton("Run local server",
@@ -43,7 +43,7 @@ public abstract class ServerPreferencesForm {
         llamaServiceSettingsState.getLocalSettings(), serverAgent) {
       @Override
       protected boolean isModelExists(HuggingFaceModel model) {
-        return ServerPreferencesForm.this.isModelExists(model);
+        return LlamaServerPreferencesForm.this.isModelExists(model);
       }
     };
     remoteServerPreferencesForm = new RemoteServerPreferencesForm(

@@ -5,16 +5,23 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
+import ee.carlrobert.codegpt.credentials.YouCredentialsManager;
 import org.jetbrains.annotations.NotNull;
 
 @State(name = "CodeGPT_YouSettings", storages = @Storage("CodeGPT_YouSettings.xml"))
-public class YouSettingsState implements PersistentStateComponent<YouSettingsState> {
+public class YouSettingsState extends RemoteSettings<YouCredentialsManager> implements PersistentStateComponent<YouSettingsState> {
 
   private boolean displayWebSearchResults = true;
   private boolean useGPT4Model;
 
   public static YouSettingsState getInstance() {
-    return ApplicationManager.getApplication().getService(YouSettingsState.class);
+    YouSettingsState settingsState = new YouSettingsState();
+    settingsState.setCredentialsManager(new YouCredentialsManager());
+    return settingsState;
+  }
+
+  public YouSettingsState() {
+    super(null, null);
   }
 
   @Override

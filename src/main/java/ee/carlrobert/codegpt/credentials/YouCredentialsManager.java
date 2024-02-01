@@ -1,42 +1,48 @@
 package ee.carlrobert.codegpt.credentials;
 
 import com.intellij.credentialStore.CredentialAttributes;
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.components.Service;
-import org.jetbrains.annotations.Nullable;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
-@Service
-public final class YouCredentialsManager extends ServiceCredentialsManager {
+public final class YouCredentialsManager extends CredentialsManager {
 
   private static final CredentialAttributes accountPasswordCredentialAttributes =
       CredentialsUtil.createCredentialAttributes("ACCOUNT_PASSWORD");
 
-  private String accountPassword;
+  public YouCredentialsManager() {
+    super(Set.of(accountPasswordCredentialAttributes));
+    
+  }
+  
+  public YouCredentialsManager(CredentialAttributes accountPasswordCredentialAttributes,
+      Set<CredentialAttributes> additionalAttributes) {
+    super(mergeAttributes(additionalAttributes, accountPasswordCredentialAttributes));
+  }
 
-  private YouCredentialsManager() {
-    accountPassword = CredentialsUtil.getPassword(accountPasswordCredentialAttributes);
+  public static Set<CredentialAttributes> mergeAttributes(Set<CredentialAttributes> attributes,
+      CredentialAttributes attribute) {
+    Set<CredentialAttributes> merged = new HashSet<>(attributes);
+    merged.add(attribute);
+    return merged;
+  }
+
+  public String getPassword() {
+    return getCredential(accountPasswordCredentialAttributes);
+  }
+
+  public void setPassword(String password) {
+    setCredential(accountPasswordCredentialAttributes, password);
   }
 
   @Override
-  public @Nullable String getApiKey() {
-    return getAccountPassword();
+  public boolean isCredentialSet() {
+    String password = getPassword();
+    return password != null && !password.isEmpty();
   }
 
-  @Override
-  public void setApiKey(String apiKey) {
-    setAccountPassword(apiKey);
+  public boolean isModified(String password) {
+    return super.isModified(Map.of(accountPasswordCredentialAttributes, password));
   }
 
-  public static YouCredentialsManager getInstance() {
-    return ApplicationManager.getApplication().getService(YouCredentialsManager.class);
-  }
-
-  public @Nullable String getAccountPassword() {
-    return accountPassword;
-  }
-
-  public void setAccountPassword(String accountPassword) {
-    this.accountPassword = accountPassword;
-    CredentialsUtil.setPassword(accountPasswordCredentialAttributes, accountPassword);
-  }
 }

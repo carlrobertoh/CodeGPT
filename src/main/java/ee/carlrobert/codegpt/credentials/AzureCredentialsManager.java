@@ -1,82 +1,50 @@
 package ee.carlrobert.codegpt.credentials;
 
-import static ee.carlrobert.codegpt.util.Utils.areStringsDifferentIgnoringEmptyOrNull;
-
 import com.intellij.credentialStore.CredentialAttributes;
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.components.Service;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
+import java.util.Map;
+import java.util.Set;
 import org.jetbrains.annotations.Nullable;
 
-@Service
-public final class AzureCredentialsManager extends ServiceCredentialsManager{
+public final class AzureCredentialsManager extends ApiKeyCredentialsManager {
 
   private static final CredentialAttributes azureOpenAIApiKeyCredentialAttributes =
       CredentialsUtil.createCredentialAttributes("AZURE_OPENAI_API_KEY");
   private static final CredentialAttributes azureActiveDirectoryTokenCredentialAttributes =
       CredentialsUtil.createCredentialAttributes("AZURE_ACTIVE_DIRECTORY_TOKEN");
 
-  private String azureOpenAIApiKey;
-  private String azureActiveDirectoryToken;
-
-  private AzureCredentialsManager() {
-    azureOpenAIApiKey = CredentialsUtil.getPassword(azureOpenAIApiKeyCredentialAttributes);
-    azureActiveDirectoryToken =
-        CredentialsUtil.getPassword(azureActiveDirectoryTokenCredentialAttributes);
+  public AzureCredentialsManager() {
+    super(azureOpenAIApiKeyCredentialAttributes,
+        Set.of(azureActiveDirectoryTokenCredentialAttributes));
   }
 
-  public static AzureCredentialsManager getInstance() {
-    return ApplicationManager.getApplication().getService(AzureCredentialsManager.class);
+  public @Nullable String getActiveDirectoryToken() {
+    return getCredential(azureActiveDirectoryTokenCredentialAttributes);
+  }
+
+  public void apply(String apiKey, String activeDirectoryToken){
+    super.apply(apiKey);
+    setCredential(azureActiveDirectoryTokenCredentialAttributes,activeDirectoryToken);
   }
 
   public String getSecret() {
     return AzureSettingsState.getInstance().isUseAzureActiveDirectoryAuthentication()
-        ? azureActiveDirectoryToken
-        : azureOpenAIApiKey;
-  }
-
-  public @Nullable String getAzureOpenAIApiKey() {
-    return azureOpenAIApiKey;
+        ? getActiveDirectoryToken()
+        : getApiKey();
   }
 
   @Override
-  public @Nullable String getApiKey() {
-    return getAzureOpenAIApiKey();
-  }
-
-  public boolean isModified(String apiKey, String azureActiveDirectoryToken) {
-    return super.isModified(apiKey)
-        ||  areStringsDifferentIgnoringEmptyOrNull(this.azureActiveDirectoryToken, azureActiveDirectoryToken);
-  }
-
-  public void setApiKey(String azureOpenAIApiKey) {
-    this.azureOpenAIApiKey = azureOpenAIApiKey;
-    CredentialsUtil.setPassword(azureOpenAIApiKeyCredentialAttributes, azureOpenAIApiKey);
-  }
-
-  public @Nullable String getAzureActiveDirectoryToken() {
-    return azureActiveDirectoryToken;
-  }
-
-  public void setAzureActiveDirectoryToken(String azureActiveDirectoryToken) {
-    this.azureActiveDirectoryToken = azureActiveDirectoryToken;
-    CredentialsUtil.setPassword(
-        azureActiveDirectoryTokenCredentialAttributes,
-        azureActiveDirectoryToken);
-  }
-
   public boolean isCredentialSet() {
     if (AzureSettingsState.getInstance().isUseAzureApiKeyAuthentication()) {
-      return isKeySet();
+      return super.isCredentialSet();
     }
-    return isTokenSet();
+    String token = getActiveDirectoryToken();
+    return token != null && !token.isEmpty();
   }
 
-  private boolean isTokenSet() {
-    return azureActiveDirectoryToken != null && !azureActiveDirectoryToken.isEmpty();
+  public boolean isModified(String apiKey, String activeDirectoryToken) {
+    return super.isModified(Map.of(azureOpenAIApiKeyCredentialAttributes, apiKey,
+        azureActiveDirectoryTokenCredentialAttributes, activeDirectoryToken));
   }
 
-  private boolean isKeySet() {
-    return azureOpenAIApiKey != null && !azureOpenAIApiKey.isEmpty();
-  }
 }

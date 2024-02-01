@@ -107,10 +107,10 @@ public final class CompletionRequestService {
   public boolean isRequestAllowed() {
     var selectedService = SettingsState.getInstance().getSelectedService();
     if (selectedService == ServiceType.AZURE) {
-      return AzureCredentialsManager.getInstance().isCredentialSet();
+      return AzureSettingsState.getInstance().getCredentialsManager().isCredentialSet();
     }
     if (selectedService == ServiceType.OPENAI) {
-      return OpenAICredentialsManager.getInstance().isApiKeySet();
+      return OpenAISettingsState.getInstance().getCredentialsManager().isCredentialSet();
     }
     return true;
   }

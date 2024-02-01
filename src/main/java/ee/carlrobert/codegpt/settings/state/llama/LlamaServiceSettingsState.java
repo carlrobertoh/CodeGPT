@@ -1,7 +1,7 @@
 package ee.carlrobert.codegpt.settings.state.llama;
 
 import ee.carlrobert.codegpt.settings.service.llama.RequestPreferencesForm;
-import ee.carlrobert.codegpt.settings.service.llama.ServerPreferencesForm;
+import ee.carlrobert.codegpt.settings.service.llama.LlamaServerPreferencesForm;
 
 public class LlamaServiceSettingsState {
 
@@ -18,31 +18,32 @@ public class LlamaServiceSettingsState {
     this.runLocalServer = runLocalServer;
   }
 
-  public boolean isModified(ServerPreferencesForm serverPreferencesForm ,
+  public boolean isModified(LlamaServerPreferencesForm llamaServerPreferencesForm,
       RequestPreferencesForm requestPreferencesForm) {
-    return localSettings.isModified(serverPreferencesForm.getLocalSettings(),
-        serverPreferencesForm.getLocalApiKey())
-        || remoteSettings.isModified(serverPreferencesForm.getRemoteSettings(),
-        serverPreferencesForm.getRemoteApikey())
-        || runLocalServer != serverPreferencesForm.isRunLocalServer()
+    return localSettings.isModified(llamaServerPreferencesForm.getLocalSettings())
+        || localSettings.getCredentialsManager().isModified(llamaServerPreferencesForm.getLocalApiKey())
+        || remoteSettings.isModified(llamaServerPreferencesForm.getRemoteSettings())
+        || remoteSettings.getCredentialsManager()
+        .isModified(llamaServerPreferencesForm.getRemoteApikey())
+        || runLocalServer != llamaServerPreferencesForm.isRunLocalServer()
         || llamaRequestSettings.isModified(requestPreferencesForm.getRequestSettings());
   }
 
-  public void apply(ServerPreferencesForm serverPreferencesForm,
+  public void apply(LlamaServerPreferencesForm llamaServerPreferencesForm,
       RequestPreferencesForm requestPreferencesForm) {
-    runLocalServer = serverPreferencesForm.isRunLocalServer();
-    localSettings = serverPreferencesForm.getLocalSettings();
-    localSettings.getCredentialsManager().apply(serverPreferencesForm.getLocalApiKey());
-    remoteSettings = serverPreferencesForm.getRemoteSettings();
-    remoteSettings.getCredentialsManager().apply(serverPreferencesForm.getRemoteApikey());
+    runLocalServer = llamaServerPreferencesForm.isRunLocalServer();
+    localSettings = llamaServerPreferencesForm.getLocalSettings();
+    localSettings.getCredentialsManager().apply(llamaServerPreferencesForm.getLocalApiKey());
+    remoteSettings = llamaServerPreferencesForm.getRemoteSettings();
+    remoteSettings.getCredentialsManager().apply(llamaServerPreferencesForm.getRemoteApikey());
     llamaRequestSettings = requestPreferencesForm.getRequestSettings();
   }
 
-  public void reset(ServerPreferencesForm serverPreferencesForm,
+  public void reset(LlamaServerPreferencesForm llamaServerPreferencesForm,
       RequestPreferencesForm requestPreferencesForm) {
-    serverPreferencesForm.setRemoteSettings(remoteSettings);
-    serverPreferencesForm.setLocalSettings(localSettings);
-    serverPreferencesForm.setRunLocalServer(runLocalServer);
+    llamaServerPreferencesForm.setRemoteSettings(remoteSettings);
+    llamaServerPreferencesForm.setLocalSettings(localSettings);
+    llamaServerPreferencesForm.setRunLocalServer(runLocalServer);
     requestPreferencesForm.setTopK(llamaRequestSettings.getTopK());
     requestPreferencesForm.setTopP(llamaRequestSettings.getTopP());
     requestPreferencesForm.setMinP(llamaRequestSettings.getMinP());

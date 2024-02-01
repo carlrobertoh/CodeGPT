@@ -33,8 +33,8 @@ public class SettingsComponent {
     servicesSelectionForm = new ServicesSelectionForm(parentDisposable);
     var cardLayout = new CardLayout();
     var cards = new JPanel(cardLayout);
-    cards.add(servicesSelectionForm.getOpenAIServiceSectionPanel(), ServiceType.OPENAI.getCode());
-    cards.add(servicesSelectionForm.getAzureServiceSectionPanel(), ServiceType.AZURE.getCode());
+    cards.add(servicesSelectionForm.getOpenAIServiceSectionPanel().getPanel(), ServiceType.OPENAI.getCode());
+    cards.add(servicesSelectionForm.getAzureServiceSectionPanel().getPanel(), ServiceType.AZURE.getCode());
     cards.add(servicesSelectionForm.getYouServiceSectionPanel(), ServiceType.YOU.getCode());
     cards.add(servicesSelectionForm.getLlamaServiceSectionPanel(), ServiceType.LLAMA.getCode());
     var serviceComboBoxModel = new DefaultComboBoxModel<ServiceType>();

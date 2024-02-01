@@ -9,7 +9,7 @@ import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.advanced.AdvancedSettingsState;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
-import ee.carlrobert.codegpt.settings.state.llama.LlamaSettingsStateLlama;
+import ee.carlrobert.codegpt.settings.state.llama.LlamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaLocalSettings;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaRemoteSettings;
 import ee.carlrobert.llm.client.azure.AzureClient;
@@ -29,7 +29,7 @@ public class CompletionClientProvider {
 
   public static OpenAIClient getOpenAIClient() {
     var settings = OpenAISettingsState.getInstance();
-    var builder = new OpenAIClient.Builder(OpenAICredentialsManager.getInstance().getApiKey())
+    var builder = new OpenAIClient.Builder(settings.getCredentialsManager().getApiKey())
         .setOrganization(settings.getOrganization());
     var baseHost = settings.getBaseHost();
     if (baseHost != null) {
@@ -44,7 +44,7 @@ public class CompletionClientProvider {
         settings.getResourceName(),
         settings.getDeploymentId(),
         settings.getApiVersion());
-    var builder = new AzureClient.Builder(AzureCredentialsManager.getInstance().getSecret(), params)
+    var builder = new AzureClient.Builder(settings.getCredentialsManager().getSecret(), params)
         .setActiveDirectoryAuthentication(settings.isUseAzureActiveDirectoryAuthentication());
     var baseHost = settings.getBaseHost();
     if (baseHost != null) {
@@ -75,7 +75,7 @@ public class CompletionClientProvider {
   }
 
   public static LlamaClient getLlamaClient() {
-    LlamaSettingsStateLlama llamaSettingsState = LlamaSettingsStateLlama.getInstance();
+    LlamaSettingsState llamaSettingsState = LlamaSettingsState.getInstance();
 
     Builder builder = new Builder();
     String apiKey;

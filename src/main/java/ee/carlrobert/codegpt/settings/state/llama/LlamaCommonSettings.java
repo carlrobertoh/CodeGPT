@@ -2,22 +2,20 @@ package ee.carlrobert.codegpt.settings.state.llama;
 
 import com.intellij.util.xmlb.annotations.Transient;
 import ee.carlrobert.codegpt.completions.PromptTemplate;
-import ee.carlrobert.codegpt.credentials.ServiceCredentialsManager;
+import ee.carlrobert.codegpt.credentials.LlamaCredentialsManager;
+import ee.carlrobert.codegpt.settings.state.CommonSettings;
 
 /**
  * All settings that both {@link LlamaLocalSettings} and {@link LlamaRemoteSettings} need.
  */
-public class LlamaCommonSettings {
+public class LlamaCommonSettings extends CommonSettings<LlamaCredentialsManager> {
 
   private PromptTemplate promptTemplate = PromptTemplate.LLAMA;
-
-  @Transient
-  protected ServiceCredentialsManager credentialsManager;
 
   public LlamaCommonSettings() {
   }
 
-  public LlamaCommonSettings(ServiceCredentialsManager credentialsManager) {
+  public LlamaCommonSettings(LlamaCredentialsManager credentialsManager) {
     this.credentialsManager = credentialsManager;
   }
 
@@ -25,9 +23,8 @@ public class LlamaCommonSettings {
     this.promptTemplate = promptTemplate;
   }
 
-  public boolean isModified(LlamaCommonSettings llamaCommonSettings, String apikey) {
-    return !promptTemplate.equals(llamaCommonSettings.getPromptTemplate())
-        || credentialsManager.isModified(apikey);
+  protected boolean isModified(LlamaCommonSettings llamaCommonSettings) {
+    return !promptTemplate.equals(llamaCommonSettings.getPromptTemplate());
   }
 
   public PromptTemplate getPromptTemplate() {
@@ -38,13 +35,4 @@ public class LlamaCommonSettings {
     this.promptTemplate = promptTemplate;
   }
 
-  @Transient
-  public ServiceCredentialsManager getCredentialsManager() {
-    return credentialsManager;
-  }
-
-  public void setCredentialsManager(
-      ServiceCredentialsManager credentialsManager) {
-    this.credentialsManager = credentialsManager;
-  }
 }

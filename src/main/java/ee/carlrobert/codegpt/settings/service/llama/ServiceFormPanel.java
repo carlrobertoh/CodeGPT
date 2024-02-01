@@ -11,18 +11,18 @@ import javax.swing.JPanel;
 
 public class ServiceFormPanel extends JPanel {
 
-  private final ServerPreferencesForm serverPreferencesForm;
+  private final LlamaServerPreferencesForm llamaServerPreferencesForm;
   private final RequestPreferencesForm requestPreferencesForm;
 
-  public ServiceFormPanel(ServerPreferencesForm serverPreferencesForm,
+  public ServiceFormPanel(LlamaServerPreferencesForm llamaServerPreferencesForm,
       LlamaRequestSettings llamaRequestSettings) {
-    this.serverPreferencesForm = serverPreferencesForm;
+    this.llamaServerPreferencesForm = llamaServerPreferencesForm;
     requestPreferencesForm = new RequestPreferencesForm(llamaRequestSettings);
     init();
   }
 
-  public ServerPreferencesForm getServerPreferencesForm() {
-    return serverPreferencesForm;
+  public LlamaServerPreferencesForm getServerPreferencesForm() {
+    return llamaServerPreferencesForm;
   }
 
   public RequestPreferencesForm getRequestPreferencesForm() {
@@ -34,7 +34,7 @@ public class ServiceFormPanel extends JPanel {
     add(FormBuilder.createFormBuilder()
         .addComponent(new TitledSeparator(
             CodeGPTBundle.get("settingsConfigurable.service.serverPreferences.title")))
-        .addComponent(serverPreferencesForm.getForm())
+        .addComponent(llamaServerPreferencesForm.getForm())
         .addComponent(new TitledSeparator("Request Preferences"))
         .addComponent(withEmptyLeftBorder(requestPreferencesForm.getForm()))
         .addComponentFillVertically(new JPanel(), 0)

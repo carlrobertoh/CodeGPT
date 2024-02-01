@@ -17,7 +17,7 @@ public class CredentialsUtil {
     passwordSafe.setPassword(credentialAttributes, password);
   }
 
-  public static @Nullable String getPassword(CredentialAttributes credentialAttributes) {
+  public static String getPassword(CredentialAttributes credentialAttributes) {
     return passwordSafe.getPassword(credentialAttributes);
   }
 }

@@ -27,6 +27,8 @@ import ee.carlrobert.codegpt.completions.CompletionRequestService;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
+import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
+import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
@@ -56,10 +58,11 @@ public class GenerateGitCommitMessageAction extends AnAction {
     var selectedService = SettingsState.getInstance().getSelectedService();
     if (selectedService == ServiceType.OPENAI || selectedService == ServiceType.AZURE) {
       var filesSelected = !getReferencedFilePaths(event).isEmpty();
+      var openAiSettings = OpenAISettingsState.getInstance();
       var callAllowed = (selectedService == ServiceType.OPENAI
-          && OpenAICredentialsManager.getInstance().isApiKeySet())
+          && openAiSettings.getCredentialsManager().isCredentialSet())
           || (selectedService == ServiceType.AZURE
-          && AzureCredentialsManager.getInstance().isCredentialSet());
+          && AzureSettingsState.getInstance().getCredentialsManager().isCredentialSet());
       event.getPresentation().setEnabled(callAllowed && filesSelected);
       event.getPresentation().setText(CodeGPTBundle.get(callAllowed
           ? "action.generateCommitMessage.title"

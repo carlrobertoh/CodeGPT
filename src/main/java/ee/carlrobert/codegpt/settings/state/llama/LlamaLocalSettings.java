@@ -41,8 +41,8 @@ public class LlamaLocalSettings extends LlamaCommonSettings {
     this.additionalCompileParameters = additionalCompileParameters;
   }
 
-  public boolean isModified(LlamaLocalSettings localSettings, String apiKey) {
-    return super.isModified(localSettings, apiKey)
+  public boolean isModified(LlamaLocalSettings localSettings) {
+    return super.isModified(localSettings)
         || useCustomModel != isUseCustomModel()
         || !customModel.equals(getCustomModel())
         || !llmModel.equals(getLlModel())

@@ -19,10 +19,10 @@ import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.completions.ServerAgent;
 import ee.carlrobert.codegpt.completions.ServerStartupParams;
 import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
-import ee.carlrobert.codegpt.credentials.ServiceCredentialsManager;
-import ee.carlrobert.codegpt.ui.ComponentWithStringValue;
+import ee.carlrobert.codegpt.credentials.LlamaCredentialsManager;
 import ee.carlrobert.codegpt.settings.service.ServerProgressPanel;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaLocalSettings;
+import ee.carlrobert.codegpt.ui.ComponentWithStringValue;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -40,7 +40,7 @@ public abstract class LocalServerPreferencesForm {
   private final JBTextField additionalParametersField;
   private JBPasswordField apiKeyField;
 
-  private final ServiceCredentialsManager credentialsManager;
+  private final LlamaCredentialsManager credentialsManager;
 
   public LocalServerPreferencesForm(LlamaLocalSettings settings, ServerAgent serverAgent) {
     this.credentialsManager = settings.getCredentialsManager();
@@ -61,11 +61,9 @@ public abstract class LocalServerPreferencesForm {
     additionalParametersField = new JBTextField(settings.getAdditionalParameters(), 30);
     additionalParametersField.setEnabled(!serverRunning);
 
-    if (credentialsManager.providesApiKey()) {
       apiKeyField = new JBPasswordField();
       apiKeyField.setColumns(30);
       apiKeyField.setText(credentialsManager.getApiKey());
-    }
 
     localModelPreferencesForm = new ModelSelectionForm(settings) {
       @Override
@@ -104,10 +102,8 @@ public abstract class LocalServerPreferencesForm {
     maxTokensField.setValue(settings.getContextSize());
     threadsField.setValue(settings.getThreads());
     additionalParametersField.setText(settings.getAdditionalParameters());
-    ServiceCredentialsManager credentialsManager = settings.getCredentialsManager();
-    if (credentialsManager.providesApiKey()) {
+    var credentialsManager = settings.getCredentialsManager();
       apiKeyField.setText(credentialsManager.getApiKey());
-    }
   }
 
   public JComponent getForm(ServerAgent serverAgent) {
@@ -142,9 +138,7 @@ public abstract class LocalServerPreferencesForm {
         .addComponentToRightColumn(
             createComment("settingsConfigurable.service.llama.additionalParameters.comment"))
         .addVerticalGap(8);
-    if (credentialsManager.providesApiKey()) {
       addApiKeyPanel(credentialsManager.getApiKey(), formBuilder, apiKeyField);
-    }
     return withEmptyLeftBorder(formBuilder.getPanel());
   }
 

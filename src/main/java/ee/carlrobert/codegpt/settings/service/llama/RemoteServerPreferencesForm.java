@@ -9,7 +9,7 @@ import com.intellij.ui.components.JBPasswordField;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
 import ee.carlrobert.codegpt.CodeGPTBundle;
-import ee.carlrobert.codegpt.credentials.ServiceCredentialsManager;
+import ee.carlrobert.codegpt.credentials.LlamaCredentialsManager;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaRemoteSettings;
 import javax.swing.JComponent;
@@ -22,20 +22,18 @@ public class RemoteServerPreferencesForm {
   private final JBTextField baseHostField;
   private final RemoteModelPreferencesForm remoteModelPreferencesForm;
   private final ServiceType servicePrefix;
-  private JBPasswordField apiKeyField;
+  private final JBPasswordField apiKeyField;
 
-  private final ServiceCredentialsManager credentialsManager;
+  private final LlamaCredentialsManager credentialsManager;
 
   public RemoteServerPreferencesForm(LlamaRemoteSettings settings, ServiceType serviceType) {
     this.credentialsManager = settings.getCredentialsManager();
     this.servicePrefix = serviceType;
     baseHostField = new JBTextField(settings.getBaseHost(), 30);
     remoteModelPreferencesForm = new RemoteModelPreferencesForm(settings, serviceType);
-    if (credentialsManager.providesApiKey()) {
       apiKeyField = new JBPasswordField();
       apiKeyField.setColumns(30);
       apiKeyField.setText(credentialsManager.getApiKey());
-    }
   }
 
   public JComponent getForm() {
@@ -49,9 +47,7 @@ public class RemoteServerPreferencesForm {
         .addComponent(new TitledSeparator(
             CodeGPTBundle.get("settingsConfigurable.service.ollama.modelPreferences.title")))
         .addComponent(withEmptyLeftBorder(remoteModelPreferencesForm.getForm()));
-    if (credentialsManager.providesApiKey()) {
       addApiKeyPanel(credentialsManager.getApiKey(), formBuilder, apiKeyField);
-    }
     return withEmptyLeftBorder(formBuilder
         .getPanel());
   }
@@ -64,10 +60,8 @@ public class RemoteServerPreferencesForm {
   public void setRemoteSettings(LlamaRemoteSettings settings) {
     remoteModelPreferencesForm.setPromptTemplate(settings.getPromptTemplate());
     baseHostField.setText(settings.getBaseHost());
-    ServiceCredentialsManager credentialsManager = settings.getCredentialsManager();
-    if(credentialsManager.providesApiKey()){
+    var credentialsManager = settings.getCredentialsManager();
       apiKeyField.setText(credentialsManager.getApiKey());
-    }
   }
 
   public LlamaRemoteSettings getRemoteSettings() {

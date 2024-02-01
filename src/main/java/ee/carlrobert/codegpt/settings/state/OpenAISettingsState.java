@@ -6,23 +6,30 @@ import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
+import ee.carlrobert.codegpt.settings.service.OpenAiServiceSelectionForm;
 import ee.carlrobert.codegpt.settings.service.ServicesSelectionForm;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import org.jetbrains.annotations.NotNull;
 
 @State(name = "CodeGPT_OpenAISettings_210", storages = @Storage("CodeGPT_OpenAISettings_210.xml"))
-public class OpenAISettingsState implements PersistentStateComponent<OpenAISettingsState> {
+public class OpenAISettingsState extends RemoteSettings<OpenAICredentialsManager> implements
+    PersistentStateComponent<OpenAISettingsState> {
 
   private static final String BASE_PATH = "/v1/chat/completions";
 
   private String organization = "";
-  private String baseHost = "https://api.openai.com";
-  private String path = BASE_PATH;
   private String model = OpenAIChatCompletionModel.GPT_3_5.getCode();
   private boolean openAIQuotaExceeded;
 
+  public OpenAISettingsState() {
+    super("https://api.openai.com", BASE_PATH);
+  }
+
   public static OpenAISettingsState getInstance() {
-    return ApplicationManager.getApplication().getService(OpenAISettingsState.class);
+    OpenAISettingsState service = ApplicationManager.getApplication()
+        .getService(OpenAISettingsState.class);
+    service.setCredentialsManager(new OpenAICredentialsManager());
+    return service;
   }
 
   @Override
@@ -35,27 +42,27 @@ public class OpenAISettingsState implements PersistentStateComponent<OpenAISetti
     XmlSerializerUtil.copyBean(state, this);
   }
 
-  public boolean isModified(ServicesSelectionForm servicesSelectionForm) {
-    return OpenAICredentialsManager.getInstance().isModified(servicesSelectionForm.getOpenAIApiKey())
-        || !servicesSelectionForm.getOpenAIOrganization().equals(organization)
-        || !servicesSelectionForm.getOpenAIBaseHost().equals(baseHost)
-        || !servicesSelectionForm.getOpenAIPath().equals(path)
-        || !servicesSelectionForm.getOpenAIModel().equals(model);
+  public boolean isModified(OpenAiServiceSelectionForm serviceSelectionForm) {
+    return super.isModified(serviceSelectionForm.getOpenAIBaseHost(),
+        serviceSelectionForm.getOpenAIPath())
+        || credentialsManager.isModified(serviceSelectionForm.getOpenAIApiKey())
+        || !serviceSelectionForm.getOpenAIOrganization().equals(organization)
+        || !serviceSelectionForm.getOpenAIModel().equals(model);
   }
 
-  public void apply(ServicesSelectionForm servicesSelectionForm) {
-    organization = servicesSelectionForm.getOpenAIOrganization();
-    baseHost = servicesSelectionForm.getOpenAIBaseHost();
-    path = servicesSelectionForm.getOpenAIPath();
-    model = servicesSelectionForm.getOpenAIModel();
+  public void apply(OpenAiServiceSelectionForm serviceSelectionForm) {
+    organization = serviceSelectionForm.getOpenAIOrganization();
+    baseHost = serviceSelectionForm.getOpenAIBaseHost();
+    path = serviceSelectionForm.getOpenAIPath();
+    model = serviceSelectionForm.getOpenAIModel();
   }
 
-  public void reset(ServicesSelectionForm servicesSelectionForm) {
-    servicesSelectionForm.setOpenAIApiKey(OpenAICredentialsManager.getInstance().getApiKey());
-    servicesSelectionForm.setOpenAIOrganization(organization);
-    servicesSelectionForm.setOpenAIBaseHost(baseHost);
-    servicesSelectionForm.setOpenAIPath(path);
-    servicesSelectionForm.setOpenAIModel(model);
+  public void reset(OpenAiServiceSelectionForm serviceSelectionForm) {
+    serviceSelectionForm.setOpenAIApiKey(credentialsManager.getApiKey());
+    serviceSelectionForm.setOpenAIOrganization(organization);
+    serviceSelectionForm.setOpenAIBaseHost(baseHost);
+    serviceSelectionForm.setOpenAIPath(path);
+    serviceSelectionForm.setOpenAIModel(model);
   }
 
   public boolean isUsingCustomPath() {
@@ -70,28 +77,12 @@ public class OpenAISettingsState implements PersistentStateComponent<OpenAISetti
     this.organization = organization;
   }
 
-  public String getBaseHost() {
-    return baseHost;
-  }
-
-  public void setBaseHost(String openAIBaseHost) {
-    this.baseHost = openAIBaseHost;
-  }
-
   public String getModel() {
     return model;
   }
 
   public void setModel(String model) {
     this.model = model;
-  }
-
-  public String getPath() {
-    return path;
-  }
-
-  public void setPath(String path) {
-    this.path = path;
   }
 
   public boolean isOpenAIQuotaExceeded() {

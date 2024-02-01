@@ -19,7 +19,7 @@ import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
-import ee.carlrobert.codegpt.settings.state.llama.LlamaSettingsStateLlama;
+import ee.carlrobert.codegpt.settings.state.llama.LlamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaLocalSettings;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaRequestSettings;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowTabPanel;
@@ -270,7 +270,7 @@ public class StandardChatToolWindowTabPanelTest extends IntegrationTest {
     configurationState.setSystemPrompt(COMPLETION_SYSTEM_PROMPT);
     configurationState.setMaxTokens(1000);
     configurationState.setTemperature(0.1);
-    var llamaSettings = LlamaSettingsStateLlama.getInstance();
+    var llamaSettings = LlamaSettingsState.getInstance();
     llamaSettings.setLocalUseCustomModel(false);
     LlamaLocalSettings localSettings = llamaSettings.getLocalSettings();
     localSettings.setLlmModel(HuggingFaceModel.CODE_LLAMA_7B_Q4);

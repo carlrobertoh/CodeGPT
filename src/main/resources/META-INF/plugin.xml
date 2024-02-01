@@ -31,7 +31,7 @@
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.AzureSettingsState"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.OpenAISettingsState"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.YouSettingsState"/>
-        <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.llama.LlamaSettingsStateLlama"/>
+        <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.llama.LlamaSettingsState"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.llama.ollama.OllamaSettingsState"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.IncludedFilesSettingsState"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.configuration.ConfigurationState"/>
