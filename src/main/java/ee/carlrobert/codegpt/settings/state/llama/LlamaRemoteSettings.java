@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.settings.state.llama;
 
+import ee.carlrobert.codegpt.codecompletions.InfillPromptTemplate;
 import ee.carlrobert.codegpt.completions.PromptTemplate;
 import ee.carlrobert.codegpt.credentials.LlamaCredentialsManager;
 import ee.carlrobert.codegpt.settings.state.util.RemoteSettings;
@@ -9,28 +10,40 @@ import ee.carlrobert.codegpt.settings.state.util.RemoteSettings;
  */
 public class LlamaRemoteSettings extends RemoteSettings<LlamaCredentialsManager> {
 
-  private PromptTemplate promptTemplate = PromptTemplate.LLAMA;
+  private PromptTemplate chatPromptTemplate = PromptTemplate.LLAMA;
+  private InfillPromptTemplate infillPromptTemplate = InfillPromptTemplate.LLAMA;
 
   public LlamaRemoteSettings() {
     super("http://localhost:8080", null, new LlamaCredentialsManager("REMOTE"));
   }
 
-  public LlamaRemoteSettings(PromptTemplate promptTemplate, String baseHost) {
+  public LlamaRemoteSettings(PromptTemplate chatPromptTemplate,
+      InfillPromptTemplate infillPromptTemplate, String baseHost) {
     super(baseHost, null, new LlamaCredentialsManager("REMOTE"));
-    this.promptTemplate = promptTemplate;
+    this.chatPromptTemplate = chatPromptTemplate;
+    this.infillPromptTemplate = infillPromptTemplate;
   }
 
-  public boolean isModified(LlamaRemoteSettings llamaCommonSettings) {
-    return super.isModified(llamaCommonSettings)
-        || !promptTemplate.equals(llamaCommonSettings.getPromptTemplate());
+  public boolean isModified(LlamaRemoteSettings llamaRemoteSettings) {
+    return super.isModified(llamaRemoteSettings)
+        || !infillPromptTemplate.equals(llamaRemoteSettings.getInfillPromptTemplate())
+        || !chatPromptTemplate.equals(llamaRemoteSettings.getChatPromptTemplate());
   }
 
-  public PromptTemplate getPromptTemplate() {
-    return promptTemplate;
+  public PromptTemplate getChatPromptTemplate() {
+    return chatPromptTemplate;
   }
 
-  public void setPromptTemplate(PromptTemplate promptTemplate) {
-    this.promptTemplate = promptTemplate;
+  public void setChatPromptTemplate(PromptTemplate promptTemplate) {
+    this.chatPromptTemplate = promptTemplate;
   }
 
+  public InfillPromptTemplate getInfillPromptTemplate() {
+    return infillPromptTemplate;
+  }
+
+  public void setInfillPromptTemplate(
+      InfillPromptTemplate infillPromptTemplate) {
+    this.infillPromptTemplate = infillPromptTemplate;
+  }
 }

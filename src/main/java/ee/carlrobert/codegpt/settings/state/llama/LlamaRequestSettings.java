@@ -1,5 +1,7 @@
 package ee.carlrobert.codegpt.settings.state.llama;
 
+import ee.carlrobert.codegpt.codecompletions.InfillPromptTemplate;
+
 /**
  * All settings for Llama completion requests
  */

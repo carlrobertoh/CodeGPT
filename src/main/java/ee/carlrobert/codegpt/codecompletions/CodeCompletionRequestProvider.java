@@ -26,7 +26,11 @@ public class CodeCompletionRequestProvider {
   }
 
   public LlamaCompletionRequest buildLlamaRequest() {
-    var promptTemplate = LlamaSettingsState.getInstance().getInfillPromptTemplate();
+
+    LlamaSettingsState settings = LlamaSettingsState.getInstance();
+    var promptTemplate =
+        settings.isRunLocalServer() ? settings.getLocalSettings().getInfillPromptTemplate()
+            : settings.getRemoteSettings().getInfillPromptTemplate();
     var prompt = promptTemplate.buildPrompt(details.getPrefix(), details.getSuffix());
     return new LlamaCompletionRequest.Builder(prompt)
         .setN_predict(MAX_TOKENS)

@@ -8,7 +8,8 @@ import ee.carlrobert.codegpt.settings.service.util.RemoteServiceForm;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaRemoteSettings;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
-import ee.carlrobert.codegpt.ui.PromptTemplateField;
+import ee.carlrobert.codegpt.ui.ChatPromptTemplatePanel;
+import ee.carlrobert.codegpt.ui.InfillPromptTemplatePanel;
 import java.util.List;
 
 /**
@@ -17,7 +18,8 @@ import java.util.List;
 public class LlamaRemoteServiceForm extends RemoteServiceForm<LlamaCredentialsManager> {
 
 
-  private PromptTemplateField promptTemplateField;
+  private ChatPromptTemplatePanel chatPromptTemplatePanel;
+  private InfillPromptTemplatePanel infillPromptTemplatePanel;
 
   public LlamaRemoteServiceForm() {
     super(LlamaSettingsState.getInstance().getRemoteSettings(), ServiceType.LLAMA);
@@ -25,11 +27,18 @@ public class LlamaRemoteServiceForm extends RemoteServiceForm<LlamaCredentialsMa
 
   @Override
   protected List<PanelBuilder> additionalServerConfigPanels() {
-    promptTemplateField = new PromptTemplateField(
-        LlamaSettingsState.getInstance().getRemoteSettings().getPromptTemplate(), true);
+    chatPromptTemplatePanel = new ChatPromptTemplatePanel(
+        LlamaSettingsState.getInstance().getRemoteSettings().getChatPromptTemplate(), true);
+    infillPromptTemplatePanel = new InfillPromptTemplatePanel(
+        LlamaSettingsState.getInstance().getRemoteSettings().getInfillPromptTemplate(), true);
     return List.of(
-        UI.PanelFactory.panel(promptTemplateField)
+        UI.PanelFactory.panel(chatPromptTemplatePanel)
             .withLabel(CodeGPTBundle.get("shared.promptTemplate"))
+            .withComment(
+                CodeGPTBundle.get("settingsConfigurable.service.llama.promptTemplate.comment"))
+            .resizeX(false),
+        UI.PanelFactory.panel(infillPromptTemplatePanel)
+            .withLabel(CodeGPTBundle.get("shared.infillPromptTemplate"))
             .withComment(
                 CodeGPTBundle.get("settingsConfigurable.service.llama.promptTemplate.comment"))
             .resizeX(false));
@@ -37,12 +46,13 @@ public class LlamaRemoteServiceForm extends RemoteServiceForm<LlamaCredentialsMa
 
   public void setRemoteSettings(LlamaRemoteSettings settings) {
     super.setRemoteSettings(settings);
-    promptTemplateField.setPromptTemplate(settings.getPromptTemplate());
+    chatPromptTemplatePanel.setPromptTemplate(settings.getChatPromptTemplate());
   }
 
   public LlamaRemoteSettings getRemoteSettings() {
     return new LlamaRemoteSettings(
-        promptTemplateField.getPromptTemplate(),
+        chatPromptTemplatePanel.getPromptTemplate(),
+        infillPromptTemplatePanel.getPromptTemplate(),
         baseHostField.getText()
     );
   }

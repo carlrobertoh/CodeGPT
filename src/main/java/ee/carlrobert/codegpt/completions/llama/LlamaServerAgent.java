@@ -90,7 +90,7 @@ public final class LlamaServerAgent implements ServerAgent {
   }
 
   private void startServer(
-      LlamaServerStartupParams params,
+      ServerStartupParams params,
       ServerProgressPanel serverProgressPanel,
       Runnable onSuccess,
       Runnable onServerTerminated) {

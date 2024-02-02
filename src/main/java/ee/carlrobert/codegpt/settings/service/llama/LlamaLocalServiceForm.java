@@ -2,14 +2,20 @@ package ee.carlrobert.codegpt.settings.service.llama;
 
 import static ee.carlrobert.codegpt.ui.UIUtil.createApiKeyPanel;
 import static ee.carlrobert.codegpt.ui.UIUtil.createComment;
+import static ee.carlrobert.codegpt.ui.UIUtil.createRadioButtonsPanel;
+import static ee.carlrobert.codegpt.ui.UIUtil.createTextFieldWithBrowseButton;
 import static ee.carlrobert.codegpt.ui.UIUtil.withEmptyLeftBorder;
 
 import com.intellij.icons.AllIcons.Actions;
+import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.ui.MessageType;
+import com.intellij.openapi.ui.TextFieldWithBrowseButton;
+import com.intellij.openapi.ui.panel.ComponentPanelBuilder;
 import com.intellij.ui.PortField;
 import com.intellij.ui.TitledSeparator;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPasswordField;
+import com.intellij.ui.components.JBRadioButton;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.ui.components.fields.IntegerField;
 import com.intellij.util.ui.FormBuilder;
@@ -26,8 +32,12 @@ import ee.carlrobert.codegpt.credentials.LlamaCredentialsManager;
 import ee.carlrobert.codegpt.settings.service.util.ServerProgressPanel;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaLocalSettings;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
+import ee.carlrobert.codegpt.ui.ChatPromptTemplatePanel;
+import ee.carlrobert.codegpt.ui.InfillPromptTemplatePanel;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
-import ee.carlrobert.codegpt.ui.PromptTemplateField;
+import java.awt.BorderLayout;
+import java.awt.CardLayout;
+import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
@@ -37,6 +47,14 @@ import javax.swing.SwingConstants;
  */
 public abstract class LlamaLocalServiceForm extends FormBuilder {
 
+  private static final String BUNDLED_SERVER_FORM_CARD_CODE = "BundledServerSettings";
+  private static final String CUSTOM_SERVER_FORM_CARD_CODE = "CustomServerSettings";
+
+  private final CardLayout cardLayout;
+  private final JBRadioButton bundledServerRadioButton;
+  private final JBRadioButton customServerRadioButton;
+  private final TextFieldWithBrowseButton browsableCustomServerTextField;
+
   private final LlamaModelSelector modelSelector;
   private final PortField portField;
   private final IntegerField maxTokensField;
@@ -44,15 +62,29 @@ public abstract class LlamaLocalServiceForm extends FormBuilder {
   private final JBTextField additionalParametersField;
   private final JBPasswordField apiKeyField;
 
-  private final PromptTemplateField promptTemplateField;
+  private final ChatPromptTemplatePanel chatPromptTemplateField;
+  private final InfillPromptTemplatePanel infillPromptTemplatePanel;
 
   private final LlamaCredentialsManager credentialsManager;
 
   private final ServerAgent serverAgent;
+  private final LlamaLocalSettings localSettings;
 
   public LlamaLocalServiceForm(LlamaLocalSettings settings, ServerAgent serverAgent) {
     this.credentialsManager = settings.getCredentialsManager();
     this.serverAgent = serverAgent;
+    this.localSettings = settings;
+
+    cardLayout = new CardLayout();
+    bundledServerRadioButton = new JBRadioButton("Use bundled server",
+        !settings.isUseCustomServer());
+    customServerRadioButton = new JBRadioButton("Use custom server",
+        settings.isUseCustomServer());
+    browsableCustomServerTextField = createTextFieldWithBrowseButton(
+        FileChooserDescriptorFactory.createSingleFileDescriptor());
+    browsableCustomServerTextField.setEnabled(!settings.isServerRunning());
+    browsableCustomServerTextField.setText(settings.getServerPath());
+
     var serverRunning = serverAgent.isServerRunning();
     portField = new PortField(settings.getServerPort());
     portField.setEnabled(!serverRunning);
@@ -67,34 +99,71 @@ public abstract class LlamaLocalServiceForm extends FormBuilder {
     threadsField.setValue(settings.getThreads());
     threadsField.setEnabled(!serverRunning);
 
-    additionalParametersField = new JBTextField(settings.getAdditionalParameters(), 30);
+    additionalParametersField = new JBTextField(settings.getAdditionalCompileParameters(), 30);
     additionalParametersField.setEnabled(!serverRunning);
 
     apiKeyField = new JBPasswordField();
 
     modelSelector = new LlamaModelSelector(settings.getModel());
 
-    promptTemplateField = new PromptTemplateField(
-        LlamaSettingsState.getInstance().getRemoteSettings().getPromptTemplate(), true);
+    chatPromptTemplateField = new ChatPromptTemplatePanel(
+        LlamaSettingsState.getInstance().getRemoteSettings().getChatPromptTemplate(), true);
+    infillPromptTemplatePanel = new InfillPromptTemplatePanel(
+        LlamaSettingsState.getInstance().getRemoteSettings().getInfillPromptTemplate(), true);
   }
 
   protected abstract boolean isModelExists(HuggingFaceModel model);
 
-  public void setLocalSettings(LlamaLocalSettings settings) {
-    LlamaCompletionModel model = settings.getModel();
-    modelSelector.setSelectedModel(model);
-    promptTemplateField.setPromptTemplate(settings.getPromptTemplate());
-    portField.setValue(settings.getServerPort());
-    maxTokensField.setValue(settings.getContextSize());
-    threadsField.setValue(settings.getThreads());
-    additionalParametersField.setText(settings.getAdditionalParameters());
-    apiKeyField.setText(settings.getCredentialsManager().getApiKey());
+
+  public JPanel getForm() {
+    JPanel finalPanel = new JPanel(new BorderLayout());
+    finalPanel.add(
+        createRadioButtonsPanel(List.of(bundledServerRadioButton, customServerRadioButton)),
+        BorderLayout.NORTH);
+    finalPanel.add(createFormPanelCards(), BorderLayout.CENTER);
+    return finalPanel;
+  }
+
+  private JPanel createFormPanelCards() {
+    var formPanelCards = new JPanel(cardLayout);
+    formPanelCards.setBorder(JBUI.Borders.emptyLeft(16));
+    formPanelCards.add(new JPanel(), BUNDLED_SERVER_FORM_CARD_CODE);
+    formPanelCards.add(createCustomServerForm(), CUSTOM_SERVER_FORM_CARD_CODE);
+    cardLayout.show(
+        formPanelCards,
+        bundledServerRadioButton.isSelected()
+            ? BUNDLED_SERVER_FORM_CARD_CODE
+            : CUSTOM_SERVER_FORM_CARD_CODE);
+
+    bundledServerRadioButton.addActionListener(e ->
+        cardLayout.show(formPanelCards, BUNDLED_SERVER_FORM_CARD_CODE));
+    customServerRadioButton.addActionListener(e ->
+        cardLayout.show(formPanelCards, CUSTOM_SERVER_FORM_CARD_CODE));
+
+    return formPanelCards;
+  }
+
+  private JPanel createCustomServerForm() {
+    var customModelHelpText = ComponentPanelBuilder.createCommentComponent(
+        CodeGPTBundle.get("settingsConfigurable.service.llama.customServerPath.comment"),
+        true);
+    customModelHelpText.setBorder(JBUI.Borders.empty(0, 4));
+
+    return FormBuilder.createFormBuilder()
+        .addLabeledComponent(
+            CodeGPTBundle.get("settingsConfigurable.service.llama.customServerPath.label"),
+            browsableCustomServerTextField)
+        .addComponentToRightColumn(customModelHelpText)
+        .addVerticalGap(4)
+        .addComponentFillVertically(new JPanel(), 0)
+        .getPanel();
   }
 
   @Override
   public JPanel getPanel() {
     var serverProgressPanel = new ServerProgressPanel();
     serverProgressPanel.setBorder(JBUI.Borders.emptyRight(16));
+    addComponent(createFormPanelCards());
     addComponent(new TitledSeparator(
             CodeGPTBundle.get("settingsConfigurable.service.ollama.modelPreferences.title")))
         .addComponent(withEmptyLeftBorder(modelSelector.getComponent()))
@@ -122,8 +191,13 @@ public abstract class LlamaLocalServiceForm extends FormBuilder {
             additionalParametersField)
         .addComponentToRightColumn(
             createComment("settingsConfigurable.service.llama.additionalParameters.comment"))
-        .addComponent(UI.PanelFactory.panel(promptTemplateField)
+        .addComponent(UI.PanelFactory.panel(chatPromptTemplateField)
             .withLabel(CodeGPTBundle.get("shared.promptTemplate"))
+            .withComment(
+                CodeGPTBundle.get("settingsConfigurable.service.llama.promptTemplate.comment"))
+            .resizeX(false).createPanel())
+        .addComponent(UI.PanelFactory.panel(infillPromptTemplatePanel)
+            .withLabel(CodeGPTBundle.get("shared.infillPromptTemplate"))
             .withComment(
                 CodeGPTBundle.get("settingsConfigurable.service.llama.promptTemplate.comment"))
             .resizeX(false).createPanel())
@@ -156,7 +230,8 @@ public abstract class LlamaLocalServiceForm extends FormBuilder {
       } else {
         disableForm(serverButton, serverProgressPanel);
         serverAgent.startAgent(
-            new ServerStartupParams(modelSelector.getSelectedModel(), getLocalSettings()),
+            new ServerStartupParams(getUsedServerPath(), modelSelector.getSelectedModel(),
+                getLocalSettings()),
             serverProgressPanel,
             () -> {
               setFormEnabled(false);
@@ -164,6 +239,7 @@ public abstract class LlamaLocalServiceForm extends FormBuilder {
                   CodeGPTBundle.get("settingsConfigurable.service.ollama.progress.serverRunning"),
                   Actions.Checked,
                   SwingConstants.LEADING));
+              localSettings.setServerRunning(true);
             },
             () -> {
               setFormEnabled(true);
@@ -175,10 +251,16 @@ public abstract class LlamaLocalServiceForm extends FormBuilder {
                       "settingsConfigurable.service.ollama.progress.serverTerminated"),
                   Actions.Cancel,
                   SwingConstants.LEADING));
+              localSettings.setServerRunning(false);
             });
       }
     });
     return serverButton;
+  }
+
+  private String getUsedServerPath() {
+    return bundledServerRadioButton.isSelected() ? LlamaLocalSettings.BUNDLED_SERVER
+        : browsableCustomServerTextField.getText();
   }
 
   private boolean validateModelConfiguration() {
@@ -217,8 +299,6 @@ public abstract class LlamaLocalServiceForm extends FormBuilder {
     return true;
   }
 
-
-
   private void enableForm(JButton serverButton, ServerProgressPanel progressPanel) {
     setFormEnabled(true);
     serverButton.setText(
@@ -243,13 +323,32 @@ public abstract class LlamaLocalServiceForm extends FormBuilder {
     maxTokensField.setEnabled(enabled);
     threadsField.setEnabled(enabled);
     additionalParametersField.setEnabled(enabled);
-    promptTemplateField.setEnabled(enabled);
+    chatPromptTemplateField.setEnabled(enabled);
+  }
+
+  public void setLocalSettings(LlamaLocalSettings settings) {
+    LlamaCompletionModel model = settings.getModel();
+    modelSelector.setSelectedModel(model);
+    chatPromptTemplateField.setPromptTemplate(settings.getChatPromptTemplate());
+    portField.setValue(settings.getServerPort());
+    maxTokensField.setValue(settings.getContextSize());
+    threadsField.setValue(settings.getThreads());
+    additionalParametersField.setText(settings.getAdditionalCompileParameters());
+    apiKeyField.setText(settings.getCredentialsManager().getApiKey());
+    if (settings.isUseCustomServer()) {
+      customServerRadioButton.setSelected(true);
+      browsableCustomServerTextField.setText(settings.getServerPath());
+    } else {
+      bundledServerRadioButton.setSelected(true);
+    }
   }
 
   public LlamaLocalSettings getLocalSettings() {
     LlamaLocalSettings localSettings = new LlamaLocalSettings(
+        getUsedServerPath(),
         modelSelector.getSelectedModel(),
-        promptTemplateField.getPromptTemplate(),
+        chatPromptTemplateField.getPromptTemplate(),
+        infillPromptTemplatePanel.getPromptTemplate(),
         portField.getNumber(),
         maxTokensField.getValue(),
         threadsField.getValue(),

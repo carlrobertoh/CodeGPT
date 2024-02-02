@@ -5,6 +5,7 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
+import com.intellij.util.xmlb.annotations.Transient;
 import ee.carlrobert.codegpt.completions.PromptTemplate;
 import ee.carlrobert.codegpt.completions.llama.LlamaCompletionModel;
 import ee.carlrobert.codegpt.credentials.LlamaCredentialsManager;
@@ -13,6 +14,7 @@ import ee.carlrobert.codegpt.settings.service.llama.LlamaLocalOrRemoteServiceFor
 import ee.carlrobert.codegpt.settings.state.llama.LlamaLocalSettings;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaRemoteSettings;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaRequestSettings;
+import ee.carlrobert.codegpt.ui.InfillPromptTemplatePanel;
 import org.jetbrains.annotations.NotNull;
 
 @State(name = "CodeGPT_LlamaSettings", storages = @Storage("CodeGPT_CodeGPT_LlamaSettings.xml"))
@@ -54,9 +56,9 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
 
   public PromptTemplate getActualPromptTemplate() {
     if (isRunLocalServer()) {
-      return localSettings.getPromptTemplate();
+      return localSettings.getChatPromptTemplate();
     }
-    return remoteSettings.getPromptTemplate();
+    return remoteSettings.getChatPromptTemplate();
   }
 
 
