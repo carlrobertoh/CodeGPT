@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.codecompletions;
 
+import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAITextCompletionRequest;
@@ -26,11 +27,7 @@ public class CodeCompletionRequestProvider {
   }
 
   public LlamaCompletionRequest buildLlamaRequest() {
-
-    LlamaSettingsState settings = LlamaSettingsState.getInstance();
-    var promptTemplate =
-        settings.isRunLocalServer() ? settings.getLocalSettings().getInfillPromptTemplate()
-            : settings.getRemoteSettings().getInfillPromptTemplate();
+    var promptTemplate = LlamaSettingsState.getInstance().getInfillPromptTemplate();
     var prompt = promptTemplate.buildPrompt(details.getPrefix(), details.getSuffix());
     return new LlamaCompletionRequest.Builder(prompt)
         .setN_predict(MAX_TOKENS)
@@ -38,5 +35,17 @@ public class CodeCompletionRequestProvider {
         .setTemperature(0.1)
         .setStop(promptTemplate.getStopTokens())
         .build();
+  }
+
+  private InfillPromptTemplate getLlamaInfillPromptTemplate() {
+    var settings = LlamaSettingsState.getInstance();
+    if (!settings.isRunLocalServer()) {
+      return settings.getRemoteSettings().getInfillPromptTemplate();
+    }
+    if (settings.isUseCustomModel()) {
+      return settings.getLocalSettings().getInfillPromptTemplate();
+    }
+    return LlamaModel.findByHuggingFaceModel(settings.getLocalSettings().getModel())
+        .getInfillPromptTemplate();
   }
 }

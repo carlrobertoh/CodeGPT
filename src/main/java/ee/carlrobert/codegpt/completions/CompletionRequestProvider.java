@@ -104,7 +104,15 @@ public class CompletionRequestProvider {
       Message message,
       ConversationType conversationType) {
     var settings = LlamaSettingsState.getInstance();
-    PromptTemplate promptTemplate = settings.getActualPromptTemplate();
+    PromptTemplate promptTemplate;
+    if (settings.isRunLocalServer()) {
+      var localSettings = settings.getLocalSettings();
+      promptTemplate = localSettings.isUseCustomModel()
+          ? localSettings.getChatPromptTemplate()
+          : localSettings.getModel().getChatPromptTemplate();
+    } else {
+      promptTemplate = settings.getRemoteSettings().getInfillPromptTemplate();
+    }
 
     var systemPrompt = COMPLETION_SYSTEM_PROMPT;
     if (conversationType == ConversationType.FIX_COMPILE_ERRORS) {

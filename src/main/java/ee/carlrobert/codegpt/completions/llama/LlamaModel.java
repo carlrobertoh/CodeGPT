@@ -4,7 +4,8 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
-import ee.carlrobert.codegpt.completions.PromptTemplate;
+import ee.carlrobert.codegpt.codecompletions.InfillPromptTemplate;
+import ee.carlrobert.codegpt.completions.HuggingFaceModel;
 import java.util.Collections;
 import java.util.List;
 import org.jetbrains.annotations.NotNull;
@@ -17,6 +18,7 @@ public enum LlamaModel {
           + "support for large input contexts, and zero-shot instruction following ability for "
           + "programming tasks.",
       PromptTemplate.LLAMA,
+      InfillPromptTemplate.LLAMA,
       List.of(
           HuggingFaceModel.CODE_LLAMA_7B_Q3,
           HuggingFaceModel.CODE_LLAMA_7B_Q4,
@@ -45,6 +47,7 @@ public enum LlamaModel {
           + "in both English and Chinese. It achieves state-of-the-art performance among "
           + "open-source code models on multiple programming languages and various benchmarks.",
       PromptTemplate.ALPACA,
+      InfillPromptTemplate.DEEPSEEK_CODER,
       List.of(
           HuggingFaceModel.DEEPSEEK_CODER_1_3B_Q3,
           HuggingFaceModel.DEEPSEEK_CODER_1_3B_Q4,
@@ -85,6 +88,7 @@ public enum LlamaModel {
   private final String label;
   private final String description;
   private final PromptTemplate promptTemplate;
+  private final InfillPromptTemplate infillPromptTemplate;
   private final List<HuggingFaceModel> huggingFaceModels;
 
   LlamaModel(
@@ -92,14 +96,23 @@ public enum LlamaModel {
       String description,
       PromptTemplate promptTemplate,
       List<HuggingFaceModel> huggingFaceModels) {
+    this(label, description, promptTemplate, null, huggingFaceModels);
+  }
+
+  LlamaModel(
+      String label,
+      String description,
+      PromptTemplate promptTemplate,
+      InfillPromptTemplate infillPromptTemplate,
+      List<HuggingFaceModel> huggingFaceModels) {
     this.label = label;
     this.description = description;
     this.promptTemplate = promptTemplate;
+    this.infillPromptTemplate = infillPromptTemplate;
     this.huggingFaceModels = huggingFaceModels;
   }
 
-  public static @NotNull LlamaModel findByHuggingFaceModel(
-      HuggingFaceModel huggingFaceModel) {
+  public static @NotNull LlamaModel findByHuggingFaceModel(HuggingFaceModel huggingFaceModel) {
     for (var llamaModel : LlamaModel.values()) {
       if (llamaModel.getHuggingFaceModels().contains(huggingFaceModel)) {
         return llamaModel;
@@ -126,6 +139,14 @@ public enum LlamaModel {
     return promptTemplate;
   }
 
+  public InfillPromptTemplate getInfillPromptTemplate() {
+    return infillPromptTemplate;
+  }
+
+  public List<HuggingFaceModel> getHuggingFaceModels() {
+    return huggingFaceModels;
+  }
+
   public String getFormattedModelSizeRange() {
     var parameters = huggingFaceModels.stream()
         .map(HuggingFaceModel::getParameterSize)
@@ -134,10 +155,6 @@ public enum LlamaModel {
       return parameters.iterator().next() + "B";
     }
     return format("(%dB - %dB)", Collections.min(parameters), Collections.max(parameters));
-  }
-
-  public List<HuggingFaceModel> getHuggingFaceModels() {
-    return huggingFaceModels;
   }
 
   public List<Integer> getSortedUniqueModelSizes() {
