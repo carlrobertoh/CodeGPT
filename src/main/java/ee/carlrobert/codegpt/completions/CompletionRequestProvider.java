@@ -105,9 +105,14 @@ public class CompletionRequestProvider {
       Message message,
       ConversationType conversationType) {
     var settings = LlamaSettingsState.getInstance();
-    var promptTemplate = settings.isUseCustomModel()
-        ? settings.getPromptTemplate()
-        : LlamaModel.findByHuggingFaceModel(settings.getHuggingFaceModel()).getPromptTemplate();
+    PromptTemplate promptTemplate;
+    if (settings.isRunLocalServer()) {
+      promptTemplate = settings.isUseCustomModel()
+          ? settings.getLocalModelPromptTemplate()
+          : LlamaModel.findByHuggingFaceModel(settings.getHuggingFaceModel()).getPromptTemplate();
+    } else {
+      promptTemplate = settings.getRemoteModelPromptTemplate();
+    }
 
     var systemPrompt = COMPLETION_SYSTEM_PROMPT;
     if (conversationType == ConversationType.FIX_COMPILE_ERRORS) {

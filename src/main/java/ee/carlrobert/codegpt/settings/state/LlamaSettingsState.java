@@ -8,6 +8,7 @@ import com.intellij.util.xmlb.XmlSerializerUtil;
 import ee.carlrobert.codegpt.codecompletions.InfillPromptTemplate;
 import ee.carlrobert.codegpt.completions.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
+import ee.carlrobert.codegpt.credentials.LlamaCredentialsManager;
 import ee.carlrobert.codegpt.settings.service.ServiceSelectionForm;
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -16,13 +17,15 @@ import org.jetbrains.annotations.NotNull;
 @State(name = "CodeGPT_LlamaSettings", storages = @Storage("CodeGPT_CodeGPT_LlamaSettings.xml"))
 public class LlamaSettingsState implements PersistentStateComponent<LlamaSettingsState> {
 
+  private boolean runLocalServer = true;
   private boolean useCustomModel;
   private String customLlamaModelPath = "";
-  private boolean useCustomServer;
-  private String customLlamaServerPath = "";
   private HuggingFaceModel huggingFaceModel = HuggingFaceModel.CODE_LLAMA_7B_Q4;
-  private PromptTemplate promptTemplate = PromptTemplate.LLAMA;
-  private InfillPromptTemplate infillPromptTemplate = InfillPromptTemplate.LLAMA;
+  private PromptTemplate localModelPromptTemplate = PromptTemplate.LLAMA;
+  private PromptTemplate remoteModelPromptTemplate = PromptTemplate.LLAMA;
+  private InfillPromptTemplate localModelInfillPromptTemplate = InfillPromptTemplate.LLAMA;
+  private InfillPromptTemplate remoteModelInfillPromptTemplate = InfillPromptTemplate.LLAMA;
+  private String baseHost = "http://localhost:8080";
   private Integer serverPort = getRandomAvailablePortOrDefault();
   private int contextSize = 2048;
   private int threads = 8;
@@ -52,18 +55,25 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
   public boolean isModified(ServiceSelectionForm serviceSelectionForm) {
     var modelPreferencesForm = serviceSelectionForm.getLlamaModelPreferencesForm();
     var requestPreferencesForm = serviceSelectionForm.getLlamaRequestPreferencesForm();
-    return serverPort != serviceSelectionForm.getLlamaServerPort()
+    var serverPreferencesForm = serviceSelectionForm.getLlamaServerPreferencesForm();
+
+    return !serviceSelectionForm.getLlamaServerPreferencesForm().getApiKey()
+        .equals(LlamaCredentialsManager.getInstance().getApiKey())
+        || runLocalServer != serviceSelectionForm.isLlamaRunLocalServer()
+        || !localModelPromptTemplate.equals(modelPreferencesForm.getPromptTemplate())
+        || !remoteModelPromptTemplate.equals(serviceSelectionForm.getLlamaPromptTemplate())
+        || localModelInfillPromptTemplate != modelPreferencesForm.getInfillPromptTemplate()
+        || remoteModelInfillPromptTemplate != serverPreferencesForm.getInfillPromptTemplate()
+        || !baseHost.equals(serviceSelectionForm.getLlamaBaseHost())
+        || serverPort != serviceSelectionForm.getLlamaServerPort()
         || contextSize != serviceSelectionForm.getContextSize()
         || threads != serviceSelectionForm.getThreads()
-        || useCustomServer != serviceSelectionForm.isUseCustomLlamaServer()
-        || !customLlamaServerPath.equals(serviceSelectionForm.getCustomLlamaServerPath())
         || !additionalParameters.equals(serviceSelectionForm.getAdditionalParameters())
         || huggingFaceModel != modelPreferencesForm.getSelectedModel()
         || topK != requestPreferencesForm.getTopK()
         || topP != requestPreferencesForm.getTopP()
         || minP != requestPreferencesForm.getMinP()
         || repeatPenalty != requestPreferencesForm.getRepeatPenalty()
-        || !promptTemplate.equals(modelPreferencesForm.getPromptTemplate())
         || useCustomModel != modelPreferencesForm.isUseCustomLlamaModel()
         || !customLlamaModelPath.equals(modelPreferencesForm.getCustomLlamaModelPath());
   }
@@ -71,19 +81,24 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
   public void apply(ServiceSelectionForm serviceSelectionForm) {
     var modelPreferencesForm = serviceSelectionForm.getLlamaModelPreferencesForm();
     customLlamaModelPath = modelPreferencesForm.getCustomLlamaModelPath();
+    customLlamaModelPath = modelPreferencesForm.getCustomLlamaModelPath();
     huggingFaceModel = modelPreferencesForm.getSelectedModel();
     useCustomModel = modelPreferencesForm.isUseCustomLlamaModel();
-    promptTemplate = modelPreferencesForm.getPromptTemplate();
+    localModelPromptTemplate = modelPreferencesForm.getPromptTemplate();
+    remoteModelPromptTemplate = serviceSelectionForm.getLlamaPromptTemplate();
+    localModelInfillPromptTemplate = modelPreferencesForm.getInfillPromptTemplate();
+    remoteModelInfillPromptTemplate =
+        serviceSelectionForm.getLlamaServerPreferencesForm().getInfillPromptTemplate();
     var requestPreferencesForm = serviceSelectionForm.getLlamaRequestPreferencesForm();
     topK = requestPreferencesForm.getTopK();
     topP = requestPreferencesForm.getTopP();
     minP = requestPreferencesForm.getMinP();
     repeatPenalty = requestPreferencesForm.getRepeatPenalty();
+    runLocalServer = serviceSelectionForm.isLlamaRunLocalServer();
+    baseHost = serviceSelectionForm.getLlamaBaseHost();
     serverPort = serviceSelectionForm.getLlamaServerPort();
     contextSize = serviceSelectionForm.getContextSize();
     threads = serviceSelectionForm.getThreads();
-    useCustomServer = serviceSelectionForm.isUseCustomLlamaServer();
-    customLlamaServerPath = serviceSelectionForm.getCustomLlamaServerPath();
     additionalParameters = serviceSelectionForm.getAdditionalParameters();
   }
 
@@ -92,34 +107,24 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
     modelPreferencesForm.setSelectedModel(huggingFaceModel);
     modelPreferencesForm.setCustomLlamaModelPath(customLlamaModelPath);
     modelPreferencesForm.setUseCustomLlamaModel(useCustomModel);
-    modelPreferencesForm.setPromptTemplate(promptTemplate);
+    modelPreferencesForm.setPromptTemplate(localModelPromptTemplate);
+    modelPreferencesForm.setInfillPromptTemplate(localModelInfillPromptTemplate);
     var requestPreferencesForm = serviceSelectionForm.getLlamaRequestPreferencesForm();
     requestPreferencesForm.setTopK(topK);
     requestPreferencesForm.setTopP(topP);
     requestPreferencesForm.setMinP(minP);
     requestPreferencesForm.setRepeatPenalty(repeatPenalty);
+    serviceSelectionForm.setLlamaRunLocalServer(runLocalServer);
+    serviceSelectionForm.setLlamaBaseHost(baseHost);
     serviceSelectionForm.setLlamaServerPort(serverPort);
+    serviceSelectionForm.setLlamaPromptTemplate(remoteModelPromptTemplate);
     serviceSelectionForm.setContextSize(contextSize);
     serviceSelectionForm.setThreads(threads);
-    serviceSelectionForm.setUseCustomLlamaServer(useCustomServer);
-    serviceSelectionForm.setCustomLlamaServerPath(customLlamaServerPath);
     serviceSelectionForm.setAdditionalParameters(additionalParameters);
-  }
 
-  public boolean isUseCustomServer() {
-    return useCustomServer;
-  }
-
-  public void setUseCustomServer(boolean useCustomServer) {
-    this.useCustomServer = useCustomServer;
-  }
-
-  public String getCustomLlamaServerPath() {
-    return customLlamaServerPath;
-  }
-
-  public void setCustomLlamaServerPath(String customLlamaServerPath) {
-    this.customLlamaServerPath = customLlamaServerPath;
+    var llamaServerPreferencesForm = serviceSelectionForm.getLlamaServerPreferencesForm();
+    llamaServerPreferencesForm.setInfillPromptTemplate(remoteModelInfillPromptTemplate);
+    llamaServerPreferencesForm.setApiKey(LlamaCredentialsManager.getInstance().getApiKey());
   }
 
   public boolean isUseCustomModel() {
@@ -146,12 +151,56 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
     this.huggingFaceModel = huggingFaceModel;
   }
 
-  public PromptTemplate getPromptTemplate() {
-    return promptTemplate;
+  public PromptTemplate getLocalModelPromptTemplate() {
+    return localModelPromptTemplate;
   }
 
-  public void setPromptTemplate(PromptTemplate promptTemplate) {
-    this.promptTemplate = promptTemplate;
+  public void setLocalModelPromptTemplate(
+      PromptTemplate localModelPromptTemplate) {
+    this.localModelPromptTemplate = localModelPromptTemplate;
+  }
+
+  public InfillPromptTemplate getLocalModelInfillPromptTemplate() {
+    return localModelInfillPromptTemplate;
+  }
+
+  public void setLocalModelInfillPromptTemplate(
+      InfillPromptTemplate localModelInfillPromptTemplate) {
+    this.localModelInfillPromptTemplate = localModelInfillPromptTemplate;
+  }
+
+  public InfillPromptTemplate getRemoteModelInfillPromptTemplate() {
+    return remoteModelInfillPromptTemplate;
+  }
+
+  public void setRemoteModelInfillPromptTemplate(
+      InfillPromptTemplate remoteModelInfillPromptTemplate) {
+    this.remoteModelInfillPromptTemplate = remoteModelInfillPromptTemplate;
+  }
+
+  public boolean isRunLocalServer() {
+    return runLocalServer;
+  }
+
+  public void setRunLocalServer(boolean runLocalServer) {
+    this.runLocalServer = runLocalServer;
+  }
+
+  public String getBaseHost() {
+    return baseHost;
+  }
+
+  public void setBaseHost(String baseHost) {
+    this.baseHost = baseHost;
+  }
+
+  public PromptTemplate getRemoteModelPromptTemplate() {
+    return remoteModelPromptTemplate;
+  }
+
+  public void setRemoteModelPromptTemplate(
+      PromptTemplate remoteModelPromptTemplate) {
+    this.remoteModelPromptTemplate = remoteModelPromptTemplate;
   }
 
   public Integer getServerPort() {
@@ -216,14 +265,6 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
 
   public void setRepeatPenalty(double repeatPenalty) {
     this.repeatPenalty = repeatPenalty;
-  }
-
-  public InfillPromptTemplate getInfillPromptTemplate() {
-    return infillPromptTemplate;
-  }
-
-  public void setInfillPromptTemplate(InfillPromptTemplate infillPromptTemplate) {
-    this.infillPromptTemplate = infillPromptTemplate;
   }
 
   private static Integer getRandomAvailablePortOrDefault() {
