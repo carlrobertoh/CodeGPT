@@ -40,15 +40,19 @@ public final class LlamaServerAgent implements ServerAgent {
       Runnable onSuccess,
       Runnable onServerTerminated) {
     ApplicationManager.getApplication().invokeLater(() -> {
-      try {
-        serverProgressPanel.updateText(
-            CodeGPTBundle.get("llamaServerAgent.buildingProject.description"));
-        makeProcessHandler = new OSProcessHandler(getMakeCommandLinde());
-        makeProcessHandler.addProcessListener(
-            getMakeProcessListener(params, serverProgressPanel, onSuccess, onServerTerminated));
-        makeProcessHandler.startNotify();
-      } catch (ExecutionException e) {
-        throw new RuntimeException(e);
+      if (!params.isUseCustomServer()) {
+        try {
+          serverProgressPanel.updateText(
+              CodeGPTBundle.get("llamaServerAgent.buildingProject.description"));
+          makeProcessHandler = new OSProcessHandler(getMakeCommandLinde());
+          makeProcessHandler.addProcessListener(
+              getMakeProcessListener(params, serverProgressPanel, onSuccess, onServerTerminated));
+          makeProcessHandler.startNotify();
+        } catch (ExecutionException e) {
+          throw new RuntimeException(e);
+        }
+      } else {
+        startServer(params, serverProgressPanel, onSuccess, onServerTerminated);
       }
     });
   }
@@ -80,21 +84,29 @@ public final class LlamaServerAgent implements ServerAgent {
 
       @Override
       public void processTerminated(@NotNull ProcessEvent event) {
-        try {
-          LOG.info("Booting up llama server");
-
-          serverProgressPanel.updateText(
-              CodeGPTBundle.get("llamaServerAgent.serverBootup.description"));
-          startServerProcessHandler = new OSProcessHandler.Silent(getServerCommandLine(params));
-          startServerProcessHandler.addProcessListener(
-              getProcessListener(params.getPort(), onSuccess, onServerTerminated));
-          startServerProcessHandler.startNotify();
-        } catch (ExecutionException ex) {
-          LOG.error("Unable to start llama server", ex);
-          throw new RuntimeException(ex);
-        }
+        startServer(params, serverProgressPanel, onSuccess, onServerTerminated);
       }
     };
+  }
+
+  private void startServer(
+      LlamaServerStartupParams params,
+      ServerProgressPanel serverProgressPanel,
+      Runnable onSuccess,
+      Runnable onServerTerminated) {
+    try {
+      LOG.info("Booting up llama server");
+
+      serverProgressPanel.updateText(
+          CodeGPTBundle.get("llamaServerAgent.serverBootup.description"));
+      startServerProcessHandler = new OSProcessHandler.Silent(getServerCommandLine(params));
+      startServerProcessHandler.addProcessListener(
+          getProcessListener(params.getPort(), onSuccess, onServerTerminated));
+      startServerProcessHandler.startNotify();
+    } catch (ExecutionException ex) {
+      LOG.error("Unable to start llama server", ex);
+      throw new RuntimeException(ex);
+    }
   }
 
   private ProcessListener getProcessListener(
@@ -153,8 +165,8 @@ public final class LlamaServerAgent implements ServerAgent {
 
   private GeneralCommandLine getServerCommandLine(ServerStartupParams params) {
     GeneralCommandLine commandLine = new GeneralCommandLine().withCharset(StandardCharsets.UTF_8);
-    commandLine.setExePath("./server");
-    commandLine.withWorkDirectory(CodeGPTPlugin.getLlamaSourcePath());
+    commandLine.setExePath("./" + params.getServerFileName());
+    commandLine.withWorkDirectory(params.getServerDirectory());
     String modelFileName = LlamaCompletionModel.getModelPath(params.getSelectedModel());
     commandLine.addParameters(
         "-m", modelFileName,
