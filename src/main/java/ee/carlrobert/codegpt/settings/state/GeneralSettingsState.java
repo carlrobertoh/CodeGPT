@@ -7,7 +7,7 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
-import ee.carlrobert.codegpt.completions.llama.CustomLamaModel;
+import ee.carlrobert.codegpt.completions.llama.CustomLlamaModel;
 import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaCompletionModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
@@ -52,13 +52,13 @@ public class GeneralSettingsState implements PersistentStateComponent<GeneralSet
       setSelectedService(ServiceType.AZURE);
     }
     if ("llama.chat.completion".equals(clientCode)) {
-      setSelectedService(ServiceType.LLAMA);
+      setSelectedService(ServiceType.LLAMA_CPP);
       var llamaSettings = LlamaSettingsState.getInstance();
       try {
         llamaSettings.getLocalSettings()
             .setModel(HuggingFaceModel.valueOf(conversation.getModel()));
       } catch (IllegalArgumentException ignore) {
-        llamaSettings.getLocalSettings().setModel(new CustomLamaModel(conversation.getModel()));
+        llamaSettings.getLocalSettings().setModel(new CustomLlamaModel(conversation.getModel()));
       }
     }
     if ("you.chat.completion".equals(clientCode)) {
@@ -74,11 +74,11 @@ public class GeneralSettingsState implements PersistentStateComponent<GeneralSet
         return AzureSettingsState.getInstance().getDeploymentId();
       case YOU:
         return "YouCode";
-      case LLAMA:
+      case LLAMA_CPP:
         var llamaSettings = LlamaSettingsState.getInstance();
         LlamaCompletionModel usedModel = llamaSettings.getUsedModel();
-        if (usedModel instanceof CustomLamaModel) {
-          CustomLamaModel customModel = (CustomLamaModel) usedModel;
+        if (usedModel instanceof CustomLlamaModel) {
+          CustomLlamaModel customModel = (CustomLlamaModel) usedModel;
           var filePath = customModel.getModelPath();
           int lastSeparatorIndex = filePath.lastIndexOf('/');
           if (lastSeparatorIndex == -1) {

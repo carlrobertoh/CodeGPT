@@ -58,7 +58,7 @@ public class ServicesSelectionForm {
     var settings = LlamaSettingsState.getInstance();
     return new LlamaServiceForm(
         new LlamaLocalOrRemoteServiceForm(settings,
-            ApplicationManager.getApplication().getService(LlamaServerAgent.class), ServiceType.LLAMA) {
+            ApplicationManager.getApplication().getService(LlamaServerAgent.class), ServiceType.LLAMA_CPP) {
           @Override
           public boolean isModelExists(HuggingFaceModel model) {
             return FileUtil.exists(

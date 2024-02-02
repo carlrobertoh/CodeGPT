@@ -1,7 +1,7 @@
 package ee.carlrobert.codegpt.codecompletions;
 
 
-import static ee.carlrobert.codegpt.settings.service.ServiceType.LLAMA;
+import static ee.carlrobert.codegpt.settings.service.ServiceType.LLAMA_CPP;
 
 import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator;
 import com.intellij.openapi.project.Project;
@@ -36,7 +36,7 @@ public class CallDebouncer {
     Future<?> prev = delayedMap.put(key, scheduler.schedule(() -> {
       try {
         cancelPreviousCall();
-        var progressIndicator = LLAMA.equals(GeneralSettingsState.getInstance().getSelectedService())
+        var progressIndicator = LLAMA_CPP.equals(GeneralSettingsState.getInstance().getSelectedService())
             ? createProgressIndicator()
             : null;
         currentCall.set(runnable.call(progressIndicator));

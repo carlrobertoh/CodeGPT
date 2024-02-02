@@ -36,10 +36,10 @@ public class SettingsComponent {
     cards.add(servicesSelectionForm.getOpenAIServiceSectionPanel().getPanel(), ServiceType.OPENAI.getCode());
     cards.add(servicesSelectionForm.getAzureServiceSectionPanel().getPanel(), ServiceType.AZURE.getCode());
     cards.add(servicesSelectionForm.getYouServiceSectionPanel(), ServiceType.YOU.getCode());
-    cards.add(servicesSelectionForm.getLlamaServiceSectionPanel(), ServiceType.LLAMA.getCode());
+    cards.add(servicesSelectionForm.getLlamaServiceSectionPanel(), ServiceType.LLAMA_CPP.getCode());
     var serviceComboBoxModel = new DefaultComboBoxModel<ServiceType>();
     serviceComboBoxModel.addAll(Arrays.stream(ServiceType.values())
-        .filter(it -> ServiceType.LLAMA != it || SystemInfoRt.isUnix)
+        .filter(it -> ServiceType.LLAMA_CPP != it || SystemInfoRt.isUnix)
         .collect(toList()));
     serviceComboBox = new ComboBox<>(serviceComboBoxModel);
     serviceComboBox.setSelectedItem(ServiceType.OPENAI);

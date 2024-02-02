@@ -13,9 +13,6 @@ import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import java.util.List;
-import java.util.Map;
-import javax.swing.ButtonGroup;
-import javax.swing.JComponent;
 import javax.swing.JPanel;
 
 /**
@@ -59,25 +56,14 @@ public class AzureServiceForm extends
         azureSettings.isUseAzureActiveDirectoryAuthentication());
 
     apiKeyFieldPanel = super.authenticationComponents().get(0).createPanel();
-    registerPanelsVisibility(azureSettings);
-    registerRadioButtons();
-    return List.of(UI.PanelFactory
-            .panel(useAzureApiKeyAuthenticationRadioButton)
-            .resizeX(false),
-        UI.PanelFactory
-            .panel(apiKeyFieldPanel),
-        UI.PanelFactory
-            .panel(useAzureActiveDirectoryAuthenticationRadioButton)
-            .resizeX(false),
-        UI.PanelFactory
-            .panel(azureActiveDirectoryTokenFieldPanel)
-    );
+    return UIUtil.createSelectLayoutBuilders(useAzureApiKeyAuthenticationRadioButton, apiKeyFieldPanel,
+            useAzureActiveDirectoryAuthenticationRadioButton, azureActiveDirectoryTokenFieldPanel,
+            azureSettings.isUseAzureApiKeyAuthentication());
   }
 
   @Override
   protected List<PanelBuilder> additionalServerConfigPanels() {
     var azureSettings = AzureSettingsState.getInstance();
-
     azureResourceNameField = new JBTextField(azureSettings.getResourceName(), 35);
     azureDeploymentIdField = new JBTextField(azureSettings.getDeploymentId(), 35);
     azureApiVersionField = new JBTextField(azureSettings.getApiVersion(), 35);
@@ -100,30 +86,6 @@ public class AzureServiceForm extends
             .resizeX(false)));
     return panels;
   }
-
-  private void registerPanelsVisibility(AzureSettingsState azureSettings) {
-    apiKeyFieldPanel.setVisible(azureSettings.isUseAzureApiKeyAuthentication());
-    azureActiveDirectoryTokenFieldPanel.setVisible(
-        azureSettings.isUseAzureActiveDirectoryAuthentication());
-  }
-
-  private void registerRadioButtons() {
-    registerRadioButtons(List.of(
-        Map.entry(useAzureApiKeyAuthenticationRadioButton, apiKeyFieldPanel),
-        Map.entry(useAzureActiveDirectoryAuthenticationRadioButton,
-            azureActiveDirectoryTokenFieldPanel)));
-  }
-
-  private void registerRadioButtons(List<Map.Entry<JBRadioButton, JComponent>> entries) {
-    var buttonGroup = new ButtonGroup();
-    entries.forEach(entry -> buttonGroup.add(entry.getKey()));
-    entries.forEach(entry -> entry.getKey().addActionListener((e) -> {
-      for (Map.Entry<JBRadioButton, JComponent> innerEntry : entries) {
-        innerEntry.getValue().setVisible(innerEntry.equals(entry));
-      }
-    }));
-  }
-
 
   public void setAzureActiveDirectoryAuthenticationSelected(boolean selected) {
     useAzureActiveDirectoryAuthenticationRadioButton.setSelected(selected);

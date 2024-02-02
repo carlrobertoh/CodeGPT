@@ -9,6 +9,10 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.EncodingManager;
+import ee.carlrobert.codegpt.completions.llama.CustomLlamaModel;
+import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
+import ee.carlrobert.codegpt.completions.llama.LlamaCompletionModel;
+import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.conversations.message.Message;
@@ -107,11 +111,15 @@ public class CompletionRequestProvider {
     PromptTemplate promptTemplate;
     if (settings.isRunLocalServer()) {
       var localSettings = settings.getLocalSettings();
-      promptTemplate = localSettings.isUseCustomModel()
-          ? localSettings.getChatPromptTemplate()
-          : localSettings.getModel().getChatPromptTemplate();
+      LlamaCompletionModel model = localSettings.getModel();
+      if (model instanceof CustomLlamaModel) {
+        promptTemplate = localSettings.getChatPromptTemplate();
+      } else {
+        promptTemplate = LlamaModel.findByHuggingFaceModel((HuggingFaceModel) model)
+            .getPromptTemplate();
+      }
     } else {
-      promptTemplate = settings.getRemoteSettings().getInfillPromptTemplate();
+      promptTemplate = settings.getRemoteSettings().getChatPromptTemplate();
     }
 
     var systemPrompt = COMPLETION_SYSTEM_PROMPT;

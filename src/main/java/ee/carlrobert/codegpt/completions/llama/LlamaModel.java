@@ -5,7 +5,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 import ee.carlrobert.codegpt.codecompletions.InfillPromptTemplate;
-import ee.carlrobert.codegpt.completions.HuggingFaceModel;
+import ee.carlrobert.codegpt.completions.PromptTemplate;
 import java.util.Collections;
 import java.util.List;
 import org.jetbrains.annotations.NotNull;
@@ -87,27 +87,27 @@ public enum LlamaModel {
 
   private final String label;
   private final String description;
-  private final PromptTemplate promptTemplate;
+  private final PromptTemplate chatPromptTemplate;
   private final InfillPromptTemplate infillPromptTemplate;
   private final List<HuggingFaceModel> huggingFaceModels;
 
   LlamaModel(
       String label,
       String description,
-      PromptTemplate promptTemplate,
+      PromptTemplate chatPromptTemplate,
       List<HuggingFaceModel> huggingFaceModels) {
-    this(label, description, promptTemplate, null, huggingFaceModels);
+    this(label, description, chatPromptTemplate, null, huggingFaceModels);
   }
 
   LlamaModel(
       String label,
       String description,
-      PromptTemplate promptTemplate,
+      PromptTemplate chatPromptTemplate,
       InfillPromptTemplate infillPromptTemplate,
       List<HuggingFaceModel> huggingFaceModels) {
     this.label = label;
     this.description = description;
-    this.promptTemplate = promptTemplate;
+    this.chatPromptTemplate = chatPromptTemplate;
     this.infillPromptTemplate = infillPromptTemplate;
     this.huggingFaceModels = huggingFaceModels;
   }
@@ -136,7 +136,7 @@ public enum LlamaModel {
   }
 
   public PromptTemplate getPromptTemplate() {
-    return promptTemplate;
+    return chatPromptTemplate;
   }
 
   public InfillPromptTemplate getInfillPromptTemplate() {

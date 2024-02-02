@@ -1,7 +1,7 @@
 package ee.carlrobert.codegpt.completions;
 
 import static ee.carlrobert.codegpt.settings.service.ServiceType.AZURE;
-import static ee.carlrobert.codegpt.settings.service.ServiceType.LLAMA;
+import static ee.carlrobert.codegpt.settings.service.ServiceType.LLAMA_CPP;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.OPENAI;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.YOU;
 
@@ -9,8 +9,6 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
 import ee.carlrobert.codegpt.codecompletions.CodeCompletionRequestProvider;
 import ee.carlrobert.codegpt.codecompletions.InfillRequestDetails;
-import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
-import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.GeneralSettingsState;
@@ -60,7 +58,7 @@ public final class CompletionRequestService {
         return CompletionClientProvider.getYouClient().getChatCompletionAsync(
             requestProvider.buildYouCompletionRequest(callParameters.getMessage()),
             eventListener);
-      case LLAMA:
+      case LLAMA_CPP:
         return CompletionClientProvider.getLlamaClient().getChatCompletionAsync(
             requestProvider.buildLlamaCompletionRequest(
                 callParameters.getMessage(),
@@ -79,7 +77,7 @@ public final class CompletionRequestService {
       case OPENAI:
         return CompletionClientProvider.getOpenAIClient()
             .getCompletionAsync(requestProvider.buildOpenAIRequest(), eventListener);
-      case LLAMA:
+      case LLAMA_CPP:
         return CompletionClientProvider.getLlamaClient()
             .getChatCompletionAsync(requestProvider.buildLlamaRequest(), eventListener);
       default:
@@ -107,7 +105,7 @@ public final class CompletionRequestService {
 
   public Optional<String> getLookupCompletion(String prompt) {
     var selectedService = GeneralSettingsState.getInstance().getSelectedService();
-    if (selectedService == YOU || selectedService == LLAMA) {
+    if (selectedService == YOU || selectedService == LLAMA_CPP) {
       return Optional.empty();
     }
 

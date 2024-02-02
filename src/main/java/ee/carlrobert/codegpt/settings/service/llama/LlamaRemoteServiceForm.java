@@ -22,7 +22,7 @@ public class LlamaRemoteServiceForm extends RemoteServiceForm<LlamaCredentialsMa
   private InfillPromptTemplatePanel infillPromptTemplatePanel;
 
   public LlamaRemoteServiceForm() {
-    super(LlamaSettingsState.getInstance().getRemoteSettings(), ServiceType.LLAMA);
+    super(LlamaSettingsState.getInstance().getRemoteSettings(), ServiceType.LLAMA_CPP);
   }
 
   @Override

@@ -31,7 +31,7 @@ public interface ShortcutsTestMixin {
   }
 
   default void useLlamaService() {
-    GeneralSettingsState.getInstance().setSelectedService(ServiceType.LLAMA);
+    GeneralSettingsState.getInstance().setSelectedService(ServiceType.LLAMA_CPP);
     LlamaSettingsState llamaSettingsState = LlamaSettingsState.getInstance();
     llamaSettingsState.setRunLocalServer(true);
     var localSettings = llamaSettingsState.getLocalSettings();

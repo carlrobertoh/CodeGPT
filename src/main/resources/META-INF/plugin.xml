@@ -34,7 +34,6 @@
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.YouSettingsState"/>
         <applicationService
           serviceImplementation="ee.carlrobert.codegpt.settings.state.LlamaSettingsState"/>
-        <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.llama.ollama.OllamaSettingsState"/>
         <applicationService
           serviceImplementation="ee.carlrobert.codegpt.settings.state.util.IncludedFilesSettingsState"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.configuration.ConfigurationState"/>

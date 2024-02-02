@@ -1,5 +1,8 @@
 package ee.carlrobert.codegpt.codecompletions;
 
+import ee.carlrobert.codegpt.completions.llama.CustomLlamaModel;
+import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
+import ee.carlrobert.codegpt.completions.llama.LlamaCompletionModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
@@ -27,7 +30,7 @@ public class CodeCompletionRequestProvider {
   }
 
   public LlamaCompletionRequest buildLlamaRequest() {
-    var promptTemplate = LlamaSettingsState.getInstance().getInfillPromptTemplate();
+    var promptTemplate = getLlamaInfillPromptTemplate();
     var prompt = promptTemplate.buildPrompt(details.getPrefix(), details.getSuffix());
     return new LlamaCompletionRequest.Builder(prompt)
         .setN_predict(MAX_TOKENS)
@@ -42,10 +45,11 @@ public class CodeCompletionRequestProvider {
     if (!settings.isRunLocalServer()) {
       return settings.getRemoteSettings().getInfillPromptTemplate();
     }
-    if (settings.isUseCustomModel()) {
+    LlamaCompletionModel model = settings.getLocalSettings().getModel();
+    if (model instanceof CustomLlamaModel) {
       return settings.getLocalSettings().getInfillPromptTemplate();
     }
-    return LlamaModel.findByHuggingFaceModel(settings.getLocalSettings().getModel())
+    return LlamaModel.findByHuggingFaceModel((HuggingFaceModel) model)
         .getInfillPromptTemplate();
   }
 }

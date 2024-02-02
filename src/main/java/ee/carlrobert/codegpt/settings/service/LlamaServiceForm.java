@@ -13,7 +13,7 @@ import javax.swing.JPanel;
 
 /**
  * Form containing all forms to configure using
- * {@link ee.carlrobert.codegpt.settings.service.ServiceType#LLAMA}
+ * {@link ee.carlrobert.codegpt.settings.service.ServiceType#LLAMA_CPP}
  */
 public class LlamaServiceForm extends JPanel {
 

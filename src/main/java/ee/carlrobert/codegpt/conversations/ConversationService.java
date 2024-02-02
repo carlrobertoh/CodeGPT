@@ -195,7 +195,7 @@ public final class ConversationService {
         return AzureSettingsState.getInstance().getDeploymentId();
       case YOU:
         return "YouCode";
-      case LLAMA:
+      case LLAMA_CPP:
         return LlamaSettingsState.getInstance().getUsedModelPath();
       default:
         throw new RuntimeException("Could not find corresponding service mapping");

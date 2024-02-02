@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.settings.service.llama;
 
+import static ee.carlrobert.codegpt.ui.UIUtil.createRadioButtonsPanel;
 import static ee.carlrobert.codegpt.ui.UIUtil.createTextFieldWithBrowseButton;
 import static ee.carlrobert.codegpt.ui.UIUtil.createRadioButtonGroupLayouts;
 import static java.lang.String.format;
@@ -23,20 +24,25 @@ import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBRadioButton;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
+import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
-import ee.carlrobert.codegpt.completions.llama.CustomLamaModel;
+import ee.carlrobert.codegpt.codecompletions.InfillPromptTemplate;
+import ee.carlrobert.codegpt.completions.llama.CustomLlamaModel;
 import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaCompletionModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaServerAgent;
 import ee.carlrobert.codegpt.settings.service.util.ModelSelector;
+import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.ui.ComponentWithStringValue;
+import ee.carlrobert.codegpt.ui.InfillPromptTemplatePanel;
 import ee.carlrobert.codegpt.ui.UIUtil.RadioButtonWithLayout;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.io.File;
+import java.util.List;
 import java.util.Map;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -48,7 +54,7 @@ import javax.swing.SwingUtilities;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * {@link ModelSelector} with either {@link HuggingFaceModel} selection or {@link CustomLamaModel}
+ * {@link ModelSelector} with either {@link HuggingFaceModel} selection or {@link CustomLlamaModel}
  * file chooser.
  */
 public class LlamaModelSelector implements ModelSelector<LlamaCompletionModel> {
@@ -83,9 +89,10 @@ public class LlamaModelSelector implements ModelSelector<LlamaCompletionModel> {
   private final DefaultComboBoxModel<HuggingFaceModel> huggingFaceComboBoxModel;
 
   private final TextFieldWithBrowseButton customModelPathField;
+  private final InfillPromptTemplatePanel infillPromptTemplatePanel;
 
   public LlamaModelSelector(LlamaCompletionModel initialModel) {
-    boolean isCustomModel = initialModel instanceof CustomLamaModel;
+    boolean isCustomModel = initialModel instanceof CustomLlamaModel;
     predefinedModelRadioButton = new JBRadioButton("Use pre-defined model",
         !isCustomModel);
     customModelRadioButton = new JBRadioButton("Use custom model",
@@ -144,11 +151,14 @@ public class LlamaModelSelector implements ModelSelector<LlamaCompletionModel> {
         initialModelSizes.size() > 1 && !llamaServerAgent.isServerRunning());
 
     String modelPath =
-        initialModel instanceof CustomLamaModel ? ((CustomLamaModel) initialModel).getModelPath()
+        initialModel instanceof CustomLlamaModel ? ((CustomLlamaModel) initialModel).getModelPath()
             : "";
     customModelPathField = createTextFieldWithBrowseButton(
         FileChooserDescriptorFactory.createSingleFileDescriptor("gguf"));
     customModelPathField.setText(modelPath);
+
+    infillPromptTemplatePanel = new InfillPromptTemplatePanel(
+        LlamaSettingsState.getInstance().getRemoteSettings().getInfillPromptTemplate(), true);
   }
 
 
@@ -178,7 +188,9 @@ public class LlamaModelSelector implements ModelSelector<LlamaCompletionModel> {
 
   private JPanel getModelForm() {
     JPanel finalPanel = new JPanel(new BorderLayout());
-    finalPanel.add(createRadioButtonsPanel(), BorderLayout.NORTH);
+    finalPanel.add(
+        createRadioButtonsPanel(List.of(predefinedModelRadioButton, customModelRadioButton)),
+        BorderLayout.NORTH);
     finalPanel.add(createRadioButtonGroupLayouts(
         Map.of(
             PREDEFINED_MODEL_FORM_CARD_CODE,
@@ -197,19 +209,19 @@ public class LlamaModelSelector implements ModelSelector<LlamaCompletionModel> {
     huggingFaceModelComboBox.setEnabled(enabled);
   }
 
-  private JPanel createRadioButtonsPanel() {
-    var buttonGroup = new ButtonGroup();
-    buttonGroup.add(predefinedModelRadioButton);
-    buttonGroup.add(customModelRadioButton);
-
-    var radioPanel = new JPanel();
-    radioPanel.setLayout(new BoxLayout(radioPanel, BoxLayout.PAGE_AXIS));
-    radioPanel.add(predefinedModelRadioButton);
-    radioPanel.add(Box.createVerticalStrut(4));
-    radioPanel.add(customModelRadioButton);
-    radioPanel.add(Box.createVerticalStrut(8));
-    return radioPanel;
-  }
+//  private JPanel createRadioButtonsPanel() {
+//    var buttonGroup = new ButtonGroup();
+//    buttonGroup.add(predefinedModelRadioButton);
+//    buttonGroup.add(customModelRadioButton);
+//
+//    var radioPanel = new JPanel();
+//    radioPanel.setLayout(new BoxLayout(radioPanel, BoxLayout.PAGE_AXIS));
+//    radioPanel.add(predefinedModelRadioButton);
+//    radioPanel.add(Box.createVerticalStrut(4));
+//    radioPanel.add(customModelRadioButton);
+//    radioPanel.add(Box.createVerticalStrut(8));
+//    return radioPanel;
+//  }
 
   private JPanel createCustomModelForm() {
     var customModelHelpText = ComponentPanelBuilder.createCommentComponent(
@@ -221,7 +233,11 @@ public class LlamaModelSelector implements ModelSelector<LlamaCompletionModel> {
         .addLabeledComponent(
             CodeGPTBundle.get("settingsConfigurable.service.llama.customModelPath.label"),
             getChooseCustomModelComponent().getComponent())
-        .addComponentToRightColumn(customModelHelpText)
+        .addComponent(UI.PanelFactory.panel(infillPromptTemplatePanel)
+            .withLabel(CodeGPTBundle.get("shared.infillPromptTemplate"))
+            .withComment(
+                CodeGPTBundle.get("settingsConfigurable.service.llama.promptTemplate.comment"))
+            .resizeX(false).createPanel())
         .addVerticalGap(4)
         .addComponentFillVertically(new JPanel(), 0)
         .getPanel();
@@ -455,12 +471,12 @@ public class LlamaModelSelector implements ModelSelector<LlamaCompletionModel> {
           CodeGPTPlugin.getLlamaModelsPath() + File.separator
               + ((HuggingFaceModel) model).getModelFileName());
     }
-    return FileUtil.exists(((CustomLamaModel) model).getModelPath());
+    return FileUtil.exists(((CustomLlamaModel) model).getModelPath());
   }
 
 
-  public void setUseCustomModel(boolean useCustomOllamaModel) {
-    customModelRadioButton.setSelected(useCustomOllamaModel);
+  public void setUseCustomModel(boolean isUseCustomModel) {
+    customModelRadioButton.setSelected(isUseCustomModel);
   }
 
   public boolean isUseCustomModel() {
@@ -478,7 +494,7 @@ public class LlamaModelSelector implements ModelSelector<LlamaCompletionModel> {
       huggingFaceComboBoxModel.setSelectedItem(model);
     } else {
       setUseCustomModel(true);
-      setCustomModel(((CustomLamaModel) model).getModelPath());
+      setCustomModel(((CustomLlamaModel) model).getModelPath());
     }
   }
 
@@ -487,10 +503,17 @@ public class LlamaModelSelector implements ModelSelector<LlamaCompletionModel> {
     if (!isUseCustomModel()) {
       return (HuggingFaceModel) huggingFaceComboBoxModel.getSelectedItem();
     } else {
-      return new CustomLamaModel(getCustomModel());
+      return new CustomLlamaModel(getCustomModel());
     }
   }
 
+  public void setInfillPromptTemplate(InfillPromptTemplate infillPromptTemplate) {
+    infillPromptTemplatePanel.setPromptTemplate(infillPromptTemplate);
+  }
+
+  public InfillPromptTemplate getInfillPromptTemplate() {
+    return infillPromptTemplatePanel.getPromptTemplate();
+  }
 
   private void setCustomModel(String customModel) {
     getChooseCustomModelComponent().setValue(customModel);

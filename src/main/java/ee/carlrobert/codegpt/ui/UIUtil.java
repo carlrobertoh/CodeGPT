@@ -8,6 +8,8 @@ import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
 import com.intellij.openapi.ui.TextBrowseFolderListener;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.ui.panel.ComponentPanelBuilder;
+import com.intellij.openapi.ui.panel.PanelBuilder;
+import com.intellij.openapi.ui.panel.PanelGridBuilder;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.ui.components.JBPasswordField;
@@ -15,6 +17,7 @@ import com.intellij.ui.components.JBRadioButton;
 import com.intellij.ui.components.JBTextArea;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
+import com.intellij.util.ui.UI.PanelFactory;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.SmartScroller;
 import java.awt.BorderLayout;
@@ -205,12 +208,57 @@ public class UIUtil {
     return formPanelCards;
   }
 
+
+  public static JPanel createSelectLayoutComponents(JBRadioButton firstRadio,
+      JComponent firstLayout,
+      JBRadioButton secondRadio, JComponent secondLayout, boolean isFirstInitallySelected) {
+    PanelGridBuilder grid = PanelFactory.grid();
+    createSelectLayoutBuilders(firstRadio,
+        firstLayout, secondRadio, secondLayout, isFirstInitallySelected).forEach(grid::add);
+    return grid.createPanel();
+  }
+
+  public static List<PanelBuilder> createSelectLayoutBuilders(JBRadioButton firstRadio,
+      JComponent firstLayout,
+      JBRadioButton secondRadio, JComponent secondLayout, boolean isFirstInitallySelected) {
+    UIUtil.createSelectLayoutBuilders(List.of(
+        new RadioButtonWithLayout(firstRadio, firstLayout),
+        new RadioButtonWithLayout(secondRadio, secondLayout)
+    ), isFirstInitallySelected ? firstRadio : secondRadio);
+    return List.of(
+        UI.PanelFactory
+            .panel(firstRadio)
+            .resizeX(false),
+        UI.PanelFactory
+            .panel(firstLayout), UI.PanelFactory
+            .panel(secondRadio)
+            .resizeX(false),
+        UI.PanelFactory
+            .panel(secondLayout));
+  }
+
+  private static void createSelectLayoutBuilders(List<RadioButtonWithLayout> entries,
+      JBRadioButton initiallySelected) {
+    var buttonGroup = new ButtonGroup();
+    entries.forEach(entry -> buttonGroup.add(entry.getRadioButton()));
+    entries.forEach(entry -> {
+          JBRadioButton radioButton = entry.getRadioButton();
+          entry.getComponent().setVisible(radioButton.equals(initiallySelected));
+          radioButton.addActionListener((e) -> {
+            for (RadioButtonWithLayout innerEntry : entries) {
+              innerEntry.getComponent().setVisible(innerEntry.equals(entry));
+            }
+          });
+        }
+    );
+  }
+
   public static class RadioButtonWithLayout {
 
     private final JBRadioButton radioButton;
-    private final Component layout;
+    private final JComponent layout;
 
-    public RadioButtonWithLayout(JBRadioButton radioButton, Component layout) {
+    public RadioButtonWithLayout(JBRadioButton radioButton, JComponent layout) {
       this.radioButton = radioButton;
       this.layout = layout;
     }
@@ -219,7 +267,7 @@ public class UIUtil {
       return radioButton;
     }
 
-    public Component getComponent() {
+    public JComponent getComponent() {
       return layout;
     }
   }
@@ -245,5 +293,7 @@ public class UIUtil {
     browseButton.addBrowseFolderListener(new TextBrowseFolderListener(fileChooserDescriptor));
     return browseButton;
   }
+
+
 }
 

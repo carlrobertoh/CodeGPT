@@ -5,8 +5,6 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
-import com.intellij.util.xmlb.annotations.Transient;
-import ee.carlrobert.codegpt.completions.PromptTemplate;
 import ee.carlrobert.codegpt.completions.llama.LlamaCompletionModel;
 import ee.carlrobert.codegpt.credentials.LlamaCredentialsManager;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaRequestsForm;
@@ -14,7 +12,6 @@ import ee.carlrobert.codegpt.settings.service.llama.LlamaLocalOrRemoteServiceFor
 import ee.carlrobert.codegpt.settings.state.llama.LlamaLocalSettings;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaRemoteSettings;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaRequestSettings;
-import ee.carlrobert.codegpt.ui.InfillPromptTemplatePanel;
 import org.jetbrains.annotations.NotNull;
 
 @State(name = "CodeGPT_LlamaSettings", storages = @Storage("CodeGPT_CodeGPT_LlamaSettings.xml"))
@@ -23,7 +20,7 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
   protected boolean runLocalServer = true;
   protected LlamaLocalSettings localSettings = new LlamaLocalSettings();
   protected LlamaRemoteSettings remoteSettings = new LlamaRemoteSettings();
-  protected LlamaRequestSettings llamaRequestSettings = new LlamaRequestSettings();
+  protected LlamaRequestSettings requestSettings = new LlamaRequestSettings();
 
   public LlamaSettingsState() {
   }
@@ -54,14 +51,6 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
     return localSettings.getModel();
   }
 
-  public PromptTemplate getActualPromptTemplate() {
-    if (isRunLocalServer()) {
-      return localSettings.getChatPromptTemplate();
-    }
-    return remoteSettings.getChatPromptTemplate();
-  }
-
-
   public boolean isRunLocalServer() {
     return runLocalServer;
   }
@@ -78,7 +67,7 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
         || remoteSettings.getCredentialsManager()
         .isModified(llamaLocalOrRemoteServiceForm.getRemoteApikey())
         || runLocalServer != llamaLocalOrRemoteServiceForm.isRunLocalServer()
-        || llamaRequestSettings.isModified(llamaRequestsForm.getRequestSettings());
+        || requestSettings.isModified(llamaRequestsForm.getRequestSettings());
   }
 
   public void apply(LlamaLocalOrRemoteServiceForm llamaLocalOrRemoteServiceForm,
@@ -88,7 +77,7 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
     localSettings.getCredentialsManager().apply(llamaLocalOrRemoteServiceForm.getLocalApiKey());
     remoteSettings = llamaLocalOrRemoteServiceForm.getRemoteSettings();
     remoteSettings.getCredentialsManager().apply(llamaLocalOrRemoteServiceForm.getRemoteApikey());
-    llamaRequestSettings = llamaRequestsForm.getRequestSettings();
+    requestSettings = llamaRequestsForm.getRequestSettings();
   }
 
   public void reset(LlamaLocalOrRemoteServiceForm llamaLocalOrRemoteServiceForm,
@@ -96,10 +85,10 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
     llamaLocalOrRemoteServiceForm.setRemoteSettings(remoteSettings);
     llamaLocalOrRemoteServiceForm.setLocalSettings(localSettings);
     llamaLocalOrRemoteServiceForm.setRunLocalServer(runLocalServer);
-    llamaRequestsForm.setTopK(llamaRequestSettings.getTopK());
-    llamaRequestsForm.setTopP(llamaRequestSettings.getTopP());
-    llamaRequestsForm.setMinP(llamaRequestSettings.getMinP());
-    llamaRequestsForm.setRepeatPenalty(llamaRequestSettings.getRepeatPenalty());
+    llamaRequestsForm.setTopK(requestSettings.getTopK());
+    llamaRequestsForm.setTopP(requestSettings.getTopP());
+    llamaRequestsForm.setMinP(requestSettings.getMinP());
+    llamaRequestsForm.setRepeatPenalty(requestSettings.getRepeatPenalty());
   }
 
   public LlamaLocalSettings getLocalSettings() {
@@ -119,12 +108,12 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
   }
 
   public LlamaRequestSettings getRequestSettings() {
-    return llamaRequestSettings;
+    return requestSettings;
   }
 
   public void setRequestSettings(
       LlamaRequestSettings llamaRequestSettings) {
-    this.llamaRequestSettings = llamaRequestSettings;
+    this.requestSettings = llamaRequestSettings;
   }
 
 }

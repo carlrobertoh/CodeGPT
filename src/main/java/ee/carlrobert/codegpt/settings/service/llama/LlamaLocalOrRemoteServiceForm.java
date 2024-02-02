@@ -29,16 +29,19 @@ public abstract class LlamaLocalOrRemoteServiceForm {
   private final LlamaLocalServiceForm llamaLocalServiceForm;
   private final LlamaRemoteServiceForm llamaRemoteServiceForm;
 
+  private final LlamaSettingsState llamaSettingsState;
+
   public LlamaLocalOrRemoteServiceForm(LlamaSettingsState llamaSettingsState,
       ServerAgent serverAgent,
       ServiceType serviceType) {
+    this.llamaSettingsState = llamaSettingsState;
     runLocalServerRadioButton = new JBRadioButton("Run local server",
         llamaSettingsState.isRunLocalServer());
     useExistingServerRadioButton = new JBRadioButton("Use existing server",
         !llamaSettingsState.isRunLocalServer());
 
-    llamaLocalServiceForm = new LlamaLocalServiceForm(
-        llamaSettingsState.getLocalSettings(), serverAgent) {
+    llamaLocalServiceForm = new LlamaLocalServiceForm(llamaSettingsState.getLocalSettings(),
+        serverAgent, this::onServerAgentStateChanged) {
       @Override
       protected boolean isModelExists(HuggingFaceModel model) {
         return LlamaLocalOrRemoteServiceForm.this.isModelExists(model);
@@ -47,13 +50,13 @@ public abstract class LlamaLocalOrRemoteServiceForm {
     llamaRemoteServiceForm = new LlamaRemoteServiceForm();
   }
 
+  private void onServerAgentStateChanged(boolean isRunning) {
+    setFormEnabled(isRunning);
+    llamaSettingsState.getLocalSettings().setServerRunning(isRunning);
+  }
+
   public abstract boolean isModelExists(HuggingFaceModel model);
 
-  public void addAdditionalLocalFields(FormBuilder formBuilder) {
-  }
-
-  public void addAdditionalRemoteFields(FormBuilder formBuilder) {
-  }
 
   public JPanel getForm() {
     return createForm(Map.of(
@@ -68,11 +71,9 @@ public abstract class LlamaLocalOrRemoteServiceForm {
 
 
   private void setFormEnabled(boolean enabled) {
-    // TODO: to be called when server is started/stopped
     runLocalServerRadioButton.setEnabled(enabled);
     useExistingServerRadioButton.setEnabled(enabled);
     llamaLocalServiceForm.setFormEnabled(enabled);
-//    llamaRemoteServerPreferencesForm.setFormEnabled(enabled);
   }
 
   public void setRunLocalServer(boolean runLocalServer) {

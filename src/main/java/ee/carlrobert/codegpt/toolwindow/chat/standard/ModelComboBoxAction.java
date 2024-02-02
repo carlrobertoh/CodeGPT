@@ -8,6 +8,7 @@ import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.actionSystem.ex.ComboBoxAction;
 import ee.carlrobert.codegpt.Icons;
+import ee.carlrobert.codegpt.completions.llama.CustomLlamaModel;
 import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.conversations.ConversationService;
@@ -67,11 +68,10 @@ public class ModelComboBoxAction extends ComboBoxAction {
         createModelAction(ServiceType.AZURE, "Azure OpenAI", Icons.Azure, presentation));
     actionGroup.addSeparator();
     actionGroup.add(createModelAction(
-        ServiceType.LLAMA,
+        ServiceType.LLAMA_CPP,
         getSelectedHuggingFace(),
         Icons.Llama,
         presentation));
-    // TODO add Ollama
     actionGroup.addSeparator();
     actionGroup.add(createModelAction(ServiceType.YOU, "You.com", Icons.YouSmall, presentation));
     return actionGroup;
@@ -99,7 +99,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
         templatePresentation.setIcon(Icons.YouSmall);
         templatePresentation.setText("You.com");
         break;
-      case LLAMA:
+      case LLAMA_CPP:
         templatePresentation.setText(getSelectedHuggingFace());
         templatePresentation.setIcon(Icons.Llama);
         break;
@@ -108,12 +108,16 @@ public class ModelComboBoxAction extends ComboBoxAction {
   }
 
   private String getSelectedHuggingFace() {
-    var huggingFaceModel = (HuggingFaceModel) LlamaSettingsState.getInstance().getUsedModel();
-    return format(
-        "%s %dB (Q%d)",
-        LlamaModel.findByHuggingFaceModel(huggingFaceModel).getLabel(),
-        huggingFaceModel.getParameterSize(),
-        huggingFaceModel.getQuantization());
+    var model = LlamaSettingsState.getInstance().getUsedModel();
+    if (model instanceof HuggingFaceModel) {
+      HuggingFaceModel huggingFaceModel = (HuggingFaceModel) model;
+      return format(
+          "%s %dB (Q%d)",
+          LlamaModel.findByHuggingFaceModel(huggingFaceModel).getLabel(),
+          huggingFaceModel.getParameterSize(),
+          huggingFaceModel.getQuantization());
+    }
+    return ((CustomLlamaModel) model).getModelFileName();
   }
 
   private AnAction createModelAction(

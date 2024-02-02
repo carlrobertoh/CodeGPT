@@ -7,7 +7,7 @@ import java.io.File;
 public interface LlamaCompletionModel extends CompletionModel {
 
   static String getModelPath(LlamaCompletionModel model) {
-    return model instanceof CustomLamaModel ? ((CustomLamaModel) model).getModelPath()
+    return model instanceof CustomLlamaModel ? ((CustomLlamaModel) model).getModelPath()
         : CodeGPTPlugin.getLlamaSourcePath() + File.separator
             + ((HuggingFaceModel) model).getModelFileName();
   }
