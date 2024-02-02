@@ -1,7 +1,8 @@
 package ee.carlrobert.codegpt.completions;
 
 import com.intellij.openapi.Disposable;
-import ee.carlrobert.codegpt.settings.service.ServerProgressPanel;
+import ee.carlrobert.codegpt.completions.llama.ServerStartupParams;
+import ee.carlrobert.codegpt.settings.service.util.ServerProgressPanel;
 
 public interface ServerAgent extends Disposable {
 

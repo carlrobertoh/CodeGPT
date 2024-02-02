@@ -17,9 +17,8 @@ import com.intellij.openapi.util.Key;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.completions.ServerAgent;
-import ee.carlrobert.codegpt.completions.ServerStartupParams;
-import ee.carlrobert.codegpt.settings.service.ServerProgressPanel;
-import ee.carlrobert.codegpt.settings.state.llama.LlamaSettingsState;
+import ee.carlrobert.codegpt.settings.service.util.ServerProgressPanel;
+import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -156,9 +155,9 @@ public final class LlamaServerAgent implements ServerAgent {
     GeneralCommandLine commandLine = new GeneralCommandLine().withCharset(StandardCharsets.UTF_8);
     commandLine.setExePath("./server");
     commandLine.withWorkDirectory(CodeGPTPlugin.getLlamaSourcePath());
-    String modelFileName = params.isUseCustomModel() ? params.getCustomModelId() : params.getSelectedModel().getModelFileName();
+    String modelFileName = LlamaCompletionModel.getModelPath(params.getSelectedModel());
     commandLine.addParameters(
-        "-m", CodeGPTPlugin.getLlamaSourcePath() + File.separator + modelFileName,
+        "-m", modelFileName,
         "-c", String.valueOf(params.getContextLength()),
         "--port", String.valueOf(params.getPort()),
         "-t", String.valueOf(params.getThreads()));

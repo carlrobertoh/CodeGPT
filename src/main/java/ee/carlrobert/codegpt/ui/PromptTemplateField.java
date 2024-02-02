@@ -19,13 +19,16 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import org.apache.commons.text.StringEscapeUtils;
 
-public class PromptTemplateWrapper extends JPanel {
+/**
+ * Panel with {@link ComboBox} to choose a {@link PromptTemplate}
+ */
+public class PromptTemplateField extends JPanel {
 
   private final JBLabel promptTemplateHelpIcon;
   private final ComboBox<PromptTemplate> promptTemplateComboBox;
   private final JLabel promptTemplateHelpText;
 
-  public PromptTemplateWrapper(PromptTemplate initiallySelectedTemplate, boolean enabled) {
+  public PromptTemplateField(PromptTemplate initiallySelectedTemplate, boolean enabled) {
     super(new FlowLayout(FlowLayout.LEADING, 0, 0));
     promptTemplateComboBox = new ComboBox<>(new EnumComboBoxModel<>(PromptTemplate.class));
     promptTemplateComboBox.setSelectedItem(initiallySelectedTemplate);
@@ -51,7 +54,7 @@ public class PromptTemplateWrapper extends JPanel {
     promptTemplateComboBox.setSelectedItem(promptTemplate);
   }
 
-  public PromptTemplate getPrompTemplate() {
+  public PromptTemplate getPromptTemplate() {
     return (PromptTemplate) promptTemplateComboBox.getSelectedItem();
   }
 

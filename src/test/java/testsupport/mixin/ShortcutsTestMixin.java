@@ -1,17 +1,15 @@
 package testsupport.mixin;
 
-import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
-import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
-import ee.carlrobert.codegpt.settings.state.SettingsState;
-import ee.carlrobert.codegpt.settings.state.llama.LlamaSettingsState;
+import ee.carlrobert.codegpt.settings.state.GeneralSettingsState;
+import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 
 public interface ShortcutsTestMixin {
 
   default void useOpenAIService() {
-    SettingsState.getInstance().setSelectedService(ServiceType.OPENAI);
+    GeneralSettingsState.getInstance().setSelectedService(ServiceType.OPENAI);
     OpenAISettingsState openAISettings = OpenAISettingsState.getInstance();
     openAISettings.getCredentialsManager().setApiKey("TEST_API_KEY");
     openAISettings.setModel("gpt-4");
@@ -19,7 +17,7 @@ public interface ShortcutsTestMixin {
   }
 
   default void useAzureService() {
-    SettingsState.getInstance().setSelectedService(ServiceType.AZURE);
+    GeneralSettingsState.getInstance().setSelectedService(ServiceType.AZURE);
     var azureSettings = AzureSettingsState.getInstance();
     azureSettings.getCredentialsManager().setApiKey("TEST_API_KEY");
     azureSettings.setBaseHost(null);
@@ -29,11 +27,11 @@ public interface ShortcutsTestMixin {
   }
 
   default void useYouService() {
-    SettingsState.getInstance().setSelectedService(ServiceType.YOU);
+    GeneralSettingsState.getInstance().setSelectedService(ServiceType.YOU);
   }
 
   default void useLlamaService() {
-    SettingsState.getInstance().setSelectedService(ServiceType.LLAMA);
+    GeneralSettingsState.getInstance().setSelectedService(ServiceType.LLAMA);
     LlamaSettingsState llamaSettingsState = LlamaSettingsState.getInstance();
     llamaSettingsState.setRunLocalServer(true);
     var localSettings = llamaSettingsState.getLocalSettings();

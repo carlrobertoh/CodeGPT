@@ -14,11 +14,11 @@ import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
-import ee.carlrobert.codegpt.settings.state.IncludedFilesSettingsState;
+import ee.carlrobert.codegpt.settings.state.util.IncludedFilesSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
-import ee.carlrobert.codegpt.settings.state.SettingsState;
+import ee.carlrobert.codegpt.settings.state.GeneralSettingsState;
 import ee.carlrobert.codegpt.settings.state.YouSettingsState;
-import ee.carlrobert.codegpt.settings.state.llama.LlamaSettingsState;
+import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaRequestSettings;
 import ee.carlrobert.codegpt.telemetry.core.configuration.TelemetryConfiguration;
 import ee.carlrobert.codegpt.telemetry.core.service.UserId;
@@ -85,7 +85,7 @@ public class CompletionRequestProvider {
             new OpenAIChatCompletionMessage("system",
                 getResourceContent("/prompts/method-name-generator.txt")),
             new OpenAIChatCompletionMessage("user", context)))
-        .setModel(OpenAISettingsState.getInstance().getModel())
+        .setModel(OpenAISettingsState.getInstance().getModel().getCode())
         .setStream(false)
         .build();
   }
@@ -195,7 +195,8 @@ public class CompletionRequestProvider {
       boolean useContextualSearch) {
     var messages = buildMessages(callParameters, useContextualSearch);
 
-    if (model == null || SettingsState.getInstance().getSelectedService() == ServiceType.YOU) {
+    if (model == null
+        || GeneralSettingsState.getInstance().getSelectedService() == ServiceType.YOU) {
       return messages;
     }
 

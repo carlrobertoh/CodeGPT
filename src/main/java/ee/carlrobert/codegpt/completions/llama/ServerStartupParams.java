@@ -1,24 +1,17 @@
-package ee.carlrobert.codegpt.completions;
+package ee.carlrobert.codegpt.completions.llama;
 
-import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaLocalSettings;
 import java.util.List;
 
 public class ServerStartupParams {
 
-  private final boolean useCustomModel;
-  private final String customModelId;
-  private final HuggingFaceModel selectedModel;
+  private final LlamaCompletionModel selectedModel;
   private final int contextLength;
   private final int threads;
   private final int port;
   private final List<String> additionalParameters;
 
-  public ServerStartupParams(
-      boolean useCustomModel, String customModelId,
-      HuggingFaceModel selectedModel, LlamaLocalSettings localSettings) {
-    this.useCustomModel = useCustomModel;
-    this.customModelId = customModelId;
+  public ServerStartupParams(LlamaCompletionModel selectedModel, LlamaLocalSettings localSettings) {
     this.selectedModel = selectedModel;
     this.contextLength = localSettings.getContextSize();
     this.threads = localSettings.getThreads();
@@ -26,15 +19,7 @@ public class ServerStartupParams {
     this.additionalParameters = localSettings.getListOfAdditionalParameters();
   }
 
-  public boolean isUseCustomModel() {
-    return useCustomModel;
-  }
-
-  public String getCustomModelId() {
-    return customModelId;
-  }
-
-  public HuggingFaceModel getSelectedModel() {
+  public LlamaCompletionModel getSelectedModel() {
     return selectedModel;
   }
 

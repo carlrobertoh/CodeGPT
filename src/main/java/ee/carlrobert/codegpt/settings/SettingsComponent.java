@@ -13,7 +13,7 @@ import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.settings.service.ServicesSelectionForm;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
-import ee.carlrobert.codegpt.settings.state.SettingsState;
+import ee.carlrobert.codegpt.settings.state.GeneralSettingsState;
 import java.awt.CardLayout;
 import java.util.Arrays;
 import javax.swing.DefaultComboBoxModel;
@@ -27,7 +27,7 @@ public class SettingsComponent {
   private final ComboBox<ServiceType> serviceComboBox;
   private final ServicesSelectionForm servicesSelectionForm;
 
-  public SettingsComponent(Disposable parentDisposable, SettingsState settings) {
+  public SettingsComponent(Disposable parentDisposable, GeneralSettingsState settings) {
     displayNameField = new JBTextField(settings.getDisplayName(), 20);
 
     servicesSelectionForm = new ServicesSelectionForm(parentDisposable);

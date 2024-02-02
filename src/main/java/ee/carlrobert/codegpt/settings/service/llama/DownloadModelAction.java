@@ -10,7 +10,6 @@ import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import ee.carlrobert.codegpt.CodeGPTBundle;
-import ee.carlrobert.codegpt.completions.LlmModel;
 import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
 import ee.carlrobert.codegpt.util.DownloadingUtil;
 import ee.carlrobert.codegpt.util.file.FileUtil;
@@ -32,14 +31,14 @@ public class DownloadModelAction extends AnAction {
   private final Runnable onDownloaded;
   private final Consumer<Exception> onFailed;
   private final Consumer<String> onUpdateProgress;
-  private final DefaultComboBoxModel<LlmModel> comboBoxModel;
+  private final DefaultComboBoxModel<HuggingFaceModel> comboBoxModel;
 
   public DownloadModelAction(
       Consumer<ProgressIndicator> onDownload,
       Runnable onDownloaded,
       Consumer<Exception> onFailed,
       Consumer<String> onUpdateProgress,
-      DefaultComboBoxModel<LlmModel> comboBoxModel) {
+      DefaultComboBoxModel<HuggingFaceModel> comboBoxModel) {
     this.onDownload = onDownload;
     this.onDownloaded = onDownloaded;
     this.onFailed = onFailed;

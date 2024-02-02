@@ -1,8 +1,11 @@
-package ee.carlrobert.codegpt.settings.state;
+package ee.carlrobert.codegpt.settings.state.util;
 
 import com.intellij.util.xmlb.annotations.Transient;
 import ee.carlrobert.codegpt.credentials.CredentialsManager;
 
+/**
+ * Settings that all service settings share in common
+ */
 public class CommonSettings<T extends CredentialsManager> {
 
   @Transient
@@ -19,5 +22,9 @@ public class CommonSettings<T extends CredentialsManager> {
   public void setCredentialsManager(
       T credentialsManager) {
     this.credentialsManager = credentialsManager;
+  }
+
+  public boolean isModified(CommonSettings<T> commonSettings) {
+    return false;
   }
 }

@@ -1,7 +1,7 @@
 package ee.carlrobert.codegpt.completions;
 
 import com.intellij.openapi.diagnostic.Logger;
-import ee.carlrobert.codegpt.settings.state.SettingsState;
+import ee.carlrobert.codegpt.settings.state.GeneralSettingsState;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.client.you.completion.YouCompletionEventListener;
@@ -71,7 +71,7 @@ public class CompletionRequestHandler {
     }
 
     protected Void doInBackground() {
-      var settings = SettingsState.getInstance();
+      var settings = GeneralSettingsState.getInstance();
       try {
         eventSource = startCall(callParameters, new YouRequestCompletionEventListener());
       } catch (TotalUsageExceededException e) {
@@ -119,7 +119,7 @@ public class CompletionRequestHandler {
       }
     }
 
-    private void sendInfo(SettingsState settings) {
+    private void sendInfo(GeneralSettingsState settings) {
       TelemetryAction.COMPLETION.createActionMessage()
           .property("conversationId", callParameters.getConversation().getId().toString())
           .property("model", callParameters.getConversation().getModel())

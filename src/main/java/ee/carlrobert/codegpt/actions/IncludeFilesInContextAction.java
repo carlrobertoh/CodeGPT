@@ -24,7 +24,7 @@ import com.intellij.util.ui.UI.PanelFactory;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.CodeGPTKeys;
 import ee.carlrobert.codegpt.EncodingManager;
-import ee.carlrobert.codegpt.settings.state.IncludedFilesSettingsState;
+import ee.carlrobert.codegpt.settings.state.util.IncludedFilesSettingsState;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import ee.carlrobert.codegpt.ui.checkbox.FileCheckboxTree;
 import ee.carlrobert.codegpt.ui.checkbox.PsiElementCheckboxTree;

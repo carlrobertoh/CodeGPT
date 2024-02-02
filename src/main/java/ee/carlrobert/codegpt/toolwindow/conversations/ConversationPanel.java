@@ -8,7 +8,7 @@ import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.actions.toolwindow.DeleteConversationAction;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
-import ee.carlrobert.codegpt.settings.state.SettingsState;
+import ee.carlrobert.codegpt.settings.state.GeneralSettingsState;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
 import ee.carlrobert.codegpt.ui.IconActionButton;
 import ee.carlrobert.codegpt.ui.ModelIconLabel;
@@ -42,7 +42,7 @@ class ConversationPanel extends JPanel {
     addMouseListener(new MouseAdapter() {
       @Override
       public void mouseClicked(MouseEvent e) {
-        SettingsState.getInstance().sync(conversation);
+        GeneralSettingsState.getInstance().sync(conversation);
         toolWindowContentManager.displayConversation(conversation);
       }
     });

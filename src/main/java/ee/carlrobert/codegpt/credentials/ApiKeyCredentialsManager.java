@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-abstract class ApiKeyCredentialsManager extends CredentialsManager {
+public abstract class ApiKeyCredentialsManager extends CredentialsManager {
 
   protected CredentialAttributes apiKeyAttribute;
 

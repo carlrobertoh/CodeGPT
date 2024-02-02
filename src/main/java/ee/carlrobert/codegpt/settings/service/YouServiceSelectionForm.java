@@ -20,7 +20,7 @@ import ee.carlrobert.codegpt.completions.you.auth.YouAuthenticationError;
 import ee.carlrobert.codegpt.completions.you.auth.YouAuthenticationService;
 import ee.carlrobert.codegpt.completions.you.auth.response.YouAuthenticationResponse;
 import ee.carlrobert.codegpt.completions.you.auth.response.YouUser;
-import ee.carlrobert.codegpt.settings.state.SettingsState;
+import ee.carlrobert.codegpt.settings.state.GeneralSettingsState;
 import ee.carlrobert.codegpt.settings.state.YouSettingsState;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import java.awt.BorderLayout;
@@ -34,6 +34,10 @@ import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * Form containing all forms to configure using
+ * {@link ee.carlrobert.codegpt.settings.service.ServiceType#YOU}
+ */
 public class YouServiceSelectionForm extends JPanel {
 
   private final JBTextField emailField;
@@ -44,7 +48,7 @@ public class YouServiceSelectionForm extends JPanel {
 
   public YouServiceSelectionForm(Disposable parentDisposable) {
     super(new BorderLayout());
-    var settings = SettingsState.getInstance();
+    var settings = GeneralSettingsState.getInstance();
     emailField = new JBTextField(settings.getEmail(), 25);
     passwordField = new JBPasswordField();
     passwordField.setColumns(25);
@@ -213,7 +217,7 @@ public class YouServiceSelectionForm extends JPanel {
       SwingUtilities.invokeLater(() -> {
         var email = emailField.getText();
         var password = passwordField.getPassword();
-        SettingsState.getInstance().setEmail(email);
+        GeneralSettingsState.getInstance().setEmail(email);
         YouSettingsState.getInstance().getCredentialsManager()
             .setPassword(new String(password));
         refreshView(createUserInformationPanel(authenticationResponse.getData().getUser()));

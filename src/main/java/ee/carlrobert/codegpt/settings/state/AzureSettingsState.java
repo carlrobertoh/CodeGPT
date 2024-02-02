@@ -6,12 +6,14 @@ import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
-import ee.carlrobert.codegpt.settings.service.AzureServiceSelectionForm;
-import ee.carlrobert.codegpt.settings.service.ServicesSelectionForm;
+import ee.carlrobert.codegpt.settings.service.AzureServiceForm;
+import ee.carlrobert.codegpt.settings.state.util.RemoteWithModelSettings;
+import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import org.jetbrains.annotations.NotNull;
 
 @State(name = "CodeGPT_AzureSettings_210", storages = @Storage("CodeGPT_AzureSettings_210.xml"))
-public class AzureSettingsState extends RemoteSettings<AzureCredentialsManager> implements
+public class AzureSettingsState extends
+    RemoteWithModelSettings<AzureCredentialsManager, OpenAIChatCompletionModel> implements
     PersistentStateComponent<AzureSettingsState> {
 
   private static final String BASE_PATH = "/openai/deployments/%s/chat/completions?api-version=%s";
@@ -23,14 +25,13 @@ public class AzureSettingsState extends RemoteSettings<AzureCredentialsManager> 
   private boolean useAzureActiveDirectoryAuthentication;
 
   public AzureSettingsState() {
-    super("https://%s.openai.azure.com", BASE_PATH);
+    super("https://%s.openai.azure.com", BASE_PATH, OpenAIChatCompletionModel.GPT_3_5,
+        new AzureCredentialsManager());
   }
 
   public static AzureSettingsState getInstance() {
-    AzureSettingsState service = ApplicationManager.getApplication()
+    return ApplicationManager.getApplication()
         .getService(AzureSettingsState.class);
-    service.setCredentialsManager(new AzureCredentialsManager());
-    return service;
   }
 
   @Override
@@ -43,21 +44,20 @@ public class AzureSettingsState extends RemoteSettings<AzureCredentialsManager> 
     XmlSerializerUtil.copyBean(state, this);
   }
 
-  public boolean isModified(AzureServiceSelectionForm serviceSelectionForm) {
-    return serviceSelectionForm.isAzureActiveDirectoryAuthenticationSelected()
+  public boolean isModified(AzureServiceForm serviceSelectionForm) {
+    return super.isModified(serviceSelectionForm.getRemoteWithModelSettings())
+        || serviceSelectionForm.isAzureActiveDirectoryAuthenticationSelected()
         != isUseAzureActiveDirectoryAuthentication()
         || serviceSelectionForm.isAzureApiKeyAuthenticationSelected()
         != isUseAzureApiKeyAuthentication()
-        || credentialsManager.isModified(serviceSelectionForm.getAzureOpenAIApiKey(),
+        || credentialsManager.isModified(serviceSelectionForm.getApiKey(),
             serviceSelectionForm.getAzureActiveDirectoryToken())
         || !serviceSelectionForm.getAzureResourceName().equals(resourceName)
         || !serviceSelectionForm.getAzureDeploymentId().equals(deploymentId)
-        || !serviceSelectionForm.getAzureApiVersion().equals(apiVersion)
-        || !serviceSelectionForm.getAzureBaseHost().equals(baseHost)
-        || !serviceSelectionForm.getAzurePath().equals(path);
+        || !serviceSelectionForm.getAzureApiVersion().equals(apiVersion);
   }
 
-  public void apply(AzureServiceSelectionForm serviceSelectionForm) {
+  public void apply(AzureServiceForm serviceSelectionForm) {
     useAzureActiveDirectoryAuthentication =
         serviceSelectionForm.isAzureActiveDirectoryAuthenticationSelected();
     useAzureApiKeyAuthentication = serviceSelectionForm.isAzureApiKeyAuthenticationSelected();
@@ -65,12 +65,16 @@ public class AzureSettingsState extends RemoteSettings<AzureCredentialsManager> 
     resourceName = serviceSelectionForm.getAzureResourceName();
     deploymentId = serviceSelectionForm.getAzureDeploymentId();
     apiVersion = serviceSelectionForm.getAzureApiVersion();
-    baseHost = serviceSelectionForm.getAzureBaseHost();
-    path = serviceSelectionForm.getAzurePath();
+    RemoteWithModelSettings<AzureCredentialsManager, OpenAIChatCompletionModel> remoteSettings = serviceSelectionForm.getRemoteWithModelSettings();
+    baseHost = remoteSettings.getBaseHost();
+    path = remoteSettings.getPath();
+    model = remoteSettings.getModel();
+    credentialsManager.apply(serviceSelectionForm.getApiKey(),
+        serviceSelectionForm.getAzureActiveDirectoryToken());
   }
 
-  public void reset(AzureServiceSelectionForm serviceSelectionForm) {
-    serviceSelectionForm.setAzureApiKey(credentialsManager.getApiKey());
+  public void reset(AzureServiceForm serviceSelectionForm) {
+    serviceSelectionForm.setApiKey(credentialsManager.getApiKey());
     serviceSelectionForm.setAzureActiveDirectoryToken(credentialsManager.getActiveDirectoryToken());
     serviceSelectionForm.setAzureApiKeyAuthenticationSelected(useAzureApiKeyAuthentication);
     serviceSelectionForm.setAzureActiveDirectoryAuthenticationSelected(
@@ -78,8 +82,8 @@ public class AzureSettingsState extends RemoteSettings<AzureCredentialsManager> 
     serviceSelectionForm.setAzureResourceName(resourceName);
     serviceSelectionForm.setAzureDeploymentId(deploymentId);
     serviceSelectionForm.setAzureApiVersion(apiVersion);
-    serviceSelectionForm.setAzureBaseHost(baseHost);
-    serviceSelectionForm.setAzurePath(path);
+    serviceSelectionForm.setRemoteWithModelSettings(
+        new RemoteWithModelSettings<>(baseHost, path, model, credentialsManager));
   }
 
   public boolean isUsingCustomPath() {

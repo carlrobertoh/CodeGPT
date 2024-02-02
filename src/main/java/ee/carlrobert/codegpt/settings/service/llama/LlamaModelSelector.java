@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.settings.service.llama;
 
+import static ee.carlrobert.codegpt.ui.UIUtil.createTextFieldWithBrowseButton;
 import static ee.carlrobert.codegpt.ui.UIUtil.createRadioButtonGroupLayouts;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
@@ -10,8 +11,10 @@ import com.intellij.ide.HelpTooltip;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.ui.ComboBox;
+import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.ui.panel.ComponentPanelBuilder;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.ui.EnumComboBoxModel;
@@ -22,14 +25,13 @@ import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
-import ee.carlrobert.codegpt.completions.LlmModel;
-import ee.carlrobert.codegpt.completions.PromptTemplate;
+import ee.carlrobert.codegpt.completions.llama.CustomLamaModel;
 import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
+import ee.carlrobert.codegpt.completions.llama.LlamaCompletionModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaServerAgent;
+import ee.carlrobert.codegpt.settings.service.util.ModelSelector;
 import ee.carlrobert.codegpt.ui.ComponentWithStringValue;
-import ee.carlrobert.codegpt.settings.state.llama.LlamaLocalSettings;
-import ee.carlrobert.codegpt.ui.PromptTemplateWrapper;
 import ee.carlrobert.codegpt.ui.UIUtil.RadioButtonWithLayout;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -40,11 +42,16 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import org.jetbrains.annotations.NotNull;
 
-public abstract class ModelSelectionForm {
+/**
+ * {@link ModelSelector} with either {@link HuggingFaceModel} selection or {@link CustomLamaModel}
+ * file chooser.
+ */
+public class LlamaModelSelector implements ModelSelector<LlamaCompletionModel> {
 
   private static final Map<Integer, Map<Integer, ModelDetails>> modelDetailsMap = Map.of(
       7, Map.of(
@@ -67,27 +74,28 @@ public abstract class ModelSelectionForm {
   private final JBRadioButton customModelRadioButton;
   private final JBLabel helpIcon;
   private final JBLabel modelExistsIcon;
-  private final ComboBox<LlmModel> huggingFaceModelComboBox;
+  private final ComboBox<HuggingFaceModel> huggingFaceModelComboBox;
   private final JBLabel modelDetailsLabel;
   private final ComboBox<LlamaModel> modelComboBox;
   private final ComboBox<ModelSize> modelSizeComboBox;
   private final JPanel downloadModelActionLinkWrapper;
   private final JBLabel progressLabel;
-  private final DefaultComboBoxModel<LlmModel> huggingFaceComboBoxModel;
-  private final PromptTemplateWrapper promptTemplateWrapper;
+  private final DefaultComboBoxModel<HuggingFaceModel> huggingFaceComboBoxModel;
 
-  protected final LlamaLocalSettings settings;
+  private final TextFieldWithBrowseButton customModelPathField;
 
-  public ModelSelectionForm(LlamaLocalSettings settings) {
-    this.settings = settings;
+  public LlamaModelSelector(LlamaCompletionModel initialModel) {
+    boolean isCustomModel = initialModel instanceof CustomLamaModel;
     predefinedModelRadioButton = new JBRadioButton("Use pre-defined model",
-        !settings.isUseCustomModel());
+        !isCustomModel);
     customModelRadioButton = new JBRadioButton("Use custom model",
-        settings.isUseCustomModel());
+        isCustomModel);
 
     huggingFaceComboBoxModel = new DefaultComboBoxModel<>();
-    var llm = settings.getLlModel();
-    var llamaModel = LlamaModel.findByHuggingFaceModel(llm);
+    var llm = isCustomModel ? LlamaModel.CODE_LLAMA.getHuggingFaceModels().get(0)
+        : (HuggingFaceModel) initialModel;
+    var llamaModel = isCustomModel ? LlamaModel.CODE_LLAMA
+        : LlamaModel.findByHuggingFaceModel(llm);
 
     var selectableModels = llamaModel.getHuggingFaceModels().stream()
         .filter(model -> model.getParameterSize() == llm.getParameterSize())
@@ -99,7 +107,7 @@ public abstract class ModelSelectionForm {
     progressLabel.setBorder(JBUI.Borders.emptyLeft(2));
     progressLabel.setFont(JBUI.Fonts.smallFont());
     modelExistsIcon = new JBLabel(Actions.Checked);
-    modelExistsIcon.setVisible(isModelExists(settings.getLlModel()));
+    modelExistsIcon.setVisible(isModelExists(initialModel));
     helpIcon = new JBLabel(General.ContextHelp);
 
     downloadModelActionLinkWrapper = new JPanel(new BorderLayout());
@@ -134,15 +142,41 @@ public abstract class ModelSelectionForm {
         huggingFaceComboBoxModel);
     modelSizeComboBox.setEnabled(
         initialModelSizes.size() > 1 && !llamaServerAgent.isServerRunning());
-    promptTemplateWrapper = new PromptTemplateWrapper(
-        settings.getPromptTemplate(),
-        !llamaServerAgent.isServerRunning());
 
+    String modelPath =
+        initialModel instanceof CustomLamaModel ? ((CustomLamaModel) initialModel).getModelPath()
+            : "";
+    customModelPathField = createTextFieldWithBrowseButton(
+        FileChooserDescriptorFactory.createSingleFileDescriptor("gguf"));
+    customModelPathField.setText(modelPath);
   }
 
-  public abstract ComponentWithStringValue getChooseCustomModelComponent();
 
-  public JPanel getModelForm() {
+  @Override
+  public JComponent getComponent() {
+    return getModelForm();
+  }
+
+  public ComponentWithStringValue getChooseCustomModelComponent() {
+    return new ComponentWithStringValue() {
+      @Override
+      public JComponent getComponent() {
+        return customModelPathField;
+      }
+
+      @Override
+      public String getValue() {
+        return customModelPathField.getText();
+      }
+
+      @Override
+      public void setValue(String value) {
+        customModelPathField.setText(value);
+      }
+    };
+  }
+
+  private JPanel getModelForm() {
     JPanel finalPanel = new JPanel(new BorderLayout());
     finalPanel.add(createRadioButtonsPanel(), BorderLayout.NORTH);
     finalPanel.add(createRadioButtonGroupLayouts(
@@ -188,8 +222,6 @@ public abstract class ModelSelectionForm {
             CodeGPTBundle.get("settingsConfigurable.service.llama.customModelPath.label"),
             getChooseCustomModelComponent().getComponent())
         .addComponentToRightColumn(customModelHelpText)
-        .addLabeledComponent(CodeGPTBundle.get("shared.promptTemplate"), promptTemplateWrapper)
-        .addComponentToRightColumn(promptTemplateWrapper.getPromptTemplateHelpText())
         .addVerticalGap(4)
         .addComponentFillVertically(new JPanel(), 0)
         .getPanel();
@@ -230,8 +262,7 @@ public abstract class ModelSelectionForm {
         .getPanel();
   }
 
-
-  private String getHuggingFaceModelDetailsHtml(LlmModel model) {
+  private String getHuggingFaceModelDetailsHtml(HuggingFaceModel model) {
     int parameterSize = model.getParameterSize();
     int quantization = model.getQuantization();
 
@@ -286,7 +317,7 @@ public abstract class ModelSelectionForm {
   private ComboBox<ModelSize> createModelSizeComboBox(
       EnumComboBoxModel<LlamaModel> llamaModelComboBoxModel,
       DefaultComboBoxModel<ModelSize> modelSizeComboBoxModel,
-      DefaultComboBoxModel<LlmModel> huggingFaceComboBoxModel) {
+      DefaultComboBoxModel<HuggingFaceModel> huggingFaceComboBoxModel) {
     var comboBox = new ComboBox<>(modelSizeComboBoxModel);
     comboBox.setPreferredSize(modelComboBox.getPreferredSize());
     comboBox.setSelectedItem(modelSizeComboBoxModel.getSelectedItem());
@@ -308,8 +339,8 @@ public abstract class ModelSelectionForm {
     return comboBox;
   }
 
-  private ComboBox<LlmModel> createHuggingFaceComboBox(
-      DefaultComboBoxModel<LlmModel> huggingFaceComboBoxModel,
+  private ComboBox<HuggingFaceModel> createHuggingFaceComboBox(
+      DefaultComboBoxModel<HuggingFaceModel> huggingFaceComboBoxModel,
       JBLabel modelExistsIcon,
       JBLabel modelDetailsLabel,
       JPanel downloadModelActionLinkWrapper) {
@@ -330,7 +361,7 @@ public abstract class ModelSelectionForm {
   private AnActionLink createCancelDownloadLink(
       JBLabel progressLabel,
       JPanel actionLinkWrapper,
-      DefaultComboBoxModel<LlmModel> huggingFaceComboBoxModel,
+      DefaultComboBoxModel<HuggingFaceModel> huggingFaceComboBoxModel,
       ProgressIndicator progressIndicator) {
     return new AnActionLink(
         CodeGPTBundle.get("settingsConfigurable.service.llama.cancelDownloadLink.label"),
@@ -370,10 +401,9 @@ public abstract class ModelSelectionForm {
   private AnActionLink createDownloadModelLink(
       JBLabel progressLabel,
       JPanel actionLinkWrapper,
-      DefaultComboBoxModel<LlmModel> huggingFaceComboBoxModel) {
+      DefaultComboBoxModel<HuggingFaceModel> huggingFaceComboBoxModel) {
     return new AnActionLink(
         CodeGPTBundle.get("settingsConfigurable.service.llama.downloadModelLink.label"),
-        // TODO implement for Ollama
         new DownloadModelAction(
             progressIndicator -> {
               SwingUtilities.invokeLater(() -> {
@@ -396,7 +426,7 @@ public abstract class ModelSelectionForm {
                       actionLinkWrapper,
                       huggingFaceComboBoxModel));
               actionLinkWrapper.setVisible(false);
-              settings.setLlmModel((HuggingFaceModel) huggingFaceComboBoxModel.getSelectedItem());
+//              settings.setLlmModel((HuggingFaceModel) huggingFaceComboBoxModel.getSelectedItem());
             }),
             (error) -> {
               throw new RuntimeException(error);
@@ -419,17 +449,13 @@ public abstract class ModelSelectionForm {
         .installOn(helpIcon);
   }
 
-  public void setPromptTemplate(PromptTemplate promptTemplate) {
-    promptTemplateWrapper.setPromptTemplate(promptTemplate);
-  }
-
-  public PromptTemplate getPromptTemplate() {
-    return promptTemplateWrapper.getPrompTemplate();
-  }
-
-  private boolean isModelExists(HuggingFaceModel model) {
-    return FileUtil.exists(
-        CodeGPTPlugin.getLlamaModelsPath() + File.separator + model.getModelFileName());
+  private boolean isModelExists(LlamaCompletionModel model) {
+    if (model instanceof HuggingFaceModel) {
+      return FileUtil.exists(
+          CodeGPTPlugin.getLlamaModelsPath() + File.separator
+              + ((HuggingFaceModel) model).getModelFileName());
+    }
+    return FileUtil.exists(((CustomLamaModel) model).getModelPath());
   }
 
 
@@ -441,27 +467,37 @@ public abstract class ModelSelectionForm {
     return customModelRadioButton.isSelected();
   }
 
-  public ComboBox<LlmModel> getHuggingFaceModelComboBox() {
+  public ComboBox<HuggingFaceModel> getHuggingFaceModelComboBox() {
     return huggingFaceModelComboBox;
   }
 
-  public void setSelectedModel(LlmModel model) {
-    huggingFaceComboBoxModel.setSelectedItem(model);
+  @Override
+  public void setSelectedModel(LlamaCompletionModel model) {
+    if (model instanceof HuggingFaceModel) {
+      setUseCustomModel(false);
+      huggingFaceComboBoxModel.setSelectedItem(model);
+    } else {
+      setUseCustomModel(true);
+      setCustomModel(((CustomLamaModel) model).getModelPath());
+    }
   }
 
-  public HuggingFaceModel getSelectedModel() {
-    return (HuggingFaceModel) huggingFaceComboBoxModel.getSelectedItem();
+  @Override
+  public LlamaCompletionModel getSelectedModel() {
+    if (!isUseCustomModel()) {
+      return (HuggingFaceModel) huggingFaceComboBoxModel.getSelectedItem();
+    } else {
+      return new CustomLamaModel(getCustomModel());
+    }
   }
 
-  public void setCustomModel(String customModel) {
+
+  private void setCustomModel(String customModel) {
     getChooseCustomModelComponent().setValue(customModel);
   }
-  public String getCustomModel() {
-    return getChooseCustomModelComponent().getValue();
-  }
 
-  public String getActualModel() {
-    return isUseCustomModel() ? getChooseCustomModelComponent().getValue() : getSelectedModel().getModelFileName();
+  private String getCustomModel() {
+    return getChooseCustomModelComponent().getValue();
   }
 
   private static class ModelDetails {

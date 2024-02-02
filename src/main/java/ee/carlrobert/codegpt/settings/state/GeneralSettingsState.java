@@ -7,35 +7,37 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
+import ee.carlrobert.codegpt.completions.llama.CustomLamaModel;
 import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
+import ee.carlrobert.codegpt.completions.llama.LlamaCompletionModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
-import ee.carlrobert.codegpt.settings.state.llama.LlamaSettingsState;
+import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import org.jetbrains.annotations.NotNull;
 
 @State(name = "CodeGPT_GeneralSettings_210", storages = @Storage("CodeGPT_GeneralSettings_210.xml"))
-public class SettingsState implements PersistentStateComponent<SettingsState> {
+public class GeneralSettingsState implements PersistentStateComponent<GeneralSettingsState> {
 
   private String email = "";
   private String displayName = "";
   private boolean previouslySignedIn;
   private ServiceType selectedService = ServiceType.OPENAI;
 
-  public SettingsState() {
+  public GeneralSettingsState() {
   }
 
-  public static SettingsState getInstance() {
-    return ApplicationManager.getApplication().getService(SettingsState.class);
+  public static GeneralSettingsState getInstance() {
+    return ApplicationManager.getApplication().getService(GeneralSettingsState.class);
   }
 
   @Override
-  public SettingsState getState() {
+  public GeneralSettingsState getState() {
     return this;
   }
 
   @Override
-  public void loadState(@NotNull SettingsState state) {
+  public void loadState(@NotNull GeneralSettingsState state) {
     XmlSerializerUtil.copyBean(state, this);
   }
 
@@ -43,7 +45,8 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
     var clientCode = conversation.getClientCode();
     if ("chat.completion".equals(clientCode)) {
       setSelectedService(ServiceType.OPENAI);
-      OpenAISettingsState.getInstance().setModel(conversation.getModel());
+      OpenAISettingsState.getInstance()
+          .setModel(OpenAIChatCompletionModel.findByCode(conversation.getModel()));
     }
     if ("azure.chat.completion".equals(clientCode)) {
       setSelectedService(ServiceType.AZURE);
@@ -52,12 +55,10 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
       setSelectedService(ServiceType.LLAMA);
       var llamaSettings = LlamaSettingsState.getInstance();
       try {
-        var huggingFaceModel = HuggingFaceModel.valueOf(conversation.getModel());
-        llamaSettings.setLocalModel(huggingFaceModel);
-        llamaSettings.setLocalUseCustomModel(false);
+        llamaSettings.getLocalSettings()
+            .setModel(HuggingFaceModel.valueOf(conversation.getModel()));
       } catch (IllegalArgumentException ignore) {
-        llamaSettings.setLocalModel(conversation.getModel());
-        llamaSettings.setLocalUseCustomModel(true);
+        llamaSettings.getLocalSettings().setModel(new CustomLamaModel(conversation.getModel()));
       }
     }
     if ("you.chat.completion".equals(clientCode)) {
@@ -68,22 +69,24 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
   public String getModel() {
     switch (selectedService) {
       case OPENAI:
-        return OpenAISettingsState.getInstance().getModel();
+        return OpenAISettingsState.getInstance().getModel().getCode();
       case AZURE:
         return AzureSettingsState.getInstance().getDeploymentId();
       case YOU:
         return "YouCode";
       case LLAMA:
         var llamaSettings = LlamaSettingsState.getInstance();
-        if (llamaSettings.isLocalUseCustomModel()) {
-          var filePath = llamaSettings.getLocalModelPath();
+        LlamaCompletionModel usedModel = llamaSettings.getUsedModel();
+        if (usedModel instanceof CustomLamaModel) {
+          CustomLamaModel customModel = (CustomLamaModel) usedModel;
+          var filePath = customModel.getModelPath();
           int lastSeparatorIndex = filePath.lastIndexOf('/');
           if (lastSeparatorIndex == -1) {
             return filePath;
           }
           return filePath.substring(lastSeparatorIndex + 1);
         }
-        var huggingFaceModel = llamaSettings.getLocalModel();
+        var huggingFaceModel = (HuggingFaceModel) usedModel;
         var llamaModel = LlamaModel.findByHuggingFaceModel(huggingFaceModel);
         return format(
             "%s %dB (Q%d)",

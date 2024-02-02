@@ -23,7 +23,7 @@ import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
-import ee.carlrobert.codegpt.settings.state.SettingsState;
+import ee.carlrobert.codegpt.settings.state.GeneralSettingsState;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowPanel;
@@ -280,7 +280,7 @@ public abstract class ChatToolWindowTabPanel implements Disposable {
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.gridy = 1;
     rootPanel.add(
-        createUserPromptPanel(SettingsState.getInstance().getSelectedService()), gbc);
+        createUserPromptPanel(GeneralSettingsState.getInstance().getSelectedService()), gbc);
     return rootPanel;
   }
 }

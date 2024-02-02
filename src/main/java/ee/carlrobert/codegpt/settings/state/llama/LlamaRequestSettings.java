@@ -1,7 +1,7 @@
 package ee.carlrobert.codegpt.settings.state.llama;
 
 /**
- * All settings for completion requests
+ * All settings for Llama completion requests
  */
 public class LlamaRequestSettings {
 

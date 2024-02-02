@@ -2,17 +2,21 @@ package ee.carlrobert.codegpt.settings.state.llama;
 
 import ee.carlrobert.codegpt.completions.PromptTemplate;
 import ee.carlrobert.codegpt.credentials.LlamaCredentialsManager;
-import ee.carlrobert.codegpt.settings.state.RemoteSettings;
+import ee.carlrobert.codegpt.settings.state.util.RemoteSettings;
 
 /**
  * All settings for using an existing remote Llama server
  */
 public class LlamaRemoteSettings extends RemoteSettings<LlamaCredentialsManager> {
 
-  private PromptTemplate promptTemplate;
+  private PromptTemplate promptTemplate = PromptTemplate.LLAMA;
+
+  public LlamaRemoteSettings() {
+    super("http://localhost:8080", null, new LlamaCredentialsManager("REMOTE"));
+  }
 
   public LlamaRemoteSettings(PromptTemplate promptTemplate, String baseHost) {
-    super(baseHost, null);
+    super(baseHost, null, new LlamaCredentialsManager("REMOTE"));
     this.promptTemplate = promptTemplate;
   }
 

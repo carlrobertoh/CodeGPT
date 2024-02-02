@@ -1,6 +1,6 @@
 package ee.carlrobert.codegpt.settings.service.llama;
 
-import static ee.carlrobert.codegpt.ui.UIUtil.addApiKeyPanel;
+import static ee.carlrobert.codegpt.ui.UIUtil.createApiKeyPanel;
 import static ee.carlrobert.codegpt.ui.UIUtil.createComment;
 import static ee.carlrobert.codegpt.ui.UIUtil.withEmptyLeftBorder;
 
@@ -15,35 +15,44 @@ import com.intellij.ui.components.fields.IntegerField;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.JBUI.Panels;
+import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.completions.ServerAgent;
-import ee.carlrobert.codegpt.completions.ServerStartupParams;
+import ee.carlrobert.codegpt.completions.llama.ServerStartupParams;
+import ee.carlrobert.codegpt.completions.llama.CustomLamaModel;
 import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
+import ee.carlrobert.codegpt.completions.llama.LlamaCompletionModel;
 import ee.carlrobert.codegpt.credentials.LlamaCredentialsManager;
-import ee.carlrobert.codegpt.settings.service.ServerProgressPanel;
+import ee.carlrobert.codegpt.settings.service.util.ServerProgressPanel;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaLocalSettings;
-import ee.carlrobert.codegpt.ui.ComponentWithStringValue;
+import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
+import ee.carlrobert.codegpt.ui.PromptTemplateField;
 import javax.swing.JButton;
-import javax.swing.JComponent;
+import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
 /**
  * Form containing fields for all {@link LlamaLocalSettings}
  */
-public abstract class LocalServerPreferencesForm {
+public abstract class LlamaLocalServiceForm extends FormBuilder {
 
-  private final ModelSelectionForm localModelPreferencesForm;
+  private final LlamaModelSelector modelSelector;
   private final PortField portField;
   private final IntegerField maxTokensField;
   private final IntegerField threadsField;
   private final JBTextField additionalParametersField;
-  private JBPasswordField apiKeyField;
+  private final JBPasswordField apiKeyField;
+
+  private final PromptTemplateField promptTemplateField;
 
   private final LlamaCredentialsManager credentialsManager;
 
-  public LocalServerPreferencesForm(LlamaLocalSettings settings, ServerAgent serverAgent) {
+  private final ServerAgent serverAgent;
+
+  public LlamaLocalServiceForm(LlamaLocalSettings settings, ServerAgent serverAgent) {
     this.credentialsManager = settings.getCredentialsManager();
+    this.serverAgent = serverAgent;
     var serverRunning = serverAgent.isServerRunning();
     portField = new PortField(settings.getServerPort());
     portField.setEnabled(!serverRunning);
@@ -61,58 +70,34 @@ public abstract class LocalServerPreferencesForm {
     additionalParametersField = new JBTextField(settings.getAdditionalParameters(), 30);
     additionalParametersField.setEnabled(!serverRunning);
 
-      apiKeyField = new JBPasswordField();
-      apiKeyField.setColumns(30);
-      apiKeyField.setText(credentialsManager.getApiKey());
+    apiKeyField = new JBPasswordField();
 
-    localModelPreferencesForm = new ModelSelectionForm(settings) {
-      @Override
-      public ComponentWithStringValue getChooseCustomModelComponent() {
-        JBTextField textField = new JBTextField(settings.getCustomModel(), 30);
-        textField.setText(settings.getCustomModel());
-        return new ComponentWithStringValue() {
-          @Override
-          public JComponent getComponent() {
-            return textField;
-          }
+    modelSelector = new LlamaModelSelector(settings.getModel());
 
-          @Override
-          public String getValue() {
-            return textField.getText();
-          }
-
-          @Override
-          public void setValue(String value) {
-            textField.setText(value);
-          }
-        };
-      }
-    };
-
+    promptTemplateField = new PromptTemplateField(
+        LlamaSettingsState.getInstance().getRemoteSettings().getPromptTemplate(), true);
   }
 
   protected abstract boolean isModelExists(HuggingFaceModel model);
 
   public void setLocalSettings(LlamaLocalSettings settings) {
-    localModelPreferencesForm.setSelectedModel(settings.getLlModel());
-    localModelPreferencesForm.setCustomModel(settings.getCustomModel());
-    localModelPreferencesForm.setUseCustomModel(settings.isUseCustomModel());
-    localModelPreferencesForm.setPromptTemplate(settings.getPromptTemplate());
+    LlamaCompletionModel model = settings.getModel();
+    modelSelector.setSelectedModel(model);
+    promptTemplateField.setPromptTemplate(settings.getPromptTemplate());
     portField.setValue(settings.getServerPort());
     maxTokensField.setValue(settings.getContextSize());
     threadsField.setValue(settings.getThreads());
     additionalParametersField.setText(settings.getAdditionalParameters());
-    var credentialsManager = settings.getCredentialsManager();
-      apiKeyField.setText(credentialsManager.getApiKey());
+    apiKeyField.setText(settings.getCredentialsManager().getApiKey());
   }
 
-  public JComponent getForm(ServerAgent serverAgent) {
+  @Override
+  public JPanel getPanel() {
     var serverProgressPanel = new ServerProgressPanel();
     serverProgressPanel.setBorder(JBUI.Borders.emptyRight(16));
-    FormBuilder formBuilder = FormBuilder.createFormBuilder()
-        .addComponent(new TitledSeparator(
+    addComponent(new TitledSeparator(
             CodeGPTBundle.get("settingsConfigurable.service.ollama.modelPreferences.title")))
-        .addComponent(withEmptyLeftBorder(localModelPreferencesForm.getModelForm()))
+        .addComponent(withEmptyLeftBorder(modelSelector.getComponent()))
         .addVerticalGap(8)
         .addLabeledComponent(
             CodeGPTBundle.get("shared.port"),
@@ -137,9 +122,18 @@ public abstract class LocalServerPreferencesForm {
             additionalParametersField)
         .addComponentToRightColumn(
             createComment("settingsConfigurable.service.llama.additionalParameters.comment"))
-        .addVerticalGap(8);
-      addApiKeyPanel(credentialsManager.getApiKey(), formBuilder, apiKeyField);
-    return withEmptyLeftBorder(formBuilder.getPanel());
+        .addComponent(UI.PanelFactory.panel(promptTemplateField)
+            .withLabel(CodeGPTBundle.get("shared.promptTemplate"))
+            .withComment(
+                CodeGPTBundle.get("settingsConfigurable.service.llama.promptTemplate.comment"))
+            .resizeX(false).createPanel())
+        .addVerticalGap(8)
+        .addComponentFillVertically(new JPanel(), 0);
+    addComponent(new TitledSeparator(
+        CodeGPTBundle.get("settingsConfigurable.shared.authentication.title")));
+    addComponent(
+        createApiKeyPanel(credentialsManager.getApiKey(), apiKeyField).createPanel());
+    return withEmptyLeftBorder(super.getPanel());
   }
 
   private JButton getServerButton(
@@ -162,11 +156,7 @@ public abstract class LocalServerPreferencesForm {
       } else {
         disableForm(serverButton, serverProgressPanel);
         serverAgent.startAgent(
-            new ServerStartupParams(
-                localModelPreferencesForm.isUseCustomModel(),
-                localModelPreferencesForm.getCustomModel(),
-                localModelPreferencesForm.getSelectedModel(),
-                getLocalSettings()),
+            new ServerStartupParams(modelSelector.getSelectedModel(), getLocalSettings()),
             serverProgressPanel,
             () -> {
               setFormEnabled(false);
@@ -197,13 +187,14 @@ public abstract class LocalServerPreferencesForm {
 
 
   private boolean validateCustomModelPath() {
-    if (localModelPreferencesForm.isUseCustomModel()) {
-      var customModelPath = localModelPreferencesForm.getCustomModel();
+    LlamaCompletionModel model = modelSelector.getSelectedModel();
+    if (model instanceof CustomLamaModel) {
+      var customModelPath = ((CustomLamaModel) model).getModelPath();
       if (customModelPath == null || customModelPath.isEmpty()) {
         OverlayUtil.showBalloon(
             CodeGPTBundle.get("validation.error.fieldRequired"),
             MessageType.ERROR,
-            localModelPreferencesForm.getChooseCustomModelComponent().getComponent());
+            modelSelector.getChooseCustomModelComponent().getComponent());
         return false;
       }
     }
@@ -211,13 +202,17 @@ public abstract class LocalServerPreferencesForm {
   }
 
   private boolean validateSelectedModel() {
-    if (!localModelPreferencesForm.isUseCustomModel()
-        && !isModelExists(localModelPreferencesForm.getSelectedModel())) {
-      OverlayUtil.showBalloon(
-          CodeGPTBundle.get("settingsConfigurable.service.ollama.overlay.modelNotDownloaded.text"),
-          MessageType.ERROR,
-          localModelPreferencesForm.getHuggingFaceModelComboBox());
-      return false;
+    LlamaCompletionModel model = modelSelector.getSelectedModel();
+    if (model instanceof HuggingFaceModel) {
+      HuggingFaceModel model1 = (HuggingFaceModel) model;
+      if (!isModelExists(model1)) {
+        OverlayUtil.showBalloon(
+            CodeGPTBundle.get(
+                "settingsConfigurable.service.ollama.overlay.modelNotDownloaded.text"),
+            MessageType.ERROR,
+            modelSelector.getHuggingFaceModelComboBox());
+        return false;
+      }
     }
     return true;
   }
@@ -243,19 +238,18 @@ public abstract class LocalServerPreferencesForm {
   }
 
   public void setFormEnabled(boolean enabled) {
-    localModelPreferencesForm.enableFields(enabled);
+    modelSelector.enableFields(enabled);
     portField.setEnabled(enabled);
     maxTokensField.setEnabled(enabled);
     threadsField.setEnabled(enabled);
     additionalParametersField.setEnabled(enabled);
+    promptTemplateField.setEnabled(enabled);
   }
 
   public LlamaLocalSettings getLocalSettings() {
     LlamaLocalSettings localSettings = new LlamaLocalSettings(
-        localModelPreferencesForm.isUseCustomModel(),
-        localModelPreferencesForm.getCustomModel(),
-        localModelPreferencesForm.getSelectedModel(),
-        localModelPreferencesForm.getPromptTemplate(),
+        modelSelector.getSelectedModel(),
+        promptTemplateField.getPromptTemplate(),
         portField.getNumber(),
         maxTokensField.getValue(),
         threadsField.getValue(),

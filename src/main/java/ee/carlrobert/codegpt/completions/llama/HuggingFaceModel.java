@@ -2,11 +2,10 @@ package ee.carlrobert.codegpt.completions.llama;
 
 import static java.lang.String.format;
 
-import ee.carlrobert.codegpt.completions.LlmModel;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-public enum HuggingFaceModel implements LlmModel {
+public enum HuggingFaceModel implements LlamaCompletionModel {
 
   CODE_LLAMA_7B_Q3(7, 3, "CodeLlama-7B-Instruct-GGUF", "codellama:7b-instruct-q3_K_M"),
   CODE_LLAMA_7B_Q4(7, 4, "CodeLlama-7B-Instruct-GGUF", "codellama:7b-instruct-q4_K_M"),
@@ -64,18 +63,27 @@ public enum HuggingFaceModel implements LlmModel {
     this.modelTag = modelTag;
   }
 
-  @Override
   public int getParameterSize() {
     return parameterSize;
   }
 
-  @Override
   public int getQuantization() {
     return quantization;
   }
 
   public String getCode() {
     return name();
+  }
+
+  @Override
+  public String getDescription() {
+    return "";
+  }
+
+  @Override
+  public int getMaxTokens() {
+    //TODO
+    return 2048;
   }
 
   public String getModelTag() {
@@ -86,7 +94,6 @@ public enum HuggingFaceModel implements LlmModel {
     return modelFileName.toLowerCase().replace("-gguf", format(".Q%d_K_M.gguf", quantization));
   }
 
-  @Override
   public URL getModelUrl() {
     try {
       return new URL(

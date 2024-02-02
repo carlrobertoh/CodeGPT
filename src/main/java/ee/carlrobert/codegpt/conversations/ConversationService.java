@@ -9,8 +9,8 @@ import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
-import ee.carlrobert.codegpt.settings.state.SettingsState;
-import ee.carlrobert.codegpt.settings.state.llama.LlamaSettingsState;
+import ee.carlrobert.codegpt.settings.state.GeneralSettingsState;
+import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -42,7 +42,7 @@ public final class ConversationService {
   }
 
   public Conversation createConversation(String clientCode) {
-    var settings = SettingsState.getInstance();
+    var settings = GeneralSettingsState.getInstance();
     var conversation = new Conversation();
     conversation.setId(UUID.randomUUID());
     conversation.setClientCode(clientCode);
@@ -111,7 +111,8 @@ public final class ConversationService {
   }
 
   public Conversation startConversation() {
-    var completionCode = SettingsState.getInstance().getSelectedService().getCompletionCode();
+    var completionCode = GeneralSettingsState.getInstance().getSelectedService()
+        .getCompletionCode();
     var conversation = createConversation(completionCode);
     conversationState.setCurrentConversation(conversation);
     addConversation(conversation);
@@ -189,14 +190,13 @@ public final class ConversationService {
   private static String getModelForSelectedService(ServiceType serviceType) {
     switch (serviceType) {
       case OPENAI:
-        return OpenAISettingsState.getInstance().getModel();
+        return OpenAISettingsState.getInstance().getModel().getCode();
       case AZURE:
         return AzureSettingsState.getInstance().getDeploymentId();
       case YOU:
         return "YouCode";
       case LLAMA:
-        var llamaSettings = LlamaSettingsState.getInstance();
-        return llamaSettings.getLocalModelPath();
+        return LlamaSettingsState.getInstance().getUsedModelPath();
       default:
         throw new RuntimeException("Could not find corresponding service mapping");
     }

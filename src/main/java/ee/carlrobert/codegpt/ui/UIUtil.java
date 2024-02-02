@@ -3,15 +3,16 @@ package ee.carlrobert.codegpt.ui;
 import static javax.swing.event.HyperlinkEvent.EventType.ACTIVATED;
 
 import com.intellij.ide.BrowserUtil;
+import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
+import com.intellij.openapi.ui.TextBrowseFolderListener;
+import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.ui.panel.ComponentPanelBuilder;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.ScrollPaneFactory;
-import com.intellij.ui.TitledSeparator;
 import com.intellij.ui.components.JBPasswordField;
 import com.intellij.ui.components.JBRadioButton;
 import com.intellij.ui.components.JBTextArea;
-import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
@@ -142,6 +143,10 @@ public class UIUtil {
     return component;
   }
 
+  public static JPanel withEmptyLeftBorder(JPanel panel) {
+    return (JPanel) withEmptyLeftBorder((JComponent) panel);
+  }
+
   public static JLabel createComment(String messageKey) {
     var comment = ComponentPanelBuilder.createCommentComponent(
         CodeGPTBundle.get(messageKey), true);
@@ -219,19 +224,26 @@ public class UIUtil {
     }
   }
 
-  public static void addApiKeyPanel(String initialApiKey, FormBuilder formBuilder, JBPasswordField apiKeyField) {
+  public static ComponentPanelBuilder createApiKeyPanel(String initialApiKey,
+      JBPasswordField apiKeyField) {
     apiKeyField.setColumns(30);
     apiKeyField.setText(initialApiKey);
-    var apiKeyFieldPanel = UI.PanelFactory.panel(apiKeyField)
+    return UI.PanelFactory.panel(apiKeyField)
         .withLabel(CodeGPTBundle.get("settingsConfigurable.shared.apiKey.label"))
         .resizeX(false)
         .withComment(
             CodeGPTBundle.get("settingsConfigurable.shared.apiKey.comment"))
-        .withCommentHyperlinkListener(UIUtil::handleHyperlinkClicked)
-        .createPanel();
-    formBuilder.addComponent(new TitledSeparator(
-            CodeGPTBundle.get("settingsConfigurable.shared.authentication.title")))
-        .addComponent(withEmptyLeftBorder(apiKeyFieldPanel));
+        .withCommentHyperlinkListener(UIUtil::handleHyperlinkClicked);
+  }
+
+  public static TextFieldWithBrowseButton createTextFieldWithBrowseButton(
+      FileChooserDescriptor fileChooserDescriptor) {
+    var browseButton = new TextFieldWithBrowseButton();
+    browseButton.setEnabled(true);
+    fileChooserDescriptor.setForcedToUseIdeaFileChooser(true);
+    fileChooserDescriptor.setHideIgnored(false);
+    browseButton.addBrowseFolderListener(new TextBrowseFolderListener(fileChooserDescriptor));
+    return browseButton;
   }
 }
 

@@ -13,14 +13,14 @@ import javax.swing.JPanel;
 /**
  * Form containing fields for all {@link LlamaRequestSettings}
  */
-public class RequestPreferencesForm {
+public class LlamaRequestsForm {
 
   private final IntegerField topKField;
   private final JBTextField topPField;
   private final JBTextField minPField;
   private final JBTextField repeatPenaltyField;
 
-  public RequestPreferencesForm(LlamaRequestSettings settings) {
+  public LlamaRequestsForm(LlamaRequestSettings settings) {
     topKField = new IntegerField();
     topKField.setColumns(12);
     topKField.setValue(settings.getTopK());

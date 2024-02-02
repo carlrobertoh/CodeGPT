@@ -8,13 +8,14 @@ import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.actionSystem.ex.ComboBoxAction;
 import ee.carlrobert.codegpt.Icons;
+import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
-import ee.carlrobert.codegpt.settings.state.SettingsState;
-import ee.carlrobert.codegpt.settings.state.llama.LlamaSettingsState;
+import ee.carlrobert.codegpt.settings.state.GeneralSettingsState;
+import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import java.util.List;
 import javax.swing.Icon;
@@ -24,12 +25,12 @@ import org.jetbrains.annotations.NotNull;
 public class ModelComboBoxAction extends ComboBoxAction {
 
   private final Runnable onAddNewTab;
-  private final SettingsState settings;
+  private final GeneralSettingsState settings;
   private final OpenAISettingsState openAISettings;
 
   public ModelComboBoxAction(Runnable onAddNewTab, ServiceType selectedService) {
     this.onAddNewTab = onAddNewTab;
-    settings = SettingsState.getInstance();
+    settings = GeneralSettingsState.getInstance();
     openAISettings = OpenAISettingsState.getInstance();
     updateTemplatePresentation(selectedService);
   }
@@ -87,7 +88,8 @@ public class ModelComboBoxAction extends ComboBoxAction {
       case OPENAI:
         templatePresentation.setIcon(Icons.OpenAI);
         templatePresentation.setText(
-            OpenAIChatCompletionModel.findByCode(openAISettings.getModel()).getDescription());
+            OpenAIChatCompletionModel.findByCode(openAISettings.getModel().getCode())
+                .getDescription());
         break;
       case AZURE:
         templatePresentation.setIcon(Icons.Azure);
@@ -106,7 +108,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
   }
 
   private String getSelectedHuggingFace() {
-    var huggingFaceModel = LlamaSettingsState.getInstance().getLocalModel();
+    var huggingFaceModel = (HuggingFaceModel) LlamaSettingsState.getInstance().getUsedModel();
     return format(
         "%s %dB (Q%d)",
         LlamaModel.findByHuggingFaceModel(huggingFaceModel).getLabel(),
@@ -164,7 +166,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
 
       @Override
       public void actionPerformed(@NotNull AnActionEvent e) {
-        openAISettings.setModel(model.getCode());
+        openAISettings.setModel(model);
         handleProviderChange(
             ServiceType.OPENAI,
             model.getDescription(),

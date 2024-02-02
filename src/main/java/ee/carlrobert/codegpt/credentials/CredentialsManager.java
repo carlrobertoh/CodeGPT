@@ -1,6 +1,6 @@
 package ee.carlrobert.codegpt.credentials;
 
-import static ee.carlrobert.codegpt.util.Utils.areStringsDifferentIgnoringEmptyOrNull;
+import static ee.carlrobert.codegpt.util.Utils.areValuesDifferent;
 
 import com.intellij.credentialStore.CredentialAttributes;
 import java.util.HashMap;
@@ -34,7 +34,7 @@ public abstract class CredentialsManager {
 
   protected boolean isModified(Map<CredentialAttributes, String> credentials) {
     for (Entry<CredentialAttributes, String> entry : this.credentials.entrySet()) {
-      if (!credentials.containsKey(entry.getKey()) || areStringsDifferentIgnoringEmptyOrNull(
+      if (!credentials.containsKey(entry.getKey()) || areValuesDifferent(
           entry.getValue(), credentials.get(entry.getKey()))) {
         return true;
       }
