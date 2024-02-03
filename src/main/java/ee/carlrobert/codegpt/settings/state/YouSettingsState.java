@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.settings.state;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
@@ -16,9 +17,8 @@ public class YouSettingsState extends RemoteSettings<YouCredentialsManager>
   private boolean useGPT4Model;
 
   public static YouSettingsState getInstance() {
-    YouSettingsState settingsState = new YouSettingsState();
-    settingsState.setCredentialsManager(new YouCredentialsManager());
-    return settingsState;
+    return ApplicationManager.getApplication()
+        .getService(YouSettingsState.class);
   }
 
   public YouSettingsState() {

@@ -54,7 +54,6 @@ public class LlamaRequestsForm {
             repeatPenaltyField)
         .addComponentToRightColumn(
             createComment("settingsConfigurable.service.llama.repeatPenalty.comment"))
-        .addComponentFillVertically(new JPanel(), 0)
         .getPanel();
   }
 

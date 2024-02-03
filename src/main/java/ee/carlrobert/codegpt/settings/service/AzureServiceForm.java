@@ -13,6 +13,7 @@ import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import java.util.List;
 import javax.swing.JPanel;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Form containing all forms to configure using
@@ -55,9 +56,9 @@ public class AzureServiceForm extends
         azureSettings.isUseAzureActiveDirectoryAuthentication());
 
     apiKeyFieldPanel = super.authenticationComponents().get(0).createPanel();
-    return UIUtil.createSelectLayoutBuilders(useAzureApiKeyAuthenticationRadioButton,
+    return List.of(UIUtil.createSelectLayoutPanelBuilder(useAzureApiKeyAuthenticationRadioButton,
         apiKeyFieldPanel, useAzureActiveDirectoryAuthenticationRadioButton,
-        azureActiveDirectoryTokenFieldPanel, azureSettings.isUseAzureApiKeyAuthentication());
+        azureActiveDirectoryTokenFieldPanel, azureSettings.isUseAzureApiKeyAuthentication()));
   }
 
   @Override
@@ -132,6 +133,22 @@ public class AzureServiceForm extends
 
   public String getAzureApiVersion() {
     return azureApiVersionField.getText();
+  }
+
+  public AzureSettingsState getSettings() {
+    return new AzureSettingsState(getBaseHost(), getPath(), getModel(),
+        new AzureCredentialsManager() {
+          @Override
+          public String getApiKey() {
+            return AzureServiceForm.this.getApiKey();
+          }
+
+          @Override
+          public @Nullable String getActiveDirectoryToken() {
+            return AzureServiceForm.this.getAzureActiveDirectoryToken();
+          }
+        }, getAzureResourceName(), getAzureDeploymentId(), getAzureApiVersion(),
+        isAzureApiKeyAuthenticationSelected(), isAzureActiveDirectoryAuthenticationSelected());
   }
 
 

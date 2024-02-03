@@ -2,6 +2,7 @@ package ee.carlrobert.codegpt.ui;
 
 import com.intellij.icons.AllIcons.General;
 import com.intellij.ide.HelpTooltip;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.panel.ComponentPanelBuilder;
 import com.intellij.ui.EnumComboBoxModel;
@@ -45,7 +46,11 @@ public abstract class BasePromptTemplatePanel<T extends Enum<T>> extends JPanel 
         CodeGPTBundle.get(helpTextKey),
         true);
     promptTemplateHelpText.setBorder(JBUI.Borders.empty(0, 4));
-    updatePromptTemplateHelpTooltip(initiallySelectedTemplate);
+    if (!ApplicationManager.getApplication().isUnitTestMode()) {
+      // throws java.lang.NoSuchMethodError: 'Range.of(java.lang.Comparable, java.lang.Comparable)'
+      // in ServiceFormTest Unittest
+      updatePromptTemplateHelpTooltip(initiallySelectedTemplate);
+    }
   }
 
   public void setPromptTemplate(T promptTemplate) {

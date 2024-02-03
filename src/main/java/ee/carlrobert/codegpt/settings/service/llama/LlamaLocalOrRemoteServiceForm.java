@@ -4,23 +4,16 @@ import static ee.carlrobert.codegpt.ui.UIUtil.createForm;
 
 import com.intellij.ui.components.JBRadioButton;
 import ee.carlrobert.codegpt.completions.ServerAgent;
-import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
-import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaLocalSettings;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaRemoteSettings;
-import ee.carlrobert.codegpt.ui.UIUtil.RadioButtonWithLayout;
-import java.util.Map;
 import javax.swing.JPanel;
 
 /**
  * Form containing {@link JBRadioButton} to toggle between({@link LlamaLocalServiceForm}) or
  * ({@link LlamaRemoteServiceForm}).
  */
-public abstract class LlamaLocalOrRemoteServiceForm {
-
-  private static final String RUN_LOCAL_SERVER_FORM_CARD_CODE = "RunLocalServerSettings";
-  private static final String USE_EXISTING_SERVER_FORM_CARD_CODE = "UseExistingServerSettings";
+public class LlamaLocalOrRemoteServiceForm {
 
   private final JBRadioButton runLocalServerRadioButton;
   private final JBRadioButton useExistingServerRadioButton;
@@ -31,8 +24,7 @@ public abstract class LlamaLocalOrRemoteServiceForm {
   private final LlamaSettingsState llamaSettingsState;
 
   public LlamaLocalOrRemoteServiceForm(LlamaSettingsState llamaSettingsState,
-      ServerAgent serverAgent,
-      ServiceType serviceType) {
+      ServerAgent serverAgent) {
     this.llamaSettingsState = llamaSettingsState;
     runLocalServerRadioButton = new JBRadioButton("Run local server",
         llamaSettingsState.isRunLocalServer());
@@ -40,12 +32,7 @@ public abstract class LlamaLocalOrRemoteServiceForm {
         !llamaSettingsState.isRunLocalServer());
 
     llamaLocalServiceForm = new LlamaLocalServiceForm(llamaSettingsState.getLocalSettings(),
-        serverAgent, this::onServerAgentStateChanged) {
-      @Override
-      protected boolean isModelExists(HuggingFaceModel model) {
-        return LlamaLocalOrRemoteServiceForm.this.isModelExists(model);
-      }
-    };
+        serverAgent, this::onServerAgentStateChanged);
     llamaRemoteServiceForm = new LlamaRemoteServiceForm();
   }
 
@@ -54,18 +41,11 @@ public abstract class LlamaLocalOrRemoteServiceForm {
     llamaSettingsState.getLocalSettings().setServerRunning(isRunning);
   }
 
-  public abstract boolean isModelExists(HuggingFaceModel model);
-
 
   public JPanel getForm() {
-    return createForm(Map.of(
-        RUN_LOCAL_SERVER_FORM_CARD_CODE, new RadioButtonWithLayout(runLocalServerRadioButton,
-            llamaLocalServiceForm.getPanel()),
-        USE_EXISTING_SERVER_FORM_CARD_CODE, new RadioButtonWithLayout(useExistingServerRadioButton,
-            llamaRemoteServiceForm.getPanel())
-    ), runLocalServerRadioButton.isSelected()
-        ? RUN_LOCAL_SERVER_FORM_CARD_CODE
-        : USE_EXISTING_SERVER_FORM_CARD_CODE);
+    return createForm(runLocalServerRadioButton, llamaLocalServiceForm.getPanel(),
+        useExistingServerRadioButton, llamaRemoteServiceForm.getPanel(),
+        runLocalServerRadioButton.isSelected());
   }
 
 

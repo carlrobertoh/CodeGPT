@@ -27,6 +27,14 @@ public class OpenAISettingsState extends
         new OpenAICredentialsManager());
   }
 
+  public OpenAISettingsState(String baseHost, String path, OpenAIChatCompletionModel model,
+      OpenAICredentialsManager credentialsManager, String organization,
+      boolean openAIQuotaExceeded) {
+    super(baseHost, path, model, credentialsManager);
+    this.organization = organization;
+    this.openAIQuotaExceeded = openAIQuotaExceeded;
+  }
+
   public static OpenAISettingsState getInstance() {
     return ApplicationManager.getApplication()
         .getService(OpenAISettingsState.class);
@@ -43,19 +51,18 @@ public class OpenAISettingsState extends
   }
 
   @Transient
-  public boolean isModified(OpenAiServiceForm serviceSelectionForm) {
-    return super.isModified(serviceSelectionForm.getRemoteWithModelSettings())
-        || credentialsManager.isModified(serviceSelectionForm.getApiKey())
-        || !serviceSelectionForm.getOrganization().equals(organization);
+  public boolean isModified(OpenAISettingsState settingsState) {
+    return super.isModified(settingsState)
+        || credentialsManager.isModified(settingsState.getCredentialsManager().getApiKey())
+        || !settingsState.getOrganization().equals(organization);
   }
 
-  public void apply(OpenAiServiceForm serviceSelectionForm) {
-    var remoteSettings = serviceSelectionForm.getRemoteWithModelSettings();
-    baseHost = remoteSettings.getBaseHost();
-    path = remoteSettings.getPath();
-    setModel(remoteSettings.getModel());
-    organization = serviceSelectionForm.getOrganization();
-    credentialsManager.apply(serviceSelectionForm.getApiKey());
+  public void apply(OpenAISettingsState settingsState) {
+    baseHost = settingsState.getBaseHost();
+    path = settingsState.getPath();
+    setModel(settingsState.getModel());
+    organization = settingsState.getOrganization();
+    credentialsManager.apply(settingsState.getCredentialsManager().getApiKey());
   }
 
   public void reset(OpenAiServiceForm serviceSelectionForm) {

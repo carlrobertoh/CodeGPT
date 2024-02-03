@@ -27,6 +27,7 @@ public class LlamaLocalSettings extends CommonSettings<LlamaCredentialsManager> 
 
   public static final String BUNDLED_SERVER =
       CodeGPTPlugin.getLlamaSourcePath() + File.separator + "server";
+  public static final String CREDENTIALS_PREFIX = "LOCAL";
 
   private boolean serverRunning = false;
   private Integer serverPort = getRandomAvailablePortOrDefault();
@@ -51,7 +52,8 @@ public class LlamaLocalSettings extends CommonSettings<LlamaCredentialsManager> 
       InfillPromptTemplate infillPromptTemplate,
       Integer serverPort, int contextSize,
       int threads,
-      String additionalCompileParameters) {
+      String additionalCompileParameters,
+      LlamaCredentialsManager credentialsManager) {
     this.serverPath = serverPath;
     this.model = model;
     this.serverPort = serverPort;
@@ -60,6 +62,7 @@ public class LlamaLocalSettings extends CommonSettings<LlamaCredentialsManager> 
     this.additionalCompileParameters = additionalCompileParameters;
     this.chatPromptTemplate = chatPromptTemplate;
     this.infillPromptTemplate = infillPromptTemplate;
+    this.credentialsManager = credentialsManager;
   }
 
   @Transient

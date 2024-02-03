@@ -9,7 +9,6 @@ import com.intellij.openapi.ui.TextBrowseFolderListener;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.ui.panel.ComponentPanelBuilder;
 import com.intellij.openapi.ui.panel.PanelBuilder;
-import com.intellij.openapi.ui.panel.PanelGridBuilder;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.ui.components.JBPasswordField;
@@ -17,7 +16,6 @@ import com.intellij.ui.components.JBRadioButton;
 import com.intellij.ui.components.JBTextArea;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
-import com.intellij.util.ui.UI.PanelFactory;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.SmartScroller;
 import java.awt.BorderLayout;
@@ -25,12 +23,11 @@ import java.awt.CardLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Insets;
 import java.net.URISyntaxException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -157,6 +154,18 @@ public class UIUtil {
     return comment;
   }
 
+  public static JPanel createForm(JBRadioButton radio1, JComponent layout1, JBRadioButton radio2,
+      JComponent layout2,
+      boolean isFirstLayoutInitial) {
+    String firstComponentName = "first";
+    String secondComponentName = "second";
+    return createForm(Map.of(
+        firstComponentName, new RadioButtonWithLayout(radio1,
+            layout1),
+        secondComponentName, new RadioButtonWithLayout(radio2,
+            layout2)), isFirstLayoutInitial ? firstComponentName : secondComponentName);
+  }
+
   public static JPanel createForm(Map<String, RadioButtonWithLayout> layouts,
       String initialLayout) {
     JPanel finalPanel = new JPanel(new BorderLayout());
@@ -167,77 +176,18 @@ public class UIUtil {
     return finalPanel;
   }
 
-  /**
-   * Creates RadioButton group to toggle between different layouts.
-   *
-   * @param layouts       Map from layout name to RadioButton + Layout to be shown
-   * @param initialLayout Key of {@code layouts} entry to be initially shown
-   * @return Panel with the RadioButton group
-   */
-  public static JPanel createRadioButtonGroupLayouts(Map<String, RadioButtonWithLayout> layouts,
-      String initialLayout) {
-    CardLayout cardlayout = new CardLayout() {
-      @Override
-      public void show(Container parent, String name) {
-        super.show(parent, name);
-        // Set height to selected components height instead of consistent height
-        Optional<Component> selectedComponent = Arrays.stream(parent.getComponents())
-            .filter(component -> name.equals(component.getName()))
-            .findFirst();
-        if (selectedComponent.isEmpty()) {
-          return;
-        }
-        parent.setPreferredSize(new Dimension(parent.getPreferredSize().width,
-            (int) selectedComponent.get().getPreferredSize().getHeight()));
-      }
-    };
-
-    var formPanelCards = new JPanel(cardlayout);
-    formPanelCards.setBorder(JBUI.Borders.emptyLeft(16));
-
-    for (Entry<String, RadioButtonWithLayout> layout : layouts.entrySet()) {
-      RadioButtonWithLayout value = layout.getValue();
-      Component component = value.getComponent();
-      String key = layout.getKey();
-      component.setName(key);
-      formPanelCards.add(component, key);
-      value.getRadioButton().addActionListener(e -> cardlayout.show(formPanelCards, key));
-    }
-
-    cardlayout.show(formPanelCards, initialLayout);
-    return formPanelCards;
+  public static PanelBuilder createSelectLayoutPanelBuilder(JBRadioButton radio1,
+      JComponent layout1, JBRadioButton radio2, JComponent layout2,
+      boolean isFirstIniitallySelected) {
+    UIUtil.createSelectLayoutPanelBuilder(List.of(
+        new RadioButtonWithLayout(radio1, layout1),
+        new RadioButtonWithLayout(radio2, layout2)
+    ), isFirstIniitallySelected ? radio1 : radio2);
+    return UI.PanelFactory
+        .panel(createForm(radio1, layout1, radio2, layout2, isFirstIniitallySelected));
   }
 
-
-  public static JPanel createSelectLayoutComponents(JBRadioButton firstRadio,
-      JComponent firstLayout,
-      JBRadioButton secondRadio, JComponent secondLayout, boolean isFirstInitallySelected) {
-    PanelGridBuilder grid = PanelFactory.grid();
-    createSelectLayoutBuilders(firstRadio,
-        firstLayout, secondRadio, secondLayout, isFirstInitallySelected).forEach(grid::add);
-    return grid.createPanel();
-  }
-
-  public static List<PanelBuilder> createSelectLayoutBuilders(JBRadioButton firstRadio,
-      JComponent firstLayout,
-      JBRadioButton secondRadio, JComponent secondLayout, boolean isFirstInitallySelected) {
-    UIUtil.createSelectLayoutBuilders(List.of(
-        new RadioButtonWithLayout(firstRadio, firstLayout),
-        new RadioButtonWithLayout(secondRadio, secondLayout)
-    ), isFirstInitallySelected ? firstRadio : secondRadio);
-    return List.of(
-        UI.PanelFactory
-            .panel(firstRadio)
-            .resizeX(false),
-        UI.PanelFactory
-            .panel(firstLayout), UI.PanelFactory
-            .panel(secondRadio)
-            .resizeX(false),
-        UI.PanelFactory
-            .panel(secondLayout));
-  }
-
-  private static void createSelectLayoutBuilders(List<RadioButtonWithLayout> entries,
+  private static void createSelectLayoutPanelBuilder(List<RadioButtonWithLayout> entries,
       JBRadioButton initiallySelected) {
     var buttonGroup = new ButtonGroup();
     entries.forEach(entry -> buttonGroup.add(entry.getRadioButton()));
@@ -251,25 +201,6 @@ public class UIUtil {
           });
         }
     );
-  }
-
-  public static class RadioButtonWithLayout {
-
-    private final JBRadioButton radioButton;
-    private final JComponent layout;
-
-    public RadioButtonWithLayout(JBRadioButton radioButton, JComponent layout) {
-      this.radioButton = radioButton;
-      this.layout = layout;
-    }
-
-    public JBRadioButton getRadioButton() {
-      return radioButton;
-    }
-
-    public JComponent getComponent() {
-      return layout;
-    }
   }
 
   public static ComponentPanelBuilder createApiKeyPanel(String initialApiKey,
@@ -292,6 +223,84 @@ public class UIUtil {
     fileChooserDescriptor.setHideIgnored(false);
     browseButton.addBrowseFolderListener(new TextBrowseFolderListener(fileChooserDescriptor));
     return browseButton;
+  }
+
+
+  /**
+   * Creates RadioButton group to toggle between different layouts.
+   *
+   * @param layouts       Map from layout name to RadioButton + Layout to be shown
+   * @param initialLayout Key of {@code layouts} entry to be initially shown
+   * @return Panel with the RadioButton group
+   */
+  private static JPanel createRadioButtonGroupLayouts(Map<String, RadioButtonWithLayout> layouts,
+      String initialLayout) {
+    AutoSizeCardLayout cardlayout = new AutoSizeCardLayout();
+
+    var formPanelCards = new JPanel(cardlayout);
+    formPanelCards.setBorder(JBUI.Borders.emptyLeft(16));
+
+    for (Entry<String, RadioButtonWithLayout> layout : layouts.entrySet()) {
+      RadioButtonWithLayout value = layout.getValue();
+      Component component = value.getComponent();
+      String key = layout.getKey();
+      component.setName(key);
+      formPanelCards.add(component, key);
+      value.getRadioButton().addActionListener(e -> cardlayout.show(formPanelCards, key));
+    }
+
+    cardlayout.show(formPanelCards, initialLayout);
+    return formPanelCards;
+  }
+
+  public static class RadioButtonWithLayout {
+    private final JBRadioButton radioButton;
+    private final JComponent layout;
+
+    public RadioButtonWithLayout(JBRadioButton radioButton, JComponent layout) {
+      this.radioButton = radioButton;
+      this.layout = layout;
+    }
+
+    public JBRadioButton getRadioButton() {
+      return radioButton;
+    }
+
+    public JComponent getComponent() {
+      return layout;
+    }
+  }
+
+
+  /**
+   * {@link CardLayout} that automatically resizes its size according to the shown component.<br/>
+   * Source: <a href="https://stackoverflow.com/a/8286694/9748566">StackOverflow</a>
+   */
+  public static class AutoSizeCardLayout extends CardLayout {
+
+    @Override
+    public Dimension preferredLayoutSize(Container parent) {
+
+      Component current = findCurrentComponent(parent);
+      if (current != null) {
+        Insets insets = parent.getInsets();
+        Dimension pref = current.getPreferredSize();
+        pref.width += insets.left + insets.right;
+        pref.height += insets.top + insets.bottom;
+        return pref;
+      }
+      return super.preferredLayoutSize(parent);
+    }
+
+    public Component findCurrentComponent(Container parent) {
+      for (Component comp : parent.getComponents()) {
+        if (comp.isVisible()) {
+          return comp;
+        }
+      }
+      return null;
+    }
+
   }
 
 

@@ -271,9 +271,8 @@ public class StandardChatToolWindowTabPanelTest extends IntegrationTest {
     configurationState.setMaxTokens(1000);
     configurationState.setTemperature(0.1);
     var llamaSettings = LlamaSettingsState.getInstance();
-    llamaSettings.setLocalUseCustomModel(false);
     LlamaLocalSettings localSettings = llamaSettings.getLocalSettings();
-    localSettings.setLlmModel(HuggingFaceModel.CODE_LLAMA_7B_Q4);
+    localSettings.setModel(HuggingFaceModel.CODE_LLAMA_7B_Q4);
     LlamaRequestSettings llamaRequestSettings = llamaSettings.getRequestSettings();
     llamaRequestSettings.setTopK(30);
     llamaRequestSettings.setTopP(0.8);

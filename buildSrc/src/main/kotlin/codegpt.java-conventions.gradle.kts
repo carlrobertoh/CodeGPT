@@ -10,8 +10,6 @@ plugins {
 version = properties("pluginVersion")
 
 repositories {
-  //TODO
-  mavenLocal()
   mavenCentral()
 }
 

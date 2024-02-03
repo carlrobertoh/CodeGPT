@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import org.jetbrains.annotations.Nullable;
 
-public final class AzureCredentialsManager extends ApiKeyCredentialsManager {
+public class AzureCredentialsManager extends ApiKeyCredentialsManager {
 
   private static final CredentialAttributes azureOpenAIApiKeyCredentialAttributes =
       CredentialsUtil.createCredentialAttributes("AZURE_OPENAI_API_KEY");

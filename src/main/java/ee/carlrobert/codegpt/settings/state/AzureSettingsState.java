@@ -30,6 +30,18 @@ public class AzureSettingsState extends
         new AzureCredentialsManager());
   }
 
+  public AzureSettingsState(String baseHost, String path, OpenAIChatCompletionModel model,
+      AzureCredentialsManager credentialsManager, String resourceName, String deploymentId,
+      String apiVersion, boolean useAzureApiKeyAuthentication,
+      boolean useAzureActiveDirectoryAuthentication) {
+    super(baseHost, path, model, credentialsManager);
+    this.resourceName = resourceName;
+    this.deploymentId = deploymentId;
+    this.apiVersion = apiVersion;
+    this.useAzureApiKeyAuthentication = useAzureApiKeyAuthentication;
+    this.useAzureActiveDirectoryAuthentication = useAzureActiveDirectoryAuthentication;
+  }
+
   public static AzureSettingsState getInstance() {
     return ApplicationManager.getApplication()
         .getService(AzureSettingsState.class);
@@ -46,33 +58,33 @@ public class AzureSettingsState extends
   }
 
   @Transient
-  public boolean isModified(AzureServiceForm serviceSelectionForm) {
-    return super.isModified(serviceSelectionForm.getRemoteWithModelSettings())
-        || serviceSelectionForm.isAzureActiveDirectoryAuthenticationSelected()
+  public boolean isModified(AzureSettingsState settingsState) {
+    return super.isModified(settingsState)
+        || settingsState.isUseAzureActiveDirectoryAuthentication()
         != isUseAzureActiveDirectoryAuthentication()
-        || serviceSelectionForm.isAzureApiKeyAuthenticationSelected()
+        || settingsState.isUseAzureApiKeyAuthentication()
         != isUseAzureApiKeyAuthentication()
-        || credentialsManager.isModified(serviceSelectionForm.getApiKey(),
-            serviceSelectionForm.getAzureActiveDirectoryToken())
-        || !serviceSelectionForm.getAzureResourceName().equals(resourceName)
-        || !serviceSelectionForm.getAzureDeploymentId().equals(deploymentId)
-        || !serviceSelectionForm.getAzureApiVersion().equals(apiVersion);
+        || credentialsManager.isModified(settingsState.getCredentialsManager().getApiKey(),
+        settingsState.getCredentialsManager().getActiveDirectoryToken())
+        || !settingsState.getResourceName().equals(resourceName)
+        || !settingsState.getDeploymentId().equals(deploymentId)
+        || !settingsState.getApiVersion().equals(apiVersion);
   }
 
-  public void apply(AzureServiceForm serviceSelectionForm) {
+  public void apply(AzureSettingsState settingsState) {
     useAzureActiveDirectoryAuthentication =
-        serviceSelectionForm.isAzureActiveDirectoryAuthenticationSelected();
-    useAzureApiKeyAuthentication = serviceSelectionForm.isAzureApiKeyAuthenticationSelected();
+        settingsState.isUseAzureActiveDirectoryAuthentication();
+    useAzureApiKeyAuthentication = settingsState.isUseAzureApiKeyAuthentication();
 
-    resourceName = serviceSelectionForm.getAzureResourceName();
-    deploymentId = serviceSelectionForm.getAzureDeploymentId();
-    apiVersion = serviceSelectionForm.getAzureApiVersion();
-    var remoteSettings = serviceSelectionForm.getRemoteWithModelSettings();
-    baseHost = remoteSettings.getBaseHost();
-    path = remoteSettings.getPath();
-    model = remoteSettings.getModel();
-    credentialsManager.apply(serviceSelectionForm.getApiKey(),
-        serviceSelectionForm.getAzureActiveDirectoryToken());
+    resourceName = settingsState.getResourceName();
+    deploymentId = settingsState.getDeploymentId();
+    apiVersion = settingsState.getApiVersion();
+    baseHost = settingsState.getBaseHost();
+    path = settingsState.getPath();
+    model = settingsState.getModel();
+    AzureCredentialsManager otherCredentials = settingsState.getCredentialsManager();
+    credentialsManager.apply(otherCredentials.getApiKey(),
+        otherCredentials.getActiveDirectoryToken());
   }
 
   public void reset(AzureServiceForm serviceSelectionForm) {

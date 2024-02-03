@@ -1,6 +1,6 @@
 package ee.carlrobert.codegpt.credentials;
 
-public final class OpenAICredentialsManager extends ApiKeyCredentialsManager {
+public class OpenAICredentialsManager extends ApiKeyCredentialsManager {
 
   public OpenAICredentialsManager() {
     super(CredentialsUtil.createCredentialAttributes("OPENAI_API_KEY"));

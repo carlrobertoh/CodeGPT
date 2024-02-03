@@ -47,4 +47,16 @@ public class OpenAiServiceForm extends
     return organizationField.getText();
   }
 
+  public OpenAISettingsState getSettings() {
+    return new OpenAISettingsState(getBaseHost(), getPath(), getModel(),
+        new OpenAICredentialsManager() {
+          @Override
+          public String getApiKey() {
+            return new String(apiKeyField.getPassword());
+          }
+        },
+        getOrganization(), false
+    );
+  }
+
 }

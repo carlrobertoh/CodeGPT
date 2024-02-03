@@ -11,6 +11,7 @@ import ee.carlrobert.codegpt.settings.state.util.RemoteSettings;
  */
 public class LlamaRemoteSettings extends RemoteSettings<LlamaCredentialsManager> {
 
+  public static final String CREDENTIALS_PREFIX = "REMOTE";
 
   private PromptTemplate chatPromptTemplate = PromptTemplate.LLAMA;
   private InfillPromptTemplate infillPromptTemplate = InfillPromptTemplate.LLAMA;
@@ -20,10 +21,12 @@ public class LlamaRemoteSettings extends RemoteSettings<LlamaCredentialsManager>
   }
 
   public LlamaRemoteSettings(PromptTemplate chatPromptTemplate,
-      InfillPromptTemplate infillPromptTemplate, String baseHost) {
+      InfillPromptTemplate infillPromptTemplate, String baseHost,
+      LlamaCredentialsManager credentialsManager) {
     super(baseHost, null, new LlamaCredentialsManager("REMOTE"));
     this.chatPromptTemplate = chatPromptTemplate;
     this.infillPromptTemplate = infillPromptTemplate;
+    this.credentialsManager = credentialsManager;
   }
 
   @Transient

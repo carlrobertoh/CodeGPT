@@ -53,7 +53,13 @@ public class LlamaRemoteServiceForm extends RemoteServiceForm<LlamaCredentialsMa
     return new LlamaRemoteSettings(
         chatPromptTemplatePanel.getPromptTemplate(),
         infillPromptTemplatePanel.getPromptTemplate(),
-        baseHostField.getText()
+        baseHostField.getText(),
+        new LlamaCredentialsManager(LlamaRemoteSettings.CREDENTIALS_PREFIX) {
+          @Override
+          public String getApiKey() {
+            return new String(apiKeyField.getPassword());
+          }
+        }
     );
   }
 

@@ -3,20 +3,16 @@ package ee.carlrobert.codegpt.settings.service;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.ui.TitledSeparator;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
-import ee.carlrobert.codegpt.CodeGPTPlugin;
-import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaServerAgent;
 import ee.carlrobert.codegpt.completions.you.auth.AuthenticationNotifier;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaLocalOrRemoteServiceForm;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.YouSettingsState;
-import java.io.File;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
@@ -53,18 +49,12 @@ public class ServicesSelectionForm {
             (AuthenticationNotifier) () -> displayWebSearchResultsCheckBox.setEnabled(true));
   }
 
-  private LlamaServiceForm createLlamaServiceSectionPanel() {
+  static LlamaServiceForm createLlamaServiceSectionPanel() {
     var settings = LlamaSettingsState.getInstance();
     return new LlamaServiceForm(
         new LlamaLocalOrRemoteServiceForm(settings,
-            ApplicationManager.getApplication().getService(LlamaServerAgent.class),
-            ServiceType.LLAMA_CPP) {
-          @Override
-          public boolean isModelExists(HuggingFaceModel model) {
-            return FileUtil.exists(
-                CodeGPTPlugin.getLlamaModelsPath() + File.separator + model.getModelFileName());
-          }
-        }, settings.getRequestSettings());
+            ApplicationManager.getApplication().getService(LlamaServerAgent.class)),
+        settings.getRequestSettings());
   }
 
   private JPanel createYouServiceSectionPanel() {
@@ -105,5 +95,6 @@ public class ServicesSelectionForm {
   public LlamaServiceForm getLlamaServiceSectionPanel() {
     return llamaServiceSectionPanel;
   }
+
 
 }
