@@ -6,8 +6,8 @@ import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.completions.you.YouUserManager;
 import ee.carlrobert.codegpt.settings.advanced.AdvancedSettingsState;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
-import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
+import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaLocalSettings;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaRemoteSettings;
 import ee.carlrobert.llm.client.azure.AzureClient;
@@ -77,7 +77,7 @@ public class CompletionClientProvider {
 
     Builder builder = new Builder();
     String apiKey;
-    if(llamaSettingsState.isRunLocalServer()){
+    if (llamaSettingsState.isRunLocalServer()) {
       LlamaLocalSettings localSettings = llamaSettingsState.getLocalSettings();
       builder.setPort(localSettings.getServerPort());
       apiKey = localSettings.getCredentialsManager().getApiKey();

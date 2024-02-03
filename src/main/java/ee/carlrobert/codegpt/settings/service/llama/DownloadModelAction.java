@@ -86,7 +86,8 @@ public class DownloadModelAction extends AnAction {
                     fileSize,
                     bytesRead[0])),
             0, 1, TimeUnit.SECONDS);
-        FileUtil.copyFileWithProgress(model.getModelFileName(), url, bytesRead, fileSize, indicator);
+        FileUtil.copyFileWithProgress(model.getModelFileName(), url, bytesRead,
+            fileSize, indicator);
       } catch (IOException ex) {
         LOG.error("Unable to open connection", ex);
         onFailed.accept(ex);

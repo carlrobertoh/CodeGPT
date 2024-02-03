@@ -36,7 +36,7 @@ import org.jetbrains.annotations.Nullable;
 
 /**
  * Form containing all forms to configure using
- * {@link ee.carlrobert.codegpt.settings.service.ServiceType#YOU}
+ * {@link ee.carlrobert.codegpt.settings.service.ServiceType#YOU}.
  */
 public class YouServiceSelectionForm extends JPanel {
 

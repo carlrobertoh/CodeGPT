@@ -5,24 +5,24 @@ import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.credentials.ApiKeyCredentialsManager;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
-import ee.carlrobert.codegpt.settings.state.util.RemoteSettings;
-import ee.carlrobert.codegpt.settings.state.util.RemoteWithModelSettings;
-import ee.carlrobert.llm.completion.CompletionModel;
+import ee.carlrobert.codegpt.settings.state.util.RemoteOpenAiSettings;
+import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import java.util.List;
+
 /**
- * Form for all {@link RemoteWithModelSettings} fields (including apiKey from
- * {@link ApiKeyCredentialsManager})
+ * Form for all {@link RemoteOpenAiSettings} fields (including apiKey from
+ * {@link ApiKeyCredentialsManager}).
  */
-public abstract class RemoteServiceWithModelForm<T extends ApiKeyCredentialsManager, M extends CompletionModel> extends
+public abstract class RemoteOpenAiServiceForm<T extends ApiKeyCredentialsManager> extends
     RemoteServiceForm<T> {
 
-  protected final ModelSelector<M> modelSelector;
+  protected final ModelSelector<OpenAIChatCompletionModel> modelSelector;
 
-  protected final RemoteWithModelSettings<T, M> remoteSettings;
+  protected final RemoteOpenAiSettings<T> remoteSettings;
 
-  public RemoteServiceWithModelForm(
-      RemoteWithModelSettings<T, M> remoteSettings,
-      ServiceType serviceType, ModelSelector<M> modelSelector) {
+  public RemoteOpenAiServiceForm(
+      RemoteOpenAiSettings<T> remoteSettings,
+      ServiceType serviceType, ModelSelector<OpenAIChatCompletionModel> modelSelector) {
     super(remoteSettings, serviceType);
     this.remoteSettings = remoteSettings;
     this.modelSelector = modelSelector;
@@ -39,21 +39,21 @@ public abstract class RemoteServiceWithModelForm<T extends ApiKeyCredentialsMana
     return panels;
   }
 
-  public void setModel(M model) {
+  public void setModel(OpenAIChatCompletionModel model) {
     modelSelector.setSelectedModel(model);
   }
 
-  public M getModel() {
-    return (M) modelSelector.getSelectedModel();
+  public OpenAIChatCompletionModel getModel() {
+    return modelSelector.getSelectedModel();
   }
 
 
-  public RemoteWithModelSettings<T, M> getRemoteWithModelSettings() {
-    return new RemoteWithModelSettings<>(getBaseHost(),
+  public RemoteOpenAiSettings<T> getRemoteWithModelSettings() {
+    return new RemoteOpenAiSettings<>(getBaseHost(),
         getPath(), getModel(), remoteSettings.getCredentialsManager());
   }
 
-  public void setRemoteWithModelSettings(RemoteWithModelSettings<T, M> remoteSettings) {
+  public void setRemoteWithModelSettings(RemoteOpenAiSettings<T> remoteSettings) {
     setRemoteSettings(remoteSettings);
     setModel(remoteSettings.getModel());
   }

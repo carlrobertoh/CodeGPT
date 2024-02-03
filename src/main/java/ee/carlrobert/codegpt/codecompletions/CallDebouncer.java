@@ -36,9 +36,8 @@ public class CallDebouncer {
     Future<?> prev = delayedMap.put(key, scheduler.schedule(() -> {
       try {
         cancelPreviousCall();
-        var progressIndicator = LLAMA_CPP.equals(GeneralSettingsState.getInstance().getSelectedService())
-            ? createProgressIndicator()
-            : null;
+        var progressIndicator = LLAMA_CPP.equals(GeneralSettingsState
+            .getInstance().getSelectedService()) ? createProgressIndicator() : null;
         currentCall.set(runnable.call(progressIndicator));
       } finally {
         delayedMap.remove(key);

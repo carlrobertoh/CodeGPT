@@ -5,10 +5,10 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
+import com.intellij.util.xmlb.annotations.Transient;
 import ee.carlrobert.codegpt.completions.llama.LlamaCompletionModel;
 import ee.carlrobert.codegpt.credentials.LlamaCredentialsManager;
-import ee.carlrobert.codegpt.settings.service.llama.LlamaRequestsForm;
-import ee.carlrobert.codegpt.settings.service.llama.LlamaLocalOrRemoteServiceForm;
+import ee.carlrobert.codegpt.settings.service.LlamaServiceForm;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaLocalSettings;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaRemoteSettings;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaRequestSettings;
@@ -59,32 +59,36 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
     this.runLocalServer = runLocalServer;
   }
 
-  public boolean isModified(LlamaLocalOrRemoteServiceForm llamaLocalOrRemoteServiceForm,
-      LlamaRequestsForm llamaRequestsForm) {
-    return localSettings.isModified(llamaLocalOrRemoteServiceForm.getLocalSettings())
-        || localSettings.getCredentialsManager().isModified(llamaLocalOrRemoteServiceForm.getLocalApiKey())
-        || remoteSettings.isModified(llamaLocalOrRemoteServiceForm.getRemoteSettings())
+  @Transient
+  public boolean isModified(LlamaServiceForm llamaServiceForm) {
+    var llamaServerForm = llamaServiceForm.getServerPreferencesForm();
+    var llamaRequestForm = llamaServiceForm.getRequestPreferencesForm();
+    return localSettings.isModified(llamaServerForm.getLocalSettings())
+        || localSettings.getCredentialsManager().isModified(llamaServerForm.getLocalApiKey())
+        || remoteSettings.isModified(llamaServerForm.getRemoteSettings())
         || remoteSettings.getCredentialsManager()
-        .isModified(llamaLocalOrRemoteServiceForm.getRemoteApikey())
-        || runLocalServer != llamaLocalOrRemoteServiceForm.isRunLocalServer()
-        || requestSettings.isModified(llamaRequestsForm.getRequestSettings());
+        .isModified(llamaServerForm.getRemoteApikey())
+        || runLocalServer != llamaServerForm.isRunLocalServer()
+        || requestSettings.isModified(llamaRequestForm.getRequestSettings());
   }
 
-  public void apply(LlamaLocalOrRemoteServiceForm llamaLocalOrRemoteServiceForm,
-      LlamaRequestsForm llamaRequestsForm) {
-    runLocalServer = llamaLocalOrRemoteServiceForm.isRunLocalServer();
-    localSettings = llamaLocalOrRemoteServiceForm.getLocalSettings();
-    localSettings.getCredentialsManager().apply(llamaLocalOrRemoteServiceForm.getLocalApiKey());
-    remoteSettings = llamaLocalOrRemoteServiceForm.getRemoteSettings();
-    remoteSettings.getCredentialsManager().apply(llamaLocalOrRemoteServiceForm.getRemoteApikey());
+  public void apply(LlamaServiceForm llamaServiceForm) {
+    var llamaServerForm = llamaServiceForm.getServerPreferencesForm();
+    runLocalServer = llamaServerForm.isRunLocalServer();
+    localSettings = llamaServerForm.getLocalSettings();
+    localSettings.getCredentialsManager().apply(llamaServerForm.getLocalApiKey());
+    remoteSettings = llamaServerForm.getRemoteSettings();
+    remoteSettings.getCredentialsManager().apply(llamaServerForm.getRemoteApikey());
+    var llamaRequestsForm = llamaServiceForm.getRequestPreferencesForm();
     requestSettings = llamaRequestsForm.getRequestSettings();
   }
 
-  public void reset(LlamaLocalOrRemoteServiceForm llamaLocalOrRemoteServiceForm,
-      LlamaRequestsForm llamaRequestsForm) {
-    llamaLocalOrRemoteServiceForm.setRemoteSettings(remoteSettings);
-    llamaLocalOrRemoteServiceForm.setLocalSettings(localSettings);
-    llamaLocalOrRemoteServiceForm.setRunLocalServer(runLocalServer);
+  public void reset(LlamaServiceForm llamaServiceForm) {
+    var llamaServerForm = llamaServiceForm.getServerPreferencesForm();
+    llamaServerForm.setRemoteSettings(remoteSettings);
+    llamaServerForm.setLocalSettings(localSettings);
+    llamaServerForm.setRunLocalServer(runLocalServer);
+    var llamaRequestsForm = llamaServiceForm.getRequestPreferencesForm();
     llamaRequestsForm.setTopK(requestSettings.getTopK());
     llamaRequestsForm.setTopP(requestSettings.getTopP());
     llamaRequestsForm.setMinP(requestSettings.getMinP());

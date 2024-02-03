@@ -31,7 +31,7 @@ public abstract class ApiKeyCredentialsManager extends CredentialsManager {
     return getCredential(apiKeyAttribute);
   }
 
-  public void apply(String apiKey){
+  public void apply(String apiKey) {
     setCredential(apiKeyAttribute, apiKey);
   }
 

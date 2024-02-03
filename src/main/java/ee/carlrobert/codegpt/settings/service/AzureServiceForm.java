@@ -8,20 +8,19 @@ import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAiModelSelector;
-import ee.carlrobert.codegpt.settings.service.util.RemoteServiceWithModelForm;
+import ee.carlrobert.codegpt.settings.service.util.RemoteOpenAiServiceForm;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.ui.UIUtil;
-import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import java.util.List;
 import javax.swing.JPanel;
 
 /**
  * Form containing all forms to configure using
- * {@link ee.carlrobert.codegpt.settings.service.ServiceType#AZURE}
+ * {@link ee.carlrobert.codegpt.settings.service.ServiceType#AZURE}.
  */
 
 public class AzureServiceForm extends
-    RemoteServiceWithModelForm<AzureCredentialsManager, OpenAIChatCompletionModel> {
+    RemoteOpenAiServiceForm<AzureCredentialsManager> {
 
   private JBRadioButton useAzureApiKeyAuthenticationRadioButton;
   private JBRadioButton useAzureActiveDirectoryAuthenticationRadioButton;
@@ -56,9 +55,9 @@ public class AzureServiceForm extends
         azureSettings.isUseAzureActiveDirectoryAuthentication());
 
     apiKeyFieldPanel = super.authenticationComponents().get(0).createPanel();
-    return UIUtil.createSelectLayoutBuilders(useAzureApiKeyAuthenticationRadioButton, apiKeyFieldPanel,
-            useAzureActiveDirectoryAuthenticationRadioButton, azureActiveDirectoryTokenFieldPanel,
-            azureSettings.isUseAzureApiKeyAuthentication());
+    return UIUtil.createSelectLayoutBuilders(useAzureApiKeyAuthenticationRadioButton,
+        apiKeyFieldPanel, useAzureActiveDirectoryAuthenticationRadioButton,
+        azureActiveDirectoryTokenFieldPanel, azureSettings.isUseAzureApiKeyAuthentication());
   }
 
   @Override

@@ -1,9 +1,9 @@
 package ee.carlrobert.codegpt.settings.state.llama;
 
-import ee.carlrobert.codegpt.codecompletions.InfillPromptTemplate;
+import com.intellij.util.xmlb.annotations.Transient;
 
 /**
- * All settings for Llama completion requests
+ * All settings for Llama completion requests.
  */
 public class LlamaRequestSettings {
 
@@ -54,6 +54,7 @@ public class LlamaRequestSettings {
     this.repeatPenalty = repeatPenalty;
   }
 
+  @Transient
   public boolean isModified(LlamaRequestSettings llamaRequestSettings) {
     return topK != llamaRequestSettings.getTopK()
         || topP != llamaRequestSettings.getTopP()

@@ -4,7 +4,7 @@ import ee.carlrobert.llm.completion.CompletionModel;
 import javax.swing.JComponent;
 
 /**
- * Helper interface to indicate a Component holds a {@link CompletionModel} value
+ * Helper interface to indicate a Component holds a {@link CompletionModel} value.
  */
 public interface ModelSelector<T extends CompletionModel> {
 

@@ -4,16 +4,16 @@ import com.intellij.openapi.ui.panel.PanelBuilder;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.credentials.LlamaCredentialsManager;
-import ee.carlrobert.codegpt.settings.service.util.RemoteServiceForm;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
-import ee.carlrobert.codegpt.settings.state.llama.LlamaRemoteSettings;
+import ee.carlrobert.codegpt.settings.service.util.RemoteServiceForm;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
+import ee.carlrobert.codegpt.settings.state.llama.LlamaRemoteSettings;
 import ee.carlrobert.codegpt.ui.ChatPromptTemplatePanel;
 import ee.carlrobert.codegpt.ui.InfillPromptTemplatePanel;
 import java.util.List;
 
 /**
- * Form containing fields for all {@link LlamaRemoteSettings}
+ * Form containing fields for all {@link LlamaRemoteSettings}.
  */
 public class LlamaRemoteServiceForm extends RemoteServiceForm<LlamaCredentialsManager> {
 

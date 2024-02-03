@@ -40,6 +40,7 @@ public class CustomLlamaModel implements LlamaCompletionModel {
   public String getModelFileName() {
     return modelPath.substring(modelPath.lastIndexOf(File.separator) + 1);
   }
+
   @Override
   public boolean equals(Object obj) {
     if (!(obj instanceof CustomLlamaModel)) {

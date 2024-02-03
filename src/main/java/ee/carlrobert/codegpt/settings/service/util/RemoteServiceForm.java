@@ -20,7 +20,7 @@ import javax.swing.JPanel;
 
 /**
  * Form for all {@link RemoteSettings} fields (including apiKey from
- * {@link ApiKeyCredentialsManager})
+ * {@link ApiKeyCredentialsManager}).
  */
 public abstract class RemoteServiceForm<T extends ApiKeyCredentialsManager> extends FormBuilder {
 

@@ -13,10 +13,9 @@ import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaServerAgent;
 import ee.carlrobert.codegpt.completions.you.auth.AuthenticationNotifier;
-import ee.carlrobert.codegpt.settings.service.llama.LlamaRequestsForm;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaLocalOrRemoteServiceForm;
-import ee.carlrobert.codegpt.settings.state.YouSettingsState;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
+import ee.carlrobert.codegpt.settings.state.YouSettingsState;
 import java.io.File;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -58,7 +57,8 @@ public class ServicesSelectionForm {
     var settings = LlamaSettingsState.getInstance();
     return new LlamaServiceForm(
         new LlamaLocalOrRemoteServiceForm(settings,
-            ApplicationManager.getApplication().getService(LlamaServerAgent.class), ServiceType.LLAMA_CPP) {
+            ApplicationManager.getApplication().getService(LlamaServerAgent.class),
+            ServiceType.LLAMA_CPP) {
           @Override
           public boolean isModelExists(HuggingFaceModel model) {
             return FileUtil.exists(
@@ -90,14 +90,6 @@ public class ServicesSelectionForm {
     return displayWebSearchResultsCheckBox.isSelected();
   }
 
-  public LlamaLocalOrRemoteServiceForm getLlamaServerPreferencesForm() {
-    return llamaServiceSectionPanel.getServerPreferencesForm();
-  }
-
-  public LlamaRequestsForm getLlamaRequestPreferencesForm() {
-    return llamaServiceSectionPanel.getRequestPreferencesForm();
-  }
-
   public OpenAiServiceForm getOpenAIServiceSectionPanel() {
     return openAIServiceSectionPanel;
   }
@@ -110,7 +102,7 @@ public class ServicesSelectionForm {
     return youServiceSectionPanel;
   }
 
-  public JPanel getLlamaServiceSectionPanel() {
+  public LlamaServiceForm getLlamaServiceSectionPanel() {
     return llamaServiceSectionPanel;
   }
 

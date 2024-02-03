@@ -3,6 +3,7 @@ package ee.carlrobert.codegpt.settings.state.llama;
 import static ee.carlrobert.codegpt.util.Utils.areValuesDifferent;
 import static java.util.stream.Collectors.toList;
 
+import com.intellij.util.xmlb.annotations.OptionTag;
 import com.intellij.util.xmlb.annotations.Transient;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.codecompletions.InfillPromptTemplate;
@@ -11,6 +12,7 @@ import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaCompletionModel;
 import ee.carlrobert.codegpt.credentials.LlamaCredentialsManager;
 import ee.carlrobert.codegpt.settings.state.util.CommonSettings;
+import ee.carlrobert.codegpt.settings.state.util.LlamaCompletionModelConverter;
 import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -19,7 +21,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * All settings necessary for running a Llama server locally
+ * All settings necessary for running a Llama server locally.
  */
 public class LlamaLocalSettings extends CommonSettings<LlamaCredentialsManager> {
 
@@ -34,7 +36,7 @@ public class LlamaLocalSettings extends CommonSettings<LlamaCredentialsManager> 
 
   private PromptTemplate chatPromptTemplate = PromptTemplate.LLAMA;
   private InfillPromptTemplate infillPromptTemplate = InfillPromptTemplate.LLAMA;
-
+  @OptionTag(converter = LlamaCompletionModelConverter.class)
   protected LlamaCompletionModel model = HuggingFaceModel.CODE_LLAMA_7B_Q4;
   private String serverPath = BUNDLED_SERVER;
 
@@ -60,6 +62,7 @@ public class LlamaLocalSettings extends CommonSettings<LlamaCredentialsManager> 
     this.infillPromptTemplate = infillPromptTemplate;
   }
 
+  @Transient
   public boolean isModified(LlamaLocalSettings localSettings) {
     return super.isModified(localSettings)
         || !serverPath.equals(localSettings.getServerPath())

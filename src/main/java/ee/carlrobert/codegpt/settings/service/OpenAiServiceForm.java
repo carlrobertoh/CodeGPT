@@ -6,18 +6,17 @@ import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAiModelSelector;
-import ee.carlrobert.codegpt.settings.service.util.RemoteServiceWithModelForm;
+import ee.carlrobert.codegpt.settings.service.util.RemoteOpenAiServiceForm;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
-import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import java.util.List;
 
 /**
  * Form containing all forms to configure using
- * {@link ee.carlrobert.codegpt.settings.service.ServiceType#OPENAI}
+ * {@link ee.carlrobert.codegpt.settings.service.ServiceType#OPENAI}.
  */
 
 public class OpenAiServiceForm extends
-    RemoteServiceWithModelForm<OpenAICredentialsManager, OpenAIChatCompletionModel> {
+    RemoteOpenAiServiceForm<OpenAICredentialsManager> {
 
   private JBTextField organizationField;
 

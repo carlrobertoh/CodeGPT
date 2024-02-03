@@ -22,9 +22,9 @@ public final class AzureCredentialsManager extends ApiKeyCredentialsManager {
     return getCredential(azureActiveDirectoryTokenCredentialAttributes);
   }
 
-  public void apply(String apiKey, String activeDirectoryToken){
+  public void apply(String apiKey, String activeDirectoryToken) {
     super.apply(apiKey);
-    setCredential(azureActiveDirectoryTokenCredentialAttributes,activeDirectoryToken);
+    setCredential(azureActiveDirectoryTokenCredentialAttributes, activeDirectoryToken);
   }
 
   public String getSecret() {

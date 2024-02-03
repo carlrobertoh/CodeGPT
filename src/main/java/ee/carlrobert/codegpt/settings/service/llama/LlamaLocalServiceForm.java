@@ -23,14 +23,14 @@ import com.intellij.util.ui.JBUI.Panels;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.completions.ServerAgent;
-import ee.carlrobert.codegpt.completions.llama.ServerStartupParams;
 import ee.carlrobert.codegpt.completions.llama.CustomLlamaModel;
 import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaCompletionModel;
+import ee.carlrobert.codegpt.completions.llama.ServerStartupParams;
 import ee.carlrobert.codegpt.credentials.LlamaCredentialsManager;
 import ee.carlrobert.codegpt.settings.service.util.ServerProgressPanel;
-import ee.carlrobert.codegpt.settings.state.llama.LlamaLocalSettings;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
+import ee.carlrobert.codegpt.settings.state.llama.LlamaLocalSettings;
 import ee.carlrobert.codegpt.ui.ChatPromptTemplatePanel;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.codegpt.ui.UIUtil;
@@ -40,7 +40,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
 /**
- * Form containing fields for all {@link LlamaLocalSettings}
+ * Form containing fields for all {@link LlamaLocalSettings}.
  */
 public abstract class LlamaLocalServiceForm extends FormBuilder {
 
@@ -221,7 +221,7 @@ public abstract class LlamaLocalServiceForm extends FormBuilder {
         OverlayUtil.showBalloon(
             CodeGPTBundle.get("validation.error.fieldRequired"),
             MessageType.ERROR,
-            modelSelector.getChooseCustomModelComponent().getComponent());
+            modelSelector.getCustomModelPathField());
         return false;
       }
     }
@@ -306,24 +306,6 @@ public abstract class LlamaLocalServiceForm extends FormBuilder {
   public String getApiKey() {
     return apiKeyField != null ? new String(apiKeyField.getPassword()) : null;
   }
-
-  public void setApiKey(String apiKey) {
-    apiKeyField.setText(apiKey);
-  }
-
-  //  private JPanel createBundledOrCustomServerPanel() {
-//    String bundledServerSettings = "BundledServerSettings";
-//    String customServerSettings = "CustomServerSettings";
-//    return createForm(Map.of(
-//        bundledServerSettings,
-//        new RadioButtonWithLayout(bundledServerRadioButton, new JPanel()),
-//        customServerSettings,
-//        new RadioButtonWithLayout(customServerRadioButton, createCustomServerForm())
-//    ), bundledServerRadioButton.isSelected()
-//        ? bundledServerSettings
-//        : customServerSettings);
-//  }
-
 
   private JPanel createCustomServerForm() {
     var customModelHelpText = ComponentPanelBuilder.createCommentComponent(

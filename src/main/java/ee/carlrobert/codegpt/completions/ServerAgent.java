@@ -12,8 +12,8 @@ public interface ServerAgent extends Disposable {
       Runnable onSuccess,
       Runnable onServerTerminated);
 
-   void stopAgent();
+  void stopAgent();
 
-   boolean isServerRunning();
+  boolean isServerRunning();
 
 }

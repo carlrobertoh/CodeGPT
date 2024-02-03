@@ -9,7 +9,8 @@ import ee.carlrobert.codegpt.settings.state.util.RemoteSettings;
 import org.jetbrains.annotations.NotNull;
 
 @State(name = "CodeGPT_YouSettings", storages = @Storage("CodeGPT_YouSettings.xml"))
-public class YouSettingsState extends RemoteSettings<YouCredentialsManager> implements PersistentStateComponent<YouSettingsState> {
+public class YouSettingsState extends RemoteSettings<YouCredentialsManager>
+    implements PersistentStateComponent<YouSettingsState> {
 
   private boolean displayWebSearchResults = true;
   private boolean useGPT4Model;

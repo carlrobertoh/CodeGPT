@@ -7,12 +7,11 @@ import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaRequestSettings;
-import ee.carlrobert.codegpt.ui.PromptTemplateField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 /**
- * Form containing fields for all {@link LlamaRequestSettings}
+ * Form containing fields for all {@link LlamaRequestSettings}.
  */
 public class LlamaRequestsForm {
 
@@ -98,7 +97,7 @@ public class LlamaRequestsForm {
     return comment;
   }
 
-  public LlamaRequestSettings getRequestSettings(){
+  public LlamaRequestSettings getRequestSettings() {
     return new LlamaRequestSettings(
         topKField.getValue(),
         Double.parseDouble(topPField.getText()),

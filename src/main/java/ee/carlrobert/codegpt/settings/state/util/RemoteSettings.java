@@ -2,10 +2,11 @@ package ee.carlrobert.codegpt.settings.state.util;
 
 import static ee.carlrobert.codegpt.util.Utils.areValuesDifferent;
 
+import com.intellij.util.xmlb.annotations.Transient;
 import ee.carlrobert.codegpt.credentials.CredentialsManager;
 
 /**
- * Settings for using a remote service
+ * Settings for using a remote service.
  */
 public class RemoteSettings<T extends CredentialsManager> extends CommonSettings<T> {
 
@@ -37,6 +38,7 @@ public class RemoteSettings<T extends CredentialsManager> extends CommonSettings
     this.path = path;
   }
 
+  @Transient
   public boolean isModified(RemoteSettings<T> remoteSettings) {
     return super.isModified(remoteSettings)
         || !remoteSettings.getBaseHost().equals(this.baseHost)

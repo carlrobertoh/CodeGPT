@@ -3,20 +3,19 @@ package ee.carlrobert.codegpt.settings.service.llama;
 import static ee.carlrobert.codegpt.ui.UIUtil.createForm;
 
 import com.intellij.ui.components.JBRadioButton;
-import com.intellij.util.ui.FormBuilder;
 import ee.carlrobert.codegpt.completions.ServerAgent;
 import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
+import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaLocalSettings;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaRemoteSettings;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.ui.UIUtil.RadioButtonWithLayout;
 import java.util.Map;
 import javax.swing.JPanel;
 
 /**
  * Form containing {@link JBRadioButton} to toggle between({@link LlamaLocalServiceForm}) or
- * ({@link LlamaRemoteServiceForm})
+ * ({@link LlamaRemoteServiceForm}).
  */
 public abstract class LlamaLocalOrRemoteServiceForm {
 
