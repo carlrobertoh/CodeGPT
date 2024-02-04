@@ -97,11 +97,19 @@ public class ModelComboBoxAction extends ComboBoxAction {
         templatePresentation.setText("You.com");
         break;
       case LLAMA_CPP:
-        templatePresentation.setText(getSelectedHuggingFace());
+        templatePresentation.setText(getLlamaCppPresentationText());
         templatePresentation.setIcon(Icons.Llama);
         break;
       default:
     }
+  }
+
+  private String getLlamaCppPresentationText() {
+    var llamaSettingState = LlamaSettingsState.getInstance();
+    if (!llamaSettingState.isRunLocalServer()) {
+      return format("Remote %s", llamaSettingState.getRemoteModelPromptTemplate());
+    }
+    return getSelectedHuggingFace();
   }
 
   private String getSelectedHuggingFace() {
