@@ -37,7 +37,7 @@ public class OllamaModelDownload implements ModelDownload {
     } else {
       onUpdateProgress.accept("Finished model download");
       OllamaModel ollamaModel = new OllamaModel();
-      ollamaModel.setModel(model.getModelTag());
+      ollamaModel.setName(model.getModelTag());
       OllamaSettingsState.getInstance().addModelToAvailable(ollamaModel);
     }
   }

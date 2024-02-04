@@ -58,7 +58,7 @@ public class CodeCompletionServiceTest extends IntegrationTest {
 
     StringBuilder actualCompletion = new StringBuilder();
     codeCompletionService.fetchCodeCompletion(elementAtCaret, caretOffset, document,
-        new CompletionEventListener() {
+        new CompletionEventListener<>() {
           @Override
           public void onComplete(StringBuilder messageBuilder) {
             actualCompletion.append(messageBuilder);
