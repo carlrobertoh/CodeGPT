@@ -10,9 +10,9 @@ import com.intellij.openapi.components.Service;
 import ee.carlrobert.codegpt.codecompletions.CodeCompletionRequestProvider;
 import ee.carlrobert.codegpt.codecompletions.InfillRequestDetails;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
-import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
+import ee.carlrobert.codegpt.settings.state.AzureSettings;
 import ee.carlrobert.codegpt.settings.state.GeneralSettingsState;
-import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
+import ee.carlrobert.codegpt.settings.state.OpenAISettings;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
 import ee.carlrobert.llm.completion.CompletionEventListener;
@@ -37,7 +37,7 @@ public final class CompletionRequestService {
     var requestProvider = new CompletionRequestProvider(callParameters.getConversation());
     switch (GeneralSettingsState.getInstance().getSelectedService()) {
       case OPENAI:
-        var openAISettings = OpenAISettingsState.getInstance();
+        var openAISettings = OpenAISettings.getInstance();
         return CompletionClientProvider.getOpenAIClient().getChatCompletionAsync(
             requestProvider.buildOpenAIChatCompletionRequest(
                 openAISettings.getModel().getCode(),
@@ -46,7 +46,7 @@ public final class CompletionRequestService {
                 openAISettings.isUsingCustomPath() ? openAISettings.getPath() : null),
             eventListener);
       case AZURE:
-        var azureSettings = AzureSettingsState.getInstance();
+        var azureSettings = AzureSettings.getInstance();
         return CompletionClientProvider.getAzureClient().getChatCompletionAsync(
             requestProvider.buildOpenAIChatCompletionRequest(
                 null,
@@ -92,7 +92,7 @@ public final class CompletionRequestService {
         new OpenAIChatCompletionMessage("system",
             ConfigurationState.getInstance().getCommitMessagePrompt()),
         new OpenAIChatCompletionMessage("user", prompt)))
-        .setModel(OpenAISettingsState.getInstance().getModel())
+        .setModel(OpenAISettings.getInstance().getModel())
         .build();
     var selectedService = GeneralSettingsState.getInstance().getSelectedService();
     if (selectedService == OPENAI) {
@@ -123,10 +123,10 @@ public final class CompletionRequestService {
   public boolean isRequestAllowed() {
     var selectedService = GeneralSettingsState.getInstance().getSelectedService();
     if (selectedService == AZURE) {
-      return AzureSettingsState.getInstance().getCredentialsManager().isCredentialSet();
+      return AzureSettings.getInstance().getCredentialsManager().isCredentialSet();
     }
     if (selectedService == OPENAI) {
-      return OpenAISettingsState.getInstance().getCredentialsManager().isCredentialSet();
+      return OpenAISettings.getInstance().getCredentialsManager().isCredentialSet();
     }
     return true;
   }

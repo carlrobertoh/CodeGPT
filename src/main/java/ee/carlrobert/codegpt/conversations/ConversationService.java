@@ -7,10 +7,10 @@ import com.intellij.openapi.components.Service;
 import ee.carlrobert.codegpt.completions.CallParameters;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
-import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
+import ee.carlrobert.codegpt.settings.state.AzureSettings;
 import ee.carlrobert.codegpt.settings.state.GeneralSettingsState;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
-import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
+import ee.carlrobert.codegpt.settings.state.LlamaSettings;
+import ee.carlrobert.codegpt.settings.state.OpenAISettings;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -190,13 +190,13 @@ public final class ConversationService {
   private static String getModelForSelectedService(ServiceType serviceType) {
     switch (serviceType) {
       case OPENAI:
-        return OpenAISettingsState.getInstance().getModel().getCode();
+        return OpenAISettings.getInstance().getModel().getCode();
       case AZURE:
-        return AzureSettingsState.getInstance().getDeploymentId();
+        return AzureSettings.getInstance().getDeploymentId();
       case YOU:
         return "YouCode";
       case LLAMA_CPP:
-        return LlamaSettingsState.getInstance().getUsedModelPath();
+        return LlamaSettings.getInstance().getUsedModelPath();
       default:
         throw new RuntimeException("Could not find corresponding service mapping");
     }

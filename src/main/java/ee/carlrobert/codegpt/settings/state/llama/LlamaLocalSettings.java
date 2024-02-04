@@ -12,7 +12,6 @@ import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaCompletionModel;
 import ee.carlrobert.codegpt.credentials.LlamaCredentialsManager;
 import ee.carlrobert.codegpt.settings.state.util.CommonSettings;
-import ee.carlrobert.codegpt.settings.state.util.LlamaCompletionModelConverter;
 import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -43,6 +42,7 @@ public class LlamaLocalSettings extends CommonSettings<LlamaCredentialsManager> 
 
 
   public LlamaLocalSettings() {
+    this.credentialsManager = new LlamaCredentialsManager(CREDENTIALS_PREFIX);
   }
 
   public LlamaLocalSettings(

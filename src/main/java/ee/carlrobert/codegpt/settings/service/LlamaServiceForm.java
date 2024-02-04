@@ -7,8 +7,8 @@ import com.intellij.util.ui.FormBuilder;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaLocalOrRemoteServiceForm;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaRequestsForm;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaRequestSettings;
+import ee.carlrobert.codegpt.settings.state.llama.LlamaSettingsState;
 import java.awt.BorderLayout;
 import javax.swing.JPanel;
 

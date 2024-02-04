@@ -5,11 +5,12 @@ import static java.lang.String.format;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.completions.you.YouUserManager;
 import ee.carlrobert.codegpt.settings.advanced.AdvancedSettingsState;
-import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
-import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
+import ee.carlrobert.codegpt.settings.state.AzureSettings;
+import ee.carlrobert.codegpt.settings.state.LlamaSettings;
+import ee.carlrobert.codegpt.settings.state.OpenAISettings;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaLocalSettings;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaRemoteSettings;
+import ee.carlrobert.codegpt.settings.state.llama.LlamaSettingsState;
 import ee.carlrobert.llm.client.azure.AzureClient;
 import ee.carlrobert.llm.client.azure.AzureCompletionRequestParams;
 import ee.carlrobert.llm.client.llama.LlamaClient;
@@ -26,7 +27,7 @@ import okhttp3.OkHttpClient;
 public class CompletionClientProvider {
 
   public static OpenAIClient getOpenAIClient() {
-    var settings = OpenAISettingsState.getInstance();
+    var settings = OpenAISettings.getInstance();
     var builder = new OpenAIClient.Builder(settings.getCredentialsManager().getApiKey())
         .setOrganization(settings.getOrganization());
     var baseHost = settings.getBaseHost();
@@ -37,7 +38,7 @@ public class CompletionClientProvider {
   }
 
   public static AzureClient getAzureClient() {
-    var settings = AzureSettingsState.getInstance();
+    var settings = AzureSettings.getInstance();
     var params = new AzureCompletionRequestParams(
         settings.getResourceName(),
         settings.getDeploymentId(),
@@ -73,7 +74,7 @@ public class CompletionClientProvider {
   }
 
   public static LlamaClient getLlamaClient() {
-    LlamaSettingsState llamaSettingsState = LlamaSettingsState.getInstance();
+    LlamaSettingsState llamaSettingsState = LlamaSettings.getInstance();
 
     Builder builder = new Builder();
     String apiKey;

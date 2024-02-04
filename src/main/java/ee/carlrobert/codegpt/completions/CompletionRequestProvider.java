@@ -19,9 +19,9 @@ import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.GeneralSettingsState;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
-import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
-import ee.carlrobert.codegpt.settings.state.YouSettingsState;
+import ee.carlrobert.codegpt.settings.state.LlamaSettings;
+import ee.carlrobert.codegpt.settings.state.OpenAISettings;
+import ee.carlrobert.codegpt.settings.state.YouSettings;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaRequestSettings;
 import ee.carlrobert.codegpt.settings.state.util.IncludedFilesSettingsState;
 import ee.carlrobert.codegpt.telemetry.core.configuration.TelemetryConfiguration;
@@ -92,7 +92,7 @@ public class CompletionRequestProvider {
             new OpenAIChatCompletionMessage("system",
                 getResourceContent("/prompts/method-name-generator.txt")),
             new OpenAIChatCompletionMessage("user", context)))
-        .setModel(OpenAISettingsState.getInstance().getModel().getCode())
+        .setModel(OpenAISettings.getInstance().getModel().getCode())
         .setStream(false)
         .build();
   }
@@ -107,7 +107,7 @@ public class CompletionRequestProvider {
   public LlamaCompletionRequest buildLlamaCompletionRequest(
       Message message,
       ConversationType conversationType) {
-    var settings = LlamaSettingsState.getInstance();
+    var settings = LlamaSettings.getInstance();
     PromptTemplate promptTemplate;
     if (settings.isRunLocalServer()) {
       var localSettings = settings.getLocalSettings();
@@ -145,7 +145,7 @@ public class CompletionRequestProvider {
 
   public YouCompletionRequest buildYouCompletionRequest(Message message) {
     var requestBuilder = new YouCompletionRequest.Builder(message.getPrompt())
-        .setUseGPT4Model(YouSettingsState.getInstance().isUseGPT4Model())
+        .setUseGPT4Model(YouSettings.getInstance().isUseGPT4Model())
         .setChatHistory(conversation.getMessages().stream()
             .map(prevMessage -> new YouCompletionRequestMessage(
                 prevMessage.getPrompt(),

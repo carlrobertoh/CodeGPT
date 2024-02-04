@@ -1,22 +1,12 @@
-package ee.carlrobert.codegpt.settings.state;
+package ee.carlrobert.codegpt.settings.state.llama;
 
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.components.PersistentStateComponent;
-import com.intellij.openapi.components.State;
-import com.intellij.openapi.components.Storage;
-import com.intellij.util.xmlb.XmlSerializerUtil;
 import com.intellij.util.xmlb.annotations.Transient;
 import ee.carlrobert.codegpt.completions.llama.LlamaCompletionModel;
 import ee.carlrobert.codegpt.credentials.LlamaCredentialsManager;
 import ee.carlrobert.codegpt.settings.service.LlamaServiceForm;
-import ee.carlrobert.codegpt.settings.state.llama.LlamaLocalSettings;
-import ee.carlrobert.codegpt.settings.state.llama.LlamaRemoteSettings;
-import ee.carlrobert.codegpt.settings.state.llama.LlamaRequestSettings;
 import ee.carlrobert.codegpt.settings.state.util.CommonSettings;
-import org.jetbrains.annotations.NotNull;
 
-@State(name = "CodeGPT_LlamaSettings", storages = @Storage("CodeGPT_CodeGPT_LlamaSettings.xml"))
-public class LlamaSettingsState implements PersistentStateComponent<LlamaSettingsState> {
+public class LlamaSettingsState {
 
   protected boolean runLocalServer = true;
   protected LlamaLocalSettings localSettings = new LlamaLocalSettings();
@@ -32,24 +22,6 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
     this.localSettings = localSettings;
     this.remoteSettings = remoteSettings;
     this.requestSettings = requestSettings;
-  }
-
-  public static LlamaSettingsState getInstance() {
-    LlamaSettingsState service = ApplicationManager.getApplication()
-        .getService(LlamaSettingsState.class);
-    service.localSettings.setCredentialsManager(new LlamaCredentialsManager("LOCAL"));
-    service.remoteSettings.setCredentialsManager(new LlamaCredentialsManager("REMOTE"));
-    return service;
-  }
-
-  @Override
-  public LlamaSettingsState getState() {
-    return this;
-  }
-
-  @Override
-  public void loadState(@NotNull LlamaSettingsState state) {
-    XmlSerializerUtil.copyBean(state, this);
   }
 
   public String getUsedModelPath() {

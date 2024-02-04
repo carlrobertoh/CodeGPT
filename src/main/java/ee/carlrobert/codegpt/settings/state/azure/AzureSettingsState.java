@@ -1,21 +1,12 @@
-package ee.carlrobert.codegpt.settings.state;
+package ee.carlrobert.codegpt.settings.state.azure;
 
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.components.PersistentStateComponent;
-import com.intellij.openapi.components.State;
-import com.intellij.openapi.components.Storage;
-import com.intellij.util.xmlb.XmlSerializerUtil;
 import com.intellij.util.xmlb.annotations.Transient;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.settings.service.AzureServiceForm;
-import ee.carlrobert.codegpt.settings.state.util.RemoteOpenAiSettings;
+import ee.carlrobert.codegpt.settings.state.openai.OpenAIRemoteSettings;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
-import org.jetbrains.annotations.NotNull;
 
-@State(name = "CodeGPT_AzureSettings_210", storages = @Storage("CodeGPT_AzureSettings_210.xml"))
-public class AzureSettingsState extends
-    RemoteOpenAiSettings<AzureCredentialsManager> implements
-    PersistentStateComponent<AzureSettingsState> {
+public class AzureSettingsState extends OpenAIRemoteSettings<AzureCredentialsManager> {
 
   private static final String BASE_PATH = "/openai/deployments/%s/chat/completions?api-version=%s";
 
@@ -40,21 +31,6 @@ public class AzureSettingsState extends
     this.apiVersion = apiVersion;
     this.useAzureApiKeyAuthentication = useAzureApiKeyAuthentication;
     this.useAzureActiveDirectoryAuthentication = useAzureActiveDirectoryAuthentication;
-  }
-
-  public static AzureSettingsState getInstance() {
-    return ApplicationManager.getApplication()
-        .getService(AzureSettingsState.class);
-  }
-
-  @Override
-  public AzureSettingsState getState() {
-    return this;
-  }
-
-  @Override
-  public void loadState(@NotNull AzureSettingsState state) {
-    XmlSerializerUtil.copyBean(state, this);
   }
 
   @Transient
@@ -97,7 +73,7 @@ public class AzureSettingsState extends
     serviceSelectionForm.setAzureDeploymentId(deploymentId);
     serviceSelectionForm.setAzureApiVersion(apiVersion);
     serviceSelectionForm.setRemoteWithModelSettings(
-        new RemoteOpenAiSettings<>(baseHost, path, model, credentialsManager));
+        new OpenAIRemoteSettings<>(baseHost, path, model, credentialsManager));
   }
 
   public boolean isUsingCustomPath() {

@@ -9,7 +9,8 @@ import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAiModelSelector;
 import ee.carlrobert.codegpt.settings.service.util.RemoteOpenAiServiceForm;
-import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
+import ee.carlrobert.codegpt.settings.state.AzureSettings;
+import ee.carlrobert.codegpt.settings.state.azure.AzureSettingsState;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import java.util.List;
 import javax.swing.JPanel;
@@ -34,12 +35,12 @@ public class AzureServiceForm extends
   private JPanel apiKeyFieldPanel;
 
   public AzureServiceForm() {
-    super(AzureSettingsState.getInstance(), ServiceType.AZURE, new OpenAiModelSelector());
+    super(AzureSettings.getInstance(), ServiceType.AZURE, new OpenAiModelSelector());
   }
 
   @Override
   protected List<PanelBuilder> authenticationComponents() {
-    var azureSettings = AzureSettingsState.getInstance();
+    var azureSettings = AzureSettings.getInstance();
     AzureCredentialsManager credentials = azureSettings.getCredentialsManager();
     azureActiveDirectoryTokenField = new JBPasswordField();
     azureActiveDirectoryTokenField.setColumns(30);
@@ -63,7 +64,7 @@ public class AzureServiceForm extends
 
   @Override
   protected List<PanelBuilder> additionalServerConfigPanels() {
-    var azureSettings = AzureSettingsState.getInstance();
+    var azureSettings = AzureSettings.getInstance();
     azureResourceNameField = new JBTextField(azureSettings.getResourceName(), 35);
     azureDeploymentIdField = new JBTextField(azureSettings.getDeploymentId(), 35);
     azureApiVersionField = new JBTextField(azureSettings.getApiVersion(), 35);

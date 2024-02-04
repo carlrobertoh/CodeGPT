@@ -6,7 +6,7 @@ import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.credentials.LlamaCredentialsManager;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.service.util.RemoteServiceForm;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
+import ee.carlrobert.codegpt.settings.state.LlamaSettings;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaRemoteSettings;
 import ee.carlrobert.codegpt.ui.ChatPromptTemplatePanel;
 import ee.carlrobert.codegpt.ui.InfillPromptTemplatePanel;
@@ -22,15 +22,15 @@ public class LlamaRemoteServiceForm extends RemoteServiceForm<LlamaCredentialsMa
   private InfillPromptTemplatePanel infillPromptTemplatePanel;
 
   public LlamaRemoteServiceForm() {
-    super(LlamaSettingsState.getInstance().getRemoteSettings(), ServiceType.LLAMA_CPP);
+    super(LlamaSettings.getInstance().getRemoteSettings(), ServiceType.LLAMA_CPP);
   }
 
   @Override
   protected List<PanelBuilder> additionalServerConfigPanels() {
     chatPromptTemplatePanel = new ChatPromptTemplatePanel(
-        LlamaSettingsState.getInstance().getRemoteSettings().getChatPromptTemplate(), true);
+        LlamaSettings.getInstance().getRemoteSettings().getChatPromptTemplate(), true);
     infillPromptTemplatePanel = new InfillPromptTemplatePanel(
-        LlamaSettingsState.getInstance().getRemoteSettings().getInfillPromptTemplate(), true);
+        LlamaSettings.getInstance().getRemoteSettings().getInfillPromptTemplate(), true);
     return List.of(
         UI.PanelFactory.panel(chatPromptTemplatePanel)
             .withLabel(CodeGPTBundle.get("shared.promptTemplate"))

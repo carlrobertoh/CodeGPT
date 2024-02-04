@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.settings.state.util;
+package ee.carlrobert.codegpt.settings.state.llama;
 
 import com.intellij.util.xmlb.Converter;
 import ee.carlrobert.codegpt.completions.llama.CustomLlamaModel;

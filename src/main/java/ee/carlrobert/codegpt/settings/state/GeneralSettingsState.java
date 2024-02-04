@@ -45,17 +45,17 @@ public class GeneralSettingsState implements PersistentStateComponent<GeneralSet
     var clientCode = conversation.getClientCode();
     if ("chat.completion".equals(clientCode)) {
       setSelectedService(ServiceType.OPENAI);
-      OpenAISettingsState.getInstance()
+      OpenAISettings.getInstance()
           .setModel(OpenAIChatCompletionModel.findByCode(conversation.getModel()));
     }
     if ("azure.chat.completion".equals(clientCode)) {
       setSelectedService(ServiceType.AZURE);
-      AzureSettingsState.getInstance()
+      AzureSettings.getInstance()
           .setModel(OpenAIChatCompletionModel.findByCode(conversation.getModel()));
     }
     if ("llama.chat.completion".equals(clientCode)) {
       setSelectedService(ServiceType.LLAMA_CPP);
-      var llamaSettings = LlamaSettingsState.getInstance();
+      var llamaSettings = LlamaSettings.getInstance();
       try {
         llamaSettings.getLocalSettings()
             .setModel(HuggingFaceModel.valueOf(conversation.getModel()));
@@ -71,13 +71,13 @@ public class GeneralSettingsState implements PersistentStateComponent<GeneralSet
   public String getModel() {
     switch (selectedService) {
       case OPENAI:
-        return OpenAISettingsState.getInstance().getModel().getCode();
+        return OpenAISettings.getInstance().getModel().getCode();
       case AZURE:
-        return AzureSettingsState.getInstance().getDeploymentId();
+        return AzureSettings.getInstance().getDeploymentId();
       case YOU:
         return "YouCode";
       case LLAMA_CPP:
-        var llamaSettings = LlamaSettingsState.getInstance();
+        var llamaSettings = LlamaSettings.getInstance();
         LlamaCompletionModel usedModel = llamaSettings.getUsedModel();
         if (usedModel instanceof CustomLlamaModel) {
           CustomLlamaModel customModel = (CustomLlamaModel) usedModel;

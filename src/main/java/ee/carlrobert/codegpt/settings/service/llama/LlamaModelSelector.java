@@ -32,7 +32,7 @@ import ee.carlrobert.codegpt.completions.llama.LlamaCompletionModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaServerAgent;
 import ee.carlrobert.codegpt.settings.service.util.ModelSelector;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
+import ee.carlrobert.codegpt.settings.state.LlamaSettings;
 import ee.carlrobert.codegpt.ui.ChatPromptTemplatePanel;
 import ee.carlrobert.codegpt.ui.InfillPromptTemplatePanel;
 import java.awt.BorderLayout;
@@ -148,9 +148,9 @@ public class LlamaModelSelector implements ModelSelector<LlamaCompletionModel> {
     customModelPathField.setText(modelPath);
 
     infillPromptTemplatePanel = new InfillPromptTemplatePanel(
-        LlamaSettingsState.getInstance().getRemoteSettings().getInfillPromptTemplate(), true);
+        LlamaSettings.getInstance().getRemoteSettings().getInfillPromptTemplate(), true);
     chatPromptTemplateField = new ChatPromptTemplatePanel(
-        LlamaSettingsState.getInstance().getRemoteSettings().getChatPromptTemplate(), true);
+        LlamaSettings.getInstance().getRemoteSettings().getChatPromptTemplate(), true);
   }
 
 

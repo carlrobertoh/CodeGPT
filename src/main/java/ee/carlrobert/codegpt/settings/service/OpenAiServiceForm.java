@@ -7,7 +7,8 @@ import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAiModelSelector;
 import ee.carlrobert.codegpt.settings.service.util.RemoteOpenAiServiceForm;
-import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
+import ee.carlrobert.codegpt.settings.state.OpenAISettings;
+import ee.carlrobert.codegpt.settings.state.openai.OpenAISettingsState;
 import java.util.List;
 
 /**
@@ -21,12 +22,12 @@ public class OpenAiServiceForm extends
   private JBTextField organizationField;
 
   public OpenAiServiceForm() {
-    super(OpenAISettingsState.getInstance(), ServiceType.OPENAI, new OpenAiModelSelector());
+    super(OpenAISettings.getInstance(), ServiceType.OPENAI, new OpenAiModelSelector());
   }
 
   @Override
   protected List<PanelBuilder> additionalServerConfigPanels() {
-    var openAISettings = OpenAISettingsState.getInstance();
+    var openAISettings = OpenAISettings.getInstance();
     organizationField = new JBTextField(openAISettings.getOrganization(), 30);
     List<PanelBuilder> panels = super.additionalServerConfigPanels();
     panels.add(

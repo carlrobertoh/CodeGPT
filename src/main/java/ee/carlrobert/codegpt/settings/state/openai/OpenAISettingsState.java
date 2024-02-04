@@ -1,21 +1,11 @@
-package ee.carlrobert.codegpt.settings.state;
+package ee.carlrobert.codegpt.settings.state.openai;
 
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.components.PersistentStateComponent;
-import com.intellij.openapi.components.State;
-import com.intellij.openapi.components.Storage;
-import com.intellij.util.xmlb.XmlSerializerUtil;
 import com.intellij.util.xmlb.annotations.Transient;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.service.OpenAiServiceForm;
-import ee.carlrobert.codegpt.settings.state.util.RemoteOpenAiSettings;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
-import org.jetbrains.annotations.NotNull;
 
-@State(name = "CodeGPT_OpenAISettings_210", storages = @Storage("CodeGPT_OpenAISettings_210.xml"))
-public class OpenAISettingsState extends
-    RemoteOpenAiSettings<OpenAICredentialsManager> implements
-    PersistentStateComponent<OpenAISettingsState> {
+public class OpenAISettingsState extends OpenAIRemoteSettings<OpenAICredentialsManager> {
 
   private static final String BASE_PATH = "/v1/chat/completions";
 
@@ -35,21 +25,6 @@ public class OpenAISettingsState extends
     this.openAIQuotaExceeded = openAIQuotaExceeded;
   }
 
-  public static OpenAISettingsState getInstance() {
-    return ApplicationManager.getApplication()
-        .getService(OpenAISettingsState.class);
-  }
-
-  @Override
-  public OpenAISettingsState getState() {
-    return this;
-  }
-
-  @Override
-  public void loadState(@NotNull OpenAISettingsState state) {
-    XmlSerializerUtil.copyBean(state, this);
-  }
-
   @Transient
   public boolean isModified(OpenAISettingsState settingsState) {
     return super.isModified(settingsState)
@@ -67,7 +42,7 @@ public class OpenAISettingsState extends
 
   public void reset(OpenAiServiceForm serviceSelectionForm) {
     serviceSelectionForm.setRemoteWithModelSettings(
-        new RemoteOpenAiSettings<>(baseHost, path, model, credentialsManager));
+        new OpenAIRemoteSettings<>(baseHost, path, model, credentialsManager));
     serviceSelectionForm.setApiKey(credentialsManager.getApiKey());
     serviceSelectionForm.setOrganization(organization);
   }

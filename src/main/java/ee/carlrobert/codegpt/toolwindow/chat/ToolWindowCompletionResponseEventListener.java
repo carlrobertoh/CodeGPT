@@ -12,8 +12,8 @@ import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.GeneralSettingsState;
-import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
-import ee.carlrobert.codegpt.settings.state.YouSettingsState;
+import ee.carlrobert.codegpt.settings.state.OpenAISettings;
+import ee.carlrobert.codegpt.settings.state.YouSettings;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ChatMessageResponseBody;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ResponsePanel;
@@ -86,7 +86,7 @@ abstract class ToolWindowCompletionResponseEventListener implements
       try {
         if ("insufficient_quota".equals(error.getCode())) {
           if (GeneralSettingsState.getInstance().getSelectedService() == ServiceType.OPENAI) {
-            OpenAISettingsState.getInstance().setOpenAIQuotaExceeded(true);
+            OpenAISettings.getInstance().setOpenAIQuotaExceeded(true);
           }
           responseContainer.displayQuotaExceeded();
         } else {
@@ -128,7 +128,7 @@ abstract class ToolWindowCompletionResponseEventListener implements
     if (containsResults) {
       message.setSerpResults(serpResults);
     }
-    var displayResults = YouSettingsState.getInstance().isDisplayWebSearchResults();
+    var displayResults = YouSettings.getInstance().isDisplayWebSearchResults();
 
     SwingUtilities.invokeLater(() -> {
       try {

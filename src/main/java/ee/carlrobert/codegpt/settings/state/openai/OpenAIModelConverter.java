@@ -1,11 +1,11 @@
-package ee.carlrobert.codegpt.settings.state.util;
+package ee.carlrobert.codegpt.settings.state.openai;
 
 import com.intellij.util.xmlb.Converter;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class OpenAiModelConverter extends Converter<OpenAIChatCompletionModel> {
+public class OpenAIModelConverter extends Converter<OpenAIChatCompletionModel> {
 
   @Override
   public @Nullable OpenAIChatCompletionModel fromString(@NotNull String value) {

@@ -1,17 +1,19 @@
 package testsupport.mixin;
 
 import ee.carlrobert.codegpt.settings.service.ServiceType;
-import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
+import ee.carlrobert.codegpt.settings.state.AzureSettings;
 import ee.carlrobert.codegpt.settings.state.GeneralSettingsState;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
-import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
+import ee.carlrobert.codegpt.settings.state.LlamaSettings;
+import ee.carlrobert.codegpt.settings.state.OpenAISettings;
+import ee.carlrobert.codegpt.settings.state.llama.LlamaSettingsState;
+import ee.carlrobert.codegpt.settings.state.openai.OpenAISettingsState;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 
 public interface ShortcutsTestMixin {
 
   default void useOpenAIService() {
     GeneralSettingsState.getInstance().setSelectedService(ServiceType.OPENAI);
-    OpenAISettingsState openAISettings = OpenAISettingsState.getInstance();
+    OpenAISettingsState openAISettings = OpenAISettings.getInstance();
     openAISettings.getCredentialsManager().apply("TEST_API_KEY");
     openAISettings.setModel(OpenAIChatCompletionModel.GPT_4);
     openAISettings.setBaseHost(null);
@@ -19,7 +21,7 @@ public interface ShortcutsTestMixin {
 
   default void useAzureService() {
     GeneralSettingsState.getInstance().setSelectedService(ServiceType.AZURE);
-    var azureSettings = AzureSettingsState.getInstance();
+    var azureSettings = AzureSettings.getInstance();
     azureSettings.getCredentialsManager().apply("TEST_API_KEY");
     azureSettings.setBaseHost(null);
     azureSettings.setResourceName("TEST_RESOURCE_NAME");
@@ -33,7 +35,7 @@ public interface ShortcutsTestMixin {
 
   default void useLlamaService() {
     GeneralSettingsState.getInstance().setSelectedService(ServiceType.LLAMA_CPP);
-    LlamaSettingsState llamaSettingsState = LlamaSettingsState.getInstance();
+    LlamaSettingsState llamaSettingsState = LlamaSettings.getInstance();
     llamaSettingsState.setRunLocalServer(true);
     var localSettings = llamaSettingsState.getLocalSettings();
     localSettings.setServerPort(null);

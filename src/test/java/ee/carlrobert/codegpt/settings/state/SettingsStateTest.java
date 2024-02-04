@@ -14,7 +14,7 @@ import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 public class SettingsStateTest extends BasePlatformTestCase {
 
   public void testOpenAISettingsSync() {
-    var openAISettings = OpenAISettingsState.getInstance();
+    var openAISettings = OpenAISettings.getInstance();
     openAISettings.setModel(OpenAIChatCompletionModel.GPT_3_5);
     var conversation = new Conversation();
     conversation.setModel("gpt-4");
@@ -36,7 +36,7 @@ public class SettingsStateTest extends BasePlatformTestCase {
     settings.sync(conversation);
 
     assertThat(settings.getSelectedService()).isEqualTo(ServiceType.AZURE);
-    assertThat(AzureSettingsState.getInstance().getModel()).isEqualTo(
+    assertThat(AzureSettings.getInstance().getModel()).isEqualTo(
         OpenAIChatCompletionModel.GPT_4);
   }
 
@@ -52,7 +52,7 @@ public class SettingsStateTest extends BasePlatformTestCase {
   }
 
   public void testLlamaSettingsModelPathSync() {
-    var llamaSettings = LlamaSettingsState.getInstance().getLocalSettings();
+    var llamaSettings = LlamaSettings.getInstance().getLocalSettings();
     llamaSettings.setModel(HuggingFaceModel.WIZARD_CODER_PYTHON_7B_Q3);
     var conversation = new Conversation();
     conversation.setModel("TEST_LLAMA_MODEL_PATH");
@@ -68,7 +68,7 @@ public class SettingsStateTest extends BasePlatformTestCase {
   }
 
   public void testLlamaSettingsHuggingFaceModelSync() {
-    var llamaSettings = LlamaSettingsState.getInstance().getLocalSettings();
+    var llamaSettings = LlamaSettings.getInstance().getLocalSettings();
     llamaSettings.setModel(HuggingFaceModel.WIZARD_CODER_PYTHON_7B_Q3);
     var conversation = new Conversation();
     conversation.setModel("CODE_LLAMA_7B_Q3");

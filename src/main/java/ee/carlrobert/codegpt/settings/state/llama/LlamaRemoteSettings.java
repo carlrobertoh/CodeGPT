@@ -17,16 +17,15 @@ public class LlamaRemoteSettings extends RemoteSettings<LlamaCredentialsManager>
   private InfillPromptTemplate infillPromptTemplate = InfillPromptTemplate.LLAMA;
 
   public LlamaRemoteSettings() {
-    super("http://localhost:8080", null, new LlamaCredentialsManager("REMOTE"));
+    super("http://localhost:8080", null, new LlamaCredentialsManager(CREDENTIALS_PREFIX));
   }
 
   public LlamaRemoteSettings(PromptTemplate chatPromptTemplate,
       InfillPromptTemplate infillPromptTemplate, String baseHost,
       LlamaCredentialsManager credentialsManager) {
-    super(baseHost, null, new LlamaCredentialsManager("REMOTE"));
+    super(baseHost, null, credentialsManager);
     this.chatPromptTemplate = chatPromptTemplate;
     this.infillPromptTemplate = infillPromptTemplate;
-    this.credentialsManager = credentialsManager;
   }
 
   @Transient

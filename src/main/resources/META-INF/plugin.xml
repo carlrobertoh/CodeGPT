@@ -29,11 +29,14 @@
           serviceImplementation="ee.carlrobert.codegpt.telemetry.core.service.TelemetryServiceFactory"/>
         <applicationService
           serviceImplementation="ee.carlrobert.codegpt.settings.state.GeneralSettingsState"/>
-        <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.AzureSettingsState"/>
-        <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.OpenAISettingsState"/>
-        <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.YouSettingsState"/>
         <applicationService
-          serviceImplementation="ee.carlrobert.codegpt.settings.state.LlamaSettingsState"/>
+          serviceImplementation="ee.carlrobert.codegpt.settings.state.AzureSettings"/>
+        <applicationService
+          serviceImplementation="ee.carlrobert.codegpt.settings.state.OpenAISettings"/>
+        <applicationService
+          serviceImplementation="ee.carlrobert.codegpt.settings.state.YouSettings"/>
+        <applicationService
+          serviceImplementation="ee.carlrobert.codegpt.settings.state.LlamaSettings"/>
         <applicationService
           serviceImplementation="ee.carlrobert.codegpt.settings.state.util.IncludedFilesSettingsState"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.configuration.ConfigurationState"/>

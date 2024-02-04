@@ -4,9 +4,9 @@ import static ee.carlrobert.codegpt.ui.UIUtil.createForm;
 
 import com.intellij.ui.components.JBRadioButton;
 import ee.carlrobert.codegpt.completions.ServerAgent;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaLocalSettings;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaRemoteSettings;
+import ee.carlrobert.codegpt.settings.state.llama.LlamaSettingsState;
 import javax.swing.JPanel;
 
 /**

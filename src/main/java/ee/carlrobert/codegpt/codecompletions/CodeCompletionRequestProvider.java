@@ -4,7 +4,7 @@ import ee.carlrobert.codegpt.completions.llama.CustomLlamaModel;
 import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaCompletionModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
+import ee.carlrobert.codegpt.settings.state.LlamaSettings;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAITextCompletionRequest;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -41,7 +41,7 @@ public class CodeCompletionRequestProvider {
   }
 
   private InfillPromptTemplate getLlamaInfillPromptTemplate() {
-    var settings = LlamaSettingsState.getInstance();
+    var settings = LlamaSettings.getInstance();
     if (!settings.isRunLocalServer()) {
       return settings.getRemoteSettings().getInfillPromptTemplate();
     }

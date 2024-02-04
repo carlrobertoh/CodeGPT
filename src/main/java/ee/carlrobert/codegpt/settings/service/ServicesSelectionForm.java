@@ -11,8 +11,8 @@ import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.completions.llama.LlamaServerAgent;
 import ee.carlrobert.codegpt.completions.you.auth.AuthenticationNotifier;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaLocalOrRemoteServiceForm;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
-import ee.carlrobert.codegpt.settings.state.YouSettingsState;
+import ee.carlrobert.codegpt.settings.state.LlamaSettings;
+import ee.carlrobert.codegpt.settings.state.YouSettings;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
@@ -35,7 +35,7 @@ public class ServicesSelectionForm {
 
     displayWebSearchResultsCheckBox = new JBCheckBox(
         CodeGPTBundle.get("settingsConfigurable.service.you.displayResults.label"),
-        YouSettingsState.getInstance().isDisplayWebSearchResults());
+        YouSettings.getInstance().isDisplayWebSearchResults());
 
     openAIServiceSectionPanel = new OpenAiServiceForm();
     azureServiceSectionPanel = new AzureServiceForm();
@@ -50,7 +50,7 @@ public class ServicesSelectionForm {
   }
 
   static LlamaServiceForm createLlamaServiceSectionPanel() {
-    var settings = LlamaSettingsState.getInstance();
+    var settings = LlamaSettings.getInstance();
     return new LlamaServiceForm(
         new LlamaLocalOrRemoteServiceForm(settings,
             ApplicationManager.getApplication().getService(LlamaServerAgent.class)),
