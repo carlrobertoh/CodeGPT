@@ -9,7 +9,7 @@ public class YouProCheckbox extends JBCheckBox {
 
   public YouProCheckbox() {
     super(CodeGPTBundle.get("toolwindow.chat.youProCheckBox.text"));
-    var youSettings = YouSettings.getInstance();
+    var youSettings = YouSettings.getInstance().getState();
     var youUserManager = YouUserManager.getInstance();
     setOpaque(false);
     setEnabled(youUserManager.isSubscribed());

@@ -61,7 +61,7 @@ public class StandardChatToolWindowTabPanel extends ChatToolWindowTabPanel {
           new ChatMessageResponseBody(project, this).withResponse(message.getResponse());
 
       var serpResults = message.getSerpResults();
-      if (YouSettings.getInstance().isDisplayWebSearchResults()
+      if (YouSettings.getInstance().getState().isDisplayWebSearchResults()
           && serpResults != null && !serpResults.isEmpty()) {
         messageResponseBody.displaySerpResults(serpResults);
       }

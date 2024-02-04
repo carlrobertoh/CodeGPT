@@ -41,7 +41,7 @@ public class CodeCompletionRequestProvider {
   }
 
   private InfillPromptTemplate getLlamaInfillPromptTemplate() {
-    var settings = LlamaSettings.getInstance();
+    var settings = LlamaSettings.getInstance().getState();
     if (!settings.isRunLocalServer()) {
       return settings.getRemoteSettings().getInfillPromptTemplate();
     }

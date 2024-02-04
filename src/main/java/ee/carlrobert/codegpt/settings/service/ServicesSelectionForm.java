@@ -35,7 +35,7 @@ public class ServicesSelectionForm {
 
     displayWebSearchResultsCheckBox = new JBCheckBox(
         CodeGPTBundle.get("settingsConfigurable.service.you.displayResults.label"),
-        YouSettings.getInstance().isDisplayWebSearchResults());
+        YouSettings.getInstance().getState().isDisplayWebSearchResults());
 
     openAIServiceSectionPanel = new OpenAIServiceForm();
     azureServiceSectionPanel = new AzureServiceForm();
@@ -50,7 +50,7 @@ public class ServicesSelectionForm {
   }
 
   static LlamaServiceForm createLlamaServiceSectionPanel() {
-    var settings = LlamaSettings.getInstance();
+    var settings = LlamaSettings.getInstance().getState();
     return new LlamaServiceForm(
         new LlamaLocalOrRemoteServiceForm(settings,
             ApplicationManager.getApplication().getService(LlamaServerAgent.class)),

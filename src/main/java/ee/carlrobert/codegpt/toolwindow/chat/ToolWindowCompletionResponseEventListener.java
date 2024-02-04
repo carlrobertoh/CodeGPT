@@ -86,7 +86,7 @@ abstract class ToolWindowCompletionResponseEventListener implements
       try {
         if ("insufficient_quota".equals(error.getCode())) {
           if (GeneralSettingsState.getInstance().getSelectedService() == ServiceType.OPENAI) {
-            OpenAISettings.getInstance().setOpenAIQuotaExceeded(true);
+            OpenAISettings.getInstance().getState().setOpenAIQuotaExceeded(true);
           }
           responseContainer.displayQuotaExceeded();
         } else {
@@ -128,7 +128,7 @@ abstract class ToolWindowCompletionResponseEventListener implements
     if (containsResults) {
       message.setSerpResults(serpResults);
     }
-    var displayResults = YouSettings.getInstance().isDisplayWebSearchResults();
+    var displayResults = YouSettings.getInstance().getState().isDisplayWebSearchResults();
 
     SwingUtilities.invokeLater(() -> {
       try {

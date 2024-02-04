@@ -14,7 +14,7 @@ public class ConversationsStateTest extends BasePlatformTestCase {
   public void testStartNewDefaultConversation() {
     var settings = GeneralSettingsState.getInstance();
     settings.setSelectedService(ServiceType.OPENAI);
-    OpenAISettings.getInstance().setModel(OpenAIChatCompletionModel.GPT_3_5);
+    OpenAISettings.getInstance().getState().setModel(OpenAIChatCompletionModel.GPT_3_5);
 
     var conversation = ConversationService.getInstance().startConversation();
 

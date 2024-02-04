@@ -142,7 +142,7 @@ public final class LlamaServerAgent implements ServerAgent {
             if ("HTTP server listening".equals(serverMessage.getMessage())) {
               LOG.info("Server up and running!");
 
-              LlamaSettings.getInstance().getLocalSettings().setServerPort(port);
+              LlamaSettings.getInstance().getState().getLocalSettings().setServerPort(port);
               onSuccess.run();
             }
           } catch (Exception ignore) {

@@ -10,7 +10,7 @@ import ee.carlrobert.codegpt.codecompletions.InfillPromptTemplate;
 import ee.carlrobert.codegpt.completions.PromptTemplate;
 import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaCompletionModel;
-import ee.carlrobert.codegpt.credentials.LlamaCredentialsManager;
+import ee.carlrobert.codegpt.credentials.ApiKeyCredentials;
 import ee.carlrobert.codegpt.settings.state.util.CommonSettings;
 import java.io.File;
 import java.io.IOException;
@@ -22,7 +22,7 @@ import java.util.List;
 /**
  * All settings necessary for running a Llama server locally.
  */
-public class LlamaLocalSettings extends CommonSettings<LlamaCredentialsManager> {
+public class LlamaLocalSettings extends CommonSettings<ApiKeyCredentials> {
 
   public static final String BUNDLED_SERVER =
       CodeGPTPlugin.getLlamaSourcePath() + File.separator + "server";
@@ -40,9 +40,8 @@ public class LlamaLocalSettings extends CommonSettings<LlamaCredentialsManager> 
   protected LlamaCompletionModel model = HuggingFaceModel.CODE_LLAMA_7B_Q4;
   private String serverPath = BUNDLED_SERVER;
 
-
   public LlamaLocalSettings() {
-    this.credentialsManager = new LlamaCredentialsManager(CREDENTIALS_PREFIX);
+    this.credentials = new ApiKeyCredentials();
   }
 
   public LlamaLocalSettings(
@@ -53,7 +52,7 @@ public class LlamaLocalSettings extends CommonSettings<LlamaCredentialsManager> 
       Integer serverPort, int contextSize,
       int threads,
       String additionalCompileParameters,
-      LlamaCredentialsManager credentialsManager) {
+      ApiKeyCredentials credentials) {
     this.serverPath = serverPath;
     this.model = model;
     this.serverPort = serverPort;
@@ -62,12 +61,12 @@ public class LlamaLocalSettings extends CommonSettings<LlamaCredentialsManager> 
     this.additionalCompileParameters = additionalCompileParameters;
     this.chatPromptTemplate = chatPromptTemplate;
     this.infillPromptTemplate = infillPromptTemplate;
-    this.credentialsManager = credentialsManager;
+    this.credentials = credentials;
   }
 
   @Transient
   public boolean isModified(LlamaLocalSettings localSettings) {
-    return super.isModified(localSettings)
+    return credentials.isModified(localSettings.getCredentials())
         || !serverPath.equals(localSettings.getServerPath())
         || !serverPort.equals(localSettings.getServerPort())
         || contextSize != localSettings.getContextSize()

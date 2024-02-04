@@ -37,7 +37,7 @@ public final class CompletionRequestService {
     var requestProvider = new CompletionRequestProvider(callParameters.getConversation());
     switch (GeneralSettingsState.getInstance().getSelectedService()) {
       case OPENAI:
-        var openAISettings = OpenAISettings.getInstance();
+        var openAISettings = OpenAISettings.getInstance().getState();
         return CompletionClientProvider.getOpenAIClient().getChatCompletionAsync(
             requestProvider.buildOpenAIChatCompletionRequest(
                 openAISettings.getModel().getCode(),
@@ -46,7 +46,7 @@ public final class CompletionRequestService {
                 openAISettings.isUsingCustomPath() ? openAISettings.getPath() : null),
             eventListener);
       case AZURE:
-        var azureSettings = AzureSettings.getInstance();
+        var azureSettings = AzureSettings.getInstance().getState();
         return CompletionClientProvider.getAzureClient().getChatCompletionAsync(
             requestProvider.buildOpenAIChatCompletionRequest(
                 null,
@@ -92,7 +92,7 @@ public final class CompletionRequestService {
         new OpenAIChatCompletionMessage("system",
             ConfigurationState.getInstance().getCommitMessagePrompt()),
         new OpenAIChatCompletionMessage("user", prompt)))
-        .setModel(OpenAISettings.getInstance().getModel())
+        .setModel(OpenAISettings.getInstance().getState().getModel())
         .build();
     var selectedService = GeneralSettingsState.getInstance().getSelectedService();
     if (selectedService == OPENAI) {
@@ -123,10 +123,10 @@ public final class CompletionRequestService {
   public boolean isRequestAllowed() {
     var selectedService = GeneralSettingsState.getInstance().getSelectedService();
     if (selectedService == AZURE) {
-      return AzureSettings.getInstance().getCredentialsManager().isCredentialSet();
+      return AzureSettings.getInstance().getState().getCredentials().isCredentialSet();
     }
     if (selectedService == OPENAI) {
-      return OpenAISettings.getInstance().getCredentialsManager().isCredentialSet();
+      return OpenAISettings.getInstance().getState().getCredentials().isCredentialSet();
     }
     return true;
   }

@@ -56,11 +56,11 @@ public class GenerateGitCommitMessageAction extends AnAction {
     var selectedService = GeneralSettingsState.getInstance().getSelectedService();
     if (selectedService == ServiceType.OPENAI || selectedService == ServiceType.AZURE) {
       var filesSelected = !getReferencedFilePaths(event).isEmpty();
-      var openAiSettings = OpenAISettings.getInstance();
+      var openAiSettings = OpenAISettings.getInstance().getState();
       var callAllowed = (selectedService == ServiceType.OPENAI
-          && openAiSettings.getCredentialsManager().isCredentialSet())
+          && openAiSettings.getCredentials().isCredentialSet())
           || (selectedService == ServiceType.AZURE
-          && AzureSettings.getInstance().getCredentialsManager().isCredentialSet());
+          && AzureSettings.getInstance().getState().getCredentials().isCredentialSet());
       event.getPresentation().setEnabled(callAllowed && filesSelected);
       event.getPresentation().setText(CodeGPTBundle.get(callAllowed
           ? "action.generateCommitMessage.title"

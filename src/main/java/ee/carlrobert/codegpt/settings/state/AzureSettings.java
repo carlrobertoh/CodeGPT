@@ -5,24 +5,26 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
+import ee.carlrobert.codegpt.credentials.manager.AzureCredentialsManager;
 import ee.carlrobert.codegpt.settings.state.azure.AzureSettingsState;
 import org.jetbrains.annotations.NotNull;
 
 @State(name = "CodeGPT_AzureSettings_210", storages = @Storage("CodeGPT_AzureSettings_210.xml"))
 public class AzureSettings implements PersistentStateComponent<AzureSettingsState> {
 
-  private final AzureSettingsState state;
+  private AzureSettingsState state;
 
   public AzureSettings() {
     this.state = new AzureSettingsState();
   }
 
-  public static AzureSettingsState getInstance() {
+  public static AzureSettings getInstance() {
     return ApplicationManager.getApplication()
-        .getService(AzureSettings.class).getState();
+        .getService(AzureSettings.class);
   }
 
   @Override
+  @NotNull
   public AzureSettingsState getState() {
     return this.state;
   }
@@ -30,5 +32,11 @@ public class AzureSettings implements PersistentStateComponent<AzureSettingsStat
   @Override
   public void loadState(@NotNull AzureSettingsState state) {
     XmlSerializerUtil.copyBean(state, this.state);
+    this.state.setCredentials(AzureCredentialsManager.getInstance().getCredentials());
+  }
+
+  public void apply(AzureSettingsState settingsState) {
+    this.state = settingsState;
+    AzureCredentialsManager.getInstance().apply(settingsState.getCredentials());
   }
 }

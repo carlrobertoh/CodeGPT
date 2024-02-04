@@ -3,13 +3,13 @@ package ee.carlrobert.codegpt.settings.state.llama;
 import com.intellij.util.xmlb.annotations.Transient;
 import ee.carlrobert.codegpt.codecompletions.InfillPromptTemplate;
 import ee.carlrobert.codegpt.completions.PromptTemplate;
-import ee.carlrobert.codegpt.credentials.LlamaCredentialsManager;
+import ee.carlrobert.codegpt.credentials.ApiKeyCredentials;
 import ee.carlrobert.codegpt.settings.state.util.RemoteSettings;
 
 /**
  * All settings for using an existing remote Llama server.
  */
-public class LlamaRemoteSettings extends RemoteSettings<LlamaCredentialsManager> {
+public class LlamaRemoteSettings extends RemoteSettings<ApiKeyCredentials> {
 
   public static final String CREDENTIALS_PREFIX = "REMOTE";
 
@@ -17,13 +17,13 @@ public class LlamaRemoteSettings extends RemoteSettings<LlamaCredentialsManager>
   private InfillPromptTemplate infillPromptTemplate = InfillPromptTemplate.LLAMA;
 
   public LlamaRemoteSettings() {
-    super("http://localhost:8080", null, new LlamaCredentialsManager(CREDENTIALS_PREFIX));
+    super("http://localhost:8080", null, new ApiKeyCredentials());
   }
 
   public LlamaRemoteSettings(PromptTemplate chatPromptTemplate,
       InfillPromptTemplate infillPromptTemplate, String baseHost,
-      LlamaCredentialsManager credentialsManager) {
-    super(baseHost, null, credentialsManager);
+      ApiKeyCredentials credentials) {
+    super(baseHost, null, credentials);
     this.chatPromptTemplate = chatPromptTemplate;
     this.infillPromptTemplate = infillPromptTemplate;
   }

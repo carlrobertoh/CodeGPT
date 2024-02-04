@@ -27,8 +27,8 @@ import okhttp3.OkHttpClient;
 public class CompletionClientProvider {
 
   public static OpenAIClient getOpenAIClient() {
-    var settings = OpenAISettings.getInstance();
-    var builder = new OpenAIClient.Builder(settings.getCredentialsManager().getApiKey())
+    var settings = OpenAISettings.getInstance().getState();
+    var builder = new OpenAIClient.Builder(settings.getCredentials().getApiKey())
         .setOrganization(settings.getOrganization());
     var baseHost = settings.getBaseHost();
     if (baseHost != null) {
@@ -38,12 +38,12 @@ public class CompletionClientProvider {
   }
 
   public static AzureClient getAzureClient() {
-    var settings = AzureSettings.getInstance();
+    var settings = AzureSettings.getInstance().getState();
     var params = new AzureCompletionRequestParams(
         settings.getResourceName(),
         settings.getDeploymentId(),
         settings.getApiVersion());
-    var builder = new AzureClient.Builder(settings.getCredentialsManager().getSecret(), params)
+    var builder = new AzureClient.Builder(settings.getCredentials().getSecret(), params)
         .setActiveDirectoryAuthentication(settings.isUseAzureActiveDirectoryAuthentication());
     var baseHost = settings.getBaseHost();
     if (baseHost != null) {
@@ -74,18 +74,18 @@ public class CompletionClientProvider {
   }
 
   public static LlamaClient getLlamaClient() {
-    LlamaSettingsState llamaSettingsState = LlamaSettings.getInstance();
+    LlamaSettingsState llamaSettingsState = LlamaSettings.getInstance().getState();
 
     Builder builder = new Builder();
     String apiKey;
     if (llamaSettingsState.isRunLocalServer()) {
       LlamaLocalSettings localSettings = llamaSettingsState.getLocalSettings();
       builder.setPort(localSettings.getServerPort());
-      apiKey = localSettings.getCredentialsManager().getApiKey();
+      apiKey = localSettings.getCredentials().getApiKey();
     } else {
       LlamaRemoteSettings remoteSettings = llamaSettingsState.getRemoteSettings();
       builder.setHost(remoteSettings.getBaseHost());
-      apiKey = remoteSettings.getCredentialsManager().getApiKey();
+      apiKey = remoteSettings.getCredentials().getApiKey();
     }
     if (apiKey != null && !apiKey.isBlank()) {
       builder.setApiKey(apiKey);

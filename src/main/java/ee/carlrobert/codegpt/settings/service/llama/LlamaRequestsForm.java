@@ -103,4 +103,11 @@ public class LlamaRequestsForm {
         Double.parseDouble(minPField.getText()),
         Double.parseDouble(repeatPenaltyField.getText()));
   }
+
+  public void setRequestSettings(LlamaRequestSettings settings) {
+    topKField.setValue(settings.getTopK());
+    topPField.setText(String.valueOf(settings.getTopP()));
+    minPField.setText(String.valueOf(settings.getMinP()));
+    repeatPenaltyField.setText(String.valueOf(settings.getRepeatPenalty()));
+  }
 }

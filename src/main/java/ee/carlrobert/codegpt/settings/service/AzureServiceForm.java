@@ -6,21 +6,20 @@ import com.intellij.ui.components.JBRadioButton;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
-import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
+import ee.carlrobert.codegpt.credentials.AzureCredentials;
 import ee.carlrobert.codegpt.settings.service.util.RemoteServiceForm;
 import ee.carlrobert.codegpt.settings.state.AzureSettings;
 import ee.carlrobert.codegpt.settings.state.azure.AzureSettingsState;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import java.util.List;
 import javax.swing.JPanel;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * Form containing all forms to configure using
  * {@link ee.carlrobert.codegpt.settings.service.ServiceType#AZURE}.
  */
 
-public class AzureServiceForm extends RemoteServiceForm<AzureCredentialsManager> {
+public class AzureServiceForm extends RemoteServiceForm<AzureCredentials> {
 
   private JBRadioButton useAzureApiKeyAuthenticationRadioButton;
   private JBRadioButton useAzureActiveDirectoryAuthenticationRadioButton;
@@ -33,13 +32,13 @@ public class AzureServiceForm extends RemoteServiceForm<AzureCredentialsManager>
   private JPanel apiKeyFieldPanel;
 
   public AzureServiceForm() {
-    super(AzureSettings.getInstance(), ServiceType.AZURE);
+    super(AzureSettings.getInstance().getState(), ServiceType.AZURE);
   }
 
   @Override
   protected List<PanelBuilder> authenticationComponents() {
-    var azureSettings = AzureSettings.getInstance();
-    AzureCredentialsManager credentials = azureSettings.getCredentialsManager();
+    var azureSettings = AzureSettings.getInstance().getState();
+    AzureCredentials credentials = azureSettings.getCredentials();
     azureActiveDirectoryTokenField = new JBPasswordField();
     azureActiveDirectoryTokenField.setColumns(30);
     azureActiveDirectoryTokenField.setText(credentials.getActiveDirectoryToken());
@@ -62,7 +61,7 @@ public class AzureServiceForm extends RemoteServiceForm<AzureCredentialsManager>
 
   @Override
   protected List<PanelBuilder> additionalServerConfigPanels() {
-    var azureSettings = AzureSettings.getInstance();
+    var azureSettings = AzureSettings.getInstance().getState();
     azureResourceNameField = new JBTextField(azureSettings.getResourceName(), 35);
     azureDeploymentIdField = new JBTextField(azureSettings.getDeploymentId(), 35);
     azureApiVersionField = new JBTextField(azureSettings.getApiVersion(), 35);
@@ -136,19 +135,9 @@ public class AzureServiceForm extends RemoteServiceForm<AzureCredentialsManager>
 
   public AzureSettingsState getSettings() {
     return new AzureSettingsState(getBaseHost(), getPath(),
-        new AzureCredentialsManager() {
-          @Override
-          public String getApiKey() {
-            return AzureServiceForm.this.getApiKey();
-          }
-
-          @Override
-          public @Nullable String getActiveDirectoryToken() {
-            return AzureServiceForm.this.getAzureActiveDirectoryToken();
-          }
-        }, getAzureResourceName(), getAzureDeploymentId(), getAzureApiVersion(),
-        isAzureApiKeyAuthenticationSelected(), isAzureActiveDirectoryAuthenticationSelected());
+        new AzureCredentials(getApiKey(), getAzureActiveDirectoryToken()), getAzureResourceName(),
+        getAzureDeploymentId(), getAzureApiVersion(), isAzureApiKeyAuthenticationSelected(),
+        isAzureActiveDirectoryAuthenticationSelected());
   }
-
 
 }

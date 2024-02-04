@@ -21,7 +21,7 @@ public class MethodNameLookupListener implements LookupManagerListener {
   public void activeLookupChanged(@Nullable Lookup oldLookup, @Nullable Lookup newLookup) {
     var application = ApplicationManager.getApplication();
     var configuration = ConfigurationState.getInstance();
-    var credentialsManager = OpenAISettings.getInstance().getCredentialsManager();
+    var credentialsManager = OpenAISettings.getInstance().getState().getCredentials();
 
     if (!configuration.isMethodRefactoringEnabled()
         || !credentialsManager.isCredentialSet()

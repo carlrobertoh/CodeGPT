@@ -24,8 +24,8 @@ import testsupport.IntegrationTest;
 public class CompletionRequestProviderTest extends IntegrationTest {
 
   public void testChatCompletionRequestWithSystemPromptOverride() {
-    OpenAISettingsState openAISettings = OpenAISettings.getInstance();
-    openAISettings.getCredentialsManager().apply("TEST_API_KEY");
+    OpenAISettingsState openAISettings = OpenAISettings.getInstance().getState();
+    openAISettings.getCredentials().setApiKey("TEST_API_KEY");
     openAISettings.setBaseHost(null);
     ConfigurationState.getInstance().setSystemPrompt("TEST_SYSTEM_PROMPT");
     var conversation = ConversationService.getInstance().startConversation();

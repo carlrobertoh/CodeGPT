@@ -47,9 +47,9 @@ public class SettingsConfigurable implements Configurable {
   @Override
   public boolean isModified() {
     var settings = GeneralSettingsState.getInstance();
-    var openAISettings = OpenAISettings.getInstance();
-    var azureSettings = AzureSettings.getInstance();
-    var llamaSettings = LlamaSettings.getInstance();
+    var openAISettings = OpenAISettings.getInstance().getState();
+    var azureSettings = AzureSettings.getInstance().getState();
+    var llamaSettings = LlamaSettings.getInstance().getState();
 
     var serviceSelectionForm = settingsComponent.getServiceSelectionForm();
     return !settingsComponent.getDisplayName().equals(settings.getDisplayName())
@@ -59,7 +59,7 @@ public class SettingsConfigurable implements Configurable {
         || azureSettings.isModified(
         serviceSelectionForm.getAzureServiceSectionPanel().getSettings())
         || serviceSelectionForm.isDisplayWebSearchResults()
-        != YouSettings.getInstance().isDisplayWebSearchResults()
+        != YouSettings.getInstance().getState().isDisplayWebSearchResults()
         || llamaSettings.isModified(
         serviceSelectionForm.getLlamaServiceSectionPanel().getSettings());
   }
@@ -67,19 +67,13 @@ public class SettingsConfigurable implements Configurable {
   @Override
   public void apply() {
     var serviceSelectionForm = settingsComponent.getServiceSelectionForm();
-    var credentialsManager = OpenAISettings.getInstance()
-        .getCredentialsManager();
+    var credentialsManager = OpenAISettings.getInstance().getState()
+        .getCredentials();
     var prevKey = credentialsManager.getApiKey();
     if (prevKey != null && !prevKey.equals(
         serviceSelectionForm.getOpenAIServiceSectionPanel().getApiKey())) {
-      OpenAISettings.getInstance().setOpenAIQuotaExceeded(false);
+      OpenAISettings.getInstance().getState().setOpenAIQuotaExceeded(false);
     }
-
-    credentialsManager.apply(serviceSelectionForm.getOpenAIServiceSectionPanel().getApiKey());
-    var azureSettings = AzureSettings.getInstance();
-    AzureServiceForm azureServiceSectionPanel = serviceSelectionForm.getAzureServiceSectionPanel();
-    azureSettings.getCredentialsManager().apply(azureServiceSectionPanel.getApiKey(),
-        azureServiceSectionPanel.getAzureActiveDirectoryToken());
 
     var settings = GeneralSettingsState.getInstance();
     settings.setDisplayName(settingsComponent.getDisplayName());
@@ -87,14 +81,17 @@ public class SettingsConfigurable implements Configurable {
 
     var openAISettings = OpenAISettings.getInstance();
     openAISettings.apply(serviceSelectionForm.getOpenAIServiceSectionPanel().getSettings());
-    azureSettings.apply(azureServiceSectionPanel.getSettings());
+
+    AzureServiceForm azureServiceSectionPanel = serviceSelectionForm.getAzureServiceSectionPanel();
+    AzureSettings.getInstance().apply(azureServiceSectionPanel.getSettings());
+
     LlamaSettings.getInstance()
         .apply(serviceSelectionForm.getLlamaServiceSectionPanel().getSettings());
-    YouSettings.getInstance()
+    YouSettings.getInstance().getState()
         .setDisplayWebSearchResults(serviceSelectionForm.isDisplayWebSearchResults());
 
     var serviceChanged = isServiceChanged(settings);
-    var modelChanged = !openAISettings.getModel()
+    var modelChanged = !openAISettings.getState().getModel()
         .equals(serviceSelectionForm.getOpenAIServiceSectionPanel().getModel());
     if (serviceChanged || modelChanged) {
       resetActiveTab();
@@ -115,12 +112,14 @@ public class SettingsConfigurable implements Configurable {
     settingsComponent.setDisplayName(settings.getDisplayName());
     settingsComponent.setSelectedService(settings.getSelectedService());
 
-    OpenAISettings.getInstance().reset(serviceSelectionForm.getOpenAIServiceSectionPanel());
-    AzureSettings.getInstance().reset(serviceSelectionForm.getAzureServiceSectionPanel());
-    LlamaSettings.getInstance().reset(serviceSelectionForm.getLlamaServiceSectionPanel());
-
+    serviceSelectionForm.getOpenAIServiceSectionPanel()
+        .setSettings(OpenAISettings.getInstance().getState());
+    serviceSelectionForm.getAzureServiceSectionPanel()
+        .setSettings(AzureSettings.getInstance().getState());
+    serviceSelectionForm.getLlamaServiceSectionPanel()
+        .setSettings(LlamaSettings.getInstance().getState());
     serviceSelectionForm.setDisplayWebSearchResults(
-        YouSettings.getInstance().isDisplayWebSearchResults());
+        YouSettings.getInstance().getState().isDisplayWebSearchResults());
   }
 
   @Override

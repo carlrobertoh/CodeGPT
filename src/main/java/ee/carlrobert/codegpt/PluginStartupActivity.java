@@ -34,7 +34,7 @@ public class PluginStartupActivity implements StartupActivity {
       return;
     }
 
-    var password = YouSettings.getInstance().getCredentialsManager().getPassword();
+    var password = YouSettings.getInstance().getState().getCredentials().getPassword();
     if (!settings.getEmail().isEmpty() && password != null && !password.isEmpty()) {
       YouAuthenticationService.getInstance()
           .signInAsync(settings.getEmail(), password, new AuthenticationHandler() {

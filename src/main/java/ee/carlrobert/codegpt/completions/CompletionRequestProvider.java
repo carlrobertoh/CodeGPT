@@ -92,7 +92,7 @@ public class CompletionRequestProvider {
             new OpenAIChatCompletionMessage("system",
                 getResourceContent("/prompts/method-name-generator.txt")),
             new OpenAIChatCompletionMessage("user", context)))
-        .setModel(OpenAISettings.getInstance().getModel().getCode())
+        .setModel(OpenAISettings.getInstance().getState().getModel().getCode())
         .setStream(false)
         .build();
   }
@@ -107,7 +107,7 @@ public class CompletionRequestProvider {
   public LlamaCompletionRequest buildLlamaCompletionRequest(
       Message message,
       ConversationType conversationType) {
-    var settings = LlamaSettings.getInstance();
+    var settings = LlamaSettings.getInstance().getState();
     PromptTemplate promptTemplate;
     if (settings.isRunLocalServer()) {
       var localSettings = settings.getLocalSettings();
@@ -145,7 +145,7 @@ public class CompletionRequestProvider {
 
   public YouCompletionRequest buildYouCompletionRequest(Message message) {
     var requestBuilder = new YouCompletionRequest.Builder(message.getPrompt())
-        .setUseGPT4Model(YouSettings.getInstance().isUseGPT4Model())
+        .setUseGPT4Model(YouSettings.getInstance().getState().isUseGPT4Model())
         .setChatHistory(conversation.getMessages().stream()
             .map(prevMessage -> new YouCompletionRequestMessage(
                 prevMessage.getPrompt(),

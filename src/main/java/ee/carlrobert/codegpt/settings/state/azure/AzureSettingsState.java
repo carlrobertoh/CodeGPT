@@ -1,11 +1,10 @@
 package ee.carlrobert.codegpt.settings.state.azure;
 
 import com.intellij.util.xmlb.annotations.Transient;
-import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
-import ee.carlrobert.codegpt.settings.service.AzureServiceForm;
+import ee.carlrobert.codegpt.credentials.AzureCredentials;
 import ee.carlrobert.codegpt.settings.state.util.RemoteSettings;
 
-public class AzureSettingsState extends RemoteSettings<AzureCredentialsManager> {
+public class AzureSettingsState extends RemoteSettings<AzureCredentials> {
 
   private static final String BASE_PATH = "/openai/deployments/%s/chat/completions?api-version=%s";
 
@@ -16,15 +15,14 @@ public class AzureSettingsState extends RemoteSettings<AzureCredentialsManager> 
   private boolean useAzureActiveDirectoryAuthentication;
 
   public AzureSettingsState() {
-    super("https://%s.openai.azure.com", BASE_PATH,
-        new AzureCredentialsManager());
+    super("https://%s.openai.azure.com", BASE_PATH, new AzureCredentials());
   }
 
   public AzureSettingsState(String baseHost, String path,
-      AzureCredentialsManager credentialsManager, String resourceName, String deploymentId,
+      AzureCredentials credentials, String resourceName, String deploymentId,
       String apiVersion, boolean useAzureApiKeyAuthentication,
       boolean useAzureActiveDirectoryAuthentication) {
-    super(baseHost, path, credentialsManager);
+    super(baseHost, path, credentials);
     this.resourceName = resourceName;
     this.deploymentId = deploymentId;
     this.apiVersion = apiVersion;
@@ -39,8 +37,7 @@ public class AzureSettingsState extends RemoteSettings<AzureCredentialsManager> 
         != isUseAzureActiveDirectoryAuthentication()
         || settingsState.isUseAzureApiKeyAuthentication()
         != isUseAzureApiKeyAuthentication()
-        || credentialsManager.isModified(settingsState.getCredentialsManager().getApiKey(),
-        settingsState.getCredentialsManager().getActiveDirectoryToken())
+        || credentials.isModified(settingsState.getCredentials())
         || !settingsState.getResourceName().equals(resourceName)
         || !settingsState.getDeploymentId().equals(deploymentId)
         || !settingsState.getApiVersion().equals(apiVersion);
@@ -56,22 +53,6 @@ public class AzureSettingsState extends RemoteSettings<AzureCredentialsManager> 
     apiVersion = settingsState.getApiVersion();
     baseHost = settingsState.getBaseHost();
     path = settingsState.getPath();
-    AzureCredentialsManager otherCredentials = settingsState.getCredentialsManager();
-    credentialsManager.apply(otherCredentials.getApiKey(),
-        otherCredentials.getActiveDirectoryToken());
-  }
-
-  public void reset(AzureServiceForm serviceSelectionForm) {
-    serviceSelectionForm.setApiKey(credentialsManager.getApiKey());
-    serviceSelectionForm.setAzureActiveDirectoryToken(credentialsManager.getActiveDirectoryToken());
-    serviceSelectionForm.setAzureApiKeyAuthenticationSelected(useAzureApiKeyAuthentication);
-    serviceSelectionForm.setAzureActiveDirectoryAuthenticationSelected(
-        useAzureActiveDirectoryAuthentication);
-    serviceSelectionForm.setAzureResourceName(resourceName);
-    serviceSelectionForm.setAzureDeploymentId(deploymentId);
-    serviceSelectionForm.setAzureApiVersion(apiVersion);
-    serviceSelectionForm.setRemoteSettings(
-        new RemoteSettings<>(baseHost, path, credentialsManager));
   }
 
   public boolean isUsingCustomPath() {

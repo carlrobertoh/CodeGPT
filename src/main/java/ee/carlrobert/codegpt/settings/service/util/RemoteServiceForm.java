@@ -11,7 +11,8 @@ import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
-import ee.carlrobert.codegpt.credentials.ApiKeyCredentialsManager;
+import ee.carlrobert.codegpt.credentials.ApiKeyCredentials;
+import ee.carlrobert.codegpt.credentials.manager.ApiKeyCredentialsManager;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.util.RemoteSettings;
 import java.util.ArrayList;
@@ -22,13 +23,13 @@ import javax.swing.JPanel;
  * Form for all {@link RemoteSettings} fields (including apiKey from
  * {@link ApiKeyCredentialsManager}).
  */
-public abstract class RemoteServiceForm<T extends ApiKeyCredentialsManager> extends FormBuilder {
+public abstract class RemoteServiceForm<T extends ApiKeyCredentials> extends FormBuilder {
 
   protected final JBTextField baseHostField;
   protected final JBTextField pathField;
   protected final JBPasswordField apiKeyField;
 
-  private final RemoteSettings<T> remoteSettings;
+  protected final RemoteSettings<T> remoteSettings;
   protected final ServiceType serviceType;
 
   private final PanelGridBuilder serverConfigurationPanelBuilder;
@@ -72,7 +73,7 @@ public abstract class RemoteServiceForm<T extends ApiKeyCredentialsManager> exte
 
   protected List<PanelBuilder> authenticationComponents() {
     return Lists.newArrayList(
-        createApiKeyPanel(remoteSettings.getCredentialsManager().getApiKey(), apiKeyField));
+        createApiKeyPanel(remoteSettings.getCredentials().getApiKey(), apiKeyField));
   }
 
   protected List<PanelBuilder> additionalServerConfigPanels() {
@@ -103,15 +104,15 @@ public abstract class RemoteServiceForm<T extends ApiKeyCredentialsManager> exte
     return pathField.getText();
   }
 
-  public RemoteSettings<T> getRemoteSettings() {
+  public RemoteSettings<T> getSettings() {
     return new RemoteSettings<>(getBaseHost(),
-        getPath(), remoteSettings.getCredentialsManager());
+        getPath(), remoteSettings.getCredentials());
   }
 
-  public void setRemoteSettings(RemoteSettings<T> remoteSettings) {
+  public void setSettings(RemoteSettings<T> remoteSettings) {
     setBaseHost(remoteSettings.getBaseHost());
     setPath(remoteSettings.getPath());
-    setApiKey(remoteSettings.getCredentialsManager().getApiKey());
+    setApiKey(remoteSettings.getCredentials().getApiKey());
   }
 
 }

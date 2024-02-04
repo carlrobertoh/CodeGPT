@@ -3,7 +3,7 @@ package ee.carlrobert.codegpt.settings.service.llama;
 import com.intellij.openapi.ui.panel.PanelBuilder;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
-import ee.carlrobert.codegpt.credentials.LlamaCredentialsManager;
+import ee.carlrobert.codegpt.credentials.ApiKeyCredentials;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.service.util.RemoteServiceForm;
 import ee.carlrobert.codegpt.settings.state.LlamaSettings;
@@ -15,22 +15,22 @@ import java.util.List;
 /**
  * Form containing fields for all {@link LlamaRemoteSettings}.
  */
-public class LlamaRemoteServiceForm extends RemoteServiceForm<LlamaCredentialsManager> {
+public class LlamaRemoteServiceForm extends RemoteServiceForm<ApiKeyCredentials> {
 
 
   private ChatPromptTemplatePanel chatPromptTemplatePanel;
   private InfillPromptTemplatePanel infillPromptTemplatePanel;
 
   public LlamaRemoteServiceForm() {
-    super(LlamaSettings.getInstance().getRemoteSettings(), ServiceType.LLAMA_CPP);
+    super(LlamaSettings.getInstance().getState().getRemoteSettings(), ServiceType.LLAMA_CPP);
   }
 
   @Override
   protected List<PanelBuilder> additionalServerConfigPanels() {
     chatPromptTemplatePanel = new ChatPromptTemplatePanel(
-        LlamaSettings.getInstance().getRemoteSettings().getChatPromptTemplate(), true);
+        LlamaSettings.getInstance().getState().getRemoteSettings().getChatPromptTemplate(), true);
     infillPromptTemplatePanel = new InfillPromptTemplatePanel(
-        LlamaSettings.getInstance().getRemoteSettings().getInfillPromptTemplate(), true);
+        LlamaSettings.getInstance().getState().getRemoteSettings().getInfillPromptTemplate(), true);
     return List.of(
         UI.PanelFactory.panel(chatPromptTemplatePanel)
             .withLabel(CodeGPTBundle.get("shared.promptTemplate"))
@@ -45,7 +45,7 @@ public class LlamaRemoteServiceForm extends RemoteServiceForm<LlamaCredentialsMa
   }
 
   public void setRemoteSettings(LlamaRemoteSettings settings) {
-    super.setRemoteSettings(settings);
+    super.setSettings(settings);
     chatPromptTemplatePanel.setPromptTemplate(settings.getChatPromptTemplate());
   }
 
@@ -54,12 +54,7 @@ public class LlamaRemoteServiceForm extends RemoteServiceForm<LlamaCredentialsMa
         chatPromptTemplatePanel.getPromptTemplate(),
         infillPromptTemplatePanel.getPromptTemplate(),
         baseHostField.getText(),
-        new LlamaCredentialsManager(LlamaRemoteSettings.CREDENTIALS_PREFIX) {
-          @Override
-          public String getApiKey() {
-            return new String(apiKeyField.getPassword());
-          }
-        }
+        new ApiKeyCredentials(getApiKey())
     );
   }
 

@@ -55,4 +55,10 @@ public class LlamaServiceForm extends JPanel {
     );
   }
 
+  public void setSettings(LlamaSettingsState settings) {
+    llamaLocalOrRemoteServiceForm.setLocalSettings(settings.getLocalSettings());
+    llamaLocalOrRemoteServiceForm.setRemoteSettings(settings.getRemoteSettings());
+    llamaRequestsForm.setRequestSettings(settings.getRequestSettings());
+  }
+
 }

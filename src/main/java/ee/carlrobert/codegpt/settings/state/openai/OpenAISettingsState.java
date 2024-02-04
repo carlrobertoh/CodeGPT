@@ -1,26 +1,31 @@
 package ee.carlrobert.codegpt.settings.state.openai;
 
+import static ee.carlrobert.codegpt.util.Utils.areValuesDifferent;
+
+import com.intellij.util.xmlb.annotations.OptionTag;
 import com.intellij.util.xmlb.annotations.Transient;
-import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
-import ee.carlrobert.codegpt.settings.service.OpenAIServiceForm;
+import ee.carlrobert.codegpt.credentials.ApiKeyCredentials;
+import ee.carlrobert.codegpt.settings.state.util.RemoteSettings;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 
-public class OpenAISettingsState extends OpenAIRemoteSettings<OpenAICredentialsManager> {
+public class OpenAISettingsState extends RemoteSettings<ApiKeyCredentials> {
 
   private static final String BASE_PATH = "/v1/chat/completions";
 
+  @OptionTag(converter = OpenAIModelConverter.class)
+  protected OpenAIChatCompletionModel model = OpenAIChatCompletionModel.GPT_3_5;
   private String organization = "";
   private boolean openAIQuotaExceeded;
 
   public OpenAISettingsState() {
-    super("https://api.openai.com", BASE_PATH, OpenAIChatCompletionModel.GPT_3_5,
-        new OpenAICredentialsManager());
+    super("https://api.openai.com", BASE_PATH, new ApiKeyCredentials());
   }
 
   public OpenAISettingsState(String baseHost, String path, OpenAIChatCompletionModel model,
-      OpenAICredentialsManager credentialsManager, String organization,
+      ApiKeyCredentials credentials, String organization,
       boolean openAIQuotaExceeded) {
-    super(baseHost, path, model, credentialsManager);
+    super(baseHost, path, credentials);
+    this.model = model;
     this.organization = organization;
     this.openAIQuotaExceeded = openAIQuotaExceeded;
   }
@@ -28,27 +33,21 @@ public class OpenAISettingsState extends OpenAIRemoteSettings<OpenAICredentialsM
   @Transient
   public boolean isModified(OpenAISettingsState settingsState) {
     return super.isModified(settingsState)
-        || credentialsManager.isModified(settingsState.getCredentialsManager().getApiKey())
-        || !settingsState.getOrganization().equals(organization);
-  }
-
-  public void apply(OpenAISettingsState settingsState) {
-    baseHost = settingsState.getBaseHost();
-    path = settingsState.getPath();
-    setModel(settingsState.getModel());
-    organization = settingsState.getOrganization();
-    credentialsManager.apply(settingsState.getCredentialsManager().getApiKey());
-  }
-
-  public void reset(OpenAIServiceForm serviceSelectionForm) {
-    serviceSelectionForm.setRemoteWithModelSettings(
-        new OpenAIRemoteSettings<>(baseHost, path, model, credentialsManager));
-    serviceSelectionForm.setApiKey(credentialsManager.getApiKey());
-    serviceSelectionForm.setOrganization(organization);
+        || credentials.isModified(settingsState.getCredentials())
+        || !settingsState.getOrganization().equals(organization)
+        || areValuesDifferent(model, this.getModel());
   }
 
   public boolean isUsingCustomPath() {
     return !BASE_PATH.equals(path);
+  }
+
+  public OpenAIChatCompletionModel getModel() {
+    return model;
+  }
+
+  public void setModel(OpenAIChatCompletionModel model) {
+    this.model = model;
   }
 
   public String getOrganization() {

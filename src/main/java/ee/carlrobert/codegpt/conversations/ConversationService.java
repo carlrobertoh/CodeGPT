@@ -190,13 +190,13 @@ public final class ConversationService {
   private static String getModelForSelectedService(ServiceType serviceType) {
     switch (serviceType) {
       case OPENAI:
-        return OpenAISettings.getInstance().getModel().getCode();
+        return OpenAISettings.getInstance().getState().getModel().getCode();
       case AZURE:
-        return AzureSettings.getInstance().getDeploymentId();
+        return AzureSettings.getInstance().getState().getDeploymentId();
       case YOU:
         return "YouCode";
       case LLAMA_CPP:
-        return LlamaSettings.getInstance().getUsedModelPath();
+        return LlamaSettings.getInstance().getState().getUsedModelPath();
       default:
         throw new RuntimeException("Could not find corresponding service mapping");
     }

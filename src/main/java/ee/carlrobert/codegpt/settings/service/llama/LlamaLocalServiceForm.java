@@ -25,7 +25,7 @@ import ee.carlrobert.codegpt.completions.ServerAgent;
 import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaCompletionModel;
 import ee.carlrobert.codegpt.completions.llama.ServerStartupParams;
-import ee.carlrobert.codegpt.credentials.LlamaCredentialsManager;
+import ee.carlrobert.codegpt.credentials.ApiKeyCredentials;
 import ee.carlrobert.codegpt.settings.service.util.ServerProgressPanel;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaLocalSettings;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
@@ -51,8 +51,6 @@ public class LlamaLocalServiceForm extends FormBuilder {
   private final JBTextField additionalParametersField;
   private final JBPasswordField apiKeyField;
 
-  private final LlamaCredentialsManager credentialsManager;
-
   private final ServerAgent serverAgent;
   private final Consumer<Boolean> onServerAgentStateChanged;
   private final LlamaLocalSettings localSettings;
@@ -60,7 +58,6 @@ public class LlamaLocalServiceForm extends FormBuilder {
   public LlamaLocalServiceForm(LlamaLocalSettings settings, ServerAgent serverAgent,
       Consumer<Boolean> onServerAgentStateChanged) {
     this.localSettings = settings;
-    this.credentialsManager = settings.getCredentialsManager();
     this.serverAgent = serverAgent;
     this.onServerAgentStateChanged = onServerAgentStateChanged;
 
@@ -136,7 +133,7 @@ public class LlamaLocalServiceForm extends FormBuilder {
     addComponent(new TitledSeparator(
         CodeGPTBundle.get("settingsConfigurable.shared.authentication.title")));
     addComponent(
-        createApiKeyPanel(credentialsManager.getApiKey(), apiKeyField).createPanel());
+        createApiKeyPanel(localSettings.getCredentials().getApiKey(), apiKeyField).createPanel());
     return withEmptyLeftBorder(super.getPanel());
   }
 
@@ -248,7 +245,7 @@ public class LlamaLocalServiceForm extends FormBuilder {
     maxTokensField.setValue(settings.getContextSize());
     threadsField.setValue(settings.getThreads());
     additionalParametersField.setText(settings.getAdditionalCompileParameters());
-    apiKeyField.setText(settings.getCredentialsManager().getApiKey());
+    apiKeyField.setText(settings.getCredentials().getApiKey());
     if (settings.isUseCustomServer()) {
       customServerRadioButton.setSelected(true);
       browsableCustomServerTextField.setText(settings.getServerPath());
@@ -267,12 +264,7 @@ public class LlamaLocalServiceForm extends FormBuilder {
         maxTokensField.getValue(),
         threadsField.getValue(),
         additionalParametersField.getText(),
-        new LlamaCredentialsManager(LlamaLocalSettings.CREDENTIALS_PREFIX) {
-          @Override
-          public String getApiKey() {
-            return new String(apiKeyField.getPassword());
-          }
-        }
+        new ApiKeyCredentials(getApiKey())
     );
   }
 

@@ -92,7 +92,8 @@ public class DefaultCompletionRequestHandlerTest extends IntegrationTest {
 
   public void testAzureChatCompletionCallWithCustomSettings() {
     useAzureService();
-    AzureSettings.getInstance().setPath("/codegpt/deployments/%s/completions?api-version=%s");
+    AzureSettings.getInstance().getState()
+        .setPath("/codegpt/deployments/%s/completions?api-version=%s");
     var conversationService = ConversationService.getInstance();
     var prevMessage = new Message("TEST_PREV_PROMPT");
     prevMessage.setResponse("TEST_PREV_RESPONSE");

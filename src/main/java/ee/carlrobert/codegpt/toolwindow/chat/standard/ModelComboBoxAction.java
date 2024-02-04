@@ -33,7 +33,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
   public ModelComboBoxAction(Runnable onAddNewTab, ServiceType selectedService) {
     this.onAddNewTab = onAddNewTab;
     settings = GeneralSettingsState.getInstance();
-    openAISettings = OpenAISettings.getInstance();
+    openAISettings = OpenAISettings.getInstance().getState();
     updateTemplatePresentation(selectedService);
   }
 
@@ -109,7 +109,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
   }
 
   private String getSelectedHuggingFace() {
-    var model = LlamaSettings.getInstance().getUsedModel();
+    var model = LlamaSettings.getInstance().getState().getUsedModel();
     if (model instanceof HuggingFaceModel) {
       HuggingFaceModel huggingFaceModel = (HuggingFaceModel) model;
       return format(

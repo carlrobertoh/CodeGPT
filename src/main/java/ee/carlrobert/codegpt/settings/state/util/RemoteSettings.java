@@ -3,12 +3,12 @@ package ee.carlrobert.codegpt.settings.state.util;
 import static ee.carlrobert.codegpt.util.Utils.areValuesDifferent;
 
 import com.intellij.util.xmlb.annotations.Transient;
-import ee.carlrobert.codegpt.credentials.CredentialsManager;
+import ee.carlrobert.codegpt.credentials.Credentials;
 
 /**
  * Settings for using a remote service.
  */
-public class RemoteSettings<T extends CredentialsManager> extends CommonSettings<T> {
+public class RemoteSettings<T extends Credentials> extends CommonSettings<T> {
 
   protected String baseHost = "http://localhost:8080";
   protected String path = null;
@@ -16,10 +16,10 @@ public class RemoteSettings<T extends CredentialsManager> extends CommonSettings
   public RemoteSettings() {
   }
 
-  public RemoteSettings(String baseHost, String path, T credentialsManager) {
+  public RemoteSettings(String baseHost, String path, T credentials) {
     this.baseHost = baseHost;
     this.path = path;
-    this.credentialsManager = credentialsManager;
+    this.credentials = credentials;
   }
 
   public String getBaseHost() {
@@ -40,8 +40,7 @@ public class RemoteSettings<T extends CredentialsManager> extends CommonSettings
 
   @Transient
   public boolean isModified(RemoteSettings<T> remoteSettings) {
-    return super.isModified(remoteSettings)
-        || !remoteSettings.getBaseHost().equals(this.baseHost)
+    return !remoteSettings.getBaseHost().equals(this.baseHost)
         || areValuesDifferent(remoteSettings.getPath(), this.path);
   }
 

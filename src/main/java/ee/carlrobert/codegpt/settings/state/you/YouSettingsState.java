@@ -1,17 +1,23 @@
 package ee.carlrobert.codegpt.settings.state.you;
 
-import ee.carlrobert.codegpt.credentials.YouCredentialsManager;
-import ee.carlrobert.codegpt.settings.state.util.RemoteSettings;
+import ee.carlrobert.codegpt.credentials.PasswordCredentials;
+import ee.carlrobert.codegpt.settings.state.util.CommonSettings;
 
-public class YouSettingsState extends RemoteSettings<YouCredentialsManager> {
+public class YouSettingsState extends CommonSettings<PasswordCredentials> {
 
   private boolean displayWebSearchResults = true;
   private boolean useGPT4Model;
 
   public YouSettingsState() {
-    super(null, null, new YouCredentialsManager());
+    this.credentials = new PasswordCredentials();
   }
 
+  public YouSettingsState(boolean displayWebSearchResults, boolean useGPT4Model,
+      PasswordCredentials credentials) {
+    this.displayWebSearchResults = displayWebSearchResults;
+    this.useGPT4Model = useGPT4Model;
+    this.credentials = credentials;
+  }
 
   public boolean isDisplayWebSearchResults() {
     return displayWebSearchResults;

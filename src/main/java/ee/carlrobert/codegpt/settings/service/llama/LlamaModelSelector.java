@@ -148,9 +148,9 @@ public class LlamaModelSelector implements ModelSelector<LlamaCompletionModel> {
     customModelPathField.setText(modelPath);
 
     infillPromptTemplatePanel = new InfillPromptTemplatePanel(
-        LlamaSettings.getInstance().getRemoteSettings().getInfillPromptTemplate(), true);
+        LlamaSettings.getInstance().getState().getRemoteSettings().getInfillPromptTemplate(), true);
     chatPromptTemplateField = new ChatPromptTemplatePanel(
-        LlamaSettings.getInstance().getRemoteSettings().getChatPromptTemplate(), true);
+        LlamaSettings.getInstance().getState().getRemoteSettings().getChatPromptTemplate(), true);
   }
 
 
