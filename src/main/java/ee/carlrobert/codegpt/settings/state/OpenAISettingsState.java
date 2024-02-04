@@ -8,13 +8,13 @@ import com.intellij.util.xmlb.XmlSerializerUtil;
 import com.intellij.util.xmlb.annotations.Transient;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.service.OpenAiServiceForm;
-import ee.carlrobert.codegpt.settings.state.util.RemoteOpenAiSettings;
+import ee.carlrobert.codegpt.settings.state.util.OpenAiRemoteSettings;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import org.jetbrains.annotations.NotNull;
 
 @State(name = "CodeGPT_OpenAISettings_210", storages = @Storage("CodeGPT_OpenAISettings_210.xml"))
 public class OpenAISettingsState extends
-    RemoteOpenAiSettings<OpenAICredentialsManager> implements
+    OpenAiRemoteSettings<OpenAICredentialsManager> implements
     PersistentStateComponent<OpenAISettingsState> {
 
   private static final String BASE_PATH = "/v1/chat/completions";
@@ -67,7 +67,7 @@ public class OpenAISettingsState extends
 
   public void reset(OpenAiServiceForm serviceSelectionForm) {
     serviceSelectionForm.setRemoteWithModelSettings(
-        new RemoteOpenAiSettings<>(baseHost, path, model, credentialsManager));
+        new OpenAiRemoteSettings<>(baseHost, path, model, credentialsManager));
     serviceSelectionForm.setApiKey(credentialsManager.getApiKey());
     serviceSelectionForm.setOrganization(organization);
   }

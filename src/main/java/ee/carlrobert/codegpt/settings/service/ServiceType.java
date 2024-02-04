@@ -7,7 +7,9 @@ public enum ServiceType {
   AZURE("AZURE", CodeGPTBundle.get("service.azure.title"), "azure.chat.completion", "azure"),
   YOU("YOU", CodeGPTBundle.get("service.you.title"), "you.chat.completion", "you"),
   LLAMA_CPP("LLAMA_CPP", CodeGPTBundle.get("service.llama.title"), "llama.chat.completion",
-      "llama");
+      "llama"),
+  OLLAMA("OLLAMA", CodeGPTBundle.get("service.ollama.title"), "ollama.chat.completion",
+      "ollama");
 
   private final String code;
   private final String label;

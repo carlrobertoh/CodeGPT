@@ -64,4 +64,8 @@ public abstract class CredentialsManager {
   }
 
   public abstract boolean isCredentialSet();
+
+  public boolean isActive(){
+    return true;
+  }
 }

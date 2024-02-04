@@ -5,11 +5,13 @@ import static java.util.stream.Collectors.toList;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
 import ee.carlrobert.codegpt.completions.CallParameters;
+import ee.carlrobert.codegpt.completions.llama.LlamaCompletionModel;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.GeneralSettingsState;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
+import ee.carlrobert.codegpt.settings.state.LlamaCppSettingsState;
+import ee.carlrobert.codegpt.settings.state.OllamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -196,7 +198,9 @@ public final class ConversationService {
       case YOU:
         return "YouCode";
       case LLAMA_CPP:
-        return LlamaSettingsState.getInstance().getUsedModelPath();
+        return LlamaCppSettingsState.getInstance().getUsedModelPath();
+      case OLLAMA:
+        return LlamaCompletionModel.getOllamaId(OllamaSettingsState.getInstance().getUsedModel());
       default:
         throw new RuntimeException("Could not find corresponding service mapping");
     }

@@ -1,10 +1,5 @@
 package ee.carlrobert.codegpt.settings.state;
 
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.components.PersistentStateComponent;
-import com.intellij.openapi.components.State;
-import com.intellij.openapi.components.Storage;
-import com.intellij.util.xmlb.XmlSerializerUtil;
 import com.intellij.util.xmlb.annotations.Transient;
 import ee.carlrobert.codegpt.completions.llama.LlamaCompletionModel;
 import ee.carlrobert.codegpt.credentials.LlamaCredentialsManager;
@@ -13,43 +8,24 @@ import ee.carlrobert.codegpt.settings.state.llama.LlamaLocalSettings;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaRemoteSettings;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaRequestSettings;
 import ee.carlrobert.codegpt.settings.state.util.CommonSettings;
-import org.jetbrains.annotations.NotNull;
 
-@State(name = "CodeGPT_LlamaSettings", storages = @Storage("CodeGPT_CodeGPT_LlamaSettings.xml"))
-public class LlamaSettingsState implements PersistentStateComponent<LlamaSettingsState> {
+public class LlamaSettingsState<T extends LlamaRemoteSettings> {
 
   protected boolean runLocalServer = true;
   protected LlamaLocalSettings localSettings = new LlamaLocalSettings();
-  protected LlamaRemoteSettings remoteSettings = new LlamaRemoteSettings();
   protected LlamaRequestSettings requestSettings = new LlamaRequestSettings();
+  protected T remoteSettings;
 
-  public LlamaSettingsState() {
+  public LlamaSettingsState(T remoteSettings) {
+    this.remoteSettings = remoteSettings;
   }
 
   public LlamaSettingsState(boolean runLocalServer, LlamaLocalSettings localSettings,
-      LlamaRemoteSettings remoteSettings, LlamaRequestSettings requestSettings) {
+      T remoteSettings, LlamaRequestSettings requestSettings) {
     this.runLocalServer = runLocalServer;
     this.localSettings = localSettings;
     this.remoteSettings = remoteSettings;
     this.requestSettings = requestSettings;
-  }
-
-  public static LlamaSettingsState getInstance() {
-    LlamaSettingsState service = ApplicationManager.getApplication()
-        .getService(LlamaSettingsState.class);
-    service.localSettings.setCredentialsManager(new LlamaCredentialsManager("LOCAL"));
-    service.remoteSettings.setCredentialsManager(new LlamaCredentialsManager("REMOTE"));
-    return service;
-  }
-
-  @Override
-  public LlamaSettingsState getState() {
-    return this;
-  }
-
-  @Override
-  public void loadState(@NotNull LlamaSettingsState state) {
-    XmlSerializerUtil.copyBean(state, this);
   }
 
   public String getUsedModelPath() {
@@ -69,7 +45,7 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
   }
 
   @Transient
-  public boolean isModified(LlamaSettingsState settingsState) {
+  public boolean isModified(LlamaSettingsState<T> settingsState) {
     return localSettings.isModified(settingsState.getLocalSettings())
         || localSettings.getCredentialsManager()
         .isModified(settingsState.getLocalSettings().getCredentialsManager().getApiKey())
@@ -80,7 +56,7 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
         || requestSettings.isModified(settingsState.getRequestSettings());
   }
 
-  public void apply(LlamaSettingsState settingsState) {
+  public void apply(LlamaSettingsState<T> settingsState) {
     runLocalServer = settingsState.isRunLocalServer();
 
     LlamaCredentialsManager localCredentials = applyCredentials(localSettings,
@@ -103,7 +79,7 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
   }
 
 
-  public void reset(LlamaServiceForm llamaServiceForm) {
+  public void reset(LlamaServiceForm<T> llamaServiceForm) {
     var llamaServerForm = llamaServiceForm.getServerPreferencesForm();
     llamaServerForm.setRemoteSettings(remoteSettings);
     llamaServerForm.setLocalSettings(localSettings);
@@ -123,11 +99,11 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
     this.localSettings = localSettings;
   }
 
-  public LlamaRemoteSettings getRemoteSettings() {
+  public T getRemoteSettings() {
     return remoteSettings;
   }
 
-  public void setRemoteSettings(LlamaRemoteSettings remoteSettings) {
+  public void setRemoteSettings(T remoteSettings) {
     this.remoteSettings = remoteSettings;
   }
 

@@ -3,7 +3,7 @@ package testsupport.mixin;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.GeneralSettingsState;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
+import ee.carlrobert.codegpt.settings.state.LlamaCppSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 
@@ -33,9 +33,9 @@ public interface ShortcutsTestMixin {
 
   default void useLlamaService() {
     GeneralSettingsState.getInstance().setSelectedService(ServiceType.LLAMA_CPP);
-    LlamaSettingsState llamaSettingsState = LlamaSettingsState.getInstance();
-    llamaSettingsState.setRunLocalServer(true);
-    var localSettings = llamaSettingsState.getLocalSettings();
+    LlamaCppSettingsState llamaCppSettingsState = LlamaCppSettingsState.getInstance();
+    llamaCppSettingsState.setRunLocalServer(true);
+    var localSettings = llamaCppSettingsState.getLocalSettings();
     localSettings.setServerPort(null);
   }
 }

@@ -21,6 +21,7 @@ import com.intellij.ui.EnumComboBoxModel;
 import com.intellij.ui.components.AnActionLink;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBRadioButton;
+import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
@@ -31,8 +32,9 @@ import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaCompletionModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaServerAgent;
+import ee.carlrobert.codegpt.settings.service.ServiceType;
+import ee.carlrobert.codegpt.settings.service.llama.ollama.OllamaModelDownload;
 import ee.carlrobert.codegpt.settings.service.util.ModelSelector;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.ui.ChatPromptTemplatePanel;
 import ee.carlrobert.codegpt.ui.InfillPromptTemplatePanel;
 import java.awt.BorderLayout;
@@ -78,11 +80,19 @@ public class LlamaModelSelector implements ModelSelector<LlamaCompletionModel> {
   private final JBLabel progressLabel;
   private final DefaultComboBoxModel<HuggingFaceModel> huggingFaceComboBoxModel;
 
-  private final TextFieldWithBrowseButton customModelPathField;
+  private final ComponentWithValue<String> customModelField;
   private final InfillPromptTemplatePanel infillPromptTemplatePanel;
   private final ChatPromptTemplatePanel chatPromptTemplateField;
+  private final ModelDownload downloader;
+  private final ServiceType serviceType;
+  private final LlamaCompletionModel initialModel;
 
-  public LlamaModelSelector(LlamaCompletionModel initialModel) {
+  public LlamaModelSelector(ServiceType serviceType, LlamaCompletionModel initialModel,
+      PromptTemplate initialChatPromptTemplate,
+      InfillPromptTemplate initialInfillPromptTemplate) {
+    this.serviceType = serviceType;
+    this.downloader = createModelDownloader();
+    this.initialModel = initialModel;
     boolean isCustomModel = initialModel instanceof CustomLlamaModel;
     predefinedModelRadioButton = new JBRadioButton("Use pre-defined model",
         !isCustomModel);
@@ -103,7 +113,7 @@ public class LlamaModelSelector implements ModelSelector<LlamaCompletionModel> {
     progressLabel.setBorder(JBUI.Borders.emptyLeft(2));
     progressLabel.setFont(JBUI.Fonts.smallFont());
     modelExistsIcon = new JBLabel(Actions.Checked);
-    modelExistsIcon.setVisible(LlamaCompletionModel.isModelExists(initialModel));
+    modelExistsIcon.setVisible(false);
     helpIcon = new JBLabel(General.ContextHelp);
 
     downloadModelActionLinkWrapper = new JPanel(new BorderLayout());
@@ -140,22 +150,68 @@ public class LlamaModelSelector implements ModelSelector<LlamaCompletionModel> {
     modelSizeComboBox.setEnabled(
         initialModelSizes.size() > 1 && !llamaServerAgent.isServerRunning());
 
-    String modelPath =
-        initialModel instanceof CustomLlamaModel ? ((CustomLlamaModel) initialModel).getModelPath()
-            : "";
-    customModelPathField = createTextFieldWithBrowseButton(
-        FileChooserDescriptorFactory.createSingleFileDescriptor("gguf"));
-    customModelPathField.setText(modelPath);
-
-    infillPromptTemplatePanel = new InfillPromptTemplatePanel(
-        LlamaSettingsState.getInstance().getRemoteSettings().getInfillPromptTemplate(), true);
-    chatPromptTemplateField = new ChatPromptTemplatePanel(
-        LlamaSettingsState.getInstance().getRemoteSettings().getChatPromptTemplate(), true);
+    customModelField = createCustomModelField();
+    infillPromptTemplatePanel = new InfillPromptTemplatePanel(initialInfillPromptTemplate, true);
+    chatPromptTemplateField = new ChatPromptTemplatePanel(initialChatPromptTemplate, true);
   }
 
 
+  private ModelDownload createModelDownloader() {
+    return serviceType.equals(ServiceType.OLLAMA) ? new OllamaModelDownload()
+        : new LlamaCppModelDownload();
+  }
+
+  private ComponentWithValue<String> createCustomModelField() {
+    String modelPath =
+        initialModel instanceof CustomLlamaModel ? ((CustomLlamaModel) initialModel).getModel()
+            : "";
+    ComponentWithValue<String> customModelField;
+    if (serviceType == ServiceType.LLAMA_CPP) {
+      TextFieldWithBrowseButton browseTextField = createTextFieldWithBrowseButton(
+          FileChooserDescriptorFactory.createSingleFileDescriptor("gguf"));
+      customModelField = new ComponentWithValue<>() {
+        @Override
+        public String getValue() {
+          return browseTextField.getText();
+        }
+
+        @Override
+        public void setValue(String value) {
+          browseTextField.setText(value);
+        }
+
+        @Override
+        public JComponent getComponent() {
+          return browseTextField;
+        }
+      };
+    } else {
+      JBTextField textField = new JBTextField(30);
+      customModelField = new ComponentWithValue<String>() {
+        @Override
+        public String getValue() {
+          return textField.getText();
+        }
+
+        @Override
+        public void setValue(String value) {
+          textField.setText(value);
+        }
+
+        @Override
+        public JComponent getComponent() {
+          return textField;
+        }
+      };
+    }
+    customModelField.setValue(modelPath);
+    return customModelField;
+  }
+
   @Override
   public JComponent getComponent() {
+    modelExistsIcon.setVisible(LlamaCompletionModel.isModelExists(initialModel, serviceType));
+
     return createForm(predefinedModelRadioButton, createPredefinedModelForm(),
         customModelRadioButton, createCustomModelForm(), predefinedModelRadioButton.isSelected());
   }
@@ -168,18 +224,19 @@ public class LlamaModelSelector implements ModelSelector<LlamaCompletionModel> {
   }
 
   private JPanel createCustomModelForm() {
-    var customModelHelpText = ComponentPanelBuilder.createCommentComponent(
-        CodeGPTBundle.get("settingsConfigurable.service.llama.customModelPath.comment"),
-        true);
-    customModelHelpText.setBorder(JBUI.Borders.empty(0, 4));
-
     return FormBuilder.createFormBuilder()
         .addLabeledComponent(
-            CodeGPTBundle.get("settingsConfigurable.service.llama.customModelPath.label"),
-            customModelPathField)
+            CodeGPTBundle.get(String.format("settingsConfigurable.service.%s.customModel.label",
+                serviceType.getBundlePrefix())),
+            customModelField.getComponent())
+        .addComponentToRightColumn(
+            createComment(String.format("settingsConfigurable.service.%s.customModel.comment",
+                serviceType.getBundlePrefix())))
         .addVerticalGap(4)
         .addLabeledComponent(CodeGPTBundle.get("shared.infillPromptTemplate"),
             infillPromptTemplatePanel)
+        .addComponentToRightColumn(
+            createComment("settingsConfigurable.service.llama.infillTemplate.comment"))
         .addLabeledComponent(CodeGPTBundle.get("shared.promptTemplate"), chatPromptTemplateField)
         .addComponentToRightColumn(
             createComment("settingsConfigurable.service.llama.promptTemplate.comment"))
@@ -305,7 +362,7 @@ public class LlamaModelSelector implements ModelSelector<LlamaCompletionModel> {
     var comboBox = new ComboBox<>(huggingFaceComboBoxModel);
     comboBox.addItemListener(e -> {
       var selectedModel = (HuggingFaceModel) e.getItem();
-      var modelExists = LlamaCompletionModel.isModelExists(selectedModel);
+      var modelExists = LlamaCompletionModel.isModelExists(selectedModel, serviceType);
 
       updateModelHelpTooltip(selectedModel);
       modelDetailsLabel.setText(getHuggingFaceModelDetailsHtml(selectedModel));
@@ -363,6 +420,7 @@ public class LlamaModelSelector implements ModelSelector<LlamaCompletionModel> {
     return new AnActionLink(
         CodeGPTBundle.get("settingsConfigurable.service.llama.downloadModelLink.label"),
         new DownloadModelAction(
+            downloader,
             progressIndicator -> {
               SwingUtilities.invokeLater(() -> {
                 configureFieldsForDownloading(true);
@@ -406,7 +464,7 @@ public class LlamaModelSelector implements ModelSelector<LlamaCompletionModel> {
   }
 
   public boolean isModelExists() {
-    return LlamaCompletionModel.isModelExists(getSelectedModel());
+    return LlamaCompletionModel.isModelExists(getSelectedModel(), serviceType);
   }
 
   public void setUseCustomModel(boolean isUseCustomModel) {
@@ -428,7 +486,7 @@ public class LlamaModelSelector implements ModelSelector<LlamaCompletionModel> {
       huggingFaceComboBoxModel.setSelectedItem(model);
     } else {
       setUseCustomModel(true);
-      setCustomModel(((CustomLlamaModel) model).getModelPath());
+      setCustomModel(((CustomLlamaModel) model).getModel());
     }
   }
 
@@ -461,16 +519,16 @@ public class LlamaModelSelector implements ModelSelector<LlamaCompletionModel> {
             .getPromptTemplate();
   }
 
-  public TextFieldWithBrowseButton getCustomModelPathField() {
-    return customModelPathField;
+  public JComponent getCustomModelField() {
+    return customModelField.getComponent();
   }
 
   private void setCustomModel(String customModel) {
-    customModelPathField.setText(customModel);
+    customModelField.setValue(customModel);
   }
 
   private String getCustomModel() {
-    return customModelPathField.getText();
+    return customModelField.getValue();
   }
 
   private static class ModelDetails {

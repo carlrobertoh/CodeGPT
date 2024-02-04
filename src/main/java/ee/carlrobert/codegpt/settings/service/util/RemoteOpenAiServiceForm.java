@@ -5,12 +5,12 @@ import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.credentials.ApiKeyCredentialsManager;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
-import ee.carlrobert.codegpt.settings.state.util.RemoteOpenAiSettings;
+import ee.carlrobert.codegpt.settings.state.util.OpenAiRemoteSettings;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import java.util.List;
 
 /**
- * Form for all {@link RemoteOpenAiSettings} fields (including apiKey from
+ * Form for all {@link OpenAiRemoteSettings} fields (including apiKey from
  * {@link ApiKeyCredentialsManager}).
  */
 public abstract class RemoteOpenAiServiceForm<T extends ApiKeyCredentialsManager> extends
@@ -18,10 +18,10 @@ public abstract class RemoteOpenAiServiceForm<T extends ApiKeyCredentialsManager
 
   protected final ModelSelector<OpenAIChatCompletionModel> modelSelector;
 
-  protected final RemoteOpenAiSettings<T> remoteSettings;
+  protected final OpenAiRemoteSettings<T> remoteSettings;
 
   public RemoteOpenAiServiceForm(
-      RemoteOpenAiSettings<T> remoteSettings,
+      OpenAiRemoteSettings<T> remoteSettings,
       ServiceType serviceType, ModelSelector<OpenAIChatCompletionModel> modelSelector) {
     super(remoteSettings, serviceType);
     this.remoteSettings = remoteSettings;
@@ -48,12 +48,12 @@ public abstract class RemoteOpenAiServiceForm<T extends ApiKeyCredentialsManager
   }
 
 
-  public RemoteOpenAiSettings<T> getRemoteWithModelSettings() {
-    return new RemoteOpenAiSettings<>(getBaseHost(),
+  public OpenAiRemoteSettings<T> getRemoteWithModelSettings() {
+    return new OpenAiRemoteSettings<>(getBaseHost(),
         getPath(), getModel(), remoteSettings.getCredentialsManager());
   }
 
-  public void setRemoteWithModelSettings(RemoteOpenAiSettings<T> remoteSettings) {
+  public void setRemoteWithModelSettings(OpenAiRemoteSettings<T> remoteSettings) {
     setRemoteSettings(remoteSettings);
     setModel(remoteSettings.getModel());
   }

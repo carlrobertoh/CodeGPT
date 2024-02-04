@@ -55,7 +55,7 @@ public class GeneralSettingsState implements PersistentStateComponent<GeneralSet
     }
     if ("llama.chat.completion".equals(clientCode)) {
       setSelectedService(ServiceType.LLAMA_CPP);
-      var llamaSettings = LlamaSettingsState.getInstance();
+      var llamaSettings = LlamaCppSettingsState.getInstance();
       try {
         llamaSettings.getLocalSettings()
             .setModel(HuggingFaceModel.valueOf(conversation.getModel()));
@@ -77,27 +77,35 @@ public class GeneralSettingsState implements PersistentStateComponent<GeneralSet
       case YOU:
         return "YouCode";
       case LLAMA_CPP:
-        var llamaSettings = LlamaSettingsState.getInstance();
-        LlamaCompletionModel usedModel = llamaSettings.getUsedModel();
-        if (usedModel instanceof CustomLlamaModel) {
-          CustomLlamaModel customModel = (CustomLlamaModel) usedModel;
-          var filePath = customModel.getModelPath();
-          int lastSeparatorIndex = filePath.lastIndexOf('/');
-          if (lastSeparatorIndex == -1) {
-            return filePath;
-          }
-          return filePath.substring(lastSeparatorIndex + 1);
-        }
-        var huggingFaceModel = (HuggingFaceModel) usedModel;
-        var llamaModel = LlamaModel.findByHuggingFaceModel(huggingFaceModel);
-        return format(
-            "%s %dB (Q%d)",
-            llamaModel.getLabel(),
-            huggingFaceModel.getParameterSize(),
-            huggingFaceModel.getQuantization());
+        return getLlamaModel(LlamaCppSettingsState.getInstance());
+      case OLLAMA:
+        return getLlamaModel(OllamaSettingsState.getInstance());
       default:
         return "Unknown";
     }
+  }
+
+  private static String getLlamaModel(LlamaSettingsState<?> settingsState) {
+    LlamaCompletionModel usedModel = settingsState.getUsedModel();
+    if (usedModel instanceof CustomLlamaModel) {
+      CustomLlamaModel customModel = (CustomLlamaModel) usedModel;
+      if (settingsState instanceof LlamaCppSettingsState) {
+        var filePath = customModel.getModel();
+        int lastSeparatorIndex = filePath.lastIndexOf('/');
+        if (lastSeparatorIndex == -1) {
+          return filePath;
+        }
+        return filePath.substring(lastSeparatorIndex + 1);
+      }
+      return customModel.getModel();
+    }
+    var huggingFaceModel = (HuggingFaceModel) usedModel;
+    var llamaModel = LlamaModel.findByHuggingFaceModel(huggingFaceModel);
+    return format(
+        "%s %dB (Q%d)",
+        llamaModel.getLabel(),
+        huggingFaceModel.getParameterSize(),
+        huggingFaceModel.getQuantization());
   }
 
   public String getEmail() {

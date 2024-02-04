@@ -4,6 +4,7 @@ import static ee.carlrobert.codegpt.ui.UIUtil.createForm;
 
 import com.intellij.ui.components.JBRadioButton;
 import ee.carlrobert.codegpt.completions.ServerAgent;
+import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaLocalSettings;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaRemoteSettings;
@@ -13,18 +14,20 @@ import javax.swing.JPanel;
  * Form containing {@link JBRadioButton} to toggle between({@link LlamaLocalServiceForm}) or
  * ({@link LlamaRemoteServiceForm}).
  */
-public class LlamaLocalOrRemoteServiceForm {
+public class LlamaLocalOrRemoteServiceForm<T extends LlamaRemoteSettings> {
 
   private final JBRadioButton runLocalServerRadioButton;
   private final JBRadioButton useExistingServerRadioButton;
 
   private final LlamaLocalServiceForm llamaLocalServiceForm;
-  private final LlamaRemoteServiceForm llamaRemoteServiceForm;
+  private final LlamaRemoteServiceForm<T> llamaRemoteServiceForm;
 
-  private final LlamaSettingsState llamaSettingsState;
+  private final LlamaSettingsState<T> llamaSettingsState;
 
-  public LlamaLocalOrRemoteServiceForm(LlamaSettingsState llamaSettingsState,
-      ServerAgent serverAgent) {
+  public LlamaLocalOrRemoteServiceForm(ServiceType serviceType,
+      LlamaSettingsState<T> llamaSettingsState,
+      ServerAgent serverAgent,
+      LlamaRemoteServiceForm<T> remoteServiceForm) {
     this.llamaSettingsState = llamaSettingsState;
     runLocalServerRadioButton = new JBRadioButton("Run local server",
         llamaSettingsState.isRunLocalServer());
@@ -32,8 +35,8 @@ public class LlamaLocalOrRemoteServiceForm {
         !llamaSettingsState.isRunLocalServer());
 
     llamaLocalServiceForm = new LlamaLocalServiceForm(llamaSettingsState.getLocalSettings(),
-        serverAgent, this::onServerAgentStateChanged);
-    llamaRemoteServiceForm = new LlamaRemoteServiceForm();
+        serverAgent, this::onServerAgentStateChanged, serviceType);
+    llamaRemoteServiceForm = remoteServiceForm;
   }
 
   private void onServerAgentStateChanged(boolean isRunning) {
@@ -63,11 +66,11 @@ public class LlamaLocalOrRemoteServiceForm {
     return runLocalServerRadioButton.isSelected();
   }
 
-  public void setRemoteSettings(LlamaRemoteSettings remoteSettings) {
+  public void setRemoteSettings(T remoteSettings) {
     llamaRemoteServiceForm.setRemoteSettings(remoteSettings);
   }
 
-  public LlamaRemoteSettings getRemoteSettings() {
+  public T getRemoteSettings() {
     return llamaRemoteServiceForm.getRemoteSettings();
   }
 

@@ -18,8 +18,7 @@ import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.completions.ServerAgent;
 import ee.carlrobert.codegpt.settings.service.util.ServerProgressPanel;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
-import java.io.File;
+import ee.carlrobert.codegpt.settings.state.LlamaCppSettingsState;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -143,7 +142,7 @@ public final class LlamaServerAgent implements ServerAgent {
             if ("HTTP server listening".equals(serverMessage.getMessage())) {
               LOG.info("Server up and running!");
 
-              LlamaSettingsState.getInstance().getLocalSettings().setServerPort(port);
+              LlamaCppSettingsState.getInstance().getLocalSettings().setServerPort(port);
               onSuccess.run();
             }
           } catch (Exception ignore) {

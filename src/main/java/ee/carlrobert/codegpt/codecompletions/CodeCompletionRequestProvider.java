@@ -4,9 +4,17 @@ import ee.carlrobert.codegpt.completions.llama.CustomLlamaModel;
 import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaCompletionModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
+import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
+import ee.carlrobert.codegpt.settings.state.LlamaCppSettingsState;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
+import ee.carlrobert.codegpt.settings.state.OllamaSettingsState;
+import ee.carlrobert.codegpt.settings.state.llama.LlamaRemoteSettings;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
+import ee.carlrobert.llm.client.ollama.completion.request.OllamaCompletionRequest;
+import ee.carlrobert.llm.client.ollama.completion.request.OllamaParameters;
+import ee.carlrobert.llm.client.ollama.completion.request.OllamaParameters.Builder;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAITextCompletionRequest;
+import java.util.Map;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault
@@ -30,7 +38,7 @@ public class CodeCompletionRequestProvider {
   }
 
   public LlamaCompletionRequest buildLlamaRequest() {
-    var promptTemplate = getLlamaInfillPromptTemplate();
+    var promptTemplate = getLlamaInfillPromptTemplate(LlamaCppSettingsState.getInstance());
     var prompt = promptTemplate.buildPrompt(details.getPrefix(), details.getSuffix());
     return new LlamaCompletionRequest.Builder(prompt)
         .setN_predict(MAX_TOKENS)
@@ -40,16 +48,36 @@ public class CodeCompletionRequestProvider {
         .build();
   }
 
-  private InfillPromptTemplate getLlamaInfillPromptTemplate() {
-    var settings = LlamaSettingsState.getInstance();
-    if (!settings.isRunLocalServer()) {
-      return settings.getRemoteSettings().getInfillPromptTemplate();
+  public OllamaCompletionRequest buildOllamaRequest() {
+    var settingsState = OllamaSettingsState.getInstance();
+    var model = LlamaCompletionModel.getOllamaId(settingsState.getUsedModel());
+    var promptTemplate = getLlamaInfillPromptTemplate(settingsState);
+    var prompt = promptTemplate.buildPrompt(details.getPrefix(), details.getSuffix());
+    var configuration = ConfigurationState.getInstance();
+    var requestSettings = settingsState.getRequestSettings();
+    return new OllamaCompletionRequest.Builder(model, prompt)
+        .setOptions(new OllamaParameters(new Builder()
+            .temperature(configuration.getTemperature())
+            .numPredict(configuration.getMaxTokens())
+            .topK(requestSettings.getTopK())
+            .topP(requestSettings.getTopP())
+            .repeatPenalty(requestSettings.getRepeatPenalty())
+        ))
+        .setStream(true)
+        .build();
+  }
+
+  private InfillPromptTemplate getLlamaInfillPromptTemplate(
+      LlamaSettingsState<? extends LlamaRemoteSettings> settingsState) {
+    if (!settingsState.isRunLocalServer()) {
+      return settingsState.getRemoteSettings().getInfillPromptTemplate();
     }
-    LlamaCompletionModel model = settings.getLocalSettings().getModel();
+    LlamaCompletionModel model = settingsState.getLocalSettings().getModel();
     if (model instanceof CustomLlamaModel) {
-      return settings.getLocalSettings().getInfillPromptTemplate();
+      return settingsState.getLocalSettings().getInfillPromptTemplate();
     }
     return LlamaModel.findByHuggingFaceModel((HuggingFaceModel) model)
         .getInfillPromptTemplate();
   }
+
 }

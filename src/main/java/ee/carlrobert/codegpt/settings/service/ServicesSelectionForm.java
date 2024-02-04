@@ -8,10 +8,11 @@ import com.intellij.ui.components.JBCheckBox;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
-import ee.carlrobert.codegpt.completions.llama.LlamaServerAgent;
 import ee.carlrobert.codegpt.completions.you.auth.AuthenticationNotifier;
-import ee.carlrobert.codegpt.settings.service.llama.LlamaLocalOrRemoteServiceForm;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
+import ee.carlrobert.codegpt.settings.service.llama.LlamaCppServiceForm;
+import ee.carlrobert.codegpt.settings.service.llama.ollama.OllamaServiceForm;
+import ee.carlrobert.codegpt.settings.state.LlamaCppSettingsState;
+import ee.carlrobert.codegpt.settings.state.OllamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.YouSettingsState;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -28,7 +29,8 @@ public class ServicesSelectionForm {
   private final JPanel youServiceSectionPanel;
   private final JBCheckBox displayWebSearchResultsCheckBox;
 
-  private final LlamaServiceForm llamaServiceSectionPanel;
+  private final LlamaCppServiceForm llamaCppServiceSectionPanel;
+  private final OllamaServiceForm ollamaServiceSectionPanel;
 
   public ServicesSelectionForm(Disposable parentDisposable) {
     this.parentDisposable = parentDisposable;
@@ -40,7 +42,8 @@ public class ServicesSelectionForm {
     openAIServiceSectionPanel = new OpenAiServiceForm();
     azureServiceSectionPanel = new AzureServiceForm();
     youServiceSectionPanel = createYouServiceSectionPanel();
-    llamaServiceSectionPanel = createLlamaServiceSectionPanel();
+    llamaCppServiceSectionPanel = createLlamaServiceSectionPanel();
+    ollamaServiceSectionPanel = createOllamaServiceSectionPanel();
 
     ApplicationManager.getApplication()
         .getMessageBus()
@@ -49,12 +52,13 @@ public class ServicesSelectionForm {
             (AuthenticationNotifier) () -> displayWebSearchResultsCheckBox.setEnabled(true));
   }
 
-  static LlamaServiceForm createLlamaServiceSectionPanel() {
-    var settings = LlamaSettingsState.getInstance();
-    return new LlamaServiceForm(
-        new LlamaLocalOrRemoteServiceForm(settings,
-            ApplicationManager.getApplication().getService(LlamaServerAgent.class)),
-        settings.getRequestSettings());
+  static LlamaCppServiceForm createLlamaServiceSectionPanel() {
+    var settings = LlamaCppSettingsState.getInstance();
+    return new LlamaCppServiceForm(settings);
+  }
+
+  static OllamaServiceForm createOllamaServiceSectionPanel() {
+    return new OllamaServiceForm(OllamaSettingsState.getInstance());
   }
 
   private JPanel createYouServiceSectionPanel() {
@@ -92,8 +96,12 @@ public class ServicesSelectionForm {
     return youServiceSectionPanel;
   }
 
-  public LlamaServiceForm getLlamaServiceSectionPanel() {
-    return llamaServiceSectionPanel;
+  public LlamaCppServiceForm getLlamaCppServiceSectionPanel() {
+    return llamaCppServiceSectionPanel;
+  }
+
+  public OllamaServiceForm getOllamaServiceSectionPanel() {
+    return ollamaServiceSectionPanel;
   }
 
 

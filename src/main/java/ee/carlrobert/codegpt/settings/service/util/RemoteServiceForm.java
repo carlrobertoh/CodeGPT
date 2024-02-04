@@ -62,10 +62,12 @@ public abstract class RemoteServiceForm<T extends ApiKeyCredentialsManager> exte
         CodeGPTBundle.get("settingsConfigurable.service.serverConfig.title")));
     additionalServerConfigPanels().forEach(serverConfigurationPanelBuilder::add);
     addComponent(serverConfigurationPanelBuilder.createPanel());
-    addComponent(new TitledSeparator(
-        CodeGPTBundle.get("settingsConfigurable.shared.authentication.title")));
-    authenticationComponents().forEach(authenticationPanels::add);
-    addComponent(authenticationPanels.createPanel());
+    if (remoteSettings.getCredentialsManager().isActive()) {
+      addComponent(new TitledSeparator(
+          CodeGPTBundle.get("settingsConfigurable.shared.authentication.title")));
+      authenticationComponents().forEach(authenticationPanels::add);
+      addComponent(authenticationPanels.createPanel());
+    }
     addComponentFillVertically(new JPanel(), 0);
     return super.getPanel();
   }
@@ -111,7 +113,9 @@ public abstract class RemoteServiceForm<T extends ApiKeyCredentialsManager> exte
   public void setRemoteSettings(RemoteSettings<T> remoteSettings) {
     setBaseHost(remoteSettings.getBaseHost());
     setPath(remoteSettings.getPath());
-    setApiKey(remoteSettings.getCredentialsManager().getApiKey());
+    if (this.remoteSettings.getCredentialsManager().isActive()) {
+      setApiKey(remoteSettings.getCredentialsManager().getApiKey());
+    }
   }
 
 }

@@ -6,7 +6,8 @@ import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.completions.you.YouUserManager;
 import ee.carlrobert.codegpt.settings.advanced.AdvancedSettingsState;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
+import ee.carlrobert.codegpt.settings.state.LlamaCppSettingsState;
+import ee.carlrobert.codegpt.settings.state.OllamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaLocalSettings;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaRemoteSettings;
@@ -14,6 +15,7 @@ import ee.carlrobert.llm.client.azure.AzureClient;
 import ee.carlrobert.llm.client.azure.AzureCompletionRequestParams;
 import ee.carlrobert.llm.client.llama.LlamaClient;
 import ee.carlrobert.llm.client.llama.LlamaClient.Builder;
+import ee.carlrobert.llm.client.ollama.OllamaClient;
 import ee.carlrobert.llm.client.openai.OpenAIClient;
 import ee.carlrobert.llm.client.you.UTMParameters;
 import ee.carlrobert.llm.client.you.YouClient;
@@ -73,21 +75,35 @@ public class CompletionClientProvider {
   }
 
   public static LlamaClient getLlamaClient() {
-    LlamaSettingsState llamaSettingsState = LlamaSettingsState.getInstance();
+    LlamaCppSettingsState llamaCppSettingsState = LlamaCppSettingsState.getInstance();
 
     Builder builder = new Builder();
     String apiKey;
-    if (llamaSettingsState.isRunLocalServer()) {
-      LlamaLocalSettings localSettings = llamaSettingsState.getLocalSettings();
+    if (llamaCppSettingsState.isRunLocalServer()) {
+      var localSettings = llamaCppSettingsState.getLocalSettings();
       builder.setPort(localSettings.getServerPort());
       apiKey = localSettings.getCredentialsManager().getApiKey();
     } else {
-      LlamaRemoteSettings remoteSettings = llamaSettingsState.getRemoteSettings();
+      var remoteSettings = llamaCppSettingsState.getRemoteSettings();
       builder.setHost(remoteSettings.getBaseHost());
       apiKey = remoteSettings.getCredentialsManager().getApiKey();
     }
     if (apiKey != null && !apiKey.isBlank()) {
       builder.setApiKey(apiKey);
+    }
+    return builder.build(getDefaultClientBuilder());
+  }
+
+  public static OllamaClient getOllamaClient() {
+    OllamaSettingsState settings = OllamaSettingsState.getInstance();
+
+    OllamaClient.Builder builder = new OllamaClient.Builder();
+    if (settings.isRunLocalServer()) {
+      var localSettings = settings.getLocalSettings();
+      builder.setPort(localSettings.getServerPort());
+    } else {
+      var remoteSettings = settings.getRemoteSettings();
+      builder.setHost(remoteSettings.getBaseHost());
     }
     return builder.build(getDefaultClientBuilder());
   }

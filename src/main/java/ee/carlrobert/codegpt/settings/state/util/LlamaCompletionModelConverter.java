@@ -24,7 +24,7 @@ public class LlamaCompletionModelConverter extends Converter<LlamaCompletionMode
     if (value instanceof HuggingFaceModel) {
       return ((HuggingFaceModel) value).name();
     } else if (value instanceof CustomLlamaModel) {
-      return CUSTOM_MODEL_PREFIX + ((CustomLlamaModel) value).getModelPath();
+      return CUSTOM_MODEL_PREFIX + ((CustomLlamaModel) value).getModel();
     }
     throw new IllegalArgumentException(String.format("No conversion available for %s",
         value.getClass().getName()));

@@ -8,7 +8,8 @@ import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.settings.service.AzureServiceForm;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.GeneralSettingsState;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
+import ee.carlrobert.codegpt.settings.state.LlamaCppSettingsState;
+import ee.carlrobert.codegpt.settings.state.OllamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.YouSettingsState;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
@@ -49,7 +50,8 @@ public class SettingsConfigurable implements Configurable {
     var settings = GeneralSettingsState.getInstance();
     var openAISettings = OpenAISettingsState.getInstance();
     var azureSettings = AzureSettingsState.getInstance();
-    var llamaSettings = LlamaSettingsState.getInstance();
+    var llamaSettings = LlamaCppSettingsState.getInstance();
+    var ollamaSettings = OllamaSettingsState.getInstance();
 
     var serviceSelectionForm = settingsComponent.getServiceSelectionForm();
     return !settingsComponent.getDisplayName().equals(settings.getDisplayName())
@@ -61,7 +63,9 @@ public class SettingsConfigurable implements Configurable {
         || serviceSelectionForm.isDisplayWebSearchResults()
         != YouSettingsState.getInstance().isDisplayWebSearchResults()
         || llamaSettings.isModified(
-        serviceSelectionForm.getLlamaServiceSectionPanel().getSettings());
+        serviceSelectionForm.getLlamaCppServiceSectionPanel().getSettings())
+        || ollamaSettings.isModified(
+        serviceSelectionForm.getOllamaServiceSectionPanel().getSettings());
   }
 
   @Override
@@ -74,8 +78,8 @@ public class SettingsConfigurable implements Configurable {
         serviceSelectionForm.getOpenAIServiceSectionPanel().getApiKey())) {
       OpenAISettingsState.getInstance().setOpenAIQuotaExceeded(false);
     }
-
     credentialsManager.apply(serviceSelectionForm.getOpenAIServiceSectionPanel().getApiKey());
+
     var azureSettings = AzureSettingsState.getInstance();
     AzureServiceForm azureServiceSectionPanel = serviceSelectionForm.getAzureServiceSectionPanel();
     azureSettings.getCredentialsManager().apply(azureServiceSectionPanel.getApiKey(),
@@ -88,8 +92,12 @@ public class SettingsConfigurable implements Configurable {
     var openAISettings = OpenAISettingsState.getInstance();
     openAISettings.apply(serviceSelectionForm.getOpenAIServiceSectionPanel().getSettings());
     azureSettings.apply(azureServiceSectionPanel.getSettings());
-    LlamaSettingsState.getInstance()
-        .apply(serviceSelectionForm.getLlamaServiceSectionPanel().getSettings());
+    LlamaCppSettingsState.getInstance()
+        .apply(serviceSelectionForm.getLlamaCppServiceSectionPanel()
+            .getSettings());
+    OllamaSettingsState.getInstance()
+        .apply(serviceSelectionForm.getOllamaServiceSectionPanel()
+            .getSettings());
     YouSettingsState.getInstance()
         .setDisplayWebSearchResults(serviceSelectionForm.isDisplayWebSearchResults());
 
@@ -117,7 +125,8 @@ public class SettingsConfigurable implements Configurable {
 
     OpenAISettingsState.getInstance().reset(serviceSelectionForm.getOpenAIServiceSectionPanel());
     AzureSettingsState.getInstance().reset(serviceSelectionForm.getAzureServiceSectionPanel());
-    LlamaSettingsState.getInstance().reset(serviceSelectionForm.getLlamaServiceSectionPanel());
+    LlamaCppSettingsState.getInstance().reset(serviceSelectionForm.getLlamaCppServiceSectionPanel());
+    OllamaSettingsState.getInstance().reset(serviceSelectionForm.getOllamaServiceSectionPanel());
 
     serviceSelectionForm.setDisplayWebSearchResults(
         YouSettingsState.getInstance().isDisplayWebSearchResults());

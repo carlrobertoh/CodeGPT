@@ -6,8 +6,10 @@ import com.intellij.ui.TitledSeparator;
 import com.intellij.util.ui.FormBuilder;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaLocalOrRemoteServiceForm;
+import ee.carlrobert.codegpt.settings.service.llama.LlamaRemoteServiceForm;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaRequestsForm;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
+import ee.carlrobert.codegpt.settings.state.llama.LlamaRemoteSettings;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaRequestSettings;
 import java.awt.BorderLayout;
 import javax.swing.JPanel;
@@ -16,19 +18,19 @@ import javax.swing.JPanel;
  * Form containing all forms to configure using
  * {@link ee.carlrobert.codegpt.settings.service.ServiceType#LLAMA_CPP}.
  */
-public class LlamaServiceForm extends JPanel {
+public class LlamaServiceForm<T extends LlamaRemoteSettings> extends JPanel {
 
-  private final LlamaLocalOrRemoteServiceForm llamaLocalOrRemoteServiceForm;
+  private final LlamaLocalOrRemoteServiceForm<T> llamaLocalOrRemoteServiceForm;
   private final LlamaRequestsForm llamaRequestsForm;
 
-  public LlamaServiceForm(LlamaLocalOrRemoteServiceForm llamaLocalOrRemoteServiceForm,
+  public LlamaServiceForm(LlamaLocalOrRemoteServiceForm<T> llamaLocalOrRemoteServiceForm,
       LlamaRequestSettings llamaRequestSettings) {
     this.llamaLocalOrRemoteServiceForm = llamaLocalOrRemoteServiceForm;
     llamaRequestsForm = new LlamaRequestsForm(llamaRequestSettings);
     init();
   }
 
-  public LlamaLocalOrRemoteServiceForm getServerPreferencesForm() {
+  public LlamaLocalOrRemoteServiceForm<T> getServerPreferencesForm() {
     return llamaLocalOrRemoteServiceForm;
   }
 
@@ -44,11 +46,12 @@ public class LlamaServiceForm extends JPanel {
         .addComponent(llamaLocalOrRemoteServiceForm.getForm())
         .addComponent(new TitledSeparator("Request Preferences"))
         .addComponent(withEmptyLeftBorder(llamaRequestsForm.getForm()))
+        .addComponentFillVertically(new JPanel(), 0)
         .getPanel());
   }
 
-  public LlamaSettingsState getSettings() {
-    return new LlamaSettingsState(llamaLocalOrRemoteServiceForm.isRunLocalServer(),
+  public LlamaSettingsState<T> getSettings() {
+    return new LlamaSettingsState<>(llamaLocalOrRemoteServiceForm.isRunLocalServer(),
         llamaLocalOrRemoteServiceForm.getLocalSettings(),
         llamaLocalOrRemoteServiceForm.getRemoteSettings(),
         llamaRequestsForm.getRequestSettings()

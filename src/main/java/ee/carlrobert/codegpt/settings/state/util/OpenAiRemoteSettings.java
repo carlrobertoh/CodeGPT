@@ -10,21 +10,27 @@ import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 /**
  * Settings for using a remote service with model selection.
  */
-public class RemoteOpenAiSettings<T extends CredentialsManager> extends
+public class OpenAiRemoteSettings<T extends CredentialsManager> extends
     RemoteSettings<T> {
 
   @OptionTag(converter = OpenAiModelConverter.class)
-  protected OpenAIChatCompletionModel model;
+  protected OpenAIChatCompletionModel model = OpenAIChatCompletionModel.GPT_3_5;
 
-  public RemoteOpenAiSettings() {
+  public OpenAiRemoteSettings() {
   }
 
-  public RemoteOpenAiSettings(String baseHost, String path, OpenAIChatCompletionModel model,
+  public OpenAiRemoteSettings(String baseHost, String path, OpenAIChatCompletionModel model,
       T credentialsManager) {
     this.baseHost = baseHost;
     this.path = path;
     this.model = model;
     this.credentialsManager = credentialsManager;
+  }
+
+  @Transient
+  public boolean isModified(OpenAiRemoteSettings<T> remoteSettings) {
+    return super.isModified(remoteSettings)
+        || areValuesDifferent(remoteSettings.getModel(), this.getModel());
   }
 
   public OpenAIChatCompletionModel getModel() {
@@ -33,12 +39,6 @@ public class RemoteOpenAiSettings<T extends CredentialsManager> extends
 
   public void setModel(OpenAIChatCompletionModel model) {
     this.model = model;
-  }
-
-  @Transient
-  public boolean isModified(RemoteOpenAiSettings<T> remoteSettings) {
-    return super.isModified(remoteSettings)
-        || areValuesDifferent(remoteSettings.getModel(), this.getModel());
   }
 
 }

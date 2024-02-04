@@ -8,13 +8,13 @@ import com.intellij.util.xmlb.XmlSerializerUtil;
 import com.intellij.util.xmlb.annotations.Transient;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.settings.service.AzureServiceForm;
-import ee.carlrobert.codegpt.settings.state.util.RemoteOpenAiSettings;
+import ee.carlrobert.codegpt.settings.state.util.OpenAiRemoteSettings;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import org.jetbrains.annotations.NotNull;
 
 @State(name = "CodeGPT_AzureSettings_210", storages = @Storage("CodeGPT_AzureSettings_210.xml"))
 public class AzureSettingsState extends
-    RemoteOpenAiSettings<AzureCredentialsManager> implements
+    OpenAiRemoteSettings<AzureCredentialsManager> implements
     PersistentStateComponent<AzureSettingsState> {
 
   private static final String BASE_PATH = "/openai/deployments/%s/chat/completions?api-version=%s";
@@ -97,7 +97,7 @@ public class AzureSettingsState extends
     serviceSelectionForm.setAzureDeploymentId(deploymentId);
     serviceSelectionForm.setAzureApiVersion(apiVersion);
     serviceSelectionForm.setRemoteWithModelSettings(
-        new RemoteOpenAiSettings<>(baseHost, path, model, credentialsManager));
+        new OpenAiRemoteSettings<>(baseHost, path, model, credentialsManager));
   }
 
   public boolean isUsingCustomPath() {

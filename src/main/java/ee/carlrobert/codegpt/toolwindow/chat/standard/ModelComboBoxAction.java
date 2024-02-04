@@ -15,7 +15,9 @@ import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.GeneralSettingsState;
+import ee.carlrobert.codegpt.settings.state.LlamaCppSettingsState;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
+import ee.carlrobert.codegpt.settings.state.OllamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import java.util.List;
@@ -69,8 +71,13 @@ public class ModelComboBoxAction extends ComboBoxAction {
     actionGroup.addSeparator();
     actionGroup.add(createModelAction(
         ServiceType.LLAMA_CPP,
-        getSelectedHuggingFace(),
+        getSelectedModelString(LlamaCppSettingsState.getInstance()),
         Icons.Llama,
+        presentation));
+    actionGroup.add(createModelAction(
+        ServiceType.OLLAMA,
+        getSelectedModelString(OllamaSettingsState.getInstance()),
+        Icons.Ollama,
         presentation));
     actionGroup.addSeparator();
     actionGroup.add(createModelAction(ServiceType.YOU, "You.com", Icons.YouSmall, presentation));
@@ -100,15 +107,19 @@ public class ModelComboBoxAction extends ComboBoxAction {
         templatePresentation.setText("You.com");
         break;
       case LLAMA_CPP:
-        templatePresentation.setText(getSelectedHuggingFace());
+        templatePresentation.setText(
+            getSelectedModelString(LlamaCppSettingsState.getInstance()));
         templatePresentation.setIcon(Icons.Llama);
+      case OLLAMA:
+        templatePresentation.setText(getSelectedModelString(OllamaSettingsState.getInstance()));
+        templatePresentation.setIcon(Icons.Ollama);
         break;
       default:
     }
   }
 
-  private String getSelectedHuggingFace() {
-    var model = LlamaSettingsState.getInstance().getUsedModel();
+  private String getSelectedModelString(LlamaSettingsState<?> settingsState) {
+    var model = settingsState.getUsedModel();
     if (model instanceof HuggingFaceModel) {
       HuggingFaceModel huggingFaceModel = (HuggingFaceModel) model;
       return format(
@@ -117,7 +128,8 @@ public class ModelComboBoxAction extends ComboBoxAction {
           huggingFaceModel.getParameterSize(),
           huggingFaceModel.getQuantization());
     }
-    return ((CustomLlamaModel) model).getModelFileName();
+    return settingsState instanceof OllamaSettingsState ? ((CustomLlamaModel) model).getModel()
+        : ((CustomLlamaModel) model).getModelFileName();
   }
 
   private AnAction createModelAction(
