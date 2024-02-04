@@ -50,8 +50,6 @@ public class GeneralSettingsState implements PersistentStateComponent<GeneralSet
     }
     if ("azure.chat.completion".equals(clientCode)) {
       setSelectedService(ServiceType.AZURE);
-      AzureSettings.getInstance()
-          .setModel(OpenAIChatCompletionModel.findByCode(conversation.getModel()));
     }
     if ("llama.chat.completion".equals(clientCode)) {
       setSelectedService(ServiceType.LLAMA_CPP);

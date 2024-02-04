@@ -3,10 +3,9 @@ package ee.carlrobert.codegpt.settings.state.azure;
 import com.intellij.util.xmlb.annotations.Transient;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.settings.service.AzureServiceForm;
-import ee.carlrobert.codegpt.settings.state.openai.OpenAIRemoteSettings;
-import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
+import ee.carlrobert.codegpt.settings.state.util.RemoteSettings;
 
-public class AzureSettingsState extends OpenAIRemoteSettings<AzureCredentialsManager> {
+public class AzureSettingsState extends RemoteSettings<AzureCredentialsManager> {
 
   private static final String BASE_PATH = "/openai/deployments/%s/chat/completions?api-version=%s";
 
@@ -17,15 +16,15 @@ public class AzureSettingsState extends OpenAIRemoteSettings<AzureCredentialsMan
   private boolean useAzureActiveDirectoryAuthentication;
 
   public AzureSettingsState() {
-    super("https://%s.openai.azure.com", BASE_PATH, OpenAIChatCompletionModel.GPT_3_5,
+    super("https://%s.openai.azure.com", BASE_PATH,
         new AzureCredentialsManager());
   }
 
-  public AzureSettingsState(String baseHost, String path, OpenAIChatCompletionModel model,
+  public AzureSettingsState(String baseHost, String path,
       AzureCredentialsManager credentialsManager, String resourceName, String deploymentId,
       String apiVersion, boolean useAzureApiKeyAuthentication,
       boolean useAzureActiveDirectoryAuthentication) {
-    super(baseHost, path, model, credentialsManager);
+    super(baseHost, path, credentialsManager);
     this.resourceName = resourceName;
     this.deploymentId = deploymentId;
     this.apiVersion = apiVersion;
@@ -57,7 +56,6 @@ public class AzureSettingsState extends OpenAIRemoteSettings<AzureCredentialsMan
     apiVersion = settingsState.getApiVersion();
     baseHost = settingsState.getBaseHost();
     path = settingsState.getPath();
-    model = settingsState.getModel();
     AzureCredentialsManager otherCredentials = settingsState.getCredentialsManager();
     credentialsManager.apply(otherCredentials.getApiKey(),
         otherCredentials.getActiveDirectoryToken());
@@ -72,8 +70,8 @@ public class AzureSettingsState extends OpenAIRemoteSettings<AzureCredentialsMan
     serviceSelectionForm.setAzureResourceName(resourceName);
     serviceSelectionForm.setAzureDeploymentId(deploymentId);
     serviceSelectionForm.setAzureApiVersion(apiVersion);
-    serviceSelectionForm.setRemoteWithModelSettings(
-        new OpenAIRemoteSettings<>(baseHost, path, model, credentialsManager));
+    serviceSelectionForm.setRemoteSettings(
+        new RemoteSettings<>(baseHost, path, credentialsManager));
   }
 
   public boolean isUsingCustomPath() {

@@ -2,7 +2,7 @@ package ee.carlrobert.codegpt.settings.state.openai;
 
 import com.intellij.util.xmlb.annotations.Transient;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
-import ee.carlrobert.codegpt.settings.service.OpenAiServiceForm;
+import ee.carlrobert.codegpt.settings.service.OpenAIServiceForm;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 
 public class OpenAISettingsState extends OpenAIRemoteSettings<OpenAICredentialsManager> {
@@ -40,7 +40,7 @@ public class OpenAISettingsState extends OpenAIRemoteSettings<OpenAICredentialsM
     credentialsManager.apply(settingsState.getCredentialsManager().getApiKey());
   }
 
-  public void reset(OpenAiServiceForm serviceSelectionForm) {
+  public void reset(OpenAIServiceForm serviceSelectionForm) {
     serviceSelectionForm.setRemoteWithModelSettings(
         new OpenAIRemoteSettings<>(baseHost, path, model, credentialsManager));
     serviceSelectionForm.setApiKey(credentialsManager.getApiKey());

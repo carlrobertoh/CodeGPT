@@ -7,8 +7,7 @@ import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
-import ee.carlrobert.codegpt.settings.service.openai.OpenAiModelSelector;
-import ee.carlrobert.codegpt.settings.service.util.RemoteOpenAiServiceForm;
+import ee.carlrobert.codegpt.settings.service.util.RemoteServiceForm;
 import ee.carlrobert.codegpt.settings.state.AzureSettings;
 import ee.carlrobert.codegpt.settings.state.azure.AzureSettingsState;
 import ee.carlrobert.codegpt.ui.UIUtil;
@@ -21,8 +20,7 @@ import org.jetbrains.annotations.Nullable;
  * {@link ee.carlrobert.codegpt.settings.service.ServiceType#AZURE}.
  */
 
-public class AzureServiceForm extends
-    RemoteOpenAiServiceForm<AzureCredentialsManager> {
+public class AzureServiceForm extends RemoteServiceForm<AzureCredentialsManager> {
 
   private JBRadioButton useAzureApiKeyAuthenticationRadioButton;
   private JBRadioButton useAzureActiveDirectoryAuthenticationRadioButton;
@@ -35,7 +33,7 @@ public class AzureServiceForm extends
   private JPanel apiKeyFieldPanel;
 
   public AzureServiceForm() {
-    super(AzureSettings.getInstance(), ServiceType.AZURE, new OpenAiModelSelector());
+    super(AzureSettings.getInstance(), ServiceType.AZURE);
   }
 
   @Override
@@ -137,7 +135,7 @@ public class AzureServiceForm extends
   }
 
   public AzureSettingsState getSettings() {
-    return new AzureSettingsState(getBaseHost(), getPath(), getModel(),
+    return new AzureSettingsState(getBaseHost(), getPath(),
         new AzureCredentialsManager() {
           @Override
           public String getApiKey() {

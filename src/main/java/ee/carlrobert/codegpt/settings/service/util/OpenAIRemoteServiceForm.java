@@ -13,14 +13,14 @@ import java.util.List;
  * Form for all {@link OpenAIRemoteSettings} fields (including apiKey from
  * {@link ApiKeyCredentialsManager}).
  */
-public abstract class RemoteOpenAiServiceForm<T extends ApiKeyCredentialsManager> extends
+public abstract class OpenAIRemoteServiceForm<T extends ApiKeyCredentialsManager> extends
     RemoteServiceForm<T> {
 
   protected final ModelSelector<OpenAIChatCompletionModel> modelSelector;
 
   protected final OpenAIRemoteSettings<T> remoteSettings;
 
-  public RemoteOpenAiServiceForm(
+  public OpenAIRemoteServiceForm(
       OpenAIRemoteSettings<T> remoteSettings,
       ServiceType serviceType, ModelSelector<OpenAIChatCompletionModel> modelSelector) {
     super(remoteSettings, serviceType);

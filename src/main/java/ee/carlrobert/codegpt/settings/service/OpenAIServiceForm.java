@@ -6,7 +6,6 @@ import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAiModelSelector;
-import ee.carlrobert.codegpt.settings.service.util.RemoteOpenAiServiceForm;
 import ee.carlrobert.codegpt.settings.state.OpenAISettings;
 import ee.carlrobert.codegpt.settings.state.openai.OpenAISettingsState;
 import java.util.List;
@@ -16,12 +15,12 @@ import java.util.List;
  * {@link ee.carlrobert.codegpt.settings.service.ServiceType#OPENAI}.
  */
 
-public class OpenAiServiceForm extends
-    RemoteOpenAiServiceForm<OpenAICredentialsManager> {
+public class OpenAIServiceForm extends
+    ee.carlrobert.codegpt.settings.service.util.OpenAIRemoteServiceForm<OpenAICredentialsManager> {
 
   private JBTextField organizationField;
 
-  public OpenAiServiceForm() {
+  public OpenAIServiceForm() {
     super(OpenAISettings.getInstance(), ServiceType.OPENAI, new OpenAiModelSelector());
   }
 

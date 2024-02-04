@@ -22,7 +22,7 @@ public class ServicesSelectionForm {
 
   private final Disposable parentDisposable;
 
-  private final OpenAiServiceForm openAIServiceSectionPanel;
+  private final OpenAIServiceForm openAIServiceSectionPanel;
   private final AzureServiceForm azureServiceSectionPanel;
 
   private final JPanel youServiceSectionPanel;
@@ -37,7 +37,7 @@ public class ServicesSelectionForm {
         CodeGPTBundle.get("settingsConfigurable.service.you.displayResults.label"),
         YouSettings.getInstance().isDisplayWebSearchResults());
 
-    openAIServiceSectionPanel = new OpenAiServiceForm();
+    openAIServiceSectionPanel = new OpenAIServiceForm();
     azureServiceSectionPanel = new AzureServiceForm();
     youServiceSectionPanel = createYouServiceSectionPanel();
     llamaServiceSectionPanel = createLlamaServiceSectionPanel();
@@ -80,7 +80,7 @@ public class ServicesSelectionForm {
     return displayWebSearchResultsCheckBox.isSelected();
   }
 
-  public OpenAiServiceForm getOpenAIServiceSectionPanel() {
+  public OpenAIServiceForm getOpenAIServiceSectionPanel() {
     return openAIServiceSectionPanel;
   }
 
