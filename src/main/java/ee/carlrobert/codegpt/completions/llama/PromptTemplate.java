@@ -96,6 +96,37 @@ public enum PromptTemplate {
           .append("### Response:\n")
           .toString();
     }
+  },
+  DEEPSEEK_CODER("DeepSeek Coder") {
+    @Override
+    public String buildPrompt(String systemPrompt, String userPrompt, List<Message> history) {
+      StringBuilder prompt = new StringBuilder();
+
+      String defaultSystemPrompt = "You are an AI programming assistant, utilizing the Deepseek Coder model, developed by Deepseek Company, and you only answer questions related to computer science. For politically sensitive questions, security and privacy issues, and other non-computer science questions, you will refuse to answer";
+
+      prompt.append("<｜begin▁of▁sentence｜>");
+      if (systemPrompt != null && !systemPrompt.isEmpty()) {
+        prompt.append(systemPrompt);
+      } else {
+        prompt.append(defaultSystemPrompt);
+      }
+      prompt.append("\n\n");
+
+      for (Message message : history) {
+        prompt.append("### Instruction\n")
+            .append(message.getPrompt())
+            .append("\n\n")
+            .append("### Response:\n")
+            .append(message.getResponse())
+            .append("<|EOT|>\n\n");
+      }
+
+      return prompt.append("### Instruction\n")
+          .append(userPrompt)
+          .append("\n\n")
+          .append("### Response:\n")
+          .toString();
+    }
   };
 
   private final String label;
