@@ -10,9 +10,9 @@ import ee.carlrobert.codegpt.credentials.CredentialsUtil;
 public final class AzureCredentialsManager extends CredentialsManager<AzureCredentials> {
 
   private final CredentialAttributes apiKeyCredentialsAttribute =
-      CredentialsUtil.createCredentialAttributes("AZURE_OPEN_AI_API_KEY");
+      CredentialsUtil.createCredentialAttributes("AZURE_OPENAI_API_KEY");
   private final CredentialAttributes activeDirectoryTokenCredentialsAttribute =
-      CredentialsUtil.createCredentialAttributes("AZURE_OPEN_AI_API_KEY");
+      CredentialsUtil.createCredentialAttributes("AZURE_ACTIVE_DIRECTORY_TOKEN");
 
   public AzureCredentialsManager() {
     credentials = new AzureCredentials(CredentialsUtil.getPassword((apiKeyCredentialsAttribute)),

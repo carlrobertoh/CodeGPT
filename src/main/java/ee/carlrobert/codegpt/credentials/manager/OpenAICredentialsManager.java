@@ -7,7 +7,7 @@ import com.intellij.openapi.components.Service;
 public final class OpenAICredentialsManager extends ApiKeyCredentialsManager {
 
   public OpenAICredentialsManager() {
-    super("OPEN_AI");
+    super("OPENAI");
   }
 
   public static OpenAICredentialsManager getInstance() {
