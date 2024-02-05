@@ -43,18 +43,6 @@ public class AzureSettingsState extends RemoteSettings<AzureCredentials> {
         || !settingsState.getApiVersion().equals(apiVersion);
   }
 
-  public void apply(AzureSettingsState settingsState) {
-    useAzureActiveDirectoryAuthentication =
-        settingsState.isUseAzureActiveDirectoryAuthentication();
-    useAzureApiKeyAuthentication = settingsState.isUseAzureApiKeyAuthentication();
-
-    resourceName = settingsState.getResourceName();
-    deploymentId = settingsState.getDeploymentId();
-    apiVersion = settingsState.getApiVersion();
-    baseHost = settingsState.getBaseHost();
-    path = settingsState.getPath();
-  }
-
   public boolean isUsingCustomPath() {
     return !BASE_PATH.equals(path);
   }

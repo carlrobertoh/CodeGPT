@@ -49,12 +49,6 @@ public class LlamaSettingsState {
         || requestSettings.isModified(settingsState.getRequestSettings());
   }
 
-  public void apply(LlamaSettingsState settingsState) {
-    runLocalServer = settingsState.isRunLocalServer();
-    localSettings = settingsState.getLocalSettings();
-    remoteSettings = settingsState.getRemoteSettings();
-    requestSettings = settingsState.getRequestSettings();
-  }
 
   public LlamaLocalSettings getLocalSettings() {
     return localSettings;
