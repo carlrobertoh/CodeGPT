@@ -40,7 +40,8 @@ class CodeCompletionEventListener implements CompletionEventListener {
       progressIndicator.processFinish();
     }
 
-    CodeGPTEditorManager.getInstance().disposeEditorInlays(editor);
+    var editorManager = CodeGPTEditorManager.getInstance();
+    editorManager.disposeEditorInlays(editor);
 
     var inlayText = messageBuilder.toString();
     if (!inlayText.isEmpty()) {
@@ -59,7 +60,7 @@ class CodeCompletionEventListener implements CompletionEventListener {
     Notifications.Bus.notify(OverlayUtil.getDefaultNotification(
             String.format(
                 CodeGPTBundle.get("notification.completionError.description"),
-                error.getMessage()),
+                ex.getMessage()),
             NotificationType.ERROR)
         .addAction(new OpenSettingsAction()), editor.getProject());
   }
