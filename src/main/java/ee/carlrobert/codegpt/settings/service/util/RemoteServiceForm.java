@@ -72,6 +72,11 @@ public abstract class RemoteServiceForm<T extends ApiKeyCredentials> extends For
   }
 
   protected List<PanelBuilder> authenticationComponents() {
+    if (serviceType == ServiceType.OPENAI) {
+      return Lists.newArrayList(
+          createApiKeyPanel(remoteSettings.getCredentials().getApiKey(), apiKeyField,
+              "settingsConfigurable.service.openai.apiKey.comment"));
+    }
     return Lists.newArrayList(
         createApiKeyPanel(remoteSettings.getCredentials().getApiKey(), apiKeyField));
   }

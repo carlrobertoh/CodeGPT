@@ -204,15 +204,21 @@ public class UIUtil {
   }
 
   public static ComponentPanelBuilder createApiKeyPanel(String initialApiKey,
-      JBPasswordField apiKeyField) {
+      JBPasswordField apiKeyField, String commentBundleKey) {
     apiKeyField.setColumns(30);
     apiKeyField.setText(initialApiKey);
     return UI.PanelFactory.panel(apiKeyField)
         .withLabel(CodeGPTBundle.get("settingsConfigurable.shared.apiKey.label"))
         .resizeX(false)
         .withComment(
-            CodeGPTBundle.get("settingsConfigurable.shared.apiKey.comment"))
+            CodeGPTBundle.get(commentBundleKey))
         .withCommentHyperlinkListener(UIUtil::handleHyperlinkClicked);
+  }
+
+  public static ComponentPanelBuilder createApiKeyPanel(String initialApiKey,
+      JBPasswordField apiKeyField) {
+    return createApiKeyPanel(initialApiKey, apiKeyField,
+        "settingsConfigurable.shared.apiKey.comment");
   }
 
   public static TextFieldWithBrowseButton createTextFieldWithBrowseButton(
