@@ -157,8 +157,8 @@ public class UIUtil {
   public static JPanel createForm(JBRadioButton radio1, JComponent layout1, JBRadioButton radio2,
       JComponent layout2,
       boolean isFirstLayoutInitial) {
-    String firstComponentName = "first";
-    String secondComponentName = "second";
+    String firstComponentName = "1st";
+    String secondComponentName = "2nd";
     return createForm(Map.of(
         firstComponentName, new RadioButtonWithLayout(radio1,
             layout1),
@@ -169,8 +169,9 @@ public class UIUtil {
   public static JPanel createForm(Map<String, RadioButtonWithLayout> layouts,
       String initialLayout) {
     JPanel finalPanel = new JPanel(new BorderLayout());
-    finalPanel.add(createRadioButtonsPanel(layouts.values().stream().map(
-            RadioButtonWithLayout::getRadioButton).collect(Collectors.toList())),
+    finalPanel.add(createRadioButtonsPanel(
+            layouts.entrySet().stream().sorted(Entry.comparingByKey())
+                .map(entry -> entry.getValue().getRadioButton()).collect(Collectors.toList())),
         BorderLayout.NORTH);
     finalPanel.add(createRadioButtonGroupLayouts(layouts, initialLayout), BorderLayout.CENTER);
     return finalPanel;
@@ -178,13 +179,13 @@ public class UIUtil {
 
   public static PanelBuilder createSelectLayoutPanelBuilder(JBRadioButton radio1,
       JComponent layout1, JBRadioButton radio2, JComponent layout2,
-      boolean isFirstIniitallySelected) {
+      boolean isFirstInitiallySelected) {
     UIUtil.createSelectLayoutPanelBuilder(List.of(
         new RadioButtonWithLayout(radio1, layout1),
         new RadioButtonWithLayout(radio2, layout2)
-    ), isFirstIniitallySelected ? radio1 : radio2);
+    ), isFirstInitiallySelected ? radio1 : radio2);
     return UI.PanelFactory
-        .panel(createForm(radio1, layout1, radio2, layout2, isFirstIniitallySelected));
+        .panel(createForm(radio1, layout1, radio2, layout2, isFirstInitiallySelected));
   }
 
   private static void createSelectLayoutPanelBuilder(List<RadioButtonWithLayout> entries,

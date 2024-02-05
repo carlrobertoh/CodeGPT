@@ -21,6 +21,7 @@ public final class AzureCredentialsManager extends CredentialsManager<AzureCrede
 
   @Override
   public void apply(AzureCredentials credentials) {
+    this.credentials = credentials;
     CredentialsUtil.setPassword(apiKeyCredentialsAttribute, credentials.getApiKey());
     CredentialsUtil.setPassword(activeDirectoryTokenCredentialsAttribute,
         credentials.getActiveDirectoryToken());

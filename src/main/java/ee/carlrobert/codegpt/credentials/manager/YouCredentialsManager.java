@@ -19,6 +19,7 @@ public final class YouCredentialsManager extends CredentialsManager<PasswordCred
 
   @Override
   public void apply(PasswordCredentials credentials) {
+    this.credentials = credentials;
     CredentialsUtil.setPassword(passwordCredentialAttributes, credentials.getPassword());
   }
 

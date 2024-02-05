@@ -142,7 +142,8 @@ public class AzureServiceForm extends RemoteServiceForm<AzureCredentials> {
 
   public void setSettings(AzureSettingsState settings) {
     super.setSettings(settings);
-    setAzureActiveDirectoryAuthenticationSelected(settings.isUseAzureActiveDirectoryAuthentication());
+    setAzureActiveDirectoryAuthenticationSelected(
+        settings.isUseAzureActiveDirectoryAuthentication());
     setAzureActiveDirectoryToken(settings.getCredentials().getActiveDirectoryToken());
     setAzureApiKeyAuthenticationSelected(settings.isUseAzureApiKeyAuthentication());
     setAzureApiVersion(settings.getApiVersion());

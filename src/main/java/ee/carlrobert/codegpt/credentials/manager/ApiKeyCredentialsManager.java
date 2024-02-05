@@ -16,6 +16,7 @@ public class ApiKeyCredentialsManager extends CredentialsManager<ApiKeyCredentia
 
   @Override
   public void apply(ApiKeyCredentials credentials) {
+    this.credentials = credentials;
     CredentialsUtil.setPassword(apiKeyCredentialsAttribute, credentials.getApiKey());
   }
 }
