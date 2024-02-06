@@ -7,6 +7,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.actionSystem.ex.ComboBoxAction;
+import com.intellij.openapi.project.DumbAwareAction;
 import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.conversations.ConversationService;
@@ -54,13 +55,12 @@ public class ModelComboBoxAction extends ComboBoxAction {
     var actionGroup = new DefaultActionGroup();
     actionGroup.addSeparator("OpenAI");
     List.of(
-            OpenAIChatCompletionModel.GPT_4_1106_128k,
-            OpenAIChatCompletionModel.GPT_3_5_1106_16k,
+            OpenAIChatCompletionModel.GPT_4_0125_128k,
+            OpenAIChatCompletionModel.GPT_3_5_0125_16k,
             OpenAIChatCompletionModel.GPT_4_32k,
             OpenAIChatCompletionModel.GPT_4,
             OpenAIChatCompletionModel.GPT_3_5)
-        .forEach(
-            model -> actionGroup.add(createOpenAIModelAction(model, presentation)));
+        .forEach(model -> actionGroup.add(createOpenAIModelAction(model, presentation)));
     actionGroup.addSeparator();
     actionGroup.add(
         createModelAction(ServiceType.AZURE, "Azure OpenAI", Icons.Azure, presentation));
@@ -118,7 +118,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
       String label,
       Icon icon,
       Presentation comboBoxPresentation) {
-    return new AnAction(label, "", icon) {
+    return new DumbAwareAction(label, "", icon) {
       @Override
       public void update(@NotNull AnActionEvent event) {
         var presentation = event.getPresentation();
@@ -154,7 +154,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
       Presentation comboBoxPresentation) {
     createModelAction(ServiceType.OPENAI, model.getDescription(), Icons.OpenAI,
         comboBoxPresentation);
-    return new AnAction(model.getDescription(), "", Icons.OpenAI) {
+    return new DumbAwareAction(model.getDescription(), "", Icons.OpenAI) {
       @Override
       public void update(@NotNull AnActionEvent event) {
         var presentation = event.getPresentation();

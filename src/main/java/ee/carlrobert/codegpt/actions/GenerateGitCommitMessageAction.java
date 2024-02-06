@@ -92,8 +92,8 @@ public class GenerateGitCommitMessageAction extends AnAction {
     }
   }
 
-  private CompletionEventListener getEventListener(Project project, Document document) {
-    return new CompletionEventListener() {
+  private CompletionEventListener<String> getEventListener(Project project, Document document) {
+    return new CompletionEventListener<>() {
       private final StringBuilder messageBuilder = new StringBuilder();
 
       @Override
