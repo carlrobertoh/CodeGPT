@@ -22,8 +22,10 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.EditorCustomElementRenderer;
 import com.intellij.openapi.editor.Inlay;
 import com.intellij.openapi.editor.InlayModel;
+import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.keymap.KeymapManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
@@ -79,8 +81,7 @@ public final class CodeCompletionService implements Disposable {
         || !EditorUtil.isSelectedEditor(editor)
         || LookupManager.getActiveLookup(editor) != null
         || editor.isViewer()
-        || editor.isOneLineMode()
-    ) {
+        || editor.isOneLineMode()) {
       return;
     }
 
@@ -96,7 +97,7 @@ public final class CodeCompletionService implements Disposable {
         (progressIndicator) -> CompletionRequestService.getInstance().getCodeCompletionAsync(
             request,
             new CodeCompletionEventListener(editor, offset, progressIndicator)),
-        500,
+        750,
         TimeUnit.MILLISECONDS);
   }
 
