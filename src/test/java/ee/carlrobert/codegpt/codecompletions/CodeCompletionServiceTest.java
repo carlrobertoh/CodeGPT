@@ -6,9 +6,7 @@ import static ee.carlrobert.codegpt.codecompletions.CodeCompletionService.APPLY_
 import static ee.carlrobert.codegpt.util.file.FileUtil.getResourceContent;
 import static ee.carlrobert.llm.client.util.JSONUtil.e;
 import static ee.carlrobert.llm.client.util.JSONUtil.jsonMapResponse;
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
 
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.VisualPosition;
@@ -44,21 +42,22 @@ public class CodeCompletionServiceTest extends IntegrationTest {
 
     editor.getCaretModel().moveToVisualPosition(cursorPosition);
 
-    await().pollInSameThread().atMost(5, SECONDS)
-        .until(() -> {
-          PlatformTestUtil.dispatchAllInvocationEventsInIdeEventQueue();
+    PlatformTestUtil.waitWithEventsDispatching(
+        "Editor inlay assertions failed",
+        () -> {
           var singleLineInlayElement = editor.getUserData(SINGLE_LINE_INLAY);
           var multiLineInlayElement = editor.getUserData(MULTI_LINE_INLAY);
           if (singleLineInlayElement != null && multiLineInlayElement != null) {
             var singleLine =
-                ((InlayInlineElementRenderer) singleLineInlayElement.getRenderer()).getInlayText();
+                ((InlayInlineElementRenderer) singleLineInlayElement.getRenderer())
+                    .getInlayText();
             var multiLine =
                 ((InlayBlockElementRenderer) multiLineInlayElement.getRenderer()).getInlayText();
             return "TEST_SINGLE_LINE_OUTPUT".equals(singleLine)
                 && "TEST_MULTI_LINE_OUTPUT".equals(multiLine);
           }
           return false;
-        });
+        }, 5);
   }
 
   public void testApplyInlayAction() {
