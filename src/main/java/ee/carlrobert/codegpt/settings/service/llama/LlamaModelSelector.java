@@ -180,6 +180,8 @@ public class LlamaModelSelector implements ModelSelector<LlamaCompletionModel> {
         .addVerticalGap(4)
         .addLabeledComponent(CodeGPTBundle.get("shared.infillPromptTemplate"),
             infillPromptTemplatePanel)
+        .addComponentToRightColumn(
+            createComment("settingsConfigurable.service.llama.infillTemplate.comment"))
         .addLabeledComponent(CodeGPTBundle.get("shared.promptTemplate"), chatPromptTemplateField)
         .addComponentToRightColumn(
             createComment("settingsConfigurable.service.llama.promptTemplate.comment"))

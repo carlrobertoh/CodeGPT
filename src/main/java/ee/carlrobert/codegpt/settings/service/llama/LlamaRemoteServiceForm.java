@@ -47,6 +47,7 @@ public class LlamaRemoteServiceForm extends RemoteServiceForm<ApiKeyCredentials>
   public void setRemoteSettings(LlamaRemoteSettings settings) {
     super.setSettings(settings);
     chatPromptTemplatePanel.setPromptTemplate(settings.getChatPromptTemplate());
+    infillPromptTemplatePanel.setPromptTemplate(settings.getInfillPromptTemplate());
   }
 
   public LlamaRemoteSettings getRemoteSettings() {
