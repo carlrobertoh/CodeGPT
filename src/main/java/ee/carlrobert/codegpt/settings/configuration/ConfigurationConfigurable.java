@@ -36,12 +36,9 @@ public class ConfigurationConfigurable implements Configurable {
     return !configurationComponent.getTableData().equals(configuration.getTableData())
         || configurationComponent.getMaxTokens() != configuration.getMaxTokens()
         || configurationComponent.getTemperature() != configuration.getTemperature()
-        || configurationComponent.getInlineDelay() != configuration.getInlineDelay()
         || !configurationComponent.getSystemPrompt().equals(configuration.getSystemPrompt())
         || !configurationComponent.getCommitMessagePrompt()
         .equals(configuration.getCommitMessagePrompt())
-        || !configurationComponent.getInlineCompletionPrompt()
-        .equals(configuration.getInlineCompletionPrompt())
         || configurationComponent.isCheckForPluginUpdates()
         != configuration.isCheckForPluginUpdates()
         || configurationComponent.isCreateNewChatOnEachAction()
@@ -60,8 +57,6 @@ public class ConfigurationConfigurable implements Configurable {
     configuration.setTemperature(configurationComponent.getTemperature());
     configuration.setSystemPrompt(configurationComponent.getSystemPrompt());
     configuration.setCommitMessagePrompt(configurationComponent.getCommitMessagePrompt());
-    configuration.setInlineCompletionPrompt(configurationComponent.getInlineCompletionPrompt());
-    configuration.setInlineDelay(configurationComponent.getInlineDelay());
     configuration.setCheckForPluginUpdates(configurationComponent.isCheckForPluginUpdates());
     configuration.setCreateNewChatOnEachAction(
         configurationComponent.isCreateNewChatOnEachAction());
@@ -79,8 +74,6 @@ public class ConfigurationConfigurable implements Configurable {
     configurationComponent.setTemperature(configuration.getTemperature());
     configurationComponent.setSystemPrompt(configuration.getSystemPrompt());
     configurationComponent.setCommitMessagePrompt(configuration.getCommitMessagePrompt());
-    configurationComponent.setInlineCompletionPrompt(configuration.getInlineCompletionPrompt());
-    configurationComponent.setInlineDelay(configuration.getInlineDelay());
     configurationComponent.setCheckForPluginUpdates(configuration.isCheckForPluginUpdates());
     configurationComponent.setCreateNewChatOnEachAction(
         configuration.isCreateNewChatOnEachAction());
