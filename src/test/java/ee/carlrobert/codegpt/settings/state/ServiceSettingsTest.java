@@ -5,17 +5,13 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static testsupport.TestUtil.assertCredentials;
 import static testsupport.TestUtil.assertPassword;
 
-import com.intellij.ide.passwordSafe.PasswordSafe;
 import com.intellij.ide.plugins.IdeaPluginDescriptorImpl;
 import com.intellij.ide.plugins.PluginManagerCore;
 import com.intellij.ide.plugins.PluginSetBuilder;
 import com.intellij.ide.plugins.RawPluginDescriptor;
-import com.intellij.mock.MockApplication;
-import com.intellij.openapi.Disposable;
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.util.Disposer;
 import ee.carlrobert.codegpt.TestPasswordSafe;
 import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
+import ee.carlrobert.codegpt.credentials.CredentialsService;
 import ee.carlrobert.codegpt.credentials.PasswordCredentials;
 import ee.carlrobert.codegpt.credentials.manager.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.manager.LlamaLocalCredentialsManager;
@@ -30,33 +26,29 @@ import ee.carlrobert.codegpt.settings.state.you.YouSettingsState;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import java.nio.file.Path;
 import java.util.List;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 
 public class ServiceSettingsTest {
 
-  @BeforeClass
-  public static void setUp() {
-    Disposable disposable = Disposer.newDisposable();
-    final var application = MockApplication.setUp(disposable);
-    ApplicationManager.setApplication(application, disposable);
-    mockCodeGptPluginPath();
-    application.registerService(PasswordSafe.class, new TestPasswordSafe());
-    application.registerService(YouCredentialsManager.class, new YouCredentialsManager());
-    application.registerService(OpenAICredentialsManager.class, new OpenAICredentialsManager());
-    application.registerService(LlamaLocalCredentialsManager.class,
-        new LlamaLocalCredentialsManager());
-    application.registerService(LlamaRemoteCredentialsManager.class,
-        new LlamaRemoteCredentialsManager());
+  private TestPasswordSafe passwordSafe;
+  private CredentialsService credentialsService;
+
+  @Before
+  public void setUp() {
+    passwordSafe = new TestPasswordSafe();
+    credentialsService = new CredentialsService(passwordSafe);
   }
 
   @Test
   public void testLlamaSettings() {
-    LlamaSettings settings = new LlamaSettings();
-    LlamaRemoteCredentialsManager remoteCredentialsManager =
-        LlamaRemoteCredentialsManager.getInstance();
-    LlamaLocalCredentialsManager localCredentialsManager =
-        LlamaLocalCredentialsManager.getInstance();
+    mockCodeGptPluginPath();
+    LlamaLocalCredentialsManager localCredentialsManager = new LlamaLocalCredentialsManager(
+        credentialsService);
+    LlamaRemoteCredentialsManager remoteCredentialsManager = new LlamaRemoteCredentialsManager(
+        credentialsService);
+    LlamaSettings settings = new LlamaSettings(localCredentialsManager,
+        remoteCredentialsManager);
 
     assertCredentials(settings.getState().getLocalSettings(), null);
     assertCredentials(localCredentialsManager.getCredentials(), null);
@@ -98,8 +90,8 @@ public class ServiceSettingsTest {
 
   @Test
   public void testOpenAiSettings() {
-    OpenAISettings settings = new OpenAISettings();
-    OpenAICredentialsManager credentialsManager = OpenAICredentialsManager.getInstance();
+    OpenAICredentialsManager credentialsManager = new OpenAICredentialsManager(credentialsService);
+    OpenAISettings settings = new OpenAISettings(credentialsManager);
 
     assertCredentials(settings.getState(), null);
     assertCredentials(credentialsManager.getCredentials(), null);
@@ -122,8 +114,8 @@ public class ServiceSettingsTest {
 
   @Test
   public void testAzureSettings() {
-    AzureCredentialsManager credentialsManager = AzureCredentialsManager.getInstance();
-    AzureSettings settings = new AzureSettings();
+    AzureCredentialsManager credentialsManager = new AzureCredentialsManager(credentialsService);
+    AzureSettings settings = new AzureSettings(credentialsManager);
 
     assertCredentials(settings.getState(), null, null);
     assertCredentials(credentialsManager.getCredentials(), null, null);
@@ -145,8 +137,8 @@ public class ServiceSettingsTest {
 
   @Test
   public void testYouSettings() {
-    YouCredentialsManager credentialsManager = YouCredentialsManager.getInstance();
-    YouSettings settings = new YouSettings();
+    YouCredentialsManager credentialsManager = new YouCredentialsManager(credentialsService);
+    YouSettings settings = new YouSettings(credentialsManager);
 
     assertPassword(settings.getState(), null);
     assertPassword(credentialsManager.getCredentials(), null);

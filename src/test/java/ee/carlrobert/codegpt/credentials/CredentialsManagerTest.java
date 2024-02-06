@@ -6,46 +6,42 @@ import static testsupport.TestUtil.assertPassword;
 
 import com.intellij.credentialStore.CredentialAttributes;
 import com.intellij.credentialStore.Credentials;
-import com.intellij.ide.passwordSafe.PasswordSafe;
-import com.intellij.mock.MockApplication;
-import com.intellij.openapi.Disposable;
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.util.Disposer;
 import ee.carlrobert.codegpt.TestPasswordSafe;
 import ee.carlrobert.codegpt.credentials.manager.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.manager.LlamaLocalCredentialsManager;
 import ee.carlrobert.codegpt.credentials.manager.LlamaRemoteCredentialsManager;
 import ee.carlrobert.codegpt.credentials.manager.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.credentials.manager.YouCredentialsManager;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 
 public class CredentialsManagerTest {
 
-  private static TestPasswordSafe passwordSafe = new TestPasswordSafe();
+  private TestPasswordSafe passwordSafe;
+  private CredentialsService credentialsService;
 
-  @BeforeClass
-  public static void setUp() {
-    Disposable disposable = Disposer.newDisposable();
-    final var application = MockApplication.setUp(disposable);
-    ApplicationManager.setApplication(application, disposable);
-    application.registerService(PasswordSafe.class, passwordSafe);
+  @Before
+  public void setUp() {
+    passwordSafe = new TestPasswordSafe();
+    credentialsService = new CredentialsService(passwordSafe);
   }
 
   @Test
   public void testLlamaCredentialsManager() {
     String expectedApiKey = "apikey";
-    CredentialAttributes llamaLocalApiKey = CredentialsUtil.createCredentialAttributes(
+    CredentialAttributes llamaLocalApiKey = credentialsService.createCredentialAttributes(
         "LLAMA_LOCAL_API_KEY");
     passwordSafe.set(llamaLocalApiKey, new Credentials("foo", expectedApiKey));
-    LlamaLocalCredentialsManager localCredentialsManager = new LlamaLocalCredentialsManager();
+    LlamaLocalCredentialsManager localCredentialsManager = new LlamaLocalCredentialsManager(
+        credentialsService);
     assertCredentials(localCredentialsManager.getCredentials(), expectedApiKey);
 
-    CredentialAttributes llamaRemoteApiKey = CredentialsUtil.createCredentialAttributes(
+    CredentialAttributes llamaRemoteApiKey = credentialsService.createCredentialAttributes(
         "LLAMA_REMOTE_API_KEY");
     expectedApiKey = "test";
     passwordSafe.set(llamaRemoteApiKey, new Credentials("foo", expectedApiKey));
-    LlamaRemoteCredentialsManager remoteCredentialsManager = new LlamaRemoteCredentialsManager();
+    LlamaRemoteCredentialsManager remoteCredentialsManager = new LlamaRemoteCredentialsManager(
+        credentialsService);
     assertCredentials(remoteCredentialsManager.getCredentials(), expectedApiKey);
 
     expectedApiKey = "bar";
@@ -57,10 +53,10 @@ public class CredentialsManagerTest {
   @Test
   public void testOpenAiCredentialsManager() {
     String expectedApiKey = "apikey";
-    CredentialAttributes apiKey = CredentialsUtil.createCredentialAttributes(
+    CredentialAttributes apiKey = credentialsService.createCredentialAttributes(
         "OPENAI_API_KEY");
     passwordSafe.set(apiKey, new Credentials("foo", expectedApiKey));
-    OpenAICredentialsManager credentialsManager = new OpenAICredentialsManager();
+    OpenAICredentialsManager credentialsManager = new OpenAICredentialsManager(credentialsService);
     assertCredentials(credentialsManager.getCredentials(), expectedApiKey);
 
     expectedApiKey = "test";
@@ -73,13 +69,13 @@ public class CredentialsManagerTest {
   public void testAzureCredentialsManager() {
     String expectedApiKey = "apikey";
     String expectedToken = "token";
-    CredentialAttributes apiKey = CredentialsUtil.createCredentialAttributes(
+    CredentialAttributes apiKey = credentialsService.createCredentialAttributes(
         "AZURE_OPENAI_API_KEY");
-    CredentialAttributes tokenKey = CredentialsUtil.createCredentialAttributes(
+    CredentialAttributes tokenKey = credentialsService.createCredentialAttributes(
         "AZURE_ACTIVE_DIRECTORY_TOKEN");
     passwordSafe.set(apiKey, new Credentials("foo", expectedApiKey));
     passwordSafe.set(tokenKey, new Credentials("foo", expectedToken));
-    AzureCredentialsManager credentialsManager = new AzureCredentialsManager();
+    AzureCredentialsManager credentialsManager = new AzureCredentialsManager(credentialsService);
     assertCredentials(credentialsManager.getCredentials(), expectedApiKey, expectedToken);
 
     expectedApiKey = "test";
@@ -93,10 +89,10 @@ public class CredentialsManagerTest {
   @Test
   public void testOpenYouCredentialsManager() {
     String expectedPw = "password";
-    CredentialAttributes passwordKey = CredentialsUtil.createCredentialAttributes(
+    CredentialAttributes passwordKey = credentialsService.createCredentialAttributes(
         "YOU_ACCOUNT_PASSWORD");
     passwordSafe.set(passwordKey, new Credentials("foo", expectedPw));
-    YouCredentialsManager credentialsManager = new YouCredentialsManager();
+    YouCredentialsManager credentialsManager = new YouCredentialsManager(credentialsService);
     assertPassword(credentialsManager.getCredentials(), expectedPw);
 
     expectedPw = "test";
