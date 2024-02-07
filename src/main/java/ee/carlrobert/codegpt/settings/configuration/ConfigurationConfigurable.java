@@ -12,7 +12,7 @@ public class ConfigurationConfigurable implements Configurable {
 
   private Disposable parentDisposable;
 
-  private ConfigurationComponent configurationComponent;
+  private ConfigurationComponent component;
 
   @Nls(capitalization = Nls.Capitalization.Title)
   @Override
@@ -24,26 +24,26 @@ public class ConfigurationConfigurable implements Configurable {
   @Override
   public JComponent createComponent() {
     parentDisposable = Disposer.newDisposable();
-    configurationComponent = new ConfigurationComponent(
+    component = new ConfigurationComponent(
         parentDisposable,
         ConfigurationSettings.getCurrentState());
-    return configurationComponent.getPanel();
+    return component.getPanel();
   }
 
   @Override
   public boolean isModified() {
-    return !configurationComponent.getCurrentFormState()
+    return !component.getCurrentFormState()
         .equals(ConfigurationSettings.getCurrentState());
   }
 
   @Override
   public void apply() {
-    ConfigurationSettings.getInstance().loadState(configurationComponent.getCurrentFormState());
+    ConfigurationSettings.getInstance().loadState(component.getCurrentFormState());
   }
 
   @Override
   public void reset() {
-    configurationComponent.resetForm();
+    component.resetForm();
   }
 
   @Override
@@ -51,6 +51,6 @@ public class ConfigurationConfigurable implements Configurable {
     if (parentDisposable != null) {
       Disposer.dispose(parentDisposable);
     }
-    configurationComponent = null;
+    component = null;
   }
 }

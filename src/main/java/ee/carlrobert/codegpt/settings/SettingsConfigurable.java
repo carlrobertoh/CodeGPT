@@ -24,7 +24,7 @@ public class SettingsConfigurable implements Configurable {
 
   private Disposable parentDisposable;
 
-  private SettingsComponent settingsComponent;
+  private SettingsComponent component;
 
   @Nls(capitalization = Nls.Capitalization.Title)
   @Override
@@ -34,7 +34,7 @@ public class SettingsConfigurable implements Configurable {
 
   @Override
   public JComponent getPreferredFocusedComponent() {
-    return settingsComponent.getPreferredFocusedComponent();
+    return component.getPreferredFocusedComponent();
   }
 
   @Nullable
@@ -42,15 +42,15 @@ public class SettingsConfigurable implements Configurable {
   public JComponent createComponent() {
     var settings = GeneralSettings.getInstance();
     parentDisposable = Disposer.newDisposable();
-    settingsComponent = new SettingsComponent(parentDisposable, settings);
-    return settingsComponent.getPanel();
+    component = new SettingsComponent(parentDisposable, settings);
+    return component.getPanel();
   }
 
   @Override
   public boolean isModified() {
     var settings = GeneralSettings.getInstance();
-    var serviceSelectionForm = settingsComponent.getServiceSelectionForm();
-    return !settingsComponent.getDisplayName().equals(settings.getState().getDisplayName())
+    var serviceSelectionForm = component.getServiceSelectionForm();
+    return !component.getDisplayName().equals(settings.getState().getDisplayName())
         || isServiceChanged(settings)
         || OpenAISettings.getInstance().isModified(serviceSelectionForm)
         || AzureSettings.getInstance().isModified(serviceSelectionForm)
@@ -61,7 +61,7 @@ public class SettingsConfigurable implements Configurable {
 
   @Override
   public void apply() {
-    var serviceSelectionForm = settingsComponent.getServiceSelectionForm();
+    var serviceSelectionForm = component.getServiceSelectionForm();
     var openAISettings = OpenAISettings.getInstance();
 
     var prevKey = OpenAICredentialManager.getInstance().getCredential();
@@ -77,8 +77,8 @@ public class SettingsConfigurable implements Configurable {
         .setCredential(serviceSelectionForm.getLlamaServerPreferencesForm().getApiKey());
 
     var settings = GeneralSettings.getInstance();
-    settings.getState().setDisplayName(settingsComponent.getDisplayName());
-    settings.getState().setSelectedService(settingsComponent.getSelectedService());
+    settings.getState().setDisplayName(component.getDisplayName());
+    settings.getState().setSelectedService(component.getSelectedService());
 
     openAISettings.loadState(serviceSelectionForm.getCurrentOpenAIFormState());
     AzureSettings.getInstance().loadState(serviceSelectionForm.getCurrentAzureFormState());
@@ -93,7 +93,7 @@ public class SettingsConfigurable implements Configurable {
       resetActiveTab();
       if (serviceChanged) {
         TelemetryAction.SETTINGS_CHANGED.createActionMessage()
-            .property("service", settingsComponent.getSelectedService().getCode().toLowerCase())
+            .property("service", component.getSelectedService().getCode().toLowerCase())
             .send();
       }
     }
@@ -102,11 +102,11 @@ public class SettingsConfigurable implements Configurable {
   @Override
   public void reset() {
     var settings = GeneralSettings.getCurrentState();
-    var serviceSelectionForm = settingsComponent.getServiceSelectionForm();
+    var serviceSelectionForm = component.getServiceSelectionForm();
 
     // settingsComponent.setEmail(settings.getEmail());
-    settingsComponent.setDisplayName(settings.getDisplayName());
-    settingsComponent.setSelectedService(settings.getSelectedService());
+    component.setDisplayName(settings.getDisplayName());
+    component.setSelectedService(settings.getSelectedService());
 
     serviceSelectionForm.resetOpenAIForm();
     serviceSelectionForm.resetAzureForm();
@@ -121,11 +121,11 @@ public class SettingsConfigurable implements Configurable {
     if (parentDisposable != null) {
       Disposer.dispose(parentDisposable);
     }
-    settingsComponent = null;
+    component = null;
   }
 
   private boolean isServiceChanged(GeneralSettings settings) {
-    return settingsComponent.getSelectedService() != settings.getState().getSelectedService();
+    return component.getSelectedService() != settings.getState().getSelectedService();
   }
 
   private void resetActiveTab() {

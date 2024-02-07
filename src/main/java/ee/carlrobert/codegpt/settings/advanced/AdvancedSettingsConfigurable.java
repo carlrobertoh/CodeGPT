@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class AdvancedSettingsConfigurable implements Configurable {
 
-  private AdvancedSettingsComponent advancedSettingsComponent;
+  private AdvancedSettingsComponent component;
 
   @Nls(capitalization = Nls.Capitalization.Title)
   @Override
@@ -19,27 +19,27 @@ public class AdvancedSettingsConfigurable implements Configurable {
   @Nullable
   @Override
   public JComponent createComponent() {
-    return new AdvancedSettingsComponent(AdvancedSettings.getCurrentState()).getPanel();
+    component = new AdvancedSettingsComponent(AdvancedSettings.getCurrentState());
+    return component.getPanel();
   }
 
   @Override
   public boolean isModified() {
-    return !advancedSettingsComponent.getCurrentFormState()
-        .equals(AdvancedSettings.getCurrentState());
+    return !component.getCurrentFormState().equals(AdvancedSettings.getCurrentState());
   }
 
   @Override
   public void apply() {
-    AdvancedSettings.getInstance().loadState(advancedSettingsComponent.getCurrentFormState());
+    AdvancedSettings.getInstance().loadState(component.getCurrentFormState());
   }
 
   @Override
   public void reset() {
-    advancedSettingsComponent.resetForm();
+    component.resetForm();
   }
 
   @Override
   public void disposeUIResources() {
-    advancedSettingsComponent = null;
+    component = null;
   }
 }
