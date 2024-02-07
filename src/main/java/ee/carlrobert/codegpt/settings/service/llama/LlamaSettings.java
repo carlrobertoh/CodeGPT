@@ -33,7 +33,7 @@ public class LlamaSettings implements PersistentStateComponent<LlamaSettingsStat
   }
 
   public boolean isModified(LlamaSettingsForm form) {
-    return !form.getCurrentFormState().equals(state)
+    return !form.getCurrentState().equals(state)
         || !form.getLlamaServerPreferencesForm().getApiKey()
         .equals(LlamaCredentialManager.getInstance().getCredential());
   }

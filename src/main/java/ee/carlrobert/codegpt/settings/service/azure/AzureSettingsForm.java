@@ -113,7 +113,7 @@ public class AzureSettingsForm {
         .getPanel();
   }
 
-  public AzureSettingsState getCurrentFormState() {
+  public AzureSettingsState getCurrentState() {
     var state = new AzureSettingsState();
     state.setUseAzureActiveDirectoryAuthentication(
         useAzureActiveDirectoryAuthenticationRadioButton.isSelected());

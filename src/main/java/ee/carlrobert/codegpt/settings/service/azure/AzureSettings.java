@@ -33,7 +33,7 @@ public class AzureSettings implements PersistentStateComponent<AzureSettingsStat
 
   public boolean isModified(AzureSettingsForm form) {
     var credentialsManager = AzureCredentialManager.getInstance();
-    return !form.getCurrentFormState().equals(state)
+    return !form.getCurrentState().equals(state)
         || !form.getActiveDirectoryToken().equals(credentialsManager.getActiveDirectoryToken())
         || !form.getApiKey().equals(credentialsManager.getApiKey());
   }

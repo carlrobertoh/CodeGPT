@@ -4,15 +4,12 @@ import static java.util.stream.Collectors.toList;
 
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.ui.ComboBox;
-import com.intellij.openapi.ui.ComponentValidator;
-import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.util.SystemInfoRt;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.settings.service.ServiceSelectionForm;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
-import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import java.awt.CardLayout;
 import java.util.Arrays;
 import javax.swing.DefaultComboBoxModel;
@@ -43,12 +40,8 @@ public class GeneralSettingsComponent {
     serviceComboBox = new ComboBox<>(serviceComboBoxModel);
     serviceComboBox.setSelectedItem(ServiceType.OPENAI);
     serviceComboBox.setPreferredSize(displayNameField.getPreferredSize());
-    var serviceInputValidator = createInputValidator(parentDisposable, serviceComboBox);
-    serviceInputValidator.revalidate();
-    serviceComboBox.addItemListener(e -> {
-      serviceInputValidator.revalidate();
-      cardLayout.show(cards, ((ServiceType) e.getItem()).getCode());
-    });
+    serviceComboBox.addItemListener(e ->
+        cardLayout.show(cards, ((ServiceType) e.getItem()).getCode()));
 
     mainPanel = FormBuilder.createFormBuilder()
         .addLabeledComponent(
@@ -88,28 +81,5 @@ public class GeneralSettingsComponent {
 
   public void setDisplayName(String displayName) {
     displayNameField.setText(displayName);
-  }
-
-  private ComponentValidator createInputValidator(
-      Disposable parentDisposable,
-      JComponent component) {
-    var validator = new ComponentValidator(parentDisposable)
-        .withValidator(() -> {
-          if (component instanceof ComboBox) {
-            var selectedItem = ((ComboBox<?>) component).getSelectedItem();
-            if (selectedItem == ServiceType.OPENAI
-                && OpenAISettings.getCurrentState().isOpenAIQuotaExceeded()) {
-              return new ValidationInfo(
-                  CodeGPTBundle.get("settings.openaiQuotaExceeded"),
-                  component);
-            }
-          }
-
-          return null;
-        })
-        .andStartOnFocusLost()
-        .installOn(component);
-    validator.enableValidation();
-    return validator;
   }
 }

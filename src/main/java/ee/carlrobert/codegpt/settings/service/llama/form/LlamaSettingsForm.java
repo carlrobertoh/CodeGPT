@@ -21,7 +21,7 @@ public class LlamaSettingsForm extends JPanel {
     init();
   }
 
-  public LlamaSettingsState getCurrentFormState() {
+  public LlamaSettingsState getCurrentState() {
     var state = new LlamaSettingsState();
     state.setTopK(llamaRequestPreferencesForm.getTopK());
     state.setTopP(llamaRequestPreferencesForm.getTopP());

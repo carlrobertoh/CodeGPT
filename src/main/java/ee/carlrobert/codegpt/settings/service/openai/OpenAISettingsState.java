@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt.settings.service.openai;
 
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
+import java.util.Objects;
 
 public class OpenAISettingsState {
 
@@ -10,7 +11,6 @@ public class OpenAISettingsState {
   private String baseHost = "https://api.openai.com";
   private String path = BASE_PATH;
   private String model = OpenAIChatCompletionModel.GPT_3_5.getCode();
-  private boolean openAIQuotaExceeded;
 
   public boolean isUsingCustomPath() {
     return !BASE_PATH.equals(path);
@@ -48,11 +48,23 @@ public class OpenAISettingsState {
     this.path = path;
   }
 
-  public boolean isOpenAIQuotaExceeded() {
-    return openAIQuotaExceeded;
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    OpenAISettingsState that = (OpenAISettingsState) o;
+    return Objects.equals(organization, that.organization)
+        && Objects.equals(baseHost, that.baseHost)
+        && Objects.equals(path, that.path)
+        && Objects.equals(model, that.model);
   }
 
-  public void setOpenAIQuotaExceeded(boolean openAIQuotaExceeded) {
-    this.openAIQuotaExceeded = openAIQuotaExceeded;
+  @Override
+  public int hashCode() {
+    return Objects.hash(organization, baseHost, path, model);
   }
 }

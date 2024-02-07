@@ -47,10 +47,10 @@ public class GeneralSettingsConfigurable implements Configurable {
 
   @Override
   public boolean isModified() {
-    var settings = GeneralSettings.getInstance();
+    var settings = GeneralSettings.getCurrentState();
     var serviceSelectionForm = component.getServiceSelectionForm();
-    return !component.getDisplayName().equals(settings.getState().getDisplayName())
-        || isServiceChanged(settings)
+    return !component.getDisplayName().equals(settings.getDisplayName())
+        || component.getSelectedService() != settings.getSelectedService()
         || OpenAISettings.getInstance().isModified(serviceSelectionForm.getOpenAISettingsForm())
         || AzureSettings.getInstance().isModified(serviceSelectionForm.getAzureSettingsForm())
         || YouSettings.getInstance().isModified(serviceSelectionForm.getYouSettingsForm())
@@ -59,37 +59,31 @@ public class GeneralSettingsConfigurable implements Configurable {
 
   @Override
   public void apply() {
+    var settings = GeneralSettings.getCurrentState();
+    settings.setDisplayName(component.getDisplayName());
+    settings.setSelectedService(component.getSelectedService());
+
     var serviceSelectionForm = component.getServiceSelectionForm();
     var openAISettingsForm = serviceSelectionForm.getOpenAISettingsForm();
-    var openAISettings = OpenAISettings.getInstance();
-
-    var prevKey = OpenAICredentialManager.getInstance().getCredential();
-    if (prevKey != null && !prevKey.equals(openAISettingsForm.getApiKey())) {
-      openAISettings.getState().setOpenAIQuotaExceeded(false);
-    }
-
     OpenAICredentialManager.getInstance().setCredential(openAISettingsForm.getApiKey());
+    var openAISettings = OpenAISettings.getInstance();
+    openAISettings.loadState(openAISettingsForm.getCurrentState());
+
+    var azureSettingsForm = serviceSelectionForm.getAzureSettingsForm();
+    AzureSettings.getInstance().loadState(azureSettingsForm.getCurrentState());
     var azureCredentials = AzureCredentialManager.getInstance();
-    azureCredentials.setApiKey(serviceSelectionForm.getAzureSettingsForm().getApiKey());
-    azureCredentials.setActiveDirectoryToken(
-        serviceSelectionForm.getAzureSettingsForm().getActiveDirectoryToken());
+    azureCredentials.setApiKey(azureSettingsForm.getApiKey());
+    azureCredentials.setActiveDirectoryToken(azureSettingsForm.getActiveDirectoryToken());
+
+    YouSettings.getInstance()
+        .loadState(serviceSelectionForm.getYouSettingsForm().getCurrentState());
+
+    var llamaSettingsForm = serviceSelectionForm.getLlamaSettingsForm();
     LlamaCredentialManager.getInstance()
-        .setCredential(serviceSelectionForm.getLlamaSettingsForm().getLlamaServerPreferencesForm()
-            .getApiKey());
+        .setCredential(llamaSettingsForm.getLlamaServerPreferencesForm().getApiKey());
+    LlamaSettings.getInstance().loadState(llamaSettingsForm.getCurrentState());
 
-    var settings = GeneralSettings.getInstance();
-    settings.getState().setDisplayName(component.getDisplayName());
-    settings.getState().setSelectedService(component.getSelectedService());
-
-    openAISettings.loadState(openAISettings.getState());
-    AzureSettings.getInstance()
-        .loadState(serviceSelectionForm.getAzureSettingsForm().getCurrentFormState());
-    LlamaSettings.getInstance()
-        .loadState(serviceSelectionForm.getLlamaSettingsForm().getCurrentFormState());
-    YouSettings.getCurrentState().setDisplayWebSearchResults(
-        serviceSelectionForm.getYouSettingsForm().isDisplayWebSearchResults());
-
-    var serviceChanged = isServiceChanged(settings);
+    var serviceChanged = component.getSelectedService() != settings.getSelectedService();
     var modelChanged = !openAISettings.getState().getModel()
         .equals(openAISettingsForm.getModel());
     if (serviceChanged || modelChanged) {
@@ -105,12 +99,10 @@ public class GeneralSettingsConfigurable implements Configurable {
   @Override
   public void reset() {
     var settings = GeneralSettings.getCurrentState();
-    var serviceSelectionForm = component.getServiceSelectionForm();
-
-    // settingsComponent.setEmail(settings.getEmail());
     component.setDisplayName(settings.getDisplayName());
     component.setSelectedService(settings.getSelectedService());
 
+    var serviceSelectionForm = component.getServiceSelectionForm();
     serviceSelectionForm.getOpenAISettingsForm().resetForm();
     serviceSelectionForm.getAzureSettingsForm().resetForm();
     serviceSelectionForm.getLlamaSettingsForm().resetForm();
@@ -123,10 +115,6 @@ public class GeneralSettingsConfigurable implements Configurable {
       Disposer.dispose(parentDisposable);
     }
     component = null;
-  }
-
-  private boolean isServiceChanged(GeneralSettings settings) {
-    return component.getSelectedService() != settings.getState().getSelectedService();
   }
 
   private void resetActiveTab() {
