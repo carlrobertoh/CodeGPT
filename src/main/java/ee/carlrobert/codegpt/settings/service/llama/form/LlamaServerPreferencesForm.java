@@ -38,6 +38,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Nullable;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -348,7 +349,11 @@ public class LlamaServerPreferencesForm {
         : remotePromptTemplatePanel.getPromptTemplate();
   }
 
-  public String getApiKey() {
+  public @Nullable String getApiKey() {
+    var apiKey = new String(apiKeyField.getPassword());
+    if (apiKey.isEmpty()) {
+      return null;
+    }
     return new String(apiKeyField.getPassword());
   }
 

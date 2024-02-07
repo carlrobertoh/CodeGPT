@@ -9,9 +9,13 @@ import ee.carlrobert.codegpt.credentials.AzureCredentialManager;
 import ee.carlrobert.codegpt.credentials.LlamaCredentialManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
+import ee.carlrobert.codegpt.settings.service.azure.AzureSettingsForm;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
+import ee.carlrobert.codegpt.settings.service.llama.form.LlamaSettingsForm;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
+import ee.carlrobert.codegpt.settings.service.openai.OpenAISettingsForm;
 import ee.carlrobert.codegpt.settings.service.you.YouSettings;
+import ee.carlrobert.codegpt.settings.service.you.YouSettingsForm;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
 import ee.carlrobert.codegpt.util.ApplicationUtil;
@@ -65,26 +69,13 @@ public class GeneralSettingsConfigurable implements Configurable {
 
     var serviceSelectionForm = component.getServiceSelectionForm();
     var openAISettingsForm = serviceSelectionForm.getOpenAISettingsForm();
-    OpenAICredentialManager.getInstance().setCredential(openAISettingsForm.getApiKey());
-    var openAISettings = OpenAISettings.getInstance();
-    openAISettings.loadState(openAISettingsForm.getCurrentState());
-
-    var azureSettingsForm = serviceSelectionForm.getAzureSettingsForm();
-    AzureSettings.getInstance().loadState(azureSettingsForm.getCurrentState());
-    var azureCredentials = AzureCredentialManager.getInstance();
-    azureCredentials.setApiKey(azureSettingsForm.getApiKey());
-    azureCredentials.setActiveDirectoryToken(azureSettingsForm.getActiveDirectoryToken());
-
-    YouSettings.getInstance()
-        .loadState(serviceSelectionForm.getYouSettingsForm().getCurrentState());
-
-    var llamaSettingsForm = serviceSelectionForm.getLlamaSettingsForm();
-    LlamaCredentialManager.getInstance()
-        .setCredential(llamaSettingsForm.getLlamaServerPreferencesForm().getApiKey());
-    LlamaSettings.getInstance().loadState(llamaSettingsForm.getCurrentState());
+    applyOpenAISettings(openAISettingsForm);
+    applyAzureSettings(serviceSelectionForm.getAzureSettingsForm());
+    applyYouSettings(serviceSelectionForm.getYouSettingsForm());
+    applyLlamaSettings(serviceSelectionForm.getLlamaSettingsForm());
 
     var serviceChanged = component.getSelectedService() != settings.getSelectedService();
-    var modelChanged = !openAISettings.getState().getModel()
+    var modelChanged = !OpenAISettings.getCurrentState().getModel()
         .equals(openAISettingsForm.getModel());
     if (serviceChanged || modelChanged) {
       resetActiveTab();
@@ -94,6 +85,23 @@ public class GeneralSettingsConfigurable implements Configurable {
             .send();
       }
     }
+  }
+
+  private void applyLlamaSettings(LlamaSettingsForm form) {
+    LlamaCredentialManager.getInstance()
+        .setCredential(form.getLlamaServerPreferencesForm().getApiKey());
+    LlamaSettings.getInstance().loadState(form.getCurrentState());
+  }
+
+  private void applyYouSettings(YouSettingsForm form) {
+    YouSettings.getInstance().loadState(form.getCurrentState());
+  }
+
+  private void applyAzureSettings(AzureSettingsForm form) {
+    AzureSettings.getInstance().loadState(form.getCurrentState());
+    var azureCredentials = AzureCredentialManager.getInstance();
+    azureCredentials.setApiKey(form.getApiKey());
+    azureCredentials.setActiveDirectoryToken(form.getActiveDirectoryToken());
   }
 
   @Override
@@ -115,6 +123,11 @@ public class GeneralSettingsConfigurable implements Configurable {
       Disposer.dispose(parentDisposable);
     }
     component = null;
+  }
+
+  private void applyOpenAISettings(OpenAISettingsForm form) {
+    OpenAICredentialManager.getInstance().setCredential(form.getApiKey());
+    OpenAISettings.getInstance().loadState(form.getCurrentState());
   }
 
   private void resetActiveTab() {

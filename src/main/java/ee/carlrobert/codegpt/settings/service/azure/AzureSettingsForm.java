@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import javax.swing.ButtonGroup;
 import javax.swing.JPanel;
+import org.jetbrains.annotations.Nullable;
 
 public class AzureSettingsForm {
 
@@ -141,12 +142,20 @@ public class AzureSettingsForm {
     azurePathField.setText(state.getPath());
   }
 
-  public String getActiveDirectoryToken() {
-    return new String(azureActiveDirectoryTokenField.getPassword());
+  public @Nullable String getActiveDirectoryToken() {
+    var activeDirToken = new String(azureActiveDirectoryTokenField.getPassword());
+    if (activeDirToken.isEmpty()) {
+      return null;
+    }
+    return activeDirToken;
   }
 
-  public String getApiKey() {
-    return new String(azureApiKeyField.getPassword());
+  public @Nullable String getApiKey() {
+    var apiKey = new String(azureApiKeyField.getPassword());
+    if (apiKey.isEmpty()) {
+      return null;
+    }
+    return apiKey;
   }
 
   private void registerPanelsVisibility(AzureSettingsState azureSettings) {
