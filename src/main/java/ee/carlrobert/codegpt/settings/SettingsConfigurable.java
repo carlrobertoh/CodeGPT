@@ -8,7 +8,7 @@ import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.credentials.AzureCredentialManager;
 import ee.carlrobert.codegpt.credentials.LlamaCredentialManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
-import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
+import ee.carlrobert.codegpt.settings.state.AzureSettings;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
@@ -50,7 +50,7 @@ public class SettingsConfigurable implements Configurable {
   public boolean isModified() {
     var settings = SettingsState.getInstance();
     var openAISettings = OpenAISettingsState.getInstance();
-    var azureSettings = AzureSettingsState.getInstance();
+    var azureSettings = AzureSettings.getInstance();
     var llamaSettings = LlamaSettingsState.getInstance();
 
     var serviceSelectionForm = settingsComponent.getServiceSelectionForm();
@@ -83,10 +83,10 @@ public class SettingsConfigurable implements Configurable {
     settings.setDisplayName(settingsComponent.getDisplayName());
     settings.setSelectedService(settingsComponent.getSelectedService());
 
-    var azureSettings = AzureSettingsState.getInstance();
+    var azureSettings = AzureSettings.getInstance();
     var openAISettings = OpenAISettingsState.getInstance();
     openAISettings.apply(serviceSelectionForm);
-    azureSettings.apply(serviceSelectionForm);
+    azureSettings.loadState(serviceSelectionForm.getCurrentAzureFormState());
     LlamaSettingsState.getInstance().apply(serviceSelectionForm);
     YouSettingsState.getInstance()
         .setDisplayWebSearchResults(serviceSelectionForm.isDisplayWebSearchResults());
@@ -113,7 +113,7 @@ public class SettingsConfigurable implements Configurable {
     settingsComponent.setSelectedService(settings.getSelectedService());
 
     OpenAISettingsState.getInstance().reset(serviceSelectionForm);
-    AzureSettingsState.getInstance().reset(serviceSelectionForm);
+    serviceSelectionForm.resetAzureForm();
     LlamaSettingsState.getInstance().reset(serviceSelectionForm);
 
     serviceSelectionForm.setDisplayWebSearchResults(

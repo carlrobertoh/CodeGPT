@@ -7,7 +7,7 @@ import com.intellij.openapi.components.Service;
 import ee.carlrobert.codegpt.completions.CallParameters;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
-import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
+import ee.carlrobert.codegpt.settings.state.AzureSettings;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
@@ -191,7 +191,7 @@ public final class ConversationService {
       case OPENAI:
         return OpenAISettingsState.getInstance().getModel();
       case AZURE:
-        return AzureSettingsState.getInstance().getDeploymentId();
+        return AzureSettings.getInstance().getState().getDeploymentId();
       case YOU:
         return "YouCode";
       case LLAMA_CPP:

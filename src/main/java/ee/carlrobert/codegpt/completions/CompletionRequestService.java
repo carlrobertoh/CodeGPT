@@ -12,7 +12,7 @@ import ee.carlrobert.codegpt.codecompletions.InfillRequestDetails;
 import ee.carlrobert.codegpt.credentials.AzureCredentialManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
-import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
+import ee.carlrobert.codegpt.settings.state.AzureSettings;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
@@ -48,7 +48,7 @@ public final class CompletionRequestService {
                 openAISettings.isUsingCustomPath() ? openAISettings.getPath() : null),
             eventListener);
       case AZURE:
-        var azureSettings = AzureSettingsState.getInstance();
+        var azureSettings = AzureSettings.getInstance().getState();
         return CompletionClientProvider.getAzureClient().getChatCompletionAsync(
             requestProvider.buildOpenAIChatCompletionRequest(
                 null,

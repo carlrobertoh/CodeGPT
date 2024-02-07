@@ -69,7 +69,7 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
       case OPENAI:
         return OpenAISettingsState.getInstance().getModel();
       case AZURE:
-        return AzureSettingsState.getInstance().getDeploymentId();
+        return AzureSettings.getInstance().getState().getDeploymentId();
       case YOU:
         return "YouCode";
       case LLAMA_CPP:

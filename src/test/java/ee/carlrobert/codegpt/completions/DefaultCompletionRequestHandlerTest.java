@@ -15,7 +15,7 @@ import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
-import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
+import ee.carlrobert.codegpt.settings.state.AzureSettings;
 import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange;
 import java.util.List;
 import java.util.Map;
@@ -92,7 +92,9 @@ public class DefaultCompletionRequestHandlerTest extends IntegrationTest {
 
   public void testAzureChatCompletionCallWithCustomSettings() {
     useAzureService();
-    AzureSettingsState.getInstance().setPath("/codegpt/deployments/%s/completions?api-version=%s");
+    AzureSettings.getInstance()
+        .getState()
+        .setPath("/codegpt/deployments/%s/completions?api-version=%s");
     var conversationService = ConversationService.getInstance();
     var prevMessage = new Message("TEST_PREV_PROMPT");
     prevMessage.setResponse("TEST_PREV_RESPONSE");

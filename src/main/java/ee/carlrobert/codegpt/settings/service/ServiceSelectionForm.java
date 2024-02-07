@@ -18,6 +18,7 @@ import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
 import ee.carlrobert.codegpt.completions.you.auth.AuthenticationNotifier;
 import ee.carlrobert.codegpt.credentials.AzureCredentialManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
+import ee.carlrobert.codegpt.settings.state.AzureSettings;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.YouSettingsState;
@@ -66,7 +67,7 @@ public class ServiceSelectionForm {
     openAIApiKeyField.setColumns(30);
     openAIApiKeyField.setText(OpenAICredentialManager.getInstance().getCredential());
 
-    var azureSettings = AzureSettingsState.getInstance();
+    var azureSettings = AzureSettings.getInstance().getState();
     useAzureApiKeyAuthenticationRadioButton = new JBRadioButton(
         CodeGPTBundle.get("settingsConfigurable.service.azure.useApiKeyAuth.label"),
         azureSettings.isUseAzureApiKeyAuthentication());
@@ -288,6 +289,31 @@ public class ServiceSelectionForm {
     return ((OpenAIChatCompletionModel) (openAICompletionModelComboBox.getModel()
         .getSelectedItem()))
         .getCode();
+  }
+
+  public AzureSettingsState getCurrentAzureFormState() {
+    var state = new AzureSettingsState();
+    state.setUseAzureActiveDirectoryAuthentication(isAzureActiveDirectoryAuthenticationSelected());
+    state.setUseAzureApiKeyAuthentication(isAzureApiKeyAuthenticationSelected());
+    state.setResourceName(getAzureResourceName());
+    state.setDeploymentId(getAzureDeploymentId());
+    state.setApiVersion(getAzureApiVersion());
+    state.setBaseHost(getAzureBaseHost());
+    state.setPath(getAzurePath());
+    return state;
+  }
+
+  public void resetAzureForm() {
+    var state = AzureSettings.getCurrentState();
+    setAzureApiKey(AzureCredentialManager.getInstance().getApiKey());
+    setAzureActiveDirectoryToken(AzureCredentialManager.getInstance().getActiveDirectoryToken());
+    setAzureApiKeyAuthenticationSelected(state.isUseAzureApiKeyAuthentication());
+    setAzureActiveDirectoryAuthenticationSelected(state.isUseAzureActiveDirectoryAuthentication());
+    setAzureResourceName(state.getResourceName());
+    setAzureDeploymentId(state.getDeploymentId());
+    setAzureApiVersion(state.getApiVersion());
+    setAzureBaseHost(state.getBaseHost());
+    setAzurePath(state.getPath());
   }
 
   public void setAzureActiveDirectoryAuthenticationSelected(boolean selected) {

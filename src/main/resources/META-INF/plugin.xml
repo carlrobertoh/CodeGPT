@@ -28,7 +28,7 @@
         <applicationService
           serviceImplementation="ee.carlrobert.codegpt.telemetry.core.service.TelemetryServiceFactory"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.SettingsState"/>
-        <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.AzureSettingsState"/>
+        <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.AzureSettings"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.OpenAISettingsState"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.YouSettingsState"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.LlamaSettingsState"/>

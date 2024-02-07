@@ -8,7 +8,7 @@ import ee.carlrobert.codegpt.credentials.AzureCredentialManager;
 import ee.carlrobert.codegpt.credentials.LlamaCredentialManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
 import ee.carlrobert.codegpt.settings.advanced.AdvancedSettingsState;
-import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
+import ee.carlrobert.codegpt.settings.state.AzureSettings;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.llm.client.azure.AzureClient;
@@ -38,7 +38,7 @@ public class CompletionClientProvider {
   }
 
   public static AzureClient getAzureClient() {
-    var settings = AzureSettingsState.getInstance();
+    var settings = AzureSettings.getInstance().getState();
     var params = new AzureCompletionRequestParams(
         settings.getResourceName(),
         settings.getDeploymentId(),
