@@ -11,6 +11,7 @@ import static org.assertj.core.groups.Tuple.tuple;
 
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
+import ee.carlrobert.codegpt.credentials.managers.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettings;
 import ee.carlrobert.codegpt.settings.state.openai.OpenAISettingsState;
@@ -25,7 +26,7 @@ public class CompletionRequestProviderTest extends IntegrationTest {
 
   public void testChatCompletionRequestWithSystemPromptOverride() {
     OpenAISettingsState openAISettings = OpenAISettings.getInstance().getState();
-    openAISettings.getCredentials().setApiKey("TEST_API_KEY");
+    OpenAICredentialsManager.getInstance().getCredentials().setApiKey("TEST_API_KEY");
     openAISettings.setBaseHost(null);
     ConfigurationState.getInstance().setSystemPrompt("TEST_SYSTEM_PROMPT");
     var conversation = ConversationService.getInstance().startConversation();

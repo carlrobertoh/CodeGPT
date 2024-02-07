@@ -11,7 +11,7 @@ import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 
-public class SettingsStateTest extends BasePlatformTestCase {
+public class GeneralSettingsStateTest extends BasePlatformTestCase {
 
   public void testOpenAISettingsSync() {
     var openAISettings = OpenAISettings.getInstance().getState();
