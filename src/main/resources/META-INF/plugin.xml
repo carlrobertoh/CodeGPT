@@ -32,7 +32,7 @@
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.OpenAISettings"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.YouSettings"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.LlamaSettings"/>
-        <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.IncludedFilesSettingsState"/>
+        <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.IncludedFilesSettings"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.advanced.AdvancedSettingsState"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.conversations.ConversationsState"/>

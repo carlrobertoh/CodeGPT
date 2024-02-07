@@ -16,7 +16,7 @@ import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
-import ee.carlrobert.codegpt.settings.state.IncludedFilesSettingsState;
+import ee.carlrobert.codegpt.settings.state.IncludedFilesSettings;
 import ee.carlrobert.codegpt.settings.state.LlamaSettings;
 import ee.carlrobert.codegpt.settings.state.OpenAISettings;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
@@ -67,7 +67,7 @@ public class CompletionRequestProvider {
 
   public static String getPromptWithContext(List<ReferencedFile> referencedFiles,
       String userPrompt) {
-    var includedFilesSettings = IncludedFilesSettingsState.getInstance();
+    var includedFilesSettings = IncludedFilesSettings.getCurrentState();
     var repeatableContext = referencedFiles.stream()
         .map(item -> includedFilesSettings.getRepeatableContext()
             .replace("{FILE_PATH}", item.getFilePath())

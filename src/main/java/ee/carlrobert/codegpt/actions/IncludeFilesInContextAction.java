@@ -2,6 +2,8 @@ package ee.carlrobert.codegpt.actions;
 
 import static com.intellij.openapi.actionSystem.CommonDataKeys.VIRTUAL_FILE_ARRAY;
 import static com.intellij.openapi.ui.DialogWrapper.OK_EXIT_CODE;
+import static ee.carlrobert.codegpt.settings.state.IncludedFilesSettingsState.DEFAULT_PROMPT_TEMPLATE;
+import static ee.carlrobert.codegpt.settings.state.IncludedFilesSettingsState.DEFAULT_REPEATABLE_CONTEXT;
 import static java.lang.String.format;
 
 import com.intellij.openapi.actionSystem.AnAction;
@@ -24,7 +26,7 @@ import com.intellij.util.ui.UI.PanelFactory;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.CodeGPTKeys;
 import ee.carlrobert.codegpt.EncodingManager;
-import ee.carlrobert.codegpt.settings.state.IncludedFilesSettingsState;
+import ee.carlrobert.codegpt.settings.state.IncludedFilesSettings;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import ee.carlrobert.codegpt.ui.checkbox.FileCheckboxTree;
 import ee.carlrobert.codegpt.ui.checkbox.PsiElementCheckboxTree;
@@ -70,7 +72,7 @@ public class IncludeFilesInContextAction extends AnAction {
       }
     });
 
-    var includedFilesSettings = IncludedFilesSettingsState.getInstance();
+    var includedFilesSettings = IncludedFilesSettings.getCurrentState();
     var promptTemplateTextArea = UIUtil.createTextArea(includedFilesSettings.getPromptTemplate());
     var repeatableContextTextArea =
         UIUtil.createTextArea(includedFilesSettings.getRepeatableContext());
@@ -225,12 +227,11 @@ public class IncludeFilesInContextAction extends AnAction {
     var restoreButton = new JButton(
         CodeGPTBundle.get("action.includeFilesInContext.dialog.restoreToDefaults.label"));
     restoreButton.addActionListener(e -> {
-      var includedFilesSettings = IncludedFilesSettingsState.getInstance();
-      includedFilesSettings.setPromptTemplate(IncludedFilesSettingsState.DEFAULT_PROMPT_TEMPLATE);
-      includedFilesSettings.setRepeatableContext(
-          IncludedFilesSettingsState.DEFAULT_REPEATABLE_CONTEXT);
-      promptTemplateTextArea.setText(IncludedFilesSettingsState.DEFAULT_PROMPT_TEMPLATE);
-      repeatableContextTextArea.setText(IncludedFilesSettingsState.DEFAULT_REPEATABLE_CONTEXT);
+      var includedFilesSettings = IncludedFilesSettings.getCurrentState();
+      includedFilesSettings.setPromptTemplate(DEFAULT_PROMPT_TEMPLATE);
+      includedFilesSettings.setRepeatableContext(DEFAULT_REPEATABLE_CONTEXT);
+      promptTemplateTextArea.setText(DEFAULT_PROMPT_TEMPLATE);
+      repeatableContextTextArea.setText(DEFAULT_REPEATABLE_CONTEXT);
     });
     return restoreButton;
   }
