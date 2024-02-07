@@ -26,7 +26,6 @@ import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.codecompletions.InfillPromptTemplate;
 import ee.carlrobert.codegpt.completions.PromptTemplate;
-import ee.carlrobert.codegpt.completions.llama.CustomLlamaModel;
 import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaCompletionModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
@@ -47,7 +46,7 @@ import javax.swing.SwingUtilities;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * {@link ModelSelector} with either {@link HuggingFaceModel} selection or {@link CustomLlamaModel}
+ * {@link ModelSelector} with either {@link HuggingFaceModel} selection or a custom model
  * file chooser.
  */
 public class LlamaModelSelector implements ModelSelector<LlamaCompletionModel> {
@@ -83,7 +82,7 @@ public class LlamaModelSelector implements ModelSelector<LlamaCompletionModel> {
   private final ChatPromptTemplatePanel chatPromptTemplateField;
 
   public LlamaModelSelector(LlamaCompletionModel initialModel) {
-    boolean isCustomModel = initialModel instanceof CustomLlamaModel;
+    boolean isCustomModel = !(initialModel instanceof HuggingFaceModel);
     predefinedModelRadioButton = new JBRadioButton("Use pre-defined model",
         !isCustomModel);
     customModelRadioButton = new JBRadioButton("Use custom model",
@@ -140,9 +139,7 @@ public class LlamaModelSelector implements ModelSelector<LlamaCompletionModel> {
     modelSizeComboBox.setEnabled(
         initialModelSizes.size() > 1 && !llamaServerAgent.isServerRunning());
 
-    String modelPath =
-        initialModel instanceof CustomLlamaModel ? ((CustomLlamaModel) initialModel).getModelPath()
-            : "";
+    String modelPath = initialModel instanceof HuggingFaceModel ? "" : initialModel.getCode();
     customModelPathField = createTextFieldWithBrowseButton(
         FileChooserDescriptorFactory.createSingleFileDescriptor("gguf"));
     customModelPathField.setText(modelPath);
@@ -431,7 +428,7 @@ public class LlamaModelSelector implements ModelSelector<LlamaCompletionModel> {
       huggingFaceComboBoxModel.setSelectedItem(model);
     } else {
       setUseCustomModel(true);
-      setCustomModel(((CustomLlamaModel) model).getModelPath());
+      setCustomModel(model.getCode());
     }
   }
 
@@ -440,7 +437,7 @@ public class LlamaModelSelector implements ModelSelector<LlamaCompletionModel> {
     if (!isUseCustomModel()) {
       return (HuggingFaceModel) huggingFaceComboBoxModel.getSelectedItem();
     } else {
-      return new CustomLlamaModel(getCustomModel());
+      return this::getCustomModel;
     }
   }
 

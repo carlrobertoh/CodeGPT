@@ -8,7 +8,6 @@ import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.actionSystem.ex.ComboBoxAction;
 import ee.carlrobert.codegpt.Icons;
-import ee.carlrobert.codegpt.completions.llama.CustomLlamaModel;
 import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.conversations.ConversationService;
@@ -70,7 +69,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
     actionGroup.addSeparator();
     actionGroup.add(createModelAction(
         ServiceType.LLAMA_CPP,
-        getSelectedHuggingFace(),
+        getSelectedModel(),
         Icons.Llama,
         presentation));
     actionGroup.addSeparator();
@@ -101,14 +100,14 @@ public class ModelComboBoxAction extends ComboBoxAction {
         templatePresentation.setText("You.com");
         break;
       case LLAMA_CPP:
-        templatePresentation.setText(getSelectedHuggingFace());
+        templatePresentation.setText(getSelectedModel());
         templatePresentation.setIcon(Icons.Llama);
         break;
       default:
     }
   }
 
-  private String getSelectedHuggingFace() {
+  private String getSelectedModel() {
     var model = LlamaSettings.getInstance().getState().getUsedModel();
     if (model instanceof HuggingFaceModel) {
       HuggingFaceModel huggingFaceModel = (HuggingFaceModel) model;
@@ -118,7 +117,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
           huggingFaceModel.getParameterSize(),
           huggingFaceModel.getQuantization());
     }
-    return ((CustomLlamaModel) model).getModelFileName();
+    return model.getCode();
   }
 
   private AnAction createModelAction(

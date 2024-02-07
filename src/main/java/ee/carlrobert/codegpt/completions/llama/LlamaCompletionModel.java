@@ -8,12 +8,21 @@ import java.io.File;
 public interface LlamaCompletionModel extends CompletionModel {
 
   static String getModelPath(LlamaCompletionModel model) {
-    return model instanceof CustomLlamaModel ? ((CustomLlamaModel) model).getModelPath()
-        : CodeGPTPlugin.getLlamaModelsPath() + File.separator
-            + ((HuggingFaceModel) model).getModelFileName();
+    return model instanceof HuggingFaceModel ? CodeGPTPlugin.getLlamaModelsPath() + File.separator
+        + ((HuggingFaceModel) model).getModelFileName() : model.getCode();
   }
 
   static boolean isModelExists(LlamaCompletionModel model) {
     return FileUtil.exists(getModelPath(model));
+  }
+
+  @Override
+  default String getDescription() {
+    return null;
+  }
+
+  @Override
+  default int getMaxTokens() {
+    return -1;
   }
 }

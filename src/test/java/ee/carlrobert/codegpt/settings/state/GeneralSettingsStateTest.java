@@ -4,7 +4,6 @@ import static ee.carlrobert.codegpt.completions.llama.HuggingFaceModel.CODE_LLAM
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
-import ee.carlrobert.codegpt.completions.llama.CustomLlamaModel;
 import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaCompletionModel;
 import ee.carlrobert.codegpt.conversations.Conversation;
@@ -61,8 +60,8 @@ public class GeneralSettingsStateTest extends BasePlatformTestCase {
 
     assertThat(settings.getSelectedService()).isEqualTo(ServiceType.LLAMA_CPP);
     LlamaCompletionModel model = llamaSettings.getModel();
-    assertTrue(model instanceof CustomLlamaModel);
-    assertThat(((CustomLlamaModel) model).getModelPath()).isEqualTo("TEST_LLAMA_MODEL_PATH");
+    assertFalse(model instanceof HuggingFaceModel);
+    assertThat(model.getCode()).isEqualTo("TEST_LLAMA_MODEL_PATH");
   }
 
   public void testLlamaSettingsHuggingFaceModelSync() {

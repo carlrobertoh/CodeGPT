@@ -7,7 +7,6 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
-import ee.carlrobert.codegpt.completions.llama.CustomLlamaModel;
 import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaCompletionModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
@@ -58,7 +57,7 @@ public class GeneralSettingsState implements PersistentStateComponent<GeneralSet
         llamaSettings.getLocalSettings()
             .setModel(HuggingFaceModel.valueOf(conversation.getModel()));
       } catch (IllegalArgumentException ignore) {
-        llamaSettings.getLocalSettings().setModel(new CustomLlamaModel(conversation.getModel()));
+        llamaSettings.getLocalSettings().setModel(conversation::getModel);
       }
     }
     if ("you.chat.completion".equals(clientCode)) {
@@ -77,9 +76,8 @@ public class GeneralSettingsState implements PersistentStateComponent<GeneralSet
       case LLAMA_CPP:
         var llamaSettings = LlamaSettings.getInstance().getState();
         LlamaCompletionModel usedModel = llamaSettings.getUsedModel();
-        if (usedModel instanceof CustomLlamaModel) {
-          CustomLlamaModel customModel = (CustomLlamaModel) usedModel;
-          var filePath = customModel.getModelPath();
+        if (!(usedModel instanceof HuggingFaceModel)) {
+          var filePath = usedModel.getCode();
           int lastSeparatorIndex = filePath.lastIndexOf('/');
           if (lastSeparatorIndex == -1) {
             return filePath;

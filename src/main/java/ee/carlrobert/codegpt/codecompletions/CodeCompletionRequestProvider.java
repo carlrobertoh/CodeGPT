@@ -1,6 +1,5 @@
 package ee.carlrobert.codegpt.codecompletions;
 
-import ee.carlrobert.codegpt.completions.llama.CustomLlamaModel;
 import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaCompletionModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
@@ -46,10 +45,10 @@ public class CodeCompletionRequestProvider {
       return settings.getRemoteSettings().getInfillPromptTemplate();
     }
     LlamaCompletionModel model = settings.getLocalSettings().getModel();
-    if (model instanceof CustomLlamaModel) {
-      return settings.getLocalSettings().getInfillPromptTemplate();
+    if (model instanceof HuggingFaceModel) {
+      return LlamaModel.findByHuggingFaceModel((HuggingFaceModel) model)
+          .getInfillPromptTemplate();
     }
-    return LlamaModel.findByHuggingFaceModel((HuggingFaceModel) model)
-        .getInfillPromptTemplate();
+    return settings.getLocalSettings().getInfillPromptTemplate();
   }
 }
