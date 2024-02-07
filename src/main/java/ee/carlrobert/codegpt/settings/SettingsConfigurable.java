@@ -12,7 +12,7 @@ import ee.carlrobert.codegpt.settings.state.AzureSettings;
 import ee.carlrobert.codegpt.settings.state.LlamaSettings;
 import ee.carlrobert.codegpt.settings.state.OpenAISettings;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
-import ee.carlrobert.codegpt.settings.state.YouSettingsState;
+import ee.carlrobert.codegpt.settings.state.YouSettings;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
 import ee.carlrobert.codegpt.util.ApplicationUtil;
@@ -59,7 +59,7 @@ public class SettingsConfigurable implements Configurable {
         || openAISettings.isModified(serviceSelectionForm)
         || azureSettings.isModified(serviceSelectionForm)
         || serviceSelectionForm.isDisplayWebSearchResults()
-        != YouSettingsState.getInstance().isDisplayWebSearchResults()
+        != YouSettings.getCurrentState().isDisplayWebSearchResults()
         || llamaSettings.isModified(serviceSelectionForm);
   }
 
@@ -88,7 +88,7 @@ public class SettingsConfigurable implements Configurable {
     openAISettings.loadState(serviceSelectionForm.getCurrentOpenAIFormState());
     azureSettings.loadState(serviceSelectionForm.getCurrentAzureFormState());
     LlamaSettings.getInstance().loadState(serviceSelectionForm.getCurrentLlamaFormState());
-    YouSettingsState.getInstance()
+    YouSettings.getCurrentState()
         .setDisplayWebSearchResults(serviceSelectionForm.isDisplayWebSearchResults());
 
     var serviceChanged = isServiceChanged(settings);
@@ -118,7 +118,7 @@ public class SettingsConfigurable implements Configurable {
     serviceSelectionForm.resetLlamaForm();
 
     serviceSelectionForm.setDisplayWebSearchResults(
-        YouSettingsState.getInstance().isDisplayWebSearchResults());
+        YouSettings.getCurrentState().isDisplayWebSearchResults());
   }
 
   @Override

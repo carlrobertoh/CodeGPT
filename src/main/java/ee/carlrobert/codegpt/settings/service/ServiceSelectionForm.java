@@ -25,7 +25,7 @@ import ee.carlrobert.codegpt.settings.state.LlamaSettings;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettings;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
-import ee.carlrobert.codegpt.settings.state.YouSettingsState;
+import ee.carlrobert.codegpt.settings.state.YouSettings;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import java.util.List;
@@ -113,7 +113,7 @@ public class ServiceSelectionForm {
 
     displayWebSearchResultsCheckBox = new JBCheckBox(
         CodeGPTBundle.get("settingsConfigurable.service.you.displayResults.label"),
-        YouSettingsState.getInstance().isDisplayWebSearchResults());
+        YouSettings.getCurrentState().isDisplayWebSearchResults());
 
     openAIServiceSectionPanel = createOpenAIServiceSectionPanel();
     azureServiceSectionPanel = createAzureServiceSectionPanel();

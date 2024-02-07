@@ -30,7 +30,7 @@
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.SettingsState"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.AzureSettings"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.OpenAISettings"/>
-        <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.YouSettingsState"/>
+        <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.YouSettings"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.LlamaSettings"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.IncludedFilesSettingsState"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings"/>

@@ -3,13 +3,13 @@ package ee.carlrobert.codegpt.toolwindow.chat.ui.textarea;
 import com.intellij.ui.components.JBCheckBox;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.completions.you.YouUserManager;
-import ee.carlrobert.codegpt.settings.state.YouSettingsState;
+import ee.carlrobert.codegpt.settings.state.YouSettings;
 
 public class YouProCheckbox extends JBCheckBox {
 
   public YouProCheckbox() {
     super(CodeGPTBundle.get("toolwindow.chat.youProCheckBox.text"));
-    var youSettings = YouSettingsState.getInstance();
+    var youSettings = YouSettings.getCurrentState();
     var youUserManager = YouUserManager.getInstance();
     setOpaque(false);
     setEnabled(youUserManager.isSubscribed());

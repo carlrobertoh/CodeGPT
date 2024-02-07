@@ -13,7 +13,7 @@ import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.OpenAISettings;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
-import ee.carlrobert.codegpt.settings.state.YouSettingsState;
+import ee.carlrobert.codegpt.settings.state.YouSettings;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ChatMessageResponseBody;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ResponsePanel;
@@ -128,7 +128,7 @@ abstract class ToolWindowCompletionResponseEventListener implements
     if (containsResults) {
       message.setSerpResults(serpResults);
     }
-    var displayResults = YouSettingsState.getInstance().isDisplayWebSearchResults();
+    var displayResults = YouSettings.getCurrentState().isDisplayWebSearchResults();
 
     SwingUtilities.invokeLater(() -> {
       try {

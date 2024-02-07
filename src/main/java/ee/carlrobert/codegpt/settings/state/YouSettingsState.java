@@ -1,31 +1,11 @@
 package ee.carlrobert.codegpt.settings.state;
 
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.components.PersistentStateComponent;
-import com.intellij.openapi.components.State;
-import com.intellij.openapi.components.Storage;
-import com.intellij.util.xmlb.XmlSerializerUtil;
-import org.jetbrains.annotations.NotNull;
+import java.util.Objects;
 
-@State(name = "CodeGPT_YouSettings", storages = @Storage("CodeGPT_YouSettings.xml"))
-public class YouSettingsState implements PersistentStateComponent<YouSettingsState> {
+public class YouSettingsState {
 
   private boolean displayWebSearchResults = true;
   private boolean useGPT4Model;
-
-  public static YouSettingsState getInstance() {
-    return ApplicationManager.getApplication().getService(YouSettingsState.class);
-  }
-
-  @Override
-  public YouSettingsState getState() {
-    return this;
-  }
-
-  @Override
-  public void loadState(@NotNull YouSettingsState state) {
-    XmlSerializerUtil.copyBean(state, this);
-  }
 
   public boolean isDisplayWebSearchResults() {
     return displayWebSearchResults;
@@ -41,5 +21,23 @@ public class YouSettingsState implements PersistentStateComponent<YouSettingsSta
 
   public void setUseGPT4Model(boolean useGPT4Model) {
     this.useGPT4Model = useGPT4Model;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    YouSettingsState that = (YouSettingsState) o;
+    return displayWebSearchResults == that.displayWebSearchResults
+        && useGPT4Model == that.useGPT4Model;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(displayWebSearchResults, useGPT4Model);
   }
 }

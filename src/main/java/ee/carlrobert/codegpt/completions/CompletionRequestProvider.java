@@ -20,7 +20,7 @@ import ee.carlrobert.codegpt.settings.state.IncludedFilesSettingsState;
 import ee.carlrobert.codegpt.settings.state.LlamaSettings;
 import ee.carlrobert.codegpt.settings.state.OpenAISettings;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
-import ee.carlrobert.codegpt.settings.state.YouSettingsState;
+import ee.carlrobert.codegpt.settings.state.YouSettings;
 import ee.carlrobert.codegpt.telemetry.core.configuration.TelemetryConfiguration;
 import ee.carlrobert.codegpt.telemetry.core.service.UserId;
 import ee.carlrobert.embedding.EmbeddingsService;
@@ -136,7 +136,7 @@ public class CompletionRequestProvider {
 
   public YouCompletionRequest buildYouCompletionRequest(Message message) {
     var requestBuilder = new YouCompletionRequest.Builder(message.getPrompt())
-        .setUseGPT4Model(YouSettingsState.getInstance().isUseGPT4Model())
+        .setUseGPT4Model(YouSettings.getCurrentState().isUseGPT4Model())
         .setChatHistory(conversation.getMessages().stream()
             .map(prevMessage -> new YouCompletionRequestMessage(
                 prevMessage.getPrompt(),

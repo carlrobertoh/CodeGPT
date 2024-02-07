@@ -7,7 +7,7 @@ import com.intellij.openapi.project.Project;
 import ee.carlrobert.codegpt.completions.ConversationType;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.message.Message;
-import ee.carlrobert.codegpt.settings.state.YouSettingsState;
+import ee.carlrobert.codegpt.settings.state.YouSettings;
 import ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowTabPanel;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ChatMessageResponseBody;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ResponsePanel;
@@ -61,7 +61,7 @@ public class StandardChatToolWindowTabPanel extends ChatToolWindowTabPanel {
           new ChatMessageResponseBody(project, this).withResponse(message.getResponse());
 
       var serpResults = message.getSerpResults();
-      if (YouSettingsState.getInstance().isDisplayWebSearchResults()
+      if (YouSettings.getCurrentState().isDisplayWebSearchResults()
           && serpResults != null && !serpResults.isEmpty()) {
         messageResponseBody.displaySerpResults(serpResults);
       }
