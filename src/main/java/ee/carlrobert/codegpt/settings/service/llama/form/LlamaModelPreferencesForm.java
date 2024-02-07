@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.settings.service;
+package ee.carlrobert.codegpt.settings.service.llama.form;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
@@ -29,7 +29,7 @@ import ee.carlrobert.codegpt.completions.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaServerAgent;
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
-import ee.carlrobert.codegpt.settings.state.LlamaSettings;
+import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.ui.ChatPromptTemplatePanel;
 import ee.carlrobert.codegpt.ui.InfillPromptTemplatePanel;
 import java.awt.BorderLayout;

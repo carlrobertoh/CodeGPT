@@ -2,8 +2,8 @@ package ee.carlrobert.codegpt.actions;
 
 import static com.intellij.openapi.actionSystem.CommonDataKeys.VIRTUAL_FILE_ARRAY;
 import static com.intellij.openapi.ui.DialogWrapper.OK_EXIT_CODE;
-import static ee.carlrobert.codegpt.settings.state.IncludedFilesSettingsState.DEFAULT_PROMPT_TEMPLATE;
-import static ee.carlrobert.codegpt.settings.state.IncludedFilesSettingsState.DEFAULT_REPEATABLE_CONTEXT;
+import static ee.carlrobert.codegpt.settings.IncludedFilesSettingsState.DEFAULT_PROMPT_TEMPLATE;
+import static ee.carlrobert.codegpt.settings.IncludedFilesSettingsState.DEFAULT_REPEATABLE_CONTEXT;
 import static java.lang.String.format;
 
 import com.intellij.openapi.actionSystem.AnAction;
@@ -26,7 +26,7 @@ import com.intellij.util.ui.UI.PanelFactory;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.CodeGPTKeys;
 import ee.carlrobert.codegpt.EncodingManager;
-import ee.carlrobert.codegpt.settings.state.IncludedFilesSettings;
+import ee.carlrobert.codegpt.settings.IncludedFilesSettings;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import ee.carlrobert.codegpt.ui.checkbox.FileCheckboxTree;
 import ee.carlrobert.codegpt.ui.checkbox.PsiElementCheckboxTree;

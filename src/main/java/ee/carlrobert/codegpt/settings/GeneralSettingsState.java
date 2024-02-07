@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.settings.state;
+package ee.carlrobert.codegpt.settings;
 
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 

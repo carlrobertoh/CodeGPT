@@ -1,6 +1,4 @@
-package ee.carlrobert.codegpt.settings.state;
-
-import static java.lang.String.format;
+package ee.carlrobert.codegpt.settings;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
@@ -10,6 +8,9 @@ import ee.carlrobert.codegpt.completions.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
+import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
+import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
+import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import org.jetbrains.annotations.NotNull;
 
 @State(name = "CodeGPT_GeneralSettings_210", storages = @Storage("CodeGPT_GeneralSettings_210.xml"))
@@ -82,7 +83,7 @@ public class GeneralSettings implements PersistentStateComponent<GeneralSettings
         }
         var huggingFaceModel = llamaSettings.getHuggingFaceModel();
         var llamaModel = LlamaModel.findByHuggingFaceModel(huggingFaceModel);
-        return format(
+        return String.format(
             "%s %dB (Q%d)",
             llamaModel.getLabel(),
             huggingFaceModel.getParameterSize(),

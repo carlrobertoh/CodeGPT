@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.settings.state;
+package ee.carlrobert.codegpt.settings.service.azure;
 
 import com.intellij.util.xmlb.annotations.Transient;
 import java.util.Objects;

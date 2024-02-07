@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.settings.service;
+package ee.carlrobert.codegpt.settings.service.llama.form;
 
 import static ee.carlrobert.codegpt.ui.UIUtil.createComment;
 import static ee.carlrobert.codegpt.ui.UIUtil.createForm;
@@ -27,7 +27,7 @@ import ee.carlrobert.codegpt.completions.llama.LlamaServerAgent;
 import ee.carlrobert.codegpt.completions.llama.LlamaServerStartupParams;
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
 import ee.carlrobert.codegpt.credentials.LlamaCredentialManager;
-import ee.carlrobert.codegpt.settings.state.LlamaSettings;
+import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.ui.ChatPromptTemplatePanel;
 import ee.carlrobert.codegpt.ui.InfillPromptTemplatePanel;
 import ee.carlrobert.codegpt.ui.OverlayUtil;

@@ -5,7 +5,7 @@ import static java.lang.String.format;
 import com.intellij.ui.components.ActionLink;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.Icons;
-import ee.carlrobert.codegpt.settings.state.GeneralSettings;
+import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ResponsePanel;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import java.awt.BorderLayout;

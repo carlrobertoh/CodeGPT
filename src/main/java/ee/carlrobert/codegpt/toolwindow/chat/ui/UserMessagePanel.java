@@ -9,7 +9,7 @@ import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.conversations.message.Message;
-import ee.carlrobert.codegpt.settings.state.GeneralSettings;
+import ee.carlrobert.codegpt.settings.GeneralSettings;
 import java.awt.BorderLayout;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;

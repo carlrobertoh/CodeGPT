@@ -15,7 +15,7 @@ import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
-import ee.carlrobert.codegpt.settings.state.AzureSettings;
+import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
 import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange;
 import java.util.List;
 import java.util.Map;

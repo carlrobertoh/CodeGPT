@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.settings.state;
+package ee.carlrobert.codegpt.settings.service.openai;
 
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 

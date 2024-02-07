@@ -8,11 +8,10 @@ import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.credentials.AzureCredentialManager;
 import ee.carlrobert.codegpt.credentials.LlamaCredentialManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
-import ee.carlrobert.codegpt.settings.state.AzureSettings;
-import ee.carlrobert.codegpt.settings.state.GeneralSettings;
-import ee.carlrobert.codegpt.settings.state.LlamaSettings;
-import ee.carlrobert.codegpt.settings.state.OpenAISettings;
-import ee.carlrobert.codegpt.settings.state.YouSettings;
+import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
+import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
+import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
+import ee.carlrobert.codegpt.settings.service.you.YouSettings;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
 import ee.carlrobert.codegpt.util.ApplicationUtil;
@@ -20,11 +19,11 @@ import javax.swing.JComponent;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
 
-public class SettingsConfigurable implements Configurable {
+public class GeneralSettingsConfigurable implements Configurable {
 
   private Disposable parentDisposable;
 
-  private SettingsComponent component;
+  private GeneralSettingsComponent component;
 
   @Nls(capitalization = Nls.Capitalization.Title)
   @Override
@@ -42,7 +41,7 @@ public class SettingsConfigurable implements Configurable {
   public JComponent createComponent() {
     var settings = GeneralSettings.getInstance();
     parentDisposable = Disposer.newDisposable();
-    component = new SettingsComponent(parentDisposable, settings);
+    component = new GeneralSettingsComponent(parentDisposable, settings);
     return component.getPanel();
   }
 

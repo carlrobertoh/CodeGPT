@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.settings.service;
+package ee.carlrobert.codegpt.settings.service.llama.form;
 
 import static ee.carlrobert.codegpt.ui.UIUtil.withEmptyLeftBorder;
 

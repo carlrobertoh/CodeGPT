@@ -5,7 +5,7 @@ import static ee.carlrobert.codegpt.settings.service.ServiceType.LLAMA_CPP;
 import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator;
 import com.intellij.openapi.project.Project;
 import ee.carlrobert.codegpt.CodeGPTBundle;
-import ee.carlrobert.codegpt.settings.state.GeneralSettings;
+import ee.carlrobert.codegpt.settings.GeneralSettings;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;

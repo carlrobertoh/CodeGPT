@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.settings.state;
+package ee.carlrobert.codegpt.settings.service.llama;
 
 import ee.carlrobert.codegpt.codecompletions.InfillPromptTemplate;
 import ee.carlrobert.codegpt.completions.HuggingFaceModel;

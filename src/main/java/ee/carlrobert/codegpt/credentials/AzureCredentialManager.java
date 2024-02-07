@@ -2,7 +2,7 @@ package ee.carlrobert.codegpt.credentials;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
-import ee.carlrobert.codegpt.settings.state.AzureSettings;
+import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
 
 @Service
 public final class AzureCredentialManager extends AbstractCredentialManager {

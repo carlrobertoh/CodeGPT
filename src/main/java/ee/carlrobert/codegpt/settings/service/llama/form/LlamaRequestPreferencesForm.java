@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.settings.service;
+package ee.carlrobert.codegpt.settings.service.llama.form;
 
 import com.intellij.openapi.ui.panel.ComponentPanelBuilder;
 import com.intellij.ui.components.JBTextField;
@@ -6,7 +6,7 @@ import com.intellij.ui.components.fields.IntegerField;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
-import ee.carlrobert.codegpt.settings.state.LlamaSettings;
+import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 

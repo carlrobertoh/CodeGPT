@@ -8,7 +8,7 @@ import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.actions.toolwindow.DeleteConversationAction;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
-import ee.carlrobert.codegpt.settings.state.GeneralSettings;
+import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
 import ee.carlrobert.codegpt.ui.IconActionButton;
 import ee.carlrobert.codegpt.ui.ModelIconLabel;

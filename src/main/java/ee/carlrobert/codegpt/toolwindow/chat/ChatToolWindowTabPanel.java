@@ -23,7 +23,7 @@ import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
-import ee.carlrobert.codegpt.settings.state.GeneralSettings;
+import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowPanel;

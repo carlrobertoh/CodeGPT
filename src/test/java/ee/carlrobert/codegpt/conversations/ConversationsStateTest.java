@@ -5,8 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
-import ee.carlrobert.codegpt.settings.state.GeneralSettings;
-import ee.carlrobert.codegpt.settings.state.OpenAISettings;
+import ee.carlrobert.codegpt.settings.GeneralSettings;
+import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 
 public class ConversationsStateTest extends BasePlatformTestCase {

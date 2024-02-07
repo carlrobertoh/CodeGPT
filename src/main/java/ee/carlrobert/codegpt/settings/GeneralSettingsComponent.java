@@ -10,24 +10,23 @@ import com.intellij.openapi.util.SystemInfoRt;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
 import ee.carlrobert.codegpt.CodeGPTBundle;
+import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.codegpt.settings.service.ServiceSelectionForm;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
-import ee.carlrobert.codegpt.settings.state.GeneralSettings;
-import ee.carlrobert.codegpt.settings.state.OpenAISettings;
 import java.awt.CardLayout;
 import java.util.Arrays;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
-public class SettingsComponent {
+public class GeneralSettingsComponent {
 
   private final JPanel mainPanel;
   private final JBTextField displayNameField;
   private final ComboBox<ServiceType> serviceComboBox;
   private final ServiceSelectionForm serviceSelectionForm;
 
-  public SettingsComponent(Disposable parentDisposable, GeneralSettings settings) {
+  public GeneralSettingsComponent(Disposable parentDisposable, GeneralSettings settings) {
     displayNameField = new JBTextField(settings.getState().getDisplayName(), 20);
 
     serviceSelectionForm = new ServiceSelectionForm(parentDisposable);

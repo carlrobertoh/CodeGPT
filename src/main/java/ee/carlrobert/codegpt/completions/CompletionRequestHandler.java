@@ -1,8 +1,8 @@
 package ee.carlrobert.codegpt.completions;
 
 import com.intellij.openapi.diagnostic.Logger;
-import ee.carlrobert.codegpt.settings.state.GeneralSettings;
-import ee.carlrobert.codegpt.settings.state.GeneralSettingsState;
+import ee.carlrobert.codegpt.settings.GeneralSettings;
+import ee.carlrobert.codegpt.settings.GeneralSettingsState;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.client.you.completion.YouCompletionEventListener;

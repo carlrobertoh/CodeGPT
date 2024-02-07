@@ -10,7 +10,7 @@ import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.indexes.CodebaseIndexingCompletedNotifier;
 import ee.carlrobert.codegpt.indexes.CodebaseIndexingTask;
 import ee.carlrobert.codegpt.indexes.FolderStructureTreePanel;
-import ee.carlrobert.codegpt.settings.SettingsConfigurable;
+import ee.carlrobert.codegpt.settings.GeneralSettingsConfigurable;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ResponsePanel;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.codegpt.ui.UIUtil;
@@ -80,7 +80,7 @@ class ContextualChatToolWindowLandingPanel extends ResponsePanel {
       if (event.getURL() == null) {
         switch (event.getDescription()) {
           case "LOGIN":
-            ShowSettingsUtil.getInstance().showSettingsDialog(project, SettingsConfigurable.class);
+            ShowSettingsUtil.getInstance().showSettingsDialog(project, GeneralSettingsConfigurable.class);
             break;
           case "LIST_DEPENDENCIES":
             actionEvent.handleAction("List all the dependencies that the project uses");

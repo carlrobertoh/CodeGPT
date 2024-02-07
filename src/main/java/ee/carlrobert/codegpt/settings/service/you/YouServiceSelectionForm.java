@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.settings.service;
+package ee.carlrobert.codegpt.settings.service.you;
 
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.ui.ComponentValidator;
@@ -21,7 +21,7 @@ import ee.carlrobert.codegpt.completions.you.auth.YouAuthenticationService;
 import ee.carlrobert.codegpt.completions.you.auth.response.YouAuthenticationResponse;
 import ee.carlrobert.codegpt.completions.you.auth.response.YouUser;
 import ee.carlrobert.codegpt.credentials.YouCredentialManager;
-import ee.carlrobert.codegpt.settings.state.GeneralSettings;
+import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;

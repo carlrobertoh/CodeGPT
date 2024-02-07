@@ -15,7 +15,7 @@
         <postStartupActivity implementation="ee.carlrobert.codegpt.CodeGPTUpdateStartupActivity"/>
         <postStartupActivity implementation="ee.carlrobert.codegpt.PluginStartupActivity"/>
         <applicationConfigurable id="settings.codegpt" parentId="tools" displayName="CodeGPT"
-            instance="ee.carlrobert.codegpt.settings.SettingsConfigurable"/>
+            instance="ee.carlrobert.codegpt.settings.GeneralSettingsConfigurable"/>
         <applicationConfigurable id="settings.codegpt.configuration" parentId="settings.codegpt" displayName="Configuration"
             instance="ee.carlrobert.codegpt.settings.configuration.ConfigurationConfigurable"/>
         <applicationConfigurable id="settings.codegpt.advanced" parentId="settings.codegpt" displayName="Advanced Settings"
@@ -27,12 +27,12 @@
           displayName="Telemetry"/>
         <applicationService
           serviceImplementation="ee.carlrobert.codegpt.telemetry.core.service.TelemetryServiceFactory"/>
-        <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.GeneralSettings"/>
-        <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.AzureSettings"/>
-        <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.OpenAISettings"/>
-        <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.YouSettings"/>
-        <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.LlamaSettings"/>
-        <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.state.IncludedFilesSettings"/>
+        <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.GeneralSettings"/>
+        <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.service.azure.AzureSettings"/>
+        <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.service.openai.OpenAISettings"/>
+        <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.service.you.YouSettings"/>
+        <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.service.llama.LlamaSettings"/>
+        <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.IncludedFilesSettings"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.advanced.AdvancedSettings"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.conversations.ConversationsState"/>

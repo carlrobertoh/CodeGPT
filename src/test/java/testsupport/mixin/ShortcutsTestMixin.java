@@ -3,10 +3,10 @@ package testsupport.mixin;
 import ee.carlrobert.codegpt.credentials.AzureCredentialManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
-import ee.carlrobert.codegpt.settings.state.AzureSettings;
-import ee.carlrobert.codegpt.settings.state.GeneralSettings;
-import ee.carlrobert.codegpt.settings.state.LlamaSettings;
-import ee.carlrobert.codegpt.settings.state.OpenAISettings;
+import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
+import ee.carlrobert.codegpt.settings.GeneralSettings;
+import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
+import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 
 public interface ShortcutsTestMixin {
 

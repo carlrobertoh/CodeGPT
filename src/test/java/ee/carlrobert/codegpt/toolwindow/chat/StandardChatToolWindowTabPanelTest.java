@@ -19,7 +19,7 @@ import ee.carlrobert.codegpt.completions.HuggingFaceModel;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
-import ee.carlrobert.codegpt.settings.state.LlamaSettings;
+import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowTabPanel;
 import ee.carlrobert.embedding.ReferencedFile;
 import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange;
