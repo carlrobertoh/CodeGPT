@@ -17,7 +17,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import org.jetbrains.annotations.Nullable;
 
 @ParametersAreNonnullByDefault
-class CodeCompletionEventListener implements CompletionEventListener {
+class CodeCompletionEventListener implements CompletionEventListener<String> {
 
   private static final Logger LOG = Logger.getInstance(CodeCompletionEventListener.class);
 

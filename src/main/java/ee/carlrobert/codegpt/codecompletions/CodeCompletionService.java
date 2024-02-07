@@ -22,10 +22,8 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.EditorCustomElementRenderer;
 import com.intellij.openapi.editor.Inlay;
 import com.intellij.openapi.editor.InlayModel;
-import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.keymap.KeymapManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
@@ -35,7 +33,7 @@ import com.intellij.util.concurrency.annotations.RequiresReadLock;
 import com.intellij.util.concurrency.annotations.RequiresWriteLock;
 import ee.carlrobert.codegpt.actions.CodeCompletionEnabledListener;
 import ee.carlrobert.codegpt.completions.CompletionRequestService;
-import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
+import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import ee.carlrobert.codegpt.util.EditorUtil;
 import java.awt.event.KeyEvent;
 import java.util.List;
@@ -77,7 +75,7 @@ public final class CodeCompletionService implements Disposable {
     Project project = editor.getProject();
     if (project == null
         || project.isDisposed()
-        || !ConfigurationState.getInstance().isCodeCompletionsEnabled()
+        || !ConfigurationSettings.getCurrentState().isCodeCompletionsEnabled()
         || !EditorUtil.isSelectedEditor(editor)
         || LookupManager.getActiveLookup(editor) != null
         || editor.isViewer()
@@ -155,7 +153,7 @@ public final class CodeCompletionService implements Disposable {
     Document document = editor.getDocument();
     document.insertString(offset, text);
     editor.getCaretModel().moveToOffset(offset + text.length());
-    if (ConfigurationState.getInstance().isAutoFormattingEnabled()) {
+    if (ConfigurationSettings.getCurrentState().isAutoFormattingEnabled()) {
       EditorUtil.reformatDocument(
           requireNonNull(editor.getProject()),
           document,

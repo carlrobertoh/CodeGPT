@@ -12,7 +12,7 @@ import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.project.Project;
 import ee.carlrobert.codegpt.CodeGPTKeys;
 import ee.carlrobert.codegpt.conversations.message.Message;
-import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
+import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
 import ee.carlrobert.codegpt.util.file.FileUtil;
 import ee.carlrobert.embedding.ReferencedFile;
@@ -52,7 +52,7 @@ public class EditorActionsUtil {
       group.add(new CustomPromptAction());
       group.addSeparator();
 
-      var configuredActions = ConfigurationState.getInstance().getTableData();
+      var configuredActions = ConfigurationSettings.getCurrentState().getTableData();
       configuredActions.forEach((label, prompt) -> {
         // using label as action description to prevent com.intellij.diagnostic.PluginException
         // https://github.com/carlrobertoh/CodeGPT/issues/95

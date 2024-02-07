@@ -27,7 +27,7 @@ import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.indexes.FolderStructureTreePanel;
-import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
+import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import ee.carlrobert.codegpt.util.EditorUtil;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
@@ -115,7 +115,7 @@ public class OverlayUtil {
           @Override
           public void rememberChoice(boolean isSelected, int exitCode) {
             if (isSelected) {
-              ConfigurationState.getInstance().setIgnoreGitCommitTokenLimit(true);
+              ConfigurationSettings.getCurrentState().setIgnoreGitCommitTokenLimit(true);
             }
           }
 

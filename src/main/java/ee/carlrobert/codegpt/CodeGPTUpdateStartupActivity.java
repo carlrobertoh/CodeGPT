@@ -13,7 +13,7 @@ import com.intellij.openapi.startup.StartupActivity;
 import com.intellij.openapi.updateSettings.impl.UpdateChecker;
 import com.intellij.openapi.updateSettings.impl.UpdateSettings;
 import com.intellij.util.concurrency.AppExecutorUtil;
-import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
+import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import java.util.concurrent.TimeUnit;
 import org.jetbrains.annotations.NotNull;
@@ -31,7 +31,7 @@ public class CodeGPTUpdateStartupActivity implements StartupActivity.Background 
 
   private void schedulePluginUpdateChecks(Project project) {
     AppExecutorUtil.getAppScheduledExecutorService().scheduleWithFixedDelay(() -> {
-      if (project != null && ConfigurationState.getInstance().isCheckForPluginUpdates()) {
+      if (project != null && ConfigurationSettings.getCurrentState().isCheckForPluginUpdates()) {
         new CheckForUpdatesTask(project).queue();
       }
 
@@ -67,7 +67,7 @@ public class CodeGPTUpdateStartupActivity implements StartupActivity.Background 
                       .executeOnPooledThread(() -> installCodeGPTUpdate(myProject))))
               .addAction(NotificationAction.createSimpleExpiring(
                   CodeGPTBundle.get("checkForUpdatesTask.notification.hideButton"),
-                  () -> ConfigurationState.getInstance().setCheckForPluginUpdates(false)))
+                  () -> ConfigurationSettings.getCurrentState().setCheckForPluginUpdates(false)))
               .notify(myProject);
         }
       }

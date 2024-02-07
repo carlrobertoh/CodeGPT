@@ -16,7 +16,7 @@ import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.conversations.message.Message;
-import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
+import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import java.util.Arrays;
 import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
@@ -37,7 +37,7 @@ public final class StandardChatToolWindowContentManager {
   public void sendMessage(Message message, ConversationType conversationType) {
     getToolWindow().show();
 
-    if (ConfigurationState.getInstance().isCreateNewChatOnEachAction()
+    if (ConfigurationSettings.getCurrentState().isCreateNewChatOnEachAction()
         || ConversationsState.getCurrentConversation() == null) {
       createNewTabPanel().sendMessage(message, conversationType);
       return;

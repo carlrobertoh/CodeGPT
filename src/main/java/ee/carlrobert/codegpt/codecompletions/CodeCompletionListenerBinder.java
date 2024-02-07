@@ -10,7 +10,7 @@ import com.intellij.openapi.editor.event.DocumentEvent;
 import com.intellij.openapi.editor.event.SelectionEvent;
 import com.intellij.openapi.editor.event.SelectionListener;
 import ee.carlrobert.codegpt.actions.CodeCompletionEnabledListener;
-import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
+import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,7 +25,7 @@ public class CodeCompletionListenerBinder implements Disposable {
   public CodeCompletionListenerBinder(Editor editor) {
     this.editor = editor;
 
-    if (ConfigurationState.getInstance().isCodeCompletionsEnabled()) {
+    if (ConfigurationSettings.getCurrentState().isCodeCompletionsEnabled()) {
       addListeners();
     }
 

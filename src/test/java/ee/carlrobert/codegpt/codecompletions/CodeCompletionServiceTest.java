@@ -12,7 +12,7 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.VisualPosition;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.testFramework.PlatformTestUtil;
-import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
+import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange;
 import java.util.List;
 import testsupport.IntegrationTest;
@@ -23,7 +23,7 @@ public class CodeCompletionServiceTest extends IntegrationTest {
 
   public void testFetchCodeCompletionLlama() {
     useLlamaService();
-    ConfigurationState.getInstance().setCodeCompletionsEnabled(true);
+    ConfigurationSettings.getCurrentState().setCodeCompletionsEnabled(true);
     myFixture.configureByText(
         "CompletionTest.java",
         getResourceContent("/codecompletions/code-completion-file.txt"));
@@ -61,7 +61,7 @@ public class CodeCompletionServiceTest extends IntegrationTest {
   }
 
   public void testApplyInlayAction() {
-    ConfigurationState.getInstance().setAutoFormattingEnabled(false);
+    ConfigurationSettings.getCurrentState().setAutoFormattingEnabled(false);
     myFixture.configureByText(
         "CompletionTest.java",
         getResourceContent("/codecompletions/code-completion-file.txt"));

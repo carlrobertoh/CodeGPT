@@ -19,7 +19,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.codeStyle.CodeStyleManager;
 import com.intellij.testFramework.LightVirtualFile;
-import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
+import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import org.jetbrains.annotations.NotNull;
@@ -116,7 +116,7 @@ public final class EditorUtil {
 
             document.replaceString(startOffset, endOffset, text);
 
-            if (ConfigurationState.getInstance().isAutoFormattingEnabled()) {
+            if (ConfigurationSettings.getCurrentState().isAutoFormattingEnabled()) {
               reformatDocument(project, document, startOffset, endOffset);
             }
 
