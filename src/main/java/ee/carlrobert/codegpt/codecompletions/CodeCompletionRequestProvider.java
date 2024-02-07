@@ -1,7 +1,7 @@
 package ee.carlrobert.codegpt.codecompletions;
 
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
+import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAITextCompletionRequest;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -38,7 +38,7 @@ public class CodeCompletionRequestProvider {
   }
 
   private InfillPromptTemplate getLlamaInfillPromptTemplate() {
-    var settings = LlamaSettingsState.getInstance();
+    var settings = LlamaSettings.getCurrentState();
     if (!settings.isRunLocalServer()) {
       return settings.getRemoteModelInfillPromptTemplate();
     }

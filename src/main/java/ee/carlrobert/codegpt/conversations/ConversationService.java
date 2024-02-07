@@ -6,11 +6,11 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
 import ee.carlrobert.codegpt.completions.CallParameters;
 import ee.carlrobert.codegpt.conversations.message.Message;
+import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
-import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
-import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
-import ee.carlrobert.codegpt.settings.state.SettingsState;
+import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
+import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
+import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -42,13 +42,13 @@ public final class ConversationService {
   }
 
   public Conversation createConversation(String clientCode) {
-    var settings = SettingsState.getInstance();
     var conversation = new Conversation();
     conversation.setId(UUID.randomUUID());
     conversation.setClientCode(clientCode);
     conversation.setCreatedOn(LocalDateTime.now());
     conversation.setUpdatedOn(LocalDateTime.now());
-    conversation.setModel(getModelForSelectedService(settings.getSelectedService()));
+    conversation.setModel(getModelForSelectedService(
+        GeneralSettings.getCurrentState().getSelectedService()));
     return conversation;
   }
 
@@ -111,7 +111,7 @@ public final class ConversationService {
   }
 
   public Conversation startConversation() {
-    var completionCode = SettingsState.getInstance().getSelectedService().getCompletionCode();
+    var completionCode = GeneralSettings.getCurrentState().getSelectedService().getCompletionCode();
     var conversation = createConversation(completionCode);
     conversationState.setCurrentConversation(conversation);
     addConversation(conversation);
@@ -189,13 +189,13 @@ public final class ConversationService {
   private static String getModelForSelectedService(ServiceType serviceType) {
     switch (serviceType) {
       case OPENAI:
-        return OpenAISettingsState.getInstance().getModel();
+        return OpenAISettings.getCurrentState().getModel();
       case AZURE:
-        return AzureSettingsState.getInstance().getDeploymentId();
+        return AzureSettings.getCurrentState().getDeploymentId();
       case YOU:
         return "YouCode";
       case LLAMA_CPP:
-        var llamaSettings = LlamaSettingsState.getInstance();
+        var llamaSettings = LlamaSettings.getCurrentState();
         return llamaSettings.isUseCustomModel()
             ? llamaSettings.getCustomLlamaModelPath()
             : llamaSettings.getHuggingFaceModel().getCode();

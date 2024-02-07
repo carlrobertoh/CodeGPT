@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.ui;
+package ee.carlrobert.codegpt.settings.service.llama.form;
 
 import com.intellij.icons.AllIcons.General;
 import com.intellij.ide.HelpTooltip;

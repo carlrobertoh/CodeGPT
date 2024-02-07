@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.settings.service;
+package ee.carlrobert.codegpt.settings.service.llama.form;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
@@ -29,9 +29,8 @@ import ee.carlrobert.codegpt.completions.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaServerAgent;
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
-import ee.carlrobert.codegpt.ui.ChatPromptTemplatePanel;
-import ee.carlrobert.codegpt.ui.InfillPromptTemplatePanel;
+import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
+import ee.carlrobert.codegpt.settings.service.llama.LlamaSettingsState;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Dimension;
@@ -86,7 +85,7 @@ public class LlamaModelPreferencesForm {
     progressLabel.setBorder(JBUI.Borders.emptyLeft(2));
     progressLabel.setFont(JBUI.Fonts.smallFont());
     modelExistsIcon = new JBLabel(Actions.Checked);
-    var llamaSettings = LlamaSettingsState.getInstance();
+    var llamaSettings = LlamaSettings.getCurrentState();
     modelExistsIcon.setVisible(isModelExists(llamaSettings.getHuggingFaceModel()));
     helpIcon = new JBLabel(General.ContextHelp);
     huggingFaceComboBoxModel = new DefaultComboBoxModel<>();
@@ -152,6 +151,14 @@ public class LlamaModelPreferencesForm {
     return finalPanel;
   }
 
+  public void resetForm(LlamaSettingsState state) {
+    huggingFaceComboBoxModel.setSelectedItem(state.getHuggingFaceModel());
+    browsableCustomModelTextField.setText(state.getCustomLlamaModelPath());
+    customModelRadioButton.setSelected(state.isUseCustomModel());
+    localPromptTemplatePanel.setPromptTemplate(state.getLocalModelPromptTemplate());
+    infillPromptTemplatePanel.setPromptTemplate(state.getLocalModelInfillPromptTemplate());
+  }
+
   public void enableFields(boolean enabled) {
     modelComboBox.setEnabled(enabled);
     modelSizeComboBox.setEnabled(enabled);
@@ -166,40 +173,20 @@ public class LlamaModelPreferencesForm {
     return huggingFaceModelComboBox;
   }
 
-  public void setSelectedModel(HuggingFaceModel model) {
-    huggingFaceComboBoxModel.setSelectedItem(model);
-  }
-
   public HuggingFaceModel getSelectedModel() {
     return (HuggingFaceModel) huggingFaceComboBoxModel.getSelectedItem();
-  }
-
-  public void setCustomLlamaModelPath(String modelPath) {
-    browsableCustomModelTextField.setText(modelPath);
   }
 
   public String getCustomLlamaModelPath() {
     return browsableCustomModelTextField.getText();
   }
 
-  public void setUseCustomLlamaModel(boolean useCustomLlamaModel) {
-    customModelRadioButton.setSelected(useCustomLlamaModel);
-  }
-
   public boolean isUseCustomLlamaModel() {
     return customModelRadioButton.isSelected();
   }
 
-  public void setPromptTemplate(PromptTemplate promptTemplate) {
-    localPromptTemplatePanel.setPromptTemplate(promptTemplate);
-  }
-
   public PromptTemplate getPromptTemplate() {
     return localPromptTemplatePanel.getPromptTemplate();
-  }
-
-  public void setInfillPromptTemplate(InfillPromptTemplate promptTemplate) {
-    infillPromptTemplatePanel.setPromptTemplate(promptTemplate);
   }
 
   public InfillPromptTemplate getInfillPromptTemplate() {
@@ -479,9 +466,8 @@ public class LlamaModelPreferencesForm {
                       actionLinkWrapper,
                       huggingFaceComboBoxModel));
               actionLinkWrapper.setVisible(false);
-              LlamaSettingsState.getInstance()
-                  .setHuggingFaceModel(
-                      (HuggingFaceModel) huggingFaceComboBoxModel.getSelectedItem());
+              LlamaSettings.getCurrentState().setHuggingFaceModel(
+                  (HuggingFaceModel) huggingFaceComboBoxModel.getSelectedItem());
             }),
             (error) -> {
               throw new RuntimeException(error);

@@ -14,13 +14,13 @@ import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.conversations.message.Message;
+import ee.carlrobert.codegpt.settings.GeneralSettings;
+import ee.carlrobert.codegpt.settings.IncludedFilesSettings;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
-import ee.carlrobert.codegpt.settings.state.IncludedFilesSettingsState;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
-import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
-import ee.carlrobert.codegpt.settings.state.SettingsState;
-import ee.carlrobert.codegpt.settings.state.YouSettingsState;
+import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
+import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
+import ee.carlrobert.codegpt.settings.service.you.YouSettings;
 import ee.carlrobert.codegpt.telemetry.core.configuration.TelemetryConfiguration;
 import ee.carlrobert.codegpt.telemetry.core.service.UserId;
 import ee.carlrobert.embedding.EmbeddingsService;
@@ -51,9 +51,6 @@ public class CompletionRequestProvider {
   public static final String FIX_COMPILE_ERRORS_SYSTEM_PROMPT = getResourceContent(
       "/prompts/fix-compile-errors.txt");
 
-  public static final String INLINE_COMPLETION_PROMPT = getResourceContent(
-      "/prompts/inline-completion-prompt.txt");
-
   private final EncodingManager encodingManager = EncodingManager.getInstance();
   private final EmbeddingsService embeddingsService;
   private final Conversation conversation;
@@ -67,7 +64,7 @@ public class CompletionRequestProvider {
 
   public static String getPromptWithContext(List<ReferencedFile> referencedFiles,
       String userPrompt) {
-    var includedFilesSettings = IncludedFilesSettingsState.getInstance();
+    var includedFilesSettings = IncludedFilesSettings.getCurrentState();
     var repeatableContext = referencedFiles.stream()
         .map(item -> includedFilesSettings.getRepeatableContext()
             .replace("{FILE_PATH}", item.getFilePath())
@@ -89,7 +86,7 @@ public class CompletionRequestProvider {
             new OpenAIChatCompletionMessage("system",
                 getResourceContent("/prompts/method-name-generator.txt")),
             new OpenAIChatCompletionMessage("user", context)))
-        .setModel(OpenAISettingsState.getInstance().getModel())
+        .setModel(OpenAISettings.getCurrentState().getModel())
         .setStream(false)
         .build();
   }
@@ -104,7 +101,7 @@ public class CompletionRequestProvider {
   public LlamaCompletionRequest buildLlamaCompletionRequest(
       Message message,
       ConversationType conversationType) {
-    var settings = LlamaSettingsState.getInstance();
+    var settings = LlamaSettings.getCurrentState();
     PromptTemplate promptTemplate;
     if (settings.isRunLocalServer()) {
       promptTemplate = settings.isUseCustomModel()
@@ -136,7 +133,7 @@ public class CompletionRequestProvider {
 
   public YouCompletionRequest buildYouCompletionRequest(Message message) {
     var requestBuilder = new YouCompletionRequest.Builder(message.getPrompt())
-        .setUseGPT4Model(YouSettingsState.getInstance().isUseGPT4Model())
+        .setUseGPT4Model(YouSettings.getCurrentState().isUseGPT4Model())
         .setChatHistory(conversation.getMessages().stream()
             .map(prevMessage -> new YouCompletionRequestMessage(
                 prevMessage.getPrompt(),
@@ -207,7 +204,8 @@ public class CompletionRequestProvider {
       boolean useContextualSearch) {
     var messages = buildMessages(callParameters, useContextualSearch);
 
-    if (model == null || SettingsState.getInstance().getSelectedService() == ServiceType.YOU) {
+    if (model == null
+        || GeneralSettings.getCurrentState().getSelectedService() == ServiceType.YOU) {
       return messages;
     }
 

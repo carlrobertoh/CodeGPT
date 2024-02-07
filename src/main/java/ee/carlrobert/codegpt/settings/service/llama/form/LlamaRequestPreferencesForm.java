@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.settings.service;
+package ee.carlrobert.codegpt.settings.service.llama.form;
 
 import com.intellij.openapi.ui.panel.ComponentPanelBuilder;
 import com.intellij.ui.components.JBTextField;
@@ -6,7 +6,7 @@ import com.intellij.ui.components.fields.IntegerField;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
+import ee.carlrobert.codegpt.settings.service.llama.LlamaSettingsState;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -17,8 +17,7 @@ public class LlamaRequestPreferencesForm {
   private final JBTextField minPField;
   private final JBTextField repeatPenaltyField;
 
-  public LlamaRequestPreferencesForm() {
-    var llamaSettings = LlamaSettingsState.getInstance();
+  public LlamaRequestPreferencesForm(LlamaSettingsState llamaSettings) {
     topKField = new IntegerField();
     topKField.setColumns(12);
     topKField.setValue(llamaSettings.getTopK());
@@ -56,36 +55,27 @@ public class LlamaRequestPreferencesForm {
         .getPanel();
   }
 
-  public int getTopK() {
-    return topKField.getValue();
+  public void resetForm(LlamaSettingsState state) {
+    topKField.setValue(state.getTopK());
+    topPField.setText(String.valueOf((state.getTopP())));
+    minPField.setText(String.valueOf((state.getMinP())));
+    repeatPenaltyField.setText(String.valueOf((state.getRepeatPenalty())));
   }
 
-  public void setTopK(int topK) {
-    topKField.setValue(topK);
+  public int getTopK() {
+    return topKField.getValue();
   }
 
   public double getTopP() {
     return Double.parseDouble(topPField.getText());
   }
 
-  public void setTopP(double topP) {
-    topPField.setText(String.valueOf(topP));
-  }
-
   public double getMinP() {
     return Double.parseDouble(minPField.getText());
   }
 
-  public void setMinP(double minP) {
-    minPField.setText(String.valueOf(minP));
-  }
-
   public double getRepeatPenalty() {
     return Double.parseDouble(repeatPenaltyField.getText());
-  }
-
-  public void setRepeatPenalty(double repeatPenalty) {
-    repeatPenaltyField.setText(String.valueOf(repeatPenalty));
   }
 
   private JLabel createComment(String messageKey) {

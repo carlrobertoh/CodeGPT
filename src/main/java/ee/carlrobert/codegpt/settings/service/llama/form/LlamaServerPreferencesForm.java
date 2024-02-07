@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.settings.service;
+package ee.carlrobert.codegpt.settings.service.llama.form;
 
 import static ee.carlrobert.codegpt.ui.UIUtil.createComment;
 import static ee.carlrobert.codegpt.ui.UIUtil.createForm;
@@ -26,10 +26,8 @@ import ee.carlrobert.codegpt.completions.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaServerAgent;
 import ee.carlrobert.codegpt.completions.llama.LlamaServerStartupParams;
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
-import ee.carlrobert.codegpt.credentials.LlamaCredentialsManager;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
-import ee.carlrobert.codegpt.ui.ChatPromptTemplatePanel;
-import ee.carlrobert.codegpt.ui.InfillPromptTemplatePanel;
+import ee.carlrobert.codegpt.credentials.LlamaCredentialManager;
+import ee.carlrobert.codegpt.settings.service.llama.LlamaSettingsState;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import ee.carlrobert.codegpt.ui.UIUtil.RadioButtonWithLayout;
@@ -38,6 +36,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Nullable;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -61,42 +60,40 @@ public class LlamaServerPreferencesForm {
   private final ChatPromptTemplatePanel remotePromptTemplatePanel;
   private final InfillPromptTemplatePanel infillPromptTemplatePanel;
 
-  public LlamaServerPreferencesForm() {
-    var llamaSettings = LlamaSettingsState.getInstance();
-    var llamaServerAgent =
-        ApplicationManager.getApplication().getService(LlamaServerAgent.class);
+  public LlamaServerPreferencesForm(LlamaSettingsState settings) {
+    var llamaServerAgent = ApplicationManager.getApplication().getService(LlamaServerAgent.class);
     var serverRunning = llamaServerAgent.isServerRunning();
-    portField = new PortField(llamaSettings.getServerPort());
+    portField = new PortField(settings.getServerPort());
     portField.setEnabled(!serverRunning);
 
     maxTokensField = new IntegerField("max_tokens", 256, 4096);
     maxTokensField.setColumns(12);
-    maxTokensField.setValue(llamaSettings.getContextSize());
+    maxTokensField.setValue(settings.getContextSize());
     maxTokensField.setEnabled(!serverRunning);
 
     threadsField = new IntegerField("threads", 1, 256);
     threadsField.setColumns(12);
-    threadsField.setValue(llamaSettings.getThreads());
+    threadsField.setValue(settings.getThreads());
     threadsField.setEnabled(!serverRunning);
 
-    additionalParametersField = new JBTextField(llamaSettings.getAdditionalParameters(), 30);
+    additionalParametersField = new JBTextField(settings.getAdditionalParameters(), 30);
     additionalParametersField.setEnabled(!serverRunning);
 
-    baseHostField = new JBTextField(llamaSettings.getBaseHost(), 30);
+    baseHostField = new JBTextField(settings.getBaseHost(), 30);
     apiKeyField = new JBPasswordField();
     apiKeyField.setColumns(30);
-    apiKeyField.setText(LlamaCredentialsManager.getInstance().getApiKey());
+    apiKeyField.setText(LlamaCredentialManager.getInstance().getCredential());
 
     llamaModelPreferencesForm = new LlamaModelPreferencesForm();
     runLocalServerRadioButton = new JBRadioButton("Run local server",
-        llamaSettings.isRunLocalServer());
+        settings.isRunLocalServer());
     useExistingServerRadioButton = new JBRadioButton("Use remote server",
-        !llamaSettings.isRunLocalServer());
+        !settings.isRunLocalServer());
 
     remotePromptTemplatePanel = new ChatPromptTemplatePanel(
-        llamaSettings.getRemoteModelPromptTemplate(), true);
+        settings.getRemoteModelPromptTemplate(), true);
     infillPromptTemplatePanel = new InfillPromptTemplatePanel(
-        llamaSettings.getRemoteModelInfillPromptTemplate(), true
+        settings.getRemoteModelInfillPromptTemplate(), true
     );
   }
 
@@ -111,6 +108,22 @@ public class LlamaServerPreferencesForm {
     ), runLocalServerRadioButton.isSelected()
         ? RUN_LOCAL_SERVER_FORM_CARD_CODE
         : USE_EXISTING_SERVER_FORM_CARD_CODE);
+  }
+
+  public void resetForm(LlamaSettingsState state) {
+    llamaModelPreferencesForm.resetForm(state);
+
+    remotePromptTemplatePanel.setPromptTemplate(state.getLocalModelPromptTemplate()); // ?
+    infillPromptTemplatePanel.setPromptTemplate(state.getLocalModelInfillPromptTemplate());
+    runLocalServerRadioButton.setSelected(state.isRunLocalServer());
+    baseHostField.setText(state.getBaseHost());
+    portField.setNumber(state.getServerPort());
+    maxTokensField.setValue(state.getContextSize());
+    threadsField.setValue(state.getThreads());
+    additionalParametersField.setText(state.getAdditionalParameters());
+    remotePromptTemplatePanel.setPromptTemplate(state.getRemoteModelPromptTemplate()); // ?
+    infillPromptTemplatePanel.setPromptTemplate(state.getRemoteModelInfillPromptTemplate());
+    apiKeyField.setText(LlamaCredentialManager.getInstance().getCredential());
   }
 
   public JComponent createUseExistingServerForm() {
@@ -230,7 +243,6 @@ public class LlamaServerPreferencesForm {
     return validateCustomModelPath() && validateSelectedModel();
   }
 
-
   private boolean validateCustomModelPath() {
     if (llamaModelPreferencesForm.isUseCustomLlamaModel()) {
       var customModelPath = llamaModelPreferencesForm.getCustomLlamaModelPath();
@@ -257,12 +269,10 @@ public class LlamaServerPreferencesForm {
     return true;
   }
 
-
   private boolean isModelExists(HuggingFaceModel model) {
     return FileUtil.exists(
         CodeGPTPlugin.getLlamaModelsPath() + File.separator + model.getFileName());
   }
-
 
   private void enableForm(JButton serverButton, ServerProgressPanel progressPanel) {
     setFormEnabled(true);
@@ -290,25 +300,12 @@ public class LlamaServerPreferencesForm {
     additionalParametersField.setEnabled(enabled);
   }
 
-
-  public void setRunLocalServer(boolean runLocalServer) {
-    runLocalServerRadioButton.setSelected(runLocalServer);
-  }
-
   public boolean isRunLocalServer() {
     return runLocalServerRadioButton.isSelected();
   }
 
-  public void setBaseHost(String baseHost) {
-    baseHostField.setText(baseHost);
-  }
-
   public String getBaseHost() {
     return baseHostField.getText();
-  }
-
-  public void setServerPort(int serverPort) {
-    portField.setNumber(serverPort);
   }
 
   public int getServerPort() {
@@ -319,13 +316,8 @@ public class LlamaServerPreferencesForm {
     return llamaModelPreferencesForm;
   }
 
-
   public int getContextSize() {
     return maxTokensField.getValue();
-  }
-
-  public void setContextSize(int contextSize) {
-    maxTokensField.setValue(contextSize);
   }
 
   public void setThreads(int threads) {
@@ -334,10 +326,6 @@ public class LlamaServerPreferencesForm {
 
   public int getThreads() {
     return threadsField.getValue();
-  }
-
-  public void setAdditionalParameters(String additionalParameters) {
-    additionalParametersField.setText(additionalParameters);
   }
 
   public String getAdditionalParameters() {
@@ -359,20 +347,12 @@ public class LlamaServerPreferencesForm {
         : remotePromptTemplatePanel.getPromptTemplate();
   }
 
-  public void setApiKey(String apiKey) {
-    apiKeyField.setText(apiKey);
-  }
-
-  public String getApiKey() {
+  public @Nullable String getApiKey() {
+    var apiKey = new String(apiKeyField.getPassword());
+    if (apiKey.isEmpty()) {
+      return null;
+    }
     return new String(apiKeyField.getPassword());
-  }
-
-  public void setPromptTemplate(PromptTemplate promptTemplate) {
-    remotePromptTemplatePanel.setPromptTemplate(promptTemplate);
-  }
-
-  public void setInfillPromptTemplate(InfillPromptTemplate promptTemplate) {
-    infillPromptTemplatePanel.setPromptTemplate(promptTemplate);
   }
 
   public InfillPromptTemplate getInfillPromptTemplate() {

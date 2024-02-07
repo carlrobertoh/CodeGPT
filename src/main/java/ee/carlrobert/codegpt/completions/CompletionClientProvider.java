@@ -5,16 +5,15 @@ import static java.lang.String.format;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.completions.you.YouUserManager;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
-import ee.carlrobert.codegpt.credentials.LlamaCredentialsManager;
-import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
-import ee.carlrobert.codegpt.settings.advanced.AdvancedSettingsState;
-import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
-import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
+import ee.carlrobert.codegpt.credentials.LlamaCredentialManager;
+import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
+import ee.carlrobert.codegpt.settings.advanced.AdvancedSettings;
+import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
+import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
+import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.llm.client.azure.AzureClient;
 import ee.carlrobert.llm.client.azure.AzureCompletionRequestParams;
 import ee.carlrobert.llm.client.llama.LlamaClient;
-import ee.carlrobert.llm.client.llama.LlamaClient.Builder;
 import ee.carlrobert.llm.client.openai.OpenAIClient;
 import ee.carlrobert.llm.client.you.UTMParameters;
 import ee.carlrobert.llm.client.you.YouClient;
@@ -27,8 +26,8 @@ import okhttp3.OkHttpClient;
 public class CompletionClientProvider {
 
   public static OpenAIClient getOpenAIClient() {
-    var settings = OpenAISettingsState.getInstance();
-    var builder = new OpenAIClient.Builder(OpenAICredentialsManager.getInstance().getApiKey())
+    var settings = OpenAISettings.getCurrentState();
+    var builder = new OpenAIClient.Builder(OpenAICredentialManager.getInstance().getCredential())
         .setOrganization(settings.getOrganization());
     var baseHost = settings.getBaseHost();
     if (baseHost != null) {
@@ -38,12 +37,13 @@ public class CompletionClientProvider {
   }
 
   public static AzureClient getAzureClient() {
-    var settings = AzureSettingsState.getInstance();
+    var settings = AzureSettings.getCurrentState();
     var params = new AzureCompletionRequestParams(
         settings.getResourceName(),
         settings.getDeploymentId(),
         settings.getApiVersion());
-    var builder = new AzureClient.Builder(AzureCredentialsManager.getInstance().getSecret(), params)
+    var builder = new AzureClient
+        .Builder(AzureCredentialsManager.getInstance().getCredential(), params)
         .setActiveDirectoryAuthentication(settings.isUseAzureActiveDirectoryAuthentication());
     var baseHost = settings.getBaseHost();
     if (baseHost != null) {
@@ -74,12 +74,12 @@ public class CompletionClientProvider {
   }
 
   public static LlamaClient getLlamaClient() {
-    LlamaSettingsState llamaSettingsState = LlamaSettingsState.getInstance();
-    Builder builder = new Builder()
-        .setPort(llamaSettingsState.getServerPort());
-    if (!llamaSettingsState.isRunLocalServer()) {
-      builder.setHost(llamaSettingsState.getBaseHost());
-      String apiKey = LlamaCredentialsManager.getInstance().getApiKey();
+    var llamaSettings = LlamaSettings.getCurrentState();
+    var builder = new LlamaClient.Builder()
+        .setPort(llamaSettings.getServerPort());
+    if (!llamaSettings.isRunLocalServer()) {
+      builder.setHost(llamaSettings.getBaseHost());
+      String apiKey = LlamaCredentialManager.getInstance().getCredential();
       if (apiKey != null && !apiKey.isBlank()) {
         builder.setApiKey(apiKey);
       }
@@ -89,7 +89,7 @@ public class CompletionClientProvider {
 
   private static OkHttpClient.Builder getDefaultClientBuilder() {
     OkHttpClient.Builder builder = new OkHttpClient.Builder();
-    var advancedSettings = AdvancedSettingsState.getInstance();
+    var advancedSettings = AdvancedSettings.getCurrentState();
     var proxyHost = advancedSettings.getProxyHost();
     var proxyPort = advancedSettings.getProxyPort();
     if (!proxyHost.isEmpty() && proxyPort != 0) {

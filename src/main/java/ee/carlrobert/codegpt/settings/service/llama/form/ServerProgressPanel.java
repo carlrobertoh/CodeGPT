@@ -1,9 +1,7 @@
-package ee.carlrobert.codegpt.settings.service;
+package ee.carlrobert.codegpt.settings.service.llama.form;
 
 import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.AsyncProcessIcon;
-import java.awt.FlowLayout;
-import javax.swing.Box;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 

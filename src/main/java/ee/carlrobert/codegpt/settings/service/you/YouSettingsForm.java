@@ -1,4 +1,6 @@
-package ee.carlrobert.codegpt.settings.service;
+package ee.carlrobert.codegpt.settings.service.you;
+
+import static ee.carlrobert.codegpt.ui.UIUtil.withEmptyLeftBorder;
 
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.ui.ComponentValidator;
@@ -6,6 +8,7 @@ import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.TitledSeparator;
+import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPasswordField;
 import com.intellij.ui.components.JBTextField;
@@ -20,8 +23,7 @@ import ee.carlrobert.codegpt.completions.you.auth.YouAuthenticationError;
 import ee.carlrobert.codegpt.completions.you.auth.YouAuthenticationService;
 import ee.carlrobert.codegpt.completions.you.auth.response.YouAuthenticationResponse;
 import ee.carlrobert.codegpt.completions.you.auth.response.YouUser;
-import ee.carlrobert.codegpt.credentials.YouCredentialsManager;
-import ee.carlrobert.codegpt.settings.state.SettingsState;
+import ee.carlrobert.codegpt.credentials.YouCredentialManager;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -34,28 +36,31 @@ import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 import org.jetbrains.annotations.Nullable;
 
-public class YouServiceSelectionForm extends JPanel {
+public class YouSettingsForm extends JPanel {
 
   private final JBTextField emailField;
   private final JBPasswordField passwordField;
   private final JButton signInButton;
   private final JTextPane signUpTextPane;
   private final AsyncProcessIcon loadingSpinner;
+  private final JBCheckBox displayWebSearchResultsCheckBox;
 
-  public YouServiceSelectionForm(Disposable parentDisposable) {
+  public YouSettingsForm(YouSettingsState settings, Disposable parentDisposable) {
     super(new BorderLayout());
-    var settings = SettingsState.getInstance();
     emailField = new JBTextField(settings.getEmail(), 25);
     passwordField = new JBPasswordField();
     passwordField.setColumns(25);
     if (!settings.getEmail().isEmpty()) {
-      passwordField.setText(YouCredentialsManager.getInstance().getAccountPassword());
+      passwordField.setText(YouCredentialManager.getInstance().getCredential());
     }
     signInButton = new JButton(CodeGPTBundle.get("settingsConfigurable.service.you.signIn.label"));
     signUpTextPane = createSignUpTextPane();
     loadingSpinner = new AsyncProcessIcon("sign_in_spinner");
     loadingSpinner.setBorder(JBUI.Borders.emptyLeft(8));
     loadingSpinner.setVisible(false);
+    displayWebSearchResultsCheckBox = new JBCheckBox(
+        CodeGPTBundle.get("settingsConfigurable.service.you.displayResults.label"),
+        YouSettings.getCurrentState().isDisplayWebSearchResults());
 
     var emailValidator = createInputValidator(parentDisposable, emailField);
     var passwordValidator = createInputValidator(parentDisposable, passwordField);
@@ -74,13 +79,29 @@ public class YouServiceSelectionForm extends JPanel {
                 new UserAuthenticationHandler());
       }
     });
+    add(createForm());
+  }
 
-    if (YouUserManager.getInstance().getAuthenticationResponse() == null) {
-      add(createUserAuthenticationPanel(emailField, passwordField, null));
+  private JPanel createForm() {
+    var formBuilder = FormBuilder.createFormBuilder();
+    var authResponse = YouUserManager.getInstance().getAuthenticationResponse();
+    if (authResponse == null) {
+      formBuilder.addComponent(createUserAuthenticationPanel(emailField, passwordField, null));
     } else {
-      add(createUserInformationPanel(
-          YouUserManager.getInstance().getAuthenticationResponse().getData().getUser()));
+      formBuilder.addComponent(createUserInformationPanel(authResponse.getData().getUser()));
     }
+    return formBuilder
+        .addComponent(new TitledSeparator(
+            CodeGPTBundle.get("settingsConfigurable.service.you.chatPreferences.title")))
+        .addComponent(withEmptyLeftBorder(displayWebSearchResultsCheckBox))
+        .addComponentFillVertically(new JPanel(), 0)
+        .getPanel();
+  }
+
+  public void resetForm() {
+    var state = YouSettings.getCurrentState();
+    setDisplayWebSearchResults(state.isDisplayWebSearchResults());
+    setEmail(state.getEmail());
   }
 
   public String getEmail() {
@@ -91,8 +112,20 @@ public class YouServiceSelectionForm extends JPanel {
     emailField.setText(email);
   }
 
-  public String getPassword() {
-    return new String(passwordField.getPassword());
+  public @Nullable String getPassword() {
+    var password = new String(passwordField.getPassword());
+    if (password.isEmpty()) {
+      return null;
+    }
+    return password;
+  }
+
+  public void setDisplayWebSearchResults(boolean displayWebSearchResults) {
+    displayWebSearchResultsCheckBox.setSelected(displayWebSearchResults);
+  }
+
+  public boolean isDisplayWebSearchResults() {
+    return displayWebSearchResultsCheckBox.isSelected();
   }
 
   private ComponentValidator createInputValidator(
@@ -177,6 +210,7 @@ public class YouServiceSelectionForm extends JPanel {
         .addComponent(new TitledSeparator(
             CodeGPTBundle.get("settingsConfigurable.service.you.authentication.title")))
         .addComponent(contentPanel)
+        .addComponentFillVertically(new JPanel(), 0)
         .getPanel();
   }
 
@@ -202,7 +236,15 @@ public class YouServiceSelectionForm extends JPanel {
                 .addComponent(signOutButton)
                 .getPanel())
             .withBorder(JBUI.Borders.emptyLeft(16)))
+        .addComponentFillVertically(new JPanel(), 0)
         .getPanel();
+  }
+
+  public YouSettingsState getCurrentState() {
+    var state = new YouSettingsState();
+    state.setEmail(getEmail());
+    state.setDisplayWebSearchResults(isDisplayWebSearchResults());
+    return state;
   }
 
   class UserAuthenticationHandler implements AuthenticationHandler {
@@ -212,26 +254,27 @@ public class YouServiceSelectionForm extends JPanel {
       SwingUtilities.invokeLater(() -> {
         var email = emailField.getText();
         var password = passwordField.getPassword();
-        SettingsState.getInstance().setEmail(email);
-        YouCredentialsManager.getInstance().setAccountPassword(new String(password));
+        YouSettings.getCurrentState().setEmail(email);
+        YouCredentialManager.getInstance().setCredential(new String(password));
         refreshView(createUserInformationPanel(authenticationResponse.getData().getUser()));
       });
     }
 
     @Override
     public void handleGenericError() {
-      SwingUtilities.invokeLater(() -> refreshView(createUserAuthenticationPanel(
-          emailField,
-          passwordField,
-          new YouAuthenticationError("unknown", "Something went wrong."))));
+      SwingUtilities.invokeLater(() -> refresh(null));
     }
 
     @Override
     public void handleError(YouAuthenticationError error) {
-      SwingUtilities.invokeLater(() -> refreshView(createUserAuthenticationPanel(
-          emailField,
-          passwordField,
-          error)));
+      SwingUtilities.invokeLater(() -> refresh(error));
+    }
+
+    private void refresh(@Nullable YouAuthenticationError error) {
+      if (error == null) {
+        error = new YouAuthenticationError("unknown", "Something went wrong.");
+      }
+      refreshView(createUserAuthenticationPanel(emailField, passwordField, error));
     }
   }
 

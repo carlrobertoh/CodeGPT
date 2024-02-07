@@ -10,11 +10,11 @@ import com.intellij.openapi.components.Service;
 import ee.carlrobert.codegpt.codecompletions.CodeCompletionRequestProvider;
 import ee.carlrobert.codegpt.codecompletions.InfillRequestDetails;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
-import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
+import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
+import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
-import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
-import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
-import ee.carlrobert.codegpt.settings.state.SettingsState;
+import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
+import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
 import ee.carlrobert.llm.completion.CompletionEventListener;
@@ -35,11 +35,11 @@ public final class CompletionRequestService {
   public EventSource getChatCompletionAsync(
       CallParameters callParameters,
       boolean useContextualSearch,
-      CompletionEventListener eventListener) {
+      CompletionEventListener<String> eventListener) {
     var requestProvider = new CompletionRequestProvider(callParameters.getConversation());
-    switch (SettingsState.getInstance().getSelectedService()) {
+    switch (GeneralSettings.getCurrentState().getSelectedService()) {
       case OPENAI:
-        var openAISettings = OpenAISettingsState.getInstance();
+        var openAISettings = OpenAISettings.getCurrentState();
         return CompletionClientProvider.getOpenAIClient().getChatCompletionAsync(
             requestProvider.buildOpenAIChatCompletionRequest(
                 openAISettings.getModel(),
@@ -48,7 +48,7 @@ public final class CompletionRequestService {
                 openAISettings.isUsingCustomPath() ? openAISettings.getPath() : null),
             eventListener);
       case AZURE:
-        var azureSettings = AzureSettingsState.getInstance();
+        var azureSettings = AzureSettings.getCurrentState();
         return CompletionClientProvider.getAzureClient().getChatCompletionAsync(
             requestProvider.buildOpenAIChatCompletionRequest(
                 null,
@@ -73,9 +73,9 @@ public final class CompletionRequestService {
 
   public EventSource getCodeCompletionAsync(
       InfillRequestDetails requestDetails,
-      CompletionEventListener eventListener) {
+      CompletionEventListener<String> eventListener) {
     var requestProvider = new CodeCompletionRequestProvider(requestDetails);
-    switch (SettingsState.getInstance().getSelectedService()) {
+    switch (GeneralSettings.getCurrentState().getSelectedService()) {
       case OPENAI:
         return CompletionClientProvider.getOpenAIClient()
             .getCompletionAsync(requestProvider.buildOpenAIRequest(), eventListener);
@@ -94,9 +94,9 @@ public final class CompletionRequestService {
         new OpenAIChatCompletionMessage("system",
             ConfigurationSettings.getCurrentState().getCommitMessagePrompt()),
         new OpenAIChatCompletionMessage("user", prompt)))
-        .setModel(OpenAISettingsState.getInstance().getModel())
+        .setModel(OpenAISettings.getCurrentState().getModel())
         .build();
-    var selectedService = SettingsState.getInstance().getSelectedService();
+    var selectedService = GeneralSettings.getCurrentState().getSelectedService();
     if (selectedService == OPENAI) {
       CompletionClientProvider.getOpenAIClient().getChatCompletionAsync(request, eventListener);
     }
@@ -106,7 +106,7 @@ public final class CompletionRequestService {
   }
 
   public Optional<String> getLookupCompletion(String prompt) {
-    var selectedService = SettingsState.getInstance().getSelectedService();
+    var selectedService = GeneralSettings.getCurrentState().getSelectedService();
     if (selectedService == YOU || selectedService == LLAMA_CPP) {
       return Optional.empty();
     }
@@ -123,12 +123,12 @@ public final class CompletionRequestService {
   }
 
   public boolean isRequestAllowed() {
-    var selectedService = SettingsState.getInstance().getSelectedService();
+    var selectedService = GeneralSettings.getCurrentState().getSelectedService();
     if (selectedService == AZURE) {
       return AzureCredentialsManager.getInstance().isCredentialSet();
     }
     if (selectedService == OPENAI) {
-      return OpenAICredentialsManager.getInstance().isApiKeySet();
+      return OpenAICredentialManager.getInstance().isCredentialSet();
     }
     return true;
   }
