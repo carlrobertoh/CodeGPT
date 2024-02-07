@@ -93,7 +93,8 @@ public class ChatMessageResponseBody extends JPanel {
         format("<html><p style=\"margin-top: 4px; margin-bottom: 8px;\">%s</p></html>", message));
     currentlyProcessedTextPane.addHyperlinkListener(e -> {
       if (e.getEventType() == ACTIVATED) {
-        ShowSettingsUtil.getInstance().showSettingsDialog(project, GeneralSettingsConfigurable.class);
+        ShowSettingsUtil.getInstance()
+            .showSettingsDialog(project, GeneralSettingsConfigurable.class);
       }
     });
     currentlyProcessedTextPane.getCaret().setVisible(false);
@@ -108,7 +109,8 @@ public class ChatMessageResponseBody extends JPanel {
 
     currentlyProcessedTextPane.addHyperlinkListener(e -> {
       if (e.getEventType() == ACTIVATED) {
-        ShowSettingsUtil.getInstance().showSettingsDialog(project, GeneralSettingsConfigurable.class);
+        ShowSettingsUtil.getInstance()
+            .showSettingsDialog(project, GeneralSettingsConfigurable.class);
         TelemetryAction.IDE_ACTION.createActionMessage()
             .property("action", ActionType.CHANGE_PROVIDER.name())
             .send();

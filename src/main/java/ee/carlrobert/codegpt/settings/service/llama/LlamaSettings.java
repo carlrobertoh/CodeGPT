@@ -5,7 +5,7 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import ee.carlrobert.codegpt.credentials.LlamaCredentialManager;
-import ee.carlrobert.codegpt.settings.service.ServiceSelectionForm;
+import ee.carlrobert.codegpt.settings.service.llama.form.LlamaSettingsForm;
 import org.jetbrains.annotations.NotNull;
 
 @State(name = "CodeGPT_LlamaSettings", storages = @Storage("CodeGPT_CodeGPT_LlamaSettings.xml"))
@@ -32,9 +32,9 @@ public class LlamaSettings implements PersistentStateComponent<LlamaSettingsStat
     return ApplicationManager.getApplication().getService(LlamaSettings.class);
   }
 
-  public boolean isModified(ServiceSelectionForm serviceSelectionForm) {
-    return !serviceSelectionForm.getCurrentLlamaFormState().equals(state)
-        || !serviceSelectionForm.getLlamaServerPreferencesForm().getApiKey()
+  public boolean isModified(LlamaSettingsForm form) {
+    return !form.getCurrentFormState().equals(state)
+        || !form.getLlamaServerPreferencesForm().getApiKey()
         .equals(LlamaCredentialManager.getInstance().getCredential());
   }
 }

@@ -4,17 +4,8 @@ import ee.carlrobert.codegpt.settings.service.ServiceType;
 
 public class GeneralSettingsState {
 
-  private String email = "";
   private String displayName = "";
   private ServiceType selectedService = ServiceType.OPENAI;
-
-  public String getEmail() {
-    return email;
-  }
-
-  public void setEmail(String email) {
-    this.email = email;
-  }
 
   public String getDisplayName() {
     if (displayName == null || displayName.isEmpty()) {

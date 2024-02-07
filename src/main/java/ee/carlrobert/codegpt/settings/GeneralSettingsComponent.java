@@ -10,9 +10,9 @@ import com.intellij.openapi.util.SystemInfoRt;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
 import ee.carlrobert.codegpt.CodeGPTBundle;
-import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.codegpt.settings.service.ServiceSelectionForm;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
+import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import java.awt.CardLayout;
 import java.util.Arrays;
 import javax.swing.DefaultComboBoxModel;
@@ -32,10 +32,10 @@ public class GeneralSettingsComponent {
     serviceSelectionForm = new ServiceSelectionForm(parentDisposable);
     var cardLayout = new CardLayout();
     var cards = new JPanel(cardLayout);
-    cards.add(serviceSelectionForm.getOpenAIServiceSectionPanel(), ServiceType.OPENAI.getCode());
-    cards.add(serviceSelectionForm.getAzureServiceSectionPanel(), ServiceType.AZURE.getCode());
-    cards.add(serviceSelectionForm.getYouServiceSectionPanel(), ServiceType.YOU.getCode());
-    cards.add(serviceSelectionForm.getLlamaServiceSectionPanel(), ServiceType.LLAMA_CPP.getCode());
+    cards.add(serviceSelectionForm.getOpenAISettingsForm().getForm(), ServiceType.OPENAI.getCode());
+    cards.add(serviceSelectionForm.getAzureSettingsForm().getForm(), ServiceType.AZURE.getCode());
+    cards.add(serviceSelectionForm.getYouSettingsForm().getForm(), ServiceType.YOU.getCode());
+    cards.add(serviceSelectionForm.getLlamaSettingsForm(), ServiceType.LLAMA_CPP.getCode());
     var serviceComboBoxModel = new DefaultComboBoxModel<ServiceType>();
     serviceComboBoxModel.addAll(Arrays.stream(ServiceType.values())
         .filter(it -> ServiceType.LLAMA_CPP != it || SystemInfoRt.isUnix)

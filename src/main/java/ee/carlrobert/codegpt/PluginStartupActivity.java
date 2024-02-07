@@ -12,6 +12,7 @@ import ee.carlrobert.codegpt.completions.you.auth.YouAuthenticationService;
 import ee.carlrobert.codegpt.completions.you.auth.response.YouAuthenticationResponse;
 import ee.carlrobert.codegpt.credentials.YouCredentialManager;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
+import ee.carlrobert.codegpt.settings.service.you.YouSettings;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -29,7 +30,7 @@ public class PluginStartupActivity implements StartupActivity {
   }
 
   private void handleYouServiceAuthentication() {
-    var settings = GeneralSettings.getCurrentState();
+    var settings = YouSettings.getCurrentState();
     var password = YouCredentialManager.getInstance().getCredential();
     if (!settings.getEmail().isEmpty() && password != null && !password.isEmpty()) {
       YouAuthenticationService.getInstance()

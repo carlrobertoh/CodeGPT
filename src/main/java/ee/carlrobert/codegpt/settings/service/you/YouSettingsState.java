@@ -4,8 +4,17 @@ import java.util.Objects;
 
 public class YouSettingsState {
 
+  private String email = "";
   private boolean displayWebSearchResults = true;
   private boolean useGPT4Model;
+
+  public String getEmail() {
+    return email;
+  }
+
+  public void setEmail(String email) {
+    this.email = email;
+  }
 
   public boolean isDisplayWebSearchResults() {
     return displayWebSearchResults;
@@ -33,11 +42,12 @@ public class YouSettingsState {
     }
     YouSettingsState that = (YouSettingsState) o;
     return displayWebSearchResults == that.displayWebSearchResults
-        && useGPT4Model == that.useGPT4Model;
+        && useGPT4Model == that.useGPT4Model
+        && Objects.equals(email, that.email);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(displayWebSearchResults, useGPT4Model);
+    return Objects.hash(displayWebSearchResults, useGPT4Model, email);
   }
 }

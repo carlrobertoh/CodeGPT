@@ -30,6 +30,7 @@ import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaServerAgent;
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
+import ee.carlrobert.codegpt.settings.service.llama.LlamaSettingsState;
 import ee.carlrobert.codegpt.ui.ChatPromptTemplatePanel;
 import ee.carlrobert.codegpt.ui.InfillPromptTemplatePanel;
 import java.awt.BorderLayout;
@@ -152,6 +153,14 @@ public class LlamaModelPreferencesForm {
     return finalPanel;
   }
 
+  public void resetForm(LlamaSettingsState state) {
+    huggingFaceComboBoxModel.setSelectedItem(state.getHuggingFaceModel());
+    browsableCustomModelTextField.setText(state.getCustomLlamaModelPath());
+    customModelRadioButton.setSelected(state.isUseCustomModel());
+    localPromptTemplatePanel.setPromptTemplate(state.getLocalModelPromptTemplate());
+    infillPromptTemplatePanel.setPromptTemplate(state.getLocalModelInfillPromptTemplate());
+  }
+
   public void enableFields(boolean enabled) {
     modelComboBox.setEnabled(enabled);
     modelSizeComboBox.setEnabled(enabled);
@@ -166,40 +175,20 @@ public class LlamaModelPreferencesForm {
     return huggingFaceModelComboBox;
   }
 
-  public void setSelectedModel(HuggingFaceModel model) {
-    huggingFaceComboBoxModel.setSelectedItem(model);
-  }
-
   public HuggingFaceModel getSelectedModel() {
     return (HuggingFaceModel) huggingFaceComboBoxModel.getSelectedItem();
-  }
-
-  public void setCustomLlamaModelPath(String modelPath) {
-    browsableCustomModelTextField.setText(modelPath);
   }
 
   public String getCustomLlamaModelPath() {
     return browsableCustomModelTextField.getText();
   }
 
-  public void setUseCustomLlamaModel(boolean useCustomLlamaModel) {
-    customModelRadioButton.setSelected(useCustomLlamaModel);
-  }
-
   public boolean isUseCustomLlamaModel() {
     return customModelRadioButton.isSelected();
   }
 
-  public void setPromptTemplate(PromptTemplate promptTemplate) {
-    localPromptTemplatePanel.setPromptTemplate(promptTemplate);
-  }
-
   public PromptTemplate getPromptTemplate() {
     return localPromptTemplatePanel.getPromptTemplate();
-  }
-
-  public void setInfillPromptTemplate(InfillPromptTemplate promptTemplate) {
-    infillPromptTemplatePanel.setPromptTemplate(promptTemplate);
   }
 
   public InfillPromptTemplate getInfillPromptTemplate() {

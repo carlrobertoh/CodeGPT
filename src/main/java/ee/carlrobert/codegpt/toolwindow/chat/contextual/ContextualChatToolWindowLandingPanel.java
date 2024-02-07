@@ -80,7 +80,8 @@ class ContextualChatToolWindowLandingPanel extends ResponsePanel {
       if (event.getURL() == null) {
         switch (event.getDescription()) {
           case "LOGIN":
-            ShowSettingsUtil.getInstance().showSettingsDialog(project, GeneralSettingsConfigurable.class);
+            ShowSettingsUtil.getInstance()
+                .showSettingsDialog(project, GeneralSettingsConfigurable.class);
             break;
           case "LIST_DEPENDENCIES":
             actionEvent.handleAction("List all the dependencies that the project uses");

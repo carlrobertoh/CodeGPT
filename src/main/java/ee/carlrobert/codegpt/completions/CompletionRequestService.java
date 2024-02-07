@@ -11,9 +11,9 @@ import ee.carlrobert.codegpt.codecompletions.CodeCompletionRequestProvider;
 import ee.carlrobert.codegpt.codecompletions.InfillRequestDetails;
 import ee.carlrobert.codegpt.credentials.AzureCredentialManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
+import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
-import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
@@ -35,7 +35,7 @@ public final class CompletionRequestService {
   public EventSource getChatCompletionAsync(
       CallParameters callParameters,
       boolean useContextualSearch,
-      CompletionEventListener eventListener) {
+      CompletionEventListener<String> eventListener) {
     var requestProvider = new CompletionRequestProvider(callParameters.getConversation());
     switch (GeneralSettings.getCurrentState().getSelectedService()) {
       case OPENAI:
@@ -73,7 +73,7 @@ public final class CompletionRequestService {
 
   public EventSource getCodeCompletionAsync(
       InfillRequestDetails requestDetails,
-      CompletionEventListener eventListener) {
+      CompletionEventListener<String> eventListener) {
     var requestProvider = new CodeCompletionRequestProvider(requestDetails);
     switch (GeneralSettings.getCurrentState().getSelectedService()) {
       case OPENAI:
