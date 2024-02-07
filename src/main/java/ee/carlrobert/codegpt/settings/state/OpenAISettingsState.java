@@ -5,7 +5,7 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
-import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
+import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
 import ee.carlrobert.codegpt.settings.service.ServiceSelectionForm;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import org.jetbrains.annotations.NotNull;
@@ -37,7 +37,7 @@ public class OpenAISettingsState implements PersistentStateComponent<OpenAISetti
 
   public boolean isModified(ServiceSelectionForm serviceSelectionForm) {
     return !serviceSelectionForm.getOpenAIApiKey()
-        .equals(OpenAICredentialsManager.getInstance().getApiKey())
+        .equals(OpenAICredentialManager.getInstance().getCredential())
         || !serviceSelectionForm.getOpenAIOrganization().equals(organization)
         || !serviceSelectionForm.getOpenAIBaseHost().equals(baseHost)
         || !serviceSelectionForm.getOpenAIPath().equals(path)
@@ -52,7 +52,7 @@ public class OpenAISettingsState implements PersistentStateComponent<OpenAISetti
   }
 
   public void reset(ServiceSelectionForm serviceSelectionForm) {
-    serviceSelectionForm.setOpenAIApiKey(OpenAICredentialsManager.getInstance().getApiKey());
+    serviceSelectionForm.setOpenAIApiKey(OpenAICredentialManager.getInstance().getCredential());
     serviceSelectionForm.setOpenAIOrganization(organization);
     serviceSelectionForm.setOpenAIBaseHost(baseHost);
     serviceSelectionForm.setOpenAIPath(path);

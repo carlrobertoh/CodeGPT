@@ -4,9 +4,9 @@ import static java.lang.String.format;
 
 import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.completions.you.YouUserManager;
-import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
-import ee.carlrobert.codegpt.credentials.LlamaCredentialsManager;
-import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
+import ee.carlrobert.codegpt.credentials.AzureCredentialManager;
+import ee.carlrobert.codegpt.credentials.LlamaCredentialManager;
+import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
 import ee.carlrobert.codegpt.settings.advanced.AdvancedSettingsState;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
@@ -28,7 +28,7 @@ public class CompletionClientProvider {
 
   public static OpenAIClient getOpenAIClient() {
     var settings = OpenAISettingsState.getInstance();
-    var builder = new OpenAIClient.Builder(OpenAICredentialsManager.getInstance().getApiKey())
+    var builder = new OpenAIClient.Builder(OpenAICredentialManager.getInstance().getCredential())
         .setOrganization(settings.getOrganization());
     var baseHost = settings.getBaseHost();
     if (baseHost != null) {
@@ -43,7 +43,8 @@ public class CompletionClientProvider {
         settings.getResourceName(),
         settings.getDeploymentId(),
         settings.getApiVersion());
-    var builder = new AzureClient.Builder(AzureCredentialsManager.getInstance().getSecret(), params)
+    var builder = new AzureClient
+        .Builder(AzureCredentialManager.getInstance().getCredential(), params)
         .setActiveDirectoryAuthentication(settings.isUseAzureActiveDirectoryAuthentication());
     var baseHost = settings.getBaseHost();
     if (baseHost != null) {
@@ -79,7 +80,7 @@ public class CompletionClientProvider {
         .setPort(llamaSettingsState.getServerPort());
     if (!llamaSettingsState.isRunLocalServer()) {
       builder.setHost(llamaSettingsState.getBaseHost());
-      String apiKey = LlamaCredentialsManager.getInstance().getApiKey();
+      String apiKey = LlamaCredentialManager.getInstance().getCredential();
       if (apiKey != null && !apiKey.isBlank()) {
         builder.setApiKey(apiKey);
       }

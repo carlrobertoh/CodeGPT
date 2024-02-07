@@ -16,8 +16,8 @@ import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
 import ee.carlrobert.codegpt.completions.you.auth.AuthenticationNotifier;
-import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
-import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
+import ee.carlrobert.codegpt.credentials.AzureCredentialManager;
+import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.YouSettingsState;
@@ -64,7 +64,7 @@ public class ServiceSelectionForm {
     this.parentDisposable = parentDisposable;
     openAIApiKeyField = new JBPasswordField();
     openAIApiKeyField.setColumns(30);
-    openAIApiKeyField.setText(OpenAICredentialsManager.getInstance().getApiKey());
+    openAIApiKeyField.setText(OpenAICredentialManager.getInstance().getCredential());
 
     var azureSettings = AzureSettingsState.getInstance();
     useAzureApiKeyAuthenticationRadioButton = new JBRadioButton(
@@ -75,7 +75,7 @@ public class ServiceSelectionForm {
         azureSettings.isUseAzureActiveDirectoryAuthentication());
     azureApiKeyField = new JBPasswordField();
     azureApiKeyField.setColumns(30);
-    azureApiKeyField.setText(AzureCredentialsManager.getInstance().getAzureOpenAIApiKey());
+    azureApiKeyField.setText(AzureCredentialManager.getInstance().getApiKey());
     azureApiKeyFieldPanel = UI.PanelFactory.panel(azureApiKeyField)
         .withLabel(CodeGPTBundle.get("settingsConfigurable.shared.apiKey.label"))
         .resizeX(false)
@@ -83,7 +83,7 @@ public class ServiceSelectionForm {
     azureActiveDirectoryTokenField = new JBPasswordField();
     azureActiveDirectoryTokenField.setColumns(30);
     azureActiveDirectoryTokenField.setText(
-        AzureCredentialsManager.getInstance().getAzureActiveDirectoryToken());
+        AzureCredentialManager.getInstance().getActiveDirectoryToken());
     azureActiveDirectoryTokenFieldPanel = UI.PanelFactory.panel(azureActiveDirectoryTokenField)
         .withLabel(CodeGPTBundle.get("settingsConfigurable.service.azure.bearerToken.label"))
         .resizeX(false)

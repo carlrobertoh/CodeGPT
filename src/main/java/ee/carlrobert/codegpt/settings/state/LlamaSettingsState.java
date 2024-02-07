@@ -8,7 +8,7 @@ import com.intellij.util.xmlb.XmlSerializerUtil;
 import ee.carlrobert.codegpt.codecompletions.InfillPromptTemplate;
 import ee.carlrobert.codegpt.completions.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
-import ee.carlrobert.codegpt.credentials.LlamaCredentialsManager;
+import ee.carlrobert.codegpt.credentials.LlamaCredentialManager;
 import ee.carlrobert.codegpt.settings.service.ServiceSelectionForm;
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -58,7 +58,7 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
     var serverPreferencesForm = serviceSelectionForm.getLlamaServerPreferencesForm();
 
     return !serviceSelectionForm.getLlamaServerPreferencesForm().getApiKey()
-        .equals(LlamaCredentialsManager.getInstance().getApiKey())
+        .equals(LlamaCredentialManager.getInstance().getCredential())
         || runLocalServer != serviceSelectionForm.isLlamaRunLocalServer()
         || !localModelPromptTemplate.equals(modelPreferencesForm.getPromptTemplate())
         || !remoteModelPromptTemplate.equals(serviceSelectionForm.getLlamaPromptTemplate())
@@ -124,7 +124,7 @@ public class LlamaSettingsState implements PersistentStateComponent<LlamaSetting
 
     var llamaServerPreferencesForm = serviceSelectionForm.getLlamaServerPreferencesForm();
     llamaServerPreferencesForm.setInfillPromptTemplate(remoteModelInfillPromptTemplate);
-    llamaServerPreferencesForm.setApiKey(LlamaCredentialsManager.getInstance().getApiKey());
+    llamaServerPreferencesForm.setApiKey(LlamaCredentialManager.getInstance().getCredential());
   }
 
   public boolean isUseCustomModel() {

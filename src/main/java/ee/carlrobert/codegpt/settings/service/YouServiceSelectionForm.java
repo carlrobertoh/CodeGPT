@@ -20,7 +20,7 @@ import ee.carlrobert.codegpt.completions.you.auth.YouAuthenticationError;
 import ee.carlrobert.codegpt.completions.you.auth.YouAuthenticationService;
 import ee.carlrobert.codegpt.completions.you.auth.response.YouAuthenticationResponse;
 import ee.carlrobert.codegpt.completions.you.auth.response.YouUser;
-import ee.carlrobert.codegpt.credentials.YouCredentialsManager;
+import ee.carlrobert.codegpt.credentials.YouCredentialManager;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import java.awt.BorderLayout;
@@ -49,7 +49,7 @@ public class YouServiceSelectionForm extends JPanel {
     passwordField = new JBPasswordField();
     passwordField.setColumns(25);
     if (!settings.getEmail().isEmpty()) {
-      passwordField.setText(YouCredentialsManager.getInstance().getAccountPassword());
+      passwordField.setText(YouCredentialManager.getInstance().getCredential());
     }
     signInButton = new JButton(CodeGPTBundle.get("settingsConfigurable.service.you.signIn.label"));
     signUpTextPane = createSignUpTextPane();
@@ -213,7 +213,7 @@ public class YouServiceSelectionForm extends JPanel {
         var email = emailField.getText();
         var password = passwordField.getPassword();
         SettingsState.getInstance().setEmail(email);
-        YouCredentialsManager.getInstance().setAccountPassword(new String(password));
+        YouCredentialManager.getInstance().setCredential(new String(password));
         refreshView(createUserInformationPanel(authenticationResponse.getData().getUser()));
       });
     }

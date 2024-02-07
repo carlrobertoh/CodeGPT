@@ -5,9 +5,9 @@ import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.util.Disposer;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
-import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
-import ee.carlrobert.codegpt.credentials.LlamaCredentialsManager;
-import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
+import ee.carlrobert.codegpt.credentials.AzureCredentialManager;
+import ee.carlrobert.codegpt.credentials.LlamaCredentialManager;
+import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
@@ -67,17 +67,17 @@ public class SettingsConfigurable implements Configurable {
   public void apply() {
     var serviceSelectionForm = settingsComponent.getServiceSelectionForm();
 
-    var prevKey = OpenAICredentialsManager.getInstance().getApiKey();
+    var prevKey = OpenAICredentialManager.getInstance().getCredential();
     if (prevKey != null && !prevKey.equals(serviceSelectionForm.getOpenAIApiKey())) {
       OpenAISettingsState.getInstance().setOpenAIQuotaExceeded(false);
     }
 
-    OpenAICredentialsManager.getInstance().setApiKey(serviceSelectionForm.getOpenAIApiKey());
-    AzureCredentialsManager.getInstance().setApiKey(serviceSelectionForm.getAzureOpenAIApiKey());
-    AzureCredentialsManager.getInstance()
-        .setAzureActiveDirectoryToken(serviceSelectionForm.getAzureActiveDirectoryToken());
-    LlamaCredentialsManager.getInstance()
-        .setApiKey(serviceSelectionForm.getLlamaServerPreferencesForm().getApiKey());
+    OpenAICredentialManager.getInstance().setCredential(serviceSelectionForm.getOpenAIApiKey());
+    AzureCredentialManager.getInstance().setApiKey(serviceSelectionForm.getAzureOpenAIApiKey());
+    AzureCredentialManager.getInstance()
+        .setActiveDirectoryToken(serviceSelectionForm.getAzureActiveDirectoryToken());
+    LlamaCredentialManager.getInstance()
+        .setCredential(serviceSelectionForm.getLlamaServerPreferencesForm().getApiKey());
 
     var settings = SettingsState.getInstance();
     settings.setDisplayName(settingsComponent.getDisplayName());

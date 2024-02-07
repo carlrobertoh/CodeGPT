@@ -5,7 +5,7 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
-import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
+import ee.carlrobert.codegpt.credentials.AzureCredentialManager;
 import ee.carlrobert.codegpt.settings.service.ServiceSelectionForm;
 import org.jetbrains.annotations.NotNull;
 
@@ -37,15 +37,15 @@ public class AzureSettingsState implements PersistentStateComponent<AzureSetting
   }
 
   public boolean isModified(ServiceSelectionForm serviceSelectionForm) {
-    var credentialsManager = AzureCredentialsManager.getInstance();
+    var credentialsManager = AzureCredentialManager.getInstance();
     return serviceSelectionForm.isAzureActiveDirectoryAuthenticationSelected()
         != isUseAzureActiveDirectoryAuthentication()
         || serviceSelectionForm.isAzureApiKeyAuthenticationSelected()
         != isUseAzureApiKeyAuthentication()
         || !serviceSelectionForm.getAzureActiveDirectoryToken()
-        .equals(credentialsManager.getAzureActiveDirectoryToken())
+        .equals(credentialsManager.getActiveDirectoryToken())
         || !serviceSelectionForm.getAzureOpenAIApiKey()
-        .equals(credentialsManager.getAzureOpenAIApiKey())
+        .equals(credentialsManager.getApiKey())
         || !serviceSelectionForm.getAzureResourceName().equals(resourceName)
         || !serviceSelectionForm.getAzureDeploymentId().equals(deploymentId)
         || !serviceSelectionForm.getAzureApiVersion().equals(apiVersion)
@@ -67,9 +67,9 @@ public class AzureSettingsState implements PersistentStateComponent<AzureSetting
 
   public void reset(ServiceSelectionForm serviceSelectionForm) {
     serviceSelectionForm.setAzureApiKey(
-        AzureCredentialsManager.getInstance().getAzureOpenAIApiKey());
+        AzureCredentialManager.getInstance().getApiKey());
     serviceSelectionForm.setAzureActiveDirectoryToken(
-        AzureCredentialsManager.getInstance().getAzureActiveDirectoryToken());
+        AzureCredentialManager.getInstance().getActiveDirectoryToken());
     serviceSelectionForm.setAzureApiKeyAuthenticationSelected(useAzureApiKeyAuthentication);
     serviceSelectionForm.setAzureActiveDirectoryAuthenticationSelected(
         useAzureActiveDirectoryAuthentication);
