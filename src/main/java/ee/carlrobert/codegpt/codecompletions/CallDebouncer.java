@@ -32,9 +32,10 @@ public class CallDebouncer {
    * be aborted, and therefore the previous request will be cancelled.
    */
   public void debounce(Object key, CallRunnable runnable, long delay, TimeUnit unit) {
+    cancelPreviousCall();
+
     Future<?> prev = delayedMap.put(key, scheduler.schedule(() -> {
       try {
-        cancelPreviousCall();
         var progressIndicator =
             LLAMA_CPP.equals(GeneralSettings.getCurrentState().getSelectedService())
                 ? createProgressIndicator()
