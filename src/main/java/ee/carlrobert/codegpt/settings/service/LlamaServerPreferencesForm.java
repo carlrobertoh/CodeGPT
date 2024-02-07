@@ -27,7 +27,7 @@ import ee.carlrobert.codegpt.completions.llama.LlamaServerAgent;
 import ee.carlrobert.codegpt.completions.llama.LlamaServerStartupParams;
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
 import ee.carlrobert.codegpt.credentials.LlamaCredentialManager;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
+import ee.carlrobert.codegpt.settings.state.LlamaSettings;
 import ee.carlrobert.codegpt.ui.ChatPromptTemplatePanel;
 import ee.carlrobert.codegpt.ui.InfillPromptTemplatePanel;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
@@ -62,7 +62,7 @@ public class LlamaServerPreferencesForm {
   private final InfillPromptTemplatePanel infillPromptTemplatePanel;
 
   public LlamaServerPreferencesForm() {
-    var llamaSettings = LlamaSettingsState.getInstance();
+    var llamaSettings = LlamaSettings.getCurrentState();
     var llamaServerAgent =
         ApplicationManager.getApplication().getService(LlamaServerAgent.class);
     var serverRunning = llamaServerAgent.isServerRunning();

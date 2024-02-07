@@ -9,7 +9,7 @@ import ee.carlrobert.codegpt.credentials.AzureCredentialManager;
 import ee.carlrobert.codegpt.credentials.LlamaCredentialManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
 import ee.carlrobert.codegpt.settings.state.AzureSettings;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
+import ee.carlrobert.codegpt.settings.state.LlamaSettings;
 import ee.carlrobert.codegpt.settings.state.OpenAISettings;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.settings.state.YouSettingsState;
@@ -51,7 +51,7 @@ public class SettingsConfigurable implements Configurable {
     var settings = SettingsState.getInstance();
     var openAISettings = OpenAISettings.getInstance();
     var azureSettings = AzureSettings.getInstance();
-    var llamaSettings = LlamaSettingsState.getInstance();
+    var llamaSettings = LlamaSettings.getInstance();
 
     var serviceSelectionForm = settingsComponent.getServiceSelectionForm();
     return !settingsComponent.getDisplayName().equals(settings.getDisplayName())
@@ -87,7 +87,7 @@ public class SettingsConfigurable implements Configurable {
     var azureSettings = AzureSettings.getInstance();
     openAISettings.loadState(serviceSelectionForm.getCurrentOpenAIFormState());
     azureSettings.loadState(serviceSelectionForm.getCurrentAzureFormState());
-    LlamaSettingsState.getInstance().apply(serviceSelectionForm);
+    LlamaSettings.getInstance().loadState(serviceSelectionForm.getCurrentLlamaFormState());
     YouSettingsState.getInstance()
         .setDisplayWebSearchResults(serviceSelectionForm.isDisplayWebSearchResults());
 
@@ -115,7 +115,7 @@ public class SettingsConfigurable implements Configurable {
 
     serviceSelectionForm.resetOpenAIForm();
     serviceSelectionForm.resetAzureForm();
-    LlamaSettingsState.getInstance().reset(serviceSelectionForm);
+    serviceSelectionForm.resetLlamaForm();
 
     serviceSelectionForm.setDisplayWebSearchResults(
         YouSettingsState.getInstance().isDisplayWebSearchResults());

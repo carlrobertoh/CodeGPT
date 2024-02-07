@@ -47,7 +47,7 @@ public class SettingsStateTest extends BasePlatformTestCase {
   }
 
   public void testLlamaSettingsModelPathSync() {
-    var llamaSettings = LlamaSettingsState.getInstance();
+    var llamaSettings = LlamaSettings.getCurrentState();
     llamaSettings.setHuggingFaceModel(HuggingFaceModel.WIZARD_CODER_PYTHON_7B_Q3);
     var conversation = new Conversation();
     conversation.setModel("TEST_LLAMA_MODEL_PATH");
@@ -62,7 +62,7 @@ public class SettingsStateTest extends BasePlatformTestCase {
   }
 
   public void testLlamaSettingsHuggingFaceModelSync() {
-    var llamaSettings = LlamaSettingsState.getInstance();
+    var llamaSettings = LlamaSettings.getCurrentState();
     llamaSettings.setHuggingFaceModel(HuggingFaceModel.WIZARD_CODER_PYTHON_7B_Q3);
     var conversation = new Conversation();
     conversation.setModel("CODE_LLAMA_7B_Q3");

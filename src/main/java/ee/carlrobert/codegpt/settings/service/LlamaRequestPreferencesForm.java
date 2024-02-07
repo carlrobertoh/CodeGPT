@@ -6,7 +6,7 @@ import com.intellij.ui.components.fields.IntegerField;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
+import ee.carlrobert.codegpt.settings.state.LlamaSettings;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -18,7 +18,7 @@ public class LlamaRequestPreferencesForm {
   private final JBTextField repeatPenaltyField;
 
   public LlamaRequestPreferencesForm() {
-    var llamaSettings = LlamaSettingsState.getInstance();
+    var llamaSettings = LlamaSettings.getCurrentState();
     topKField = new IntegerField();
     topKField.setColumns(12);
     topKField.setValue(llamaSettings.getTopK());

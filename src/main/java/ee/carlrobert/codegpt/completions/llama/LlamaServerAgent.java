@@ -18,7 +18,7 @@ import com.intellij.openapi.util.Key;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.settings.service.ServerProgressPanel;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
+import ee.carlrobert.codegpt.settings.state.LlamaSettings;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -130,7 +130,7 @@ public final class LlamaServerAgent implements Disposable {
             if ("HTTP server listening".equals(serverMessage.getMessage())) {
               LOG.info("Server up and running!");
 
-              LlamaSettingsState.getInstance().setServerPort(port);
+              LlamaSettings.getCurrentState().setServerPort(port);
               onSuccess.run();
             }
           } catch (Exception ignore) {

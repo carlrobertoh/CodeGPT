@@ -29,7 +29,7 @@ import ee.carlrobert.codegpt.completions.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaServerAgent;
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
+import ee.carlrobert.codegpt.settings.state.LlamaSettings;
 import ee.carlrobert.codegpt.ui.ChatPromptTemplatePanel;
 import ee.carlrobert.codegpt.ui.InfillPromptTemplatePanel;
 import java.awt.BorderLayout;
@@ -86,7 +86,7 @@ public class LlamaModelPreferencesForm {
     progressLabel.setBorder(JBUI.Borders.emptyLeft(2));
     progressLabel.setFont(JBUI.Fonts.smallFont());
     modelExistsIcon = new JBLabel(Actions.Checked);
-    var llamaSettings = LlamaSettingsState.getInstance();
+    var llamaSettings = LlamaSettings.getCurrentState();
     modelExistsIcon.setVisible(isModelExists(llamaSettings.getHuggingFaceModel()));
     helpIcon = new JBLabel(General.ContextHelp);
     huggingFaceComboBoxModel = new DefaultComboBoxModel<>();
@@ -479,9 +479,8 @@ public class LlamaModelPreferencesForm {
                       actionLinkWrapper,
                       huggingFaceComboBoxModel));
               actionLinkWrapper.setVisible(false);
-              LlamaSettingsState.getInstance()
-                  .setHuggingFaceModel(
-                      (HuggingFaceModel) huggingFaceComboBoxModel.getSelectedItem());
+              LlamaSettings.getCurrentState().setHuggingFaceModel(
+                  (HuggingFaceModel) huggingFaceComboBoxModel.getSelectedItem());
             }),
             (error) -> {
               throw new RuntimeException(error);

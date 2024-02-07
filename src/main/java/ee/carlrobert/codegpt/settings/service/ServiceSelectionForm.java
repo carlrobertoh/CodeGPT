@@ -17,9 +17,12 @@ import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
 import ee.carlrobert.codegpt.completions.you.auth.AuthenticationNotifier;
 import ee.carlrobert.codegpt.credentials.AzureCredentialManager;
+import ee.carlrobert.codegpt.credentials.LlamaCredentialManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
 import ee.carlrobert.codegpt.settings.state.AzureSettings;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
+import ee.carlrobert.codegpt.settings.state.LlamaSettings;
+import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettings;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.YouSettingsState;
@@ -333,6 +336,56 @@ public class ServiceSelectionForm {
     setAzureApiVersion(state.getApiVersion());
     setAzureBaseHost(state.getBaseHost());
     setAzurePath(state.getPath());
+  }
+
+  public LlamaSettingsState getCurrentLlamaFormState() {
+    var state = new LlamaSettingsState();
+    var modelPreferencesForm = getLlamaModelPreferencesForm();
+    state.setCustomLlamaModelPath(modelPreferencesForm.getCustomLlamaModelPath());
+    state.setHuggingFaceModel(modelPreferencesForm.getSelectedModel());
+    state.setUseCustomModel(modelPreferencesForm.isUseCustomLlamaModel());
+    state.setLocalModelPromptTemplate(modelPreferencesForm.getPromptTemplate());
+    state.setRemoteModelPromptTemplate(getLlamaPromptTemplate());
+    state.setLocalModelInfillPromptTemplate(modelPreferencesForm.getInfillPromptTemplate());
+    state.setRemoteModelInfillPromptTemplate(
+        getLlamaServerPreferencesForm().getInfillPromptTemplate());
+    var requestPreferencesForm = getLlamaRequestPreferencesForm();
+    state.setTopK(requestPreferencesForm.getTopK());
+    state.setTopP(requestPreferencesForm.getTopP());
+    state.setMinP(requestPreferencesForm.getMinP());
+    state.setRepeatPenalty(requestPreferencesForm.getRepeatPenalty());
+    state.setRunLocalServer(isLlamaRunLocalServer());
+    state.setBaseHost(getLlamaBaseHost());
+    state.setServerPort(getLlamaServerPort());
+    state.setContextSize(getContextSize());
+    state.setThreads(getThreads());
+    state.setAdditionalParameters(getAdditionalParameters());
+    return state;
+  }
+
+  public void resetLlamaForm() {
+    var state = LlamaSettings.getCurrentState();
+    var modelPreferencesForm = getLlamaModelPreferencesForm();
+    modelPreferencesForm.setSelectedModel(state.getHuggingFaceModel());
+    modelPreferencesForm.setCustomLlamaModelPath(state.getCustomLlamaModelPath());
+    modelPreferencesForm.setUseCustomLlamaModel(state.isUseCustomModel());
+    modelPreferencesForm.setPromptTemplate(state.getLocalModelPromptTemplate());
+    modelPreferencesForm.setInfillPromptTemplate(state.getLocalModelInfillPromptTemplate());
+    var requestPreferencesForm = getLlamaRequestPreferencesForm();
+    requestPreferencesForm.setTopK(state.getTopK());
+    requestPreferencesForm.setTopP(state.getTopP());
+    requestPreferencesForm.setMinP(state.getMinP());
+    requestPreferencesForm.setRepeatPenalty(state.getRepeatPenalty());
+    setLlamaRunLocalServer(state.isRunLocalServer());
+    setLlamaBaseHost(state.getBaseHost());
+    setLlamaServerPort(state.getServerPort());
+    setLlamaPromptTemplate(state.getRemoteModelPromptTemplate());
+    setContextSize(state.getContextSize());
+    setThreads(state.getThreads());
+    setAdditionalParameters(state.getAdditionalParameters());
+    var llamaServerPreferencesForm = getLlamaServerPreferencesForm();
+    llamaServerPreferencesForm.setInfillPromptTemplate(state.getRemoteModelInfillPromptTemplate());
+    llamaServerPreferencesForm.setApiKey(LlamaCredentialManager.getInstance().getCredential());
   }
 
   public void setAzureActiveDirectoryAuthenticationSelected(boolean selected) {

@@ -49,7 +49,7 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
     }
     if ("llama.chat.completion".equals(clientCode)) {
       setSelectedService(ServiceType.LLAMA_CPP);
-      var llamaSettings = LlamaSettingsState.getInstance();
+      var llamaSettings = LlamaSettings.getCurrentState();
       try {
         var huggingFaceModel = HuggingFaceModel.valueOf(conversation.getModel());
         llamaSettings.setHuggingFaceModel(huggingFaceModel);
@@ -73,7 +73,7 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
       case YOU:
         return "YouCode";
       case LLAMA_CPP:
-        var llamaSettings = LlamaSettingsState.getInstance();
+        var llamaSettings = LlamaSettings.getCurrentState();
         if (llamaSettings.isUseCustomModel()) {
           var filePath = llamaSettings.getCustomLlamaModelPath();
           int lastSeparatorIndex = filePath.lastIndexOf('/');

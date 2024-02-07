@@ -8,7 +8,7 @@ import ee.carlrobert.codegpt.completions.CallParameters;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.AzureSettings;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
+import ee.carlrobert.codegpt.settings.state.LlamaSettings;
 import ee.carlrobert.codegpt.settings.state.OpenAISettings;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import java.time.LocalDateTime;
@@ -195,7 +195,7 @@ public final class ConversationService {
       case YOU:
         return "YouCode";
       case LLAMA_CPP:
-        var llamaSettings = LlamaSettingsState.getInstance();
+        var llamaSettings = LlamaSettings.getCurrentState();
         return llamaSettings.isUseCustomModel()
             ? llamaSettings.getCustomLlamaModelPath()
             : llamaSettings.getHuggingFaceModel().getCode();

@@ -13,7 +13,7 @@ import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
+import ee.carlrobert.codegpt.settings.state.LlamaSettings;
 import ee.carlrobert.codegpt.settings.state.OpenAISettings;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
@@ -106,7 +106,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
   }
 
   private String getSelectedHuggingFace() {
-    var huggingFaceModel = LlamaSettingsState.getInstance().getHuggingFaceModel();
+    var huggingFaceModel = LlamaSettings.getCurrentState().getHuggingFaceModel();
     return format(
         "%s %dB (Q%d)",
         LlamaModel.findByHuggingFaceModel(huggingFaceModel).getLabel(),
