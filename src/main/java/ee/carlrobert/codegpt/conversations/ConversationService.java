@@ -8,9 +8,9 @@ import ee.carlrobert.codegpt.completions.CallParameters;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.AzureSettings;
+import ee.carlrobert.codegpt.settings.state.GeneralSettings;
 import ee.carlrobert.codegpt.settings.state.LlamaSettings;
 import ee.carlrobert.codegpt.settings.state.OpenAISettings;
-import ee.carlrobert.codegpt.settings.state.SettingsState;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -42,13 +42,13 @@ public final class ConversationService {
   }
 
   public Conversation createConversation(String clientCode) {
-    var settings = SettingsState.getInstance();
     var conversation = new Conversation();
     conversation.setId(UUID.randomUUID());
     conversation.setClientCode(clientCode);
     conversation.setCreatedOn(LocalDateTime.now());
     conversation.setUpdatedOn(LocalDateTime.now());
-    conversation.setModel(getModelForSelectedService(settings.getSelectedService()));
+    conversation.setModel(getModelForSelectedService(
+        GeneralSettings.getCurrentState().getSelectedService()));
     return conversation;
   }
 
@@ -111,7 +111,7 @@ public final class ConversationService {
   }
 
   public Conversation startConversation() {
-    var completionCode = SettingsState.getInstance().getSelectedService().getCompletionCode();
+    var completionCode = GeneralSettings.getCurrentState().getSelectedService().getCompletionCode();
     var conversation = createConversation(completionCode);
     conversationState.setCurrentConversation(conversation);
     addConversation(conversation);

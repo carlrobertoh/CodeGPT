@@ -16,10 +16,10 @@ import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
+import ee.carlrobert.codegpt.settings.state.GeneralSettings;
 import ee.carlrobert.codegpt.settings.state.IncludedFilesSettings;
 import ee.carlrobert.codegpt.settings.state.LlamaSettings;
 import ee.carlrobert.codegpt.settings.state.OpenAISettings;
-import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.settings.state.YouSettings;
 import ee.carlrobert.codegpt.telemetry.core.configuration.TelemetryConfiguration;
 import ee.carlrobert.codegpt.telemetry.core.service.UserId;
@@ -207,7 +207,8 @@ public class CompletionRequestProvider {
       boolean useContextualSearch) {
     var messages = buildMessages(callParameters, useContextualSearch);
 
-    if (model == null || SettingsState.getInstance().getSelectedService() == ServiceType.YOU) {
+    if (model == null
+        || GeneralSettings.getCurrentState().getSelectedService() == ServiceType.YOU) {
       return messages;
     }
 

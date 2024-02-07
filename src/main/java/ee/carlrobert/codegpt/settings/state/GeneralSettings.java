@@ -6,7 +6,6 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
-import com.intellij.util.xmlb.XmlSerializerUtil;
 import ee.carlrobert.codegpt.completions.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.conversations.Conversation;
@@ -14,41 +13,40 @@ import ee.carlrobert.codegpt.settings.service.ServiceType;
 import org.jetbrains.annotations.NotNull;
 
 @State(name = "CodeGPT_GeneralSettings_210", storages = @Storage("CodeGPT_GeneralSettings_210.xml"))
-public class SettingsState implements PersistentStateComponent<SettingsState> {
+public class GeneralSettings implements PersistentStateComponent<GeneralSettingsState> {
 
-  private String email = "";
-  private String displayName = "";
-  private boolean previouslySignedIn;
-  private ServiceType selectedService = ServiceType.OPENAI;
+  private GeneralSettingsState state = new GeneralSettingsState();
 
-  public SettingsState() {
-  }
-
-  public static SettingsState getInstance() {
-    return ApplicationManager.getApplication().getService(SettingsState.class);
+  @Override
+  @NotNull
+  public GeneralSettingsState getState() {
+    return state;
   }
 
   @Override
-  public SettingsState getState() {
-    return this;
+  public void loadState(@NotNull GeneralSettingsState state) {
+    this.state = state;
   }
 
-  @Override
-  public void loadState(@NotNull SettingsState state) {
-    XmlSerializerUtil.copyBean(state, this);
+  public static GeneralSettingsState getCurrentState() {
+    return getInstance().getState();
+  }
+
+  public static GeneralSettings getInstance() {
+    return ApplicationManager.getApplication().getService(GeneralSettings.class);
   }
 
   public void sync(Conversation conversation) {
     var clientCode = conversation.getClientCode();
     if ("chat.completion".equals(clientCode)) {
-      setSelectedService(ServiceType.OPENAI);
+      state.setSelectedService(ServiceType.OPENAI);
       OpenAISettings.getCurrentState().setModel(conversation.getModel());
     }
     if ("azure.chat.completion".equals(clientCode)) {
-      setSelectedService(ServiceType.AZURE);
+      state.setSelectedService(ServiceType.AZURE);
     }
     if ("llama.chat.completion".equals(clientCode)) {
-      setSelectedService(ServiceType.LLAMA_CPP);
+      state.setSelectedService(ServiceType.LLAMA_CPP);
       var llamaSettings = LlamaSettings.getCurrentState();
       try {
         var huggingFaceModel = HuggingFaceModel.valueOf(conversation.getModel());
@@ -60,12 +58,12 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
       }
     }
     if ("you.chat.completion".equals(clientCode)) {
-      setSelectedService(ServiceType.YOU);
+      state.setSelectedService(ServiceType.YOU);
     }
   }
 
   public String getModel() {
-    switch (selectedService) {
+    switch (state.getSelectedService()) {
       case OPENAI:
         return OpenAISettings.getCurrentState().getModel();
       case AZURE:
@@ -92,44 +90,5 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
       default:
         return "Unknown";
     }
-  }
-
-  public String getEmail() {
-    return email;
-  }
-
-  public void setEmail(String email) {
-    this.email = email;
-  }
-
-  public String getDisplayName() {
-    if (displayName == null || displayName.isEmpty()) {
-      var systemUserName = System.getProperty("user.name");
-      if (systemUserName == null || systemUserName.isEmpty()) {
-        return "User";
-      }
-      return systemUserName;
-    }
-    return displayName;
-  }
-
-  public void setDisplayName(String displayName) {
-    this.displayName = displayName;
-  }
-
-  public boolean isPreviouslySignedIn() {
-    return previouslySignedIn;
-  }
-
-  public void setPreviouslySignedIn(boolean previouslySignedIn) {
-    this.previouslySignedIn = previouslySignedIn;
-  }
-
-  public ServiceType getSelectedService() {
-    return selectedService;
-  }
-
-  public void setSelectedService(ServiceType selectedService) {
-    this.selectedService = selectedService;
   }
 }

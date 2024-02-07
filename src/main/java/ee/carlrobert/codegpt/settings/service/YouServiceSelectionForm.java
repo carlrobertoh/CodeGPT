@@ -21,7 +21,7 @@ import ee.carlrobert.codegpt.completions.you.auth.YouAuthenticationService;
 import ee.carlrobert.codegpt.completions.you.auth.response.YouAuthenticationResponse;
 import ee.carlrobert.codegpt.completions.you.auth.response.YouUser;
 import ee.carlrobert.codegpt.credentials.YouCredentialManager;
-import ee.carlrobert.codegpt.settings.state.SettingsState;
+import ee.carlrobert.codegpt.settings.state.GeneralSettings;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -44,7 +44,7 @@ public class YouServiceSelectionForm extends JPanel {
 
   public YouServiceSelectionForm(Disposable parentDisposable) {
     super(new BorderLayout());
-    var settings = SettingsState.getInstance();
+    var settings = GeneralSettings.getCurrentState();
     emailField = new JBTextField(settings.getEmail(), 25);
     passwordField = new JBPasswordField();
     passwordField.setColumns(25);
@@ -212,7 +212,7 @@ public class YouServiceSelectionForm extends JPanel {
       SwingUtilities.invokeLater(() -> {
         var email = emailField.getText();
         var password = passwordField.getPassword();
-        SettingsState.getInstance().setEmail(email);
+        GeneralSettings.getCurrentState().setEmail(email);
         YouCredentialManager.getInstance().setCredential(new String(password));
         refreshView(createUserInformationPanel(authenticationResponse.getData().getUser()));
       });

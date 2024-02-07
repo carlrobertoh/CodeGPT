@@ -5,7 +5,7 @@ import static java.lang.String.format;
 import com.intellij.ui.components.ActionLink;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.Icons;
-import ee.carlrobert.codegpt.settings.state.SettingsState;
+import ee.carlrobert.codegpt.settings.state.GeneralSettings;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ResponsePanel;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import java.awt.BorderLayout;
@@ -35,7 +35,7 @@ class StandardChatToolWindowLandingPanel extends ResponsePanel {
             "<p style=\"margin-top: 4px; margin-bottom: 4px;\">"
                 + "Welcome <strong>%s</strong>, I'm your intelligent code companion, here to be"
                 + " your partner-in-crime for getting things done in a flash."
-                + "</p>", SettingsState.getInstance().getDisplayName())
+                + "</p>", GeneralSettings.getCurrentState().getDisplayName())
             + "<p style=\"margin-top: 4px; margin-bottom: 4px;\">"
             + "Feel free to ask me anything you'd like, but my true superpower lies in assisting "
             + "you with your code! Here are a few examples of how I can assist you:"

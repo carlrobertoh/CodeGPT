@@ -12,8 +12,8 @@ import com.intellij.util.ui.FormBuilder;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.settings.service.ServiceSelectionForm;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
+import ee.carlrobert.codegpt.settings.state.GeneralSettings;
 import ee.carlrobert.codegpt.settings.state.OpenAISettings;
-import ee.carlrobert.codegpt.settings.state.SettingsState;
 import java.awt.CardLayout;
 import java.util.Arrays;
 import javax.swing.DefaultComboBoxModel;
@@ -27,8 +27,8 @@ public class SettingsComponent {
   private final ComboBox<ServiceType> serviceComboBox;
   private final ServiceSelectionForm serviceSelectionForm;
 
-  public SettingsComponent(Disposable parentDisposable, SettingsState settings) {
-    displayNameField = new JBTextField(settings.getDisplayName(), 20);
+  public SettingsComponent(Disposable parentDisposable, GeneralSettings settings) {
+    displayNameField = new JBTextField(settings.getState().getDisplayName(), 20);
 
     serviceSelectionForm = new ServiceSelectionForm(parentDisposable);
     var cardLayout = new CardLayout();

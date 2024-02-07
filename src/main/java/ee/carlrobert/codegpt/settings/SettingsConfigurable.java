@@ -9,9 +9,9 @@ import ee.carlrobert.codegpt.credentials.AzureCredentialManager;
 import ee.carlrobert.codegpt.credentials.LlamaCredentialManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
 import ee.carlrobert.codegpt.settings.state.AzureSettings;
+import ee.carlrobert.codegpt.settings.state.GeneralSettings;
 import ee.carlrobert.codegpt.settings.state.LlamaSettings;
 import ee.carlrobert.codegpt.settings.state.OpenAISettings;
-import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.settings.state.YouSettings;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
@@ -40,7 +40,7 @@ public class SettingsConfigurable implements Configurable {
   @Nullable
   @Override
   public JComponent createComponent() {
-    var settings = SettingsState.getInstance();
+    var settings = GeneralSettings.getInstance();
     parentDisposable = Disposer.newDisposable();
     settingsComponent = new SettingsComponent(parentDisposable, settings);
     return settingsComponent.getPanel();
@@ -48,19 +48,15 @@ public class SettingsConfigurable implements Configurable {
 
   @Override
   public boolean isModified() {
-    var settings = SettingsState.getInstance();
-    var openAISettings = OpenAISettings.getInstance();
-    var azureSettings = AzureSettings.getInstance();
-    var llamaSettings = LlamaSettings.getInstance();
-
+    var settings = GeneralSettings.getInstance();
     var serviceSelectionForm = settingsComponent.getServiceSelectionForm();
-    return !settingsComponent.getDisplayName().equals(settings.getDisplayName())
+    return !settingsComponent.getDisplayName().equals(settings.getState().getDisplayName())
         || isServiceChanged(settings)
-        || openAISettings.isModified(serviceSelectionForm)
-        || azureSettings.isModified(serviceSelectionForm)
+        || OpenAISettings.getInstance().isModified(serviceSelectionForm)
+        || AzureSettings.getInstance().isModified(serviceSelectionForm)
         || serviceSelectionForm.isDisplayWebSearchResults()
         != YouSettings.getCurrentState().isDisplayWebSearchResults()
-        || llamaSettings.isModified(serviceSelectionForm);
+        || LlamaSettings.getInstance().isModified(serviceSelectionForm);
   }
 
   @Override
@@ -74,19 +70,18 @@ public class SettingsConfigurable implements Configurable {
     }
 
     OpenAICredentialManager.getInstance().setCredential(serviceSelectionForm.getOpenAIApiKey());
-    AzureCredentialManager.getInstance().setApiKey(serviceSelectionForm.getAzureOpenAIApiKey());
-    AzureCredentialManager.getInstance()
-        .setActiveDirectoryToken(serviceSelectionForm.getAzureActiveDirectoryToken());
+    var azureCredentials = AzureCredentialManager.getInstance();
+    azureCredentials.setApiKey(serviceSelectionForm.getAzureOpenAIApiKey());
+    azureCredentials.setActiveDirectoryToken(serviceSelectionForm.getAzureActiveDirectoryToken());
     LlamaCredentialManager.getInstance()
         .setCredential(serviceSelectionForm.getLlamaServerPreferencesForm().getApiKey());
 
-    var settings = SettingsState.getInstance();
-    settings.setDisplayName(settingsComponent.getDisplayName());
-    settings.setSelectedService(settingsComponent.getSelectedService());
+    var settings = GeneralSettings.getInstance();
+    settings.getState().setDisplayName(settingsComponent.getDisplayName());
+    settings.getState().setSelectedService(settingsComponent.getSelectedService());
 
-    var azureSettings = AzureSettings.getInstance();
     openAISettings.loadState(serviceSelectionForm.getCurrentOpenAIFormState());
-    azureSettings.loadState(serviceSelectionForm.getCurrentAzureFormState());
+    AzureSettings.getInstance().loadState(serviceSelectionForm.getCurrentAzureFormState());
     LlamaSettings.getInstance().loadState(serviceSelectionForm.getCurrentLlamaFormState());
     YouSettings.getCurrentState()
         .setDisplayWebSearchResults(serviceSelectionForm.isDisplayWebSearchResults());
@@ -106,7 +101,7 @@ public class SettingsConfigurable implements Configurable {
 
   @Override
   public void reset() {
-    var settings = SettingsState.getInstance();
+    var settings = GeneralSettings.getCurrentState();
     var serviceSelectionForm = settingsComponent.getServiceSelectionForm();
 
     // settingsComponent.setEmail(settings.getEmail());
@@ -129,8 +124,8 @@ public class SettingsConfigurable implements Configurable {
     settingsComponent = null;
   }
 
-  private boolean isServiceChanged(SettingsState settings) {
-    return settingsComponent.getSelectedService() != settings.getSelectedService();
+  private boolean isServiceChanged(GeneralSettings settings) {
+    return settingsComponent.getSelectedService() != settings.getState().getSelectedService();
   }
 
   private void resetActiveTab() {

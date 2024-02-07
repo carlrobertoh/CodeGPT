@@ -13,10 +13,11 @@ import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
+import ee.carlrobert.codegpt.settings.state.GeneralSettings;
+import ee.carlrobert.codegpt.settings.state.GeneralSettingsState;
 import ee.carlrobert.codegpt.settings.state.LlamaSettings;
 import ee.carlrobert.codegpt.settings.state.OpenAISettings;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
-import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import java.util.List;
 import javax.swing.Icon;
@@ -26,12 +27,12 @@ import org.jetbrains.annotations.NotNull;
 public class ModelComboBoxAction extends ComboBoxAction {
 
   private final Runnable onAddNewTab;
-  private final SettingsState settings;
+  private final GeneralSettingsState settings;
   private final OpenAISettingsState openAISettings;
 
   public ModelComboBoxAction(Runnable onAddNewTab, ServiceType selectedService) {
     this.onAddNewTab = onAddNewTab;
-    settings = SettingsState.getInstance();
+    settings = GeneralSettings.getCurrentState();
     openAISettings = OpenAISettings.getCurrentState();
     updateTemplatePresentation(selectedService);
   }

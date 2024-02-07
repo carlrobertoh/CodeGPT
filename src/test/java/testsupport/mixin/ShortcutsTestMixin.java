@@ -4,21 +4,21 @@ import ee.carlrobert.codegpt.credentials.AzureCredentialManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.AzureSettings;
+import ee.carlrobert.codegpt.settings.state.GeneralSettings;
 import ee.carlrobert.codegpt.settings.state.LlamaSettings;
 import ee.carlrobert.codegpt.settings.state.OpenAISettings;
-import ee.carlrobert.codegpt.settings.state.SettingsState;
 
 public interface ShortcutsTestMixin {
 
   default void useOpenAIService() {
-    SettingsState.getInstance().setSelectedService(ServiceType.OPENAI);
+    GeneralSettings.getCurrentState().setSelectedService(ServiceType.OPENAI);
     OpenAICredentialManager.getInstance().setCredential("TEST_API_KEY");
     OpenAISettings.getCurrentState().setModel("gpt-4");
     OpenAISettings.getCurrentState().setBaseHost(null);
   }
 
   default void useAzureService() {
-    SettingsState.getInstance().setSelectedService(ServiceType.AZURE);
+    GeneralSettings.getCurrentState().setSelectedService(ServiceType.AZURE);
     AzureCredentialManager.getInstance().setApiKey("TEST_API_KEY");
     var azureSettings = AzureSettings.getCurrentState();
     azureSettings.setBaseHost(null);
@@ -28,11 +28,11 @@ public interface ShortcutsTestMixin {
   }
 
   default void useYouService() {
-    SettingsState.getInstance().setSelectedService(ServiceType.YOU);
+    GeneralSettings.getCurrentState().setSelectedService(ServiceType.YOU);
   }
 
   default void useLlamaService() {
-    SettingsState.getInstance().setSelectedService(ServiceType.LLAMA_CPP);
+    GeneralSettings.getCurrentState().setSelectedService(ServiceType.LLAMA_CPP);
     LlamaSettings.getCurrentState().setServerPort(null);
   }
 }

@@ -10,7 +10,7 @@ import com.intellij.ui.components.JBTabbedPane;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
-import ee.carlrobert.codegpt.settings.state.SettingsState;
+import ee.carlrobert.codegpt.settings.state.GeneralSettings;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -106,7 +106,7 @@ public class StandardChatToolWindowTabbedPane extends JBTabbedPane {
       var conversation = toolWindowPanel.getConversation();
       if (conversation != null) {
         ConversationsState.getInstance().setCurrentConversation(conversation);
-        SettingsState.getInstance().sync(conversation);
+        GeneralSettings.getInstance().sync(conversation);
       }
     }
   }

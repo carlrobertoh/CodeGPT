@@ -27,7 +27,7 @@ import ee.carlrobert.codegpt.completions.CompletionRequestService;
 import ee.carlrobert.codegpt.credentials.AzureCredentialManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
-import ee.carlrobert.codegpt.settings.state.SettingsState;
+import ee.carlrobert.codegpt.settings.state.GeneralSettings;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.completion.CompletionEventListener;
@@ -53,7 +53,7 @@ public class GenerateGitCommitMessageAction extends AnAction {
 
   @Override
   public void update(@NotNull AnActionEvent event) {
-    var selectedService = SettingsState.getInstance().getSelectedService();
+    var selectedService = GeneralSettings.getCurrentState().getSelectedService();
     if (selectedService == ServiceType.OPENAI || selectedService == ServiceType.AZURE) {
       var filesSelected = !getReferencedFilePaths(event).isEmpty();
       var callAllowed = (selectedService == ServiceType.OPENAI

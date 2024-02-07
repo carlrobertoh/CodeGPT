@@ -11,8 +11,8 @@ import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
+import ee.carlrobert.codegpt.settings.state.GeneralSettings;
 import ee.carlrobert.codegpt.settings.state.OpenAISettings;
-import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.settings.state.YouSettings;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ChatMessageResponseBody;
@@ -85,7 +85,7 @@ abstract class ToolWindowCompletionResponseEventListener implements
     SwingUtilities.invokeLater(() -> {
       try {
         if ("insufficient_quota".equals(error.getCode())) {
-          if (SettingsState.getInstance().getSelectedService() == ServiceType.OPENAI) {
+          if (GeneralSettings.getCurrentState().getSelectedService() == ServiceType.OPENAI) {
             OpenAISettings.getCurrentState().setOpenAIQuotaExceeded(true);
           }
           responseContainer.displayQuotaExceeded();
