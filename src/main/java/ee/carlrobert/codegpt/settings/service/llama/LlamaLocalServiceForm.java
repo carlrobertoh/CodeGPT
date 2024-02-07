@@ -80,7 +80,7 @@ public class LlamaLocalServiceForm extends FormBuilder {
     threadsField.setValue(settings.getThreads());
     threadsField.setEnabled(!serverRunning);
 
-    additionalParametersField = new JBTextField(settings.getAdditionalCompileParameters(), 30);
+    additionalParametersField = new JBTextField(settings.getAdditionalCompileParameters(), 35);
     additionalParametersField.setEnabled(!serverRunning);
 
     modelSelector = new LlamaModelSelector(settings.getModel());
@@ -90,13 +90,14 @@ public class LlamaLocalServiceForm extends FormBuilder {
   public JPanel getPanel() {
     var serverProgressPanel = new ServerProgressPanel();
     serverProgressPanel.setBorder(JBUI.Borders.emptyRight(16));
-    addComponent(new TitledSeparator("Server Executable"))
+    addComponent(new TitledSeparator(
+        CodeGPTBundle.get("settingsConfigurable.service.llama.modelPreferences.title")))
+        .addComponent(withEmptyLeftBorder(modelSelector.getComponent()))
+        .addVerticalGap(8);
+    addComponent(new TitledSeparator("Server Configuration"));
+    addComponent(withEmptyLeftBorder(new FormBuilder()
         .addComponent(UIUtil.createForm(bundledServerRadioButton, new JPanel(),
             customServerRadioButton, createCustomServerForm(), !localSettings.isUseCustomServer()))
-        .addComponent(new TitledSeparator(
-            CodeGPTBundle.get("settingsConfigurable.service.llama.modelPreferences.title")))
-        .addComponent(withEmptyLeftBorder(modelSelector.getComponent()))
-        .addVerticalGap(8)
         .addLabeledComponent(
             CodeGPTBundle.get("shared.port"),
             Panels.simplePanel()
@@ -122,8 +123,7 @@ public class LlamaLocalServiceForm extends FormBuilder {
         .addComponentToRightColumn(
             createComment(
                 "settingsConfigurable.service.llama.additionalParameters.comment"))
-        .addComponentToRightColumn(
-            createComment("settingsConfigurable.service.llama.promptTemplate.comment"));
+        .getPanel()));
     return withEmptyLeftBorder(super.getPanel());
   }
 

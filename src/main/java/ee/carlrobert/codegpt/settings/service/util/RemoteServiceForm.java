@@ -1,17 +1,16 @@
 package ee.carlrobert.codegpt.settings.service.util;
 
+import static ee.carlrobert.codegpt.ui.UIUtil.withEmptyLeftBorder;
+
 import com.google.common.collect.Lists;
 import com.intellij.openapi.ui.panel.PanelBuilder;
-import com.intellij.openapi.ui.panel.PanelGridBuilder;
 import com.intellij.ui.TitledSeparator;
-import com.intellij.ui.components.JBPasswordField;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.util.RemoteSettings;
-import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JPanel;
 
@@ -22,64 +21,62 @@ public abstract class RemoteServiceForm extends FormBuilder {
 
   protected final JBTextField baseHostField;
   protected final JBTextField pathField;
-  protected final JBPasswordField apiKeyField;
-
   protected final RemoteSettings remoteSettings;
   protected final ServiceType serviceType;
 
-  private final PanelGridBuilder serverConfigurationPanelBuilder;
-  private final PanelGridBuilder authenticationPanels;
 
   public RemoteServiceForm(RemoteSettings remoteSettings, ServiceType serviceType) {
     this.remoteSettings = remoteSettings;
     this.serviceType = serviceType;
 
-    apiKeyField = new JBPasswordField();
-    baseHostField = new JBTextField(remoteSettings.getBaseHost(), 30);
-    pathField = new JBTextField(remoteSettings.getPath(), 30);
-
-    serverConfigurationPanelBuilder = UI.PanelFactory.grid()
-        .add(UI.PanelFactory.panel(baseHostField)
-            .withLabel(CodeGPTBundle.get(
-                "settingsConfigurable.shared.baseHost.label"))
-            .resizeX(false));
-    if (remoteSettings.getPath() != null) {
-      serverConfigurationPanelBuilder.add(UI.PanelFactory.panel(pathField)
-          .withLabel(CodeGPTBundle.get(
-              "settingsConfigurable.shared.path.label"))
-          .resizeX(false));
-    }
-    authenticationPanels = UI.PanelFactory.grid();
+    baseHostField = new JBTextField(remoteSettings.getBaseHost(), 35);
+    pathField = new JBTextField(remoteSettings.getPath(), 35);
   }
 
   @Override
   public JPanel getPanel() {
-    addComponent(new TitledSeparator(
-        CodeGPTBundle.get("settingsConfigurable.service.serverConfig.title")));
-    additionalServerConfigPanels().forEach(serverConfigurationPanelBuilder::add);
-    addComponent(serverConfigurationPanelBuilder.createPanel());
-    addComponent(new TitledSeparator(
-        CodeGPTBundle.get("settingsConfigurable.shared.authentication.title")));
-    authenticationComponents().forEach(authenticationPanels::add);
-    addComponent(authenticationPanels.createPanel());
-    addComponentFillVertically(new JPanel(), 0);
+    addPanels();
     return super.getPanel();
   }
 
-  protected List<PanelBuilder> authenticationComponents() {
+  protected void addPanels() {
+    addAuthenticationPanel();
+    addRequestConfigurationPanel();
+    addComponentFillVertically(new JPanel(), 0);
+  }
+
+  protected void addAuthenticationPanel() {
+    addComponent(new TitledSeparator(
+        CodeGPTBundle.get("settingsConfigurable.shared.authentication.title")));
+    var authenticationPanel = UI.PanelFactory.grid();
+    authenticationPanels().forEach(authenticationPanel::add);
+    addComponent(withEmptyLeftBorder(authenticationPanel.createPanel()));
+  }
+
+  protected void addRequestConfigurationPanel() {
+    addComponent(new TitledSeparator(
+        CodeGPTBundle.get("settingsConfigurable.service.requestConfiguration.title")));
+    var requestConfigPanel = UI.PanelFactory.grid();
+    requestConfigurationPanels().forEach(requestConfigPanel::add);
+    addComponent(withEmptyLeftBorder(requestConfigPanel.createPanel()));
+  }
+
+  protected List<PanelBuilder> authenticationPanels() {
     return Lists.newArrayList();
   }
 
-  protected List<PanelBuilder> additionalServerConfigPanels() {
-    return new ArrayList<>();
-  }
-
-  protected void setApiKey(String apiKey) {
-    apiKeyField.setText(apiKey);
-  }
-
-  protected String getApiKey() {
-    return new String(apiKeyField.getPassword());
+  protected List<PanelBuilder> requestConfigurationPanels() {
+    List<PanelBuilder> panels = Lists.newArrayList(UI.PanelFactory.panel(baseHostField)
+        .withLabel(CodeGPTBundle.get(
+            "settingsConfigurable.shared.baseHost.label"))
+        .resizeX(false));
+    if (remoteSettings.getPath() != null) {
+      panels.add(UI.PanelFactory.panel(pathField)
+          .withLabel(CodeGPTBundle.get(
+              "settingsConfigurable.shared.path.label"))
+          .resizeX(false));
+    }
+    return panels;
   }
 
   protected void setBaseHost(String baseHost) {

@@ -2,6 +2,7 @@ package ee.carlrobert.codegpt.settings.service;
 
 import static ee.carlrobert.codegpt.ui.UIUtil.createApiKeyPanel;
 
+import com.google.common.collect.Lists;
 import com.intellij.openapi.ui.panel.PanelBuilder;
 import com.intellij.ui.components.JBPasswordField;
 import com.intellij.ui.components.JBRadioButton;
@@ -31,13 +32,15 @@ public class AzureServiceForm extends RemoteServiceForm {
   private JBTextField azureResourceNameField;
   private JBTextField azureDeploymentIdField;
   private JBTextField azureApiVersionField;
+  private final JBPasswordField apiKeyField;
 
   public AzureServiceForm() {
     super(AzureSettings.getInstance().getState(), ServiceType.AZURE);
+    this.apiKeyField = new JBPasswordField();
   }
 
   @Override
-  protected List<PanelBuilder> authenticationComponents() {
+  protected List<PanelBuilder> authenticationPanels() {
     AzureCredentials credentials = AzureCredentialsManager.getInstance().getCredentials();
     azureActiveDirectoryTokenField = new JBPasswordField();
     azureActiveDirectoryTokenField.setColumns(30);
@@ -55,7 +58,7 @@ public class AzureServiceForm extends RemoteServiceForm {
         azureSettings.isUseAzureActiveDirectoryAuthentication());
     JPanel apiKeyFieldPanel = createApiKeyPanel(credentials.getApiKey(), apiKeyField).createPanel();
 
-    List<PanelBuilder> panels = super.authenticationComponents();
+    List<PanelBuilder> panels = super.authenticationPanels();
     panels.add(UIUtil.createSelectLayoutPanelBuilder(useAzureApiKeyAuthenticationRadioButton,
         apiKeyFieldPanel, useAzureActiveDirectoryAuthenticationRadioButton,
         azureActiveDirectoryTokenFieldPanel, azureSettings.isUseAzureApiKeyAuthentication()));
@@ -63,13 +66,12 @@ public class AzureServiceForm extends RemoteServiceForm {
   }
 
   @Override
-  protected List<PanelBuilder> additionalServerConfigPanels() {
+  protected List<PanelBuilder> requestConfigurationPanels() {
     var azureSettings = AzureSettings.getInstance().getState();
     azureResourceNameField = new JBTextField(azureSettings.getResourceName(), 35);
     azureDeploymentIdField = new JBTextField(azureSettings.getDeploymentId(), 35);
     azureApiVersionField = new JBTextField(azureSettings.getApiVersion(), 35);
-    List<PanelBuilder> panels = super.additionalServerConfigPanels();
-    panels.addAll(List.of(UI.PanelFactory.panel(azureResourceNameField)
+    List<PanelBuilder> panels = Lists.newArrayList(UI.PanelFactory.panel(azureResourceNameField)
             .withLabel(CodeGPTBundle.get(
                 "settingsConfigurable.service.azure.resourceName.label"))
             .resizeX(false)
@@ -84,81 +86,38 @@ public class AzureServiceForm extends RemoteServiceForm {
         UI.PanelFactory.panel(azureApiVersionField)
             .withLabel(CodeGPTBundle.get(
                 "settingsConfigurable.service.azure.apiVersion.label"))
-            .resizeX(false)));
+            .withComment(CodeGPTBundle.get(
+                "settingsConfigurable.service.azure.apiVersion.comment"))
+            .resizeX(false));
+    panels.addAll(super.requestConfigurationPanels());
     return panels;
   }
 
-  public void setAzureActiveDirectoryAuthenticationSelected(boolean selected) {
-    useAzureActiveDirectoryAuthenticationRadioButton.setSelected(selected);
-  }
-
-  public boolean isAzureActiveDirectoryAuthenticationSelected() {
-    return useAzureActiveDirectoryAuthenticationRadioButton.isSelected();
-  }
-
-  public void setAzureActiveDirectoryToken(String bearerToken) {
-    azureActiveDirectoryTokenField.setText(bearerToken);
-  }
-
-  public String getAzureActiveDirectoryToken() {
-    return new String(azureActiveDirectoryTokenField.getPassword());
-  }
-
-  public void setAzureApiKeyAuthenticationSelected(boolean selected) {
-    useAzureApiKeyAuthenticationRadioButton.setSelected(selected);
-  }
-
-  public boolean isAzureApiKeyAuthenticationSelected() {
-    return useAzureApiKeyAuthenticationRadioButton.isSelected();
-  }
-
-  public void setAzureResourceName(String resourceName) {
-    azureResourceNameField.setText(resourceName);
-  }
-
-  public String getAzureResourceName() {
-    return azureResourceNameField.getText();
-  }
-
-  public void setAzureDeploymentId(String deploymentId) {
-    azureDeploymentIdField.setText(deploymentId);
-  }
-
-  public String getAzureDeploymentId() {
-    return azureDeploymentIdField.getText();
-  }
-
-  public void setAzureApiVersion(String apiVersion) {
-    azureApiVersionField.setText(apiVersion);
-  }
-
-  public String getAzureApiVersion() {
-    return azureApiVersionField.getText();
-  }
-
   public AzureSettingsState getSettings() {
-    return new AzureSettingsState(getBaseHost(), getPath(), getAzureResourceName(),
-        getAzureDeploymentId(), getAzureApiVersion(), isAzureApiKeyAuthenticationSelected(),
-        isAzureActiveDirectoryAuthenticationSelected());
+    return new AzureSettingsState(getBaseHost(), getPath(), azureResourceNameField.getText(),
+        azureDeploymentIdField.getText(), azureApiVersionField.getText(),
+        useAzureApiKeyAuthenticationRadioButton.isSelected(),
+        useAzureActiveDirectoryAuthenticationRadioButton.isSelected());
   }
 
   public void setSettings(AzureSettingsState settings) {
     super.setSettings(settings);
-    setAzureActiveDirectoryAuthenticationSelected(
+    useAzureActiveDirectoryAuthenticationRadioButton.setSelected(
         settings.isUseAzureActiveDirectoryAuthentication());
-    setAzureApiKeyAuthenticationSelected(settings.isUseAzureApiKeyAuthentication());
-    setAzureApiVersion(settings.getApiVersion());
-    setAzureResourceName(settings.getResourceName());
-    setAzureDeploymentId(settings.getDeploymentId());
+    useAzureApiKeyAuthenticationRadioButton.setSelected(settings.isUseAzureApiKeyAuthentication());
+    azureApiVersionField.setText(settings.getApiVersion());
+    azureResourceNameField.setText(settings.getResourceName());
+    azureDeploymentIdField.setText(settings.getDeploymentId());
   }
 
   public AzureCredentials getCredentials() {
-    return new AzureCredentials(getApiKey(), getAzureActiveDirectoryToken());
+    return new AzureCredentials(new String(apiKeyField.getPassword()),
+        new String(azureActiveDirectoryTokenField.getPassword()));
   }
 
   public void setCredentials(AzureCredentials credentials) {
-    setApiKey(credentials.getApiKey());
-    setAzureActiveDirectoryToken(credentials.getActiveDirectoryToken());
+    apiKeyField.setText(credentials.getApiKey());
+    azureActiveDirectoryTokenField.setText(credentials.getActiveDirectoryToken());
   }
 
 }

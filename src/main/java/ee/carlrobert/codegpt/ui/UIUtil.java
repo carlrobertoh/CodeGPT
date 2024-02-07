@@ -169,9 +169,9 @@ public class UIUtil {
   public static JPanel createForm(Map<String, RadioButtonWithLayout> layouts,
       String initialLayout) {
     JPanel finalPanel = new JPanel(new BorderLayout());
-    finalPanel.add(createRadioButtonsPanel(
-            layouts.entrySet().stream().sorted(Entry.comparingByKey())
-                .map(entry -> entry.getValue().getRadioButton()).collect(Collectors.toList())),
+    finalPanel.add(
+        createRadioButtonsPanel(layouts.values().stream().map(RadioButtonWithLayout::getRadioButton)
+            .collect(Collectors.toList())),
         BorderLayout.NORTH);
     finalPanel.add(createRadioButtonGroupLayouts(layouts, initialLayout), BorderLayout.CENTER);
     return finalPanel;
@@ -208,18 +208,20 @@ public class UIUtil {
       JBPasswordField apiKeyField, String commentBundleKey) {
     apiKeyField.setColumns(30);
     apiKeyField.setText(initialApiKey);
-    return UI.PanelFactory.panel(apiKeyField)
+    var panel = UI.PanelFactory.panel(apiKeyField)
         .withLabel(CodeGPTBundle.get("settingsConfigurable.shared.apiKey.label"))
-        .resizeX(false)
-        .withComment(
-            CodeGPTBundle.get(commentBundleKey))
-        .withCommentHyperlinkListener(UIUtil::handleHyperlinkClicked);
+        .resizeX(false);
+    if (commentBundleKey != null) {
+      panel.withComment(
+          CodeGPTBundle.get(commentBundleKey));
+    }
+    panel.withCommentHyperlinkListener(UIUtil::handleHyperlinkClicked);
+    return panel;
   }
 
   public static ComponentPanelBuilder createApiKeyPanel(String initialApiKey,
       JBPasswordField apiKeyField) {
-    return createApiKeyPanel(initialApiKey, apiKeyField,
-        "settingsConfigurable.shared.apiKey.comment");
+    return createApiKeyPanel(initialApiKey, apiKeyField, null);
   }
 
   public static TextFieldWithBrowseButton createTextFieldWithBrowseButton(

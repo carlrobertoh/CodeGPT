@@ -2,7 +2,9 @@ package ee.carlrobert.codegpt.settings.service;
 
 import static ee.carlrobert.codegpt.ui.UIUtil.createApiKeyPanel;
 
+import com.google.common.collect.Lists;
 import com.intellij.openapi.ui.panel.PanelBuilder;
+import com.intellij.ui.components.JBPasswordField;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
@@ -24,36 +26,38 @@ public class OpenAIServiceForm extends RemoteServiceForm {
 
   private JBTextField organizationField;
   private final ModelSelector<OpenAIChatCompletionModel> modelSelector;
+  private final JBPasswordField apiKeyField;
 
 
   public OpenAIServiceForm() {
     super(OpenAISettings.getInstance().getState(), ServiceType.OPENAI);
     this.modelSelector = new OpenAiModelSelector();
     this.modelSelector.setSelectedModel(OpenAISettings.getInstance().getState().getModel());
+    this.apiKeyField = new JBPasswordField();
   }
 
   @Override
-  protected List<PanelBuilder> additionalServerConfigPanels() {
+  protected List<PanelBuilder> requestConfigurationPanels() {
     var openAISettings = OpenAISettings.getInstance().getState();
-    organizationField = new JBTextField(openAISettings.getOrganization(), 30);
-    List<PanelBuilder> panels = super.additionalServerConfigPanels();
-    panels.add(UI.PanelFactory.panel(this.modelSelector.getComponent())
-        .withLabel(CodeGPTBundle.get(
-            "settingsConfigurable.shared.model.label"))
-        .resizeX(false));
-    panels.add(
+    organizationField = new JBTextField(openAISettings.getOrganization(), 35);
+    List<PanelBuilder> panels = Lists.newArrayList(
+        UI.PanelFactory.panel(this.modelSelector.getComponent())
+            .withLabel(CodeGPTBundle.get(
+                "settingsConfigurable.shared.model.label"))
+            .resizeX(false),
         UI.PanelFactory.panel(organizationField)
             .withLabel(CodeGPTBundle.get(
                 "settingsConfigurable.service.openai.organization.label"))
             .resizeX(false)
             .withComment(CodeGPTBundle.get(
                 "settingsConfigurable.section.openai.organization.comment")));
+    panels.addAll(super.requestConfigurationPanels());
     return panels;
   }
 
   @Override
-  protected List<PanelBuilder> authenticationComponents() {
-    List<PanelBuilder> panels = super.authenticationComponents();
+  protected List<PanelBuilder> authenticationPanels() {
+    List<PanelBuilder> panels = super.authenticationPanels();
     panels.add(
         createApiKeyPanel(OpenAICredentialsManager.getInstance().getCredentials().getApiKey(),
             apiKeyField,
@@ -62,11 +66,11 @@ public class OpenAIServiceForm extends RemoteServiceForm {
   }
 
   public void setCredentials(ApiKeyCredentials credentials) {
-    setApiKey(credentials.getApiKey());
+    apiKeyField.setText(credentials.getApiKey());
   }
 
   public ApiKeyCredentials getCredentials() {
-    return new ApiKeyCredentials(getApiKey());
+    return new ApiKeyCredentials(new String(apiKeyField.getPassword()));
   }
 
   public OpenAISettingsState getSettings() {

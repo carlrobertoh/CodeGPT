@@ -177,14 +177,15 @@ public class LlamaModelSelector implements ModelSelector<LlamaCompletionModel> {
         .addLabeledComponent(
             CodeGPTBundle.get("settingsConfigurable.service.llama.customModelPath.label"),
             customModelPathField)
+        .addComponentToRightColumn(customModelHelpText)
         .addVerticalGap(4)
+        .addLabeledComponent(CodeGPTBundle.get("shared.promptTemplate"), chatPromptTemplateField)
+        .addComponentToRightColumn(
+            createComment("settingsConfigurable.service.llama.promptTemplate.comment"))
         .addLabeledComponent(CodeGPTBundle.get("shared.infillPromptTemplate"),
             infillPromptTemplatePanel)
         .addComponentToRightColumn(
             createComment("settingsConfigurable.service.llama.infillTemplate.comment"))
-        .addLabeledComponent(CodeGPTBundle.get("shared.promptTemplate"), chatPromptTemplateField)
-        .addComponentToRightColumn(
-            createComment("settingsConfigurable.service.llama.promptTemplate.comment"))
         .getPanel();
   }
 
