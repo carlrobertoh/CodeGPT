@@ -6,44 +6,31 @@ import static ee.carlrobert.codegpt.codecompletions.CodeCompletionService.APPLY_
 import static ee.carlrobert.codegpt.util.file.FileUtil.getResourceContent;
 import static ee.carlrobert.llm.client.util.JSONUtil.e;
 import static ee.carlrobert.llm.client.util.JSONUtil.jsonMapResponse;
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
 
-import com.intellij.openapi.actionSystem.ActionManager;
-import com.intellij.openapi.actionSystem.AnAction;
-import com.intellij.openapi.application.ReadAction;
-import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.editor.EditorCustomElementRenderer;
-import com.intellij.openapi.editor.Inlay;
 import com.intellij.openapi.editor.VisualPosition;
 import com.intellij.openapi.util.TextRange;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
+import com.intellij.testFramework.PlatformTestUtil;
+import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange;
-import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 import testsupport.IntegrationTest;
 
 public class CodeCompletionServiceTest extends IntegrationTest {
 
-  private final VisualPosition cursorPosition = new VisualPosition(2, 8);
+  private final VisualPosition cursorPosition = new VisualPosition(3, 0);
 
   public void testFetchCodeCompletionLlama() {
     useLlamaService();
-    var codeCompletionService = CodeCompletionService.getInstance(getProject());
-    String fileContents = getResourceContent(
-        "/codecompletions/code-completion-file.txt");
-    PsiFile psiFile = myFixture.configureByText("CompletionTest.java", fileContents);
+    ConfigurationSettings.getCurrentState().setCodeCompletionsEnabled(true);
+    myFixture.configureByText(
+        "CompletionTest.java",
+        getResourceContent("/codecompletions/code-completion-file.txt"));
     Editor editor = myFixture.getEditor();
-    Document document = editor.getDocument();
-    editor.getCaretModel().moveToVisualPosition(cursorPosition);
-    var prefix = "public static int gcd(int x, int y){\n";
-    var suffix = "\n"
-        + "    }";
-    var expectedCompletion = "return xyz;";
+    var expectedCompletion = "TEST_SINGLE_LINE_OUTPUT\nTEST_MULTI_LINE_OUTPUT";
+    var prefix = "z".repeat(1015) + "\n[INPUT]\n"; // 512 tokens
+    var suffix = "\n[\\INPUT]\n" + "z".repeat(1015); // 512 tokens
     expectLlama((StreamHttpExchange) request -> {
       assertThat(request.getUri().getPath()).isEqualTo("/completion");
       assertThat(request.getMethod()).isEqualTo("POST");
@@ -53,86 +40,44 @@ public class CodeCompletionServiceTest extends IntegrationTest {
       return List.of(jsonMapResponse(e("content", expectedCompletion), e("stop", true)));
     });
 
-    int caretOffset = editor.getCaretModel().getOffset();
-    PsiElement elementAtCaret = ReadAction.compute(() -> psiFile.findElementAt(caretOffset));
+    editor.getCaretModel().moveToVisualPosition(cursorPosition);
 
-    StringBuilder actualCompletion = new StringBuilder();
-    codeCompletionService.fetchCodeCompletion(elementAtCaret, caretOffset, document,
-        new CompletionEventListener() {
-          @Override
-          public void onComplete(StringBuilder messageBuilder) {
-            actualCompletion.append(messageBuilder);
+    PlatformTestUtil.waitWithEventsDispatching(
+        "Editor inlay assertions failed",
+        () -> {
+          var singleLineInlayElement = editor.getUserData(SINGLE_LINE_INLAY);
+          var multiLineInlayElement = editor.getUserData(MULTI_LINE_INLAY);
+          if (singleLineInlayElement != null && multiLineInlayElement != null) {
+            var singleLine =
+                ((InlayInlineElementRenderer) singleLineInlayElement.getRenderer())
+                    .getInlayText();
+            var multiLine =
+                ((InlayBlockElementRenderer) multiLineInlayElement.getRenderer()).getInlayText();
+            return "TEST_SINGLE_LINE_OUTPUT".equals(singleLine)
+                && "TEST_MULTI_LINE_OUTPUT".equals(multiLine);
           }
-        });
-    await().atMost(2, SECONDS)
-        .until(() -> actualCompletion.length() > 0);
-    assertEquals(expectedCompletion, actualCompletion.toString());
+          return false;
+        }, 5);
   }
 
-  public void testAddInlaysSingleLine() {
-    var codeCompletionService = setupTestCodeCompletion();
-    Editor editor = myFixture.getEditor();
+  public void testApplyInlayAction() {
+    ConfigurationSettings.getCurrentState().setAutoFormattingEnabled(false);
+    myFixture.configureByText(
+        "CompletionTest.java",
+        getResourceContent("/codecompletions/code-completion-file.txt"));
+    var editor = myFixture.getEditor();
     editor.getCaretModel().moveToVisualPosition(cursorPosition);
-    var expectedInlay = "        return xyz;";
-    int caretOffset = editor.getCaretModel().getOffset();
+    var expectedSingleLineInlay = "FIRST_LINE";
+    var expectedMultiLineInlay = "SECOND_LINE\nTHIRD_LINE";
+    var expectedInlay = expectedSingleLineInlay + "\n" + expectedMultiLineInlay;
+    int cursorOffsetBeforeApply = editor.getCaretModel().getOffset();
+    CodeCompletionService.getInstance(getProject())
+        .addInlays(editor, cursorOffsetBeforeApply, expectedInlay);
 
-    codeCompletionService.addInlays(editor, caretOffset, expectedInlay);
-
-    checkInlay(editor.getUserData(SINGLE_LINE_INLAY), InlayInlineElementRenderer.class,
-        expectedInlay, caretOffset);
-    checkPerformInlayAction(editor.getDocument(), cursorPosition.line, cursorPosition.line,
-        expectedInlay);
-    ActionManager.getInstance().unregisterAction(APPLY_INLAY_ACTION_ID);
-  }
-
-  public void testAddInlaysMultiLine() {
-    var codeCompletionService = setupTestCodeCompletion();
-    Editor editor = myFixture.getEditor();
-    editor.getCaretModel().moveToVisualPosition(cursorPosition);
-    var expectedInlay = "        int z = 1;\n        z = 2 + 3;\n        return xyz;";
-    int caretOffset = editor.getCaretModel().getOffset();
-
-    codeCompletionService.addInlays(editor, caretOffset, expectedInlay);
-
-    // First line of inlay
-    checkInlay(editor.getUserData(SINGLE_LINE_INLAY), InlayInlineElementRenderer.class,
-        expectedInlay.substring(0, expectedInlay.indexOf("\n")), caretOffset);
-    // Other lines of inlay
-    checkInlay(editor.getUserData(MULTI_LINE_INLAY), InlayBlockElementRenderer.class,
-        expectedInlay.substring(expectedInlay.indexOf("\n") + 1), caretOffset);
-    checkPerformInlayAction(editor.getDocument(), cursorPosition.line, cursorPosition.line + 2,
-        expectedInlay);
-    ActionManager.getInstance().unregisterAction(APPLY_INLAY_ACTION_ID);
-  }
-
-  private CodeCompletionService setupTestCodeCompletion() {
-    useLlamaService();
-    var codeCompletionService = CodeCompletionService.getInstance(getProject());
-    String fileContents = getResourceContent(
-        "/codecompletions/code-completion-file.txt");
-    myFixture.configureByText("CompletionTest.java", fileContents);
-    return codeCompletionService;
-  }
-
-  private void checkInlay(Inlay<EditorCustomElementRenderer> inlay,
-      Class<? extends EditorCustomElementRenderer> clazz, String expectedText, int expectedOffset) {
-    assertNotNull(inlay);
-    assertTrue(clazz.isInstance(inlay.getRenderer()));
-    InlayElementRenderer renderer = (InlayElementRenderer) inlay.getRenderer();
-    assertEquals(expectedText, renderer.getInlayText());
-    assertEquals(expectedOffset, inlay.getOffset());
-  }
-
-  private void checkPerformInlayAction(Document document, int startLine, int endLine,
-      String expectedText) {
-    AnAction applyInlayAction = ActionManager.getInstance().getAction(APPLY_INLAY_ACTION_ID);
-    assertNotNull(applyInlayAction);
     myFixture.performEditorAction(APPLY_INLAY_ACTION_ID);
 
-    TextRange inlayTextRange = new TextRange(document.getLineStartOffset(startLine),
-        document.getLineEndOffset(endLine));
-    assertEquals(expectedText, document.getText(inlayTextRange));
+    var newTextRange = new TextRange(cursorOffsetBeforeApply, editor.getCaretModel().getOffset());
+    var appliedInlay = editor.getDocument().getText(newTextRange);
+    assertThat(appliedInlay).isEqualTo(expectedInlay);
   }
-
-
 }

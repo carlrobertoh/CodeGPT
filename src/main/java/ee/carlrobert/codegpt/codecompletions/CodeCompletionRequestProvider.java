@@ -11,7 +11,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 @ParametersAreNonnullByDefault
 public class CodeCompletionRequestProvider {
 
-  private static final int MAX_TOKENS = 256;
+  private static final int MAX_TOKENS = 128;
 
   private final InfillRequestDetails details;
 

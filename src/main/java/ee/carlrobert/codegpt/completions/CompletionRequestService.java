@@ -11,7 +11,7 @@ import ee.carlrobert.codegpt.codecompletions.CodeCompletionRequestProvider;
 import ee.carlrobert.codegpt.codecompletions.InfillRequestDetails;
 import ee.carlrobert.codegpt.credentials.managers.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.managers.OpenAICredentialsManager;
-import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
+import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import ee.carlrobert.codegpt.settings.state.AzureSettings;
 import ee.carlrobert.codegpt.settings.state.GeneralSettingsState;
 import ee.carlrobert.codegpt.settings.state.OpenAISettings;
@@ -89,10 +89,10 @@ public final class CompletionRequestService {
 
   public void generateCommitMessageAsync(
       String prompt,
-      CompletionEventListener eventListener) {
+      CompletionEventListener<String> eventListener) {
     var request = new OpenAIChatCompletionRequest.Builder(List.of(
         new OpenAIChatCompletionMessage("system",
-            ConfigurationState.getInstance().getCommitMessagePrompt()),
+            ConfigurationSettings.getCurrentState().getCommitMessagePrompt()),
         new OpenAIChatCompletionMessage("user", prompt)))
         .setModel(OpenAISettings.getInstance().getState().getModel())
         .build();

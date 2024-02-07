@@ -2,29 +2,17 @@ package ee.carlrobert.codegpt.settings.configuration;
 
 import static ee.carlrobert.codegpt.completions.CompletionRequestProvider.COMPLETION_SYSTEM_PROMPT;
 import static ee.carlrobert.codegpt.completions.CompletionRequestProvider.GENERATE_COMMIT_MESSAGE_SYSTEM_PROMPT;
-import static ee.carlrobert.codegpt.completions.CompletionRequestProvider.INLINE_COMPLETION_PROMPT;
 
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.components.PersistentStateComponent;
-import com.intellij.openapi.components.State;
-import com.intellij.openapi.components.Storage;
-import com.intellij.util.xmlb.XmlSerializerUtil;
 import ee.carlrobert.codegpt.actions.editor.EditorActionsUtil;
 import java.util.Map;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import java.util.Objects;
 
-@State(
-    name = "CodeGPT_ConfigurationSettings_210",
-    storages = @Storage("CodeGPT_ConfigurationSettings_210.xml"))
-public class ConfigurationState implements PersistentStateComponent<ConfigurationState> {
+public class ConfigurationState {
 
   private String systemPrompt = COMPLETION_SYSTEM_PROMPT;
   private String commitMessagePrompt = GENERATE_COMMIT_MESSAGE_SYSTEM_PROMPT;
-  private String inlineCompletionPrompt = INLINE_COMPLETION_PROMPT;
   private int maxTokens = 1000;
   private double temperature = 0.1;
-  private int inlineDelay = 500;
   private boolean checkForPluginUpdates = true;
   private boolean createNewChatOnEachAction;
   private boolean ignoreGitCommitTokenLimit;
@@ -33,21 +21,6 @@ public class ConfigurationState implements PersistentStateComponent<Configuratio
   private boolean autoFormattingEnabled = true;
   private boolean codeCompletionsEnabled;
   private Map<String, String> tableData = EditorActionsUtil.DEFAULT_ACTIONS;
-
-  public static ConfigurationState getInstance() {
-    return ApplicationManager.getApplication().getService(ConfigurationState.class);
-  }
-
-  @Nullable
-  @Override
-  public ConfigurationState getState() {
-    return this;
-  }
-
-  @Override
-  public void loadState(@NotNull ConfigurationState state) {
-    XmlSerializerUtil.copyBean(state, this);
-  }
 
   public String getSystemPrompt() {
     return systemPrompt;
@@ -63,22 +36,6 @@ public class ConfigurationState implements PersistentStateComponent<Configuratio
 
   public void setCommitMessagePrompt(String commitMessagePrompt) {
     this.commitMessagePrompt = commitMessagePrompt;
-  }
-
-  public String getInlineCompletionPrompt() {
-    return inlineCompletionPrompt;
-  }
-
-  public void setInlineCompletionPrompt(String inlineCompletionPrompt) {
-    this.inlineCompletionPrompt = inlineCompletionPrompt;
-  }
-
-  public int getInlineDelay() {
-    return inlineDelay;
-  }
-
-  public void setInlineDelay(int inlineDelay) {
-    this.inlineDelay = inlineDelay;
   }
 
   public int getMaxTokens() {
@@ -129,7 +86,7 @@ public class ConfigurationState implements PersistentStateComponent<Configuratio
     this.ignoreGitCommitTokenLimit = ignoreGitCommitTokenLimit;
   }
 
-  public boolean isMethodRefactoringEnabled() {
+  public boolean isMethodNameGenerationEnabled() {
     return methodNameGenerationEnabled;
   }
 
@@ -159,5 +116,36 @@ public class ConfigurationState implements PersistentStateComponent<Configuratio
 
   public void setCodeCompletionsEnabled(boolean codeCompletionsEnabled) {
     this.codeCompletionsEnabled = codeCompletionsEnabled;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    ConfigurationState that = (ConfigurationState) o;
+    return maxTokens == that.maxTokens
+        && Double.compare(that.temperature, temperature) == 0
+        && checkForPluginUpdates == that.checkForPluginUpdates
+        && createNewChatOnEachAction == that.createNewChatOnEachAction
+        && ignoreGitCommitTokenLimit == that.ignoreGitCommitTokenLimit
+        && methodNameGenerationEnabled == that.methodNameGenerationEnabled
+        && captureCompileErrors == that.captureCompileErrors
+        && autoFormattingEnabled == that.autoFormattingEnabled
+        && codeCompletionsEnabled == that.codeCompletionsEnabled
+        && Objects.equals(systemPrompt, that.systemPrompt)
+        && Objects.equals(commitMessagePrompt, that.commitMessagePrompt)
+        && Objects.equals(tableData, that.tableData);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(systemPrompt, commitMessagePrompt, maxTokens, temperature,
+        checkForPluginUpdates, createNewChatOnEachAction, ignoreGitCommitTokenLimit,
+        methodNameGenerationEnabled, captureCompileErrors, autoFormattingEnabled,
+        codeCompletionsEnabled, tableData);
   }
 }

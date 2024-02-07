@@ -12,7 +12,7 @@ import static org.assertj.core.groups.Tuple.tuple;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.credentials.managers.OpenAICredentialsManager;
-import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
+import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import ee.carlrobert.codegpt.settings.state.OpenAISettings;
 import ee.carlrobert.codegpt.settings.state.openai.OpenAISettingsState;
 import ee.carlrobert.llm.client.http.ResponseEntity;
@@ -28,7 +28,7 @@ public class CompletionRequestProviderTest extends IntegrationTest {
     OpenAISettingsState openAISettings = OpenAISettings.getInstance().getState();
     OpenAICredentialsManager.getInstance().getCredentials().setApiKey("TEST_API_KEY");
     openAISettings.setBaseHost(null);
-    ConfigurationState.getInstance().setSystemPrompt("TEST_SYSTEM_PROMPT");
+    ConfigurationSettings.getCurrentState().setSystemPrompt("TEST_SYSTEM_PROMPT");
     var conversation = ConversationService.getInstance().startConversation();
     var firstMessage = createDummyMessage(500);
     var secondMessage = createDummyMessage(250);
@@ -87,7 +87,7 @@ public class CompletionRequestProviderTest extends IntegrationTest {
   }
 
   public void testChatCompletionRequestRetry() {
-    ConfigurationState.getInstance().setSystemPrompt(COMPLETION_SYSTEM_PROMPT);
+    ConfigurationSettings.getCurrentState().setSystemPrompt(COMPLETION_SYSTEM_PROMPT);
     var conversation = ConversationService.getInstance().startConversation();
     var firstMessage = createDummyMessage("FIRST_TEST_PROMPT", 500);
     var secondMessage = createDummyMessage("SECOND_TEST_PROMPT", 250);

@@ -39,7 +39,7 @@
           serviceImplementation="ee.carlrobert.codegpt.settings.state.LlamaSettings"/>
         <applicationService
           serviceImplementation="ee.carlrobert.codegpt.settings.state.util.IncludedFilesSettingsState"/>
-        <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.configuration.ConfigurationState"/>
+        <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.advanced.AdvancedSettingsState"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.conversations.ConversationsState"/>
         <editorFactoryListener implementation="ee.carlrobert.codegpt.codecompletions.CodeGPTEditorListener"/>

@@ -9,6 +9,7 @@ import com.knuddels.jtokkit.api.EncodingRegistry;
 import com.knuddels.jtokkit.api.EncodingType;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
+import java.util.List;
 
 @Service
 public final class EncodingManager {
@@ -51,5 +52,20 @@ public final class EncodingManager {
       LOG.warn(ex);
       return 0;
     }
+  }
+
+  /**
+   * Truncates the given text to the given number of tokens.
+   *
+   * @param text The text to truncate.
+   * @param maxTokens The maximum number of tokens to keep.
+   * @param fromStart Whether to truncate from the start or the end of the text.
+   * @return The truncated text.
+   */
+  public String truncateText(String text, int maxTokens, boolean fromStart) {
+    List<Integer> tokens = encoding.encode(text);
+    int tokensToRetrieve = Math.min(maxTokens, tokens.size());
+    int startIndex = fromStart ? 0 : tokens.size() - tokensToRetrieve;
+    return encoding.decode(tokens.subList(startIndex, startIndex + tokensToRetrieve));
   }
 }

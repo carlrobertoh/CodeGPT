@@ -12,7 +12,7 @@ import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.conversations.message.Message;
-import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
+import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.GeneralSettingsState;
 import ee.carlrobert.codegpt.settings.state.LlamaSettings;
@@ -115,7 +115,7 @@ public class CompletionRequestProvider {
         systemPrompt,
         message.getPrompt(),
         conversation.getMessages());
-    var configuration = ConfigurationState.getInstance();
+    var configuration = ConfigurationSettings.getCurrentState();
     LlamaRequestSettings llamaRequestSettings = settings.getRequestSettings();
     return new LlamaCompletionRequest.Builder(prompt)
         .setN_predict(configuration.getMaxTokens())
@@ -147,13 +147,13 @@ public class CompletionRequestProvider {
       CallParameters callParameters,
       boolean useContextualSearch,
       @Nullable String overriddenPath) {
-
+    var configuration = ConfigurationSettings.getCurrentState();
     var builder = new OpenAIChatCompletionRequest.Builder(
         buildMessages(model, callParameters, useContextualSearch))
         .setModel(model)
-        .setMaxTokens(ConfigurationState.getInstance().getMaxTokens())
+        .setMaxTokens(configuration.getMaxTokens())
         .setStream(true)
-        .setTemperature(ConfigurationState.getInstance().getTemperature());
+        .setTemperature(configuration.getTemperature());
 
     if (overriddenPath != null) {
       builder.setOverriddenPath(overriddenPath);
@@ -176,7 +176,7 @@ public class CompletionRequestProvider {
       if (callParameters.getConversationType() == ConversationType.DEFAULT) {
         messages.add(new OpenAIChatCompletionMessage(
             "system",
-            ConfigurationState.getInstance().getSystemPrompt()));
+            ConfigurationSettings.getCurrentState().getSystemPrompt()));
       }
       if (callParameters.getConversationType() == ConversationType.FIX_COMPILE_ERRORS) {
         messages.add(new OpenAIChatCompletionMessage("system", FIX_COMPILE_ERRORS_SYSTEM_PROMPT));
@@ -207,7 +207,7 @@ public class CompletionRequestProvider {
 
     int totalUsage = messages.parallelStream()
         .mapToInt(encodingManager::countMessageTokens)
-        .sum() + ConfigurationState.getInstance().getMaxTokens();
+        .sum() + ConfigurationSettings.getCurrentState().getMaxTokens();
     int modelMaxTokens;
     try {
       modelMaxTokens = OpenAIChatCompletionModel.findByCode(model).getMaxTokens();
