@@ -13,7 +13,7 @@ import ee.carlrobert.codegpt.credentials.AzureCredentialManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import ee.carlrobert.codegpt.settings.state.AzureSettings;
-import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
+import ee.carlrobert.codegpt.settings.state.OpenAISettings;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
@@ -39,7 +39,7 @@ public final class CompletionRequestService {
     var requestProvider = new CompletionRequestProvider(callParameters.getConversation());
     switch (SettingsState.getInstance().getSelectedService()) {
       case OPENAI:
-        var openAISettings = OpenAISettingsState.getInstance();
+        var openAISettings = OpenAISettings.getCurrentState();
         return CompletionClientProvider.getOpenAIClient().getChatCompletionAsync(
             requestProvider.buildOpenAIChatCompletionRequest(
                 openAISettings.getModel(),
@@ -48,7 +48,7 @@ public final class CompletionRequestService {
                 openAISettings.isUsingCustomPath() ? openAISettings.getPath() : null),
             eventListener);
       case AZURE:
-        var azureSettings = AzureSettings.getInstance().getState();
+        var azureSettings = AzureSettings.getCurrentState();
         return CompletionClientProvider.getAzureClient().getChatCompletionAsync(
             requestProvider.buildOpenAIChatCompletionRequest(
                 null,
@@ -94,7 +94,7 @@ public final class CompletionRequestService {
         new OpenAIChatCompletionMessage("system",
             ConfigurationSettings.getCurrentState().getCommitMessagePrompt()),
         new OpenAIChatCompletionMessage("user", prompt)))
-        .setModel(OpenAISettingsState.getInstance().getModel())
+        .setModel(OpenAISettings.getCurrentState().getModel())
         .build();
     var selectedService = SettingsState.getInstance().getSelectedService();
     if (selectedService == OPENAI) {

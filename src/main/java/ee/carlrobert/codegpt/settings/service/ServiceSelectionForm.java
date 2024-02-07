@@ -20,6 +20,7 @@ import ee.carlrobert.codegpt.credentials.AzureCredentialManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
 import ee.carlrobert.codegpt.settings.state.AzureSettings;
 import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
+import ee.carlrobert.codegpt.settings.state.OpenAISettings;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.YouSettingsState;
 import ee.carlrobert.codegpt.ui.UIUtil;
@@ -67,7 +68,7 @@ public class ServiceSelectionForm {
     openAIApiKeyField.setColumns(30);
     openAIApiKeyField.setText(OpenAICredentialManager.getInstance().getCredential());
 
-    var azureSettings = AzureSettings.getInstance().getState();
+    var azureSettings = AzureSettings.getCurrentState();
     useAzureApiKeyAuthenticationRadioButton = new JBRadioButton(
         CodeGPTBundle.get("settingsConfigurable.service.azure.useApiKeyAuth.label"),
         azureSettings.isUseAzureApiKeyAuthentication());
@@ -90,7 +91,7 @@ public class ServiceSelectionForm {
         .resizeX(false)
         .createPanel();
 
-    var openAISettings = OpenAISettingsState.getInstance();
+    var openAISettings = OpenAISettings.getCurrentState();
     openAIBaseHostField = new JBTextField(openAISettings.getBaseHost(), 30);
     openAIPathField = new JBTextField(openAISettings.getPath(), 30);
     openAIOrganizationField = new JBTextField(openAISettings.getOrganization(), 30);
@@ -289,6 +290,24 @@ public class ServiceSelectionForm {
     return ((OpenAIChatCompletionModel) (openAICompletionModelComboBox.getModel()
         .getSelectedItem()))
         .getCode();
+  }
+
+  public OpenAISettingsState getCurrentOpenAIFormState() {
+    var state = new OpenAISettingsState();
+    state.setOrganization(getOpenAIOrganization());
+    state.setBaseHost(getOpenAIBaseHost());
+    state.setPath(getOpenAIPath());
+    state.setModel(getOpenAIModel());
+    return state;
+  }
+
+  public void resetOpenAIForm() {
+    var state = OpenAISettings.getCurrentState();
+    setOpenAIApiKey(OpenAICredentialManager.getInstance().getCredential());
+    setOpenAIOrganization(state.getOrganization());
+    setOpenAIBaseHost(state.getBaseHost());
+    setOpenAIPath(state.getPath());
+    setOpenAIModel(state.getModel());
   }
 
   public AzureSettingsState getCurrentAzureFormState() {

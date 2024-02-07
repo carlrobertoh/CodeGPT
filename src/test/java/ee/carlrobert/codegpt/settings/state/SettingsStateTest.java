@@ -11,7 +11,7 @@ import ee.carlrobert.codegpt.settings.service.ServiceType;
 public class SettingsStateTest extends BasePlatformTestCase {
 
   public void testOpenAISettingsSync() {
-    var openAISettings = OpenAISettingsState.getInstance();
+    var openAISettings = OpenAISettings.getCurrentState();
     openAISettings.setModel("gpt-3.5-turbo");
     var conversation = new Conversation();
     conversation.setModel("gpt-4");

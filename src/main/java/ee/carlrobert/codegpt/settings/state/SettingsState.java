@@ -42,7 +42,7 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
     var clientCode = conversation.getClientCode();
     if ("chat.completion".equals(clientCode)) {
       setSelectedService(ServiceType.OPENAI);
-      OpenAISettingsState.getInstance().setModel(conversation.getModel());
+      OpenAISettings.getCurrentState().setModel(conversation.getModel());
     }
     if ("azure.chat.completion".equals(clientCode)) {
       setSelectedService(ServiceType.AZURE);
@@ -67,9 +67,9 @@ public class SettingsState implements PersistentStateComponent<SettingsState> {
   public String getModel() {
     switch (selectedService) {
       case OPENAI:
-        return OpenAISettingsState.getInstance().getModel();
+        return OpenAISettings.getCurrentState().getModel();
       case AZURE:
-        return AzureSettings.getInstance().getState().getDeploymentId();
+        return AzureSettings.getCurrentState().getDeploymentId();
       case YOU:
         return "YouCode";
       case LLAMA_CPP:

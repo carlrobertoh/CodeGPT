@@ -18,7 +18,7 @@ import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.IncludedFilesSettingsState;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
-import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
+import ee.carlrobert.codegpt.settings.state.OpenAISettings;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.settings.state.YouSettingsState;
 import ee.carlrobert.codegpt.telemetry.core.configuration.TelemetryConfiguration;
@@ -89,7 +89,7 @@ public class CompletionRequestProvider {
             new OpenAIChatCompletionMessage("system",
                 getResourceContent("/prompts/method-name-generator.txt")),
             new OpenAIChatCompletionMessage("user", context)))
-        .setModel(OpenAISettingsState.getInstance().getModel())
+        .setModel(OpenAISettings.getCurrentState().getModel())
         .setStream(false)
         .build();
   }

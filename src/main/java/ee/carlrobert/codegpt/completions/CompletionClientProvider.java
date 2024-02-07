@@ -10,7 +10,7 @@ import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
 import ee.carlrobert.codegpt.settings.advanced.AdvancedSettingsState;
 import ee.carlrobert.codegpt.settings.state.AzureSettings;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
-import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
+import ee.carlrobert.codegpt.settings.state.OpenAISettings;
 import ee.carlrobert.llm.client.azure.AzureClient;
 import ee.carlrobert.llm.client.azure.AzureCompletionRequestParams;
 import ee.carlrobert.llm.client.llama.LlamaClient;
@@ -27,7 +27,7 @@ import okhttp3.OkHttpClient;
 public class CompletionClientProvider {
 
   public static OpenAIClient getOpenAIClient() {
-    var settings = OpenAISettingsState.getInstance();
+    var settings = OpenAISettings.getCurrentState();
     var builder = new OpenAIClient.Builder(OpenAICredentialManager.getInstance().getCredential())
         .setOrganization(settings.getOrganization());
     var baseHost = settings.getBaseHost();
@@ -38,7 +38,7 @@ public class CompletionClientProvider {
   }
 
   public static AzureClient getAzureClient() {
-    var settings = AzureSettings.getInstance().getState();
+    var settings = AzureSettings.getCurrentState();
     var params = new AzureCompletionRequestParams(
         settings.getResourceName(),
         settings.getDeploymentId(),

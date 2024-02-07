@@ -9,7 +9,7 @@ import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.AzureSettings;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
-import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
+import ee.carlrobert.codegpt.settings.state.OpenAISettings;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -189,9 +189,9 @@ public final class ConversationService {
   private static String getModelForSelectedService(ServiceType serviceType) {
     switch (serviceType) {
       case OPENAI:
-        return OpenAISettingsState.getInstance().getModel();
+        return OpenAISettings.getCurrentState().getModel();
       case AZURE:
-        return AzureSettings.getInstance().getState().getDeploymentId();
+        return AzureSettings.getCurrentState().getDeploymentId();
       case YOU:
         return "YouCode";
       case LLAMA_CPP:

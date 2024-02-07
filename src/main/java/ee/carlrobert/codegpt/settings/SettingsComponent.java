@@ -12,7 +12,7 @@ import com.intellij.util.ui.FormBuilder;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.settings.service.ServiceSelectionForm;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
-import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
+import ee.carlrobert.codegpt.settings.state.OpenAISettings;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import java.awt.CardLayout;
 import java.util.Arrays;
@@ -99,7 +99,7 @@ public class SettingsComponent {
           if (component instanceof ComboBox) {
             var selectedItem = ((ComboBox<?>) component).getSelectedItem();
             if (selectedItem == ServiceType.OPENAI
-                && OpenAISettingsState.getInstance().isOpenAIQuotaExceeded()) {
+                && OpenAISettings.getCurrentState().isOpenAIQuotaExceeded()) {
               return new ValidationInfo(
                   CodeGPTBundle.get("settings.openaiQuotaExceeded"),
                   component);

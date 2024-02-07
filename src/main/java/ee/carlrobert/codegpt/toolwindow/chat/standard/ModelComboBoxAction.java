@@ -14,6 +14,7 @@ import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
+import ee.carlrobert.codegpt.settings.state.OpenAISettings;
 import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
@@ -31,7 +32,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
   public ModelComboBoxAction(Runnable onAddNewTab, ServiceType selectedService) {
     this.onAddNewTab = onAddNewTab;
     settings = SettingsState.getInstance();
-    openAISettings = OpenAISettingsState.getInstance();
+    openAISettings = OpenAISettings.getCurrentState();
     updateTemplatePresentation(selectedService);
   }
 
