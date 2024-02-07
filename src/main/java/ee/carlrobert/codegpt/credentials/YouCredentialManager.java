@@ -13,5 +13,4 @@ public final class YouCredentialManager extends SingleCredentialManager {
   public static YouCredentialManager getInstance() {
     return ApplicationManager.getApplication().getService(YouCredentialManager.class);
   }
-
 }
