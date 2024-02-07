@@ -8,8 +8,7 @@ import com.intellij.credentialStore.CredentialAttributes;
 import com.intellij.credentialStore.Credentials;
 import ee.carlrobert.codegpt.TestPasswordSafe;
 import ee.carlrobert.codegpt.credentials.manager.AzureCredentialsManager;
-import ee.carlrobert.codegpt.credentials.manager.LlamaLocalCredentialsManager;
-import ee.carlrobert.codegpt.credentials.manager.LlamaRemoteCredentialsManager;
+import ee.carlrobert.codegpt.credentials.manager.LlamaCredentialsManager;
 import ee.carlrobert.codegpt.credentials.manager.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.credentials.manager.YouCredentialsManager;
 import org.junit.Before;
@@ -40,7 +39,7 @@ public class CredentialsManagerTest {
         "LLAMA_REMOTE_API_KEY");
     expectedApiKey = "test";
     passwordSafe.set(llamaRemoteApiKey, new Credentials("foo", expectedApiKey));
-    LlamaRemoteCredentialsManager remoteCredentialsManager = new LlamaRemoteCredentialsManager(
+    LlamaCredentialsManager remoteCredentialsManager = new LlamaCredentialsManager(
         credentialsService);
     assertCredentials(remoteCredentialsManager.getCredentials(), expectedApiKey);
 

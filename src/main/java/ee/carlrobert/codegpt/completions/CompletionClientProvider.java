@@ -4,12 +4,13 @@ import static java.lang.String.format;
 
 import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.completions.you.YouUserManager;
+import ee.carlrobert.codegpt.credentials.managers.AzureCredentialsManager;
+import ee.carlrobert.codegpt.credentials.managers.LlamaCredentialsManager;
+import ee.carlrobert.codegpt.credentials.managers.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.advanced.AdvancedSettingsState;
 import ee.carlrobert.codegpt.settings.state.AzureSettings;
 import ee.carlrobert.codegpt.settings.state.LlamaSettings;
 import ee.carlrobert.codegpt.settings.state.OpenAISettings;
-import ee.carlrobert.codegpt.settings.state.llama.LlamaLocalSettings;
-import ee.carlrobert.codegpt.settings.state.llama.LlamaRemoteSettings;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaSettingsState;
 import ee.carlrobert.llm.client.azure.AzureClient;
 import ee.carlrobert.llm.client.azure.AzureCompletionRequestParams;
@@ -27,7 +28,8 @@ public class CompletionClientProvider {
 
   public static OpenAIClient getOpenAIClient() {
     var settings = OpenAISettings.getInstance().getState();
-    var builder = new OpenAIClient.Builder(settings.getCredentials().getApiKey())
+    var builder = new OpenAIClient.Builder(
+        OpenAICredentialsManager.getInstance().getCredentials().getApiKey())
         .setOrganization(settings.getOrganization());
     var baseHost = settings.getBaseHost();
     if (baseHost != null) {
@@ -42,7 +44,8 @@ public class CompletionClientProvider {
         settings.getResourceName(),
         settings.getDeploymentId(),
         settings.getApiVersion());
-    var builder = new AzureClient.Builder(settings.getCredentials().getSecret(), params)
+    var builder = new AzureClient.Builder(
+        AzureCredentialsManager.getInstance().getCredentials().getSecret(), params)
         .setActiveDirectoryAuthentication(settings.isUseAzureActiveDirectoryAuthentication());
     var baseHost = settings.getBaseHost();
     if (baseHost != null) {
@@ -76,19 +79,14 @@ public class CompletionClientProvider {
     LlamaSettingsState llamaSettingsState = LlamaSettings.getInstance().getState();
 
     var builder = new LlamaClient.Builder();
-    String apiKey;
-    if (llamaSettingsState.isRunLocalServer()) {
-      LlamaLocalSettings localSettings = llamaSettingsState.getLocalSettings();
-      builder.setPort(localSettings.getServerPort());
-      apiKey = localSettings.getCredentials().getApiKey();
-    } else {
-      LlamaRemoteSettings remoteSettings = llamaSettingsState.getRemoteSettings();
-      builder.setHost(remoteSettings.getBaseHost());
-      apiKey = remoteSettings.getCredentials().getApiKey();
+    if (!llamaSettingsState.isRunLocalServer()) {
+      builder.setHost(llamaSettingsState.getRemoteSettings().getBaseHost());
+      String apiKey = LlamaCredentialsManager.getInstance().getCredentials().getApiKey();
+      if (apiKey != null && !apiKey.isBlank()) {
+        builder.setApiKey(apiKey);
+      }
     }
-    if (apiKey != null && !apiKey.isBlank()) {
-      builder.setApiKey(apiKey);
-    }
+
     return builder.build(getDefaultClientBuilder());
   }
 

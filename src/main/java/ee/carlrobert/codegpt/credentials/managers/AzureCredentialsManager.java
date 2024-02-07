@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.credentials.manager;
+package ee.carlrobert.codegpt.credentials.managers;
 
 import com.intellij.credentialStore.CredentialAttributes;
 import com.intellij.openapi.application.ApplicationManager;

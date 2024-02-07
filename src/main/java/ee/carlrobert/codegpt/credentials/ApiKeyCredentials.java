@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt.credentials;
 
 import com.intellij.openapi.util.text.StringUtil;
+import org.apache.commons.lang.StringUtils;
 
 public class ApiKeyCredentials implements Credentials {
 
@@ -27,6 +28,6 @@ public class ApiKeyCredentials implements Credentials {
   }
 
   public boolean isModified(ApiKeyCredentials apiKeyCredentials) {
-    return !StringUtil.equals(apiKey, apiKeyCredentials.getApiKey());
+    return !StringUtil.equals(StringUtils.defaultString(apiKey), apiKeyCredentials.getApiKey());
   }
 }

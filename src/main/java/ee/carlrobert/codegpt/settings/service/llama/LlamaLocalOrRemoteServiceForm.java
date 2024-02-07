@@ -4,6 +4,7 @@ import static ee.carlrobert.codegpt.ui.UIUtil.createForm;
 
 import com.intellij.ui.components.JBRadioButton;
 import ee.carlrobert.codegpt.completions.ServerAgent;
+import ee.carlrobert.codegpt.credentials.ApiKeyCredentials;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaLocalSettings;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaRemoteSettings;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaSettingsState;
@@ -41,22 +42,16 @@ public class LlamaLocalOrRemoteServiceForm {
     llamaSettingsState.getLocalSettings().setServerRunning(isRunning);
   }
 
-
   public JPanel getForm() {
     return createForm(runLocalServerRadioButton, llamaLocalServiceForm.getPanel(),
         useExistingServerRadioButton, llamaRemoteServiceForm.getPanel(),
         runLocalServerRadioButton.isSelected());
   }
 
-
   private void setFormEnabled(boolean enabled) {
     runLocalServerRadioButton.setEnabled(enabled);
     useExistingServerRadioButton.setEnabled(enabled);
     llamaLocalServiceForm.setFormEnabled(enabled);
-  }
-
-  public void setRunLocalServer(boolean runLocalServer) {
-    runLocalServerRadioButton.setSelected(runLocalServer);
   }
 
   public boolean isRunLocalServer() {
@@ -79,11 +74,11 @@ public class LlamaLocalOrRemoteServiceForm {
     return llamaLocalServiceForm.getLocalSettings();
   }
 
-  public String getLocalApiKey() {
-    return llamaLocalServiceForm.getApiKey();
+  public ApiKeyCredentials getRemoteCredentials() {
+    return llamaRemoteServiceForm.getCredentials();
   }
 
-  public String getRemoteApikey() {
-    return llamaRemoteServiceForm.getApiKey();
+  public void setRemoteCredentials(ApiKeyCredentials credentials) {
+    llamaRemoteServiceForm.setCredentials(credentials);
   }
 }

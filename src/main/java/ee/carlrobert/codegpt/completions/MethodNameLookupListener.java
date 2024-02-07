@@ -10,8 +10,8 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiUtilCore;
 import ee.carlrobert.codegpt.Icons;
+import ee.carlrobert.codegpt.credentials.managers.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
-import ee.carlrobert.codegpt.settings.state.OpenAISettings;
 import java.util.Optional;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,10 +21,10 @@ public class MethodNameLookupListener implements LookupManagerListener {
   public void activeLookupChanged(@Nullable Lookup oldLookup, @Nullable Lookup newLookup) {
     var application = ApplicationManager.getApplication();
     var configuration = ConfigurationState.getInstance();
-    var credentialsManager = OpenAISettings.getInstance().getState().getCredentials();
+    var openAICredentialsManager = OpenAICredentialsManager.getInstance().getCredentials();
 
     if (!configuration.isMethodRefactoringEnabled()
-        || !credentialsManager.isCredentialSet()
+        || !openAICredentialsManager.isCredentialSet()
         || !(newLookup instanceof LookupImpl)) {
       return;
     }

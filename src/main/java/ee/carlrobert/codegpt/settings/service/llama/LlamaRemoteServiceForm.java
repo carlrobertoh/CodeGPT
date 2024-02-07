@@ -1,9 +1,12 @@
 package ee.carlrobert.codegpt.settings.service.llama;
 
+import static ee.carlrobert.codegpt.ui.UIUtil.createApiKeyPanel;
+
 import com.intellij.openapi.ui.panel.PanelBuilder;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.credentials.ApiKeyCredentials;
+import ee.carlrobert.codegpt.credentials.managers.LlamaCredentialsManager;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.service.util.RemoteServiceForm;
 import ee.carlrobert.codegpt.settings.state.LlamaSettings;
@@ -15,11 +18,12 @@ import java.util.List;
 /**
  * Form containing fields for all {@link LlamaRemoteSettings}.
  */
-public class LlamaRemoteServiceForm extends RemoteServiceForm<ApiKeyCredentials> {
+public class LlamaRemoteServiceForm extends RemoteServiceForm {
 
 
   private ChatPromptTemplatePanel chatPromptTemplatePanel;
   private InfillPromptTemplatePanel infillPromptTemplatePanel;
+
 
   public LlamaRemoteServiceForm() {
     super(LlamaSettings.getInstance().getState().getRemoteSettings(), ServiceType.LLAMA_CPP);
@@ -44,6 +48,14 @@ public class LlamaRemoteServiceForm extends RemoteServiceForm<ApiKeyCredentials>
             .resizeX(false));
   }
 
+  @Override
+  protected List<PanelBuilder> authenticationComponents() {
+    List<PanelBuilder> panels = super.authenticationComponents();
+    panels.add(createApiKeyPanel(LlamaCredentialsManager.getInstance().getCredentials().getApiKey(),
+        apiKeyField));
+    return panels;
+  }
+
   public void setRemoteSettings(LlamaRemoteSettings settings) {
     super.setSettings(settings);
     chatPromptTemplatePanel.setPromptTemplate(settings.getChatPromptTemplate());
@@ -54,9 +66,16 @@ public class LlamaRemoteServiceForm extends RemoteServiceForm<ApiKeyCredentials>
     return new LlamaRemoteSettings(
         chatPromptTemplatePanel.getPromptTemplate(),
         infillPromptTemplatePanel.getPromptTemplate(),
-        baseHostField.getText(),
-        new ApiKeyCredentials(getApiKey())
+        baseHostField.getText()
     );
+  }
+
+  public ApiKeyCredentials getCredentials() {
+    return new ApiKeyCredentials(getApiKey());
+  }
+
+  public void setCredentials(ApiKeyCredentials credentials) {
+    setApiKey(credentials.getApiKey());
   }
 
 }

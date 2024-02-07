@@ -1,8 +1,8 @@
 package ee.carlrobert.codegpt.credentials;
 
 import com.intellij.openapi.util.text.StringUtil;
-import com.intellij.util.xmlb.annotations.Transient;
 import ee.carlrobert.codegpt.settings.state.AzureSettings;
+import org.apache.commons.lang.StringUtils;
 
 public class AzureCredentials extends ApiKeyCredentials {
 
@@ -25,7 +25,7 @@ public class AzureCredentials extends ApiKeyCredentials {
     this.activeDirectoryToken = activeDirectoryTokenCredentialAttributes;
   }
 
-  @Transient
+
   public String getSecret() {
     return AzureSettings.getInstance().getState().isUseAzureActiveDirectoryAuthentication()
         ? getActiveDirectoryToken()
@@ -42,7 +42,8 @@ public class AzureCredentials extends ApiKeyCredentials {
 
   public boolean isModified(AzureCredentials azureCredentials) {
     return super.isModified(azureCredentials)
-        || !StringUtil.equals(activeDirectoryToken, azureCredentials.getActiveDirectoryToken());
+        || !StringUtil.equals(StringUtils.defaultString(activeDirectoryToken),
+        azureCredentials.getActiveDirectoryToken());
   }
 
 }

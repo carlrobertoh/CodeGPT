@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.credentials.manager;
+package ee.carlrobert.codegpt.credentials.managers;
 
 import ee.carlrobert.codegpt.credentials.Credentials;
 import ee.carlrobert.codegpt.credentials.CredentialsService;

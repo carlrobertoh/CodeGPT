@@ -9,8 +9,6 @@ import ee.carlrobert.codegpt.codecompletions.InfillPromptTemplate;
 import ee.carlrobert.codegpt.completions.PromptTemplate;
 import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaCompletionModel;
-import ee.carlrobert.codegpt.credentials.ApiKeyCredentials;
-import ee.carlrobert.codegpt.settings.state.util.CommonSettings;
 import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -21,11 +19,10 @@ import java.util.List;
 /**
  * All settings necessary for running a Llama server locally.
  */
-public class LlamaLocalSettings extends CommonSettings<ApiKeyCredentials> {
+public class LlamaLocalSettings {
 
   public static final String BUNDLED_SERVER =
       CodeGPTPlugin.getLlamaSourcePath() + File.separator + "server";
-  public static final String CREDENTIALS_PREFIX = "LOCAL";
 
   private boolean serverRunning = false;
   private Integer serverPort = getRandomAvailablePortOrDefault();
@@ -40,7 +37,6 @@ public class LlamaLocalSettings extends CommonSettings<ApiKeyCredentials> {
   private String serverPath = BUNDLED_SERVER;
 
   public LlamaLocalSettings() {
-    this.credentials = new ApiKeyCredentials();
   }
 
   public LlamaLocalSettings(
@@ -50,8 +46,7 @@ public class LlamaLocalSettings extends CommonSettings<ApiKeyCredentials> {
       InfillPromptTemplate infillPromptTemplate,
       Integer serverPort, int contextSize,
       int threads,
-      String additionalCompileParameters,
-      ApiKeyCredentials credentials) {
+      String additionalCompileParameters) {
     this.serverPath = serverPath;
     this.model = model;
     this.serverPort = serverPort;
@@ -60,13 +55,11 @@ public class LlamaLocalSettings extends CommonSettings<ApiKeyCredentials> {
     this.additionalCompileParameters = additionalCompileParameters;
     this.chatPromptTemplate = chatPromptTemplate;
     this.infillPromptTemplate = infillPromptTemplate;
-    this.credentials = credentials;
   }
 
   @Transient
   public boolean isModified(LlamaLocalSettings localSettings) {
-    return credentials.isModified(localSettings.getCredentials())
-        || !serverPath.equals(localSettings.getServerPath())
+    return !serverPath.equals(localSettings.getServerPath())
         || !serverPort.equals(localSettings.getServerPort())
         || contextSize != localSettings.getContextSize()
         || threads != localSettings.getThreads()

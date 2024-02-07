@@ -5,6 +5,7 @@ import static ee.carlrobert.codegpt.ui.UIUtil.withEmptyLeftBorder;
 import com.intellij.ui.TitledSeparator;
 import com.intellij.util.ui.FormBuilder;
 import ee.carlrobert.codegpt.CodeGPTBundle;
+import ee.carlrobert.codegpt.credentials.ApiKeyCredentials;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaLocalOrRemoteServiceForm;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaRequestsForm;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaRequestSettings;
@@ -26,14 +27,6 @@ public class LlamaServiceForm extends JPanel {
     this.llamaLocalOrRemoteServiceForm = llamaLocalOrRemoteServiceForm;
     llamaRequestsForm = new LlamaRequestsForm(llamaRequestSettings);
     init();
-  }
-
-  public LlamaLocalOrRemoteServiceForm getServerPreferencesForm() {
-    return llamaLocalOrRemoteServiceForm;
-  }
-
-  public LlamaRequestsForm getRequestPreferencesForm() {
-    return llamaRequestsForm;
   }
 
   private void init() {
@@ -61,4 +54,11 @@ public class LlamaServiceForm extends JPanel {
     llamaRequestsForm.setRequestSettings(settings.getRequestSettings());
   }
 
+  public ApiKeyCredentials getRemoteCredentials() {
+    return llamaLocalOrRemoteServiceForm.getRemoteCredentials();
+  }
+
+  public void setRemoteCredentials(ApiKeyCredentials credentials) {
+    llamaLocalOrRemoteServiceForm.setRemoteCredentials(credentials);
+  }
 }

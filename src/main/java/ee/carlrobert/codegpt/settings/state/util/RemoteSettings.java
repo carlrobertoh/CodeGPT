@@ -2,23 +2,21 @@ package ee.carlrobert.codegpt.settings.state.util;
 
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.util.xmlb.annotations.Transient;
-import ee.carlrobert.codegpt.credentials.Credentials;
 
 /**
  * Settings for using a remote service.
  */
-public class RemoteSettings<T extends Credentials> extends CommonSettings<T> {
+public class RemoteSettings {
 
   protected String baseHost = "http://localhost:8080";
-  protected String path = null;
+  protected String path;
 
   public RemoteSettings() {
   }
 
-  public RemoteSettings(String baseHost, String path, T credentials) {
+  public RemoteSettings(String baseHost, String path) {
     this.baseHost = baseHost;
     this.path = path;
-    this.credentials = credentials;
   }
 
   public String getBaseHost() {
@@ -38,7 +36,7 @@ public class RemoteSettings<T extends Credentials> extends CommonSettings<T> {
   }
 
   @Transient
-  public boolean isModified(RemoteSettings<T> remoteSettings) {
+  public boolean isModified(RemoteSettings remoteSettings) {
     return !StringUtil.equals(this.baseHost, remoteSettings.getBaseHost())
         || !StringUtil.equals(remoteSettings.getPath(), this.path);
   }

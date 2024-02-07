@@ -14,8 +14,7 @@ import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
 import ee.carlrobert.codegpt.credentials.CredentialsService;
 import ee.carlrobert.codegpt.credentials.PasswordCredentials;
 import ee.carlrobert.codegpt.credentials.manager.AzureCredentialsManager;
-import ee.carlrobert.codegpt.credentials.manager.LlamaLocalCredentialsManager;
-import ee.carlrobert.codegpt.credentials.manager.LlamaRemoteCredentialsManager;
+import ee.carlrobert.codegpt.credentials.manager.LlamaCredentialsManager;
 import ee.carlrobert.codegpt.credentials.manager.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.credentials.manager.YouCredentialsManager;
 import ee.carlrobert.codegpt.settings.state.azure.AzureSettingsState;
@@ -45,7 +44,7 @@ public class ServiceSettingsTest {
     mockCodeGptPluginPath();
     LlamaLocalCredentialsManager localCredentialsManager = new LlamaLocalCredentialsManager(
         credentialsService);
-    LlamaRemoteCredentialsManager remoteCredentialsManager = new LlamaRemoteCredentialsManager(
+    LlamaCredentialsManager remoteCredentialsManager = new LlamaCredentialsManager(
         credentialsService);
     LlamaSettings settings = new LlamaSettings(localCredentialsManager,
         remoteCredentialsManager);

@@ -1,10 +1,13 @@
 package ee.carlrobert.codegpt.settings.service;
 
+import static ee.carlrobert.codegpt.ui.UIUtil.createApiKeyPanel;
+
 import com.intellij.openapi.ui.panel.PanelBuilder;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.credentials.ApiKeyCredentials;
+import ee.carlrobert.codegpt.credentials.managers.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAiModelSelector;
 import ee.carlrobert.codegpt.settings.service.util.ModelSelector;
 import ee.carlrobert.codegpt.settings.service.util.RemoteServiceForm;
@@ -17,7 +20,7 @@ import java.util.List;
  * Form containing all forms to configure using
  * {@link ee.carlrobert.codegpt.settings.service.ServiceType#OPENAI}.
  */
-public class OpenAIServiceForm extends RemoteServiceForm<ApiKeyCredentials> {
+public class OpenAIServiceForm extends RemoteServiceForm {
 
   private JBTextField organizationField;
   private final ModelSelector<OpenAIChatCompletionModel> modelSelector;
@@ -48,33 +51,33 @@ public class OpenAIServiceForm extends RemoteServiceForm<ApiKeyCredentials> {
     return panels;
   }
 
-  public void setOrganization(String organization) {
-    organizationField.setText(organization);
+  @Override
+  protected List<PanelBuilder> authenticationComponents() {
+    List<PanelBuilder> panels = super.authenticationComponents();
+    panels.add(
+        createApiKeyPanel(OpenAICredentialsManager.getInstance().getCredentials().getApiKey(),
+            apiKeyField,
+        "settingsConfigurable.service.openai.apiKey.comment"));
+    return panels;
   }
 
-  public String getOrganization() {
-    return organizationField.getText();
+  public void setCredentials(ApiKeyCredentials credentials) {
+    setApiKey(credentials.getApiKey());
+  }
+
+  public ApiKeyCredentials getCredentials() {
+    return new ApiKeyCredentials(getApiKey());
   }
 
   public OpenAISettingsState getSettings() {
-    return new OpenAISettingsState(getBaseHost(), getPath(), getModel(),
-        new ApiKeyCredentials(getApiKey()),
-        getOrganization(), false
-    );
+    return new OpenAISettingsState(getBaseHost(), getPath(), modelSelector.getSelectedModel(),
+        organizationField.getText(), false);
   }
 
   public void setSettings(OpenAISettingsState settings) {
     super.setSettings(settings);
     modelSelector.setSelectedModel(settings.getModel());
     organizationField.setText(settings.getOrganization());
-  }
-
-  public void setModel(OpenAIChatCompletionModel model) {
-    modelSelector.setSelectedModel(model);
-  }
-
-  public OpenAIChatCompletionModel getModel() {
-    return modelSelector.getSelectedModel();
   }
 
 }

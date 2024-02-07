@@ -44,11 +44,7 @@ public class LlamaSettingsState {
   @Transient
   public boolean isModified(LlamaSettingsState settingsState) {
     return localSettings.isModified(settingsState.getLocalSettings())
-        || localSettings.getCredentials()
-        .isModified(settingsState.getLocalSettings().getCredentials())
         || remoteSettings.isModified(settingsState.getRemoteSettings())
-        || remoteSettings.getCredentials()
-        .isModified(settingsState.getRemoteSettings().getCredentials())
         || runLocalServer != settingsState.isRunLocalServer()
         || requestSettings.isModified(settingsState.getRequestSettings());
   }

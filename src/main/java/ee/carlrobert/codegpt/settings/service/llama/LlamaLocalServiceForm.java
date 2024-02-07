@@ -1,6 +1,5 @@
 package ee.carlrobert.codegpt.settings.service.llama;
 
-import static ee.carlrobert.codegpt.ui.UIUtil.createApiKeyPanel;
 import static ee.carlrobert.codegpt.ui.UIUtil.createComment;
 import static ee.carlrobert.codegpt.ui.UIUtil.createTextFieldWithBrowseButton;
 import static ee.carlrobert.codegpt.ui.UIUtil.withEmptyLeftBorder;
@@ -13,7 +12,6 @@ import com.intellij.openapi.ui.panel.ComponentPanelBuilder;
 import com.intellij.ui.PortField;
 import com.intellij.ui.TitledSeparator;
 import com.intellij.ui.components.JBLabel;
-import com.intellij.ui.components.JBPasswordField;
 import com.intellij.ui.components.JBRadioButton;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.ui.components.fields.IntegerField;
@@ -25,7 +23,6 @@ import ee.carlrobert.codegpt.completions.ServerAgent;
 import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaCompletionModel;
 import ee.carlrobert.codegpt.completions.llama.ServerStartupParams;
-import ee.carlrobert.codegpt.credentials.ApiKeyCredentials;
 import ee.carlrobert.codegpt.settings.service.util.ServerProgressPanel;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaLocalSettings;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
@@ -49,7 +46,6 @@ public class LlamaLocalServiceForm extends FormBuilder {
   private final IntegerField maxTokensField;
   private final IntegerField threadsField;
   private final JBTextField additionalParametersField;
-  private final JBPasswordField apiKeyField;
 
   private final ServerAgent serverAgent;
   private final Consumer<Boolean> onServerAgentStateChanged;
@@ -86,8 +82,6 @@ public class LlamaLocalServiceForm extends FormBuilder {
 
     additionalParametersField = new JBTextField(settings.getAdditionalCompileParameters(), 30);
     additionalParametersField.setEnabled(!serverRunning);
-
-    apiKeyField = new JBPasswordField();
 
     modelSelector = new LlamaModelSelector(settings.getModel());
   }
@@ -130,10 +124,6 @@ public class LlamaLocalServiceForm extends FormBuilder {
                 "settingsConfigurable.service.llama.additionalParameters.comment"))
         .addComponentToRightColumn(
             createComment("settingsConfigurable.service.llama.promptTemplate.comment"));
-    addComponent(new TitledSeparator(
-        CodeGPTBundle.get("settingsConfigurable.shared.authentication.title")));
-    addComponent(
-        createApiKeyPanel(localSettings.getCredentials().getApiKey(), apiKeyField).createPanel());
     return withEmptyLeftBorder(super.getPanel());
   }
 
@@ -245,7 +235,6 @@ public class LlamaLocalServiceForm extends FormBuilder {
     maxTokensField.setValue(settings.getContextSize());
     threadsField.setValue(settings.getThreads());
     additionalParametersField.setText(settings.getAdditionalCompileParameters());
-    apiKeyField.setText(settings.getCredentials().getApiKey());
     if (settings.isUseCustomServer()) {
       customServerRadioButton.setSelected(true);
       browsableCustomServerTextField.setText(settings.getServerPath());
@@ -263,13 +252,8 @@ public class LlamaLocalServiceForm extends FormBuilder {
         portField.getNumber(),
         maxTokensField.getValue(),
         threadsField.getValue(),
-        additionalParametersField.getText(),
-        new ApiKeyCredentials(getApiKey())
+        additionalParametersField.getText()
     );
-  }
-
-  public String getApiKey() {
-    return apiKeyField != null ? new String(apiKeyField.getPassword()) : null;
   }
 
   private JPanel createCustomServerForm() {

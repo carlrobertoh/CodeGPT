@@ -4,10 +4,7 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
-import com.intellij.serviceContainer.NonInjectable;
 import com.intellij.util.xmlb.XmlSerializerUtil;
-import ee.carlrobert.codegpt.credentials.PasswordCredentials;
-import ee.carlrobert.codegpt.credentials.manager.YouCredentialsManager;
 import ee.carlrobert.codegpt.settings.state.you.YouSettingsState;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,17 +12,9 @@ import org.jetbrains.annotations.NotNull;
 public class YouSettings implements PersistentStateComponent<YouSettingsState> {
 
   private final YouSettingsState state;
-  private final YouCredentialsManager credentialsManager;
 
   public YouSettings() {
     this.state = new YouSettingsState();
-    this.credentialsManager = YouCredentialsManager.getInstance();
-  }
-
-  @NonInjectable
-  public YouSettings(YouCredentialsManager credentialsManager) {
-    this.state = new YouSettingsState();
-    this.credentialsManager = credentialsManager;
   }
 
   public static YouSettings getInstance() {
@@ -36,7 +25,6 @@ public class YouSettings implements PersistentStateComponent<YouSettingsState> {
   @Override
   public void loadState(@NotNull YouSettingsState state) {
     XmlSerializerUtil.copyBean(state, this.state);
-    this.state.setCredentials(YouCredentialsManager.getInstance().getCredentials());
   }
 
   @Override
@@ -45,8 +33,4 @@ public class YouSettings implements PersistentStateComponent<YouSettingsState> {
     return this.state;
   }
 
-  public void apply(PasswordCredentials credentials) {
-    this.state.setCredentials(credentials);
-    credentialsManager.apply(credentials);
-  }
 }

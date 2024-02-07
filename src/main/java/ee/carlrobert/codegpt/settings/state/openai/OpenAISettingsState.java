@@ -3,11 +3,10 @@ package ee.carlrobert.codegpt.settings.state.openai;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.util.xmlb.annotations.OptionTag;
 import com.intellij.util.xmlb.annotations.Transient;
-import ee.carlrobert.codegpt.credentials.ApiKeyCredentials;
 import ee.carlrobert.codegpt.settings.state.util.RemoteSettings;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 
-public class OpenAISettingsState extends RemoteSettings<ApiKeyCredentials> {
+public class OpenAISettingsState extends RemoteSettings {
 
   private static final String BASE_PATH = "/v1/chat/completions";
 
@@ -17,13 +16,13 @@ public class OpenAISettingsState extends RemoteSettings<ApiKeyCredentials> {
   private boolean openAIQuotaExceeded;
 
   public OpenAISettingsState() {
-    super("https://api.openai.com", BASE_PATH, new ApiKeyCredentials());
+    super("https://api.openai.com", BASE_PATH);
   }
 
   public OpenAISettingsState(String baseHost, String path, OpenAIChatCompletionModel model,
-      ApiKeyCredentials credentials, String organization,
+      String organization,
       boolean openAIQuotaExceeded) {
-    super(baseHost, path, credentials);
+    super(baseHost, path);
     this.model = model;
     this.organization = organization;
     this.openAIQuotaExceeded = openAIQuotaExceeded;
@@ -32,7 +31,6 @@ public class OpenAISettingsState extends RemoteSettings<ApiKeyCredentials> {
   @Transient
   public boolean isModified(OpenAISettingsState settingsState) {
     return super.isModified(settingsState)
-        || credentials.isModified(settingsState.getCredentials())
         || !StringUtil.equals(organization, settingsState.getOrganization())
         || !model.equals(settingsState.getModel());
   }

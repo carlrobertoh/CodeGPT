@@ -24,10 +24,10 @@ import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.completions.CompletionRequestService;
+import ee.carlrobert.codegpt.credentials.managers.AzureCredentialsManager;
+import ee.carlrobert.codegpt.credentials.managers.OpenAICredentialsManager;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
-import ee.carlrobert.codegpt.settings.state.AzureSettings;
 import ee.carlrobert.codegpt.settings.state.GeneralSettingsState;
-import ee.carlrobert.codegpt.settings.state.OpenAISettings;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.completion.CompletionEventListener;
@@ -56,11 +56,10 @@ public class GenerateGitCommitMessageAction extends AnAction {
     var selectedService = GeneralSettingsState.getInstance().getSelectedService();
     if (selectedService == ServiceType.OPENAI || selectedService == ServiceType.AZURE) {
       var filesSelected = !getReferencedFilePaths(event).isEmpty();
-      var openAiSettings = OpenAISettings.getInstance().getState();
       var callAllowed = (selectedService == ServiceType.OPENAI
-          && openAiSettings.getCredentials().isCredentialSet())
+          && OpenAICredentialsManager.getInstance().getCredentials().isCredentialSet())
           || (selectedService == ServiceType.AZURE
-          && AzureSettings.getInstance().getState().getCredentials().isCredentialSet());
+          && AzureCredentialsManager.getInstance().getCredentials().isCredentialSet());
       event.getPresentation().setEnabled(callAllowed && filesSelected);
       event.getPresentation().setText(CodeGPTBundle.get(callAllowed
           ? "action.generateCommitMessage.title"

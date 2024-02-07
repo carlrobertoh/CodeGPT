@@ -2,10 +2,9 @@ package ee.carlrobert.codegpt.settings.state.azure;
 
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.util.xmlb.annotations.Transient;
-import ee.carlrobert.codegpt.credentials.AzureCredentials;
 import ee.carlrobert.codegpt.settings.state.util.RemoteSettings;
 
-public class AzureSettingsState extends RemoteSettings<AzureCredentials> {
+public class AzureSettingsState extends RemoteSettings {
 
   private static final String BASE_PATH = "/openai/deployments/%s/chat/completions?api-version=%s";
 
@@ -16,14 +15,13 @@ public class AzureSettingsState extends RemoteSettings<AzureCredentials> {
   private boolean useAzureActiveDirectoryAuthentication;
 
   public AzureSettingsState() {
-    super("https://%s.openai.azure.com", BASE_PATH, new AzureCredentials());
+    super("https://%s.openai.azure.com", BASE_PATH);
   }
 
-  public AzureSettingsState(String baseHost, String path,
-      AzureCredentials credentials, String resourceName, String deploymentId,
+  public AzureSettingsState(String baseHost, String path, String resourceName, String deploymentId,
       String apiVersion, boolean useAzureApiKeyAuthentication,
       boolean useAzureActiveDirectoryAuthentication) {
-    super(baseHost, path, credentials);
+    super(baseHost, path);
     this.resourceName = resourceName;
     this.deploymentId = deploymentId;
     this.apiVersion = apiVersion;
@@ -38,7 +36,6 @@ public class AzureSettingsState extends RemoteSettings<AzureCredentials> {
         != isUseAzureActiveDirectoryAuthentication()
         || settingsState.isUseAzureApiKeyAuthentication()
         != isUseAzureApiKeyAuthentication()
-        || credentials.isModified(settingsState.getCredentials())
         || !StringUtil.equals(resourceName, settingsState.getResourceName())
         || !StringUtil.equals(deploymentId, settingsState.getDeploymentId())
         || !StringUtil.equals(apiVersion, settingsState.getApiVersion());

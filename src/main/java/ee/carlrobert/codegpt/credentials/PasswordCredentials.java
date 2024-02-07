@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt.credentials;
 
 import com.intellij.openapi.util.text.StringUtil;
+import org.apache.commons.lang.StringUtils;
 
 public class PasswordCredentials implements Credentials {
 
@@ -27,6 +28,6 @@ public class PasswordCredentials implements Credentials {
   }
 
   public boolean isModified(PasswordCredentials credentials) {
-    return !StringUtil.equals(password, credentials.getPassword());
+    return !StringUtil.equals(StringUtils.defaultString(password), credentials.getPassword());
   }
 }

@@ -1,7 +1,5 @@
 package ee.carlrobert.codegpt.settings.service.util;
 
-import static ee.carlrobert.codegpt.ui.UIUtil.createApiKeyPanel;
-
 import com.google.common.collect.Lists;
 import com.intellij.openapi.ui.panel.PanelBuilder;
 import com.intellij.openapi.ui.panel.PanelGridBuilder;
@@ -11,8 +9,6 @@ import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
-import ee.carlrobert.codegpt.credentials.ApiKeyCredentials;
-import ee.carlrobert.codegpt.credentials.manager.ApiKeyCredentialsManager;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.state.util.RemoteSettings;
 import java.util.ArrayList;
@@ -20,22 +16,21 @@ import java.util.List;
 import javax.swing.JPanel;
 
 /**
- * Form for all {@link RemoteSettings} fields (including apiKey from
- * {@link ApiKeyCredentialsManager}).
+ * Form for all {@link RemoteSettings} fields.
  */
-public abstract class RemoteServiceForm<T extends ApiKeyCredentials> extends FormBuilder {
+public abstract class RemoteServiceForm extends FormBuilder {
 
   protected final JBTextField baseHostField;
   protected final JBTextField pathField;
   protected final JBPasswordField apiKeyField;
 
-  protected final RemoteSettings<T> remoteSettings;
+  protected final RemoteSettings remoteSettings;
   protected final ServiceType serviceType;
 
   private final PanelGridBuilder serverConfigurationPanelBuilder;
   private final PanelGridBuilder authenticationPanels;
 
-  public RemoteServiceForm(RemoteSettings<T> remoteSettings, ServiceType serviceType) {
+  public RemoteServiceForm(RemoteSettings remoteSettings, ServiceType serviceType) {
     this.remoteSettings = remoteSettings;
     this.serviceType = serviceType;
 
@@ -72,24 +67,18 @@ public abstract class RemoteServiceForm<T extends ApiKeyCredentials> extends For
   }
 
   protected List<PanelBuilder> authenticationComponents() {
-    if (serviceType == ServiceType.OPENAI) {
-      return Lists.newArrayList(
-          createApiKeyPanel(remoteSettings.getCredentials().getApiKey(), apiKeyField,
-              "settingsConfigurable.service.openai.apiKey.comment"));
-    }
-    return Lists.newArrayList(
-        createApiKeyPanel(remoteSettings.getCredentials().getApiKey(), apiKeyField));
+    return Lists.newArrayList();
   }
 
   protected List<PanelBuilder> additionalServerConfigPanels() {
     return new ArrayList<>();
   }
 
-  public void setApiKey(String apiKey) {
+  protected void setApiKey(String apiKey) {
     apiKeyField.setText(apiKey);
   }
 
-  public String getApiKey() {
+  protected String getApiKey() {
     return new String(apiKeyField.getPassword());
   }
 
@@ -109,15 +98,13 @@ public abstract class RemoteServiceForm<T extends ApiKeyCredentials> extends For
     return pathField.getText();
   }
 
-  public RemoteSettings<T> getSettings() {
-    return new RemoteSettings<>(getBaseHost(),
-        getPath(), remoteSettings.getCredentials());
+  public RemoteSettings getSettings() {
+    return new RemoteSettings(getBaseHost(), getPath());
   }
 
-  public void setSettings(RemoteSettings<T> remoteSettings) {
+  public void setSettings(RemoteSettings remoteSettings) {
     setBaseHost(remoteSettings.getBaseHost());
     setPath(remoteSettings.getPath());
-    setApiKey(remoteSettings.getCredentials().getApiKey());
   }
 
 }
