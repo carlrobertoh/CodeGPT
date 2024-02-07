@@ -1,5 +1,9 @@
 package ee.carlrobert.codegpt.settings;
 
+import static ee.carlrobert.codegpt.settings.service.ServiceType.AZURE;
+import static ee.carlrobert.codegpt.settings.service.ServiceType.LLAMA_CPP;
+import static ee.carlrobert.codegpt.settings.service.ServiceType.OPENAI;
+import static ee.carlrobert.codegpt.settings.service.ServiceType.YOU;
 import static java.util.stream.Collectors.toList;
 
 import com.intellij.openapi.Disposable;
@@ -25,24 +29,22 @@ public class GeneralSettingsComponent {
 
   public GeneralSettingsComponent(Disposable parentDisposable, GeneralSettings settings) {
     displayNameField = new JBTextField(settings.getState().getDisplayName(), 20);
-
     serviceSelectionForm = new ServiceSelectionForm(parentDisposable);
     var cardLayout = new CardLayout();
     var cards = new JPanel(cardLayout);
-    cards.add(serviceSelectionForm.getOpenAISettingsForm().getForm(), ServiceType.OPENAI.getCode());
-    cards.add(serviceSelectionForm.getAzureSettingsForm().getForm(), ServiceType.AZURE.getCode());
-    cards.add(serviceSelectionForm.getYouSettingsForm().getForm(), ServiceType.YOU.getCode());
-    cards.add(serviceSelectionForm.getLlamaSettingsForm(), ServiceType.LLAMA_CPP.getCode());
+    cards.add(serviceSelectionForm.getOpenAISettingsForm().getForm(), OPENAI.getCode());
+    cards.add(serviceSelectionForm.getAzureSettingsForm().getForm(), AZURE.getCode());
+    cards.add(serviceSelectionForm.getYouSettingsForm(), YOU.getCode());
+    cards.add(serviceSelectionForm.getLlamaSettingsForm(), LLAMA_CPP.getCode());
     var serviceComboBoxModel = new DefaultComboBoxModel<ServiceType>();
     serviceComboBoxModel.addAll(Arrays.stream(ServiceType.values())
-        .filter(it -> ServiceType.LLAMA_CPP != it || SystemInfoRt.isUnix)
+        .filter(it -> LLAMA_CPP != it || SystemInfoRt.isUnix)
         .collect(toList()));
     serviceComboBox = new ComboBox<>(serviceComboBoxModel);
-    serviceComboBox.setSelectedItem(ServiceType.OPENAI);
+    serviceComboBox.setSelectedItem(OPENAI);
     serviceComboBox.setPreferredSize(displayNameField.getPreferredSize());
     serviceComboBox.addItemListener(e ->
         cardLayout.show(cards, ((ServiceType) e.getItem()).getCode()));
-
     mainPanel = FormBuilder.createFormBuilder()
         .addLabeledComponent(
             CodeGPTBundle.get("settingsConfigurable.displayName.label"),

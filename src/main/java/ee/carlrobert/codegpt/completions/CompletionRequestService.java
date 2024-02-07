@@ -9,7 +9,7 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
 import ee.carlrobert.codegpt.codecompletions.CodeCompletionRequestProvider;
 import ee.carlrobert.codegpt.codecompletions.InfillRequestDetails;
-import ee.carlrobert.codegpt.credentials.AzureCredentialManager;
+import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
@@ -125,7 +125,7 @@ public final class CompletionRequestService {
   public boolean isRequestAllowed() {
     var selectedService = GeneralSettings.getCurrentState().getSelectedService();
     if (selectedService == AZURE) {
-      return AzureCredentialManager.getInstance().isCredentialSet();
+      return AzureCredentialsManager.getInstance().isCredentialSet();
     }
     if (selectedService == OPENAI) {
       return OpenAICredentialManager.getInstance().isCredentialSet();

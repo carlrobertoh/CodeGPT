@@ -3,7 +3,6 @@ package ee.carlrobert.codegpt.settings.service.you;
 import static ee.carlrobert.codegpt.ui.UIUtil.withEmptyLeftBorder;
 
 import com.intellij.openapi.Disposable;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.ui.ComponentValidator;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.util.text.StringUtil;
@@ -20,13 +19,13 @@ import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.completions.you.YouUserManager;
 import ee.carlrobert.codegpt.completions.you.auth.AuthenticationHandler;
-import ee.carlrobert.codegpt.completions.you.auth.AuthenticationNotifier;
 import ee.carlrobert.codegpt.completions.you.auth.YouAuthenticationError;
 import ee.carlrobert.codegpt.completions.you.auth.YouAuthenticationService;
 import ee.carlrobert.codegpt.completions.you.auth.response.YouAuthenticationResponse;
 import ee.carlrobert.codegpt.completions.you.auth.response.YouUser;
 import ee.carlrobert.codegpt.credentials.YouCredentialManager;
 import ee.carlrobert.codegpt.ui.UIUtil;
+import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.util.regex.Pattern;
 import javax.swing.JButton;
@@ -34,9 +33,10 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextPane;
+import javax.swing.SwingUtilities;
 import org.jetbrains.annotations.Nullable;
 
-public class YouSettingsForm {
+public class YouSettingsForm extends JPanel {
 
   private final JBTextField emailField;
   private final JBPasswordField passwordField;
@@ -46,6 +46,7 @@ public class YouSettingsForm {
   private final JBCheckBox displayWebSearchResultsCheckBox;
 
   public YouSettingsForm(YouSettingsState settings, Disposable parentDisposable) {
+    super(new BorderLayout());
     emailField = new JBTextField(settings.getEmail(), 25);
     passwordField = new JBPasswordField();
     passwordField.setColumns(25);
@@ -78,15 +79,10 @@ public class YouSettingsForm {
                 new UserAuthenticationHandler());
       }
     });
-
-    ApplicationManager.getApplication()
-        .getMessageBus()
-        .connect()
-        .subscribe(AuthenticationNotifier.AUTHENTICATION_TOPIC,
-            (AuthenticationNotifier) () -> displayWebSearchResultsCheckBox.setEnabled(true));
+    add(createForm());
   }
 
-  public JPanel getForm() {
+  private JPanel createForm() {
     var formBuilder = FormBuilder.createFormBuilder();
     var authResponse = YouUserManager.getInstance().getAuthenticationResponse();
     if (authResponse == null) {
@@ -116,8 +112,12 @@ public class YouSettingsForm {
     emailField.setText(email);
   }
 
-  public String getPassword() {
-    return new String(passwordField.getPassword());
+  public @Nullable String getPassword() {
+    var password = new String(passwordField.getPassword());
+    if (password.isEmpty()) {
+      return null;
+    }
+    return password;
   }
 
   public void setDisplayWebSearchResults(boolean displayWebSearchResults) {
@@ -210,6 +210,7 @@ public class YouSettingsForm {
         .addComponent(new TitledSeparator(
             CodeGPTBundle.get("settingsConfigurable.service.you.authentication.title")))
         .addComponent(contentPanel)
+        .addComponentFillVertically(new JPanel(), 0)
         .getPanel();
   }
 
@@ -235,6 +236,7 @@ public class YouSettingsForm {
                 .addComponent(signOutButton)
                 .getPanel())
             .withBorder(JBUI.Borders.emptyLeft(16)))
+        .addComponentFillVertically(new JPanel(), 0)
         .getPanel();
   }
 
@@ -249,7 +251,7 @@ public class YouSettingsForm {
 
     @Override
     public void handleAuthenticated(YouAuthenticationResponse authenticationResponse) {
-      ApplicationManager.getApplication().invokeLater(() -> {
+      SwingUtilities.invokeLater(() -> {
         var email = emailField.getText();
         var password = passwordField.getPassword();
         YouSettings.getCurrentState().setEmail(email);
@@ -260,12 +262,12 @@ public class YouSettingsForm {
 
     @Override
     public void handleGenericError() {
-      ApplicationManager.getApplication().invokeLater(() -> refresh(null));
+      SwingUtilities.invokeLater(() -> refresh(null));
     }
 
     @Override
     public void handleError(YouAuthenticationError error) {
-      ApplicationManager.getApplication().invokeLater(() -> refresh(error));
+      SwingUtilities.invokeLater(() -> refresh(error));
     }
 
     private void refresh(@Nullable YouAuthenticationError error) {
@@ -279,10 +281,9 @@ public class YouSettingsForm {
   private void refreshView(JPanel contentPanel) {
     loadingSpinner.suspend();
     loadingSpinner.setVisible(false);
-    // TODO
-    /*removeAll();
+    removeAll();
     add(contentPanel);
     revalidate();
-    repaint();*/
+    repaint();
   }
 }

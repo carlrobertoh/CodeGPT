@@ -5,17 +5,17 @@ import com.intellij.openapi.components.Service;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
 
 @Service
-public final class AzureCredentialManager extends AbstractCredentialManager {
+public final class AzureCredentialsManager extends AbstractCredentialsManager {
 
   public static final String API_KEY = "AZURE_OPENAI_API_KEY";
   public static final String ACTIVE_DIRECTORY_TOKEN = "AZURE_ACTIVE_DIRECTORY_TOKEN";
 
-  private AzureCredentialManager() {
+  private AzureCredentialsManager() {
     super(API_KEY, ACTIVE_DIRECTORY_TOKEN);
   }
 
-  public static AzureCredentialManager getInstance() {
-    return ApplicationManager.getApplication().getService(AzureCredentialManager.class);
+  public static AzureCredentialsManager getInstance() {
+    return ApplicationManager.getApplication().getService(AzureCredentialsManager.class);
   }
 
   @Override

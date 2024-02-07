@@ -5,7 +5,7 @@ import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.util.Disposer;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
-import ee.carlrobert.codegpt.credentials.AzureCredentialManager;
+import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.LlamaCredentialManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
@@ -99,7 +99,7 @@ public class GeneralSettingsConfigurable implements Configurable {
 
   private void applyAzureSettings(AzureSettingsForm form) {
     AzureSettings.getInstance().loadState(form.getCurrentState());
-    var azureCredentials = AzureCredentialManager.getInstance();
+    var azureCredentials = AzureCredentialsManager.getInstance();
     azureCredentials.setApiKey(form.getApiKey());
     azureCredentials.setActiveDirectoryToken(form.getActiveDirectoryToken());
   }

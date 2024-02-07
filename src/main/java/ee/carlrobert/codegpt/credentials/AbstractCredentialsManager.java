@@ -8,13 +8,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.jetbrains.annotations.Nullable;
 
-abstract class AbstractCredentialManager {
+abstract class AbstractCredentialsManager {
 
   private static final PasswordSafe passwordSafe = PasswordSafe.getInstance();
 
   private final Map<String, CredentialAttributes> credentialMapping;
 
-  protected AbstractCredentialManager(String... keys) {
+  protected AbstractCredentialsManager(String... keys) {
     credentialMapping = Stream.of(keys).collect(Collectors.toMap(
         key -> key,
         key -> new CredentialAttributes(CredentialAttributesKt.generateServiceName("CodeGPT", key))

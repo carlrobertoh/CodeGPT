@@ -1,6 +1,6 @@
 package ee.carlrobert.codegpt.credentials;
 
-abstract class SingleCredentialManager extends AbstractCredentialManager {
+abstract class SingleCredentialManager extends AbstractCredentialsManager {
 
   private final String key;
 

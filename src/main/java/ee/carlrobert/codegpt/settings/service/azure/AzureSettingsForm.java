@@ -9,7 +9,7 @@ import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
-import ee.carlrobert.codegpt.credentials.AzureCredentialManager;
+import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import java.util.List;
 import java.util.Map;
 import javax.swing.ButtonGroup;
@@ -39,7 +39,7 @@ public class AzureSettingsForm {
         settings.isUseAzureActiveDirectoryAuthentication());
     azureApiKeyField = new JBPasswordField();
     azureApiKeyField.setColumns(30);
-    azureApiKeyField.setText(AzureCredentialManager.getInstance().getApiKey());
+    azureApiKeyField.setText(AzureCredentialsManager.getInstance().getApiKey());
     azureApiKeyFieldPanel = UI.PanelFactory.panel(azureApiKeyField)
         .withLabel(CodeGPTBundle.get("settingsConfigurable.shared.apiKey.label"))
         .resizeX(false)
@@ -47,7 +47,7 @@ public class AzureSettingsForm {
     azureActiveDirectoryTokenField = new JBPasswordField();
     azureActiveDirectoryTokenField.setColumns(30);
     azureActiveDirectoryTokenField.setText(
-        AzureCredentialManager.getInstance().getActiveDirectoryToken());
+        AzureCredentialsManager.getInstance().getActiveDirectoryToken());
     azureActiveDirectoryTokenFieldPanel = UI.PanelFactory.panel(azureActiveDirectoryTokenField)
         .withLabel(CodeGPTBundle.get("settingsConfigurable.service.azure.bearerToken.label"))
         .resizeX(false)
@@ -129,9 +129,9 @@ public class AzureSettingsForm {
 
   public void resetForm() {
     var state = AzureSettings.getCurrentState();
-    azureApiKeyField.setText(AzureCredentialManager.getInstance().getApiKey());
+    azureApiKeyField.setText(AzureCredentialsManager.getInstance().getApiKey());
     azureActiveDirectoryTokenField.setText(
-        AzureCredentialManager.getInstance().getActiveDirectoryToken());
+        AzureCredentialsManager.getInstance().getActiveDirectoryToken());
     useAzureApiKeyAuthenticationRadioButton.setSelected(state.isUseAzureApiKeyAuthentication());
     useAzureActiveDirectoryAuthenticationRadioButton.setSelected(
         state.isUseAzureActiveDirectoryAuthentication());

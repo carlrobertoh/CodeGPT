@@ -31,8 +31,6 @@ import ee.carlrobert.codegpt.completions.llama.LlamaServerAgent;
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettingsState;
-import ee.carlrobert.codegpt.ui.ChatPromptTemplatePanel;
-import ee.carlrobert.codegpt.ui.InfillPromptTemplatePanel;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Dimension;

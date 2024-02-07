@@ -1,6 +1,6 @@
 package testsupport.mixin;
 
-import ee.carlrobert.codegpt.credentials.AzureCredentialManager;
+import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
@@ -19,7 +19,7 @@ public interface ShortcutsTestMixin {
 
   default void useAzureService() {
     GeneralSettings.getCurrentState().setSelectedService(ServiceType.AZURE);
-    AzureCredentialManager.getInstance().setApiKey("TEST_API_KEY");
+    AzureCredentialsManager.getInstance().setApiKey("TEST_API_KEY");
     var azureSettings = AzureSettings.getCurrentState();
     azureSettings.setBaseHost(null);
     azureSettings.setResourceName("TEST_RESOURCE_NAME");

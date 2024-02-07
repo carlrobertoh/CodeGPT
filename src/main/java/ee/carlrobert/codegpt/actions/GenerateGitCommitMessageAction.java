@@ -24,7 +24,7 @@ import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.completions.CompletionRequestService;
-import ee.carlrobert.codegpt.credentials.AzureCredentialManager;
+import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
@@ -59,7 +59,7 @@ public class GenerateGitCommitMessageAction extends AnAction {
       var callAllowed = (selectedService == ServiceType.OPENAI
           && OpenAICredentialManager.getInstance().isCredentialSet())
           || (selectedService == ServiceType.AZURE
-          && AzureCredentialManager.getInstance().isCredentialSet());
+          && AzureCredentialsManager.getInstance().isCredentialSet());
       event.getPresentation().setEnabled(callAllowed && filesSelected);
       event.getPresentation().setText(CodeGPTBundle.get(callAllowed
           ? "action.generateCommitMessage.title"

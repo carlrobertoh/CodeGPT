@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.ui;
+package ee.carlrobert.codegpt.settings.service.llama.form;
 
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
 import ee.carlrobert.codegpt.conversations.message.Message;

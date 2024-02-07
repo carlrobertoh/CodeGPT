@@ -4,7 +4,8 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
-import ee.carlrobert.codegpt.credentials.AzureCredentialManager;
+import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 @State(name = "CodeGPT_AzureSettings_210", storages = @Storage("CodeGPT_AzureSettings_210.xml"))
@@ -32,9 +33,11 @@ public class AzureSettings implements PersistentStateComponent<AzureSettingsStat
   }
 
   public boolean isModified(AzureSettingsForm form) {
-    var credentialsManager = AzureCredentialManager.getInstance();
+    var credentialsManager = AzureCredentialsManager.getInstance();
     return !form.getCurrentState().equals(state)
-        || !form.getActiveDirectoryToken().equals(credentialsManager.getActiveDirectoryToken())
-        || !form.getApiKey().equals(credentialsManager.getApiKey());
+        || !StringUtils.equals(
+        form.getActiveDirectoryToken(),
+        credentialsManager.getActiveDirectoryToken())
+        || !StringUtils.equals(form.getApiKey(), credentialsManager.getApiKey());
   }
 }

@@ -5,6 +5,7 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 @State(name = "CodeGPT_OpenAISettings_210", storages = @Storage("CodeGPT_OpenAISettings_210.xml"))
@@ -33,6 +34,8 @@ public class OpenAISettings implements PersistentStateComponent<OpenAISettingsSt
 
   public boolean isModified(OpenAISettingsForm form) {
     return !form.getCurrentState().equals(state)
-        || !form.getApiKey().equals(OpenAICredentialManager.getInstance().getCredential());
+        || !StringUtils.equals(
+        form.getApiKey(),
+        OpenAICredentialManager.getInstance().getCredential());
   }
 }
