@@ -7,7 +7,7 @@ import ee.carlrobert.codegpt.completions.you.YouUserManager;
 import ee.carlrobert.codegpt.credentials.AzureCredentialManager;
 import ee.carlrobert.codegpt.credentials.LlamaCredentialManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
-import ee.carlrobert.codegpt.settings.advanced.AdvancedSettingsState;
+import ee.carlrobert.codegpt.settings.advanced.AdvancedSettings;
 import ee.carlrobert.codegpt.settings.state.AzureSettings;
 import ee.carlrobert.codegpt.settings.state.LlamaSettings;
 import ee.carlrobert.codegpt.settings.state.OpenAISettings;
@@ -89,7 +89,7 @@ public class CompletionClientProvider {
 
   private static OkHttpClient.Builder getDefaultClientBuilder() {
     OkHttpClient.Builder builder = new OkHttpClient.Builder();
-    var advancedSettings = AdvancedSettingsState.getInstance();
+    var advancedSettings = AdvancedSettings.getCurrentState();
     var proxyHost = advancedSettings.getProxyHost();
     var proxyPort = advancedSettings.getProxyPort();
     if (!proxyHost.isEmpty() && proxyPort != 0) {

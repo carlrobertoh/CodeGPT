@@ -82,70 +82,6 @@ public class AdvancedSettingsComponent {
     return mainPanel;
   }
 
-  public Proxy.Type getProxyType() {
-    return (Proxy.Type) proxyTypeComboBox.getSelectedItem();
-  }
-
-  public void setProxyType(Proxy.Type type) {
-    proxyTypeComboBox.setSelectedItem(type);
-  }
-
-  public String getProxyHost() {
-    return proxyHostField.getText().trim();
-  }
-
-  public void setProxyHost(String host) {
-    proxyHostField.setText(host.trim());
-  }
-
-  public int getProxyPort() {
-    return proxyPortField.getNumber();
-  }
-
-  public void setProxyPort(int port) {
-    proxyPortField.setNumber(port);
-  }
-
-  public boolean isProxyAuthSelected() {
-    return proxyAuthCheckbox.isSelected();
-  }
-
-  public void setUseProxyAuthentication(boolean isProxyAuthSelected) {
-    proxyAuthCheckbox.setSelected(isProxyAuthSelected);
-  }
-
-  public String getProxyAuthUsername() {
-    return proxyAuthUsername.getText().trim();
-  }
-
-  public void setProxyUsername(String proxyUsername) {
-    proxyAuthUsername.setText(proxyUsername);
-  }
-
-  public String getProxyAuthPassword() {
-    return new String(proxyAuthPassword.getPassword());
-  }
-
-  public void setProxyPassword(String proxyPassword) {
-    proxyAuthPassword.setText(proxyPassword);
-  }
-
-  public int getConnectionTimeout() {
-    return connectionTimeoutField.getNumber();
-  }
-
-  public void setConnectionTimeoutField(int timeout) {
-    connectionTimeoutField.setNumber(timeout);
-  }
-
-  public int getReadTimeout() {
-    return readTimeoutField.getNumber();
-  }
-
-  public void setReadTimeout(int timeout) {
-    readTimeoutField.setNumber(timeout);
-  }
-
   private JComponent createProxySettingsForm() {
     var proxyPanel = new JPanel();
     proxyPanel.setBorder(JBUI.Borders.emptyLeft(16));
@@ -190,5 +126,30 @@ public class AdvancedSettingsComponent {
     proxyPanel.add(proxyAuthPanel);
 
     return proxyPanel;
+  }
+
+  public AdvancedSettingsState getCurrentFormState() {
+    var state = new AdvancedSettingsState();
+    state.setProxyType((Proxy.Type) proxyTypeComboBox.getSelectedItem());
+    state.setProxyHost(proxyHostField.getText().trim());
+    state.setProxyPort(proxyPortField.getNumber());
+    state.setProxyAuthSelected(proxyAuthCheckbox.isSelected());
+    state.setProxyUsername(proxyAuthUsername.getText().trim());
+    state.setProxyPassword(new String(proxyAuthPassword.getPassword()));
+    state.setConnectTimeout(connectionTimeoutField.getNumber());
+    state.setReadTimeout(readTimeoutField.getNumber());
+    return state;
+  }
+
+  public void resetForm() {
+    var advancedSettings = AdvancedSettings.getCurrentState();
+    proxyTypeComboBox.setSelectedItem(advancedSettings.getProxyType());
+    proxyHostField.setText(advancedSettings.getProxyHost());
+    proxyPortField.setNumber(advancedSettings.getProxyPort());
+    proxyAuthCheckbox.setSelected(advancedSettings.isProxyAuthSelected());
+    proxyAuthUsername.setText(advancedSettings.getProxyUsername());
+    proxyAuthPassword.setText(advancedSettings.getProxyPassword());
+    connectionTimeoutField.setNumber(advancedSettings.getConnectTimeout());
+    readTimeoutField.setNumber(advancedSettings.getReadTimeout());
   }
 }
