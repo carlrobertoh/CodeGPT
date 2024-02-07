@@ -107,7 +107,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
   }
 
   private String getLlamaCppPresentationText() {
-    var llamaSettingState = LlamaSettingsState.getInstance();
+    var llamaSettingState = LlamaSettings.getCurrentState();
     if (!llamaSettingState.isRunLocalServer()) {
       return format("Remote %s", llamaSettingState.getRemoteModelPromptTemplate());
     }
