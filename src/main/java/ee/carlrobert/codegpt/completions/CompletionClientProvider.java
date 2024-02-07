@@ -14,7 +14,6 @@ import ee.carlrobert.codegpt.settings.state.llama.LlamaSettingsState;
 import ee.carlrobert.llm.client.azure.AzureClient;
 import ee.carlrobert.llm.client.azure.AzureCompletionRequestParams;
 import ee.carlrobert.llm.client.llama.LlamaClient;
-import ee.carlrobert.llm.client.llama.LlamaClient.Builder;
 import ee.carlrobert.llm.client.openai.OpenAIClient;
 import ee.carlrobert.llm.client.you.UTMParameters;
 import ee.carlrobert.llm.client.you.YouClient;
@@ -76,7 +75,7 @@ public class CompletionClientProvider {
   public static LlamaClient getLlamaClient() {
     LlamaSettingsState llamaSettingsState = LlamaSettings.getInstance().getState();
 
-    Builder builder = new Builder();
+    var builder = new LlamaClient.Builder();
     String apiKey;
     if (llamaSettingsState.isRunLocalServer()) {
       LlamaLocalSettings localSettings = llamaSettingsState.getLocalSettings();

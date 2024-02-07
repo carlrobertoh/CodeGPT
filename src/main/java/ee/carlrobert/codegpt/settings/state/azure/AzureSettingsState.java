@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.settings.state.azure;
 
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.util.xmlb.annotations.Transient;
 import ee.carlrobert.codegpt.credentials.AzureCredentials;
 import ee.carlrobert.codegpt.settings.state.util.RemoteSettings;
@@ -38,9 +39,9 @@ public class AzureSettingsState extends RemoteSettings<AzureCredentials> {
         || settingsState.isUseAzureApiKeyAuthentication()
         != isUseAzureApiKeyAuthentication()
         || credentials.isModified(settingsState.getCredentials())
-        || !settingsState.getResourceName().equals(resourceName)
-        || !settingsState.getDeploymentId().equals(deploymentId)
-        || !settingsState.getApiVersion().equals(apiVersion);
+        || !StringUtil.equals(resourceName, settingsState.getResourceName())
+        || !StringUtil.equals(deploymentId, settingsState.getDeploymentId())
+        || !StringUtil.equals(apiVersion, settingsState.getApiVersion());
   }
 
   public boolean isUsingCustomPath() {

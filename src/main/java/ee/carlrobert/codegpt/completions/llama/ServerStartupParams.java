@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.completions.llama;
 
+import com.intellij.openapi.util.text.StringUtil;
 import ee.carlrobert.codegpt.settings.state.llama.LlamaLocalSettings;
 import java.io.File;
 import java.util.List;
@@ -49,7 +50,7 @@ public class ServerStartupParams {
   }
 
   public boolean isUseCustomServer() {
-    return !serverPath.equals(LlamaLocalSettings.BUNDLED_SERVER);
+    return !StringUtil.equals(serverPath, LlamaLocalSettings.BUNDLED_SERVER);
   }
 
   public String getServerFileName() {

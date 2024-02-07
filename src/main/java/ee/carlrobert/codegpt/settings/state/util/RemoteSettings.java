@@ -1,7 +1,6 @@
 package ee.carlrobert.codegpt.settings.state.util;
 
-import static ee.carlrobert.codegpt.util.Utils.areValuesDifferent;
-
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.util.xmlb.annotations.Transient;
 import ee.carlrobert.codegpt.credentials.Credentials;
 
@@ -40,8 +39,8 @@ public class RemoteSettings<T extends Credentials> extends CommonSettings<T> {
 
   @Transient
   public boolean isModified(RemoteSettings<T> remoteSettings) {
-    return !remoteSettings.getBaseHost().equals(this.baseHost)
-        || areValuesDifferent(remoteSettings.getPath(), this.path);
+    return !StringUtil.equals(this.baseHost, remoteSettings.getBaseHost())
+        || !StringUtil.equals(remoteSettings.getPath(), this.path);
   }
 
 }

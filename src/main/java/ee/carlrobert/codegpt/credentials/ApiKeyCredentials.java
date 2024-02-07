@@ -1,6 +1,6 @@
 package ee.carlrobert.codegpt.credentials;
 
-import static ee.carlrobert.codegpt.util.Utils.areValuesDifferent;
+import com.intellij.openapi.util.text.StringUtil;
 
 public class ApiKeyCredentials implements Credentials {
 
@@ -27,6 +27,6 @@ public class ApiKeyCredentials implements Credentials {
   }
 
   public boolean isModified(ApiKeyCredentials apiKeyCredentials) {
-    return areValuesDifferent(apiKey, apiKeyCredentials.getApiKey());
+    return !StringUtil.equals(apiKey, apiKeyCredentials.getApiKey());
   }
 }

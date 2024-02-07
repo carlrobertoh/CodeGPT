@@ -1,6 +1,6 @@
 package ee.carlrobert.codegpt.credentials;
 
-import static ee.carlrobert.codegpt.util.Utils.areValuesDifferent;
+import com.intellij.openapi.util.text.StringUtil;
 
 public class PasswordCredentials implements Credentials {
 
@@ -27,6 +27,6 @@ public class PasswordCredentials implements Credentials {
   }
 
   public boolean isModified(PasswordCredentials credentials) {
-    return areValuesDifferent(password, credentials.getPassword());
+    return !StringUtil.equals(password, credentials.getPassword());
   }
 }

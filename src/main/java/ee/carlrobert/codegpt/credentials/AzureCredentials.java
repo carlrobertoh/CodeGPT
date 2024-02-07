@@ -1,7 +1,6 @@
 package ee.carlrobert.codegpt.credentials;
 
-import static ee.carlrobert.codegpt.util.Utils.areValuesDifferent;
-
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.util.xmlb.annotations.Transient;
 import ee.carlrobert.codegpt.settings.state.AzureSettings;
 
@@ -43,7 +42,7 @@ public class AzureCredentials extends ApiKeyCredentials {
 
   public boolean isModified(AzureCredentials azureCredentials) {
     return super.isModified(azureCredentials)
-        || areValuesDifferent(activeDirectoryToken, azureCredentials.getActiveDirectoryToken());
+        || !StringUtil.equals(activeDirectoryToken, azureCredentials.getActiveDirectoryToken());
   }
 
 }

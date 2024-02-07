@@ -1,6 +1,5 @@
 package ee.carlrobert.codegpt.settings.state.llama;
 
-import static ee.carlrobert.codegpt.util.Utils.areValuesDifferent;
 import static java.util.stream.Collectors.toList;
 
 import com.intellij.util.xmlb.annotations.OptionTag;
@@ -73,7 +72,7 @@ public class LlamaLocalSettings extends CommonSettings<ApiKeyCredentials> {
         || threads != localSettings.getThreads()
         || !additionalCompileParameters.equals(localSettings.getAdditionalCompileParameters())
         || !chatPromptTemplate.equals(localSettings.getChatPromptTemplate())
-        || areValuesDifferent(localSettings.getModel(), this.getModel())
+        || !model.equals(localSettings.getModel())
         || !infillPromptTemplate.equals(localSettings.getInfillPromptTemplate());
   }
 

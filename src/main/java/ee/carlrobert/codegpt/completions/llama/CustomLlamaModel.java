@@ -1,7 +1,6 @@
 package ee.carlrobert.codegpt.completions.llama;
 
-import static ee.carlrobert.codegpt.util.Utils.areValuesDifferent;
-
+import com.intellij.openapi.util.text.StringUtil;
 import java.io.File;
 
 public class CustomLlamaModel implements LlamaCompletionModel {
@@ -46,6 +45,6 @@ public class CustomLlamaModel implements LlamaCompletionModel {
     if (!(obj instanceof CustomLlamaModel)) {
       return false;
     }
-    return !areValuesDifferent(this.modelPath, ((CustomLlamaModel) obj).modelPath);
+    return !StringUtil.equals(this.modelPath, ((CustomLlamaModel) obj).modelPath);
   }
 }

@@ -1,7 +1,6 @@
 package ee.carlrobert.codegpt.settings.state.openai;
 
-import static ee.carlrobert.codegpt.util.Utils.areValuesDifferent;
-
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.util.xmlb.annotations.OptionTag;
 import com.intellij.util.xmlb.annotations.Transient;
 import ee.carlrobert.codegpt.credentials.ApiKeyCredentials;
@@ -34,8 +33,8 @@ public class OpenAISettingsState extends RemoteSettings<ApiKeyCredentials> {
   public boolean isModified(OpenAISettingsState settingsState) {
     return super.isModified(settingsState)
         || credentials.isModified(settingsState.getCredentials())
-        || !settingsState.getOrganization().equals(organization)
-        || areValuesDifferent(model, this.getModel());
+        || !StringUtil.equals(organization, settingsState.getOrganization())
+        || !model.equals(settingsState.getModel());
   }
 
   public boolean isUsingCustomPath() {
