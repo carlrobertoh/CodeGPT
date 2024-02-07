@@ -92,7 +92,7 @@ public class CompletionRequestProvider {
             new OpenAIChatCompletionMessage("system",
                 getResourceContent("/prompts/method-name-generator.txt")),
             new OpenAIChatCompletionMessage("user", context)))
-        .setModel(OpenAISettings.getInstance().getState().getModel().getCode())
+        .setModel(OpenAISettings.getInstance().getState().getModel())
         .setStream(false)
         .build();
   }
@@ -108,26 +108,14 @@ public class CompletionRequestProvider {
       Message message,
       ConversationType conversationType) {
     var settings = LlamaSettings.getInstance().getState();
-    PromptTemplate promptTemplate;
-    if (settings.isRunLocalServer()) {
-      var localSettings = settings.getLocalSettings();
-      LlamaCompletionModel model = localSettings.getModel();
-      if (model instanceof CustomLlamaModel) {
-        promptTemplate = localSettings.getChatPromptTemplate();
-      } else {
-        promptTemplate = LlamaModel.findByHuggingFaceModel((HuggingFaceModel) model)
-            .getPromptTemplate();
-      }
-    } else {
-      promptTemplate = settings.getRemoteSettings().getChatPromptTemplate();
-    }
+
 
     var systemPrompt = COMPLETION_SYSTEM_PROMPT;
     if (conversationType == ConversationType.FIX_COMPILE_ERRORS) {
       systemPrompt = FIX_COMPILE_ERRORS_SYSTEM_PROMPT;
     }
 
-    var prompt = promptTemplate.buildPrompt(
+    var prompt = settings.getUsedPromptTemplate().buildPrompt(
         systemPrompt,
         message.getPrompt(),
         conversation.getMessages());

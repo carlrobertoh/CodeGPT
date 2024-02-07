@@ -1,7 +1,11 @@
 package ee.carlrobert.codegpt.settings.state.llama;
 
 import com.intellij.util.xmlb.annotations.Transient;
+import ee.carlrobert.codegpt.completions.PromptTemplate;
+import ee.carlrobert.codegpt.completions.llama.CustomLlamaModel;
+import ee.carlrobert.codegpt.completions.llama.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaCompletionModel;
+import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 
 public class LlamaSettingsState {
 
@@ -73,6 +77,22 @@ public class LlamaSettingsState {
   public void setRequestSettings(
       LlamaRequestSettings llamaRequestSettings) {
     this.requestSettings = llamaRequestSettings;
+  }
+
+  @Transient
+  public PromptTemplate getUsedPromptTemplate() {
+    if (isRunLocalServer()) {
+      var localSettings = getLocalSettings();
+      LlamaCompletionModel model = localSettings.getModel();
+      if (model instanceof CustomLlamaModel) {
+        return localSettings.getChatPromptTemplate();
+      } else {
+        return LlamaModel.findByHuggingFaceModel((HuggingFaceModel) model)
+            .getPromptTemplate();
+      }
+    } else {
+      return getRemoteSettings().getChatPromptTemplate();
+    }
   }
 
 }
