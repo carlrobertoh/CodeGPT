@@ -60,12 +60,12 @@ dependencies {
   implementation("org.apache.commons:commons-text:1.11.0")
   implementation("com.knuddels:jtokkit:0.6.1")
 
-  testImplementation("org.assertj:assertj-core:3.25.2")
+  testImplementation("org.assertj:assertj-core:3.25.3")
   testImplementation("org.awaitility:awaitility:4.2.0")
-  testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.1")
-  testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.1")
-  testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.1")
-  testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.10.1")
+  testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.2")
+  testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.2")
+  testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
+  testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.10.2")
 }
 
 tasks.register<Exec>("updateSubmodules") {
