@@ -7,7 +7,7 @@ import ee.carlrobert.codegpt.EncodingManager;
 public class InfillRequestDetails {
 
   private static final int MAX_OFFSET = 10_000;
-  private static final int MAX_PROMPT_TOKENS = 512;
+  private static final int MAX_PROMPT_TOKENS = 128;
 
   private final String prefix;
   private final String suffix;
