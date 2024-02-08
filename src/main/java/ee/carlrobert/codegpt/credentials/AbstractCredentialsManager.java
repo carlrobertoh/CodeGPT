@@ -46,6 +46,9 @@ abstract class AbstractCredentialsManager {
   }
 
   protected void setCredential(String key, String credential) {
+    if (credential == null) {
+      return;
+    }
     passwordSafe.setPassword(credentialMapping.get(key), credential);
     credentialCache.put(key, credential);
   }

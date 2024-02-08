@@ -13,6 +13,7 @@ import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
+import javax.annotation.Nullable;
 import javax.swing.JPanel;
 
 public class OpenAISettingsForm {
@@ -77,8 +78,9 @@ public class OpenAISettingsForm {
         .getPanel();
   }
 
-  public String getApiKey() {
-    return new String(openAIApiKeyField.getPassword());
+  public @Nullable String getApiKey() {
+    var apiKey = new String(openAIApiKeyField.getPassword());
+    return apiKey.isEmpty() ? null : apiKey;
   }
 
   public String getModel() {

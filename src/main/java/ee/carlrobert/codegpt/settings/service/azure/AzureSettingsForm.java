@@ -152,10 +152,7 @@ public class AzureSettingsForm {
 
   public @Nullable String getApiKey() {
     var apiKey = new String(azureApiKeyField.getPassword());
-    if (apiKey.isEmpty()) {
-      return null;
-    }
-    return apiKey;
+    return apiKey.isEmpty() ? null : apiKey;
   }
 
   private void registerPanelsVisibility(AzureSettingsState azureSettings) {
