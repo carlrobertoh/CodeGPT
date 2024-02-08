@@ -153,7 +153,7 @@ public class LlamaServerPreferencesForm {
   }
 
   public JComponent createRunLocalServerForm(LlamaServerAgent llamaServerAgent) {
-    var serverProgressPanel = new ServerProgressPanel();
+    var serverProgressPanel = new AsyncProgressPanel();
     serverProgressPanel.setBorder(JBUI.Borders.emptyRight(16));
     return withEmptyLeftBorder(FormBuilder.createFormBuilder()
         .addComponent(new TitledSeparator(
@@ -192,7 +192,7 @@ public class LlamaServerPreferencesForm {
 
   private JButton getServerButton(
       LlamaServerAgent llamaServerAgent,
-      ServerProgressPanel serverProgressPanel) {
+      AsyncProgressPanel serverProgressPanel) {
     var serverRunning = llamaServerAgent.isServerRunning();
     var serverButton = new JButton();
     serverButton.setText(serverRunning
@@ -274,7 +274,7 @@ public class LlamaServerPreferencesForm {
         CodeGPTPlugin.getLlamaModelsPath() + File.separator + model.getFileName());
   }
 
-  private void enableForm(JButton serverButton, ServerProgressPanel progressPanel) {
+  private void enableForm(JButton serverButton, AsyncProgressPanel progressPanel) {
     setFormEnabled(true);
     serverButton.setText(
         CodeGPTBundle.get("settingsConfigurable.service.llama.startServer.label"));
@@ -283,7 +283,7 @@ public class LlamaServerPreferencesForm {
         CodeGPTBundle.get("settingsConfigurable.service.llama.progress.stoppingServer"));
   }
 
-  private void disableForm(JButton serverButton, ServerProgressPanel progressPanel) {
+  private void disableForm(JButton serverButton, AsyncProgressPanel progressPanel) {
     setFormEnabled(false);
     serverButton.setText(
         CodeGPTBundle.get("settingsConfigurable.service.llama.stopServer.label"));

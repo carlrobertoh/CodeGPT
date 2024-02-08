@@ -42,4 +42,8 @@ public class OllamaSettingsForm extends JPanel {
         .addComponentFillVertically(new JPanel(), 0)
         .getPanel());
   }
+
+  public void loadAvailableModels() {
+    ollamaRequestPreferencesForm.getLlamaModelPreferencesForm().refreshAvailableModels();
+  }
 }

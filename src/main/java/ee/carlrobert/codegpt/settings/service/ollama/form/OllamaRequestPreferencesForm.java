@@ -19,6 +19,7 @@ public class OllamaRequestPreferencesForm {
   private final JBTextField repeatPenaltyField;
 
   public OllamaRequestPreferencesForm(OllamaSettingsState settings) {
+
     ollamaModelPreferencesForm = new OllamaModelPreferencesForm();
     baseHostField = new JBTextField(settings.getBaseHost(), 30);
     topKField = new IntegerField();
@@ -91,4 +92,5 @@ public class OllamaRequestPreferencesForm {
     comment.setBorder(JBUI.Borders.empty(0, 4));
     return comment;
   }
+
 }

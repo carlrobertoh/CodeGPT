@@ -18,7 +18,7 @@ import com.intellij.openapi.util.Key;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
-import ee.carlrobert.codegpt.settings.service.llama.form.ServerProgressPanel;
+import ee.carlrobert.codegpt.settings.service.llama.form.AsyncProgressPanel;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -35,16 +35,16 @@ public final class LlamaServerAgent implements Disposable {
 
   public void startAgent(
       LlamaServerStartupParams params,
-      ServerProgressPanel serverProgressPanel,
+      AsyncProgressPanel asyncProgressPanel,
       Runnable onSuccess,
       Runnable onServerTerminated) {
     ApplicationManager.getApplication().invokeLater(() -> {
       try {
-        serverProgressPanel.updateText(
+        asyncProgressPanel.updateText(
             CodeGPTBundle.get("llamaServerAgent.buildingProject.description"));
         makeProcessHandler = new OSProcessHandler(getMakeCommandLinde());
         makeProcessHandler.addProcessListener(
-            getMakeProcessListener(params, serverProgressPanel, onSuccess, onServerTerminated));
+            getMakeProcessListener(params, asyncProgressPanel, onSuccess, onServerTerminated));
         makeProcessHandler.startNotify();
       } catch (ExecutionException e) {
         throw new RuntimeException(e);
@@ -66,7 +66,7 @@ public final class LlamaServerAgent implements Disposable {
 
   private ProcessListener getMakeProcessListener(
       LlamaServerStartupParams params,
-      ServerProgressPanel serverProgressPanel,
+      AsyncProgressPanel asyncProgressPanel,
       Runnable onSuccess,
       Runnable onServerTerminated) {
     LOG.info("Building llama project");
@@ -82,7 +82,7 @@ public final class LlamaServerAgent implements Disposable {
         try {
           LOG.info("Booting up llama server");
 
-          serverProgressPanel.updateText(
+          asyncProgressPanel.updateText(
               CodeGPTBundle.get("llamaServerAgent.serverBootup.description"));
           startServerProcessHandler = new OSProcessHandler.Silent(getServerCommandLine(params));
           startServerProcessHandler.addProcessListener(

@@ -5,6 +5,7 @@ import static java.lang.String.format;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import java.net.MalformedURLException;
 import java.net.URL;
+import org.jetbrains.annotations.NotNull;
 
 public enum HuggingFaceModel {
 
@@ -124,5 +125,16 @@ public enum HuggingFaceModel {
         LlamaModel.findByHuggingFaceModel(this).getLabel(),
         getParameterSize(),
         getQuantization());
+  }
+
+  public static @NotNull HuggingFaceModel findByOllamaTag(String ollamaTag) {
+    for (var llamaModel : HuggingFaceModel.values()) {
+      if (llamaModel.getOllamaTag().equals(ollamaTag)) {
+        return llamaModel;
+      }
+    }
+
+    throw new RuntimeException(
+        format("Unable to find correct HuggingFaceModel for ollamaTag: %s", ollamaTag));
   }
 }

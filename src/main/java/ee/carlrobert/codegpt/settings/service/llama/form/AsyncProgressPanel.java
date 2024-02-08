@@ -5,11 +5,11 @@ import com.intellij.util.ui.AsyncProcessIcon;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
-public class ServerProgressPanel extends JPanel {
+public class AsyncProgressPanel extends JPanel {
 
   private final JBLabel label = new JBLabel();
 
-  public ServerProgressPanel() {
+  public AsyncProgressPanel() {
     setVisible(false);
     add(new AsyncProcessIcon("sign_in_spinner"));
     add(label);
