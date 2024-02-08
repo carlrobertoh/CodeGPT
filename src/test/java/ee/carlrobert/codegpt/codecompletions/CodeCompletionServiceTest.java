@@ -29,8 +29,8 @@ public class CodeCompletionServiceTest extends IntegrationTest {
         getResourceContent("/codecompletions/code-completion-file.txt"));
     Editor editor = myFixture.getEditor();
     var expectedCompletion = "TEST_SINGLE_LINE_OUTPUT\nTEST_MULTI_LINE_OUTPUT";
-    var prefix = "z".repeat(1015) + "\n[INPUT]\n"; // 512 tokens
-    var suffix = "\n[\\INPUT]\n" + "z".repeat(1015); // 512 tokens
+    var prefix = "z".repeat(247) + "\n[INPUT]\n"; // 128 tokens
+    var suffix = "\n[\\INPUT]\n" + "z".repeat(247); // 128 tokens
     expectLlama((StreamHttpExchange) request -> {
       assertThat(request.getUri().getPath()).isEqualTo("/completion");
       assertThat(request.getMethod()).isEqualTo("POST");
