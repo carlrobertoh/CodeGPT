@@ -349,10 +349,7 @@ public class LlamaServerPreferencesForm {
 
   public @Nullable String getApiKey() {
     var apiKey = new String(apiKeyField.getPassword());
-    if (apiKey.isEmpty()) {
-      return null;
-    }
-    return new String(apiKeyField.getPassword());
+    return apiKey.isEmpty() ? null : apiKey;
   }
 
   public InfillPromptTemplate getInfillPromptTemplate() {
