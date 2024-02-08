@@ -5,11 +5,11 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import ee.carlrobert.codegpt.completions.HuggingFaceModel;
-import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
+import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import org.jetbrains.annotations.NotNull;
 
@@ -58,6 +58,12 @@ public class GeneralSettings implements PersistentStateComponent<GeneralSettings
         llamaSettings.setUseCustomModel(true);
       }
     }
+    if ("ollama.chat.completion".equals(clientCode)) {
+      state.setSelectedService(ServiceType.OLLAMA);
+      var ollamaSettings = OllamaSettings.getCurrentState();
+      var huggingFaceModel = HuggingFaceModel.valueOf(conversation.getModel());
+      ollamaSettings.setHuggingFaceModel(huggingFaceModel);
+    }
     if ("you.chat.completion".equals(clientCode)) {
       state.setSelectedService(ServiceType.YOU);
     }
@@ -81,13 +87,9 @@ public class GeneralSettings implements PersistentStateComponent<GeneralSettings
           }
           return filePath.substring(lastSeparatorIndex + 1);
         }
-        var huggingFaceModel = llamaSettings.getHuggingFaceModel();
-        var llamaModel = LlamaModel.findByHuggingFaceModel(huggingFaceModel);
-        return String.format(
-            "%s %dB (Q%d)",
-            llamaModel.getLabel(),
-            huggingFaceModel.getParameterSize(),
-            huggingFaceModel.getQuantization());
+        return llamaSettings.getHuggingFaceModel().toText();
+      case OLLAMA:
+        return OllamaSettings.getCurrentState().getHuggingFaceModel().toText();
       default:
         return "Unknown";
     }

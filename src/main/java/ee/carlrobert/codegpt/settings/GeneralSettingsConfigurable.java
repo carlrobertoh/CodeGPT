@@ -12,6 +12,8 @@ import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettingsForm;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.llama.form.LlamaSettingsForm;
+import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
+import ee.carlrobert.codegpt.settings.service.ollama.form.OllamaSettingsForm;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettingsForm;
 import ee.carlrobert.codegpt.settings.service.you.YouSettings;
@@ -58,7 +60,8 @@ public class GeneralSettingsConfigurable implements Configurable {
         || OpenAISettings.getInstance().isModified(serviceSelectionForm.getOpenAISettingsForm())
         || AzureSettings.getInstance().isModified(serviceSelectionForm.getAzureSettingsForm())
         || YouSettings.getInstance().isModified(serviceSelectionForm.getYouSettingsForm())
-        || LlamaSettings.getInstance().isModified(serviceSelectionForm.getLlamaSettingsForm());
+        || LlamaSettings.getInstance().isModified(serviceSelectionForm.getLlamaSettingsForm())
+        || OllamaSettings.getInstance().isModified(serviceSelectionForm.getOllamaSettingsForm());
   }
 
   @Override
@@ -73,6 +76,7 @@ public class GeneralSettingsConfigurable implements Configurable {
     applyAzureSettings(serviceSelectionForm.getAzureSettingsForm());
     applyYouSettings(serviceSelectionForm.getYouSettingsForm());
     applyLlamaSettings(serviceSelectionForm.getLlamaSettingsForm());
+    applyOllamaSettings(serviceSelectionForm.getOllamaSettingsForm());
 
     var serviceChanged = component.getSelectedService() != settings.getSelectedService();
     var modelChanged = !OpenAISettings.getCurrentState().getModel()
@@ -91,6 +95,10 @@ public class GeneralSettingsConfigurable implements Configurable {
     LlamaCredentialManager.getInstance()
         .setCredential(form.getLlamaServerPreferencesForm().getApiKey());
     LlamaSettings.getInstance().loadState(form.getCurrentState());
+  }
+
+  private void applyOllamaSettings(OllamaSettingsForm form) {
+    OllamaSettings.getInstance().loadState(form.getCurrentState());
   }
 
   private void applyYouSettings(YouSettingsForm form) {
@@ -114,6 +122,7 @@ public class GeneralSettingsConfigurable implements Configurable {
     serviceSelectionForm.getOpenAISettingsForm().resetForm();
     serviceSelectionForm.getAzureSettingsForm().resetForm();
     serviceSelectionForm.getLlamaSettingsForm().resetForm();
+    serviceSelectionForm.getOllamaSettingsForm().resetForm();
     serviceSelectionForm.getYouSettingsForm().resetForm();
   }
 

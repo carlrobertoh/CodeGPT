@@ -2,6 +2,7 @@ package ee.carlrobert.codegpt.settings;
 
 import static ee.carlrobert.codegpt.settings.service.ServiceType.AZURE;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.LLAMA_CPP;
+import static ee.carlrobert.codegpt.settings.service.ServiceType.OLLAMA;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.OPENAI;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.YOU;
 import static java.util.stream.Collectors.toList;
@@ -36,9 +37,10 @@ public class GeneralSettingsComponent {
     cards.add(serviceSelectionForm.getAzureSettingsForm().getForm(), AZURE.getCode());
     cards.add(serviceSelectionForm.getYouSettingsForm(), YOU.getCode());
     cards.add(serviceSelectionForm.getLlamaSettingsForm(), LLAMA_CPP.getCode());
+    cards.add(serviceSelectionForm.getOllamaSettingsForm(), OLLAMA.getCode());
     var serviceComboBoxModel = new DefaultComboBoxModel<ServiceType>();
     serviceComboBoxModel.addAll(Arrays.stream(ServiceType.values())
-        .filter(it -> LLAMA_CPP != it || SystemInfoRt.isUnix)
+        .filter(it -> LLAMA_CPP != it || OLLAMA != it || SystemInfoRt.isUnix)
         .collect(toList()));
     serviceComboBox = new ComboBox<>(serviceComboBoxModel);
     serviceComboBox.setSelectedItem(OPENAI);

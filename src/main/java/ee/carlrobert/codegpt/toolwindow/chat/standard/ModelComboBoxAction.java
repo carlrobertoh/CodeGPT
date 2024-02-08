@@ -9,13 +9,13 @@ import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.actionSystem.ex.ComboBoxAction;
 import com.intellij.openapi.project.DumbAwareAction;
 import ee.carlrobert.codegpt.Icons;
-import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.GeneralSettingsState;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
+import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettingsState;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
@@ -72,6 +72,11 @@ public class ModelComboBoxAction extends ComboBoxAction {
         getLlamaCppPresentationText(),
         Icons.Llama,
         presentation));
+    actionGroup.add(createModelAction(
+        ServiceType.OLLAMA,
+        getOllamaPresentationText(),
+        Icons.Ollama,
+        presentation));
     actionGroup.addSeparator();
     actionGroup.add(createModelAction(ServiceType.YOU, "You.com", Icons.YouSmall, presentation));
     return actionGroup;
@@ -102,6 +107,10 @@ public class ModelComboBoxAction extends ComboBoxAction {
         templatePresentation.setText(getLlamaCppPresentationText());
         templatePresentation.setIcon(Icons.Llama);
         break;
+      case OLLAMA:
+        templatePresentation.setText(getOllamaPresentationText());
+        templatePresentation.setIcon(Icons.Ollama);
+        break;
       default:
     }
   }
@@ -111,16 +120,12 @@ public class ModelComboBoxAction extends ComboBoxAction {
     if (!llamaSettingState.isRunLocalServer()) {
       return format("Remote %s", llamaSettingState.getRemoteModelPromptTemplate());
     }
-    return getSelectedHuggingFace();
+    return llamaSettingState.getHuggingFaceModel().toText();
   }
 
-  private String getSelectedHuggingFace() {
-    var huggingFaceModel = LlamaSettings.getCurrentState().getHuggingFaceModel();
-    return format(
-        "%s %dB (Q%d)",
-        LlamaModel.findByHuggingFaceModel(huggingFaceModel).getLabel(),
-        huggingFaceModel.getParameterSize(),
-        huggingFaceModel.getQuantization());
+
+  private String getOllamaPresentationText() {
+    return OllamaSettings.getCurrentState().getHuggingFaceModel().toText();
   }
 
   private AnAction createModelAction(
