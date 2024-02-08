@@ -9,6 +9,7 @@ import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
+import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 
 public class GeneralSettingsTest extends BasePlatformTestCase {
@@ -77,5 +78,19 @@ public class GeneralSettingsTest extends BasePlatformTestCase {
     assertThat(settings.getState().getSelectedService()).isEqualTo(ServiceType.LLAMA_CPP);
     assertThat(llamaSettings.getHuggingFaceModel()).isEqualTo(CODE_LLAMA_7B_Q3);
     assertThat(llamaSettings.isUseCustomModel()).isFalse();
+  }
+
+  public void testOllamaSettingsHuggingFaceModelSync() {
+    var ollamaSettings = OllamaSettings.getCurrentState();
+    ollamaSettings.setHuggingFaceModel(HuggingFaceModel.WIZARD_CODER_PYTHON_7B_Q3);
+    var conversation = new Conversation();
+    conversation.setModel("CODE_LLAMA_7B_Q3");
+    conversation.setClientCode("ollama.chat.completion");
+    var settings = GeneralSettings.getInstance();
+
+    settings.sync(conversation);
+
+    assertThat(settings.getState().getSelectedService()).isEqualTo(ServiceType.OLLAMA);
+    assertThat(ollamaSettings.getHuggingFaceModel()).isEqualTo(CODE_LLAMA_7B_Q3);
   }
 }

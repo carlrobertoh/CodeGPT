@@ -20,8 +20,10 @@ import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
+import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowTabPanel;
 import ee.carlrobert.embedding.ReferencedFile;
+import ee.carlrobert.llm.client.http.exchange.NdJsonStreamHttpExchange;
 import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange;
 import java.util.List;
 import java.util.Map;
@@ -308,6 +310,73 @@ public class StandardChatToolWindowTabPanelTest extends IntegrationTest {
           jsonMapResponse(
               e("content", ""),
               e("stop", true)));
+    });
+
+    panel.sendMessage(message, ConversationType.DEFAULT);
+
+    await().atMost(5, SECONDS)
+        .until(() -> {
+          var messages = conversation.getMessages();
+          return !messages.isEmpty() && "Hello!".equals(messages.get(0).getResponse());
+        });
+    assertThat(panel.getConversation())
+        .isNotNull()
+        .extracting("id", "model", "clientCode", "discardTokenLimit")
+        .containsExactly(
+            conversation.getId(),
+            conversation.getModel(),
+            conversation.getClientCode(),
+            false);
+    var messages = panel.getConversation().getMessages();
+    assertThat(messages.size()).isOne();
+    assertThat(messages.get(0))
+        .extracting("id", "prompt", "response")
+        .containsExactly(message.getId(), message.getPrompt(), message.getResponse());
+  }
+
+  public void testSendingOllamaMessage() {
+    useOllamaService();
+    var configurationState = ConfigurationSettings.getCurrentState();
+    configurationState.setSystemPrompt(COMPLETION_SYSTEM_PROMPT);
+    configurationState.setMaxTokens(1000);
+    configurationState.setTemperature(0.1);
+    var ollamaSettings = OllamaSettings.getCurrentState();
+    ollamaSettings.setHuggingFaceModel(HuggingFaceModel.CODE_LLAMA_7B_Q4);
+    ollamaSettings.setTopK(30);
+    ollamaSettings.setTopP(0.8);
+    ollamaSettings.setRepeatPenalty(1.3);
+    var message = new Message("TEST_PROMPT");
+    var conversation = ConversationService.getInstance().startConversation();
+    var panel = new StandardChatToolWindowTabPanel(getProject(), conversation);
+    expectOllama((NdJsonStreamHttpExchange) request -> {
+      assertThat(request.getUri().getPath()).isEqualTo("/api/generate");
+      assertThat(request.getBody())
+          .extracting(
+              "model",
+              "prompt",
+              "options.num_predict",
+              "options.temperature",
+              "options.top_k",
+              "options.top_p",
+              "options.repeat_penalty",
+              "stream"
+          )
+          .containsExactly(
+              HuggingFaceModel.CODE_LLAMA_7B_Q4.getOllamaTag(),
+              LLAMA.buildPrompt(
+                  COMPLETION_SYSTEM_PROMPT,
+                  "TEST_PROMPT",
+                  conversation.getMessages()),
+              configurationState.getMaxTokens(),
+              configurationState.getTemperature(),
+              ollamaSettings.getTopK(),
+              ollamaSettings.getTopP(),
+              ollamaSettings.getRepeatPenalty(),
+              true
+          );
+      return List.of(
+          jsonMapResponse(e("response", "Hel"), e("done", false)),
+          jsonMapResponse(e("response", "lo!"), e("done", true)));
     });
 
     panel.sendMessage(message, ConversationType.DEFAULT);

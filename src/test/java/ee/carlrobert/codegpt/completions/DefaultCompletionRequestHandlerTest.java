@@ -16,6 +16,7 @@ import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
+import ee.carlrobert.llm.client.http.exchange.NdJsonStreamHttpExchange;
 import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange;
 import java.util.List;
 import java.util.Map;
@@ -206,6 +207,35 @@ public class DefaultCompletionRequestHandlerTest extends IntegrationTest {
           jsonMapResponse(
               e("content", ""),
               e("stop", true)));
+    });
+
+    requestHandler.call(new CallParameters(conversation, ConversationType.DEFAULT, message, false));
+
+    await().atMost(5, SECONDS).until(() -> "Hello!".equals(message.getResponse()));
+  }
+
+  public void testOllamaChatCompletionCall() {
+    useOllamaService();
+    ConfigurationSettings.getCurrentState().setMaxTokens(99);
+    var message = new Message("TEST_PROMPT");
+    var conversation = ConversationService.getInstance().startConversation();
+    conversation.addMessage(new Message("Ping", "Pong"));
+    var requestHandler = new CompletionRequestHandler(false, getRequestEventListener(message));
+    expectOllama((NdJsonStreamHttpExchange) request -> {
+      assertThat(request.getUri().getPath()).isEqualTo("/api/generate");
+      assertThat(request.getBody())
+          .extracting("model", "prompt", "options.num_predict", "stream")
+          .containsExactly(
+              HuggingFaceModel.CODE_LLAMA_7B_Q4.getOllamaTag(),
+              LLAMA.buildPrompt(
+                  COMPLETION_SYSTEM_PROMPT,
+                  "TEST_PROMPT",
+                  conversation.getMessages()),
+              99,
+              true);
+      return List.of(
+          jsonMapResponse(e("response", "Hel"), e("done", false)),
+          jsonMapResponse(e("response", "lo!"), e("done", true)));
     });
 
     requestHandler.call(new CallParameters(conversation, ConversationType.DEFAULT, message, false));

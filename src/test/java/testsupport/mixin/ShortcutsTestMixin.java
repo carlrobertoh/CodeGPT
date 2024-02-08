@@ -1,11 +1,14 @@
 package testsupport.mixin;
 
+import ee.carlrobert.codegpt.completions.HuggingFaceModel;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
+import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
+import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettingsState;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 
 public interface ShortcutsTestMixin {
@@ -34,5 +37,12 @@ public interface ShortcutsTestMixin {
   default void useLlamaService() {
     GeneralSettings.getCurrentState().setSelectedService(ServiceType.LLAMA_CPP);
     LlamaSettings.getCurrentState().setServerPort(null);
+  }
+
+  default void useOllamaService() {
+    GeneralSettings.getCurrentState().setSelectedService(ServiceType.OLLAMA);
+    OllamaSettingsState ollamaSettingsState = OllamaSettings.getCurrentState();
+    ollamaSettingsState.setBaseHost(null);
+    ollamaSettingsState.setHuggingFaceModel(HuggingFaceModel.CODE_LLAMA_7B_Q4);
   }
 }
