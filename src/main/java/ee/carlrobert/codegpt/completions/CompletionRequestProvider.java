@@ -19,6 +19,7 @@ import ee.carlrobert.codegpt.settings.IncludedFilesSettings;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
+import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.codegpt.settings.service.you.YouSettings;
 import ee.carlrobert.codegpt.telemetry.core.configuration.TelemetryConfiguration;
@@ -26,6 +27,8 @@ import ee.carlrobert.codegpt.telemetry.core.service.UserId;
 import ee.carlrobert.embedding.EmbeddingsService;
 import ee.carlrobert.embedding.ReferencedFile;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
+import ee.carlrobert.llm.client.ollama.completion.request.OllamaCompletionRequest;
+import ee.carlrobert.llm.client.ollama.completion.request.OllamaParameters;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
@@ -128,6 +131,36 @@ public class CompletionRequestProvider {
         .setTop_p(settings.getTopP())
         .setMin_p(settings.getMinP())
         .setRepeat_penalty(settings.getRepeatPenalty())
+        .build();
+  }
+
+  public OllamaCompletionRequest buildOllamaCompletionRequest(
+      Message message,
+      ConversationType conversationType) {
+    var settings = OllamaSettings.getCurrentState();
+    PromptTemplate promptTemplate = LlamaModel.findByHuggingFaceModel(
+        settings.getHuggingFaceModel()).getPromptTemplate();
+
+    var systemPrompt = COMPLETION_SYSTEM_PROMPT;
+    if (conversationType == ConversationType.FIX_COMPILE_ERRORS) {
+      systemPrompt = FIX_COMPILE_ERRORS_SYSTEM_PROMPT;
+    }
+    // TODO check how system prompt works in ollama
+    var prompt = promptTemplate.buildPrompt(
+        systemPrompt,
+        message.getPrompt(),
+        conversation.getMessages());
+    var configuration = ConfigurationSettings.getCurrentState();
+    return new OllamaCompletionRequest.Builder(settings.getHuggingFaceModel().getOllamaTag(),
+        prompt)
+        .setOptions(new OllamaParameters.Builder()
+            .numPredict(configuration.getMaxTokens())
+            .temperature(configuration.getTemperature())
+            .topK(settings.getTopK())
+            .topP(settings.getTopP())
+            .repeatPenalty(settings.getRepeatPenalty())
+            .build())
+        .setStream(true)
         .build();
   }
 

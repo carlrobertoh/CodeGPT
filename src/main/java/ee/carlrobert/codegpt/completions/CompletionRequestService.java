@@ -2,6 +2,7 @@ package ee.carlrobert.codegpt.completions;
 
 import static ee.carlrobert.codegpt.settings.service.ServiceType.AZURE;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.LLAMA_CPP;
+import static ee.carlrobert.codegpt.settings.service.ServiceType.OLLAMA;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.OPENAI;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.YOU;
 
@@ -66,6 +67,12 @@ public final class CompletionRequestService {
                 callParameters.getMessage(),
                 callParameters.getConversationType()),
             eventListener);
+      case OLLAMA:
+        return CompletionClientProvider.getOllamaClient().getChatCompletionAsync(
+            requestProvider.buildOllamaCompletionRequest(
+                callParameters.getMessage(),
+                callParameters.getConversationType()),
+            eventListener);
       default:
         throw new IllegalArgumentException();
     }
@@ -82,6 +89,9 @@ public final class CompletionRequestService {
       case LLAMA_CPP:
         return CompletionClientProvider.getLlamaClient()
             .getChatCompletionAsync(requestProvider.buildLlamaRequest(), eventListener);
+      case OLLAMA:
+        return CompletionClientProvider.getOllamaClient()
+            .getChatCompletionAsync(requestProvider.buildOllamaRequest(), eventListener);
       default:
         throw new IllegalArgumentException("Code completion not supported for selected service");
     }
@@ -107,7 +117,7 @@ public final class CompletionRequestService {
 
   public Optional<String> getLookupCompletion(String prompt) {
     var selectedService = GeneralSettings.getCurrentState().getSelectedService();
-    if (selectedService == YOU || selectedService == LLAMA_CPP) {
+    if (selectedService == YOU || selectedService == LLAMA_CPP || selectedService == OLLAMA) {
       return Optional.empty();
     }
 

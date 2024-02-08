@@ -2,7 +2,10 @@ package ee.carlrobert.codegpt.codecompletions;
 
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
+import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
+import ee.carlrobert.llm.client.ollama.completion.request.OllamaCompletionRequest;
+import ee.carlrobert.llm.client.ollama.completion.request.OllamaParameters;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAITextCompletionRequest;
 import javax.annotation.ParametersAreNonnullByDefault;
 
@@ -37,6 +40,20 @@ public class CodeCompletionRequestProvider {
         .build();
   }
 
+  public OllamaCompletionRequest buildOllamaRequest() {
+    InfillPromptTemplate promptTemplate = getOllamaInfillPromptTemplate();
+    String prompt = promptTemplate.buildPrompt(details.getPrefix(), details.getSuffix());
+    return new OllamaCompletionRequest.Builder(
+        OllamaSettings.getCurrentState().getHuggingFaceModel().getOllamaTag(), prompt)
+        .setOptions(new OllamaParameters.Builder()
+            .numPredict(MAX_TOKENS)
+            .temperature(0.1)
+            .stop(promptTemplate.getStopTokens())
+            .build())
+        .setStream(true)
+        .build();
+  }
+
   private InfillPromptTemplate getLlamaInfillPromptTemplate() {
     var settings = LlamaSettings.getCurrentState();
     if (!settings.isRunLocalServer()) {
@@ -45,6 +62,12 @@ public class CodeCompletionRequestProvider {
     if (settings.isUseCustomModel()) {
       return settings.getLocalModelInfillPromptTemplate();
     }
+    return LlamaModel.findByHuggingFaceModel(settings.getHuggingFaceModel())
+        .getInfillPromptTemplate();
+  }
+
+  private InfillPromptTemplate getOllamaInfillPromptTemplate() {
+    var settings = OllamaSettings.getCurrentState();
     return LlamaModel.findByHuggingFaceModel(settings.getHuggingFaceModel())
         .getInfillPromptTemplate();
   }

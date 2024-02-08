@@ -1,11 +1,13 @@
 package ee.carlrobert.codegpt.codecompletions;
 
 import static ee.carlrobert.codegpt.settings.service.ServiceType.LLAMA_CPP;
+import static ee.carlrobert.codegpt.settings.service.ServiceType.OLLAMA;
 
 import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator;
 import com.intellij.openapi.project.Project;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
+import ee.carlrobert.codegpt.settings.service.ServiceType;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -36,10 +38,7 @@ public class CallDebouncer {
 
     Future<?> prev = delayedMap.put(key, scheduler.schedule(() -> {
       try {
-        var progressIndicator =
-            LLAMA_CPP.equals(GeneralSettings.getCurrentState().getSelectedService())
-                ? createProgressIndicator()
-                : null;
+        var progressIndicator = isLlamaServiceUsed() ? createProgressIndicator() : null;
         currentCall.set(runnable.call(progressIndicator));
       } finally {
         delayedMap.remove(key);
@@ -49,6 +48,12 @@ public class CallDebouncer {
     if (prev != null) {
       prev.cancel(true);
     }
+  }
+
+  private static boolean isLlamaServiceUsed() {
+    ServiceType selectedService = GeneralSettings.getCurrentState().getSelectedService();
+    return LLAMA_CPP.equals(selectedService)
+        || OLLAMA.equals(selectedService);
   }
 
   public void shutdown() {

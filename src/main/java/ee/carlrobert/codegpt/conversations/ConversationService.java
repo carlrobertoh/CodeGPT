@@ -10,6 +10,7 @@ import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
+import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -198,7 +199,9 @@ public final class ConversationService {
         var llamaSettings = LlamaSettings.getCurrentState();
         return llamaSettings.isUseCustomModel()
             ? llamaSettings.getCustomLlamaModelPath()
-            : llamaSettings.getHuggingFaceModel().getCode();
+            : llamaSettings.getHuggingFaceModel().name();
+      case OLLAMA:
+        return OllamaSettings.getCurrentState().getHuggingFaceModel().name();
       default:
         throw new RuntimeException("Could not find corresponding service mapping");
     }
