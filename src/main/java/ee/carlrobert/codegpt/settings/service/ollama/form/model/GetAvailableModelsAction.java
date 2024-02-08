@@ -1,9 +1,8 @@
-package ee.carlrobert.codegpt.settings.service.ollama.form;
+package ee.carlrobert.codegpt.settings.service.ollama.form.model;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
@@ -16,8 +15,6 @@ import java.util.function.Consumer;
 import org.jetbrains.annotations.NotNull;
 
 public class GetAvailableModelsAction extends AnAction {
-
-  private static final Logger LOG = Logger.getInstance(GetAvailableModelsAction.class);
 
   private final Runnable beforeStart;
   private final Consumer<List<OllamaModel>> onFinished;
@@ -54,12 +51,6 @@ public class GetAvailableModelsAction extends AnAction {
               .getModels());
         } catch (Exception e) {
           onFailed.accept(e);
-          return;
-        }
-        try {
-          Thread.sleep(2000);
-        } catch (InterruptedException e) {
-          throw new RuntimeException(e);
         }
       });
     }

@@ -10,6 +10,7 @@ import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
+import ee.carlrobert.codegpt.settings.service.ollama.form.model.OllamaChildModel;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 
 public class GeneralSettingsTest extends BasePlatformTestCase {
@@ -82,15 +83,15 @@ public class GeneralSettingsTest extends BasePlatformTestCase {
 
   public void testOllamaSettingsHuggingFaceModelSync() {
     var ollamaSettings = OllamaSettings.getCurrentState();
-    ollamaSettings.setHuggingFaceModel(HuggingFaceModel.WIZARD_CODER_PYTHON_7B_Q3);
+    ollamaSettings.setOllamaModel(OllamaChildModel.codellama());
     var conversation = new Conversation();
-    conversation.setModel("CODE_LLAMA_7B_Q3");
+    conversation.setModel("codellama:7b-instruct-q4_K_M");
     conversation.setClientCode("ollama.chat.completion");
     var settings = GeneralSettings.getInstance();
 
     settings.sync(conversation);
 
     assertThat(settings.getState().getSelectedService()).isEqualTo(ServiceType.OLLAMA);
-    assertThat(ollamaSettings.getHuggingFaceModel()).isEqualTo(CODE_LLAMA_7B_Q3);
+    assertThat(ollamaSettings.getOllamaModel()).isEqualTo(OllamaChildModel.codellama());
   }
 }

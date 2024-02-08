@@ -125,7 +125,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
 
 
   private String getOllamaPresentationText() {
-    return OllamaSettings.getCurrentState().getHuggingFaceModel().toText();
+    return OllamaSettings.getCurrentState().getOllamaModel().getDescription();
   }
 
   private AnAction createModelAction(

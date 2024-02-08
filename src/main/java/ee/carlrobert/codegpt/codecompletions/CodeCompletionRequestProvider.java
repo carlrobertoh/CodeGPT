@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.codecompletions;
 
+
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
@@ -44,7 +45,7 @@ public class CodeCompletionRequestProvider {
     InfillPromptTemplate promptTemplate = getOllamaInfillPromptTemplate();
     String prompt = promptTemplate.buildPrompt(details.getPrefix(), details.getSuffix());
     return new OllamaCompletionRequest.Builder(
-        OllamaSettings.getCurrentState().getHuggingFaceModel().getOllamaTag(), prompt)
+        OllamaSettings.getCurrentState().getOllamaModel().getTag(), prompt)
         .setOptions(new OllamaParameters.Builder()
             .numPredict(MAX_TOKENS)
             .temperature(0.1)
@@ -68,7 +69,6 @@ public class CodeCompletionRequestProvider {
 
   private InfillPromptTemplate getOllamaInfillPromptTemplate() {
     var settings = OllamaSettings.getCurrentState();
-    return LlamaModel.findByHuggingFaceModel(settings.getHuggingFaceModel())
-        .getInfillPromptTemplate();
+    return settings.getOllamaModel().getInfillPromptTemplate();
   }
 }

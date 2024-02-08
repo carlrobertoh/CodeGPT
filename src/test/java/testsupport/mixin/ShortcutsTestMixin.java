@@ -9,6 +9,7 @@ import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
 import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettingsState;
+import ee.carlrobert.codegpt.settings.service.ollama.form.model.OllamaChildModel;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 
 public interface ShortcutsTestMixin {
@@ -43,6 +44,6 @@ public interface ShortcutsTestMixin {
     GeneralSettings.getCurrentState().setSelectedService(ServiceType.OLLAMA);
     OllamaSettingsState ollamaSettingsState = OllamaSettings.getCurrentState();
     ollamaSettingsState.setBaseHost(null);
-    ollamaSettingsState.setHuggingFaceModel(HuggingFaceModel.CODE_LLAMA_7B_Q4);
+    ollamaSettingsState.setOllamaModel(OllamaChildModel.codellama());
   }
 }

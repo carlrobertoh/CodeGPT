@@ -201,7 +201,7 @@ public final class ConversationService {
             ? llamaSettings.getCustomLlamaModelPath()
             : llamaSettings.getHuggingFaceModel().name();
       case OLLAMA:
-        return OllamaSettings.getCurrentState().getHuggingFaceModel().name();
+        return OllamaSettings.getCurrentState().getOllamaModel().getTag();
       default:
         throw new RuntimeException("Could not find corresponding service mapping");
     }

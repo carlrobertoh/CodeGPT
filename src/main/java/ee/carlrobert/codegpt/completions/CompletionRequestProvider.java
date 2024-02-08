@@ -138,8 +138,7 @@ public class CompletionRequestProvider {
       Message message,
       ConversationType conversationType) {
     var settings = OllamaSettings.getCurrentState();
-    PromptTemplate promptTemplate = LlamaModel.findByHuggingFaceModel(
-        settings.getHuggingFaceModel()).getPromptTemplate();
+    PromptTemplate promptTemplate = settings.getOllamaModel().getPromptTemplate();
 
     var systemPrompt = COMPLETION_SYSTEM_PROMPT;
     if (conversationType == ConversationType.FIX_COMPILE_ERRORS) {
@@ -151,7 +150,7 @@ public class CompletionRequestProvider {
         message.getPrompt(),
         conversation.getMessages());
     var configuration = ConfigurationSettings.getCurrentState();
-    return new OllamaCompletionRequest.Builder(settings.getHuggingFaceModel().getOllamaTag(),
+    return new OllamaCompletionRequest.Builder(settings.getOllamaModel().getTag(),
         prompt)
         .setOptions(new OllamaParameters.Builder()
             .numPredict(configuration.getMaxTokens())

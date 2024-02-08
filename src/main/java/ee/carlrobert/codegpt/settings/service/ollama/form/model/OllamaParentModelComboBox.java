@@ -1,28 +1,27 @@
-package ee.carlrobert.codegpt.settings.service.ollama.form;
+package ee.carlrobert.codegpt.settings.service.ollama.form.model;
 
-import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.AbstractListModel;
 import javax.swing.ComboBoxModel;
 
-public class LlamaModelEnumComboBoxModel extends AbstractListModel<LlamaModel> implements
-    ComboBoxModel<LlamaModel> {
+public class OllamaParentModelComboBox extends AbstractListModel<OllamaModelParent> implements
+    ComboBoxModel<OllamaModelParent> {
 
-  private final List<LlamaModel> myList;
-  private LlamaModel mySelected;
+  private final List<OllamaModelParent> myList;
+  private OllamaModelParent mySelected;
 
 
-  public LlamaModelEnumComboBoxModel() {
+  public OllamaParentModelComboBox() {
     myList = new ArrayList<>();
   }
 
-  public void updateList(List<LlamaModel> models) {
+  public void updateList(List<OllamaModelParent> models) {
     myList.clear();
     myList.addAll(models);
     // Select previous model if still present in refreshed models list
     var newSelection = myList.isEmpty() ? null : myList.get(0);
-    for (LlamaModel model : myList) {
+    for (OllamaModelParent model : myList) {
       if (model.equals(mySelected)) {
         newSelection = mySelected;
         break;
@@ -37,23 +36,27 @@ public class LlamaModelEnumComboBoxModel extends AbstractListModel<LlamaModel> i
   }
 
   @Override
-  public LlamaModel getElementAt(int index) {
+  public OllamaModelParent getElementAt(int index) {
     return myList.get(index);
   }
 
   @Override
   public void setSelectedItem(Object item) {
-    @SuppressWarnings("unchecked") LlamaModel e = (LlamaModel) item;
+    @SuppressWarnings("unchecked") OllamaModelParent e = (OllamaModelParent) item;
     setSelectedItem(e);
   }
 
-  public void setSelectedItem(LlamaModel item) {
+  public void setSelectedItem(OllamaModelParent item) {
     mySelected = item;
     fireContentsChanged(this, 0, getSize());
   }
 
   @Override
-  public LlamaModel getSelectedItem() {
+  public OllamaModelParent getSelectedItem() {
     return mySelected;
+  }
+
+  public List<OllamaModelParent> getList() {
+    return myList;
   }
 }

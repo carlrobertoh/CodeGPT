@@ -1,22 +1,22 @@
 package ee.carlrobert.codegpt.settings.service.ollama;
 
-import ee.carlrobert.codegpt.completions.HuggingFaceModel;
+import ee.carlrobert.codegpt.settings.service.ollama.form.model.OllamaChildModel;
 import java.util.Objects;
 
 public class OllamaSettingsState {
 
-  private HuggingFaceModel huggingFaceModel = HuggingFaceModel.CODE_LLAMA_7B_Q4;
+  private OllamaChildModel ollamaModel = OllamaChildModel.codellama();
   private String baseHost = "http://localhost:8080";
   private int topK = 40;
   private double topP = 0.9;
   private double repeatPenalty = 1.1;
 
-  public HuggingFaceModel getHuggingFaceModel() {
-    return huggingFaceModel;
+  public OllamaChildModel getOllamaModel() {
+    return ollamaModel;
   }
 
-  public void setHuggingFaceModel(HuggingFaceModel huggingFaceModel) {
-    this.huggingFaceModel = huggingFaceModel;
+  public void setOllamaModel(OllamaChildModel ollamaModel) {
+    this.ollamaModel = ollamaModel;
   }
 
   public String getBaseHost() {
@@ -64,12 +64,12 @@ public class OllamaSettingsState {
     return topK == that.topK
         && Double.compare(that.topP, topP) == 0
         && Double.compare(that.repeatPenalty, repeatPenalty) == 0
-        && huggingFaceModel == that.huggingFaceModel
+        && ollamaModel == that.ollamaModel
         && Objects.equals(baseHost, that.baseHost);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(huggingFaceModel, baseHost, topK, topP, repeatPenalty);
+    return Objects.hash(ollamaModel, baseHost, topK, topP, repeatPenalty);
   }
 }

@@ -21,6 +21,7 @@ import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
+import ee.carlrobert.codegpt.settings.service.ollama.form.model.OllamaChildModel;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowTabPanel;
 import ee.carlrobert.embedding.ReferencedFile;
 import ee.carlrobert.llm.client.http.exchange.NdJsonStreamHttpExchange;
@@ -341,7 +342,7 @@ public class StandardChatToolWindowTabPanelTest extends IntegrationTest {
     configurationState.setMaxTokens(1000);
     configurationState.setTemperature(0.1);
     var ollamaSettings = OllamaSettings.getCurrentState();
-    ollamaSettings.setHuggingFaceModel(HuggingFaceModel.CODE_LLAMA_7B_Q4);
+    ollamaSettings.setOllamaModel(OllamaChildModel.codellama());
     ollamaSettings.setTopK(30);
     ollamaSettings.setTopP(0.8);
     ollamaSettings.setRepeatPenalty(1.3);

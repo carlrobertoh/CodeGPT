@@ -15,11 +15,13 @@ import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.completions.CompletionClientProvider;
-import ee.carlrobert.codegpt.completions.HuggingFaceModel;
-import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.settings.service.llama.form.AsyncProgressPanel;
-import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
 import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettingsState;
+import ee.carlrobert.codegpt.settings.service.ollama.form.model.GetAvailableModelsAction;
+import ee.carlrobert.codegpt.settings.service.ollama.form.model.OllamaChildModel;
+import ee.carlrobert.codegpt.settings.service.ollama.form.model.OllamaModelParent;
+import ee.carlrobert.codegpt.settings.service.ollama.form.model.OllamaModelQuantizationComboBox;
+import ee.carlrobert.codegpt.settings.service.ollama.form.model.OllamaParentModelComboBox;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.llm.client.ollama.completion.response.OllamaModel;
 import java.awt.BorderLayout;
@@ -27,7 +29,6 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import javax.swing.Box;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JPanel;
@@ -50,16 +51,16 @@ public class OllamaModelPreferencesForm {
           4, new ModelDetails(20.22, 22.72),
           5, new ModelDetails(23.84, 26.34)));
 
-  private final ComboBox<LlamaModel> modelComboBox;
+  private final ComboBox<OllamaModelParent> parentModelComboBox;
   private final ComboBox<ModelSize> modelSizeComboBox;
-  private final ComboBox<HuggingFaceModel> huggingFaceModelComboBox;
-  private final DefaultComboBoxModel<HuggingFaceModel> huggingFaceComboBoxModel;
+  private final ComboBox<OllamaChildModel> childModelComboBox;
+  private final DefaultComboBoxModel<OllamaChildModel> childModelComboBoxModel;
+  private final OllamaParentModelComboBox parentModelComboBoxModel;
   private final JBLabel helpIcon;
   private final AsyncProgressPanel updateModelListIcon;
   private final JPanel loadModelsActionWrapper;
   private final JBLabel progressLabel;
   private final JBLabel modelDetailsLabel;
-  private final LlamaModelEnumComboBoxModel modelComboBoxModel;
   private final AnActionLink loadModelsLink;
 
   public OllamaModelPreferencesForm() {
@@ -68,36 +69,22 @@ public class OllamaModelPreferencesForm {
     progressLabel.setFont(JBUI.Fonts.smallFont());
     helpIcon = new JBLabel(General.ContextHelp);
     updateModelListIcon = new AsyncProgressPanel();
-    huggingFaceComboBoxModel = new DefaultComboBoxModel<>();
-    var llm = OllamaSettings.getCurrentState().getHuggingFaceModel();
-    var llamaModel = LlamaModel.findByHuggingFaceModel(llm);
+    childModelComboBoxModel = new DefaultComboBoxModel<>();
 
-    var selectableSubModels = llamaModel.getHuggingFaceModels().stream()
-        .filter(model -> model.getParameterSize() == llm.getParameterSize())
-        .collect(toList());
-    huggingFaceComboBoxModel.addAll(selectableSubModels);
-    huggingFaceComboBoxModel.setSelectedItem(selectableSubModels.get(0));
     loadModelsActionWrapper = new JPanel(new BorderLayout());
     loadModelsActionWrapper.setBorder(JBUI.Borders.emptyLeft(2));
     loadModelsLink = createLoadModelsLink();
     loadModelsActionWrapper.add(loadModelsLink, BorderLayout.WEST);
     modelDetailsLabel = new JBLabel();
-    huggingFaceModelComboBox = createHuggingFaceComboBox(
-        huggingFaceComboBoxModel,
+    childModelComboBox = createHuggingFaceComboBox(childModelComboBoxModel,
         modelDetailsLabel);
     var modelSizeComboBoxModel = new DefaultComboBoxModel<ModelSize>();
-    var initialModelSizes = llamaModel.getSortedUniqueModelSizes().stream()
-        .map(ModelSize::new)
-        .collect(toList());
-    modelSizeComboBoxModel.addAll(initialModelSizes);
-    modelSizeComboBoxModel.setSelectedItem(initialModelSizes.get(0));
-    modelComboBoxModel = new LlamaModelEnumComboBoxModel();
-    modelComboBox = createModelComboBox(modelComboBoxModel, llamaModel, modelSizeComboBoxModel);
+    parentModelComboBoxModel = new OllamaParentModelComboBox();
+    parentModelComboBox = createModelComboBox(parentModelComboBoxModel, modelSizeComboBoxModel);
     modelSizeComboBox = createModelSizeComboBox(
-        modelComboBoxModel,
+        parentModelComboBoxModel,
         modelSizeComboBoxModel,
-        huggingFaceComboBoxModel);
-    modelSizeComboBox.setEnabled(initialModelSizes.size() > 1);
+        childModelComboBoxModel);
     setEnabled(false);
   }
 
@@ -106,15 +93,11 @@ public class OllamaModelPreferencesForm {
   }
 
   public void resetForm(OllamaSettingsState state) {
-    huggingFaceComboBoxModel.setSelectedItem(state.getHuggingFaceModel());
+    childModelComboBoxModel.setSelectedItem(state.getOllamaModel());
   }
 
-  public ComboBox<HuggingFaceModel> getHuggingFaceModelComboBox() {
-    return huggingFaceModelComboBox;
-  }
-
-  public HuggingFaceModel getSelectedModel() {
-    return (HuggingFaceModel) huggingFaceComboBoxModel.getSelectedItem();
+  public OllamaChildModel getSelectedModel() {
+    return (OllamaChildModel) childModelComboBoxModel.getSelectedItem();
   }
 
   private JPanel createPredefinedModelForm() {
@@ -124,14 +107,14 @@ public class OllamaModelPreferencesForm {
     quantizationHelpText.setBorder(JBUI.Borders.empty(0, 4));
 
     var modelComboBoxWrapper = new JPanel(new FlowLayout(FlowLayout.LEADING, 0, 0));
-    modelComboBoxWrapper.add(modelComboBox);
+    modelComboBoxWrapper.add(parentModelComboBox);
     modelComboBoxWrapper.add(Box.createHorizontalStrut(8));
     modelComboBoxWrapper.add(helpIcon);
     modelComboBoxWrapper.add(Box.createHorizontalStrut(4));
     modelComboBoxWrapper.add(updateModelListIcon);
 
     var huggingFaceModelComboBoxWrapper = new JPanel(new FlowLayout(FlowLayout.LEADING, 0, 0));
-    huggingFaceModelComboBoxWrapper.add(huggingFaceModelComboBox);
+    huggingFaceModelComboBoxWrapper.add(childModelComboBox);
     huggingFaceModelComboBoxWrapper.add(Box.createHorizontalStrut(8));
     huggingFaceModelComboBoxWrapper.add(modelDetailsLabel);
 
@@ -152,7 +135,7 @@ public class OllamaModelPreferencesForm {
         .getPanel();
   }
 
-  private String getHuggingFaceModelDetailsHtml(HuggingFaceModel model) {
+  private String getOllamaModelDetailsHtml(OllamaChildModel model) {
     int parameterSize = model.getParameterSize();
     int quantization = model.getQuantization();
 
@@ -171,15 +154,14 @@ public class OllamaModelPreferencesForm {
         + "</html>", details.fileSize, details.maxRAMRequired);
   }
 
-  private ComboBox<LlamaModel> createModelComboBox(
-      LlamaModelEnumComboBoxModel llamaModelEnumComboBoxModel,
-      LlamaModel llamaModel,
+  private ComboBox<OllamaModelParent> createModelComboBox(
+      OllamaParentModelComboBox ollamaParentModelComboBox,
       DefaultComboBoxModel<ModelSize> modelSizeComboBoxModel) {
-    var comboBox = new ComboBox<>(llamaModelEnumComboBoxModel);
+    var comboBox = new ComboBox<>(ollamaParentModelComboBox);
     comboBox.setPreferredSize(new Dimension(280, comboBox.getPreferredSize().height));
-    comboBox.setSelectedItem(llamaModel);
     comboBox.addItemListener(e -> {
-      var selectedModel = (LlamaModel) e.getItem();
+      var selectedModel = (OllamaModelParent) e.getItem();
+
       var modelSizes = selectedModel.getSortedUniqueModelSizes().stream()
           .map(ModelSize::new)
           .collect(toList());
@@ -189,30 +171,30 @@ public class OllamaModelPreferencesForm {
       modelSizeComboBoxModel.setSelectedItem(modelSizes.get(0));
       modelSizeComboBox.setEnabled(modelSizes.size() > 1);
 
-      var huggingFaceModels = selectedModel.getHuggingFaceModels().stream()
+      var huggingFaceModels = selectedModel.getChildrenModels().stream()
           .filter(model -> {
             var size = ((ModelSize) modelSizeComboBoxModel.getSelectedItem()).getSize();
             return size == model.getParameterSize();
           })
           .collect(toList());
 
-      huggingFaceComboBoxModel.removeAllElements();
-      huggingFaceComboBoxModel.addAll(huggingFaceModels);
-      huggingFaceComboBoxModel.setSelectedItem(huggingFaceModels.get(0));
+      childModelComboBoxModel.removeAllElements();
+      childModelComboBoxModel.addAll(huggingFaceModels);
+      childModelComboBoxModel.setSelectedItem(huggingFaceModels.get(0));
     });
     return comboBox;
   }
 
   private ComboBox<ModelSize> createModelSizeComboBox(
-      LlamaModelEnumComboBoxModel llamaModelComboBoxModel,
+      OllamaParentModelComboBox ollamaModelFamilyCheckBox,
       DefaultComboBoxModel<ModelSize> modelSizeComboBoxModel,
-      DefaultComboBoxModel<HuggingFaceModel> huggingFaceComboBoxModel) {
+      DefaultComboBoxModel<OllamaChildModel> huggingFaceComboBoxModel) {
     var comboBox = new ComboBox<>(modelSizeComboBoxModel);
-    comboBox.setPreferredSize(modelComboBox.getPreferredSize());
+    comboBox.setPreferredSize(parentModelComboBox.getPreferredSize());
     comboBox.setSelectedItem(modelSizeComboBoxModel.getSelectedItem());
     comboBox.addItemListener(e -> {
-      var selectedModel = llamaModelComboBoxModel.getSelectedItem();
-      var models = selectedModel.getHuggingFaceModels().stream()
+      var selectedModelFamily = ollamaModelFamilyCheckBox.getSelectedItem();
+      var models = selectedModelFamily.getChildrenModels().stream()
           .filter(model -> {
             var selectedModelSize = (ModelSize) modelSizeComboBoxModel.getSelectedItem();
             return selectedModelSize != null
@@ -228,14 +210,13 @@ public class OllamaModelPreferencesForm {
     return comboBox;
   }
 
-  private ComboBox<HuggingFaceModel> createHuggingFaceComboBox(
-      DefaultComboBoxModel<HuggingFaceModel> huggingFaceComboBoxModel, JBLabel modelDetailsLabel) {
-    var comboBox = new ComboBox<>(huggingFaceComboBoxModel);
+  private ComboBox<OllamaChildModel> createHuggingFaceComboBox(
+      DefaultComboBoxModel<OllamaChildModel> ollamaComboBoxModel, JBLabel modelDetailsLabel) {
+    var comboBox = new OllamaModelQuantizationComboBox(ollamaComboBoxModel);
     comboBox.addItemListener(e -> {
-      var selectedModel = (HuggingFaceModel) e.getItem();
-
+      var selectedModel = (OllamaChildModel) e.getItem();
       updateModelHelpTooltip(selectedModel);
-      modelDetailsLabel.setText(getHuggingFaceModelDetailsHtml(selectedModel));
+      modelDetailsLabel.setText(getOllamaModelDetailsHtml(selectedModel));
     });
     return comboBox;
   }
@@ -276,43 +257,39 @@ public class OllamaModelPreferencesForm {
       showModelUpdateHint(false);
       if (ollamaModelList.isEmpty()) {
         setEnabled(false);
-        modelComboBoxModel.updateList(Lists.newArrayList());
+        parentModelComboBoxModel.updateList(Lists.newArrayList());
         OverlayUtil.showBalloon(
             CodeGPTBundle.get("validation.error.noModelsAvailable"),
             MessageType.ERROR,
             loadModelsLink);
       } else {
-        modelComboBoxModel.updateList(mapOllamaModelsToLlamaModels(ollamaModelList));
+        parentModelComboBoxModel.updateList(mapOllamaModelsToModelFamilies(ollamaModelList));
       }
     });
   }
 
-  private List<LlamaModel> mapOllamaModelsToLlamaModels(List<OllamaModel> ollamaModelList) {
+  private List<OllamaModelParent> mapOllamaModelsToModelFamilies(
+      List<OllamaModel> ollamaModelList) {
     return ollamaModelList.stream()
-        .map(ollamaModel -> HuggingFaceModel.findByOllamaTag(ollamaModel.getName()))
-        // TODO: Dynamically fill checkboxes, OllamaModel.details
-        //  contains parametersize + quantization
-        .map(LlamaModel::findByHuggingFaceModel)
-        .distinct()
-        .collect(Collectors.toList());
+        .map(ollamaModel -> new OllamaModelParent(ollamaModel, ollamaModelList))
+        .distinct().collect(toList());
   }
 
-  private void updateModelHelpTooltip(HuggingFaceModel model) {
+  private void updateModelHelpTooltip(OllamaChildModel model) {
     helpIcon.setToolTipText(null);
-    var llamaModel = LlamaModel.findByHuggingFaceModel(model);
     new HelpTooltip()
-        .setTitle(llamaModel.getLabel())
-        .setDescription(llamaModel.getDescription())
+        .setTitle(model.getTag())
+        .setDescription("")
         .setBrowserLink(
             CodeGPTBundle.get("settingsConfigurable.service.llama.linkToModel.label"),
-            model.getHuggingFaceURL())
+            model.getModelLink())
         .installOn(helpIcon);
   }
 
   private void setEnabled(boolean enabled) {
-    modelComboBox.setEnabled(enabled);
+    parentModelComboBox.setEnabled(enabled);
     modelSizeComboBox.setEnabled(enabled);
-    huggingFaceModelComboBox.setEnabled(enabled);
+    childModelComboBox.setEnabled(enabled);
   }
 
   private void showModelUpdateHint(boolean show) {

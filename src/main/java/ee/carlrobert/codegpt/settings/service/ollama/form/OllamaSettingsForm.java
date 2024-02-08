@@ -26,7 +26,7 @@ public class OllamaSettingsForm extends JPanel {
     state.setRepeatPenalty(ollamaRequestPreferencesForm.getRepeatPenalty());
 
     var modelPreferencesForm = ollamaRequestPreferencesForm.getLlamaModelPreferencesForm();
-    state.setHuggingFaceModel(modelPreferencesForm.getSelectedModel());
+    state.setOllamaModel(modelPreferencesForm.getSelectedModel());
     return state;
   }
 
