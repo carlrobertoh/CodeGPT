@@ -2,8 +2,8 @@ package ee.carlrobert.codegpt.codecompletions;
 
 import static com.intellij.openapi.components.Service.Level.PROJECT;
 import static ee.carlrobert.codegpt.CodeGPTKeys.MULTI_LINE_INLAY;
+import static ee.carlrobert.codegpt.CodeGPTKeys.PREVIOUS_INLAY_TEXT;
 import static ee.carlrobert.codegpt.CodeGPTKeys.SINGLE_LINE_INLAY;
-import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
 import com.intellij.codeInsight.lookup.LookupManager;
@@ -31,6 +31,7 @@ import com.intellij.psi.PsiFile;
 import com.intellij.util.concurrency.annotations.RequiresEdt;
 import com.intellij.util.concurrency.annotations.RequiresReadLock;
 import com.intellij.util.concurrency.annotations.RequiresWriteLock;
+import ee.carlrobert.codegpt.CodeGPTKeys;
 import ee.carlrobert.codegpt.actions.CodeCompletionEnabledListener;
 import ee.carlrobert.codegpt.completions.CompletionRequestService;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
@@ -39,6 +40,8 @@ import java.awt.event.KeyEvent;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.PatternSyntaxException;
+import java.util.stream.Stream;
 import javax.annotation.ParametersAreNonnullByDefault;
 import javax.swing.KeyStroke;
 import org.jetbrains.annotations.NotNull;
@@ -51,30 +54,29 @@ public final class CodeCompletionService implements Disposable {
 
   private static final Logger LOG = Logger.getInstance(CodeCompletionService.class);
 
+  private final Project project;
   private final CallDebouncer callDebouncer;
 
   private CodeCompletionService(Project project) {
+    this.project = project;
     this.callDebouncer = new CallDebouncer(project);
-    ApplicationManager.getApplication()
-        .getMessageBus()
-        .connect()
-        .subscribe(
-            CodeCompletionEnabledListener.TOPIC,
-            (CodeCompletionEnabledListener) (completionsEnabled) -> {
-              if (!completionsEnabled) {
-                callDebouncer.cancelPreviousCall();
-              }
-            });
+
+    subscribeToFeatureToggleEvents();
   }
 
   public static CodeCompletionService getInstance(Project project) {
     return project.getService(CodeCompletionService.class);
   }
 
+  public void cancelPreviousCall() {
+    callDebouncer.cancelPreviousCall();
+  }
+
   public void handleCompletions(Editor editor, int offset) {
-    Project project = editor.getProject();
-    if (project == null
-        || project.isDisposed()
+    PREVIOUS_INLAY_TEXT.set(editor, null);
+
+    if (project.isDisposed()
+        || TypeOverHandler.getPendingTypeOverAndReset(editor)
         || !ConfigurationSettings.getCurrentState().isCodeCompletionsEnabled()
         || !EditorUtil.isSelectedEditor(editor)
         || LookupManager.getActiveLookup(editor) != null
@@ -90,6 +92,11 @@ public final class CodeCompletionService implements Disposable {
     }
 
     var request = InfillRequestDetails.fromDocumentWithMaxOffset(document, offset);
+    if (Stream.of(request.getSuffix(), request.getPrefix())
+        .anyMatch(item -> item == null || item.isEmpty())) {
+      return;
+    }
+
     callDebouncer.debounce(
         Void.class,
         (progressIndicator) -> CompletionRequestService.getInstance().getCodeCompletionAsync(
@@ -101,9 +108,15 @@ public final class CodeCompletionService implements Disposable {
 
   @RequiresEdt
   public void addInlays(Editor editor, int caretOffset, String inlayText) {
+    PREVIOUS_INLAY_TEXT.set(editor, inlayText);
+
+    if (LookupManager.getActiveLookup(editor) != null || inlayText.isBlank()) {
+      return;
+    }
+
     List<String> linesList = inlayText.lines().collect(toList());
-    String firstLine = linesList.get(0);
-    String restOfLines = linesList.size() > 1
+    var firstLine = linesList.get(0);
+    var restOfLines = linesList.size() > 1
         ? String.join("\n", linesList.subList(1, linesList.size()))
         : null;
     InlayModel inlayModel = editor.getInlayModel();
@@ -126,7 +139,7 @@ public final class CodeCompletionService implements Disposable {
     }
 
     registerApplyCompletionAction(() -> WriteCommandAction.runWriteCommandAction(
-        editor.getProject(),
+        project,
         () -> applyCompletion(editor, inlayText)));
   }
 
@@ -146,19 +159,20 @@ public final class CodeCompletionService implements Disposable {
         return;
       }
     }
+    editor.putUserData(CodeGPTKeys.PREVIOUS_INLAY_TEXT, null);
   }
 
   @RequiresWriteLock
   private void applyCompletion(Editor editor, String text, int offset) {
     Document document = editor.getDocument();
-    document.insertString(offset, text);
+    try {
+      document.insertString(offset, text);
+    } catch (PatternSyntaxException e) {
+      // ignore
+    }
     editor.getCaretModel().moveToOffset(offset + text.length());
     if (ConfigurationSettings.getCurrentState().isAutoFormattingEnabled()) {
-      EditorUtil.reformatDocument(
-          requireNonNull(editor.getProject()),
-          document,
-          offset,
-          offset + text.length());
+      EditorUtil.reformatDocument(project, document, offset, offset + text.length());
     }
   }
 
@@ -199,5 +213,18 @@ public final class CodeCompletionService implements Disposable {
     KeymapManager.getInstance().getActiveKeymap().addShortcut(
         APPLY_INLAY_ACTION_ID,
         new KeyboardShortcut(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), null));
+  }
+
+  private void subscribeToFeatureToggleEvents() {
+    ApplicationManager.getApplication()
+        .getMessageBus()
+        .connect(this)
+        .subscribe(
+            CodeCompletionEnabledListener.TOPIC,
+            (CodeCompletionEnabledListener) (completionsEnabled) -> {
+              if (!completionsEnabled) {
+                cancelPreviousCall();
+              }
+            });
   }
 }

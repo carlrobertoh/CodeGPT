@@ -11,8 +11,8 @@ import org.jetbrains.annotations.NotNull;
 public class OpenSettingsAction extends AnAction {
 
   public OpenSettingsAction() {
-    super(CodeGPTBundle.get("action.opensettings.title"),
-        CodeGPTBundle.get("action.opensettings.description"),
+    super(CodeGPTBundle.get("action.openSettings.title"),
+        CodeGPTBundle.get("action.openSettings.description"),
         General.Settings);
   }
 

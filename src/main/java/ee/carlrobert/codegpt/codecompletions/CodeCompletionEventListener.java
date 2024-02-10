@@ -1,10 +1,10 @@
 package ee.carlrobert.codegpt.codecompletions;
 
+import static ee.carlrobert.codegpt.CodeGPTKeys.PREVIOUS_INLAY_TEXT;
 import static java.util.Objects.requireNonNull;
 
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator;
@@ -13,7 +13,9 @@ import ee.carlrobert.codegpt.actions.OpenSettingsAction;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.completion.CompletionEventListener;
+import java.io.IOException;
 import javax.annotation.ParametersAreNonnullByDefault;
+import javax.swing.SwingUtilities;
 import org.jetbrains.annotations.Nullable;
 
 @ParametersAreNonnullByDefault
@@ -40,18 +42,26 @@ class CodeCompletionEventListener implements CompletionEventListener<String> {
       progressIndicator.processFinish();
     }
 
+    PREVIOUS_INLAY_TEXT.set(editor, messageBuilder.toString());
     CodeGPTEditorManager.getInstance().disposeEditorInlays(editor);
-
-    var inlayText = messageBuilder.toString();
-    if (!inlayText.isEmpty()) {
-      ApplicationManager.getApplication().invokeLater(() ->
+    SwingUtilities.invokeLater(() -> {
+      if (editor.getCaretModel().getOffset() == caretOffset) {
+        var inlayText = messageBuilder.toString();
+        if (!inlayText.isEmpty()) {
           CodeCompletionService.getInstance(requireNonNull(editor.getProject()))
-              .addInlays(editor, caretOffset, inlayText));
-    }
+              .addInlays(editor, caretOffset, inlayText);
+        }
+      }
+    });
   }
 
   @Override
   public void onError(ErrorDetails error, Throwable ex) {
+    // TODO: temp fix
+    if (ex instanceof IOException && "Canceled".equals(error.getMessage())) {
+      return;
+    }
+
     LOG.error(error.getMessage(), ex);
     if (progressIndicator != null) {
       progressIndicator.processFinish();
@@ -66,7 +76,7 @@ class CodeCompletionEventListener implements CompletionEventListener<String> {
 
   @Override
   public void onCancelled(StringBuilder messageBuilder) {
-    LOG.info("Completion cancelled");
+    LOG.debug("Completion cancelled");
     if (progressIndicator != null) {
       progressIndicator.processFinish();
     }

@@ -29,7 +29,7 @@ public class CodeCompletionServiceTest extends IntegrationTest {
         getResourceContent("/codecompletions/code-completion-file.txt"));
     Editor editor = myFixture.getEditor();
     var expectedCompletion = "TEST_SINGLE_LINE_OUTPUT\nTEST_MULTI_LINE_OUTPUT";
-    var prefix = "z".repeat(247) + "\n[INPUT]\n"; // 128 tokens
+    var prefix = "z".repeat(245) + "\n[INPUT]\nc"; // 128 tokens
     var suffix = "\n[\\INPUT]\n" + "z".repeat(247); // 128 tokens
     expectLlama((StreamHttpExchange) request -> {
       assertThat(request.getUri().getPath()).isEqualTo("/completion");
@@ -39,8 +39,9 @@ public class CodeCompletionServiceTest extends IntegrationTest {
           .isEqualTo(InfillPromptTemplate.LLAMA.buildPrompt(prefix, suffix));
       return List.of(jsonMapResponse(e("content", expectedCompletion), e("stop", true)));
     });
-
     editor.getCaretModel().moveToVisualPosition(cursorPosition);
+
+    myFixture.type('c');
 
     PlatformTestUtil.waitWithEventsDispatching(
         "Editor inlay assertions failed",
