@@ -58,7 +58,7 @@ dependencies {
   }
   implementation("org.jsoup:jsoup:1.17.2")
   implementation("org.apache.commons:commons-text:1.11.0")
-  implementation("com.knuddels:jtokkit:0.6.1")
+  implementation("com.knuddels:jtokkit:1.0.0")
 
   testImplementation("org.assertj:assertj-core:3.25.3")
   testImplementation("org.awaitility:awaitility:4.2.0")
