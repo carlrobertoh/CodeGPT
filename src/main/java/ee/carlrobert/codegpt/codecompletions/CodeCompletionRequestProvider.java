@@ -2,8 +2,12 @@ package ee.carlrobert.codegpt.codecompletions;
 
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
+import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
+import ee.carlrobert.codegpt.settings.service.openai.OpenAISettingsState;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
-import ee.carlrobert.llm.client.openai.completion.request.OpenAITextCompletionRequest;
+import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
+import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
+import java.util.List;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault
@@ -17,12 +21,17 @@ public class CodeCompletionRequestProvider {
     this.details = details;
   }
 
-  public OpenAITextCompletionRequest buildOpenAIRequest() {
-    return new OpenAITextCompletionRequest.Builder(details.getPrefix())
-        .setSuffix(details.getSuffix())
+  public OpenAIChatCompletionRequest buildOpenAIRequest() {
+    String prompt = InfillPromptTemplate.OPENAI.buildPrompt(details.getPrefix(),
+        details.getSuffix());
+    OpenAISettingsState settings = OpenAISettings.getCurrentState();
+    return new OpenAIChatCompletionRequest.Builder(
+        List.of(new OpenAIChatCompletionMessage("user", prompt)))
+        .setModel(settings.getModel())
         .setStream(true)
         .setMaxTokens(MAX_TOKENS)
         .setTemperature(0.1)
+        .setOverriddenPath(settings.isUsingCustomPath() ? settings.getPath() : null)
         .build();
   }
 
