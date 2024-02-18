@@ -35,6 +35,6 @@ public class YouSettings implements PersistentStateComponent<YouSettingsState> {
   public boolean isModified(YouSettingsForm form) {
     var password = YouCredentialManager.getInstance().getCredential();
     return !form.getCurrentState().equals(state)
-        || !StringUtils.equals(form.getPassword(), password);
+        || (!form.getEmail().isEmpty() && !StringUtils.equals(form.getPassword(), password));
   }
 }

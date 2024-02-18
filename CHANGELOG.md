@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Support for custom OpenAI model configuration
 
+### Fixed
+
+- General Settings isModified state
+
 ## [2.3.0] - 2024-02-14
 
 ### Added
