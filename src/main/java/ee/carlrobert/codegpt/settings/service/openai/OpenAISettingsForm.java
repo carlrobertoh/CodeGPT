@@ -14,8 +14,6 @@ import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import javax.annotation.Nullable;
 import javax.swing.JPanel;
 import javax.swing.event.DocumentEvent;
@@ -23,61 +21,61 @@ import org.jetbrains.annotations.NotNull;
 
 public class OpenAISettingsForm {
 
-  private final JBPasswordField openAIApiKeyField;
-  private final JBTextField openAICustomModelField;
-  private final JBTextField openAIBaseHostField;
-  private final JBTextField openAIPathField;
-  private final JBTextField openAIOrganizationField;
-  private final ComboBox<OpenAIChatCompletionModel> openAICompletionModelComboBox;
+  private final JBPasswordField apiKeyField;
+  private final JBTextField customModelField;
+  private final JBTextField baseHostField;
+  private final JBTextField pathField;
+  private final JBTextField organizationField;
+  private final ComboBox<OpenAIChatCompletionModel> completionModelComboBox;
 
   public OpenAISettingsForm(OpenAISettingsState settings) {
-    openAIApiKeyField = new JBPasswordField();
-    openAIApiKeyField.setColumns(30);
-    openAIApiKeyField.setText(OpenAICredentialManager.getInstance().getCredential());
-    openAIBaseHostField = new JBTextField(settings.getBaseHost(), 30);
-    openAIPathField = new JBTextField(settings.getPath(), 30);
-    openAIOrganizationField = new JBTextField(settings.getOrganization(), 30);
-    openAICompletionModelComboBox = new ComboBox<>(
+    apiKeyField = new JBPasswordField();
+    apiKeyField.setColumns(30);
+    apiKeyField.setText(OpenAICredentialManager.getInstance().getCredential());
+    completionModelComboBox = new ComboBox<>(
         new EnumComboBoxModel<>(OpenAIChatCompletionModel.class));
-    openAICompletionModelComboBox.setEnabled(settings.getCustomModel().isEmpty());
-    openAICompletionModelComboBox.setSelectedItem(
+    completionModelComboBox.setEnabled(settings.getCustomModel().isEmpty());
+    completionModelComboBox.setSelectedItem(
         OpenAIChatCompletionModel.findByCode(settings.getModel()));
-    openAICustomModelField = new JBTextField(settings.getCustomModel(), 20);
-    openAICustomModelField.getDocument().addDocumentListener(new DocumentAdapter() {
+    customModelField = new JBTextField(settings.getCustomModel(), 20);
+    customModelField.getDocument().addDocumentListener(new DocumentAdapter() {
       @Override
       protected void textChanged(@NotNull DocumentEvent e) {
-        openAICompletionModelComboBox.setEnabled(openAICustomModelField.getText().isEmpty());
+        completionModelComboBox.setEnabled(customModelField.getText().isEmpty());
       }
     });
+    baseHostField = new JBTextField(settings.getBaseHost(), 30);
+    pathField = new JBTextField(settings.getPath(), 30);
+    organizationField = new JBTextField(settings.getOrganization(), 30);
   }
 
   public JPanel getForm() {
     var requestConfigurationPanel = UI.PanelFactory.grid()
-        .add(UI.PanelFactory.panel(openAICompletionModelComboBox)
+        .add(UI.PanelFactory.panel(completionModelComboBox)
             .withLabel(CodeGPTBundle.get(
                 "settingsConfigurable.shared.model.label"))
             .resizeX(false))
-        .add(UI.PanelFactory.panel(openAICustomModelField)
+        .add(UI.PanelFactory.panel(customModelField)
             .withLabel(CodeGPTBundle.get(
                 "settingsConfigurable.service.openai.customModel.label"))
             .resizeX(false))
-        .add(UI.PanelFactory.panel(openAIOrganizationField)
+        .add(UI.PanelFactory.panel(organizationField)
             .withLabel(CodeGPTBundle.get(
                 "settingsConfigurable.service.openai.organization.label"))
             .resizeX(false)
             .withComment(CodeGPTBundle.get(
                 "settingsConfigurable.section.openai.organization.comment")))
-        .add(UI.PanelFactory.panel(openAIBaseHostField)
+        .add(UI.PanelFactory.panel(baseHostField)
             .withLabel(CodeGPTBundle.get(
                 "settingsConfigurable.shared.baseHost.label"))
             .resizeX(false))
-        .add(UI.PanelFactory.panel(openAIPathField)
+        .add(UI.PanelFactory.panel(pathField)
             .withLabel(CodeGPTBundle.get(
                 "settingsConfigurable.shared.path.label"))
             .resizeX(false))
         .createPanel();
 
-    var apiKeyFieldPanel = UI.PanelFactory.panel(openAIApiKeyField)
+    var apiKeyFieldPanel = UI.PanelFactory.panel(apiKeyField)
         .withLabel(CodeGPTBundle.get("settingsConfigurable.shared.apiKey.label"))
         .resizeX(false)
         .withComment(
@@ -97,34 +95,34 @@ public class OpenAISettingsForm {
   }
 
   public @Nullable String getApiKey() {
-    var apiKey = new String(openAIApiKeyField.getPassword());
+    var apiKey = new String(apiKeyField.getPassword());
     return apiKey.isEmpty() ? null : apiKey;
   }
 
   public String getModel() {
-    return ((OpenAIChatCompletionModel) (openAICompletionModelComboBox.getModel()
+    return ((OpenAIChatCompletionModel) (completionModelComboBox.getModel()
         .getSelectedItem()))
         .getCode();
   }
 
   public OpenAISettingsState getCurrentState() {
     var state = new OpenAISettingsState();
-    state.setOrganization(openAIOrganizationField.getText());
-    state.setBaseHost(openAIBaseHostField.getText());
-    state.setPath(openAIPathField.getText());
-    state.setCustomModel(openAICustomModelField.getText());
     state.setModel(getModel());
+    state.setCustomModel(customModelField.getText());
+    state.setOrganization(organizationField.getText());
+    state.setBaseHost(baseHostField.getText());
+    state.setPath(pathField.getText());
     return state;
   }
 
   public void resetForm() {
     var state = OpenAISettings.getCurrentState();
-    openAIApiKeyField.setText(OpenAICredentialManager.getInstance().getCredential());
-    openAIOrganizationField.setText(state.getOrganization());
-    openAICustomModelField.setText(state.getCustomModel());
-    openAIBaseHostField.setText(state.getBaseHost());
-    openAIPathField.setText(state.getPath());
-    openAICompletionModelComboBox.setSelectedItem(
+    apiKeyField.setText(OpenAICredentialManager.getInstance().getCredential());
+    completionModelComboBox.setSelectedItem(
         OpenAIChatCompletionModel.findByCode(state.getModel()));
+    customModelField.setText(state.getCustomModel());
+    organizationField.setText(state.getOrganization());
+    baseHostField.setText(state.getBaseHost());
+    pathField.setText(state.getPath());
   }
 }
