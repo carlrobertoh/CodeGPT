@@ -11,6 +11,7 @@ public class OpenAISettingsState {
   private String baseHost = "https://api.openai.com";
   private String path = BASE_PATH;
   private String model = OpenAIChatCompletionModel.GPT_3_5.getCode();
+  private String customModel = "";
 
   public boolean isUsingCustomPath() {
     return !BASE_PATH.equals(path);
@@ -32,6 +33,14 @@ public class OpenAISettingsState {
     this.baseHost = openAIBaseHost;
   }
 
+  public String getPath() {
+    return path;
+  }
+
+  public void setPath(String path) {
+    this.path = path;
+  }
+
   public String getModel() {
     return model;
   }
@@ -40,12 +49,12 @@ public class OpenAISettingsState {
     this.model = model;
   }
 
-  public String getPath() {
-    return path;
+  public String getCustomModel() {
+    return customModel;
   }
 
-  public void setPath(String path) {
-    this.path = path;
+  public void setCustomModel(String customModel) {
+    this.customModel = customModel;
   }
 
   @Override
@@ -60,11 +69,12 @@ public class OpenAISettingsState {
     return Objects.equals(organization, that.organization)
         && Objects.equals(baseHost, that.baseHost)
         && Objects.equals(path, that.path)
-        && Objects.equals(model, that.model);
+        && Objects.equals(model, that.model)
+        && Objects.equals(customModel, that.customModel);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(organization, baseHost, path, model);
+    return Objects.hash(organization, baseHost, path, model, customModel);
   }
 }

@@ -40,9 +40,10 @@ public final class CompletionRequestService {
     switch (GeneralSettings.getCurrentState().getSelectedService()) {
       case OPENAI:
         var openAISettings = OpenAISettings.getCurrentState();
+        var customModel = openAISettings.getCustomModel();
         return CompletionClientProvider.getOpenAIClient().getChatCompletionAsync(
             requestProvider.buildOpenAIChatCompletionRequest(
-                openAISettings.getModel(),
+                customModel.trim().isEmpty() ? openAISettings.getModel() : customModel,
                 callParameters,
                 useContextualSearch,
                 openAISettings.isUsingCustomPath() ? openAISettings.getPath() : null),

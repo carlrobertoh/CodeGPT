@@ -56,13 +56,22 @@ public class ModelComboBoxAction extends ComboBoxAction {
     var presentation = ((ComboBoxButton) button).getPresentation();
     var actionGroup = new DefaultActionGroup();
     actionGroup.addSeparator("OpenAI");
-    List.of(
-            OpenAIChatCompletionModel.GPT_4_0125_128k,
-            OpenAIChatCompletionModel.GPT_3_5_0125_16k,
-            OpenAIChatCompletionModel.GPT_4_32k,
-            OpenAIChatCompletionModel.GPT_4,
-            OpenAIChatCompletionModel.GPT_3_5)
-        .forEach(model -> actionGroup.add(createOpenAIModelAction(model, presentation)));
+    var settings = OpenAISettings.getCurrentState();
+    if (settings.getCustomModel().isEmpty()) {
+      List.of(
+              OpenAIChatCompletionModel.GPT_4_0125_128k,
+              OpenAIChatCompletionModel.GPT_3_5_0125_16k,
+              OpenAIChatCompletionModel.GPT_4_32k,
+              OpenAIChatCompletionModel.GPT_4,
+              OpenAIChatCompletionModel.GPT_3_5)
+          .forEach(model -> actionGroup.add(createOpenAIModelAction(model, presentation)));
+    } else {
+      actionGroup.add(createModelAction(
+          ServiceType.OPENAI,
+          settings.getCustomModel(),
+          Icons.OpenAI,
+          presentation));
+    }
     actionGroup.addSeparator();
     actionGroup.add(
         createModelAction(ServiceType.AZURE, "Azure OpenAI", Icons.Azure, presentation));
@@ -87,8 +96,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
     switch (selectedService) {
       case OPENAI:
         templatePresentation.setIcon(Icons.OpenAI);
-        templatePresentation.setText(
-            OpenAIChatCompletionModel.findByCode(openAISettings.getModel()).getDescription());
+        templatePresentation.setText(getOpenAiPresentationText());
         break;
       case AZURE:
         templatePresentation.setIcon(Icons.Azure);
@@ -104,6 +112,14 @@ public class ModelComboBoxAction extends ComboBoxAction {
         break;
       default:
     }
+  }
+
+  private String getOpenAiPresentationText() {
+    var settings = OpenAISettings.getCurrentState();
+    if (settings.getCustomModel().isEmpty()) {
+      return OpenAIChatCompletionModel.findByCode(openAISettings.getModel()).getDescription();
+    }
+    return settings.getCustomModel();
   }
 
   private String getLlamaCppPresentationText() {

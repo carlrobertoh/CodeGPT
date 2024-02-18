@@ -3,6 +3,7 @@ package ee.carlrobert.codegpt.settings.service.openai;
 import static ee.carlrobert.codegpt.ui.UIUtil.withEmptyLeftBorder;
 
 import com.intellij.openapi.ui.ComboBox;
+import com.intellij.ui.DocumentAdapter;
 import com.intellij.ui.EnumComboBoxModel;
 import com.intellij.ui.TitledSeparator;
 import com.intellij.ui.components.JBPasswordField;
@@ -13,12 +14,17 @@ import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import javax.annotation.Nullable;
 import javax.swing.JPanel;
+import javax.swing.event.DocumentEvent;
+import org.jetbrains.annotations.NotNull;
 
 public class OpenAISettingsForm {
 
   private final JBPasswordField openAIApiKeyField;
+  private final JBTextField openAICustomModelField;
   private final JBTextField openAIBaseHostField;
   private final JBTextField openAIPathField;
   private final JBTextField openAIOrganizationField;
@@ -33,8 +39,16 @@ public class OpenAISettingsForm {
     openAIOrganizationField = new JBTextField(settings.getOrganization(), 30);
     openAICompletionModelComboBox = new ComboBox<>(
         new EnumComboBoxModel<>(OpenAIChatCompletionModel.class));
+    openAICompletionModelComboBox.setEnabled(settings.getCustomModel().isEmpty());
     openAICompletionModelComboBox.setSelectedItem(
         OpenAIChatCompletionModel.findByCode(settings.getModel()));
+    openAICustomModelField = new JBTextField(settings.getCustomModel(), 20);
+    openAICustomModelField.getDocument().addDocumentListener(new DocumentAdapter() {
+      @Override
+      protected void textChanged(@NotNull DocumentEvent e) {
+        openAICompletionModelComboBox.setEnabled(openAICustomModelField.getText().isEmpty());
+      }
+    });
   }
 
   public JPanel getForm() {
@@ -42,6 +56,10 @@ public class OpenAISettingsForm {
         .add(UI.PanelFactory.panel(openAICompletionModelComboBox)
             .withLabel(CodeGPTBundle.get(
                 "settingsConfigurable.shared.model.label"))
+            .resizeX(false))
+        .add(UI.PanelFactory.panel(openAICustomModelField)
+            .withLabel(CodeGPTBundle.get(
+                "settingsConfigurable.service.openai.customModel.label"))
             .resizeX(false))
         .add(UI.PanelFactory.panel(openAIOrganizationField)
             .withLabel(CodeGPTBundle.get(
@@ -94,6 +112,7 @@ public class OpenAISettingsForm {
     state.setOrganization(openAIOrganizationField.getText());
     state.setBaseHost(openAIBaseHostField.getText());
     state.setPath(openAIPathField.getText());
+    state.setCustomModel(openAICustomModelField.getText());
     state.setModel(getModel());
     return state;
   }
@@ -102,6 +121,7 @@ public class OpenAISettingsForm {
     var state = OpenAISettings.getCurrentState();
     openAIApiKeyField.setText(OpenAICredentialManager.getInstance().getCredential());
     openAIOrganizationField.setText(state.getOrganization());
+    openAICustomModelField.setText(state.getCustomModel());
     openAIBaseHostField.setText(state.getBaseHost());
     openAIPathField.setText(state.getPath());
     openAICompletionModelComboBox.setSelectedItem(
