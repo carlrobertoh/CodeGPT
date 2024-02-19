@@ -121,9 +121,9 @@ public class CodeCompletionListenerBinder implements Disposable {
         var project = editor.getProject();
         if (project != null) {
           var codeCompletionService = CodeCompletionService.getInstance(project);
-          var caretOffset = event.getOffset() + event.getNewLength();
-          var charTyped = event.getNewFragment().toString().trim();
           SwingUtilities.invokeLater(() -> {
+            var caretOffset = editor.getCaretModel().getOffset();
+            var charTyped = event.getNewFragment().toString().trim();
             if (isTypingAsSuggested(charTyped)) {
               try {
                 var previousInlayText = PREVIOUS_INLAY_TEXT.get(editor).replaceFirst(charTyped, "");
