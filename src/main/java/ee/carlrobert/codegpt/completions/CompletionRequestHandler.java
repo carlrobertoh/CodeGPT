@@ -1,7 +1,8 @@
 package ee.carlrobert.codegpt.completions;
 
 import com.intellij.openapi.diagnostic.Logger;
-import ee.carlrobert.codegpt.settings.state.SettingsState;
+import ee.carlrobert.codegpt.settings.GeneralSettings;
+import ee.carlrobert.codegpt.settings.GeneralSettingsState;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.client.you.completion.YouCompletionEventListener;
@@ -42,7 +43,7 @@ public class CompletionRequestHandler {
 
   private EventSource startCall(
       CallParameters callParameters,
-      CompletionEventListener eventListener) {
+      CompletionEventListener<String> eventListener) {
     try {
       return CompletionRequestService.getInstance()
           .getChatCompletionAsync(callParameters, useContextualSearch, eventListener);
@@ -71,7 +72,7 @@ public class CompletionRequestHandler {
     }
 
     protected Void doInBackground() {
-      var settings = SettingsState.getInstance();
+      var settings = GeneralSettings.getCurrentState();
       try {
         eventSource = startCall(callParameters, new YouRequestCompletionEventListener());
       } catch (TotalUsageExceededException e) {
@@ -110,6 +111,11 @@ public class CompletionRequestHandler {
       }
 
       @Override
+      public void onCancelled(StringBuilder messageBuilder) {
+        completionResponseEventListener.handleCompleted(messageBuilder.toString(), callParameters);
+      }
+
+      @Override
       public void onError(ErrorDetails error, Throwable ex) {
         try {
           completionResponseEventListener.handleError(error, ex);
@@ -119,7 +125,7 @@ public class CompletionRequestHandler {
       }
     }
 
-    private void sendInfo(SettingsState settings) {
+    private void sendInfo(GeneralSettingsState settings) {
       TelemetryAction.COMPLETION.createActionMessage()
           .property("conversationId", callParameters.getConversation().getId().toString())
           .property("model", callParameters.getConversation().getModel())

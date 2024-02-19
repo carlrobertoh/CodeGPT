@@ -25,9 +25,9 @@ import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.completions.CompletionRequestService;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
-import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
+import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
+import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
-import ee.carlrobert.codegpt.settings.state.SettingsState;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.completion.CompletionEventListener;
@@ -53,11 +53,11 @@ public class GenerateGitCommitMessageAction extends AnAction {
 
   @Override
   public void update(@NotNull AnActionEvent event) {
-    var selectedService = SettingsState.getInstance().getSelectedService();
+    var selectedService = GeneralSettings.getCurrentState().getSelectedService();
     if (selectedService == ServiceType.OPENAI || selectedService == ServiceType.AZURE) {
       var filesSelected = !getReferencedFilePaths(event).isEmpty();
       var callAllowed = (selectedService == ServiceType.OPENAI
-          && OpenAICredentialsManager.getInstance().isApiKeySet())
+          && OpenAICredentialManager.getInstance().isCredentialSet())
           || (selectedService == ServiceType.AZURE
           && AzureCredentialsManager.getInstance().isCredentialSet());
       event.getPresentation().setEnabled(callAllowed && filesSelected);
@@ -92,8 +92,8 @@ public class GenerateGitCommitMessageAction extends AnAction {
     }
   }
 
-  private CompletionEventListener getEventListener(Project project, Document document) {
-    return new CompletionEventListener() {
+  private CompletionEventListener<String> getEventListener(Project project, Document document) {
+    return new CompletionEventListener<>() {
       private final StringBuilder messageBuilder = new StringBuilder();
 
       @Override

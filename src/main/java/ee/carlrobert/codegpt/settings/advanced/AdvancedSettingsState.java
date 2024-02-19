@@ -1,18 +1,9 @@
 package ee.carlrobert.codegpt.settings.advanced;
 
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.components.PersistentStateComponent;
-import com.intellij.openapi.components.State;
-import com.intellij.openapi.components.Storage;
-import com.intellij.util.xmlb.XmlSerializerUtil;
 import java.net.Proxy;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import java.util.Objects;
 
-@State(
-    name = "CodeGPT_AdvancedSettings_210",
-    storages = @Storage("CodeGPT_AdvancedSettings_210.xml"))
-public class AdvancedSettingsState implements PersistentStateComponent<AdvancedSettingsState> {
+public class AdvancedSettingsState {
 
   private String proxyHost = "";
   private int proxyPort;
@@ -22,21 +13,6 @@ public class AdvancedSettingsState implements PersistentStateComponent<AdvancedS
   private String proxyPassword;
   private int connectTimeout = 30;
   private int readTimeout = 30;
-
-  public static AdvancedSettingsState getInstance() {
-    return ApplicationManager.getApplication().getService(AdvancedSettingsState.class);
-  }
-
-  @Nullable
-  @Override
-  public AdvancedSettingsState getState() {
-    return this;
-  }
-
-  @Override
-  public void loadState(@NotNull AdvancedSettingsState state) {
-    XmlSerializerUtil.copyBean(state, this);
-  }
 
   public String getProxyHost() {
     return proxyHost;
@@ -100,5 +76,30 @@ public class AdvancedSettingsState implements PersistentStateComponent<AdvancedS
 
   public void setReadTimeout(int readTimeout) {
     this.readTimeout = readTimeout;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof AdvancedSettingsState)) {
+      return false;
+    }
+    AdvancedSettingsState that = (AdvancedSettingsState) o;
+    return getProxyPort() == that.getProxyPort()
+        && isProxyAuthSelected() == that.isProxyAuthSelected()
+        && getConnectTimeout() == that.getConnectTimeout()
+        && getReadTimeout() == that.getReadTimeout()
+        && Objects.equals(getProxyHost(), that.getProxyHost())
+        && getProxyType() == that.getProxyType()
+        && Objects.equals(getProxyUsername(), that.getProxyUsername())
+        && Objects.equals(getProxyPassword(), that.getProxyPassword());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(getProxyHost(), getProxyPort(), getProxyType(), isProxyAuthSelected(),
+        getProxyUsername(), getProxyPassword(), getConnectTimeout(), getReadTimeout());
   }
 }

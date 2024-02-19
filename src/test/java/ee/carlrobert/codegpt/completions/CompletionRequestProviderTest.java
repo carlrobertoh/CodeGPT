@@ -11,9 +11,9 @@ import static org.assertj.core.groups.Tuple.tuple;
 
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
-import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
-import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
-import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
+import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
+import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
+import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.llm.client.http.ResponseEntity;
 import ee.carlrobert.llm.client.http.exchange.BasicHttpExchange;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
@@ -24,9 +24,9 @@ import testsupport.IntegrationTest;
 public class CompletionRequestProviderTest extends IntegrationTest {
 
   public void testChatCompletionRequestWithSystemPromptOverride() {
-    OpenAICredentialsManager.getInstance().setApiKey("TEST_API_KEY");
-    OpenAISettingsState.getInstance().setBaseHost(null);
-    ConfigurationState.getInstance().setSystemPrompt("TEST_SYSTEM_PROMPT");
+    OpenAICredentialManager.getInstance().setCredential("TEST_API_KEY");
+    OpenAISettings.getCurrentState().setBaseHost(null);
+    ConfigurationSettings.getCurrentState().setSystemPrompt("TEST_SYSTEM_PROMPT");
     var conversation = ConversationService.getInstance().startConversation();
     var firstMessage = createDummyMessage(500);
     var secondMessage = createDummyMessage(250);
@@ -85,7 +85,7 @@ public class CompletionRequestProviderTest extends IntegrationTest {
   }
 
   public void testChatCompletionRequestRetry() {
-    ConfigurationState.getInstance().setSystemPrompt(COMPLETION_SYSTEM_PROMPT);
+    ConfigurationSettings.getCurrentState().setSystemPrompt(COMPLETION_SYSTEM_PROMPT);
     var conversation = ConversationService.getInstance().startConversation();
     var firstMessage = createDummyMessage("FIRST_TEST_PROMPT", 500);
     var secondMessage = createDummyMessage("SECOND_TEST_PROMPT", 250);

@@ -6,6 +6,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.0] - 2024-02-14
+
+### Added
+
+- Support for autocompletion (disabled by default)
+- Support for auto resolving compilation errors
+
+### Replaced
+
+- OpenAI chat models with the most recent ones
+- CodeGPT header key
+
 ## [2.2.12] - 2023-12-21
 
 ### Added
@@ -329,7 +341,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `OPENAI_API_KEY` persistence, key is saved in the OS password safe from now on
 
-[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.12...HEAD
+[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.3.0...HEAD
+[2.3.0]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.12...v2.3.0
 [2.2.12]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.11...v2.2.12
 [2.2.11]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.10...v2.2.11
 [2.2.10]: https://github.com/carlrobertoh/CodeGPT/compare/v2.2.9...v2.2.10

@@ -13,8 +13,8 @@
 
 [![Downloads][downloads-shield]][plugin-repo]
 [![Rating][Rating-shield]][plugin-repo]
+[![Discord][discord-shield]][invite-link]
 [![Version][version-shield]][plugin-repo]
-[![Contributions welcome][contributions-welcome-svg]][contributions-welcome]
 
 <!-- TABLE OF CONTENTS -->
 <details>
@@ -164,6 +164,11 @@ git submodule update
 ./gradlew runIde -Penv=win-arm64
 ```
 
+**Tailing logs**
+```shell
+tail -f build/idea-sandbox/system/log/idea.log
+```
+
 ## Issues
 
 See the [open issues][open-issues] for a full list of proposed features (and known issues).
@@ -180,12 +185,12 @@ If you found this project interesting, kindly rate it on the marketplace and don
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 
 [downloads-shield]: https://img.shields.io/jetbrains/plugin/d/21056-codegpt
+[discord-shield]: https://img.shields.io/discord/1118629761049182238?style=flat&logo=discord&label=Discord
 [version-shield]: https://img.shields.io/jetbrains/plugin/v/21056-codegpt?label=version
 [rating-shield]: https://img.shields.io/jetbrains/plugin/r/rating/21056-codegpt
-[contributions-welcome-svg]: http://img.shields.io/badge/contributions-welcome-brightgreen
-[contributions-welcome]: #
 [marketplace-img]: https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/marketplace.png?raw=true
 [plugin-repo]: https://plugins.jetbrains.com/plugin/21056-codegpt
+[invite-link]: https://discord.gg/8dTGGrwcnR
 [open-issues]: https://github.com/carlrobertoh/CodeGPT/issues
 [api-key-url]: https://platform.openai.com/account/api-keys
 [portfolio]: https://carlrobert.ee

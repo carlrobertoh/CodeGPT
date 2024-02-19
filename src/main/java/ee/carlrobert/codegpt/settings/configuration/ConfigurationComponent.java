@@ -68,7 +68,8 @@ public class ConfigurationComponent {
     temperatureField = new JBTextField(12);
     temperatureField.setText(String.valueOf(configuration.getTemperature()));
 
-    var temperatureFieldValidator = createInputValidator(parentDisposable, temperatureField);
+    var temperatureFieldValidator = createTemperatureInputValidator(parentDisposable,
+        temperatureField);
     temperatureField.getDocument().addDocumentListener(new DocumentListener() {
       @Override
       public void insertUpdate(DocumentEvent e) {
@@ -102,7 +103,8 @@ public class ConfigurationComponent {
     systemPromptTextArea.setColumns(60);
     systemPromptTextArea.setRows(3);
 
-    commitMessagePromptTextArea = new JBTextArea(configuration.getCommitMessagePrompt(), 3, 60);
+    commitMessagePromptTextArea = new JBTextArea(configuration.getCommitMessagePrompt(),
+        3, 60);
     commitMessagePromptTextArea.setLineWrap(true);
     commitMessagePromptTextArea.setBorder(JBUI.Borders.empty(8, 4));
 
@@ -114,7 +116,7 @@ public class ConfigurationComponent {
         configuration.isCreateNewChatOnEachAction());
     methodNameGenerationCheckBox = new JBCheckBox(
         CodeGPTBundle.get("configurationConfigurable.enableMethodNameGeneration.label"),
-        configuration.isMethodRefactoringEnabled());
+        configuration.isMethodNameGenerationEnabled());
     autoFormattingCheckBox = new JBCheckBox(
         CodeGPTBundle.get("configurationConfigurable.autoFormatting.label"),
         configuration.isAutoFormattingEnabled());
@@ -130,7 +132,6 @@ public class ConfigurationComponent {
         .addComponent(new TitledSeparator(
             CodeGPTBundle.get("configurationConfigurable.section.assistant.title")))
         .addComponent(createAssistantConfigurationForm())
-        .addComponentFillVertically(new JPanel(), 0)
         .addComponent(new TitledSeparator(
             CodeGPTBundle.get("configurationConfigurable.section.commitMessage.title")))
         .addComponent(createCommitMessageConfigurationForm())
@@ -142,7 +143,36 @@ public class ConfigurationComponent {
     return mainPanel;
   }
 
-  public Map<String, String> getTableData() {
+  public ConfigurationState getCurrentFormState() {
+    var state = new ConfigurationState();
+    state.setTableData(getTableData());
+    state.setMaxTokens(maxTokensField.getValue());
+    state.setTemperature(Double.parseDouble(temperatureField.getText()));
+    state.setSystemPrompt(systemPromptTextArea.getText());
+    state.setCommitMessagePrompt(commitMessagePromptTextArea.getText());
+    state.setCheckForPluginUpdates(checkForPluginUpdatesCheckBox.isSelected());
+    state.setCreateNewChatOnEachAction(openNewTabCheckBox.isSelected());
+    state.setMethodNameGenerationEnabled(methodNameGenerationCheckBox.isSelected());
+    state.setAutoFormattingEnabled(autoFormattingCheckBox.isSelected());
+    state.setCodeCompletionsEnabled(
+        ConfigurationSettings.getCurrentState().isCodeCompletionsEnabled());
+    return state;
+  }
+
+  public void resetForm() {
+    var configuration = ConfigurationSettings.getCurrentState();
+    setTableData(configuration.getTableData());
+    maxTokensField.setValue(configuration.getMaxTokens());
+    temperatureField.setText(String.valueOf(configuration.getTemperature()));
+    systemPromptTextArea.setText(configuration.getSystemPrompt());
+    commitMessagePromptTextArea.setText(configuration.getCommitMessagePrompt());
+    checkForPluginUpdatesCheckBox.setSelected(configuration.isCheckForPluginUpdates());
+    openNewTabCheckBox.setSelected(configuration.isCreateNewChatOnEachAction());
+    methodNameGenerationCheckBox.setSelected(configuration.isMethodNameGenerationEnabled());
+    autoFormattingCheckBox.setSelected(configuration.isAutoFormattingEnabled());
+  }
+
+  private Map<String, String> getTableData() {
     var model = getModel();
     Map<String, String> data = new LinkedHashMap<>();
     for (int count = 0; count < model.getRowCount(); count++) {
@@ -227,7 +257,7 @@ public class ConfigurationComponent {
     return form;
   }
 
-  private ComponentValidator createInputValidator(
+  private ComponentValidator createTemperatureInputValidator(
       Disposable parentDisposable,
       JBTextField component) {
     var validator = new ComponentValidator(parentDisposable)
@@ -262,70 +292,6 @@ public class ConfigurationComponent {
     var model = getModel();
     model.setNumRows(0);
     tableData.forEach((action, prompt) -> model.addRow(new Object[]{action, prompt}));
-  }
-
-  public void setSystemPrompt(String systemPrompt) {
-    systemPromptTextArea.setText(systemPrompt);
-  }
-
-  public String getSystemPrompt() {
-    return systemPromptTextArea.getText();
-  }
-
-  public void setCommitMessagePrompt(String commitMessagePrompt) {
-    commitMessagePromptTextArea.setText(commitMessagePrompt);
-  }
-
-  public String getCommitMessagePrompt() {
-    return commitMessagePromptTextArea.getText();
-  }
-
-  public double getTemperature() {
-    return Double.parseDouble(temperatureField.getText());
-  }
-
-  public void setTemperature(double temperature) {
-    temperatureField.setText(String.valueOf(temperature));
-  }
-
-  public int getMaxTokens() {
-    return maxTokensField.getValue();
-  }
-
-  public void setMaxTokens(int maxTokens) {
-    maxTokensField.setValue(maxTokens);
-  }
-
-  public boolean isCheckForPluginUpdates() {
-    return checkForPluginUpdatesCheckBox.isSelected();
-  }
-
-  public void setCheckForPluginUpdates(boolean checkForUpdates) {
-    checkForPluginUpdatesCheckBox.setSelected(checkForUpdates);
-  }
-
-  public boolean isCreateNewChatOnEachAction() {
-    return openNewTabCheckBox.isSelected();
-  }
-
-  public void setCreateNewChatOnEachAction(boolean createNewChatOnEachAction) {
-    openNewTabCheckBox.setSelected(createNewChatOnEachAction);
-  }
-
-  public boolean isMethodNameGenerationEnabled() {
-    return methodNameGenerationCheckBox.isSelected();
-  }
-
-  public void setDisableMethodNameGeneration(boolean disableMethodNameGeneration) {
-    methodNameGenerationCheckBox.setSelected(disableMethodNameGeneration);
-  }
-
-  public boolean isAutoFormattingEnabled() {
-    return autoFormattingCheckBox.isSelected();
-  }
-
-  public void setAutoFormattingEnabled(boolean enabled) {
-    autoFormattingCheckBox.setSelected(enabled);
   }
 
   class RevertToDefaultsActionButton extends AnActionButton {

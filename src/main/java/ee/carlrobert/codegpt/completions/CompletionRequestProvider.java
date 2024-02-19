@@ -14,20 +14,19 @@ import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.conversations.message.Message;
-import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
+import ee.carlrobert.codegpt.settings.GeneralSettings;
+import ee.carlrobert.codegpt.settings.IncludedFilesSettings;
+import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
-import ee.carlrobert.codegpt.settings.state.IncludedFilesSettingsState;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
-import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
-import ee.carlrobert.codegpt.settings.state.SettingsState;
-import ee.carlrobert.codegpt.settings.state.YouSettingsState;
+import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
+import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
+import ee.carlrobert.codegpt.settings.service.you.YouSettings;
 import ee.carlrobert.codegpt.telemetry.core.configuration.TelemetryConfiguration;
 import ee.carlrobert.codegpt.telemetry.core.service.UserId;
 import ee.carlrobert.embedding.EmbeddingsService;
 import ee.carlrobert.embedding.ReferencedFile;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
-import ee.carlrobert.llm.client.openai.completion.OpenAICompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
 import ee.carlrobert.llm.client.you.completion.YouCompletionRequest;
@@ -65,7 +64,7 @@ public class CompletionRequestProvider {
 
   public static String getPromptWithContext(List<ReferencedFile> referencedFiles,
       String userPrompt) {
-    var includedFilesSettings = IncludedFilesSettingsState.getInstance();
+    var includedFilesSettings = IncludedFilesSettings.getCurrentState();
     var repeatableContext = referencedFiles.stream()
         .map(item -> includedFilesSettings.getRepeatableContext()
             .replace("{FILE_PATH}", item.getFilePath())
@@ -80,14 +79,14 @@ public class CompletionRequestProvider {
         .replace("{QUESTION}", userPrompt);
   }
 
-  public static OpenAICompletionRequest buildOpenAILookupCompletionRequest(
+  public static OpenAIChatCompletionRequest buildOpenAILookupCompletionRequest(
       String context) {
     return new OpenAIChatCompletionRequest.Builder(
         List.of(
             new OpenAIChatCompletionMessage("system",
                 getResourceContent("/prompts/method-name-generator.txt")),
             new OpenAIChatCompletionMessage("user", context)))
-        .setModel(OpenAISettingsState.getInstance().getModel())
+        .setModel(OpenAISettings.getCurrentState().getModel())
         .setStream(false)
         .build();
   }
@@ -102,10 +101,15 @@ public class CompletionRequestProvider {
   public LlamaCompletionRequest buildLlamaCompletionRequest(
       Message message,
       ConversationType conversationType) {
-    var settings = LlamaSettingsState.getInstance();
-    var promptTemplate = settings.isUseCustomModel()
-        ? settings.getPromptTemplate()
-        : LlamaModel.findByHuggingFaceModel(settings.getHuggingFaceModel()).getPromptTemplate();
+    var settings = LlamaSettings.getCurrentState();
+    PromptTemplate promptTemplate;
+    if (settings.isRunLocalServer()) {
+      promptTemplate = settings.isUseCustomModel()
+          ? settings.getLocalModelPromptTemplate()
+          : LlamaModel.findByHuggingFaceModel(settings.getHuggingFaceModel()).getPromptTemplate();
+    } else {
+      promptTemplate = settings.getRemoteModelPromptTemplate();
+    }
 
     var systemPrompt = COMPLETION_SYSTEM_PROMPT;
     if (conversationType == ConversationType.FIX_COMPILE_ERRORS) {
@@ -116,7 +120,7 @@ public class CompletionRequestProvider {
         systemPrompt,
         message.getPrompt(),
         conversation.getMessages());
-    var configuration = ConfigurationState.getInstance();
+    var configuration = ConfigurationSettings.getCurrentState();
     return new LlamaCompletionRequest.Builder(prompt)
         .setN_predict(configuration.getMaxTokens())
         .setTemperature(configuration.getTemperature())
@@ -129,7 +133,7 @@ public class CompletionRequestProvider {
 
   public YouCompletionRequest buildYouCompletionRequest(Message message) {
     var requestBuilder = new YouCompletionRequest.Builder(message.getPrompt())
-        .setUseGPT4Model(YouSettingsState.getInstance().isUseGPT4Model())
+        .setUseGPT4Model(YouSettings.getCurrentState().isUseGPT4Model())
         .setChatHistory(conversation.getMessages().stream()
             .map(prevMessage -> new YouCompletionRequestMessage(
                 prevMessage.getPrompt(),
@@ -147,17 +151,19 @@ public class CompletionRequestProvider {
       CallParameters callParameters,
       boolean useContextualSearch,
       @Nullable String overriddenPath) {
+    var configuration = ConfigurationSettings.getCurrentState();
     var builder = new OpenAIChatCompletionRequest.Builder(
         buildMessages(model, callParameters, useContextualSearch))
         .setModel(model)
-        .setMaxTokens(ConfigurationState.getInstance().getMaxTokens())
-        .setTemperature(ConfigurationState.getInstance().getTemperature());
+        .setMaxTokens(configuration.getMaxTokens())
+        .setStream(true)
+        .setTemperature(configuration.getTemperature());
 
     if (overriddenPath != null) {
       builder.setOverriddenPath(overriddenPath);
     }
 
-    return (OpenAIChatCompletionRequest) builder.build();
+    return builder.build();
   }
 
   public List<OpenAIChatCompletionMessage> buildMessages(
@@ -174,7 +180,7 @@ public class CompletionRequestProvider {
       if (callParameters.getConversationType() == ConversationType.DEFAULT) {
         messages.add(new OpenAIChatCompletionMessage(
             "system",
-            ConfigurationState.getInstance().getSystemPrompt()));
+            ConfigurationSettings.getCurrentState().getSystemPrompt()));
       }
       if (callParameters.getConversationType() == ConversationType.FIX_COMPILE_ERRORS) {
         messages.add(new OpenAIChatCompletionMessage("system", FIX_COMPILE_ERRORS_SYSTEM_PROMPT));
@@ -198,13 +204,14 @@ public class CompletionRequestProvider {
       boolean useContextualSearch) {
     var messages = buildMessages(callParameters, useContextualSearch);
 
-    if (model == null || SettingsState.getInstance().getSelectedService() == ServiceType.YOU) {
+    if (model == null
+        || GeneralSettings.getCurrentState().getSelectedService() == ServiceType.YOU) {
       return messages;
     }
 
     int totalUsage = messages.parallelStream()
         .mapToInt(encodingManager::countMessageTokens)
-        .sum() + ConfigurationState.getInstance().getMaxTokens();
+        .sum() + ConfigurationSettings.getCurrentState().getMaxTokens();
     int modelMaxTokens;
     try {
       modelMaxTokens = OpenAIChatCompletionModel.findByCode(model).getMaxTokens();

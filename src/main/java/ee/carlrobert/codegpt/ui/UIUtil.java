@@ -4,16 +4,32 @@ import static javax.swing.event.HyperlinkEvent.EventType.ACTIVATED;
 
 import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
+import com.intellij.openapi.ui.panel.ComponentPanelBuilder;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.ScrollPaneFactory;
+import com.intellij.ui.components.JBRadioButton;
 import com.intellij.ui.components.JBTextArea;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
+import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.SmartScroller;
+import java.awt.BorderLayout;
+import java.awt.CardLayout;
+import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -103,6 +119,101 @@ public class UIUtil {
     textArea.getInputMap().put(KeyStroke.getKeyStroke("shift ENTER"), "insert-break");
     textArea.getInputMap().put(KeyStroke.getKeyStroke("ENTER"), "text-submit");
     textArea.getActionMap().put("text-submit", onSubmit);
+  }
+
+
+  public static JPanel createRadioButtonsPanel(List<JBRadioButton> radioButtons) {
+    var buttonGroup = new ButtonGroup();
+    var radioPanel = new JPanel();
+    radioPanel.setLayout(new BoxLayout(radioPanel, BoxLayout.PAGE_AXIS));
+    for (int i = 0; i < radioButtons.size(); i++) {
+      JBRadioButton radioButton = radioButtons.get(i);
+      buttonGroup.add(radioButton);
+      radioPanel.add(radioButton);
+      radioPanel.add(Box.createVerticalStrut(i == radioButtons.size() - 1 ? 8 : 4));
+    }
+    return withEmptyLeftBorder(radioPanel);
+  }
+
+  public static <T extends JComponent> T withEmptyLeftBorder(T component) {
+    component.setBorder(JBUI.Borders.emptyLeft(16));
+    return component;
+  }
+
+  public static JLabel createComment(String messageKey) {
+    var comment = ComponentPanelBuilder.createCommentComponent(
+        CodeGPTBundle.get(messageKey), true);
+    comment.setBorder(JBUI.Borders.empty(0, 4));
+    return comment;
+  }
+
+  public static JPanel createForm(Map<String, RadioButtonWithLayout> layouts,
+      String initialLayout) {
+    JPanel finalPanel = new JPanel(new BorderLayout());
+    finalPanel.add(createRadioButtonsPanel(layouts.values().stream().map(
+            RadioButtonWithLayout::getRadioButton).collect(Collectors.toList())),
+        BorderLayout.NORTH);
+    finalPanel.add(createRadioButtonGroupLayouts(layouts, initialLayout), BorderLayout.CENTER);
+    return finalPanel;
+  }
+
+  /**
+   * Creates RadioButton group to toggle between different layouts.
+   *
+   * @param layouts       Map from layout name to RadioButton + Layout to be shown
+   * @param initialLayout Key of {@code layouts} entry to be initially shown
+   * @return Panel with the RadioButton group
+   */
+  public static JPanel createRadioButtonGroupLayouts(
+      Map<String, RadioButtonWithLayout> layouts,
+      String initialLayout) {
+    CardLayout cardlayout = new CardLayout() {
+      @Override
+      public void show(Container parent, String name) {
+        super.show(parent, name);
+        // Set height to selected components height instead of consistent height
+        Optional<Component> selectedComponent = Arrays.stream(parent.getComponents())
+            .filter(component -> name.equals(component.getName()))
+            .findFirst();
+        if (selectedComponent.isEmpty()) {
+          return;
+        }
+        parent.setPreferredSize(new Dimension(parent.getPreferredSize().width,
+            (int) selectedComponent.get().getPreferredSize().getHeight()));
+      }
+    };
+
+    var formPanelCards = new JPanel(cardlayout);
+    for (Entry<String, RadioButtonWithLayout> layout : layouts.entrySet()) {
+      RadioButtonWithLayout value = layout.getValue();
+      Component component = value.getComponent();
+      String key = layout.getKey();
+      component.setName(key);
+      formPanelCards.add(component, key);
+      value.getRadioButton().addActionListener(e -> cardlayout.show(formPanelCards, key));
+    }
+
+    cardlayout.show(formPanelCards, initialLayout);
+    return formPanelCards;
+  }
+
+  public static class RadioButtonWithLayout {
+
+    private final JBRadioButton radioButton;
+    private final Component layout;
+
+    public RadioButtonWithLayout(JBRadioButton radioButton, Component layout) {
+      this.radioButton = radioButton;
+      this.layout = layout;
+    }
+
+    public JBRadioButton getRadioButton() {
+      return radioButton;
+    }
+
+    public Component getComponent() {
+      return layout;
+    }
   }
 }
 

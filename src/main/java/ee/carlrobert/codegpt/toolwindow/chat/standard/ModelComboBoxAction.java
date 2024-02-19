@@ -7,14 +7,17 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.actionSystem.ex.ComboBoxAction;
+import com.intellij.openapi.project.DumbAwareAction;
 import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
+import ee.carlrobert.codegpt.settings.GeneralSettings;
+import ee.carlrobert.codegpt.settings.GeneralSettingsState;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
-import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
-import ee.carlrobert.codegpt.settings.state.SettingsState;
+import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
+import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
+import ee.carlrobert.codegpt.settings.service.openai.OpenAISettingsState;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import java.util.List;
 import javax.swing.Icon;
@@ -24,13 +27,13 @@ import org.jetbrains.annotations.NotNull;
 public class ModelComboBoxAction extends ComboBoxAction {
 
   private final Runnable onAddNewTab;
-  private final SettingsState settings;
+  private final GeneralSettingsState settings;
   private final OpenAISettingsState openAISettings;
 
   public ModelComboBoxAction(Runnable onAddNewTab, ServiceType selectedService) {
     this.onAddNewTab = onAddNewTab;
-    settings = SettingsState.getInstance();
-    openAISettings = OpenAISettingsState.getInstance();
+    settings = GeneralSettings.getCurrentState();
+    openAISettings = OpenAISettings.getCurrentState();
     updateTemplatePresentation(selectedService);
   }
 
@@ -54,20 +57,19 @@ public class ModelComboBoxAction extends ComboBoxAction {
     var actionGroup = new DefaultActionGroup();
     actionGroup.addSeparator("OpenAI");
     List.of(
-            OpenAIChatCompletionModel.GPT_4_1106_128k,
-            OpenAIChatCompletionModel.GPT_3_5_1106_16k,
+            OpenAIChatCompletionModel.GPT_4_0125_128k,
+            OpenAIChatCompletionModel.GPT_3_5_0125_16k,
             OpenAIChatCompletionModel.GPT_4_32k,
             OpenAIChatCompletionModel.GPT_4,
             OpenAIChatCompletionModel.GPT_3_5)
-        .forEach(
-            model -> actionGroup.add(createOpenAIModelAction(model, presentation)));
+        .forEach(model -> actionGroup.add(createOpenAIModelAction(model, presentation)));
     actionGroup.addSeparator();
     actionGroup.add(
         createModelAction(ServiceType.AZURE, "Azure OpenAI", Icons.Azure, presentation));
     actionGroup.addSeparator();
     actionGroup.add(createModelAction(
         ServiceType.LLAMA_CPP,
-        getSelectedHuggingFace(),
+        getLlamaCppPresentationText(),
         Icons.Llama,
         presentation));
     actionGroup.addSeparator();
@@ -97,15 +99,23 @@ public class ModelComboBoxAction extends ComboBoxAction {
         templatePresentation.setText("You.com");
         break;
       case LLAMA_CPP:
-        templatePresentation.setText(getSelectedHuggingFace());
+        templatePresentation.setText(getLlamaCppPresentationText());
         templatePresentation.setIcon(Icons.Llama);
         break;
       default:
     }
   }
 
+  private String getLlamaCppPresentationText() {
+    var llamaSettingState = LlamaSettings.getCurrentState();
+    if (!llamaSettingState.isRunLocalServer()) {
+      return format("Remote %s", llamaSettingState.getRemoteModelPromptTemplate());
+    }
+    return getSelectedHuggingFace();
+  }
+
   private String getSelectedHuggingFace() {
-    var huggingFaceModel = LlamaSettingsState.getInstance().getHuggingFaceModel();
+    var huggingFaceModel = LlamaSettings.getCurrentState().getHuggingFaceModel();
     return format(
         "%s %dB (Q%d)",
         LlamaModel.findByHuggingFaceModel(huggingFaceModel).getLabel(),
@@ -118,7 +128,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
       String label,
       Icon icon,
       Presentation comboBoxPresentation) {
-    return new AnAction(label, "", icon) {
+    return new DumbAwareAction(label, "", icon) {
       @Override
       public void update(@NotNull AnActionEvent event) {
         var presentation = event.getPresentation();
@@ -154,7 +164,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
       Presentation comboBoxPresentation) {
     createModelAction(ServiceType.OPENAI, model.getDescription(), Icons.OpenAI,
         comboBoxPresentation);
-    return new AnAction(model.getDescription(), "", Icons.OpenAI) {
+    return new DumbAwareAction(model.getDescription(), "", Icons.OpenAI) {
       @Override
       public void update(@NotNull AnActionEvent event) {
         var presentation = event.getPresentation();

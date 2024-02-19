@@ -14,12 +14,12 @@ import java.util.regex.Pattern;
 public class MarkdownUtil {
 
   /**
-   *  Splits a given string into a list of strings where each element is either a code block
-   *  surrounded by triple backticks or a non-code block text.
+   * Splits a given string into a list of strings where each element is either a code block
+   * surrounded by triple backticks or a non-code block text.
    *
-   *  @param inputMarkdown The input markdown formatted string to be split.
-   *  @return A list of strings where each element is a code block or a non-code block text from the
-   *  input string.
+   * @param inputMarkdown The input markdown formatted string to be split.
+   * @return A list of strings where each element is a code block or a non-code block text from the
+   * input string.
    */
   public static List<String> splitCodeBlocks(String inputMarkdown) {
     List<String> result = new ArrayList<>();

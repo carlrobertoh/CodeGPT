@@ -18,8 +18,8 @@ import ee.carlrobert.codegpt.completions.ConversationType;
 import ee.carlrobert.codegpt.completions.HuggingFaceModel;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
-import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
+import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
+import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowTabPanel;
 import ee.carlrobert.embedding.ReferencedFile;
 import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange;
@@ -31,7 +31,7 @@ public class StandardChatToolWindowTabPanelTest extends IntegrationTest {
 
   public void testSendingOpenAIMessage() {
     useOpenAIService();
-    ConfigurationState.getInstance().setSystemPrompt(COMPLETION_SYSTEM_PROMPT);
+    ConfigurationSettings.getCurrentState().setSystemPrompt(COMPLETION_SYSTEM_PROMPT);
     var message = new Message("Hello!");
     var conversation = ConversationService.getInstance().startConversation();
     var panel = new StandardChatToolWindowTabPanel(getProject(), conversation);
@@ -94,7 +94,7 @@ public class StandardChatToolWindowTabPanelTest extends IntegrationTest {
         new ReferencedFile("TEST_FILE_NAME_2", "TEST_FILE_PATH_2", "TEST_FILE_CONTENT_2"),
         new ReferencedFile("TEST_FILE_NAME_3", "TEST_FILE_PATH_3", "TEST_FILE_CONTENT_3")));
     useOpenAIService();
-    ConfigurationState.getInstance().setSystemPrompt(COMPLETION_SYSTEM_PROMPT);
+    ConfigurationSettings.getCurrentState().setSystemPrompt(COMPLETION_SYSTEM_PROMPT);
     var message = new Message("TEST_MESSAGE");
     message.setUserMessage("TEST_MESSAGE");
     message.setReferencedFilePaths(
@@ -181,7 +181,7 @@ public class StandardChatToolWindowTabPanelTest extends IntegrationTest {
         new ReferencedFile("TEST_FILE_NAME_2", "TEST_FILE_PATH_2", "TEST_FILE_CONTENT_2"),
         new ReferencedFile("TEST_FILE_NAME_3", "TEST_FILE_PATH_3", "TEST_FILE_CONTENT_3")));
     useOpenAIService();
-    ConfigurationState.getInstance().setSystemPrompt(COMPLETION_SYSTEM_PROMPT);
+    ConfigurationSettings.getCurrentState().setSystemPrompt(COMPLETION_SYSTEM_PROMPT);
     var message = new Message("TEST_MESSAGE");
     message.setUserMessage("TEST_MESSAGE");
     message.setReferencedFilePaths(
@@ -264,11 +264,11 @@ public class StandardChatToolWindowTabPanelTest extends IntegrationTest {
 
   public void testSendingLlamaMessage() {
     useLlamaService();
-    var configurationState = ConfigurationState.getInstance();
+    var configurationState = ConfigurationSettings.getCurrentState();
     configurationState.setSystemPrompt(COMPLETION_SYSTEM_PROMPT);
     configurationState.setMaxTokens(1000);
     configurationState.setTemperature(0.1);
-    var llamaSettings = LlamaSettingsState.getInstance();
+    var llamaSettings = LlamaSettings.getCurrentState();
     llamaSettings.setUseCustomModel(false);
     llamaSettings.setHuggingFaceModel(HuggingFaceModel.CODE_LLAMA_7B_Q4);
     llamaSettings.setTopK(30);

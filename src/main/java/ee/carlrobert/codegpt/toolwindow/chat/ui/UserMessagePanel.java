@@ -9,7 +9,7 @@ import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.conversations.message.Message;
-import ee.carlrobert.codegpt.settings.state.SettingsState;
+import ee.carlrobert.codegpt.settings.GeneralSettings;
 import java.awt.BorderLayout;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
@@ -48,7 +48,7 @@ public class UserMessagePanel extends JPanel {
 
   private JBLabel createDisplayNameLabel() {
     return new JBLabel(
-        SettingsState.getInstance().getDisplayName(),
+        GeneralSettings.getCurrentState().getDisplayName(),
         Icons.User,
         SwingConstants.LEADING)
         .setAllowAutoWrapping(true)

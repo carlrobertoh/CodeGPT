@@ -1,26 +1,26 @@
 package testsupport.mixin;
 
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
-import ee.carlrobert.codegpt.credentials.OpenAICredentialsManager;
+import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
+import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
-import ee.carlrobert.codegpt.settings.state.AzureSettingsState;
-import ee.carlrobert.codegpt.settings.state.LlamaSettingsState;
-import ee.carlrobert.codegpt.settings.state.OpenAISettingsState;
-import ee.carlrobert.codegpt.settings.state.SettingsState;
+import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
+import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
+import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 
 public interface ShortcutsTestMixin {
 
   default void useOpenAIService() {
-    SettingsState.getInstance().setSelectedService(ServiceType.OPENAI);
-    OpenAICredentialsManager.getInstance().setApiKey("TEST_API_KEY");
-    OpenAISettingsState.getInstance().setModel("gpt-4");
-    OpenAISettingsState.getInstance().setBaseHost(null);
+    GeneralSettings.getCurrentState().setSelectedService(ServiceType.OPENAI);
+    OpenAICredentialManager.getInstance().setCredential("TEST_API_KEY");
+    OpenAISettings.getCurrentState().setModel("gpt-4");
+    OpenAISettings.getCurrentState().setBaseHost(null);
   }
 
   default void useAzureService() {
-    SettingsState.getInstance().setSelectedService(ServiceType.AZURE);
+    GeneralSettings.getCurrentState().setSelectedService(ServiceType.AZURE);
     AzureCredentialsManager.getInstance().setApiKey("TEST_API_KEY");
-    var azureSettings = AzureSettingsState.getInstance();
+    var azureSettings = AzureSettings.getCurrentState();
     azureSettings.setBaseHost(null);
     azureSettings.setResourceName("TEST_RESOURCE_NAME");
     azureSettings.setApiVersion("TEST_API_VERSION");
@@ -28,11 +28,11 @@ public interface ShortcutsTestMixin {
   }
 
   default void useYouService() {
-    SettingsState.getInstance().setSelectedService(ServiceType.YOU);
+    GeneralSettings.getCurrentState().setSelectedService(ServiceType.YOU);
   }
 
   default void useLlamaService() {
-    SettingsState.getInstance().setSelectedService(ServiceType.LLAMA_CPP);
-    LlamaSettingsState.getInstance().setServerPort(null);
+    GeneralSettings.getCurrentState().setSelectedService(ServiceType.LLAMA_CPP);
+    LlamaSettings.getCurrentState().setServerPort(null);
   }
 }

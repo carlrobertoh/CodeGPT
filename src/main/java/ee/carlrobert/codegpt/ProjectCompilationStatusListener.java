@@ -15,7 +15,7 @@ import com.intellij.openapi.compiler.CompilerMessageCategory;
 import com.intellij.openapi.project.Project;
 import ee.carlrobert.codegpt.completions.CompletionRequestProvider;
 import ee.carlrobert.codegpt.conversations.message.Message;
-import ee.carlrobert.codegpt.settings.configuration.ConfigurationState;
+import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.embedding.ReferencedFile;
@@ -40,8 +40,7 @@ public class ProjectCompilationStatusListener implements CompilationStatusListen
       int errors,
       int warnings,
       @NotNull CompileContext compileContext) {
-    var configuration = ConfigurationState.getInstance();
-    var success = !configuration.isCaptureCompileErrors()
+    var success = !ConfigurationSettings.getCurrentState().isCaptureCompileErrors()
         || (!aborted && errors == 0 && warnings == 0);
     if (success) {
       return;
@@ -56,7 +55,7 @@ public class ProjectCompilationStatusListener implements CompilationStatusListen
                   .sendMessage(getMultiFileMessage(compileContext), FIX_COMPILE_ERRORS)))
           .addAction(NotificationAction.createSimpleExpiring(
               CodeGPTBundle.get("checkForUpdatesTask.notification.hideButton"),
-              () -> ConfigurationState.getInstance().setCaptureCompileErrors(false)))
+              () -> ConfigurationSettings.getCurrentState().setCaptureCompileErrors(false)))
           .notify(project);
     }
   }
