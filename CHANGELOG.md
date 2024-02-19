@@ -8,11 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Support for custom OpenAI model configuration
+- Support for custom OpenAI model configuration (#250)
 
 ### Fixed
 
 - General Settings isModified state
+- Azure service credential condition (#375)
+- Caret offset location upon document changes (#367)
 
 ## [2.3.0] - 2024-02-14
 
