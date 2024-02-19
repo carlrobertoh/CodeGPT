@@ -21,9 +21,9 @@ public final class AzureCredentialsManager extends AbstractCredentialsManager {
   @Override
   public boolean isCredentialSet() {
     if (AzureSettings.getCurrentState().isUseAzureApiKeyAuthentication()) {
-      return isCredentialSet(ACTIVE_DIRECTORY_TOKEN);
+      return isCredentialSet(API_KEY);
     }
-    return isCredentialSet(API_KEY);
+    return isCredentialSet(ACTIVE_DIRECTORY_TOKEN);
   }
 
   @Override
