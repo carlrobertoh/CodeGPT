@@ -7,6 +7,7 @@ import com.knuddels.jtokkit.Encodings;
 import com.knuddels.jtokkit.api.Encoding;
 import com.knuddels.jtokkit.api.EncodingRegistry;
 import com.knuddels.jtokkit.api.EncodingType;
+import com.knuddels.jtokkit.api.IntArrayList;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
 import java.util.List;
@@ -57,15 +58,25 @@ public final class EncodingManager {
   /**
    * Truncates the given text to the given number of tokens.
    *
-   * @param text The text to truncate.
+   * @param text      The text to truncate.
    * @param maxTokens The maximum number of tokens to keep.
    * @param fromStart Whether to truncate from the start or the end of the text.
    * @return The truncated text.
    */
   public String truncateText(String text, int maxTokens, boolean fromStart) {
-    List<Integer> tokens = encoding.encode(text);
+    var tokens = encoding.encode(text);
     int tokensToRetrieve = Math.min(maxTokens, tokens.size());
     int startIndex = fromStart ? 0 : tokens.size() - tokensToRetrieve;
-    return encoding.decode(tokens.subList(startIndex, startIndex + tokensToRetrieve));
+    var truncatedList =
+        tokens.boxed().subList(startIndex, startIndex + tokensToRetrieve);
+    return encoding.decode(convertToIntArrayList(truncatedList));
+  }
+
+  private IntArrayList convertToIntArrayList(List<Integer> tokens) {
+    var result = new IntArrayList(tokens.size());
+    for (var integer : tokens) {
+      result.add(integer);
+    }
+    return result;
   }
 }
