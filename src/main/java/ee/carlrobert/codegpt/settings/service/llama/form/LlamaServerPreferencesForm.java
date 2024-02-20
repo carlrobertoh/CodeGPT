@@ -8,6 +8,7 @@ import static java.util.stream.Collectors.toList;
 import com.intellij.icons.AllIcons.Actions;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.ui.MessageType;
+import com.intellij.openapi.util.SystemInfoRt;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.ui.PortField;
 import com.intellij.ui.TitledSeparator;
@@ -90,6 +91,9 @@ public class LlamaServerPreferencesForm {
     useExistingServerRadioButton = new JBRadioButton("Use remote server",
         !settings.isRunLocalServer());
 
+    runLocalServerRadioButton.setEnabled(SystemInfoRt.isUnix);
+    runLocalServerRadioButton.setVisible(SystemInfoRt.isUnix);
+
     remotePromptTemplatePanel = new ChatPromptTemplatePanel(
         settings.getRemoteModelPromptTemplate(), true);
     infillPromptTemplatePanel = new InfillPromptTemplatePanel(
@@ -105,9 +109,9 @@ public class LlamaServerPreferencesForm {
             createRunLocalServerForm(llamaServerAgent)),
         USE_EXISTING_SERVER_FORM_CARD_CODE, new RadioButtonWithLayout(useExistingServerRadioButton,
             createUseExistingServerForm())
-    ), runLocalServerRadioButton.isSelected()
+    ), SystemInfoRt.isUnix ? (runLocalServerRadioButton.isSelected()
         ? RUN_LOCAL_SERVER_FORM_CARD_CODE
-        : USE_EXISTING_SERVER_FORM_CARD_CODE);
+        : USE_EXISTING_SERVER_FORM_CARD_CODE) : USE_EXISTING_SERVER_FORM_CARD_CODE);
   }
 
   public void resetForm(LlamaSettingsState state) {
