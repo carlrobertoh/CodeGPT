@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.settings.service.llama;
 
+import com.intellij.openapi.util.SystemInfoRt;
 import ee.carlrobert.codegpt.codecompletions.InfillPromptTemplate;
 import ee.carlrobert.codegpt.completions.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
@@ -9,7 +10,7 @@ import java.util.Objects;
 
 public class LlamaSettingsState {
 
-  private boolean runLocalServer = true;
+  private boolean runLocalServer = SystemInfoRt.isUnix;
   private boolean useCustomModel;
   private String customLlamaModelPath = "";
   private HuggingFaceModel huggingFaceModel = HuggingFaceModel.CODE_LLAMA_7B_Q4;
