@@ -55,6 +55,29 @@ public enum PromptTemplate {
           .toString();
     }
   },
+  MIXTRAL_INSTRUCT("Mixtral Instruct") {
+    @Override
+    public String buildPrompt(String systemPrompt, String userPrompt, List<Message> history) {
+      StringBuilder prompt = new StringBuilder();
+
+      if (systemPrompt != null && !systemPrompt.isEmpty()) {
+        prompt.append(systemPrompt)
+            .append("\n");
+      }
+
+      for (Message message : history) {
+        prompt.append("<s> [INST] ")
+            .append(message.getPrompt())
+            .append(" [/INST] ")
+            .append(message.getResponse()).append("</s> ");
+      }
+
+      return prompt.append("[INST] ")
+          .append(userPrompt)
+          .append(" [/INST]")
+          .toString();
+    }
+  },
   TORA("ToRA") {
     @Override
     public String buildPrompt(String systemPrompt, String userPrompt, List<Message> history) {
