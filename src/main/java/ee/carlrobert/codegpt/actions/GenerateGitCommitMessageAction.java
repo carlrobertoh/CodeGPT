@@ -41,6 +41,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class GenerateGitCommitMessageAction extends AnAction {
 
+  public static final int MAX_TOKEN_COUNT_WARNING = 4096;
   private final EncodingManager encodingManager;
 
   public GenerateGitCommitMessageAction() {
@@ -54,12 +55,14 @@ public class GenerateGitCommitMessageAction extends AnAction {
   @Override
   public void update(@NotNull AnActionEvent event) {
     var selectedService = GeneralSettings.getCurrentState().getSelectedService();
-    if (selectedService == ServiceType.OPENAI || selectedService == ServiceType.AZURE) {
+    if (selectedService == ServiceType.OPENAI || selectedService == ServiceType.AZURE
+        || selectedService == ServiceType.LLAMA_CPP) {
       var filesSelected = !getReferencedFilePaths(event).isEmpty();
       var callAllowed = (selectedService == ServiceType.OPENAI
           && OpenAICredentialManager.getInstance().isCredentialSet())
           || (selectedService == ServiceType.AZURE
-          && AzureCredentialsManager.getInstance().isCredentialSet());
+          && AzureCredentialsManager.getInstance().isCredentialSet())
+          || selectedService == ServiceType.LLAMA_CPP;
       event.getPresentation().setEnabled(callAllowed && filesSelected);
       event.getPresentation().setText(CodeGPTBundle.get(callAllowed
           ? "action.generateCommitMessage.title"
@@ -79,8 +82,10 @@ public class GenerateGitCommitMessageAction extends AnAction {
     }
 
     var gitDiff = getGitDiff(project, getReferencedFilePaths(event));
+
     var tokenCount = encodingManager.countTokens(gitDiff);
-    if (tokenCount > 4096 && OverlayUtil.showTokenSoftLimitWarningDialog(tokenCount) != OK) {
+    if (tokenCount > MAX_TOKEN_COUNT_WARNING
+        && OverlayUtil.showTokenSoftLimitWarningDialog(tokenCount) != OK) {
       return;
     }
 

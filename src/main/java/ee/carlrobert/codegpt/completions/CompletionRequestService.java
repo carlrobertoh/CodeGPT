@@ -9,12 +9,16 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
 import ee.carlrobert.codegpt.codecompletions.CodeCompletionRequestProvider;
 import ee.carlrobert.codegpt.codecompletions.InfillRequestDetails;
+import ee.carlrobert.codegpt.completions.llama.LlamaModel;
+import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
+import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
+import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
 import ee.carlrobert.llm.completion.CompletionEventListener;
@@ -103,6 +107,32 @@ public final class CompletionRequestService {
     }
     if (selectedService == AZURE) {
       CompletionClientProvider.getAzureClient().getChatCompletionAsync(request, eventListener);
+    }
+
+    if (selectedService == LLAMA_CPP) {
+      var settings = LlamaSettings.getCurrentState();
+      PromptTemplate promptTemplate;
+      if (settings.isRunLocalServer()) {
+        promptTemplate = settings.isUseCustomModel()
+            ? settings.getLocalModelPromptTemplate()
+            : LlamaModel.findByHuggingFaceModel(settings.getHuggingFaceModel()).getPromptTemplate();
+      } else {
+        promptTemplate = settings.getRemoteModelPromptTemplate();
+      }
+      var finalPrompt = promptTemplate.buildPrompt(
+          ConfigurationSettings.getCurrentState().getCommitMessagePrompt(),
+          prompt, List.of());
+      var configuration = ConfigurationSettings.getCurrentState();
+      CompletionClientProvider.getLlamaClient().getChatCompletionAsync(
+          new LlamaCompletionRequest.Builder(finalPrompt)
+              .setN_predict(configuration.getMaxTokens())
+              .setTemperature(configuration.getTemperature())
+              .setTop_k(settings.getTopK())
+              .setTop_p(settings.getTopP())
+              .setMin_p(settings.getMinP())
+              .setRepeat_penalty(settings.getRepeatPenalty())
+              .build()
+          , eventListener);
     }
   }
 
