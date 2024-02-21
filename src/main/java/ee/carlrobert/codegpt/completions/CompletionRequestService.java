@@ -131,8 +131,7 @@ public final class CompletionRequestService {
               .setTop_p(settings.getTopP())
               .setMin_p(settings.getMinP())
               .setRepeat_penalty(settings.getRepeatPenalty())
-              .build()
-          , eventListener);
+              .build(), eventListener);
     }
   }
 
