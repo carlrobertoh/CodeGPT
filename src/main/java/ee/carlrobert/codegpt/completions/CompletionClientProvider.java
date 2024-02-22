@@ -49,7 +49,7 @@ public class CompletionClientProvider {
     if (baseHost != null) {
       builder.setUrl(format(baseHost, params.getResourceName()));
     }
-    return builder.build();
+    return builder.build(getDefaultClientBuilder());
   }
 
   public static YouClient getYouClient() {
