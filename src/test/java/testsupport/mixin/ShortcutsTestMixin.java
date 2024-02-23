@@ -14,7 +14,6 @@ public interface ShortcutsTestMixin {
     GeneralSettings.getCurrentState().setSelectedService(ServiceType.OPENAI);
     OpenAICredentialManager.getInstance().setCredential("TEST_API_KEY");
     OpenAISettings.getCurrentState().setModel("gpt-4");
-    OpenAISettings.getCurrentState().setBaseHost(null);
   }
 
   default void useAzureService() {

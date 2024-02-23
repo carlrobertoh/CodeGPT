@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import okhttp3.sse.EventSource;
 import org.jetbrains.annotations.NotNull;
 
 public class GenerateGitCommitMessageAction extends AnAction {
@@ -102,7 +103,7 @@ public class GenerateGitCommitMessageAction extends AnAction {
       private final StringBuilder messageBuilder = new StringBuilder();
 
       @Override
-      public void onMessage(String message) {
+      public void onMessage(String message, EventSource eventSource) {
         messageBuilder.append(message);
         var application = ApplicationManager.getApplication();
         application.invokeLater(() ->

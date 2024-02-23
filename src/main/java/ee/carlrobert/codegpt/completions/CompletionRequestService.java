@@ -16,15 +16,19 @@ import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
+import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
+import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionEventSourceListener;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.util.List;
 import java.util.Optional;
+import okhttp3.Request;
 import okhttp3.sse.EventSource;
+import okhttp3.sse.EventSources;
 
 @Service
 public final class CompletionRequestService {
@@ -36,6 +40,15 @@ public final class CompletionRequestService {
     return ApplicationManager.getApplication().getService(CompletionRequestService.class);
   }
 
+  public EventSource getCustomOpenAIChatCompletionAsync(
+      Request customRequest,
+      CompletionEventListener<String> eventListener) {
+    var httpClient = CompletionClientProvider.getDefaultClientBuilder().build();
+    return EventSources.createFactory(httpClient).newEventSource(
+        customRequest,
+        new OpenAIChatCompletionEventSourceListener(eventListener));
+  }
+
   public EventSource getChatCompletionAsync(
       CallParameters callParameters,
       boolean useContextualSearch,
@@ -44,13 +57,19 @@ public final class CompletionRequestService {
     switch (GeneralSettings.getCurrentState().getSelectedService()) {
       case OPENAI:
         var openAISettings = OpenAISettings.getCurrentState();
-        var customModel = openAISettings.getCustomModel();
         return CompletionClientProvider.getOpenAIClient().getChatCompletionAsync(
             requestProvider.buildOpenAIChatCompletionRequest(
-                customModel.trim().isEmpty() ? openAISettings.getModel() : customModel,
+                openAISettings.getModel(),
                 callParameters,
                 useContextualSearch,
-                openAISettings.isUsingCustomPath() ? openAISettings.getPath() : null),
+                null),
+            eventListener);
+      case CUSTOM_OPENAI:
+        var customConfiguration = CustomServiceSettings.getCurrentState();
+        return getCustomOpenAIChatCompletionAsync(
+            requestProvider.buildCustomOpenAIChatCompletionRequest(
+                customConfiguration,
+                callParameters),
             eventListener);
       case AZURE:
         var azureSettings = AzureSettings.getCurrentState();

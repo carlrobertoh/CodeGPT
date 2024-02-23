@@ -190,6 +190,8 @@ public final class ConversationService {
     switch (serviceType) {
       case OPENAI:
         return OpenAISettings.getCurrentState().getModel();
+      case CUSTOM_OPENAI:
+        return "CustomService";
       case AZURE:
         return AzureSettings.getCurrentState().getDeploymentId();
       case YOU:

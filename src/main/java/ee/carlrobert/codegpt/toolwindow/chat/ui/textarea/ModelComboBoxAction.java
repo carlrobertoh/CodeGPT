@@ -1,5 +1,7 @@
-package ee.carlrobert.codegpt.toolwindow.chat.standard;
+package ee.carlrobert.codegpt.toolwindow.chat.ui.textarea;
 
+import static ee.carlrobert.codegpt.settings.service.ServiceType.CUSTOM_OPENAI;
+import static ee.carlrobert.codegpt.settings.service.ServiceType.OPENAI;
 import static java.lang.String.format;
 
 import com.intellij.openapi.actionSystem.AnAction;
@@ -15,6 +17,7 @@ import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.GeneralSettingsState;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
+import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettingsState;
@@ -56,22 +59,19 @@ public class ModelComboBoxAction extends ComboBoxAction {
     var presentation = ((ComboBoxButton) button).getPresentation();
     var actionGroup = new DefaultActionGroup();
     actionGroup.addSeparator("OpenAI");
-    var settings = OpenAISettings.getCurrentState();
-    if (settings.getCustomModel().isEmpty()) {
-      List.of(
-              OpenAIChatCompletionModel.GPT_4_0125_128k,
-              OpenAIChatCompletionModel.GPT_3_5_0125_16k,
-              OpenAIChatCompletionModel.GPT_4_32k,
-              OpenAIChatCompletionModel.GPT_4,
-              OpenAIChatCompletionModel.GPT_3_5)
-          .forEach(model -> actionGroup.add(createOpenAIModelAction(model, presentation)));
-    } else {
-      actionGroup.add(createModelAction(
-          ServiceType.OPENAI,
-          settings.getCustomModel(),
-          Icons.OpenAI,
-          presentation));
-    }
+    List.of(
+            OpenAIChatCompletionModel.GPT_4_0125_128k,
+            OpenAIChatCompletionModel.GPT_3_5_0125_16k,
+            OpenAIChatCompletionModel.GPT_4_32k,
+            OpenAIChatCompletionModel.GPT_4,
+            OpenAIChatCompletionModel.GPT_3_5)
+        .forEach(model -> actionGroup.add(createOpenAIModelAction(model, presentation)));
+    actionGroup.addSeparator("Custom OpenAI Service");
+    actionGroup.add(createModelAction(
+        CUSTOM_OPENAI,
+        CustomServiceSettings.getCurrentState().getTemplate().getName(),
+        Icons.OpenAI,
+        presentation));
     actionGroup.addSeparator();
     actionGroup.add(
         createModelAction(ServiceType.AZURE, "Azure OpenAI", Icons.Azure, presentation));
@@ -96,7 +96,14 @@ public class ModelComboBoxAction extends ComboBoxAction {
     switch (selectedService) {
       case OPENAI:
         templatePresentation.setIcon(Icons.OpenAI);
-        templatePresentation.setText(getOpenAiPresentationText());
+        templatePresentation.setText(
+            OpenAIChatCompletionModel.findByCode(openAISettings.getModel()).getDescription());
+        break;
+      case CUSTOM_OPENAI:
+        templatePresentation.setIcon(Icons.OpenAI);
+        templatePresentation.setText(CustomServiceSettings.getCurrentState()
+            .getTemplate()
+            .getName());
         break;
       case AZURE:
         templatePresentation.setIcon(Icons.Azure);
@@ -112,14 +119,6 @@ public class ModelComboBoxAction extends ComboBoxAction {
         break;
       default:
     }
-  }
-
-  private String getOpenAiPresentationText() {
-    var settings = OpenAISettings.getCurrentState();
-    if (settings.getCustomModel().isEmpty()) {
-      return OpenAIChatCompletionModel.findByCode(openAISettings.getModel()).getDescription();
-    }
-    return settings.getCustomModel();
   }
 
   private String getLlamaCppPresentationText() {
@@ -178,7 +177,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
   private AnAction createOpenAIModelAction(
       OpenAIChatCompletionModel model,
       Presentation comboBoxPresentation) {
-    createModelAction(ServiceType.OPENAI, model.getDescription(), Icons.OpenAI,
+    createModelAction(OPENAI, model.getDescription(), Icons.OpenAI,
         comboBoxPresentation);
     return new DumbAwareAction(model.getDescription(), "", Icons.OpenAI) {
       @Override
@@ -191,7 +190,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
       public void actionPerformed(@NotNull AnActionEvent e) {
         openAISettings.setModel(model.getCode());
         handleProviderChange(
-            ServiceType.OPENAI,
+            OPENAI,
             model.getDescription(),
             Icons.OpenAI,
             comboBoxPresentation);

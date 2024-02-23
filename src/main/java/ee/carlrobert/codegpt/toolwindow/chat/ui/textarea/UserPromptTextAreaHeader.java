@@ -8,7 +8,6 @@ import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.completions.you.YouSubscriptionNotifier;
 import ee.carlrobert.codegpt.completions.you.auth.SignedOutNotifier;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
-import ee.carlrobert.codegpt.toolwindow.chat.standard.ModelComboBoxAction;
 import java.awt.BorderLayout;
 import javax.swing.JPanel;
 

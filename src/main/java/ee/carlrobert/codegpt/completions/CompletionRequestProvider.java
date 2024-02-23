@@ -5,6 +5,8 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
@@ -14,10 +16,12 @@ import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.conversations.message.Message;
+import ee.carlrobert.codegpt.credentials.CustomServiceCredentialManager;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.IncludedFilesSettings;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
+import ee.carlrobert.codegpt.settings.service.custom.CustomServiceState;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.codegpt.settings.service.you.YouSettings;
@@ -31,11 +35,16 @@ import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMe
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
 import ee.carlrobert.llm.client.you.completion.YouCompletionRequest;
 import ee.carlrobert.llm.client.you.completion.YouCompletionRequestMessage;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import okhttp3.Request;
+import okhttp3.RequestBody;
 import org.jetbrains.annotations.Nullable;
 
 public class CompletionRequestProvider {
@@ -246,5 +255,52 @@ public class CompletionRequestProvider {
     }
 
     return messages.stream().filter(Objects::nonNull).collect(toList());
+  }
+
+  public Request buildCustomOpenAIChatCompletionRequest(
+      CustomServiceState customConfiguration,
+      CallParameters callParameters) {
+    var requestBuilder = new Request.Builder().url(customConfiguration.getUrl().trim());
+    for (var entry : customConfiguration.getHeaders().entrySet()) {
+      String value = entry.getValue();
+      if (value.contains("$CUSTOM_SERVICE_API_KEY")) {
+        value = value.replace("$CUSTOM_SERVICE_API_KEY",
+            CustomServiceCredentialManager.getInstance().getCredential());
+      }
+      requestBuilder.addHeader(entry.getKey(), value);
+    }
+
+    var body = customConfiguration.getBody().entrySet().stream()
+        .collect(Collectors.toMap(
+            Map.Entry::getKey,
+            entry -> processEntryValue(entry.getValue(), callParameters)
+        ));
+
+    try {
+      var requestBody = RequestBody.create(new ObjectMapper()
+          .writerWithDefaultPrettyPrinter()
+          .writeValueAsString(body)
+          .getBytes(StandardCharsets.UTF_8));
+      return requestBuilder.post(requestBody).build();
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private Object processEntryValue(Object value, CallParameters callParameters) {
+    if (!(value instanceof String)) {
+      return value;
+    }
+
+    String stringValue = (String) value;
+    switch (stringValue.toLowerCase().trim()) {
+      case "$openai_messages":
+        return buildMessages(callParameters, false);
+      case "true":
+      case "false":
+        return Boolean.parseBoolean(stringValue);
+      default:
+        return value;
+    }
   }
 }

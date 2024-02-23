@@ -6,10 +6,13 @@ import com.intellij.openapi.util.Disposer;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
+import ee.carlrobert.codegpt.credentials.CustomServiceCredentialManager;
 import ee.carlrobert.codegpt.credentials.LlamaCredentialManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettingsForm;
+import ee.carlrobert.codegpt.settings.service.custom.CustomServiceForm;
+import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.llama.form.LlamaSettingsForm;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
@@ -56,6 +59,8 @@ public class GeneralSettingsConfigurable implements Configurable {
     return !component.getDisplayName().equals(settings.getDisplayName())
         || component.getSelectedService() != settings.getSelectedService()
         || OpenAISettings.getInstance().isModified(serviceSelectionForm.getOpenAISettingsForm())
+        || CustomServiceSettings.getInstance()
+        .isModified(serviceSelectionForm.getCustomConfigurationSettingsForm())
         || AzureSettings.getInstance().isModified(serviceSelectionForm.getAzureSettingsForm())
         || YouSettings.getInstance().isModified(serviceSelectionForm.getYouSettingsForm())
         || LlamaSettings.getInstance().isModified(serviceSelectionForm.getLlamaSettingsForm());
@@ -70,6 +75,7 @@ public class GeneralSettingsConfigurable implements Configurable {
     var serviceSelectionForm = component.getServiceSelectionForm();
     var openAISettingsForm = serviceSelectionForm.getOpenAISettingsForm();
     applyOpenAISettings(openAISettingsForm);
+    applyCustomOpenAISettings(serviceSelectionForm.getCustomConfigurationSettingsForm());
     applyAzureSettings(serviceSelectionForm.getAzureSettingsForm());
     applyYouSettings(serviceSelectionForm.getYouSettingsForm());
     applyLlamaSettings(serviceSelectionForm.getLlamaSettingsForm());
@@ -85,6 +91,16 @@ public class GeneralSettingsConfigurable implements Configurable {
             .send();
       }
     }
+  }
+
+  private void applyOpenAISettings(OpenAISettingsForm form) {
+    OpenAICredentialManager.getInstance().setCredential(form.getApiKey());
+    OpenAISettings.getInstance().loadState(form.getCurrentState());
+  }
+
+  private void applyCustomOpenAISettings(CustomServiceForm form) {
+    CustomServiceCredentialManager.getInstance().setCredential(form.getApiKey());
+    CustomServiceSettings.getInstance().loadState(form.getCurrentState());
   }
 
   private void applyLlamaSettings(LlamaSettingsForm form) {
@@ -109,12 +125,7 @@ public class GeneralSettingsConfigurable implements Configurable {
     var settings = GeneralSettings.getCurrentState();
     component.setDisplayName(settings.getDisplayName());
     component.setSelectedService(settings.getSelectedService());
-
-    var serviceSelectionForm = component.getServiceSelectionForm();
-    serviceSelectionForm.getOpenAISettingsForm().resetForm();
-    serviceSelectionForm.getAzureSettingsForm().resetForm();
-    serviceSelectionForm.getLlamaSettingsForm().resetForm();
-    serviceSelectionForm.getYouSettingsForm().resetForm();
+    component.getServiceSelectionForm().resetForms();
   }
 
   @Override
@@ -123,11 +134,6 @@ public class GeneralSettingsConfigurable implements Configurable {
       Disposer.dispose(parentDisposable);
     }
     component = null;
-  }
-
-  private void applyOpenAISettings(OpenAISettingsForm form) {
-    OpenAICredentialManager.getInstance().setCredential(form.getApiKey());
-    OpenAISettings.getInstance().loadState(form.getCurrentState());
   }
 
   private void resetActiveTab() {
