@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Support for custom OpenAI-compatible service (#383)
+- Llama cpp for generation of git commit message (#380)
+- Remote server settings for Windows + Mixtral Instruct template (#378)
+
+### Fixed
+
+- Proxy settings for azure client (#382)
+
 ## [2.3.1] - 2024-02-19
 
 ### Added
