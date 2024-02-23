@@ -26,14 +26,9 @@ import okhttp3.OkHttpClient;
 public class CompletionClientProvider {
 
   public static OpenAIClient getOpenAIClient() {
-    var settings = OpenAISettings.getCurrentState();
-    var builder = new OpenAIClient.Builder(OpenAICredentialManager.getInstance().getCredential())
-        .setOrganization(settings.getOrganization());
-    var baseHost = settings.getBaseHost();
-    if (baseHost != null) {
-      builder.setHost(baseHost);
-    }
-    return builder.build(getDefaultClientBuilder());
+    return new OpenAIClient.Builder(OpenAICredentialManager.getInstance().getCredential())
+        .setOrganization(OpenAISettings.getCurrentState().getOrganization())
+        .build(getDefaultClientBuilder());
   }
 
   public static AzureClient getAzureClient() {
@@ -87,7 +82,7 @@ public class CompletionClientProvider {
     return builder.build(getDefaultClientBuilder());
   }
 
-  private static OkHttpClient.Builder getDefaultClientBuilder() {
+  public static OkHttpClient.Builder getDefaultClientBuilder() {
     OkHttpClient.Builder builder = new OkHttpClient.Builder();
     var advancedSettings = AdvancedSettings.getCurrentState();
     var proxyHost = advancedSettings.getProxyHost();

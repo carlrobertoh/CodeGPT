@@ -10,6 +10,10 @@ public class CallParameters {
   private final Message message;
   private final boolean retry;
 
+  public CallParameters(Conversation conversation, Message message) {
+    this(conversation, ConversationType.DEFAULT, message, false);
+  }
+
   public CallParameters(
       Conversation conversation,
       ConversationType conversationType,

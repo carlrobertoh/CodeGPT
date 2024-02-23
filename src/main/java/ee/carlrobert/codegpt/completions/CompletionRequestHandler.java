@@ -101,7 +101,7 @@ public class CompletionRequestHandler {
       }
 
       @Override
-      public void onMessage(String message) {
+      public void onMessage(String message, EventSource eventSource) {
         publish(message);
       }
 

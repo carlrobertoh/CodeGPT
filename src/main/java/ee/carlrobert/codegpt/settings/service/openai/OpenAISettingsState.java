@@ -5,17 +5,8 @@ import java.util.Objects;
 
 public class OpenAISettingsState {
 
-  private static final String BASE_PATH = "/v1/chat/completions";
-
   private String organization = "";
-  private String baseHost = "https://api.openai.com";
-  private String path = BASE_PATH;
-  private String model = OpenAIChatCompletionModel.GPT_3_5.getCode();
-  private String customModel = "";
-
-  public boolean isUsingCustomPath() {
-    return !BASE_PATH.equals(path);
-  }
+  private String model = OpenAIChatCompletionModel.GPT_3_5_0125_16k.getCode();
 
   public String getOrganization() {
     return organization;
@@ -25,36 +16,12 @@ public class OpenAISettingsState {
     this.organization = organization;
   }
 
-  public String getBaseHost() {
-    return baseHost;
-  }
-
-  public void setBaseHost(String openAIBaseHost) {
-    this.baseHost = openAIBaseHost;
-  }
-
-  public String getPath() {
-    return path;
-  }
-
-  public void setPath(String path) {
-    this.path = path;
-  }
-
   public String getModel() {
     return model;
   }
 
   public void setModel(String model) {
     this.model = model;
-  }
-
-  public String getCustomModel() {
-    return customModel;
-  }
-
-  public void setCustomModel(String customModel) {
-    this.customModel = customModel;
   }
 
   @Override
@@ -66,15 +33,11 @@ public class OpenAISettingsState {
       return false;
     }
     OpenAISettingsState that = (OpenAISettingsState) o;
-    return Objects.equals(organization, that.organization)
-        && Objects.equals(baseHost, that.baseHost)
-        && Objects.equals(path, that.path)
-        && Objects.equals(model, that.model)
-        && Objects.equals(customModel, that.customModel);
+    return Objects.equals(organization, that.organization) && Objects.equals(model, that.model);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(organization, baseHost, path, model, customModel);
+    return Objects.hash(organization, model);
   }
 }
