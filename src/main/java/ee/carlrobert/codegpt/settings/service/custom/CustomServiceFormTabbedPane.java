@@ -18,7 +18,7 @@ class CustomServiceFormTabbedPane extends JBTabbedPane {
   private final JBTable headersTable;
   private final JBTable bodyTable;
 
-  CustomServiceFormTabbedPane(CustomServiceState customConfiguration) {
+  CustomServiceFormTabbedPane(CustomServiceSettingsState customConfiguration) {
     headersTable = new JBTable(
         new DefaultTableModel(toArray(customConfiguration.getHeaders()),
             new Object[]{"Key", "Value"}));

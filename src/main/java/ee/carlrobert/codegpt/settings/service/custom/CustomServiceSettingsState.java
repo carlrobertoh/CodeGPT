@@ -2,13 +2,16 @@ package ee.carlrobert.codegpt.settings.service.custom;
 
 import static ee.carlrobert.codegpt.settings.service.custom.CustomServiceTemplate.OPENAI;
 
+import com.intellij.util.xmlb.annotations.OptionTag;
+import ee.carlrobert.codegpt.util.MapConverter;
 import java.util.Map;
 import java.util.Objects;
 
-public class CustomServiceState {
+public class CustomServiceSettingsState {
 
   private String url = OPENAI.getUrl();
   private Map<String, String> headers = OPENAI.getHeaders();
+  @OptionTag(converter = MapConverter.class)
   private Map<String, ?> body = OPENAI.getBody();
   private CustomServiceTemplate template = OPENAI;
 
@@ -52,7 +55,7 @@ public class CustomServiceState {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    CustomServiceState that = (CustomServiceState) o;
+    CustomServiceSettingsState that = (CustomServiceSettingsState) o;
     return Objects.equals(url, that.url)
         && Objects.equals(headers, that.headers)
         && Objects.equals(body, that.body)

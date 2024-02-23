@@ -11,22 +11,22 @@ import org.jetbrains.annotations.NotNull;
 @State(
     name = "CodeGPT_CustomServiceSettings",
     storages = @Storage("CodeGPT_CustomServiceSettings.xml"))
-public class CustomServiceSettings implements PersistentStateComponent<CustomServiceState> {
+public class CustomServiceSettings implements PersistentStateComponent<CustomServiceSettingsState> {
 
-  private CustomServiceState state = new CustomServiceState();
+  private CustomServiceSettingsState state = new CustomServiceSettingsState();
 
   @Override
   @NotNull
-  public CustomServiceState getState() {
+  public CustomServiceSettingsState getState() {
     return state;
   }
 
   @Override
-  public void loadState(@NotNull CustomServiceState state) {
+  public void loadState(@NotNull CustomServiceSettingsState state) {
     this.state = state;
   }
 
-  public static CustomServiceState getCurrentState() {
+  public static CustomServiceSettingsState getCurrentState() {
     return getInstance().getState();
   }
 

@@ -21,7 +21,7 @@ import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.IncludedFilesSettings;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
-import ee.carlrobert.codegpt.settings.service.custom.CustomServiceState;
+import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettingsState;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.codegpt.settings.service.you.YouSettings;
@@ -258,7 +258,7 @@ public class CompletionRequestProvider {
   }
 
   public Request buildCustomOpenAIChatCompletionRequest(
-      CustomServiceState customConfiguration,
+      CustomServiceSettingsState customConfiguration,
       CallParameters callParameters) {
     var requestBuilder = new Request.Builder().url(customConfiguration.getUrl().trim());
     for (var entry : customConfiguration.getHeaders().entrySet()) {

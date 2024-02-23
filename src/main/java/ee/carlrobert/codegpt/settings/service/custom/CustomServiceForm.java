@@ -43,7 +43,7 @@ public class CustomServiceForm {
   private final JBLabel templateHelpText;
   private final ComboBox<CustomServiceTemplate> templateComboBox;
 
-  public CustomServiceForm(CustomServiceState settings) {
+  public CustomServiceForm(CustomServiceSettingsState settings) {
     apiKeyField = new JBPasswordField();
     apiKeyField.setColumns(30);
     apiKeyField.setText(CustomServiceCredentialManager.getInstance().getCredential());
@@ -104,8 +104,8 @@ public class CustomServiceForm {
     return apiKey.isEmpty() ? null : apiKey;
   }
 
-  public CustomServiceState getCurrentState() {
-    var state = new CustomServiceState();
+  public CustomServiceSettingsState getCurrentState() {
+    var state = new CustomServiceSettingsState();
     state.setUrl(urlField.getText());
     state.setTemplate(templateComboBox.getItem());
     state.setHeaders(tabbedPane.getHeaders());
@@ -136,7 +136,7 @@ public class CustomServiceForm {
     }
   }
 
-  private void testConnection(CustomServiceState customConfiguration) {
+  private void testConnection(CustomServiceSettingsState customConfiguration) {
     var conversation = new Conversation();
     var request = new CompletionRequestProvider(conversation)
         .buildCustomOpenAIChatCompletionRequest(
