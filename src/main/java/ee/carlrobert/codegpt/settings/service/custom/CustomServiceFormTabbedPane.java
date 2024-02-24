@@ -8,6 +8,7 @@ import com.intellij.ui.components.JBTabbedPane;
 import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.JBUI;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.swing.JPanel;
@@ -68,9 +69,31 @@ class CustomServiceFormTabbedPane extends JBTabbedPane {
     var data = new HashMap<String, Object>();
     for (int i = 0; i < model.getRowCount(); i++) {
       var key = (String) model.getValueAt(i, 0);
-      data.put(key, model.getValueAt(i, 1));
+      data.put(key, parseValue(model.getValueAt(i, 1)));
     }
     return data;
+  }
+
+  private static Object parseValue(Object value) {
+    if (!(value instanceof String)) {
+      return value;
+    }
+
+    var stringValue = (String) value;
+    try {
+      return Integer.parseInt(stringValue);
+    } catch (NumberFormatException e) {
+      // ignore
+    }
+    try {
+      return Double.parseDouble(stringValue);
+    } catch (NumberFormatException e) {
+      // ignore
+    }
+    if (List.of("true", "false").contains(stringValue.toLowerCase().trim())) {
+      return Boolean.parseBoolean(stringValue);
+    }
+    return value;
   }
 
   public static Object[][] toArray(Map<?, ?> actionsMap) {

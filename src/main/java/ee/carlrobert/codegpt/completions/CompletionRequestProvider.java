@@ -216,7 +216,12 @@ public class CompletionRequestProvider {
               if (!streamRequest && "stream".equals(entry.getKey())) {
                 return false;
               }
-              return processEntryValue(entry.getValue(), messages);
+
+              var value = entry.getValue();
+              if (value instanceof String && "$OPENAI_MESSAGES".equals(((String) value).trim())) {
+                return messages;
+              }
+              return value;
             }
         ));
 
@@ -311,24 +316,5 @@ public class CompletionRequestProvider {
     }
 
     return messages.stream().filter(Objects::nonNull).collect(toList());
-  }
-
-  private static Object processEntryValue(
-      Object value,
-      List<OpenAIChatCompletionMessage> messages) {
-    if (!(value instanceof String)) {
-      return value;
-    }
-
-    String stringValue = (String) value;
-    switch (stringValue.toLowerCase().trim()) {
-      case "$openai_messages":
-        return messages;
-      case "true":
-      case "false":
-        return Boolean.parseBoolean(stringValue);
-      default:
-        return value;
-    }
   }
 }
