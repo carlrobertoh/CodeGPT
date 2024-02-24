@@ -21,6 +21,7 @@ import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.IncludedFilesSettings;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
+import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings;
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettingsState;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
@@ -88,8 +89,7 @@ public class CompletionRequestProvider {
         .replace("{QUESTION}", userPrompt);
   }
 
-  public static OpenAIChatCompletionRequest buildOpenAILookupCompletionRequest(
-      String context) {
+  public static OpenAIChatCompletionRequest buildOpenAILookupCompletionRequest(String context) {
     return new OpenAIChatCompletionRequest.Builder(
         List.of(
             new OpenAIChatCompletionMessage("system",
@@ -98,6 +98,17 @@ public class CompletionRequestProvider {
         .setModel(OpenAISettings.getCurrentState().getModel())
         .setStream(false)
         .build();
+  }
+
+  public static Request buildCustomOpenAILookupCompletionRequest(String context) {
+    return buildCustomOpenAIChatCompletionRequest(
+        CustomServiceSettings.getCurrentState(),
+        List.of(
+            new OpenAIChatCompletionMessage(
+                "system",
+                getResourceContent("/prompts/method-name-generator.txt")),
+            new OpenAIChatCompletionMessage("user", context)),
+        false);
   }
 
   public static LlamaCompletionRequest buildLlamaLookupCompletionRequest(String context) {
@@ -173,6 +184,51 @@ public class CompletionRequestProvider {
     }
 
     return builder.build();
+  }
+
+  public Request buildCustomOpenAIChatCompletionRequest(
+      CustomServiceSettingsState customConfiguration,
+      CallParameters callParameters) {
+    return buildCustomOpenAIChatCompletionRequest(
+        customConfiguration,
+        buildMessages(callParameters, false),
+        true);
+  }
+
+  private static Request buildCustomOpenAIChatCompletionRequest(
+      CustomServiceSettingsState customConfiguration,
+      List<OpenAIChatCompletionMessage> messages,
+      boolean streamRequest) {
+    var requestBuilder = new Request.Builder().url(customConfiguration.getUrl().trim());
+    for (var entry : customConfiguration.getHeaders().entrySet()) {
+      String value = entry.getValue();
+      if (value.contains("$CUSTOM_SERVICE_API_KEY")) {
+        value = value.replace("$CUSTOM_SERVICE_API_KEY",
+            CustomServiceCredentialManager.getInstance().getCredential());
+      }
+      requestBuilder.addHeader(entry.getKey(), value);
+    }
+
+    var body = customConfiguration.getBody().entrySet().stream()
+        .collect(Collectors.toMap(
+            Map.Entry::getKey,
+            entry -> {
+              if (!streamRequest && "stream".equals(entry.getKey())) {
+                return false;
+              }
+              return processEntryValue(entry.getValue(), messages);
+            }
+        ));
+
+    try {
+      var requestBody = RequestBody.create(new ObjectMapper()
+          .writerWithDefaultPrettyPrinter()
+          .writeValueAsString(body)
+          .getBytes(StandardCharsets.UTF_8));
+      return requestBuilder.post(requestBody).build();
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public List<OpenAIChatCompletionMessage> buildMessages(
@@ -257,37 +313,9 @@ public class CompletionRequestProvider {
     return messages.stream().filter(Objects::nonNull).collect(toList());
   }
 
-  public Request buildCustomOpenAIChatCompletionRequest(
-      CustomServiceSettingsState customConfiguration,
-      CallParameters callParameters) {
-    var requestBuilder = new Request.Builder().url(customConfiguration.getUrl().trim());
-    for (var entry : customConfiguration.getHeaders().entrySet()) {
-      String value = entry.getValue();
-      if (value.contains("$CUSTOM_SERVICE_API_KEY")) {
-        value = value.replace("$CUSTOM_SERVICE_API_KEY",
-            CustomServiceCredentialManager.getInstance().getCredential());
-      }
-      requestBuilder.addHeader(entry.getKey(), value);
-    }
-
-    var body = customConfiguration.getBody().entrySet().stream()
-        .collect(Collectors.toMap(
-            Map.Entry::getKey,
-            entry -> processEntryValue(entry.getValue(), callParameters)
-        ));
-
-    try {
-      var requestBody = RequestBody.create(new ObjectMapper()
-          .writerWithDefaultPrettyPrinter()
-          .writeValueAsString(body)
-          .getBytes(StandardCharsets.UTF_8));
-      return requestBuilder.post(requestBody).build();
-    } catch (JsonProcessingException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  private Object processEntryValue(Object value, CallParameters callParameters) {
+  private static Object processEntryValue(
+      Object value,
+      List<OpenAIChatCompletionMessage> messages) {
     if (!(value instanceof String)) {
       return value;
     }
@@ -295,7 +323,7 @@ public class CompletionRequestProvider {
     String stringValue = (String) value;
     switch (stringValue.toLowerCase().trim()) {
       case "$openai_messages":
-        return buildMessages(callParameters, false);
+        return messages;
       case "true":
       case "false":
         return Boolean.parseBoolean(stringValue);

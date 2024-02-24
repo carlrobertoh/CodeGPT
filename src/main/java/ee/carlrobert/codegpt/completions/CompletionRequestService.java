@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt.completions;
 
 import static ee.carlrobert.codegpt.settings.service.ServiceType.AZURE;
+import static ee.carlrobert.codegpt.settings.service.ServiceType.CUSTOM_OPENAI;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.LLAMA_CPP;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.OPENAI;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.YOU;
@@ -19,11 +20,14 @@ import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
+import ee.carlrobert.llm.client.DeserializationUtil;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionEventSourceListener;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
+import ee.carlrobert.llm.client.openai.completion.response.OpenAIChatCompletionResponse;
 import ee.carlrobert.llm.completion.CompletionEventListener;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import okhttp3.Request;
@@ -160,10 +164,25 @@ public final class CompletionRequestService {
       return Optional.empty();
     }
 
+    if (selectedService == CUSTOM_OPENAI) {
+      var request = CompletionRequestProvider.buildCustomOpenAILookupCompletionRequest(prompt);
+      var httpClient = CompletionClientProvider.getDefaultClientBuilder().build();
+      try (var response = httpClient.newCall(request).execute()) {
+        return tryExtractContent(
+            DeserializationUtil.mapResponse(response, OpenAIChatCompletionResponse.class));
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
+
     var request = CompletionRequestProvider.buildOpenAILookupCompletionRequest(prompt);
     var response = selectedService == OPENAI
         ? CompletionClientProvider.getOpenAIClient().getChatCompletion(request)
         : CompletionClientProvider.getAzureClient().getChatCompletion(request);
+    return tryExtractContent(response);
+  }
+
+  private Optional<String> tryExtractContent(OpenAIChatCompletionResponse response) {
     return response
         .getChoices()
         .stream()

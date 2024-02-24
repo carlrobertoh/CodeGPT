@@ -1,2 +1,1 @@
-Given an existing function or method body, generate five alternative names for the function.
-The response must be a comma-separated list of names. Exclude any additional information.
+Provide five alternative names for a given function or method body. Your response should be a list of names, separated by commas, without any extra information.
