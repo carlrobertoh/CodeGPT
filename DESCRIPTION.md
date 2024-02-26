@@ -13,6 +13,8 @@ Access state-of-the-art LLMs like GPT-4, Code LLama and more, all for free.
 
    a) **OpenAI** - Requires authentication via OpenAI API key.
 
+   a) **Custom OpenAI-compatible service** - Choose between multiple different providers, such as Together, Anyscale, Groq, Ollama and many more.
+
    b) **Azure** - Requires authentication via Active Directory or API key.
 
    c) **You.com** - A free, web-connected service with an optional upgrade to You⚡Pro for enhanced features.
