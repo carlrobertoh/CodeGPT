@@ -25,7 +25,7 @@ public enum InfillPromptTemplate {
       return format("<fim_prefix>%s<fim_suffix>%s<fim_middle>", prefix, suffix);
     }
   },
-  DEEPSEEK_CODER("DeepSeek Coder") {
+  DEEPSEEK_CODER("DeepSeek Coder", List.of("<|EOT|>")) {
     @Override
     public String buildPrompt(String prefix, String suffix) {
       return format("<｜fim▁begin｜>%s<｜fim▁hole｜>%s<｜fim▁end｜>", prefix, suffix);
