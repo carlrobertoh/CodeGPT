@@ -28,7 +28,7 @@ public enum InfillPromptTemplate {
   DEEPSEEK_CODER("DeepSeek Coder") {
     @Override
     public String buildPrompt(String prefix, String suffix) {
-      return format("<|fim_begin|>%s<|fim_hole|>%s<|fim_end|>", prefix, suffix);
+      return format("<｜fim▁begin｜>%s<｜fim▁hole｜>%s<｜fim▁end｜>", prefix, suffix);
     }
   };
 
