@@ -5,6 +5,7 @@ import ee.carlrobert.codegpt.CodeGPTBundle;
 public enum ServiceType {
   OPENAI("OPENAI", "service.openai.title", "chat.completion"),
   CUSTOM_OPENAI("CUSTOM_OPENAI", "service.custom.openai.title", "custom.openai.chat.completion"),
+  ANTHROPIC("ANTHROPIC", "service.anthropic.title", "anthropic.chat.completion"),
   AZURE("AZURE", "service.azure.title", "azure.chat.completion"),
   YOU("YOU", "service.you.title", "you.chat.completion"),
   LLAMA_CPP("LLAMA_CPP", "service.llama.title", "llama.chat.completion");

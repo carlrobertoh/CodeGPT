@@ -73,6 +73,12 @@ public class ModelComboBoxAction extends ComboBoxAction {
         Icons.OpenAI,
         presentation));
     actionGroup.addSeparator();
+    actionGroup.add(createModelAction(
+        ServiceType.ANTHROPIC,
+        "Anthropic (Claude)",
+        Icons.Anthropic,
+        presentation));
+    actionGroup.addSeparator();
     actionGroup.add(
         createModelAction(ServiceType.AZURE, "Azure OpenAI", Icons.Azure, presentation));
     actionGroup.addSeparator();
@@ -104,6 +110,10 @@ public class ModelComboBoxAction extends ComboBoxAction {
         templatePresentation.setText(CustomServiceSettings.getCurrentState()
             .getTemplate()
             .getName());
+        break;
+      case ANTHROPIC:
+        templatePresentation.setIcon(Icons.Anthropic);
+        templatePresentation.setText("Anthropic (Claude)");
         break;
       case AZURE:
         templatePresentation.setIcon(Icons.Azure);

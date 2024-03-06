@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.settings;
 
+import static ee.carlrobert.codegpt.settings.service.ServiceType.ANTHROPIC;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.AZURE;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.CUSTOM_OPENAI;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.LLAMA_CPP;
@@ -40,6 +41,7 @@ public class GeneralSettingsComponent {
     cards.add(
         serviceSelectionForm.getCustomConfigurationSettingsForm().getForm(),
         CUSTOM_OPENAI.getCode());
+    cards.add(serviceSelectionForm.getAnthropicSettingsForm().getForm(), ANTHROPIC.getCode());
     cards.add(serviceSelectionForm.getAzureSettingsForm().getForm(), AZURE.getCode());
     cards.add(serviceSelectionForm.getYouSettingsForm(), YOU.getCode());
     cards.add(serviceSelectionForm.getLlamaSettingsForm(), LLAMA_CPP.getCode());

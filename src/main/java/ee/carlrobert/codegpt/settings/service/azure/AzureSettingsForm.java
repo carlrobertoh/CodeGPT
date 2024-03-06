@@ -91,7 +91,7 @@ public class AzureSettingsForm {
                 "settingsConfigurable.service.azure.deploymentId.comment")))
         .add(UI.PanelFactory.panel(azureApiVersionField)
             .withLabel(CodeGPTBundle.get(
-                "settingsConfigurable.service.azure.apiVersion.label"))
+                "shared.apiVersion"))
             .resizeX(false)
             .withComment(CodeGPTBundle.get(
                 "settingsConfigurable.service.azure.apiVersion.comment")))

@@ -29,6 +29,7 @@
           serviceImplementation="ee.carlrobert.codegpt.telemetry.core.service.TelemetryServiceFactory"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.GeneralSettings"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.service.azure.AzureSettings"/>
+        <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettings"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.service.openai.OpenAISettings"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.service.you.YouSettings"/>

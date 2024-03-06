@@ -8,6 +8,7 @@ import ee.carlrobert.codegpt.completions.CallParameters;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
+import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettings;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
@@ -192,6 +193,8 @@ public final class ConversationService {
         return OpenAISettings.getCurrentState().getModel();
       case CUSTOM_OPENAI:
         return "CustomService";
+      case ANTHROPIC:
+        return AnthropicSettings.getCurrentState().getModel();
       case AZURE:
         return AzureSettings.getCurrentState().getDeploymentId();
       case YOU:

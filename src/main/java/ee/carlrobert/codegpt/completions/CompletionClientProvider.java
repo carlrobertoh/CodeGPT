@@ -4,13 +4,16 @@ import static java.lang.String.format;
 
 import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.completions.you.YouUserManager;
+import ee.carlrobert.codegpt.credentials.AnthropicCredentialsManager;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.LlamaCredentialManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
 import ee.carlrobert.codegpt.settings.advanced.AdvancedSettings;
+import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettings;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
+import ee.carlrobert.llm.client.anthropic.ClaudeClient;
 import ee.carlrobert.llm.client.azure.AzureClient;
 import ee.carlrobert.llm.client.azure.AzureCompletionRequestParams;
 import ee.carlrobert.llm.client.llama.LlamaClient;
@@ -29,6 +32,13 @@ public class CompletionClientProvider {
     return new OpenAIClient.Builder(OpenAICredentialManager.getInstance().getCredential())
         .setOrganization(OpenAISettings.getCurrentState().getOrganization())
         .build(getDefaultClientBuilder());
+  }
+
+  public static ClaudeClient getClaudeClient() {
+    return new ClaudeClient(
+        AnthropicCredentialsManager.getInstance().getCredential(),
+        AnthropicSettings.getCurrentState().getApiVersion(),
+        getDefaultClientBuilder());
   }
 
   public static AzureClient getAzureClient() {

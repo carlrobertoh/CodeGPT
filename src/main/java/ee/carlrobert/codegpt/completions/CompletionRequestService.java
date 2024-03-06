@@ -75,6 +75,10 @@ public final class CompletionRequestService {
                 customConfiguration,
                 callParameters),
             eventListener);
+      case ANTHROPIC:
+        return CompletionClientProvider.getClaudeClient().getCompletionAsync(
+            requestProvider.buildAnthropicChatCompletionRequest(callParameters),
+            eventListener);
       case AZURE:
         var azureSettings = AzureSettings.getCurrentState();
         return CompletionClientProvider.getAzureClient().getChatCompletionAsync(

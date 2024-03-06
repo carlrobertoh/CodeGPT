@@ -1,6 +1,8 @@
 package ee.carlrobert.codegpt.settings.service;
 
 import com.intellij.openapi.Disposable;
+import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettings;
+import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettingsForm;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettingsForm;
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceForm;
@@ -16,6 +18,7 @@ public class ServiceSelectionForm {
 
   private final OpenAISettingsForm openAISettingsForm;
   private final CustomServiceForm customServiceForm;
+  private final AnthropicSettingsForm anthropicSettingsForm;
   private final AzureSettingsForm azureSettingsForm;
   private final LlamaSettingsForm llamaSettingsForm;
   private final YouSettingsForm youSettingsForm;
@@ -24,6 +27,7 @@ public class ServiceSelectionForm {
     openAISettingsForm = new OpenAISettingsForm(OpenAISettings.getCurrentState());
     customServiceForm = new CustomServiceForm(
         CustomServiceSettings.getCurrentState());
+    anthropicSettingsForm = new AnthropicSettingsForm(AnthropicSettings.getCurrentState());
     azureSettingsForm = new AzureSettingsForm(AzureSettings.getCurrentState());
     youSettingsForm = new YouSettingsForm(YouSettings.getCurrentState(), parentDisposable);
     llamaSettingsForm = new LlamaSettingsForm(LlamaSettings.getCurrentState());
@@ -35,6 +39,10 @@ public class ServiceSelectionForm {
 
   public CustomServiceForm getCustomConfigurationSettingsForm() {
     return customServiceForm;
+  }
+
+  public AnthropicSettingsForm getAnthropicSettingsForm() {
+    return anthropicSettingsForm;
   }
 
   public AzureSettingsForm getAzureSettingsForm() {
@@ -52,6 +60,7 @@ public class ServiceSelectionForm {
   public void resetForms() {
     openAISettingsForm.resetForm();
     customServiceForm.resetForm();
+    anthropicSettingsForm.resetForm();
     azureSettingsForm.resetForm();
     youSettingsForm.resetForm();
     llamaSettingsForm.resetForm();
