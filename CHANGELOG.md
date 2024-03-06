@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Support for Anthropic Claude service
 
+### Fixed
+
+- `IndexOutOfBoundsException` for Azure completions
+
 ## [2.4.0] - 2024-02-26
 
 ### Added
