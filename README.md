@@ -7,7 +7,7 @@
   </a>
   <h1 style="margin: 0;" align="center">CodeGPT</h1>
   <p>
-    A JetBrains extension providing access to state-of-the-art LLMs, such as GPT-4, Code Llama, and others, all for free
+    A JetBrains extension providing access to state-of-the-art LLMs, such as GPT-4, Claude 3, Code Llama, and others, all for free
   </p>
 </div>
 
@@ -92,9 +92,13 @@ The plugin provides several key features, such as:
 
    b) **Azure** - Requires authentication via Active Directory or API key.
 
-   c) **You.com** - A free, web-connected service with an optional upgrade to You⚡Pro for enhanced features.
+   c) **Custom OpenAI-compatible service** - Choose between multiple different providers, such as Together, Anyscale, Groq, Ollama and many more.
 
-   d) **LLaMA C/C++ Port** - Recommended to have a decent computer to handle the computational requirements of running inference.
+   d) **Anthropic** - Requires authentication via API key.
+
+   e) **You.com** - A free, web-connected service with an optional upgrade to You⚡Pro for enhanced features.
+
+   f) **LLaMA C/C++ Port** - Recommended to have a decent computer to handle the computational requirements of running inference.
    > **Note**: Currently supported only on Linux and MacOS.
 
 3. **Start Using the Features**

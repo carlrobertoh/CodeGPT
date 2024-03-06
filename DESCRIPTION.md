@@ -3,7 +3,7 @@
 ## Introducing CodeGPT: Your Free, Open-Source AI Copilot for Coding
 
 CodeGPT is your go-to AI assistant, designed to enhance your coding skills and optimize your programming time.
-Access state-of-the-art LLMs like GPT-4, Code LLama and more, all for free.
+Access state-of-the-art LLMs like GPT-4, Claude 3, Code LLama and more, all for free.
 
 ## Quick Start Guide
 
@@ -13,13 +13,15 @@ Access state-of-the-art LLMs like GPT-4, Code LLama and more, all for free.
 
    a) **OpenAI** - Requires authentication via OpenAI API key.
 
-   a) **Custom OpenAI-compatible service** - Choose between multiple different providers, such as Together, Anyscale, Groq, Ollama and many more.
+   b) **Custom OpenAI-compatible service** - Choose between multiple different providers, such as Together, Anyscale, Groq, Ollama and many more.
+   
+   c) **Anthropic** - Requires authentication via API key.
 
-   b) **Azure** - Requires authentication via Active Directory or API key.
+   d) **Azure** - Requires authentication via Active Directory or API key.
 
-   c) **You.com** - A free, web-connected service with an optional upgrade to You⚡Pro for enhanced features.
+   e) **You.com** - A free, web-connected service with an optional upgrade to You⚡Pro for enhanced features.
 
-   d) **LLaMA C/C++ Port** - Run Code Llama, WizardCoder, Deepseek Coder, and other state-of-the-art models locally for free.
+   f) **LLaMA C/C++ Port** - Run Code Llama, WizardCoder, Deepseek Coder, and other state-of-the-art models locally for free.
 
 3. **Start Using the Features**
 
