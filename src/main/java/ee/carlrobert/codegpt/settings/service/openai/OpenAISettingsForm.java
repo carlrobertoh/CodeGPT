@@ -51,8 +51,7 @@ public class OpenAISettingsForm {
         .createPanel();
 
     return FormBuilder.createFormBuilder()
-        .addComponent(new TitledSeparator(
-            CodeGPTBundle.get("settingsConfigurable.service.openai.configuration.title")))
+        .addComponent(new TitledSeparator(CodeGPTBundle.get("shared.configuration")))
         .addComponent(withEmptyLeftBorder(configurationGrid))
         .addComponentFillVertically(new JPanel(), 0)
         .getPanel();

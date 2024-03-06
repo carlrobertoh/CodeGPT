@@ -8,6 +8,7 @@ import ee.carlrobert.codegpt.completions.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
+import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettings;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
@@ -43,6 +44,10 @@ public class GeneralSettings implements PersistentStateComponent<GeneralSettings
       state.setSelectedService(ServiceType.OPENAI);
       OpenAISettings.getCurrentState().setModel(conversation.getModel());
     }
+    if ("anthropic.chat.completion".equals(clientCode)) {
+      state.setSelectedService(ServiceType.ANTHROPIC);
+      AnthropicSettings.getCurrentState().setModel(conversation.getModel());
+    }
     if ("azure.chat.completion".equals(clientCode)) {
       state.setSelectedService(ServiceType.AZURE);
     }
@@ -67,6 +72,8 @@ public class GeneralSettings implements PersistentStateComponent<GeneralSettings
     switch (state.getSelectedService()) {
       case OPENAI:
         return OpenAISettings.getCurrentState().getModel();
+      case ANTHROPIC:
+        return AnthropicSettings.getCurrentState().getModel();
       case AZURE:
         return AzureSettings.getCurrentState().getDeploymentId();
       case YOU:

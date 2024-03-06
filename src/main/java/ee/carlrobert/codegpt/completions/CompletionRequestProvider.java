@@ -21,6 +21,7 @@ import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.IncludedFilesSettings;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
+import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettings;
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings;
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettingsState;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
@@ -30,6 +31,8 @@ import ee.carlrobert.codegpt.telemetry.core.configuration.TelemetryConfiguration
 import ee.carlrobert.codegpt.telemetry.core.service.UserId;
 import ee.carlrobert.embedding.EmbeddingsService;
 import ee.carlrobert.embedding.ReferencedFile;
+import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionRequest;
+import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionRequestMessage;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
@@ -44,6 +47,7 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import org.jetbrains.annotations.Nullable;
@@ -236,7 +240,29 @@ public class CompletionRequestProvider {
     }
   }
 
-  public List<OpenAIChatCompletionMessage> buildMessages(
+  public ClaudeCompletionRequest buildAnthropicChatCompletionRequest(
+      CallParameters callParameters) {
+    var configuration = ConfigurationSettings.getCurrentState();
+    var settings = AnthropicSettings.getCurrentState();
+    var request = new ClaudeCompletionRequest();
+    request.setModel(settings.getModel());
+    request.setMaxTokens(configuration.getMaxTokens());
+    request.setStream(true);
+    request.setSystem(COMPLETION_SYSTEM_PROMPT);
+    var messages = conversation.getMessages().stream()
+        .filter(prevMessage -> prevMessage.getResponse() != null
+            && !prevMessage.getResponse().isEmpty())
+        .flatMap(prevMessage -> Stream.of(
+            new ClaudeCompletionRequestMessage("user", prevMessage.getPrompt()),
+            new ClaudeCompletionRequestMessage("assistant", prevMessage.getResponse())))
+        .collect(toList());
+    messages.add(
+        new ClaudeCompletionRequestMessage("user", callParameters.getMessage().getPrompt()));
+    request.setMessages(messages);
+    return request;
+  }
+
+  private List<OpenAIChatCompletionMessage> buildMessages(
       CallParameters callParameters,
       boolean useContextualSearch) {
     var message = callParameters.getMessage();

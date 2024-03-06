@@ -5,10 +5,13 @@ import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.util.Disposer;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
+import ee.carlrobert.codegpt.credentials.AnthropicCredentialsManager;
 import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.CustomServiceCredentialManager;
 import ee.carlrobert.codegpt.credentials.LlamaCredentialManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
+import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettings;
+import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettingsForm;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettingsForm;
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceForm;
@@ -61,6 +64,8 @@ public class GeneralSettingsConfigurable implements Configurable {
         || OpenAISettings.getInstance().isModified(serviceSelectionForm.getOpenAISettingsForm())
         || CustomServiceSettings.getInstance()
         .isModified(serviceSelectionForm.getCustomConfigurationSettingsForm())
+        || AnthropicSettings.getInstance()
+        .isModified(serviceSelectionForm.getAnthropicSettingsForm())
         || AzureSettings.getInstance().isModified(serviceSelectionForm.getAzureSettingsForm())
         || YouSettings.getInstance().isModified(serviceSelectionForm.getYouSettingsForm())
         || LlamaSettings.getInstance().isModified(serviceSelectionForm.getLlamaSettingsForm());
@@ -76,6 +81,7 @@ public class GeneralSettingsConfigurable implements Configurable {
     var openAISettingsForm = serviceSelectionForm.getOpenAISettingsForm();
     applyOpenAISettings(openAISettingsForm);
     applyCustomOpenAISettings(serviceSelectionForm.getCustomConfigurationSettingsForm());
+    applyAnthropicSettings(serviceSelectionForm.getAnthropicSettingsForm());
     applyAzureSettings(serviceSelectionForm.getAzureSettingsForm());
     applyYouSettings(serviceSelectionForm.getYouSettingsForm());
     applyLlamaSettings(serviceSelectionForm.getLlamaSettingsForm());
@@ -111,6 +117,11 @@ public class GeneralSettingsConfigurable implements Configurable {
 
   private void applyYouSettings(YouSettingsForm form) {
     YouSettings.getInstance().loadState(form.getCurrentState());
+  }
+
+  private void applyAnthropicSettings(AnthropicSettingsForm form) {
+    AnthropicSettings.getInstance().loadState(form.getCurrentState());
+    AnthropicCredentialsManager.getInstance().setCredential(form.getApiKey());
   }
 
   private void applyAzureSettings(AzureSettingsForm form) {

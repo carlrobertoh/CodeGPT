@@ -23,7 +23,7 @@ checkstyle {
 }
 
 dependencies {
-  implementation("ee.carlrobert:llm-client:0.5.0")
+  implementation("ee.carlrobert:llm-client:0.6.0")
 }
 
 tasks {
