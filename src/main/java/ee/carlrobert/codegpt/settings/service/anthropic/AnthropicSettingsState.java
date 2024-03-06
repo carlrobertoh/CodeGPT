@@ -4,7 +4,7 @@ import java.util.Objects;
 
 public class AnthropicSettingsState {
 
-  private String apiVersion = "";
+  private String apiVersion = "2023-06-01";
   private String model = "claude-3-opus-20240229";
 
   public String getApiVersion() {
