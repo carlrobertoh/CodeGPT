@@ -2,6 +2,7 @@ package ee.carlrobert.codegpt.toolwindow.chat.ui.textarea;
 
 import static ee.carlrobert.codegpt.settings.service.ServiceType.CUSTOM_OPENAI;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.OPENAI;
+import static ee.carlrobert.codegpt.settings.service.ServiceType.YOU;
 import static java.lang.String.format;
 
 import com.intellij.openapi.actionSystem.AnAction;
@@ -21,7 +22,11 @@ import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettingsState;
+import ee.carlrobert.codegpt.settings.service.you.YouSettings;
+import ee.carlrobert.codegpt.settings.service.you.YouSettingsState;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
+import ee.carlrobert.llm.client.you.completion.YouCompletionCustomModel;
+import ee.carlrobert.llm.client.you.completion.YouCompletionMode;
 import java.util.List;
 import javax.swing.Icon;
 import javax.swing.JComponent;
@@ -32,11 +37,13 @@ public class ModelComboBoxAction extends ComboBoxAction {
   private final Runnable onAddNewTab;
   private final GeneralSettingsState settings;
   private final OpenAISettingsState openAISettings;
+  private final YouSettingsState youSettings;
 
   public ModelComboBoxAction(Runnable onAddNewTab, ServiceType selectedService) {
     this.onAddNewTab = onAddNewTab;
     settings = GeneralSettings.getCurrentState();
     openAISettings = OpenAISettings.getCurrentState();
+    youSettings = YouSettings.getCurrentState();
     updateTemplatePresentation(selectedService);
   }
 
@@ -87,8 +94,16 @@ public class ModelComboBoxAction extends ComboBoxAction {
         getLlamaCppPresentationText(),
         Icons.Llama,
         presentation));
-    actionGroup.addSeparator();
-    actionGroup.add(createModelAction(ServiceType.YOU, "You.com", Icons.YouSmall, presentation));
+    actionGroup.addSeparator("You.com");
+    List.of(
+            YouCompletionMode.DEFAULT,
+            YouCompletionMode.AGENT,
+            YouCompletionMode.RESEARCH)
+        .forEach(mode -> actionGroup.add(createYouModeAction(mode, presentation)));
+    List.of(
+            YouCompletionCustomModel.values()
+        )
+        .forEach(model -> actionGroup.add(createYouModelAction(model, presentation)));
     return actionGroup;
   }
 
@@ -121,7 +136,11 @@ public class ModelComboBoxAction extends ComboBoxAction {
         break;
       case YOU:
         templatePresentation.setIcon(Icons.YouSmall);
-        templatePresentation.setText("You.com");
+        templatePresentation.setText(
+            youSettings.getChatMode() == YouCompletionMode.CUSTOM
+                ? youSettings.getCustomModel().getDescription()
+                : youSettings.getChatMode().getDescription()
+        );
         break;
       case LLAMA_CPP:
         templatePresentation.setText(getLlamaCppPresentationText());
@@ -203,6 +222,55 @@ public class ModelComboBoxAction extends ComboBoxAction {
             OPENAI,
             model.getDescription(),
             Icons.OpenAI,
+            comboBoxPresentation);
+      }
+    };
+  }
+
+  private AnAction createYouModeAction(
+      YouCompletionMode mode,
+      Presentation comboBoxPresentation) {
+    createModelAction(YOU, mode.getDescription(), Icons.YouSmall,
+        comboBoxPresentation);
+    return new DumbAwareAction(mode.getDescription(), "", Icons.YouSmall) {
+      @Override
+      public void update(@NotNull AnActionEvent event) {
+        var presentation = event.getPresentation();
+        presentation.setEnabled(!presentation.getText().equals(comboBoxPresentation.getText()));
+      }
+
+      @Override
+      public void actionPerformed(@NotNull AnActionEvent e) {
+        youSettings.setChatMode(mode);
+        handleProviderChange(
+            YOU,
+            mode.getDescription(),
+            Icons.YouSmall,
+            comboBoxPresentation);
+      }
+    };
+  }
+
+  private AnAction createYouModelAction(
+      YouCompletionCustomModel model,
+      Presentation comboBoxPresentation) {
+    createModelAction(YOU, model.getDescription(), Icons.YouSmall,
+        comboBoxPresentation);
+    return new DumbAwareAction(model.getDescription(), "", Icons.YouSmall) {
+      @Override
+      public void update(@NotNull AnActionEvent event) {
+        var presentation = event.getPresentation();
+        presentation.setEnabled(!presentation.getText().equals(comboBoxPresentation.getText()));
+      }
+
+      @Override
+      public void actionPerformed(@NotNull AnActionEvent e) {
+        youSettings.setCustomModel(model);
+        youSettings.setChatMode(YouCompletionMode.CUSTOM);
+        handleProviderChange(
+            YOU,
+            model.getDescription(),
+            Icons.YouSmall,
             comboBoxPresentation);
       }
     };

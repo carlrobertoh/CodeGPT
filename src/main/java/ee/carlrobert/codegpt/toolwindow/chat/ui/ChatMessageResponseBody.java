@@ -141,6 +141,9 @@ public class ChatMessageResponseBody extends JPanel {
     if (responseReceived) {
       add(createTextPane(html, false));
     } else {
+      if (currentlyProcessedTextPane == null) {
+        prepareProcessingText(false);
+      }
       currentlyProcessedTextPane.setText(html);
     }
   }
