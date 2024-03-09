@@ -10,9 +10,13 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.actionSystem.ex.ComboBoxAction;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.DumbAwareAction;
+import com.intellij.util.messages.MessageBusConnection;
 import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
+import ee.carlrobert.codegpt.completions.you.YouUserManager;
+import ee.carlrobert.codegpt.completions.you.auth.SignedOutNotifier;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
@@ -45,6 +49,8 @@ public class ModelComboBoxAction extends ComboBoxAction {
     openAISettings = OpenAISettings.getCurrentState();
     youSettings = YouSettings.getCurrentState();
     updateTemplatePresentation(selectedService);
+
+    subscribeToYouSignedOutTopic(ApplicationManager.getApplication().getMessageBus().connect());
   }
 
   public JComponent createCustomComponent(@NotNull String place) {
@@ -94,22 +100,44 @@ public class ModelComboBoxAction extends ComboBoxAction {
         getLlamaCppPresentationText(),
         Icons.Llama,
         presentation));
-    actionGroup.addSeparator("You.com");
-    List.of(
-            YouCompletionMode.DEFAULT,
-            YouCompletionMode.AGENT,
-            YouCompletionMode.RESEARCH)
-        .forEach(mode -> actionGroup.add(createYouModeAction(mode, presentation)));
-    List.of(
-            YouCompletionCustomModel.values()
-        )
-        .forEach(model -> actionGroup.add(createYouModelAction(model, presentation)));
+
+    if (YouUserManager.getInstance().isSubscribed()) {
+      actionGroup.addSeparator("You.com");
+      List.of(
+              YouCompletionMode.DEFAULT,
+              YouCompletionMode.AGENT,
+              YouCompletionMode.RESEARCH)
+          .forEach(mode -> actionGroup.add(createYouModeAction(mode, presentation)));
+      List.of(
+              YouCompletionCustomModel.values()
+          )
+          .forEach(model -> actionGroup.add(createYouModelAction(model, presentation)));
+    } else {
+      actionGroup.addSeparator();
+      actionGroup.add(createYouModeAction(YouCompletionMode.DEFAULT, presentation));
+    }
     return actionGroup;
   }
 
   @Override
   protected boolean shouldShowDisabledActions() {
     return true;
+  }
+
+  private void subscribeToYouSignedOutTopic(
+      MessageBusConnection messageBusConnection
+  ) {
+    messageBusConnection.subscribe(
+        SignedOutNotifier.SIGNED_OUT_TOPIC,
+        (SignedOutNotifier) () -> {
+          var youSettings = YouSettings.getCurrentState();
+          if (!YouUserManager.getInstance().isSubscribed()
+              && youSettings.getChatMode() != YouCompletionMode.DEFAULT) {
+            youSettings.setChatMode(YouCompletionMode.DEFAULT);
+            updateTemplatePresentation(GeneralSettings.getCurrentState().getSelectedService());
+          }
+        }
+    );
   }
 
   private void updateTemplatePresentation(ServiceType selectedService) {
