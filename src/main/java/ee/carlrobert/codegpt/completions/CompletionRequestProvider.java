@@ -77,7 +77,7 @@ public class CompletionRequestProvider {
   }
 
   public static String getPromptWithContext(List<ReferencedFile> referencedFiles,
-      String userPrompt) {
+                                            String userPrompt) {
     var includedFilesSettings = IncludedFilesSettings.getCurrentState();
     var repeatableContext = referencedFiles.stream()
         .map(item -> includedFilesSettings.getRepeatableContext()
@@ -158,6 +158,8 @@ public class CompletionRequestProvider {
   public YouCompletionRequest buildYouCompletionRequest(Message message) {
     var requestBuilder = new YouCompletionRequest.Builder(message.getPrompt())
         .setUseGPT4Model(YouSettings.getCurrentState().isUseGPT4Model())
+        .setChatMode(YouSettings.getCurrentState().getChatMode())
+        .setCustomModel(YouSettings.getCurrentState().getCustomModel())
         .setChatHistory(conversation.getMessages().stream()
             .map(prevMessage -> new YouCompletionRequestMessage(
                 prevMessage.getPrompt(),
