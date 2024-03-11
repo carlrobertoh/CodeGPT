@@ -24,6 +24,12 @@ checkstyle {
 
 dependencies {
   implementation("ee.carlrobert:llm-client:0.6.2")
+
+  testImplementation("org.assertj:assertj-core:3.25.3")
+  testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.2")
+  testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.2")
+  testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
+  testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.10.2")
 }
 
 tasks {
