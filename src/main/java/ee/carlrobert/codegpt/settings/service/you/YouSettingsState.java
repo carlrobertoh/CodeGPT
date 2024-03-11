@@ -9,7 +9,7 @@ public class YouSettingsState {
   private String email = "";
   private boolean displayWebSearchResults = true;
   private boolean useGPT4Model;
-  private YouCompletionMode chatMode;
+  private YouCompletionMode chatMode = YouCompletionMode.DEFAULT;
   private YouCompletionCustomModel customModel;
 
   public String getEmail() {

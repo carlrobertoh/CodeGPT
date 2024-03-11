@@ -4,7 +4,6 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
-import ee.carlrobert.llm.client.you.completion.YouCompletionMode;
 import org.jetbrains.annotations.NotNull;
 
 @State(name = "CodeGPT_YouSettings", storages = @Storage("CodeGPT_YouSettings.xml"))
@@ -21,9 +20,6 @@ public class YouSettings implements PersistentStateComponent<YouSettingsState> {
   @Override
   public void loadState(@NotNull YouSettingsState state) {
     this.state = state;
-    if (this.state.getChatMode() == null) {
-      this.state.setChatMode(YouCompletionMode.DEFAULT);
-    }
   }
 
   public static YouSettingsState getCurrentState() {
