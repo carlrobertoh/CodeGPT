@@ -146,6 +146,7 @@ public class DefaultCompletionRequestHandlerTest extends IntegrationTest {
               + "count=10&"
               + "safeSearch=WebPages,Translations,TimeZone,Computation,RelatedSearches&"
               + "domain=youchat&"
+              + "selectedChatMode=default&"
               + "chat=[{\"question\":\"Ping\",\"answer\":\"Pong\"}]&"
               + "utm_source=ide&"
               + "utm_medium=jetbrains&"
