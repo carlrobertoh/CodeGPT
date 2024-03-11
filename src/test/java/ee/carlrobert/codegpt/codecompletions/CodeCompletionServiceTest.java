@@ -48,14 +48,11 @@ public class CodeCompletionServiceTest extends IntegrationTest {
         () -> {
           var singleLineInlayElement = editor.getUserData(SINGLE_LINE_INLAY);
           var multiLineInlayElement = editor.getUserData(MULTI_LINE_INLAY);
-          if (singleLineInlayElement != null && multiLineInlayElement != null) {
+          if (singleLineInlayElement != null && multiLineInlayElement == null) {
             var singleLine =
                 ((InlayInlineElementRenderer) singleLineInlayElement.getRenderer())
                     .getInlayText();
-            var multiLine =
-                ((InlayBlockElementRenderer) multiLineInlayElement.getRenderer()).getInlayText();
-            return "TEST_SINGLE_LINE_OUTPUT".equals(singleLine)
-                && "TEST_MULTI_LINE_OUTPUT".equals(multiLine);
+            return "TEST_SINGLE_LINE_OUTPUT".equals(singleLine);
           }
           return false;
         }, 5);

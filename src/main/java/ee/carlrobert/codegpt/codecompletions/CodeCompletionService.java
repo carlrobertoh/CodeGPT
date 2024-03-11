@@ -101,7 +101,7 @@ public final class CodeCompletionService implements Disposable {
         Void.class,
         (progressIndicator) -> CompletionRequestService.getInstance().getCodeCompletionAsync(
             request,
-            new CodeCompletionEventListener(editor, offset, progressIndicator)),
+            new CodeCompletionEventListener(editor, offset, request, progressIndicator)),
         750,
         TimeUnit.MILLISECONDS);
   }
@@ -156,7 +156,7 @@ public final class CodeCompletionService implements Disposable {
       if (inlay != null) {
         applyCompletion(editor, text, inlay.getOffset());
         CodeGPTEditorManager.getInstance().disposeEditorInlays(editor);
-        return;
+        break;
       }
     }
     editor.putUserData(CodeGPTKeys.PREVIOUS_INLAY_TEXT, null);

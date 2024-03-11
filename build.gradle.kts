@@ -49,6 +49,7 @@ changelog {
 dependencies {
   implementation(project(":codegpt-core"))
   implementation(project(":codegpt-telemetry"))
+  implementation(project(":codegpt-treesitter"))
 
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.16.1")
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.1")
@@ -60,12 +61,7 @@ dependencies {
   implementation("org.apache.commons:commons-text:1.11.0")
   implementation("com.knuddels:jtokkit:1.0.0")
 
-  testImplementation("org.assertj:assertj-core:3.25.3")
   testImplementation("org.awaitility:awaitility:4.2.0")
-  testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.2")
-  testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.2")
-  testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
-  testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.10.2")
 }
 
 tasks.register<Exec>("updateSubmodules") {
