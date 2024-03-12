@@ -3,6 +3,7 @@ package ee.carlrobert.codegpt.actions.toolwindow;
 import static ee.carlrobert.codegpt.Icons.Default;
 
 import com.intellij.icons.AllIcons;
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
@@ -52,5 +53,10 @@ public class DeleteAllConversationsAction extends AnAction {
       }
       this.onRefresh.run();
     }
+  }
+
+  @Override
+  public @NotNull ActionUpdateThread getActionUpdateThread() {
+    return ActionUpdateThread.BGT;
   }
 }

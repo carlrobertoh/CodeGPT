@@ -14,6 +14,7 @@ import static java.util.stream.Collectors.toList;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
@@ -115,6 +116,11 @@ public class GenerateGitCommitMessageAction extends AnAction {
       CompletionRequestService.getInstance()
           .generateCommitMessageAsync(gitDiff, getEventListener(project, editor.getDocument()));
     }
+  }
+
+  @Override
+  public @NotNull ActionUpdateThread getActionUpdateThread() {
+    return ActionUpdateThread.EDT;
   }
 
   private CompletionEventListener<String> getEventListener(Project project, Document document) {

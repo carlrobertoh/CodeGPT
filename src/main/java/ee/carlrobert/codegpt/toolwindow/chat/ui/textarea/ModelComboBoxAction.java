@@ -5,6 +5,7 @@ import static ee.carlrobert.codegpt.settings.service.ServiceType.OPENAI;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.YOU;
 import static java.lang.String.format;
 
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
@@ -211,6 +212,11 @@ public class ModelComboBoxAction extends ComboBoxAction {
       public void actionPerformed(@NotNull AnActionEvent e) {
         handleProviderChange(serviceType, label, icon, comboBoxPresentation);
       }
+
+      @Override
+      public @NotNull ActionUpdateThread getActionUpdateThread() {
+        return ActionUpdateThread.BGT;
+      }
     };
   }
 
@@ -252,6 +258,11 @@ public class ModelComboBoxAction extends ComboBoxAction {
             Icons.OpenAI,
             comboBoxPresentation);
       }
+
+      @Override
+      public @NotNull ActionUpdateThread getActionUpdateThread() {
+        return ActionUpdateThread.BGT;
+      }
     };
   }
 
@@ -275,6 +286,11 @@ public class ModelComboBoxAction extends ComboBoxAction {
             mode.getDescription(),
             Icons.YouSmall,
             comboBoxPresentation);
+      }
+
+      @Override
+      public @NotNull ActionUpdateThread getActionUpdateThread() {
+        return ActionUpdateThread.BGT;
       }
     };
   }
@@ -300,6 +316,11 @@ public class ModelComboBoxAction extends ComboBoxAction {
             model.getDescription(),
             Icons.YouSmall,
             comboBoxPresentation);
+      }
+
+      @Override
+      public @NotNull ActionUpdateThread getActionUpdateThread() {
+        return ActionUpdateThread.BGT;
       }
     };
   }

@@ -1,7 +1,6 @@
 package ee.carlrobert.codegpt.actions.toolwindow;
 
 import com.intellij.icons.AllIcons;
-import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
 import ee.carlrobert.codegpt.actions.editor.EditorActionsUtil;
 import ee.carlrobert.codegpt.conversations.Conversation;
@@ -14,11 +13,6 @@ public class MoveUpAction extends MoveAction {
   public MoveUpAction(Runnable onRefresh) {
     super("Move Up", "Move up", AllIcons.Actions.MoveUp, onRefresh);
     EditorActionsUtil.registerOrReplaceAction(this);
-  }
-
-  @Override
-  public void update(@NotNull AnActionEvent event) {
-    super.update(event);
   }
 
   @Override
