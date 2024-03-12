@@ -3,7 +3,6 @@ package ee.carlrobert.codegpt.actions;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.editor.Editor;
-import ee.carlrobert.codegpt.actions.ActionType;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import javax.swing.Icon;
 import org.jetbrains.annotations.NotNull;

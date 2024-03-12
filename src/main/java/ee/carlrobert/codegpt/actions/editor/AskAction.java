@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.actions.editor;
 
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import ee.carlrobert.codegpt.Icons;
@@ -30,5 +31,10 @@ public class AskAction extends AnAction {
         tabPanel.displayLandingView();
       }
     }
+  }
+
+  @Override
+  public @NotNull ActionUpdateThread getActionUpdateThread() {
+    return ActionUpdateThread.BGT;
   }
 }

@@ -3,6 +3,7 @@ package ee.carlrobert.codegpt.actions.toolwindow;
 import static java.util.Objects.requireNonNull;
 
 import com.intellij.icons.AllIcons;
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
@@ -33,5 +34,10 @@ public class ReplaceCodeInMainEditorAction extends AnAction {
           project,
           requireNonNull(toolWindowEditor.getSelectionModel().getSelectedText()));
     }
+  }
+
+  @Override
+  public @NotNull ActionUpdateThread getActionUpdateThread() {
+    return ActionUpdateThread.EDT;
   }
 }

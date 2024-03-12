@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt.actions.toolwindow;
 
 import com.intellij.icons.AllIcons;
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import ee.carlrobert.codegpt.actions.ActionType;
@@ -36,5 +37,10 @@ public class ClearChatWindowAction extends AnAction {
           .property("action", ActionType.CLEAR_CHAT_WINDOW.name())
           .send();
     }
+  }
+
+  @Override
+  public @NotNull ActionUpdateThread getActionUpdateThread() {
+    return ActionUpdateThread.BGT;
   }
 }

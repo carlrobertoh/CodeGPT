@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.actions.toolwindow;
 
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
@@ -35,5 +36,10 @@ public abstract class MoveAction extends AnAction {
             onRefresh.run();
           });
     }
+  }
+
+  @Override
+  public @NotNull ActionUpdateThread getActionUpdateThread() {
+    return ActionUpdateThread.BGT;
   }
 }

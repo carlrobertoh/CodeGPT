@@ -8,6 +8,7 @@ import static ee.carlrobert.codegpt.settings.service.ServiceType.YOU;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
+import com.intellij.openapi.diagnostic.Logger;
 import ee.carlrobert.codegpt.codecompletions.CodeCompletionRequestProvider;
 import ee.carlrobert.codegpt.codecompletions.InfillRequestDetails;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
@@ -16,11 +17,14 @@ import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
+import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettings;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.llm.client.DeserializationUtil;
+import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionRequest;
+import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionRequestMessage;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionEventSourceListener;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
@@ -36,6 +40,8 @@ import okhttp3.sse.EventSources;
 
 @Service
 public final class CompletionRequestService {
+
+  private static final Logger LOG = Logger.getInstance(CompletionRequestService.class);
 
   private CompletionRequestService() {
   }
@@ -122,43 +128,68 @@ public final class CompletionRequestService {
   public void generateCommitMessageAsync(
       String prompt,
       CompletionEventListener<String> eventListener) {
-    var request = new OpenAIChatCompletionRequest.Builder(List.of(
-        new OpenAIChatCompletionMessage("system",
-            ConfigurationSettings.getCurrentState().getCommitMessagePrompt()),
+    var configuration = ConfigurationSettings.getCurrentState();
+    var commitMessagePrompt = configuration.getCommitMessagePrompt();
+    var openaiRequest = new OpenAIChatCompletionRequest.Builder(List.of(
+        new OpenAIChatCompletionMessage("system", commitMessagePrompt),
         new OpenAIChatCompletionMessage("user", prompt)))
         .setModel(OpenAISettings.getCurrentState().getModel())
         .build();
     var selectedService = GeneralSettings.getCurrentState().getSelectedService();
-    if (selectedService == OPENAI) {
-      CompletionClientProvider.getOpenAIClient().getChatCompletionAsync(request, eventListener);
-    }
-    if (selectedService == AZURE) {
-      CompletionClientProvider.getAzureClient().getChatCompletionAsync(request, eventListener);
-    }
-
-    if (selectedService == LLAMA_CPP) {
-      var settings = LlamaSettings.getCurrentState();
-      PromptTemplate promptTemplate;
-      if (settings.isRunLocalServer()) {
-        promptTemplate = settings.isUseCustomModel()
-            ? settings.getLocalModelPromptTemplate()
-            : LlamaModel.findByHuggingFaceModel(settings.getHuggingFaceModel()).getPromptTemplate();
-      } else {
-        promptTemplate = settings.getRemoteModelPromptTemplate();
-      }
-      var finalPrompt = promptTemplate.buildPrompt(
-          ConfigurationSettings.getCurrentState().getCommitMessagePrompt(),
-          prompt, List.of());
-      var configuration = ConfigurationSettings.getCurrentState();
-      CompletionClientProvider.getLlamaClient().getChatCompletionAsync(
-          new LlamaCompletionRequest.Builder(finalPrompt)
-              .setN_predict(configuration.getMaxTokens())
-              .setTemperature(configuration.getTemperature())
-              .setTop_k(settings.getTopK())
-              .setTop_p(settings.getTopP())
-              .setMin_p(settings.getMinP())
-              .setRepeat_penalty(settings.getRepeatPenalty())
-              .build(), eventListener);
+    switch (selectedService) {
+      case OPENAI:
+        CompletionClientProvider.getOpenAIClient()
+            .getChatCompletionAsync(openaiRequest, eventListener);
+        break;
+      case CUSTOM_OPENAI:
+        var httpClient = CompletionClientProvider.getDefaultClientBuilder().build();
+        EventSources.createFactory(httpClient).newEventSource(
+            CompletionRequestProvider.buildCustomOpenAICompletionRequest(
+                commitMessagePrompt,
+                prompt),
+            new OpenAIChatCompletionEventSourceListener(eventListener));
+        break;
+      case ANTHROPIC:
+        var anthropicSettings = AnthropicSettings.getCurrentState();
+        var claudeRequest = new ClaudeCompletionRequest();
+        claudeRequest.setSystem(commitMessagePrompt);
+        claudeRequest.setStream(true);
+        claudeRequest.setMaxTokens(configuration.getMaxTokens());
+        claudeRequest.setModel(anthropicSettings.getModel());
+        claudeRequest.setMessages(
+            List.of(new ClaudeCompletionRequestMessage("user", prompt)));
+        CompletionClientProvider.getClaudeClient()
+            .getCompletionAsync(claudeRequest, eventListener);
+        break;
+      case AZURE:
+        CompletionClientProvider.getAzureClient()
+            .getChatCompletionAsync(openaiRequest, eventListener);
+        break;
+      case LLAMA_CPP:
+        var settings = LlamaSettings.getCurrentState();
+        PromptTemplate promptTemplate;
+        if (settings.isRunLocalServer()) {
+          promptTemplate = settings.isUseCustomModel()
+              ? settings.getLocalModelPromptTemplate()
+              : LlamaModel.findByHuggingFaceModel(settings.getHuggingFaceModel())
+                  .getPromptTemplate();
+        } else {
+          promptTemplate = settings.getRemoteModelPromptTemplate();
+        }
+        var finalPrompt = promptTemplate.buildPrompt(commitMessagePrompt, prompt, List.of());
+        CompletionClientProvider.getLlamaClient().getChatCompletionAsync(
+            new LlamaCompletionRequest.Builder(finalPrompt)
+                .setN_predict(configuration.getMaxTokens())
+                .setTemperature(configuration.getTemperature())
+                .setTop_k(settings.getTopK())
+                .setTop_p(settings.getTopP())
+                .setMin_p(settings.getMinP())
+                .setRepeat_penalty(settings.getRepeatPenalty())
+                .build(), eventListener);
+        break;
+      default:
+        LOG.debug("Unknown service: {}", selectedService);
+        break;
     }
   }
 

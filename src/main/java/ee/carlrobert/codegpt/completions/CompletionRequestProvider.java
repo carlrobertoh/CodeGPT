@@ -105,6 +105,15 @@ public class CompletionRequestProvider {
         .build();
   }
 
+  public static Request buildCustomOpenAICompletionRequest(String system, String context) {
+    return buildCustomOpenAIChatCompletionRequest(
+        CustomServiceSettings.getCurrentState(),
+        List.of(
+            new OpenAIChatCompletionMessage("system", system),
+            new OpenAIChatCompletionMessage("user", context)),
+        true);
+  }
+
   public static Request buildCustomOpenAILookupCompletionRequest(String context) {
     return buildCustomOpenAIChatCompletionRequest(
         CustomServiceSettings.getCurrentState(),

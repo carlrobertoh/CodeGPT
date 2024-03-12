@@ -4,6 +4,7 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 import com.intellij.icons.AllIcons;
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.fileEditor.FileEditorManager;
@@ -59,5 +60,10 @@ public class OpenInEditorAction extends AnAction {
           .property("action", ActionType.OPEN_CONVERSATION_IN_EDITOR.name())
           .send();
     }
+  }
+
+  @Override
+  public @NotNull ActionUpdateThread getActionUpdateThread() {
+    return ActionUpdateThread.BGT;
   }
 }

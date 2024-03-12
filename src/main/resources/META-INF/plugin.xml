@@ -89,6 +89,8 @@
           id="codegpt.enableCompletions"
           text="Enable Completions"
           class="ee.carlrobert.codegpt.actions.EnableCompletionsAction">
+            <keyboard-shortcut first-keystroke="ctrl shift alt c" keymap="$default"/>
+
             <override-text place="MainMenu" text="Enable Completions"/>
             <override-text place="popup" use-text-of-place="MainMenu"/>
         </action>
@@ -96,6 +98,8 @@
           id="codegpt.disableCompletions"
           text="Disable Completions"
           class="ee.carlrobert.codegpt.actions.DisableCompletionsAction">
+            <keyboard-shortcut first-keystroke="ctrl shift alt c" keymap="$default"/>
+
             <override-text place="MainMenu" text="Disable Completions"/>
             <override-text place="popup" use-text-of-place="MainMenu"/>
         </action>
