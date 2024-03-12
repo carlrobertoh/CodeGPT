@@ -72,7 +72,7 @@ public final class CodeCompletionService implements Disposable {
     callDebouncer.cancelPreviousCall();
   }
 
-  public void handleCompletions(Editor editor, int offset) {
+  public void requestCompletions(Editor editor, int offset) {
     PREVIOUS_INLAY_TEXT.set(editor, null);
 
     if (project.isDisposed()

@@ -1,5 +1,7 @@
 package ee.carlrobert.codegpt.toolwindow.chat.ui;
 
+import static java.util.stream.Collectors.toList;
+
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.ColorUtil;
@@ -9,6 +11,7 @@ import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.conversations.message.Message;
+import ee.carlrobert.codegpt.treesitter.repository.ProcessedTag;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
 import java.awt.BorderLayout;
 import javax.swing.JPanel;
@@ -28,8 +31,17 @@ public class UserMessagePanel extends JPanel {
     add(headerPanel, BorderLayout.NORTH);
 
     var referencedFilePaths = message.getReferencedFilePaths();
+    var referencedRepositoryMapping = message.getRepositoryMapping();
     if (referencedFilePaths != null && !referencedFilePaths.isEmpty()) {
       add(new SelectedFilesAccordion(project, referencedFilePaths), BorderLayout.CENTER);
+      add(createResponseBody(
+          project,
+          message.getUserMessage(),
+          parentDisposable), BorderLayout.SOUTH);
+    } else if (referencedRepositoryMapping != null && !referencedRepositoryMapping.isEmpty()) {
+      add(new SelectedFilesAccordion(project, referencedRepositoryMapping.stream()
+          .map(ProcessedTag::getFilePath)
+          .collect(toList())), BorderLayout.CENTER);
       add(createResponseBody(
           project,
           message.getUserMessage(),

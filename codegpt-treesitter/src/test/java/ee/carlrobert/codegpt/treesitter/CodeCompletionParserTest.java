@@ -2,6 +2,7 @@ package ee.carlrobert.codegpt.treesitter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import ee.carlrobert.codegpt.treesitter.completion.CodeCompletionParserFactory;
 import org.junit.Test;
 
 public class CodeCompletionParserTest {

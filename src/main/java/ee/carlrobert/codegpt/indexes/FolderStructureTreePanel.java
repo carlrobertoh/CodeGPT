@@ -233,6 +233,7 @@ public class FolderStructureTreePanel {
       ".settings",
       "node_modules",
       "vendor",
+      "venv",
       "lib",
       "build",
       "target",

@@ -2,9 +2,11 @@ package ee.carlrobert.codegpt.conversations.message;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import ee.carlrobert.codegpt.treesitter.repository.ProcessedTag;
 import ee.carlrobert.llm.client.you.completion.YouSerpResult;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 public class Message {
@@ -15,6 +17,7 @@ public class Message {
   private String userMessage;
   private List<YouSerpResult> serpResults;
   private List<String> referencedFilePaths;
+  private Set<ProcessedTag> repositoryMapping;
 
   public Message(String prompt, String response) {
     this(prompt);
@@ -69,6 +72,14 @@ public class Message {
 
   public void setReferencedFilePaths(List<String> referencedFilePaths) {
     this.referencedFilePaths = referencedFilePaths;
+  }
+
+  public Set<ProcessedTag> getRepositoryMapping() {
+    return repositoryMapping;
+  }
+
+  public void setRepositoryMapping(Set<ProcessedTag> repositoryMapping) {
+    this.repositoryMapping = repositoryMapping;
   }
 
   @Override

@@ -11,7 +11,7 @@ import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.actions.OpenSettingsAction;
-import ee.carlrobert.codegpt.treesitter.CodeCompletionParserFactory;
+import ee.carlrobert.codegpt.treesitter.completion.CodeCompletionParserFactory;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.codegpt.util.file.FileUtil;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;

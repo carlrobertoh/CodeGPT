@@ -132,7 +132,7 @@ public class CodeCompletionListenerBinder implements Disposable {
                 // ignore
               }
             } else {
-              codeCompletionService.handleCompletions(editor, caretOffset);
+              codeCompletionService.requestCompletions(editor, caretOffset);
             }
           });
         }

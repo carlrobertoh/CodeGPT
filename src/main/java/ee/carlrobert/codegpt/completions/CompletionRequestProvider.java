@@ -40,6 +40,7 @@ import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRe
 import ee.carlrobert.llm.client.you.completion.YouCompletionRequest;
 import ee.carlrobert.llm.client.you.completion.YouCompletionRequestMessage;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -77,7 +78,7 @@ public class CompletionRequestProvider {
   }
 
   public static String getPromptWithContext(List<ReferencedFile> referencedFiles,
-                                            String userPrompt) {
+      String userPrompt) {
     var includedFilesSettings = IncludedFilesSettings.getCurrentState();
     var repeatableContext = referencedFiles.stream()
         .map(item -> includedFilesSettings.getRepeatableContext()
@@ -276,9 +277,22 @@ public class CompletionRequestProvider {
       messages.add(new OpenAIChatCompletionMessage("user", prompt));
     } else {
       if (callParameters.getConversationType() == ConversationType.DEFAULT) {
-        messages.add(new OpenAIChatCompletionMessage(
-            "system",
-            ConfigurationSettings.getCurrentState().getSystemPrompt()));
+        var repositoryMapping = message.getRepositoryMapping();
+        if (repositoryMapping != null && !repositoryMapping.isEmpty()) {
+          var relevantContext = repositoryMapping.stream().map(
+              processedTag -> ("// " + Path.of(processedTag.getFilePath()).getFileName().toString()
+                  + "\n"
+                  + processedTag.getModifiedContent()).replace(
+                  "\n", "\n| ")).collect(joining("\n\n"));
+
+          messages.add(new OpenAIChatCompletionMessage(
+              "system",
+              COMPLETION_SYSTEM_PROMPT + "\n\nRelevant context:\n\n" + relevantContext));
+        } else {
+          messages.add(new OpenAIChatCompletionMessage(
+              "system",
+              ConfigurationSettings.getCurrentState().getSystemPrompt()));
+        }
       }
       if (callParameters.getConversationType() == ConversationType.FIX_COMPILE_ERRORS) {
         messages.add(new OpenAIChatCompletionMessage("system", FIX_COMPILE_ERRORS_SYSTEM_PROMPT));

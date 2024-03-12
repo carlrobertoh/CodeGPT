@@ -9,6 +9,7 @@ import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.impl.EditorImpl;
+import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
 import com.intellij.util.ui.JBUI;
@@ -35,6 +36,7 @@ import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.TotalTokensDetails;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.TotalTokensPanel;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.UserPromptTextArea;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.UserPromptTextAreaHeader;
+import ee.carlrobert.codegpt.treesitter.repository.parser.RepositoryParserFactory;
 import ee.carlrobert.codegpt.util.EditorUtil;
 import ee.carlrobert.codegpt.util.file.FileUtil;
 import ee.carlrobert.embedding.ReferencedFile;
@@ -241,14 +243,38 @@ public abstract class ChatToolWindowTabPanel implements Disposable {
       var selectionModel = editor.getSelectionModel();
       var selectedText = selectionModel.getSelectedText();
       if (selectedText != null && !selectedText.isEmpty()) {
-        var fileExtension = FileUtil.getFileExtension(
-            ((EditorImpl) editor).getVirtualFile().getName());
-        message = new Message(text + format("\n```%s\n%s\n```", fileExtension, selectedText));
+        var fileName = ((EditorImpl) editor).getVirtualFile().getName();
+        var fileExtension = FileUtil.getFileExtension(fileName);
+        try {
+          var parser = RepositoryParserFactory.getParserForFileExtension(project, fileExtension);
+          if (parser.isDefinitionsFileExists(project.getName())) {
+            var repositoryMapping = parser.processCode(
+                project.getName(),
+                project.getBasePath(),
+                ((EditorImpl) editor).getVirtualFile().getPath(),
+                selectedText);
+            message = new Message(text + format("\n```%s\n%s\n```", fileExtension, selectedText));
+            message.setRepositoryMapping(repositoryMapping);
+          } else {
+            var processIndicator = createProgressIndicator();
+            ApplicationManager.getApplication().executeOnPooledThread(() -> {
+              parser.createRepositoryDefinitionTags(project.getName(), project.getBasePath());
+              processIndicator.processFinish();
+            });
+          }
+        } catch (IllegalArgumentException e) {
+          // ignore
+        }
         selectionModel.removeSelection();
       }
     }
     message.setUserMessage(text);
     sendMessage(message, ConversationType.DEFAULT);
+  }
+
+  private BackgroundableProcessIndicator createProgressIndicator() {
+    return new BackgroundableProcessIndicator(project,
+        "Indexing repository", null, null, true);
   }
 
   private JPanel createUserPromptPanel(ServiceType selectedService) {

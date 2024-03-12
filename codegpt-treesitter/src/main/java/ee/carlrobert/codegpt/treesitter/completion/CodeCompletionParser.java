@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.treesitter;
+package ee.carlrobert.codegpt.treesitter.completion;
 
 import org.treesitter.TSLanguage;
 import org.treesitter.TSNode;
