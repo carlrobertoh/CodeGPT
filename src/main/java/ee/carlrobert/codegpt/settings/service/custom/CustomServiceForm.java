@@ -27,12 +27,12 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.net.MalformedURLException;
 import java.net.URL;
-import javax.annotation.Nullable;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import okhttp3.sse.EventSource;
+import org.jetbrains.annotations.Nullable;
 
 public class CustomServiceForm {
 

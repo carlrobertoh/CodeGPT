@@ -4,9 +4,7 @@ import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAITextCompletionRequest;
-import javax.annotation.ParametersAreNonnullByDefault;
 
-@ParametersAreNonnullByDefault
 public class CodeCompletionRequestProvider {
 
   private static final int MAX_TOKENS = 128;

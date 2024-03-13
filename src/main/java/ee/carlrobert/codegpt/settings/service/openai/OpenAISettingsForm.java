@@ -13,8 +13,8 @@ import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
-import javax.annotation.Nullable;
 import javax.swing.JPanel;
+import org.jetbrains.annotations.Nullable;
 
 public class OpenAISettingsForm {
 

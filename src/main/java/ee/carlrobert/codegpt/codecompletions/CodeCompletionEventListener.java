@@ -17,11 +17,9 @@ import ee.carlrobert.codegpt.util.file.FileUtil;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.io.IOException;
-import javax.annotation.ParametersAreNonnullByDefault;
 import javax.swing.SwingUtilities;
 import org.jetbrains.annotations.Nullable;
 
-@ParametersAreNonnullByDefault
 class CodeCompletionEventListener implements CompletionEventListener<String> {
 
   private static final Logger LOG = Logger.getInstance(CodeCompletionEventListener.class);

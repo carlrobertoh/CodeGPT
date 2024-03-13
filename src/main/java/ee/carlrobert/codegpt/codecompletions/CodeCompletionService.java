@@ -42,12 +42,10 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.PatternSyntaxException;
 import java.util.stream.Stream;
-import javax.annotation.ParametersAreNonnullByDefault;
 import javax.swing.KeyStroke;
 import org.jetbrains.annotations.NotNull;
 
 @Service(PROJECT)
-@ParametersAreNonnullByDefault
 public final class CodeCompletionService implements Disposable {
 
   public static final String APPLY_INLAY_ACTION_ID = "ApplyInlayAction";
