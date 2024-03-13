@@ -51,7 +51,7 @@ dependencies {
   implementation(project(":codegpt-telemetry"))
   implementation(project(":codegpt-treesitter"))
 
-  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.16.1")
+  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.17.0")
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.2")
   implementation("com.vladsch.flexmark:flexmark-all:0.64.8") {
     // vulnerable transitive dependency
