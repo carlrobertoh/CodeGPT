@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt;
 
 import com.intellij.notification.NotificationType;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.StartupActivity;
@@ -25,7 +26,8 @@ public class PluginStartupActivity implements StartupActivity {
     EditorActionsUtil.refreshActions();
     var authenticationResponse = YouUserManager.getInstance().getAuthenticationResponse();
     if (authenticationResponse == null) {
-      handleYouServiceAuthentication();
+      ApplicationManager.getApplication()
+          .executeOnPooledThread(this::handleYouServiceAuthentication);
     }
   }
 

@@ -1,6 +1,5 @@
 package ee.carlrobert.codegpt.settings.service.custom;
 
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 import com.intellij.ui.ToolbarDecorator;
@@ -75,11 +74,10 @@ class CustomServiceFormTabbedPane extends JBTabbedPane {
   }
 
   private static Object parseValue(Object value) {
-    if (!(value instanceof String)) {
+    if (!(value instanceof String stringValue)) {
       return value;
     }
 
-    var stringValue = (String) value;
     try {
       return Integer.parseInt(stringValue);
     } catch (NumberFormatException e) {
@@ -100,7 +98,7 @@ class CustomServiceFormTabbedPane extends JBTabbedPane {
     return actionsMap.entrySet()
         .stream()
         .map((entry) -> new Object[]{entry.getKey(), entry.getValue()})
-        .collect(toList())
+        .toList()
         .toArray(new Object[0][0]);
   }
 

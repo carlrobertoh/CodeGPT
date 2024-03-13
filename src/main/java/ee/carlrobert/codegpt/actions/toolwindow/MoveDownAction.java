@@ -12,7 +12,7 @@ public class MoveDownAction extends MoveAction {
 
   public MoveDownAction(Runnable onRefresh) {
     super("Move Down", "Move Down", AllIcons.Actions.MoveDown, onRefresh);
-    EditorActionsUtil.registerOrReplaceAction(this);
+    EditorActionsUtil.registerAction(this);
   }
 
   @Override

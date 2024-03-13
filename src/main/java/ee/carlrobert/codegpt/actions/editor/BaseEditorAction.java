@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.actions.editor;
 
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
@@ -17,7 +18,7 @@ abstract class BaseEditorAction extends AnAction {
       @Nullable @NlsActions.ActionDescription String description,
       @Nullable Icon icon) {
     super(text, description, icon);
-    EditorActionsUtil.registerOrReplaceAction(this);
+    EditorActionsUtil.registerAction(this);
   }
 
   BaseEditorAction(
@@ -44,5 +45,10 @@ abstract class BaseEditorAction extends AnAction {
       menuAllowed = editor.getSelectionModel().getSelectedText() != null;
     }
     event.getPresentation().setEnabled(menuAllowed);
+  }
+
+  @Override
+  public @NotNull ActionUpdateThread getActionUpdateThread() {
+    return ActionUpdateThread.EDT;
   }
 }

@@ -23,7 +23,7 @@ public class OpenInEditorAction extends AnAction {
 
   public OpenInEditorAction() {
     super("Open In Editor", "Open conversation in editor", AllIcons.Actions.SplitVertically);
-    EditorActionsUtil.registerOrReplaceAction(this);
+    EditorActionsUtil.registerAction(this);
   }
 
   @Override

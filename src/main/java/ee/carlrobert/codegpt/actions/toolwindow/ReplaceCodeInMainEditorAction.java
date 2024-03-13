@@ -15,7 +15,7 @@ public class ReplaceCodeInMainEditorAction extends AnAction {
 
   public ReplaceCodeInMainEditorAction() {
     super("Replace in Main Editor", "Replace code in main editor", AllIcons.Actions.Replace);
-    EditorActionsUtil.registerOrReplaceAction(this);
+    EditorActionsUtil.registerAction(this);
   }
 
   @Override

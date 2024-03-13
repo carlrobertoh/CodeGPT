@@ -10,9 +10,7 @@ import java.util.stream.Stream;
 import org.jetbrains.annotations.Nullable;
 
 abstract class AbstractCredentialsManager {
-
-  private static final PasswordSafe passwordSafe = PasswordSafe.getInstance();
-
+  
   private final Map<String, CredentialAttributes> credentialMapping;
   private final Map<String, String> credentialCache = new ConcurrentHashMap<>();
 
@@ -38,7 +36,7 @@ abstract class AbstractCredentialsManager {
       return cachedCredential;
     }
 
-    String credential = passwordSafe.getPassword(credentialMapping.get(key));
+    String credential = PasswordSafe.getInstance().getPassword(credentialMapping.get(key));
     if (credential != null) {
       credentialCache.put(key, credential);
     }
@@ -52,6 +50,6 @@ abstract class AbstractCredentialsManager {
       credentialCache.put(key, credential);
     }
 
-    passwordSafe.setPassword(credentialMapping.get(key), credential);
+    PasswordSafe.getInstance().setPassword(credentialMapping.get(key), credential);
   }
 }

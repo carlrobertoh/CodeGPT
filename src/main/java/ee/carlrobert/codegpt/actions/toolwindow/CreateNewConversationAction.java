@@ -15,7 +15,7 @@ public class CreateNewConversationAction extends AnAction {
   public CreateNewConversationAction(Runnable onCreate) {
     super("Create New Chat", "Create new chat", AllIcons.General.Add);
     this.onCreate = onCreate;
-    EditorActionsUtil.registerOrReplaceAction(this);
+    EditorActionsUtil.registerAction(this);
   }
 
   @Override

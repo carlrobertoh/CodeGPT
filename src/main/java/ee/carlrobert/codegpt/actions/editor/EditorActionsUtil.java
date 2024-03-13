@@ -38,15 +38,14 @@ public class EditorActionsUtil {
     return actionsMap.entrySet()
         .stream()
         .map((entry) -> new String[]{entry.getKey(), entry.getValue()})
-        .collect(toList())
+        .toList()
         .toArray(new String[0][0]);
   }
 
   public static void refreshActions() {
     AnAction actionGroup =
         ActionManager.getInstance().getAction("action.editor.group.EditorActionGroup");
-    if (actionGroup instanceof DefaultActionGroup) {
-      DefaultActionGroup group = (DefaultActionGroup) actionGroup;
+    if (actionGroup instanceof DefaultActionGroup group) {
       group.removeAll();
       group.add(new AskAction());
       group.add(new CustomPromptAction());
@@ -82,12 +81,10 @@ public class EditorActionsUtil {
     }
   }
 
-  public static void registerOrReplaceAction(AnAction action) {
+  public static void registerAction(AnAction action) {
     ActionManager actionManager = ActionManager.getInstance();
     var actionId = convertToId(action.getTemplateText());
-    if (actionManager.getAction(actionId) != null) {
-      actionManager.replaceAction(actionId, action);
-    } else {
+    if (actionManager.getAction(actionId) == null) {
       actionManager.registerAction(actionId, action, PluginId.getId("ee.carlrobert.chatgpt"));
     }
   }

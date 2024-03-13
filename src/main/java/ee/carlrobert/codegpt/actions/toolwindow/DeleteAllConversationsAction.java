@@ -21,7 +21,7 @@ public class DeleteAllConversationsAction extends AnAction {
   public DeleteAllConversationsAction(Runnable onRefresh) {
     super("Delete All", "Delete all conversations", AllIcons.Actions.GC);
     this.onRefresh = onRefresh;
-    EditorActionsUtil.registerOrReplaceAction(this);
+    EditorActionsUtil.registerAction(this);
   }
 
   @Override

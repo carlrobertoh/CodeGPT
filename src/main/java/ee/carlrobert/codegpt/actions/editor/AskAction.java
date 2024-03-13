@@ -12,7 +12,7 @@ public class AskAction extends AnAction {
 
   public AskAction() {
     super("New Chat", "Chat with CodeGPT", Icons.Sparkle);
-    EditorActionsUtil.registerOrReplaceAction(this);
+    EditorActionsUtil.registerAction(this);
   }
 
   @Override

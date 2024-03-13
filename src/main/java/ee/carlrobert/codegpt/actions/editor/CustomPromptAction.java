@@ -27,7 +27,7 @@ public class CustomPromptAction extends BaseEditorAction {
 
   CustomPromptAction() {
     super("Custom Prompt", "Custom prompt description", AllIcons.Actions.Run_anything);
-    EditorActionsUtil.registerOrReplaceAction(this);
+    EditorActionsUtil.registerAction(this);
   }
 
   @Override

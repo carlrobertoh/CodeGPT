@@ -19,7 +19,7 @@ public class DeleteConversationAction extends AnAction {
   public DeleteConversationAction(Runnable onDelete) {
     super("Delete Conversation", "Delete single conversation", AllIcons.Actions.GC);
     this.onDelete = onDelete;
-    EditorActionsUtil.registerOrReplaceAction(this);
+    EditorActionsUtil.registerAction(this);
   }
 
   @Override

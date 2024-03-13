@@ -6,6 +6,7 @@ import static ee.carlrobert.codegpt.completions.CompletionRequestProvider.COMPLE
 import com.intellij.icons.AllIcons;
 import com.intellij.icons.AllIcons.Nodes;
 import com.intellij.openapi.Disposable;
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.keymap.impl.ui.EditKeymapsDialog;
 import com.intellij.openapi.ui.ComponentValidator;
@@ -309,6 +310,11 @@ public class ConfigurationComponent {
       Arrays.stream(DEFAULT_ACTIONS_ARRAY).forEach(model::addRow);
       EditorActionsUtil.refreshActions();
     }
+
+    @Override
+    public @NotNull ActionUpdateThread getActionUpdateThread() {
+      return ActionUpdateThread.EDT;
+    }
   }
 
   class KeymapActionButton extends AnActionButton {
@@ -333,6 +339,11 @@ public class ConfigurationComponent {
         }
       }
       new EditKeymapsDialog(e.getProject(), actionId, false).show();
+    }
+
+    @Override
+    public @NotNull ActionUpdateThread getActionUpdateThread() {
+      return ActionUpdateThread.EDT;
     }
   }
 }

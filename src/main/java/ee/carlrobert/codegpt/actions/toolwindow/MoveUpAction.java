@@ -12,11 +12,11 @@ public class MoveUpAction extends MoveAction {
 
   public MoveUpAction(Runnable onRefresh) {
     super("Move Up", "Move up", AllIcons.Actions.MoveUp, onRefresh);
-    EditorActionsUtil.registerOrReplaceAction(this);
+    EditorActionsUtil.registerAction(this);
   }
 
   @Override
   protected Optional<Conversation> getConversation(@NotNull Project project) {
-    return ConversationService.getInstance().getPreviousConversation();
+    return ConversationService.getInstance().getNextConversation();
   }
 }
