@@ -177,21 +177,13 @@ public class CompletionRequestProvider {
 
   public OpenAIChatCompletionRequest buildOpenAIChatCompletionRequest(
       @Nullable String model,
-      CallParameters callParameters,
-      @Nullable String overriddenPath) {
+      CallParameters callParameters) {
     var configuration = ConfigurationSettings.getCurrentState();
-    var builder = new OpenAIChatCompletionRequest.Builder(
-        buildMessages(model, callParameters))
+    return new OpenAIChatCompletionRequest.Builder(buildMessages(model, callParameters))
         .setModel(model)
         .setMaxTokens(configuration.getMaxTokens())
         .setStream(true)
-        .setTemperature(configuration.getTemperature());
-
-    if (overriddenPath != null) {
-      builder.setOverriddenPath(overriddenPath);
-    }
-
-    return builder.build();
+        .setTemperature(configuration.getTemperature()).build();
   }
 
   public Request buildCustomOpenAIChatCompletionRequest(

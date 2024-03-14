@@ -1,7 +1,5 @@
 package ee.carlrobert.codegpt.completions;
 
-import static java.lang.String.format;
-
 import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.completions.you.YouUserManager;
 import ee.carlrobert.codegpt.credentials.AnthropicCredentialsManager;
@@ -47,14 +45,9 @@ public class CompletionClientProvider {
         settings.getResourceName(),
         settings.getDeploymentId(),
         settings.getApiVersion());
-    var builder = new AzureClient
-        .Builder(AzureCredentialsManager.getInstance().getCredential(), params)
-        .setActiveDirectoryAuthentication(settings.isUseAzureActiveDirectoryAuthentication());
-    var baseHost = settings.getBaseHost();
-    if (baseHost != null) {
-      builder.setUrl(format(baseHost, params.getResourceName()));
-    }
-    return builder.build(getDefaultClientBuilder());
+    return new AzureClient.Builder(AzureCredentialsManager.getInstance().getCredential(), params)
+        .setActiveDirectoryAuthentication(settings.isUseAzureActiveDirectoryAuthentication())
+        .build(getDefaultClientBuilder());
   }
 
   public static YouClient getYouClient() {

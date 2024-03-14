@@ -18,7 +18,6 @@ import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettings;
-import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
@@ -64,35 +63,22 @@ public final class CompletionRequestService {
       CompletionEventListener<String> eventListener) {
     var requestProvider = new CompletionRequestProvider(callParameters.getConversation());
     return switch (GeneralSettings.getCurrentState().getSelectedService()) {
-      case OPENAI -> {
-        var openAISettings = OpenAISettings.getCurrentState();
-        yield CompletionClientProvider.getOpenAIClient().getChatCompletionAsync(
-            requestProvider.buildOpenAIChatCompletionRequest(
-                openAISettings.getModel(),
-                callParameters,
-                null),
-            eventListener);
-      }
-      case CUSTOM_OPENAI -> {
-        var customConfiguration = CustomServiceSettings.getCurrentState();
-        yield getCustomOpenAIChatCompletionAsync(
-            requestProvider.buildCustomOpenAIChatCompletionRequest(
-                customConfiguration,
-                callParameters),
-            eventListener);
-      }
+      case OPENAI -> CompletionClientProvider.getOpenAIClient().getChatCompletionAsync(
+          requestProvider.buildOpenAIChatCompletionRequest(
+              OpenAISettings.getCurrentState().getModel(),
+              callParameters),
+          eventListener);
+      case CUSTOM_OPENAI -> getCustomOpenAIChatCompletionAsync(
+          requestProvider.buildCustomOpenAIChatCompletionRequest(
+              CustomServiceSettings.getCurrentState(),
+              callParameters),
+          eventListener);
       case ANTHROPIC -> CompletionClientProvider.getClaudeClient().getCompletionAsync(
           requestProvider.buildAnthropicChatCompletionRequest(callParameters),
           eventListener);
-      case AZURE -> {
-        var azureSettings = AzureSettings.getCurrentState();
-        yield CompletionClientProvider.getAzureClient().getChatCompletionAsync(
-            requestProvider.buildOpenAIChatCompletionRequest(
-                null,
-                callParameters,
-                azureSettings.isUsingCustomPath() ? azureSettings.getPath() : null),
-            eventListener);
-      }
+      case AZURE -> CompletionClientProvider.getAzureClient().getChatCompletionAsync(
+          requestProvider.buildOpenAIChatCompletionRequest(null, callParameters),
+          eventListener);
       case YOU -> CompletionClientProvider.getYouClient().getChatCompletionAsync(
           requestProvider.buildYouCompletionRequest(callParameters.getMessage()),
           eventListener);

@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- Azure custom configuration (use OpenAI-compatible service to override the default configuration) 
+
 ## [2.5.1] - 2024-03-14
 
 ### Added

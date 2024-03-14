@@ -29,8 +29,7 @@ public class CompletionRequestProviderTest extends IntegrationTest {
                 conversation,
                 ConversationType.DEFAULT,
                 new Message("TEST_CHAT_COMPLETION_PROMPT"),
-                false),
-            null);
+                false));
 
     assertThat(request.getMessages())
         .extracting("role", "content")
@@ -57,8 +56,7 @@ public class CompletionRequestProviderTest extends IntegrationTest {
                 conversation,
                 ConversationType.DEFAULT,
                 new Message("TEST_CHAT_COMPLETION_PROMPT"),
-                false),
-            null);
+                false));
 
     assertThat(request.getMessages())
         .extracting("role", "content")
@@ -86,8 +84,7 @@ public class CompletionRequestProviderTest extends IntegrationTest {
                 conversation,
                 ConversationType.DEFAULT,
                 secondMessage,
-                true),
-            null);
+                true));
 
     assertThat(request.getMessages())
         .extracting("role", "content")
@@ -115,8 +112,7 @@ public class CompletionRequestProviderTest extends IntegrationTest {
                 conversation,
                 ConversationType.DEFAULT,
                 new Message("TEST_CHAT_COMPLETION_PROMPT"),
-                false),
-            null);
+                false));
 
     assertThat(request.getMessages())
         .extracting("role", "content")
@@ -141,8 +137,7 @@ public class CompletionRequestProviderTest extends IntegrationTest {
                     conversation,
                     ConversationType.DEFAULT,
                     createDummyMessage(100),
-                    false),
-                null));
+                    false)));
   }
 
   private Message createDummyMessage(int tokenSize) {

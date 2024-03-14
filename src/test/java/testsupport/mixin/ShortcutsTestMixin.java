@@ -20,7 +20,6 @@ public interface ShortcutsTestMixin {
     GeneralSettings.getCurrentState().setSelectedService(ServiceType.AZURE);
     AzureCredentialsManager.getInstance().setApiKey("TEST_API_KEY");
     var azureSettings = AzureSettings.getCurrentState();
-    azureSettings.setBaseHost(null);
     azureSettings.setResourceName("TEST_RESOURCE_NAME");
     azureSettings.setApiVersion("TEST_API_VERSION");
     azureSettings.setDeploymentId("TEST_DEPLOYMENT_ID");

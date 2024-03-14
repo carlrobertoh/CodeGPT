@@ -24,8 +24,6 @@ public class AzureSettingsForm {
   private final JBRadioButton useAzureActiveDirectoryAuthenticationRadioButton;
   private final JBPasswordField azureActiveDirectoryTokenField;
   private final JPanel azureActiveDirectoryTokenFieldPanel;
-  private final JBTextField azureBaseHostField;
-  private final JBTextField azurePathField;
   private final JBTextField azureResourceNameField;
   private final JBTextField azureDeploymentIdField;
   private final JBTextField azureApiVersionField;
@@ -52,8 +50,6 @@ public class AzureSettingsForm {
         .withLabel(CodeGPTBundle.get("settingsConfigurable.service.azure.bearerToken.label"))
         .resizeX(false)
         .createPanel();
-    azureBaseHostField = new JBTextField(settings.getBaseHost(), 35);
-    azurePathField = new JBTextField(settings.getPath(), 35);
     azureResourceNameField = new JBTextField(settings.getResourceName(), 35);
     azureDeploymentIdField = new JBTextField(settings.getDeploymentId(), 35);
     azureApiVersionField = new JBTextField(settings.getApiVersion(), 35);
@@ -95,12 +91,6 @@ public class AzureSettingsForm {
             .resizeX(false)
             .withComment(CodeGPTBundle.get(
                 "settingsConfigurable.service.azure.apiVersion.comment")))
-        .add(UI.PanelFactory.panel(azureBaseHostField)
-            .withLabel(CodeGPTBundle.get("settingsConfigurable.shared.baseHost.label"))
-            .resizeX(false))
-        .add(UI.PanelFactory.panel(azurePathField)
-            .withLabel(CodeGPTBundle.get("settingsConfigurable.shared.path.label"))
-            .resizeX(false))
         .createPanel());
 
     return FormBuilder.createFormBuilder()
@@ -122,8 +112,6 @@ public class AzureSettingsForm {
     state.setResourceName(azureResourceNameField.getText());
     state.setDeploymentId(azureDeploymentIdField.getText());
     state.setApiVersion(azureApiVersionField.getText());
-    state.setBaseHost(azureBaseHostField.getText());
-    state.setPath(azurePathField.getText());
     return state;
   }
 
@@ -138,8 +126,6 @@ public class AzureSettingsForm {
     azureResourceNameField.setText(state.getResourceName());
     azureDeploymentIdField.setText(state.getDeploymentId());
     azureApiVersionField.setText(state.getApiVersion());
-    azureBaseHostField.setText(state.getBaseHost());
-    azurePathField.setText(state.getPath());
   }
 
   public @Nullable String getActiveDirectoryToken() {

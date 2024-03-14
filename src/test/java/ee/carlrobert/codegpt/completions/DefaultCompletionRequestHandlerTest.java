@@ -15,7 +15,6 @@ import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
-import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
 import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange;
 import java.util.List;
 import java.util.Map;
@@ -65,45 +64,6 @@ public class DefaultCompletionRequestHandlerTest extends IntegrationTest {
     expectAzure((StreamHttpExchange) request -> {
       assertThat(request.getUri().getPath()).isEqualTo(
           "/openai/deployments/TEST_DEPLOYMENT_ID/chat/completions");
-      assertThat(request.getUri().getQuery()).isEqualTo("api-version=TEST_API_VERSION");
-      assertThat(request.getHeaders().get("Api-key").get(0)).isEqualTo("TEST_API_KEY");
-      assertThat(request.getHeaders().get("X-llm-application-tag").get(0)).isEqualTo("codegpt");
-      assertThat(request.getBody())
-          .extracting("messages")
-          .isEqualTo(
-              List.of(
-                  Map.of("role", "system", "content", COMPLETION_SYSTEM_PROMPT),
-                  Map.of("role", "user", "content", "TEST_PREV_PROMPT"),
-                  Map.of("role", "assistant", "content", "TEST_PREV_RESPONSE"),
-                  Map.of("role", "user", "content", "TEST_PROMPT")));
-      return List.of(
-          jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("role", "assistant")))),
-          jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "Hel")))),
-          jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "lo")))),
-          jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "!")))));
-    });
-    var message = new Message("TEST_PROMPT");
-    var requestHandler = new CompletionRequestHandler(getRequestEventListener(message));
-
-    requestHandler.call(new CallParameters(conversation, ConversationType.DEFAULT, message, false));
-
-    await().atMost(5, SECONDS).until(() -> "Hello!".equals(message.getResponse()));
-  }
-
-  public void testAzureChatCompletionCallWithCustomSettings() {
-    useAzureService();
-    AzureSettings.getInstance()
-        .getState()
-        .setPath("/codegpt/deployments/%s/completions?api-version=%s");
-    var conversationService = ConversationService.getInstance();
-    var prevMessage = new Message("TEST_PREV_PROMPT");
-    prevMessage.setResponse("TEST_PREV_RESPONSE");
-    var conversation = conversationService.startConversation();
-    conversation.addMessage(prevMessage);
-    conversationService.saveConversation(conversation);
-    expectAzure((StreamHttpExchange) request -> {
-      assertThat(request.getUri().getPath())
-          .isEqualTo("/codegpt/deployments/TEST_DEPLOYMENT_ID/completions");
       assertThat(request.getUri().getQuery()).isEqualTo("api-version=TEST_API_VERSION");
       assertThat(request.getHeaders().get("Api-key").get(0)).isEqualTo("TEST_API_KEY");
       assertThat(request.getHeaders().get("X-llm-application-tag").get(0)).isEqualTo("codegpt");
