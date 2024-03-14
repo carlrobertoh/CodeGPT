@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    implementation("io.github.bonede:tree-sitter:0.21.0")
+    implementation("io.github.bonede:tree-sitter:0.22.1")
     implementation("io.github.bonede:tree-sitter-erlang:0.1.0")
     implementation("io.github.bonede:tree-sitter-elixir:0.1.1")
     implementation("io.github.bonede:tree-sitter-dockerfile:0.1.2")
