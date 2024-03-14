@@ -6,7 +6,7 @@ import com.intellij.icons.AllIcons;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.CheckedTreeNode;
 import com.intellij.util.PlatformIcons;
-import ee.carlrobert.embedding.ReferencedFile;
+import ee.carlrobert.codegpt.ReferencedFile;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
@@ -53,8 +53,7 @@ public class VirtualFileCheckboxTree extends FileCheckboxTree {
     return new FileCheckboxTreeCellRenderer() {
       @Override
       void updatePresentation(Object userObject) {
-        if (userObject instanceof VirtualFile) {
-          VirtualFile virtualFile = (VirtualFile) userObject;
+        if (userObject instanceof VirtualFile virtualFile) {
           if (virtualFile.isDirectory()) {
             getTextRenderer().append(virtualFile.getName());
             getTextRenderer().setIcon(PlatformIcons.FOLDER_ICON);

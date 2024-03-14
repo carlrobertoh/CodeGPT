@@ -1,7 +1,7 @@
 package ee.carlrobert.codegpt.actions;
 
 import com.intellij.util.messages.Topic;
-import ee.carlrobert.embedding.ReferencedFile;
+import ee.carlrobert.codegpt.ReferencedFile;
 import java.util.List;
 
 public interface IncludeFilesInContextNotifier {

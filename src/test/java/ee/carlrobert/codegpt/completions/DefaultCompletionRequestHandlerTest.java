@@ -27,7 +27,7 @@ public class DefaultCompletionRequestHandlerTest extends IntegrationTest {
     useOpenAIService();
     var message = new Message("TEST_PROMPT");
     var conversation = ConversationService.getInstance().startConversation();
-    var requestHandler = new CompletionRequestHandler(false, getRequestEventListener(message));
+    var requestHandler = new CompletionRequestHandler(getRequestEventListener(message));
     expectOpenAI((StreamHttpExchange) request -> {
       assertThat(request.getUri().getPath()).isEqualTo("/v1/chat/completions");
       assertThat(request.getMethod()).isEqualTo("POST");
@@ -83,7 +83,7 @@ public class DefaultCompletionRequestHandlerTest extends IntegrationTest {
           jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "!")))));
     });
     var message = new Message("TEST_PROMPT");
-    var requestHandler = new CompletionRequestHandler(false, getRequestEventListener(message));
+    var requestHandler = new CompletionRequestHandler(getRequestEventListener(message));
 
     requestHandler.call(new CallParameters(conversation, ConversationType.DEFAULT, message, false));
 
@@ -122,7 +122,7 @@ public class DefaultCompletionRequestHandlerTest extends IntegrationTest {
           jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "!")))));
     });
     var message = new Message("TEST_PROMPT");
-    var requestHandler = new CompletionRequestHandler(false, getRequestEventListener(message));
+    var requestHandler = new CompletionRequestHandler(getRequestEventListener(message));
 
     requestHandler.call(new CallParameters(conversation, ConversationType.DEFAULT, message, false));
 
@@ -134,7 +134,7 @@ public class DefaultCompletionRequestHandlerTest extends IntegrationTest {
     var message = new Message("TEST_PROMPT");
     var conversation = ConversationService.getInstance().startConversation();
     conversation.addMessage(new Message("Ping", "Pong"));
-    var requestHandler = new CompletionRequestHandler(false, getRequestEventListener(message));
+    var requestHandler = new CompletionRequestHandler(getRequestEventListener(message));
     expectYou((StreamHttpExchange) request -> {
       assertThat(request.getUri().getPath()).isEqualTo("/api/streamingSearch");
       assertThat(request.getMethod()).isEqualTo("GET");
@@ -186,7 +186,7 @@ public class DefaultCompletionRequestHandlerTest extends IntegrationTest {
     var message = new Message("TEST_PROMPT");
     var conversation = ConversationService.getInstance().startConversation();
     conversation.addMessage(new Message("Ping", "Pong"));
-    var requestHandler = new CompletionRequestHandler(false, getRequestEventListener(message));
+    var requestHandler = new CompletionRequestHandler(getRequestEventListener(message));
     expectLlama((StreamHttpExchange) request -> {
       assertThat(request.getUri().getPath()).isEqualTo("/completion");
       assertThat(request.getBody())

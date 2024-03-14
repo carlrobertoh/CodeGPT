@@ -17,15 +17,11 @@ public class CompletionRequestHandler {
   private static final Logger LOG = Logger.getInstance(CompletionRequestHandler.class);
 
   private final StringBuilder messageBuilder = new StringBuilder();
-  private final boolean useContextualSearch;
   private final CompletionResponseEventListener completionResponseEventListener;
   private SwingWorker<Void, String> swingWorker;
   private EventSource eventSource;
 
-  public CompletionRequestHandler(
-      boolean useContextualSearch,
-      CompletionResponseEventListener completionResponseEventListener) {
-    this.useContextualSearch = useContextualSearch;
+  public CompletionRequestHandler(CompletionResponseEventListener completionResponseEventListener) {
     this.completionResponseEventListener = completionResponseEventListener;
   }
 
@@ -46,7 +42,7 @@ public class CompletionRequestHandler {
       CompletionEventListener<String> eventListener) {
     try {
       return CompletionRequestService.getInstance()
-          .getChatCompletionAsync(callParameters, useContextualSearch, eventListener);
+          .getChatCompletionAsync(callParameters, eventListener);
     } catch (Throwable ex) {
       handleCallException(ex);
       throw ex;

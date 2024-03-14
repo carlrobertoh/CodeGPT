@@ -9,8 +9,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
-import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.EncodingManager;
+import ee.carlrobert.codegpt.ReferencedFile;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
 import ee.carlrobert.codegpt.conversations.Conversation;
@@ -29,8 +29,6 @@ import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.codegpt.settings.service.you.YouSettings;
 import ee.carlrobert.codegpt.telemetry.core.configuration.TelemetryConfiguration;
 import ee.carlrobert.codegpt.telemetry.core.service.UserId;
-import ee.carlrobert.embedding.EmbeddingsService;
-import ee.carlrobert.embedding.ReferencedFile;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionRequest;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionRequestMessage;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
@@ -66,18 +64,14 @@ public class CompletionRequestProvider {
       "/prompts/fix-compile-errors.txt");
 
   private final EncodingManager encodingManager = EncodingManager.getInstance();
-  private final EmbeddingsService embeddingsService;
   private final Conversation conversation;
 
   public CompletionRequestProvider(Conversation conversation) {
-    this.embeddingsService = new EmbeddingsService(
-        CompletionClientProvider.getOpenAIClient(),
-        CodeGPTPlugin.getPluginBasePath());
     this.conversation = conversation;
   }
 
   public static String getPromptWithContext(List<ReferencedFile> referencedFiles,
-                                            String userPrompt) {
+      String userPrompt) {
     var includedFilesSettings = IncludedFilesSettings.getCurrentState();
     var repeatableContext = referencedFiles.stream()
         .map(item -> includedFilesSettings.getRepeatableContext()
@@ -184,11 +178,10 @@ public class CompletionRequestProvider {
   public OpenAIChatCompletionRequest buildOpenAIChatCompletionRequest(
       @Nullable String model,
       CallParameters callParameters,
-      boolean useContextualSearch,
       @Nullable String overriddenPath) {
     var configuration = ConfigurationSettings.getCurrentState();
     var builder = new OpenAIChatCompletionRequest.Builder(
-        buildMessages(model, callParameters, useContextualSearch))
+        buildMessages(model, callParameters))
         .setModel(model)
         .setMaxTokens(configuration.getMaxTokens())
         .setStream(true)
@@ -206,7 +199,7 @@ public class CompletionRequestProvider {
       CallParameters callParameters) {
     return buildCustomOpenAIChatCompletionRequest(
         customConfiguration,
-        buildMessages(callParameters, false),
+        buildMessages(callParameters),
         true);
   }
 
@@ -273,43 +266,33 @@ public class CompletionRequestProvider {
     return request;
   }
 
-  private List<OpenAIChatCompletionMessage> buildMessages(
-      CallParameters callParameters,
-      boolean useContextualSearch) {
+  private List<OpenAIChatCompletionMessage> buildMessages(CallParameters callParameters) {
     var message = callParameters.getMessage();
     var messages = new ArrayList<OpenAIChatCompletionMessage>();
-    if (useContextualSearch) {
-      var prompt = embeddingsService.buildPromptWithContext(
-          message.getPrompt());
-      LOG.info("Retrieved context:\n" + prompt);
-      messages.add(new OpenAIChatCompletionMessage("user", prompt));
-    } else {
-      if (callParameters.getConversationType() == ConversationType.DEFAULT) {
-        messages.add(new OpenAIChatCompletionMessage(
-            "system",
-            ConfigurationSettings.getCurrentState().getSystemPrompt()));
-      }
-      if (callParameters.getConversationType() == ConversationType.FIX_COMPILE_ERRORS) {
-        messages.add(new OpenAIChatCompletionMessage("system", FIX_COMPILE_ERRORS_SYSTEM_PROMPT));
-      }
-
-      for (var prevMessage : conversation.getMessages()) {
-        if (callParameters.isRetry() && prevMessage.getId().equals(message.getId())) {
-          break;
-        }
-        messages.add(new OpenAIChatCompletionMessage("user", prevMessage.getPrompt()));
-        messages.add(new OpenAIChatCompletionMessage("assistant", prevMessage.getResponse()));
-      }
-      messages.add(new OpenAIChatCompletionMessage("user", message.getPrompt()));
+    if (callParameters.getConversationType() == ConversationType.DEFAULT) {
+      messages.add(new OpenAIChatCompletionMessage(
+          "system",
+          ConfigurationSettings.getCurrentState().getSystemPrompt()));
     }
+    if (callParameters.getConversationType() == ConversationType.FIX_COMPILE_ERRORS) {
+      messages.add(new OpenAIChatCompletionMessage("system", FIX_COMPILE_ERRORS_SYSTEM_PROMPT));
+    }
+
+    for (var prevMessage : conversation.getMessages()) {
+      if (callParameters.isRetry() && prevMessage.getId().equals(message.getId())) {
+        break;
+      }
+      messages.add(new OpenAIChatCompletionMessage("user", prevMessage.getPrompt()));
+      messages.add(new OpenAIChatCompletionMessage("assistant", prevMessage.getResponse()));
+    }
+    messages.add(new OpenAIChatCompletionMessage("user", message.getPrompt()));
     return messages;
   }
 
   private List<OpenAIChatCompletionMessage> buildMessages(
       @Nullable String model,
-      CallParameters callParameters,
-      boolean useContextualSearch) {
-    var messages = buildMessages(callParameters, useContextualSearch);
+      CallParameters callParameters) {
+    var messages = buildMessages(callParameters);
 
     if (model == null
         || GeneralSettings.getCurrentState().getSelectedService() == ServiceType.YOU) {

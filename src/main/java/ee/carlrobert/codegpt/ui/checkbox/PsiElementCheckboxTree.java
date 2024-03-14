@@ -9,7 +9,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.impl.file.PsiDirectoryImpl;
 import com.intellij.ui.CheckedTreeNode;
-import ee.carlrobert.embedding.ReferencedFile;
+import ee.carlrobert.codegpt.ReferencedFile;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;

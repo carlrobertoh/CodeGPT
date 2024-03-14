@@ -1,4 +1,4 @@
-package ee.carlrobert.embedding;
+package ee.carlrobert.codegpt;
 
 import java.io.File;
 import java.io.IOException;

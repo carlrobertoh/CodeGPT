@@ -3,7 +3,6 @@ package ee.carlrobert.codegpt;
 import com.intellij.openapi.editor.EditorCustomElementRenderer;
 import com.intellij.openapi.editor.Inlay;
 import com.intellij.openapi.util.Key;
-import ee.carlrobert.embedding.ReferencedFile;
 import java.util.List;
 
 public class CodeGPTKeys {

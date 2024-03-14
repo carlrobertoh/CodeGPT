@@ -21,9 +21,6 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Generate Grammar Source
-        run: ./gradlew generateGrammarSource
-
       - name: Run Tests
         run: ./gradlew check
 

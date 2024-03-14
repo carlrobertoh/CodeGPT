@@ -47,7 +47,6 @@ changelog {
 }
 
 dependencies {
-  implementation(project(":codegpt-core"))
   implementation(project(":codegpt-telemetry"))
   implementation(project(":codegpt-treesitter"))
 

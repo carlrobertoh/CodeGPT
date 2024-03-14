@@ -18,7 +18,6 @@ import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
-import ee.carlrobert.embedding.ReferencedFile;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;

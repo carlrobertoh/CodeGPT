@@ -61,68 +61,62 @@ public final class CompletionRequestService {
 
   public EventSource getChatCompletionAsync(
       CallParameters callParameters,
-      boolean useContextualSearch,
       CompletionEventListener<String> eventListener) {
     var requestProvider = new CompletionRequestProvider(callParameters.getConversation());
-    switch (GeneralSettings.getCurrentState().getSelectedService()) {
-      case OPENAI:
+    return switch (GeneralSettings.getCurrentState().getSelectedService()) {
+      case OPENAI -> {
         var openAISettings = OpenAISettings.getCurrentState();
-        return CompletionClientProvider.getOpenAIClient().getChatCompletionAsync(
+        yield CompletionClientProvider.getOpenAIClient().getChatCompletionAsync(
             requestProvider.buildOpenAIChatCompletionRequest(
                 openAISettings.getModel(),
                 callParameters,
-                useContextualSearch,
                 null),
             eventListener);
-      case CUSTOM_OPENAI:
+      }
+      case CUSTOM_OPENAI -> {
         var customConfiguration = CustomServiceSettings.getCurrentState();
-        return getCustomOpenAIChatCompletionAsync(
+        yield getCustomOpenAIChatCompletionAsync(
             requestProvider.buildCustomOpenAIChatCompletionRequest(
                 customConfiguration,
                 callParameters),
             eventListener);
-      case ANTHROPIC:
-        return CompletionClientProvider.getClaudeClient().getCompletionAsync(
-            requestProvider.buildAnthropicChatCompletionRequest(callParameters),
-            eventListener);
-      case AZURE:
+      }
+      case ANTHROPIC -> CompletionClientProvider.getClaudeClient().getCompletionAsync(
+          requestProvider.buildAnthropicChatCompletionRequest(callParameters),
+          eventListener);
+      case AZURE -> {
         var azureSettings = AzureSettings.getCurrentState();
-        return CompletionClientProvider.getAzureClient().getChatCompletionAsync(
+        yield CompletionClientProvider.getAzureClient().getChatCompletionAsync(
             requestProvider.buildOpenAIChatCompletionRequest(
                 null,
                 callParameters,
-                useContextualSearch,
                 azureSettings.isUsingCustomPath() ? azureSettings.getPath() : null),
             eventListener);
-      case YOU:
-        return CompletionClientProvider.getYouClient().getChatCompletionAsync(
-            requestProvider.buildYouCompletionRequest(callParameters.getMessage()),
-            eventListener);
-      case LLAMA_CPP:
-        return CompletionClientProvider.getLlamaClient().getChatCompletionAsync(
-            requestProvider.buildLlamaCompletionRequest(
-                callParameters.getMessage(),
-                callParameters.getConversationType()),
-            eventListener);
-      default:
-        throw new IllegalArgumentException();
-    }
+      }
+      case YOU -> CompletionClientProvider.getYouClient().getChatCompletionAsync(
+          requestProvider.buildYouCompletionRequest(callParameters.getMessage()),
+          eventListener);
+      case LLAMA_CPP -> CompletionClientProvider.getLlamaClient().getChatCompletionAsync(
+          requestProvider.buildLlamaCompletionRequest(
+              callParameters.getMessage(),
+              callParameters.getConversationType()),
+          eventListener);
+      default -> throw new IllegalArgumentException();
+    };
   }
 
   public EventSource getCodeCompletionAsync(
       InfillRequestDetails requestDetails,
       CompletionEventListener<String> eventListener) {
     var requestProvider = new CodeCompletionRequestProvider(requestDetails);
-    switch (GeneralSettings.getCurrentState().getSelectedService()) {
-      case OPENAI:
-        return CompletionClientProvider.getOpenAIClient()
-            .getCompletionAsync(requestProvider.buildOpenAIRequest(), eventListener);
-      case LLAMA_CPP:
-        return CompletionClientProvider.getLlamaClient()
-            .getChatCompletionAsync(requestProvider.buildLlamaRequest(), eventListener);
-      default:
-        throw new IllegalArgumentException("Code completion not supported for selected service");
-    }
+    return switch (GeneralSettings.getCurrentState().getSelectedService()) {
+      case OPENAI -> CompletionClientProvider.getOpenAIClient()
+          .getCompletionAsync(requestProvider.buildOpenAIRequest(), eventListener);
+      case LLAMA_CPP -> CompletionClientProvider.getLlamaClient()
+          .getChatCompletionAsync(requestProvider.buildLlamaRequest(), eventListener);
+      default ->
+          throw new IllegalArgumentException("Code completion not supported for selected service");
+    };
   }
 
   public void generateCommitMessageAsync(

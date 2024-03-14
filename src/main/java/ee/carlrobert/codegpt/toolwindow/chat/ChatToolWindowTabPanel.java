@@ -14,6 +14,7 @@ import com.intellij.ui.JBColor;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.CodeGPTKeys;
 import ee.carlrobert.codegpt.EncodingManager;
+import ee.carlrobert.codegpt.ReferencedFile;
 import ee.carlrobert.codegpt.actions.ActionType;
 import ee.carlrobert.codegpt.completions.CallParameters;
 import ee.carlrobert.codegpt.completions.CompletionRequestHandler;
@@ -37,7 +38,6 @@ import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.UserPromptTextArea;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.UserPromptTextAreaHeader;
 import ee.carlrobert.codegpt.util.EditorUtil;
 import ee.carlrobert.codegpt.util.file.FileUtil;
-import ee.carlrobert.embedding.ReferencedFile;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -51,7 +51,6 @@ public abstract class ChatToolWindowTabPanel implements Disposable {
 
   private static final Logger LOG = Logger.getInstance(ChatToolWindowTabPanel.class);
 
-  private final boolean useContextualSearch;
   private final JPanel rootPanel;
   private final Conversation conversation;
   private final UserPromptTextArea userPromptTextArea;
@@ -69,7 +68,6 @@ public abstract class ChatToolWindowTabPanel implements Disposable {
       boolean useContextualSearch) {
     this.project = project;
     this.conversation = conversation;
-    this.useContextualSearch = useContextualSearch;
     conversationService = ConversationService.getInstance();
     toolWindowScrollablePanel = new ChatToolWindowScrollablePanel();
     totalTokensPanel = new TotalTokensPanel(
@@ -217,7 +215,6 @@ public abstract class ChatToolWindowTabPanel implements Disposable {
     }
 
     var requestHandler = new CompletionRequestHandler(
-        useContextualSearch,
         new ToolWindowCompletionResponseEventListener(
             conversationService,
             responsePanel,
