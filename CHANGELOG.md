@@ -6,6 +6,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Support for You Pro modes
+- Basic post-processing for code completions
+- Code completion feature toggle keyboard-shortcut
+- Support for git commit message generation with Custom OpenAI and Anthropic services
+
+### Fixed
+
+- Several IntelliJ platform warnings
+
+### Changed
+
+- Supported minimum IDE build from 213 to 222
+
 ## [2.5.0] - 2024-03-06
 
 ### Added
