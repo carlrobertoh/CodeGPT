@@ -26,6 +26,7 @@ import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionRequest;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionRequestMessage;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionEventSourceListener;
+import ee.carlrobert.llm.client.openai.completion.OpenAITextCompletionEventSourceListener;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.response.OpenAIChatCompletionResponse;
@@ -91,18 +92,34 @@ public final class CompletionRequestService {
     };
   }
 
+  public EventSource getCustomOpenAICCodeCompletionAsync(
+          Request customRequest,
+          CompletionEventListener<String> eventListener) {
+    var httpClient = CompletionClientProvider.getDefaultClientBuilder().build();
+    return EventSources.createFactory(httpClient).newEventSource(
+            customRequest,
+            new OpenAITextCompletionEventSourceListener(eventListener));
+  }
+
   public EventSource getCodeCompletionAsync(
       InfillRequestDetails requestDetails,
       CompletionEventListener<String> eventListener) {
     var requestProvider = new CodeCompletionRequestProvider(requestDetails);
-    return switch (GeneralSettings.getCurrentState().getSelectedService()) {
-      case OPENAI -> CompletionClientProvider.getOpenAIClient()
-          .getCompletionAsync(requestProvider.buildOpenAIRequest(), eventListener);
-      case LLAMA_CPP -> CompletionClientProvider.getLlamaClient()
-          .getChatCompletionAsync(requestProvider.buildLlamaRequest(), eventListener);
-      default ->
-          throw new IllegalArgumentException("Code completion not supported for selected service");
-    };
+    switch (GeneralSettings.getCurrentState().getSelectedService()) {
+      case OPENAI:
+        return CompletionClientProvider.getOpenAIClient()
+            .getCompletionAsync(requestProvider.buildOpenAIRequest(), eventListener);
+      case LLAMA_CPP:
+        return CompletionClientProvider.getLlamaClient()
+            .getChatCompletionAsync(requestProvider.buildLlamaRequest(), eventListener);
+      case CUSTOM_OPENAI:
+        var customConfiguration = CustomServiceSettings.getCurrentState();
+        return getCustomOpenAICCodeCompletionAsync(
+                requestProvider.buildCustomOpenAIRequest(customConfiguration),
+                eventListener);
+      default:
+        throw new IllegalArgumentException("Code completion not supported for selected service");
+    }
   }
 
   public void generateCommitMessageAsync(

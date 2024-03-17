@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.actions;
 
+import static ee.carlrobert.codegpt.settings.service.ServiceType.CUSTOM_OPENAI;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.LLAMA_CPP;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.OPENAI;
 
@@ -31,7 +32,8 @@ public class EnableCompletionsAction extends AnAction {
     var codeCompletionEnabled = ConfigurationSettings.getCurrentState().isCodeCompletionsEnabled();
     e.getPresentation().setEnabled(!codeCompletionEnabled);
     e.getPresentation()
-        .setVisible(!codeCompletionEnabled && List.of(OPENAI, LLAMA_CPP).contains(selectedService));
+        .setVisible(!codeCompletionEnabled && List.of(CUSTOM_OPENAI, OPENAI, LLAMA_CPP)
+            .contains(selectedService));
   }
 
   @Override
