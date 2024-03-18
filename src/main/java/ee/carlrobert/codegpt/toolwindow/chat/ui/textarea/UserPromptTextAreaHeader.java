@@ -8,29 +8,41 @@ import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.completions.you.YouSubscriptionNotifier;
 import ee.carlrobert.codegpt.completions.you.auth.SignedOutNotifier;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
-import java.awt.BorderLayout;
-import javax.swing.JPanel;
+
+import java.awt.*;
+import javax.swing.*;
 
 public class UserPromptTextAreaHeader extends JPanel {
 
   public UserPromptTextAreaHeader(
-      ServiceType selectedService,
-      TotalTokensPanel totalTokensPanel,
-      Runnable onAddNewTab) {
-    super(new BorderLayout());
+          ServiceType selectedService,
+          Persona selectedPersona,
+          TotalTokensPanel totalTokensPanel,
+          Runnable onAddNewTab) {
+    super(new FlowLayout(FlowLayout.CENTER, 0, 0));
     setOpaque(false);
     setBorder(JBUI.Borders.emptyBottom(8));
+
     switch (selectedService) {
       case OPENAI:
       case AZURE:
-        add(totalTokensPanel, BorderLayout.LINE_START);
+        add(Box.createHorizontalStrut(8));
+        add(totalTokensPanel);
         break;
       case YOU:
         break;
       default:
     }
+
+    add(Box.createHorizontalStrut(8));
     add(new ModelComboBoxAction(onAddNewTab, selectedService)
-        .createCustomComponent(ActionPlaces.UNKNOWN), BorderLayout.LINE_END);
+            .createCustomComponent(ActionPlaces.UNKNOWN));
+
+    add(Box.createHorizontalStrut(8));
+
+    PersonaComboBoxAction personaComboBoxAction = new PersonaComboBoxAction(selectedPersona);
+    JComponent personaComboBox = personaComboBoxAction.createCustomComponent(ActionPlaces.UNKNOWN);
+    add(personaComboBox);
   }
 
   private void subscribeToYouTopics(JBCheckBox gpt4CheckBox) {

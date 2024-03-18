@@ -32,10 +32,7 @@ import ee.carlrobert.codegpt.toolwindow.chat.ui.ChatMessageResponseBody;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ChatToolWindowScrollablePanel;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ResponsePanel;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.UserMessagePanel;
-import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.TotalTokensDetails;
-import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.TotalTokensPanel;
-import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.UserPromptTextArea;
-import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.UserPromptTextAreaHeader;
+import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.*;
 import ee.carlrobert.codegpt.util.EditorUtil;
 import ee.carlrobert.codegpt.util.file.FileUtil;
 import java.awt.BorderLayout;
@@ -107,6 +104,8 @@ public abstract class ChatToolWindowTabPanel implements Disposable {
         message.setReferencedFilePaths(referencedFilePaths);
         message.setUserMessage(message.getPrompt());
         message.setPrompt(getPromptWithContext(referencedFiles, message.getPrompt()));
+
+        System.out.println(message.getPrompt());
 
         totalTokensPanel.updateReferencedFilesTokens(referencedFiles);
 
@@ -248,7 +247,7 @@ public abstract class ChatToolWindowTabPanel implements Disposable {
     sendMessage(message, ConversationType.DEFAULT);
   }
 
-  private JPanel createUserPromptPanel(ServiceType selectedService) {
+  private JPanel createUserPromptPanel(ServiceType selectedService, Persona selectedPersona) {
     var panel = new JPanel(new BorderLayout());
     panel.setBorder(JBUI.Borders.compound(
         JBUI.Borders.customLine(JBColor.border(), 1, 0, 0, 0),
@@ -256,6 +255,7 @@ public abstract class ChatToolWindowTabPanel implements Disposable {
     var contentManager = project.getService(StandardChatToolWindowContentManager.class);
     panel.add(JBUI.Panels.simplePanel(new UserPromptTextAreaHeader(
         selectedService,
+        selectedPersona,
         totalTokensPanel,
         contentManager::createNewTabPanel)), BorderLayout.NORTH);
     panel.add(JBUI.Panels.simplePanel(userPromptTextArea), BorderLayout.CENTER);
@@ -277,7 +277,7 @@ public abstract class ChatToolWindowTabPanel implements Disposable {
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.gridy = 1;
     rootPanel.add(
-        createUserPromptPanel(GeneralSettings.getCurrentState().getSelectedService()), gbc);
+        createUserPromptPanel(GeneralSettings.getCurrentState().getSelectedService(), GeneralSettings.getCurrentState().getSelectedPersona()), gbc);
     return rootPanel;
   }
 }
