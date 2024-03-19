@@ -18,6 +18,7 @@ import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.credentials.CustomServiceCredentialManager;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
+import ee.carlrobert.codegpt.settings.GeneralSettingsState;
 import ee.carlrobert.codegpt.settings.IncludedFilesSettings;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
@@ -29,6 +30,7 @@ import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.codegpt.settings.service.you.YouSettings;
 import ee.carlrobert.codegpt.telemetry.core.configuration.TelemetryConfiguration;
 import ee.carlrobert.codegpt.telemetry.core.service.UserId;
+import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.Persona;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionRequest;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionRequestMessage;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
@@ -142,6 +144,10 @@ public class CompletionRequestProvider {
     if (conversationType == ConversationType.FIX_COMPILE_ERRORS) {
       systemPrompt = FIX_COMPILE_ERRORS_SYSTEM_PROMPT;
     }
+    Persona persona = GeneralSettings.getCurrentState().getSelectedPersona();
+    if (persona != null && !persona.getName().equals("No Persona")) {
+      systemPrompt = persona.getPromptText();
+    }
 
     var prompt = promptTemplate.buildPrompt(
         systemPrompt,
@@ -179,6 +185,11 @@ public class CompletionRequestProvider {
       @Nullable String model,
       CallParameters callParameters) {
     var configuration = ConfigurationSettings.getCurrentState();
+    //TODO: Default persona = no prompt sub
+    Persona persona = GeneralSettings.getCurrentState().getSelectedPersona();
+    if (persona != null && !persona.getName().equals("No Persona")) {
+      configuration.setSystemPrompt(persona.getPromptText());
+    }
     return new OpenAIChatCompletionRequest.Builder(buildMessages(model, callParameters))
         .setModel(model)
         .setMaxTokens(configuration.getMaxTokens())
