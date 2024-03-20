@@ -35,12 +35,12 @@ public class UserPromptTextAreaHeader extends JPanel {
     }
 
     add(Box.createHorizontalStrut(8));
-    add(new ModelComboBoxAction(onAddNewTab, selectedService)
-            .createCustomComponent(ActionPlaces.UNKNOWN));
+    ModelComboBoxAction modelComboBoxAction = new ModelComboBoxAction(onAddNewTab, selectedService);
+    add(modelComboBoxAction.createCustomComponent(ActionPlaces.UNKNOWN));
 
     add(Box.createHorizontalStrut(8));
 
-    PersonaComboBoxAction personaComboBoxAction = new PersonaComboBoxAction(selectedPersona);
+    PersonaComboBoxAction personaComboBoxAction = new PersonaComboBoxAction(selectedPersona, modelComboBoxAction);
     JComponent personaComboBox = personaComboBoxAction.createCustomComponent(ActionPlaces.UNKNOWN);
     add(personaComboBox);
   }

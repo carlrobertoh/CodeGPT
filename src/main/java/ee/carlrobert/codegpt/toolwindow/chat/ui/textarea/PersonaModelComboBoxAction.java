@@ -18,10 +18,6 @@ import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.completions.you.YouUserManager;
 import ee.carlrobert.codegpt.completions.you.auth.SignedOutNotifier;
-import ee.carlrobert.codegpt.conversations.ConversationService;
-import ee.carlrobert.codegpt.conversations.ConversationsState;
-import ee.carlrobert.codegpt.settings.GeneralSettings;
-import ee.carlrobert.codegpt.settings.GeneralSettingsState;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
@@ -37,19 +33,18 @@ import javax.swing.Icon;
 import javax.swing.JComponent;
 import org.jetbrains.annotations.NotNull;
 
-public class ModelComboBoxAction extends ComboBoxAction {
+public class PersonaModelComboBoxAction extends ComboBoxAction {
 
-    private final Runnable onAddNewTab;
-    private final GeneralSettingsState settings;
     private final OpenAISettingsState openAISettings;
     private final YouSettingsState youSettings;
+    private Persona persona;
+    private ServiceType unsavedServiceType = ServiceType.OPENAI;
 
-    public ModelComboBoxAction(Runnable onAddNewTab, ServiceType selectedService) {
-        this.onAddNewTab = onAddNewTab;
-        settings = GeneralSettings.getCurrentState();
+    public PersonaModelComboBoxAction(Persona persona) {
         openAISettings = OpenAISettings.getCurrentState();
         youSettings = YouSettings.getCurrentState();
-        updateTemplatePresentation(selectedService);
+        updateTemplatePresentation(persona.getServiceType());
+        this.persona = persona;
 
         subscribeToYouSignedOutTopic(ApplicationManager.getApplication().getMessageBus().connect());
     }
@@ -135,13 +130,13 @@ public class ModelComboBoxAction extends ComboBoxAction {
                 if (!YouUserManager.getInstance().isSubscribed()
                 && youSettings.getChatMode() != YouCompletionMode.DEFAULT) {
                     youSettings.setChatMode(YouCompletionMode.DEFAULT);
-                    updateTemplatePresentation(GeneralSettings.getCurrentState().getSelectedService());
+                    updateTemplatePresentation(this.persona.getServiceType()); // TODO: Not sure what this funciton does because I'm not familiar with You. I'm assuming I don't want the general state though.
                 }
             }
         );
     }
 
-    public void updateTemplatePresentation(ServiceType selectedService) {
+    private void updateTemplatePresentation(ServiceType selectedService) {
         var templatePresentation = getTemplatePresentation();
         switch (selectedService) {
             case OPENAI:
@@ -177,6 +172,16 @@ public class ModelComboBoxAction extends ComboBoxAction {
             break;
             default:
         }
+    }
+
+    public void setPersona(Persona persona) {
+        this.persona = persona;
+        unsavedServiceType = persona.getServiceType();
+        updateTemplatePresentation(persona.getServiceType());
+    }
+
+    public ServiceType getSelectedService() {
+        return unsavedServiceType;
     }
 
     private String getLlamaCppPresentationText() {
@@ -225,16 +230,18 @@ public class ModelComboBoxAction extends ComboBoxAction {
         String label,
         Icon icon,
         Presentation comboBoxPresentation) {
-        settings.setSelectedService(serviceType);
         comboBoxPresentation.setIcon(icon);
         comboBoxPresentation.setText(label);
+        // persona.setServiceType(serviceType);
+        unsavedServiceType = serviceType;
 
-        var currentConversation = ConversationsState.getCurrentConversation();
-        if (currentConversation != null && !currentConversation.getMessages().isEmpty()) {
-            onAddNewTab.run();
-        } else {
-            ConversationService.getInstance().startConversation();
-        }
+        // NOTE: I don't want to update the conversation state here. I want to update the persona state.
+        // var currentConversation = ConversationsState.getCurrentConversation();
+        // if (currentConversation != null && !currentConversation.getMessages().isEmpty()) {
+        //     onAddNewTab.run();
+        // } else {
+        //     ConversationService.getInstance().startConversation();
+        // }
     }
 
     private AnAction createOpenAIModelAction(
