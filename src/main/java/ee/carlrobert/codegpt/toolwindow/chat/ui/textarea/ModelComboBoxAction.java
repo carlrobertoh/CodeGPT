@@ -229,12 +229,14 @@ public class ModelComboBoxAction extends ComboBoxAction {
         comboBoxPresentation.setIcon(icon);
         comboBoxPresentation.setText(label);
 
-        var currentConversation = ConversationsState.getCurrentConversation();
-        if (currentConversation != null && !currentConversation.getMessages().isEmpty()) {
-            onAddNewTab.run();
-        } else {
-            ConversationService.getInstance().startConversation();
-        }
+        // TODO: Make a commit message about this change.
+
+        // var currentConversation = ConversationsState.getCurrentConversation();
+        // if (currentConversation != null && !currentConversation.getMessages().isEmpty()) {
+        //     onAddNewTab.run();
+        // } else {
+        //     ConversationService.getInstance().startConversation();
+        // }
     }
 
     private AnAction createOpenAIModelAction(

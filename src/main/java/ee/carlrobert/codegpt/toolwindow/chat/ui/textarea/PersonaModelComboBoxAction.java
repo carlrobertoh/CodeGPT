@@ -130,7 +130,7 @@ public class PersonaModelComboBoxAction extends ComboBoxAction {
                 if (!YouUserManager.getInstance().isSubscribed()
                 && youSettings.getChatMode() != YouCompletionMode.DEFAULT) {
                     youSettings.setChatMode(YouCompletionMode.DEFAULT);
-                    updateTemplatePresentation(this.persona.getServiceType()); // TODO: Not sure what this funciton does because I'm not familiar with You. I'm assuming I don't want the general state though.
+                    updateTemplatePresentation(this.persona.getServiceType());
                 }
             }
         );

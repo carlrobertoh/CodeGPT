@@ -4,7 +4,6 @@ import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.actionSystem.ex.ComboBoxAction;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.ui.VerticalFlowLayout;
-import com.intellij.openapi.util.IconLoader;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.components.JBTextArea;
@@ -20,9 +19,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 
-// TODO: Merge the Persona with the Model selection.
-// TODO: Each persona is configured with a model.
-// TODO: Make the UI better :D
+// BUG: Switching the "Original" model changes the Persona's model. Instead, it should temporarily use the "Original" model's service type.
+// TODO: Change icon when not using Persona model. Have a popup appear when hovering that alerts the user that they are not using a Persona model.
+// Saving leaves the edit popup. Save and close? Save? Revert changes?
+// TODO: Make a more robust prompt injection with the persona. Make it happen in one place.
+// TODO: Use conversation types to determine if a persona should be used
+// TODO: Update Original dropdown to display the correct service type 
+// TODO: Convince Carlo to let us change the way chat's are updated when the service type is changed
 
 public class PersonaComboBoxAction extends ComboBoxAction {
     private final GeneralSettingsState settings;
