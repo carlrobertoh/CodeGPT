@@ -43,7 +43,7 @@ public class PersonaModelComboBoxAction extends ComboBoxAction {
     public PersonaModelComboBoxAction(Persona persona) {
         openAISettings = OpenAISettings.getCurrentState();
         youSettings = YouSettings.getCurrentState();
-        updateTemplatePresentation(persona.getServiceType());
+        updateTemplatePresentation(persona.getDefaultServiceType());
         this.persona = persona;
 
         subscribeToYouSignedOutTopic(ApplicationManager.getApplication().getMessageBus().connect());
@@ -130,7 +130,7 @@ public class PersonaModelComboBoxAction extends ComboBoxAction {
                 if (!YouUserManager.getInstance().isSubscribed()
                 && youSettings.getChatMode() != YouCompletionMode.DEFAULT) {
                     youSettings.setChatMode(YouCompletionMode.DEFAULT);
-                    updateTemplatePresentation(this.persona.getServiceType());
+                    updateTemplatePresentation(this.persona.getDefaultServiceType());
                 }
             }
         );
@@ -176,8 +176,8 @@ public class PersonaModelComboBoxAction extends ComboBoxAction {
 
     public void setPersona(Persona persona) {
         this.persona = persona;
-        unsavedServiceType = persona.getServiceType();
-        updateTemplatePresentation(persona.getServiceType());
+        unsavedServiceType = persona.getDefaultServiceType();
+        updateTemplatePresentation(persona.getDefaultServiceType());
     }
 
     public ServiceType getSelectedService() {

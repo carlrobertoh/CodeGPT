@@ -18,8 +18,6 @@ import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.completions.you.YouUserManager;
 import ee.carlrobert.codegpt.completions.you.auth.SignedOutNotifier;
-import ee.carlrobert.codegpt.conversations.ConversationService;
-import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.GeneralSettingsState;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
@@ -43,6 +41,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
     private final GeneralSettingsState settings;
     private final OpenAISettingsState openAISettings;
     private final YouSettingsState youSettings;
+    private Persona selectedPersona;
 
     public ModelComboBoxAction(Runnable onAddNewTab, ServiceType selectedService) {
         this.onAddNewTab = onAddNewTab;
@@ -226,10 +225,14 @@ public class ModelComboBoxAction extends ComboBoxAction {
         Icon icon,
         Presentation comboBoxPresentation) {
         settings.setSelectedService(serviceType);
+        selectedPersona = settings.getSelectedPersona();
+        if (!serviceType.equals(selectedPersona.getDefaultServiceType())) {
+            selectedPersona.setCurrentServiceType(serviceType);
+        } else {
+            selectedPersona.setCurrentServiceType(selectedPersona.getDefaultServiceType());
+        }
         comboBoxPresentation.setIcon(icon);
         comboBoxPresentation.setText(label);
-
-        // TODO: Make a commit message about this change.
 
         // var currentConversation = ConversationsState.getCurrentConversation();
         // if (currentConversation != null && !currentConversation.getMessages().isEmpty()) {

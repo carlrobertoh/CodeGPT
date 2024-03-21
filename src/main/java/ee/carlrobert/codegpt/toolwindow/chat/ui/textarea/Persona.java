@@ -6,16 +6,18 @@ import ee.carlrobert.codegpt.settings.service.ServiceType;
 public class Persona {
     private String name;
     private String promptText;
-    private ServiceType serviceType;
+    private ServiceType defaultServiceType;
+    private ServiceType currentServiceType;
 
 	public Persona() {
         this("", "", ServiceType.OPENAI);
     }
 
-    public Persona(String name, String promptText, ServiceType serviceType) {
+    public Persona(String name, String promptText, ServiceType defaultServiceType) {
         this.name = name;
         this.promptText = promptText;
-        this.serviceType = serviceType;
+        this.defaultServiceType = defaultServiceType;
+        this.currentServiceType = defaultServiceType;
     }
 
     public String getName() {
@@ -34,12 +36,20 @@ public class Persona {
         this.promptText = promptText;
     }
 
-    public ServiceType getServiceType() {
-		return serviceType;
+	public ServiceType getDefaultServiceType() {
+		return defaultServiceType;
 	}
 
-	public void setServiceType(ServiceType serviceType) {
-		this.serviceType = serviceType;
+	public void setDefaultServiceType(ServiceType defaultServiceType) {
+		this.defaultServiceType = defaultServiceType;
+	}
+
+	public ServiceType getCurrentServiceType() {
+		return currentServiceType;
+	}
+
+	public void setCurrentServiceType(ServiceType currentServiceType) {
+		this.currentServiceType = currentServiceType;
 	}
 
 }

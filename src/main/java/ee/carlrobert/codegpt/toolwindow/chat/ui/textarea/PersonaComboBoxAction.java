@@ -81,9 +81,10 @@ public class PersonaComboBoxAction extends ComboBoxAction {
             public void actionPerformed(@NotNull AnActionEvent event) {
                 System.out.println("Selected persona: " + persona.getName());
                 settings.setSelectedPersona(persona);
-                settings.setSelectedService(persona.getServiceType());
-                modelComboBoxAction.updateTemplatePresentation(persona.getServiceType());
+                settings.setSelectedService(persona.getCurrentServiceType());
+                modelComboBoxAction.updateTemplatePresentation(persona.getCurrentServiceType());
                 comboBoxPresentation.setText(persona.getName());
+                System.out.println("Selected service:" + persona.getCurrentServiceType());
             }
 
             @Override
@@ -174,7 +175,7 @@ public class PersonaComboBoxAction extends ComboBoxAction {
 
                         selectedPersona.setName(newName);
                         selectedPersona.setPromptText(newPrompt);
-                        selectedPersona.setServiceType(personaModelComboBoxAction.getSelectedService());
+                        selectedPersona.setDefaultServiceType(personaModelComboBoxAction.getSelectedService());
 
                         int index = personaNames.indexOf(selectedName);
                         if (index != -1) {
@@ -186,8 +187,8 @@ public class PersonaComboBoxAction extends ComboBoxAction {
 
                         if (doUpdateTemplatePresentation) {
                             settings.setSelectedPersona(selectedPersona);
-                            settings.setSelectedService(selectedPersona.getServiceType());
-                            modelComboBoxAction.updateTemplatePresentation(selectedPersona.getServiceType());
+                            settings.setSelectedService(selectedPersona.getDefaultServiceType());
+                            modelComboBoxAction.updateTemplatePresentation(selectedPersona.getDefaultServiceType());
                             updateTemplatePresentation(selectedPersona);
                         }
                     }
@@ -307,7 +308,7 @@ public class PersonaComboBoxAction extends ComboBoxAction {
                     settings.getPersonas().add(newPersona);
                     settings.setSelectedPersona(newPersona);
                     settings.setSelectedService(serviceType);
-                    modelComboBoxAction.updateTemplatePresentation(newPersona.getServiceType());
+                    modelComboBoxAction.updateTemplatePresentation(newPersona.getDefaultServiceType());
                     updateTemplatePresentation(settings.getSelectedPersona());
                 }
                 dialog.dispose();
