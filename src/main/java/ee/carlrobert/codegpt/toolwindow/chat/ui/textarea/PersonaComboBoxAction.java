@@ -19,7 +19,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 
-// BUG: Switching the "Original" model changes the Persona's model. Instead, it should temporarily use the "Original" model's service type.
+// BUG: Switching the "Original" model changes the Persona's model. Instead, it should temporarily use the "Original" model's service type. I think this is fixed now
 // TODO: Change icon when not using Persona model. Have a popup appear when hovering that alerts the user that they are not using a Persona model.
 // Saving leaves the edit popup. Save and close? Save? Revert changes?
 // TODO: Make a more robust prompt injection with the persona. Make it happen in one place.
@@ -91,6 +91,12 @@ public class PersonaComboBoxAction extends ComboBoxAction {
             public void update(@NotNull AnActionEvent event) {
                 var presentation = event.getPresentation();
                 presentation.setEnabled(!presentation.getText().equals(comboBoxPresentation.getText()));
+                if (!presentation.isEnabled() && settings.getSelectedPersona().getName().equals(presentation.getText())) {
+                    if (settings.getSelectedPersona().getCurrentServiceType() != settings.getSelectedPersona().getDefaultServiceType()) {
+                        presentation.setEnabled(true);
+                        presentation.setIcon(Icons.Alert);
+                    }
+                }
                 System.out.println("Updating persona: " + persona.getName());
             }
 

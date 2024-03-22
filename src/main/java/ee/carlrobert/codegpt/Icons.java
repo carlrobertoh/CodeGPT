@@ -20,4 +20,5 @@ public final class Icons {
     public static final Icon Persona = IconLoader.getIcon("/icons/persona.svg", Icons.class);
     public static final Icon Edit = IconLoader.getIcon("/icons/edit.svg", Icons.class);
     public static final Icon New = IconLoader.getIcon("/icons/new.svg", Icons.class);
+    public static final Icon Alert = IconLoader.getIcon("/icons/alert.svg", Icons.class);
 }
