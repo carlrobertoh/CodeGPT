@@ -40,6 +40,9 @@ public class PsiElementCheckboxTree extends FileCheckboxTree {
   }
 
   private static CheckedTreeNode createNode(PsiElement element) {
+    if (element instanceof com.intellij.psi.PsiClass) {
+      element = element.getContainingFile();
+    }
     if (!(element instanceof PsiDirectory || element instanceof PsiFile)) {
       return null;
     }
