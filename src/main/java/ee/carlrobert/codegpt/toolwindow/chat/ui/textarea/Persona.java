@@ -2,22 +2,23 @@
 package ee.carlrobert.codegpt.toolwindow.chat.ui.textarea;
 
 import ee.carlrobert.codegpt.settings.service.ServiceType;
+import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 
 public class Persona {
     private String name;
     private String promptText;
-    private ServiceType defaultServiceType;
-    private ServiceType currentServiceType;
+    private ServiceType serviceType;
+    private String model;
 
 	public Persona() {
         this("", "", ServiceType.OPENAI);
     }
 
-    public Persona(String name, String promptText, ServiceType defaultServiceType) {
+    public Persona(String name, String promptText, ServiceType serviceType) {
         this.name = name;
         this.promptText = promptText;
-        this.defaultServiceType = defaultServiceType;
-        this.currentServiceType = defaultServiceType;
+        this.serviceType = serviceType;
+        this.model = OpenAISettings.getCurrentState().getModel();
     }
 
     public String getName() {
@@ -36,20 +37,19 @@ public class Persona {
         this.promptText = promptText;
     }
 
-	public ServiceType getDefaultServiceType() {
-		return defaultServiceType;
+	public ServiceType getServiceType() {
+		return serviceType;
 	}
 
-	public void setDefaultServiceType(ServiceType defaultServiceType) {
-		this.defaultServiceType = defaultServiceType;
+	public void setServiceType(ServiceType serviceType) {
+		this.serviceType = serviceType;
 	}
 
-	public ServiceType getCurrentServiceType() {
-		return currentServiceType;
-	}
+    public String getModel() {
+        return model;
+    }
 
-	public void setCurrentServiceType(ServiceType currentServiceType) {
-		this.currentServiceType = currentServiceType;
-	}
-
+    public void setModel(String model) {
+        this.model = model;
+    }
 }

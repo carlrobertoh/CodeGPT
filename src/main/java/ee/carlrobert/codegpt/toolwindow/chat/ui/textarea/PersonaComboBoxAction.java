@@ -12,10 +12,14 @@ import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.GeneralSettingsState;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
+import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
+
+import static ee.carlrobert.codegpt.settings.service.ServiceType.OPENAI;
+
 import java.awt.*;
 import java.util.ArrayList;
 
@@ -29,11 +33,9 @@ import java.util.ArrayList;
 
 public class PersonaComboBoxAction extends ComboBoxAction {
     private final GeneralSettingsState settings;
-    ModelComboBoxAction modelComboBoxAction;
 
-    public PersonaComboBoxAction(Persona selectedPersona, ModelComboBoxAction modelComboBoxAction) {
+    public PersonaComboBoxAction(Persona selectedPersona) {
         this.settings = GeneralSettings.getCurrentState();
-        this.modelComboBoxAction = modelComboBoxAction;
         updateTemplatePresentation(selectedPersona);
     }
     public JComponent createCustomComponent(@NotNull String place) {
@@ -81,22 +83,21 @@ public class PersonaComboBoxAction extends ComboBoxAction {
             public void actionPerformed(@NotNull AnActionEvent event) {
                 System.out.println("Selected persona: " + persona.getName());
                 settings.setSelectedPersona(persona);
-                settings.setSelectedService(persona.getCurrentServiceType());
-                modelComboBoxAction.updateTemplatePresentation(persona.getCurrentServiceType());
+                settings.setSelectedService(persona.getServiceType());
                 comboBoxPresentation.setText(persona.getName());
-                System.out.println("Selected service:" + persona.getCurrentServiceType());
+                System.out.println("Selected service:" + persona.getServiceType());
             }
 
             @Override
             public void update(@NotNull AnActionEvent event) {
                 var presentation = event.getPresentation();
                 presentation.setEnabled(!presentation.getText().equals(comboBoxPresentation.getText()));
-                if (!presentation.isEnabled() && settings.getSelectedPersona().getName().equals(presentation.getText())) {
-                    if (settings.getSelectedPersona().getCurrentServiceType() != settings.getSelectedPersona().getDefaultServiceType()) {
-                        presentation.setEnabled(true);
-                        presentation.setIcon(Icons.Alert);
-                    }
-                }
+                // if (!presentation.isEnabled() && settings.getSelectedPersona().getName().equals(presentation.getText())) {
+                //     if (settings.getSelectedPersona().getServiceType() != settings.getSelectedPersona().getServiceType()) {
+                //         presentation.setEnabled(true);
+                //         presentation.setIcon(Icons.Alert);
+                //     }
+                // }
                 System.out.println("Updating persona: " + persona.getName());
             }
 
@@ -181,7 +182,10 @@ public class PersonaComboBoxAction extends ComboBoxAction {
 
                         selectedPersona.setName(newName);
                         selectedPersona.setPromptText(newPrompt);
-                        selectedPersona.setDefaultServiceType(personaModelComboBoxAction.getSelectedService());
+                        selectedPersona.setServiceType(personaModelComboBoxAction.getSelectedService());
+                        if (selectedPersona.getServiceType() == OPENAI) {
+                            selectedPersona.setModel(OpenAISettings.getCurrentState().getModel());
+                        }
 
                         int index = personaNames.indexOf(selectedName);
                         if (index != -1) {
@@ -193,8 +197,10 @@ public class PersonaComboBoxAction extends ComboBoxAction {
 
                         if (doUpdateTemplatePresentation) {
                             settings.setSelectedPersona(selectedPersona);
-                            settings.setSelectedService(selectedPersona.getDefaultServiceType());
-                            modelComboBoxAction.updateTemplatePresentation(selectedPersona.getDefaultServiceType());
+                            settings.setSelectedService(selectedPersona.getServiceType());
+                            if (selectedPersona.getServiceType() == OPENAI) {
+                                OpenAISettings.getCurrentState().setModel(selectedPersona.getModel());
+                            }
                             updateTemplatePresentation(selectedPersona);
                         }
                     }
@@ -222,6 +228,9 @@ public class PersonaComboBoxAction extends ComboBoxAction {
                         if (doUpdateTemplatePresentation) {
                             Persona randomPersona = settings.getRandomPersona();
                             settings.setSelectedPersona(randomPersona);
+                            if (randomPersona.getServiceType() == OPENAI) {
+                                OpenAISettings.getCurrentState().setModel(randomPersona.getModel());
+                            }
                             updateTemplatePresentation(randomPersona);
                         }
                     }
@@ -314,7 +323,6 @@ public class PersonaComboBoxAction extends ComboBoxAction {
                     settings.getPersonas().add(newPersona);
                     settings.setSelectedPersona(newPersona);
                     settings.setSelectedService(serviceType);
-                    modelComboBoxAction.updateTemplatePresentation(newPersona.getDefaultServiceType());
                     updateTemplatePresentation(settings.getSelectedPersona());
                 }
                 dialog.dispose();

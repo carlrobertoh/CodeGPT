@@ -37,14 +37,14 @@ import org.jetbrains.annotations.NotNull;
 
 public class ModelComboBoxAction extends ComboBoxAction {
 
-    private final Runnable onAddNewTab;
+    // private final Runnable onAddNewTab;
     private final GeneralSettingsState settings;
     private final OpenAISettingsState openAISettings;
     private final YouSettingsState youSettings;
     private Persona selectedPersona;
 
-    public ModelComboBoxAction(Runnable onAddNewTab, ServiceType selectedService) {
-        this.onAddNewTab = onAddNewTab;
+    public ModelComboBoxAction(ServiceType selectedService) {
+        // this.onAddNewTab = onAddNewTab;
         settings = GeneralSettings.getCurrentState();
         openAISettings = OpenAISettings.getCurrentState();
         youSettings = YouSettings.getCurrentState();
@@ -226,11 +226,6 @@ public class ModelComboBoxAction extends ComboBoxAction {
         Presentation comboBoxPresentation) {
         settings.setSelectedService(serviceType);
         selectedPersona = settings.getSelectedPersona();
-        if (!serviceType.equals(selectedPersona.getDefaultServiceType())) {
-            selectedPersona.setCurrentServiceType(serviceType);
-        } else {
-            selectedPersona.setCurrentServiceType(selectedPersona.getDefaultServiceType());
-        }
         comboBoxPresentation.setIcon(icon);
         comboBoxPresentation.setText(label);
 
