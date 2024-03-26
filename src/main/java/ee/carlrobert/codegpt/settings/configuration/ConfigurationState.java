@@ -12,6 +12,7 @@ public class ConfigurationState {
   private String systemPrompt = COMPLETION_SYSTEM_PROMPT;
   private String commitMessagePrompt = GENERATE_COMMIT_MESSAGE_SYSTEM_PROMPT;
   private int maxTokens = 1000;
+  private int maxInfillTokens = 64;
   private double temperature = 0.1;
   private boolean checkForPluginUpdates = true;
   private boolean createNewChatOnEachAction;
@@ -44,6 +45,14 @@ public class ConfigurationState {
 
   public void setMaxTokens(int maxTokens) {
     this.maxTokens = maxTokens;
+  }
+
+  public int getMaxInfillTokens() {
+    return maxInfillTokens;
+  }
+
+  public void setMaxInfillTokens(int maxInfillTokens) {
+    this.maxInfillTokens = maxInfillTokens;
   }
 
   public double getTemperature() {
@@ -128,6 +137,7 @@ public class ConfigurationState {
     }
     ConfigurationState that = (ConfigurationState) o;
     return maxTokens == that.maxTokens
+        && maxInfillTokens == that.maxInfillTokens
         && Double.compare(that.temperature, temperature) == 0
         && checkForPluginUpdates == that.checkForPluginUpdates
         && createNewChatOnEachAction == that.createNewChatOnEachAction
@@ -143,7 +153,7 @@ public class ConfigurationState {
 
   @Override
   public int hashCode() {
-    return Objects.hash(systemPrompt, commitMessagePrompt, maxTokens, temperature,
+    return Objects.hash(systemPrompt, commitMessagePrompt, maxTokens, maxInfillTokens, temperature,
         checkForPluginUpdates, createNewChatOnEachAction, ignoreGitCommitTokenLimit,
         methodNameGenerationEnabled, captureCompileErrors, autoFormattingEnabled,
         codeCompletionsEnabled, tableData);

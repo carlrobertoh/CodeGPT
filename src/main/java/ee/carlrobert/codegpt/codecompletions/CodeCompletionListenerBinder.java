@@ -15,13 +15,11 @@ import com.intellij.openapi.editor.event.SelectionListener;
 import ee.carlrobert.codegpt.actions.CodeCompletionEnabledListener;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import java.util.List;
-import java.util.regex.PatternSyntaxException;
 import javax.swing.SwingUtilities;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class CodeCompletionListenerBinder implements Disposable {
-
   private final Editor editor;
 
   private @Nullable EditorDocumentListener documentListener;
@@ -49,7 +47,7 @@ public class CodeCompletionListenerBinder implements Disposable {
             });
   }
 
-  private void addListeners() {
+  public void addListeners() {
     if (documentListener == null) {
       documentListener = new EditorDocumentListener();
       editor.getDocument().addDocumentListener(documentListener);
@@ -64,7 +62,7 @@ public class CodeCompletionListenerBinder implements Disposable {
     }
   }
 
-  private void removeListeners() {
+  public void removeListeners() {
     if (documentListener != null) {
       editor.getDocument().removeDocumentListener(documentListener);
       documentListener = null;
@@ -124,28 +122,23 @@ public class CodeCompletionListenerBinder implements Disposable {
           SwingUtilities.invokeLater(() -> {
             var caretOffset = editor.getCaretModel().getOffset();
             var charTyped = event.getNewFragment().toString().trim();
-            if (isTypingAsSuggested(charTyped)) {
-              try {
-                var previousInlayText = PREVIOUS_INLAY_TEXT.get(editor).replaceFirst(charTyped, "");
-                codeCompletionService.addInlays(editor, caretOffset, previousInlayText);
-              } catch (PatternSyntaxException e) {
-                // ignore
-              }
-            } else {
-              codeCompletionService.handleCompletions(editor, caretOffset);
+
+            // cancel previous completions when typed.
+            codeCompletionService.cancelPreviousCall();
+
+            if (shouldTriggerCodeCompletion(charTyped)) {
+              codeCompletionService.triggerCompletions(editor, caretOffset, CodeCompletionTriggerType.AUTOMATIC);
             }
           });
         }
       });
     }
 
-    private boolean isTypingAsSuggested(String charTyped) {
+    private boolean shouldTriggerCodeCompletion(String charTyped) {
       if (charTyped.isEmpty()) {
-        return false;
+        return true;
       }
-
-      var prevInlay = PREVIOUS_INLAY_TEXT.get(editor);
-      return prevInlay != null && prevInlay.startsWith(charTyped);
+      return PREVIOUS_INLAY_TEXT.get(editor) == null;
     }
 
     private boolean isCommandExcluded(String commandName) {

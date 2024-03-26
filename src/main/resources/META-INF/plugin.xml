@@ -103,6 +103,14 @@
             <override-text place="MainMenu" text="Disable Completions"/>
             <override-text place="popup" use-text-of-place="MainMenu"/>
         </action>
+        <action
+          id="codegpt.triggerCompletions"
+          text="Trigger Completions manually"
+          class="ee.carlrobert.codegpt.actions.TriggerCompletionsAction">
+          <keyboard-shortcut
+              keymap="$default"
+              first-keystroke="ctrl alt i" />
+        </action>
 
         <group id="codegpt.statusBarPopup">
             <reference id="codegpt.openSettings" />

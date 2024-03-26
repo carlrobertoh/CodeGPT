@@ -15,10 +15,10 @@ import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.TextEditor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
+import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 
 @Service
 public final class CodeGPTEditorManager {
-
   private CodeGPTEditorManager() {
   }
 
@@ -36,7 +36,6 @@ public final class CodeGPTEditorManager {
   }
 
   public void disposeEditorInlays(Editor editor) {
-    ActionManager.getInstance().unregisterAction(CodeCompletionService.APPLY_INLAY_ACTION_ID);
     disposeInlay(editor, SINGLE_LINE_INLAY);
     disposeInlay(editor, MULTI_LINE_INLAY);
   }
