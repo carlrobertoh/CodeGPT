@@ -127,7 +127,8 @@ public class CodeCompletionListenerBinder implements Disposable {
             codeCompletionService.cancelPreviousCall();
 
             if (shouldTriggerCodeCompletion(charTyped)) {
-              codeCompletionService.triggerCompletions(editor, caretOffset, CodeCompletionTriggerType.AUTOMATIC);
+              codeCompletionService.triggerCompletions(
+                  editor, caretOffset, CodeCompletionTriggerType.AUTOMATIC);
             }
           });
         }

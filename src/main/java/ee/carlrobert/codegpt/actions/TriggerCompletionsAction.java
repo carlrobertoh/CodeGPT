@@ -1,7 +1,8 @@
 package ee.carlrobert.codegpt.actions;
-import com.intellij.openapi.actionSystem.PlatformDataKeys;
+
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import ee.carlrobert.codegpt.codecompletions.CodeCompletionListenerManager;
 import org.jetbrains.annotations.NotNull;
 

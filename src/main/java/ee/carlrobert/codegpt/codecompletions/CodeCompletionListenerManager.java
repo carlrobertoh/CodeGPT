@@ -1,7 +1,7 @@
 package ee.carlrobert.codegpt.codecompletions;
+
 import com.intellij.openapi.editor.Editor;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,7 +45,8 @@ public class CodeCompletionListenerManager {
       }
       var caretOffset = editor.getCaretModel().getOffset();
       var codeCompletionService = CodeCompletionService.getInstance(project);
-      codeCompletionService.triggerCompletions(editor, caretOffset, CodeCompletionTriggerType.MANUAL);
+      codeCompletionService.triggerCompletions(
+          editor, caretOffset, CodeCompletionTriggerType.MANUAL);
     }
   }
 }

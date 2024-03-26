@@ -105,8 +105,8 @@ public final class CodeCompletionService implements Disposable {
       return;
     }
 
-    if (triggerType == CodeCompletionTriggerType.AUTOMATIC &&
-        !ConfigurationSettings.getCurrentState().isCodeCompletionsEnabled()) {
+    if (triggerType == CodeCompletionTriggerType.AUTOMATIC
+            && !ConfigurationSettings.getCurrentState().isCodeCompletionsEnabled()) {
       return;
     }
 
@@ -155,7 +155,8 @@ public final class CodeCompletionService implements Disposable {
     }
   }
 
-  private void updateInlineInlay(Editor editor, int caretOffset, InlayModel inlayModel, String firstLine) {
+  private void updateInlineInlay(Editor editor, int caretOffset, InlayModel inlayModel,
+                                 String firstLine) {
     Inlay<EditorCustomElementRenderer> inlay = editor.getUserData(SINGLE_LINE_INLAY);
     if (inlay != null) {
       inlay.dispose();
@@ -169,7 +170,8 @@ public final class CodeCompletionService implements Disposable {
     }
   }
 
-  private void updateBlockInlay(Editor editor, int caretOffset, InlayModel inlayModel, String restOfLines) {
+  private void updateBlockInlay(Editor editor, int caretOffset, InlayModel inlayModel,
+                                String restOfLines) {
     Inlay<EditorCustomElementRenderer> inlay = editor.getUserData(MULTI_LINE_INLAY);
     if (inlay != null) {
       inlay.dispose();
@@ -233,6 +235,8 @@ public final class CodeCompletionService implements Disposable {
           case APPLY_INLAY_ACTION_ACCEPT_5_ID:
             n = 5;
             break;
+          default:
+            n = 1;
         }
         String[] lines = text.split("\n");
         n = min(n, lines.length);
@@ -330,42 +334,42 @@ public final class CodeCompletionService implements Disposable {
         new KeyboardShortcut(KeyStroke.getKeyStroke(shortcut), null));
   }
 
-   public void registerTemporaryActions(Editor editor) {
-     var actionManager = ActionManager.getInstance();
-     if (actionManager.getAction(APPLY_INLAY_ACTION_ACCEPT_ALL_ID) != null) {
-       return;
-     }
-     // register temporary actions
+  public void registerTemporaryActions(Editor editor) {
+    var actionManager = ActionManager.getInstance();
+    if (actionManager.getAction(APPLY_INLAY_ACTION_ACCEPT_ALL_ID) != null) {
+      return;
+    }
+    // register temporary actions
 
-     // accept all
-     registerApplyCompletionAction(() -> WriteCommandAction.runWriteCommandAction(
-             project,
-             () -> acceptCompletion(editor, APPLY_INLAY_ACTION_ACCEPT_ALL_ID)));
-     // accept by lines
-     for (String subAction : subActionIdList) {
-       registerSubApplyCompletionActions(
-               subAction,
-               () -> WriteCommandAction.runWriteCommandAction(
-                       project,
-                       () -> acceptCompletion(editor, subAction)));
-     }
-     // cancel completion
-     registerCancelCompletionAction(() -> WriteCommandAction.runWriteCommandAction(
-             project,
-             () -> acceptCompletion(editor, APPLY_INLAY_ACTION_CANCEL_ID)));
-   }
+    // accept all
+    registerApplyCompletionAction(() -> WriteCommandAction.runWriteCommandAction(
+        project,
+        () -> acceptCompletion(editor, APPLY_INLAY_ACTION_ACCEPT_ALL_ID)));
+    // accept by lines
+    for (String subAction : subActionIdList) {
+      registerSubApplyCompletionActions(
+          subAction,
+          () -> WriteCommandAction.runWriteCommandAction(
+              project,
+              () -> acceptCompletion(editor, subAction)));
+    }
+    // cancel completion
+    registerCancelCompletionAction(() -> WriteCommandAction.runWriteCommandAction(
+        project,
+        () -> acceptCompletion(editor, APPLY_INLAY_ACTION_CANCEL_ID)));
+  }
 
-   public void unRegisterTemporaryActions() {
-     var manager = ActionManager.getInstance();
-     if (manager.getAction(APPLY_INLAY_ACTION_ACCEPT_ALL_ID) == null) {
-       return;
-     }
-     manager.unregisterAction(CodeCompletionService.APPLY_INLAY_ACTION_ACCEPT_ALL_ID);
-     for (String subActionId : CodeCompletionService.subActionIdList) {
-       manager.unregisterAction(subActionId);
-     }
-     manager.unregisterAction(CodeCompletionService.APPLY_INLAY_ACTION_CANCEL_ID);
-   }
+  public void unRegisterTemporaryActions() {
+    var manager = ActionManager.getInstance();
+    if (manager.getAction(APPLY_INLAY_ACTION_ACCEPT_ALL_ID) == null) {
+      return;
+    }
+    manager.unregisterAction(CodeCompletionService.APPLY_INLAY_ACTION_ACCEPT_ALL_ID);
+    for (String subActionId : CodeCompletionService.subActionIdList) {
+      manager.unregisterAction(subActionId);
+    }
+    manager.unregisterAction(CodeCompletionService.APPLY_INLAY_ACTION_CANCEL_ID);
+  }
 
   private void subscribeToFeatureToggleEvents() {
     ApplicationManager.getApplication()
