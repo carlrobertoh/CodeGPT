@@ -125,7 +125,7 @@ public class CompletionRequestHandler {
       TelemetryAction.COMPLETION.createActionMessage()
           .property("conversationId", callParameters.getConversation().getId().toString())
           .property("model", callParameters.getConversation().getModel())
-          .property("service", settings.getSelectedService().getCode().toLowerCase())
+          .property("service", settings.getSelectedPersona().getServiceType().getCode().toLowerCase())
           .send();
     }
 

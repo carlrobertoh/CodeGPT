@@ -277,7 +277,7 @@ public abstract class ChatToolWindowTabPanel implements Disposable {
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.gridy = 1;
     rootPanel.add(
-        createUserPromptPanel(GeneralSettings.getCurrentState().getSelectedService(), GeneralSettings.getCurrentState().getSelectedPersona()), gbc);
+        createUserPromptPanel(GeneralSettings.getCurrentState().getSelectedPersona().getServiceType(), GeneralSettings.getCurrentState().getSelectedPersona()), gbc);
     return rootPanel;
   }
 }

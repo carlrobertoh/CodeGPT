@@ -11,13 +11,13 @@ import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 public interface ShortcutsTestMixin {
 
   default void useOpenAIService() {
-    GeneralSettings.getCurrentState().setSelectedService(ServiceType.OPENAI);
+    GeneralSettings.getCurrentState().getSelectedPersona().setServiceType(ServiceType.OPENAI);
     OpenAICredentialManager.getInstance().setCredential("TEST_API_KEY");
     OpenAISettings.getCurrentState().setModel("gpt-4");
   }
 
   default void useAzureService() {
-    GeneralSettings.getCurrentState().setSelectedService(ServiceType.AZURE);
+    GeneralSettings.getCurrentState().getSelectedPersona().setServiceType(ServiceType.AZURE);
     AzureCredentialsManager.getInstance().setApiKey("TEST_API_KEY");
     var azureSettings = AzureSettings.getCurrentState();
     azureSettings.setResourceName("TEST_RESOURCE_NAME");
@@ -26,11 +26,11 @@ public interface ShortcutsTestMixin {
   }
 
   default void useYouService() {
-    GeneralSettings.getCurrentState().setSelectedService(ServiceType.YOU);
+    GeneralSettings.getCurrentState().getSelectedPersona().setServiceType(ServiceType.YOU);
   }
 
   default void useLlamaService() {
-    GeneralSettings.getCurrentState().setSelectedService(ServiceType.LLAMA_CPP);
+    GeneralSettings.getCurrentState().getSelectedPersona().setServiceType(ServiceType.LLAMA_CPP);
     LlamaSettings.getCurrentState().setServerPort(null);
   }
 }

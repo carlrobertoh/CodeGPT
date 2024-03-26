@@ -69,7 +69,7 @@ public class GenerateGitCommitMessageAction extends AnAction {
 
   @Override
   public void update(@NotNull AnActionEvent event) {
-    var selectedService = GeneralSettings.getCurrentState().getSelectedService();
+    var selectedService = GeneralSettings.getCurrentState().getSelectedPersona().getServiceType();
     if (selectedService == YOU) {
       event.getPresentation().setVisible(false);
       return;

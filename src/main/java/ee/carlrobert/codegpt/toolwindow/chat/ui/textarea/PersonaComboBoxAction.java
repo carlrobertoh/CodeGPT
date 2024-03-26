@@ -23,14 +23,6 @@ import static ee.carlrobert.codegpt.settings.service.ServiceType.OPENAI;
 import java.awt.*;
 import java.util.ArrayList;
 
-// BUG: Switching the "Original" model changes the Persona's model. Instead, it should temporarily use the "Original" model's service type. I think this is fixed now
-// TODO: Change icon when not using Persona model. Have a popup appear when hovering that alerts the user that they are not using a Persona model.
-// Saving leaves the edit popup. Save and close? Save? Revert changes?
-// TODO: Make a more robust prompt injection with the persona. Make it happen in one place.
-// TODO: Use conversation types to determine if a persona should be used
-// TODO: Update Original dropdown to display the correct service type 
-// TODO: Convince Carlo to let us change the way chat's are updated when the service type is changed
-
 public class PersonaComboBoxAction extends ComboBoxAction {
     private final GeneralSettingsState settings;
 
@@ -45,8 +37,8 @@ public class PersonaComboBoxAction extends ComboBoxAction {
     @NotNull
     @Override
     public JComponent createCustomComponent(
-            @NotNull Presentation presentation,
-            @NotNull String place) {
+        @NotNull Presentation presentation,
+        @NotNull String place) {
         ComboBoxButton button = createComboBoxButton(presentation);
         button.setBorder(null);
         return button;
@@ -55,16 +47,8 @@ public class PersonaComboBoxAction extends ComboBoxAction {
     @Override
     protected @NotNull DefaultActionGroup createPopupActionGroup(JComponent button) {
         var group = new DefaultActionGroup();
-        boolean missingDefaultPersona = true;
         for (Persona persona : settings.getPersonas()) {
-            if (persona.getName().equals("No Persona")) {
-                missingDefaultPersona = false;
-            }
             group.add(createPersonaAction(persona, getTemplatePresentation()));
-        }
-        if (missingDefaultPersona) {
-            settings.getPersonas().add(new Persona("No Persona", "Choose this persona if you want the default system prompt.", ServiceType.OPENAI));
-            group.add(createPersonaAction(new Persona("No Persona", "Choose this persona if you want the default system prompt.", ServiceType.OPENAI), getTemplatePresentation()));
         }
         group.addSeparator();
         group.add(new NewPersonaAction());
@@ -81,24 +65,14 @@ public class PersonaComboBoxAction extends ComboBoxAction {
         return new DumbAwareAction(persona.getName(), "", Icons.Persona) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent event) {
-                System.out.println("Selected persona: " + persona.getName());
                 settings.setSelectedPersona(persona);
-                settings.setSelectedService(persona.getServiceType());
                 comboBoxPresentation.setText(persona.getName());
-                System.out.println("Selected service:" + persona.getServiceType());
             }
 
             @Override
             public void update(@NotNull AnActionEvent event) {
                 var presentation = event.getPresentation();
                 presentation.setEnabled(!presentation.getText().equals(comboBoxPresentation.getText()));
-                // if (!presentation.isEnabled() && settings.getSelectedPersona().getName().equals(presentation.getText())) {
-                //     if (settings.getSelectedPersona().getServiceType() != settings.getSelectedPersona().getServiceType()) {
-                //         presentation.setEnabled(true);
-                //         presentation.setIcon(Icons.Alert);
-                //     }
-                // }
-                System.out.println("Updating persona: " + persona.getName());
             }
 
             @Override
@@ -144,10 +118,10 @@ public class PersonaComboBoxAction extends ComboBoxAction {
 
             JBTextField nameField = new JBTextField();
             nameField.setText(settings.getSelectedPersona().getName());
-            
+
             JBTextArea promptField = new JBTextArea();
             promptField.setText(settings.getSelectedPersona().getPromptText());
-            if (nameField.getText().equals("No Persona")) {
+            if (nameField.getText().equals("Default")) {
                 nameField.setEditable(false);
                 promptField.setEditable(false);
             }
@@ -172,9 +146,9 @@ public class PersonaComboBoxAction extends ComboBoxAction {
                 String selectedName = personaList.getSelectedValue();
                 if (selectedName != null) {
                     Persona selectedPersona = settings.getPersonas().stream()
-                            .filter(persona -> persona.getName().equals(selectedName))
-                            .findFirst()
-                            .orElse(null);
+                    .filter(persona -> persona.getName().equals(selectedName))
+                    .findFirst()
+                    .orElse(null);
                     if (selectedPersona != null) {
                         boolean doUpdateTemplatePresentation = settings.getSelectedPersona().getName().equals(selectedName);
                         String newName = nameField.getText();
@@ -186,6 +160,7 @@ public class PersonaComboBoxAction extends ComboBoxAction {
                         if (selectedPersona.getServiceType() == OPENAI) {
                             selectedPersona.setModel(OpenAISettings.getCurrentState().getModel());
                         }
+                        personaModelComboBoxAction.setPersona(selectedPersona);
 
                         int index = personaNames.indexOf(selectedName);
                         if (index != -1) {
@@ -197,7 +172,6 @@ public class PersonaComboBoxAction extends ComboBoxAction {
 
                         if (doUpdateTemplatePresentation) {
                             settings.setSelectedPersona(selectedPersona);
-                            settings.setSelectedService(selectedPersona.getServiceType());
                             if (selectedPersona.getServiceType() == OPENAI) {
                                 OpenAISettings.getCurrentState().setModel(selectedPersona.getModel());
                             }
@@ -209,14 +183,41 @@ public class PersonaComboBoxAction extends ComboBoxAction {
             saveButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             editPanel.add(saveButton);
 
+            JButton duplicateButton = new JButton("Duplicate Persona");
+            duplicateButton.addActionListener(e1 -> {
+                String selectedName = personaList.getSelectedValue();
+                if (selectedName != null) {
+                    Persona selectedPersona = settings.getPersonas().stream()
+                    .filter(persona -> persona.getName().equals(selectedName))
+                    .findFirst()
+                    .orElse(null);
+                    if (selectedPersona != null) {
+                        Persona duplicatedPersona = new Persona(
+                            selectedPersona.getName() + " (copy)",
+                            selectedPersona.getPromptText(),
+                            selectedPersona.getServiceType()
+                        );
+                        if (selectedPersona.getServiceType() == OPENAI) {
+                            duplicatedPersona.setModel(selectedPersona.getModel());
+                        }
+                        settings.getPersonas().add(duplicatedPersona);
+                        personaNames.add(duplicatedPersona.getName());
+                        personaList.setListData(personaNames.toArray(new String[0]));
+                        personaList.setSelectedValue(duplicatedPersona.getName(), true);
+                    }
+                }
+            });
+            duplicateButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            editPanel.add(duplicateButton);
+
             JButton deleteButton = new JButton("Delete");
             deleteButton.addActionListener(e1 -> {
                 String selectedName = personaList.getSelectedValue();
-                if (selectedName != null && !selectedName.equals("No Persona")) {
+                if (selectedName != null && !selectedName.equals("Default")) {
                     Persona selectedPersona = settings.getPersonas().stream()
-                            .filter(persona -> persona.getName().equals(selectedName))
-                            .findFirst()
-                            .orElse(null);
+                    .filter(persona -> persona.getName().equals(selectedName))
+                    .findFirst()
+                    .orElse(null);
                     if (selectedPersona != null) {
                         boolean doUpdateTemplatePresentation = settings.getSelectedPersona().getName().equals(selectedName);
                         settings.getPersonas().remove(selectedPersona);
@@ -244,11 +245,11 @@ public class PersonaComboBoxAction extends ComboBoxAction {
                     String selectedName = personaList.getSelectedValue();
                     if (selectedName != null) {
                         Persona selectedPersona = settings.getPersonas().stream()
-                                .filter(persona -> persona.getName().equals(selectedName))
-                                .findFirst()
-                                .orElse(null);
+                        .filter(persona -> persona.getName().equals(selectedName))
+                        .findFirst()
+                        .orElse(null);
                         if (selectedPersona != null) {
-                            if (selectedName.equals("No Persona")) {
+                            if (selectedName.equals("Default")) {
                                 nameField.setEditable(false);
                                 promptField.setEditable(false);
                             } else {
@@ -273,7 +274,7 @@ public class PersonaComboBoxAction extends ComboBoxAction {
             panel.add(editPanel, BorderLayout.CENTER);
 
             dialog.getContentPane().add(panel);
-            dialog.getContentPane().setPreferredSize(new Dimension(600, 400));
+            dialog.getContentPane().setPreferredSize(new Dimension(600, 450));
             dialog.pack();
             dialog.setLocationRelativeTo(null);
             dialog.setVisible(true);
@@ -322,7 +323,6 @@ public class PersonaComboBoxAction extends ComboBoxAction {
                     Persona newPersona = new Persona(name, promptText, serviceType);
                     settings.getPersonas().add(newPersona);
                     settings.setSelectedPersona(newPersona);
-                    settings.setSelectedService(serviceType);
                     updateTemplatePresentation(settings.getSelectedPersona());
                 }
                 dialog.dispose();
@@ -347,7 +347,7 @@ public class PersonaComboBoxAction extends ComboBoxAction {
     }
     private void updateTemplatePresentation(Persona selectedPersona) {
         var templatePresentation = getTemplatePresentation();
-            templatePresentation.setIcon(Icons.Persona);
-            templatePresentation.setText(selectedPersona.getName());
+        templatePresentation.setIcon(Icons.Persona);
+        templatePresentation.setText(selectedPersona.getName());
     }
 }

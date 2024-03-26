@@ -38,13 +38,14 @@ public class PersonaModelComboBoxAction extends ComboBoxAction {
     private final OpenAISettingsState openAISettings;
     private final YouSettingsState youSettings;
     private Persona persona;
-    private ServiceType unsavedServiceType = ServiceType.OPENAI;
+    private ServiceType unsavedServiceType;
 
     public PersonaModelComboBoxAction(Persona persona) {
         openAISettings = OpenAISettings.getCurrentState();
         youSettings = YouSettings.getCurrentState();
         updateTemplatePresentation(persona.getServiceType());
         this.persona = persona;
+        unsavedServiceType = persona.getServiceType();
 
         subscribeToYouSignedOutTopic(ApplicationManager.getApplication().getMessageBus().connect());
     }
@@ -237,6 +238,7 @@ public class PersonaModelComboBoxAction extends ComboBoxAction {
         comboBoxPresentation.setText(label);
         // persona.setServiceType(serviceType);
         unsavedServiceType = serviceType;
+        System.out.println("Service type changed to: " + serviceType);
 
         // NOTE: I don't want to update the conversation state here. I want to update the persona state.
         // var currentConversation = ConversationsState.getCurrentConversation();

@@ -35,11 +35,6 @@ public class UserPromptTextAreaHeader extends JPanel {
     }
 
     add(Box.createHorizontalStrut(8));
-    // ModelComboBoxAction modelComboBoxAction = new ModelComboBoxAction(onAddNewTab, selectedService);
-    // add(modelComboBoxAction.createCustomComponent(ActionPlaces.UNKNOWN));
-
-    // add(Box.createHorizontalStrut(8));
-
     PersonaComboBoxAction personaComboBoxAction = new PersonaComboBoxAction(selectedPersona);
     JComponent personaComboBox = personaComboBoxAction.createCustomComponent(ActionPlaces.UNKNOWN);
     add(personaComboBox);

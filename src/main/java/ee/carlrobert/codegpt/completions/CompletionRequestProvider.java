@@ -144,7 +144,7 @@ public class CompletionRequestProvider {
             systemPrompt = FIX_COMPILE_ERRORS_SYSTEM_PROMPT;
         }
         Persona persona = GeneralSettings.getCurrentState().getSelectedPersona();
-        if (persona != null && !persona.getName().equals("No Persona")) {
+        if (persona != null && !persona.getName().equals("Default")) {
             systemPrompt = persona.getPromptText();
         }
 
@@ -186,7 +186,7 @@ public class CompletionRequestProvider {
         var configuration = ConfigurationSettings.getCurrentState();
 
         Persona persona = GeneralSettings.getCurrentState().getSelectedPersona();
-        if (persona != null && !persona.getName().equals("No Persona")) {
+        if (persona != null && !persona.getName().equals("Default")) {
             configuration.setSystemPrompt(persona.getPromptText());
         }
 
@@ -259,7 +259,7 @@ public class CompletionRequestProvider {
         request.setStream(true);
         
         Persona persona = GeneralSettings.getCurrentState().getSelectedPersona();
-        if (persona != null && !persona.getName().equals("No Persona")) {
+        if (persona != null && !persona.getName().equals("Default")) {
             request.setSystem(persona.getPromptText());
         } else {
             request.setSystem(COMPLETION_SYSTEM_PROMPT);
@@ -309,7 +309,7 @@ public class CompletionRequestProvider {
         var messages = buildMessages(callParameters);
 
         if (model == null
-        || GeneralSettings.getCurrentState().getSelectedService() == ServiceType.YOU) {
+        || GeneralSettings.getCurrentState().getSelectedPersona().getServiceType() == ServiceType.YOU) {
             return messages;
         }
 

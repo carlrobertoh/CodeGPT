@@ -62,7 +62,7 @@ public final class CompletionRequestService {
       CallParameters callParameters,
       CompletionEventListener<String> eventListener) {
     var requestProvider = new CompletionRequestProvider(callParameters.getConversation());
-    return switch (GeneralSettings.getCurrentState().getSelectedService()) {
+    return switch (GeneralSettings.getCurrentState().getSelectedPersona().getServiceType()) {
       case OPENAI -> CompletionClientProvider.getOpenAIClient().getChatCompletionAsync(
           requestProvider.buildOpenAIChatCompletionRequest(
               OpenAISettings.getCurrentState().getModel(),
@@ -95,7 +95,7 @@ public final class CompletionRequestService {
       InfillRequestDetails requestDetails,
       CompletionEventListener<String> eventListener) {
     var requestProvider = new CodeCompletionRequestProvider(requestDetails);
-    return switch (GeneralSettings.getCurrentState().getSelectedService()) {
+    return switch (GeneralSettings.getCurrentState().getSelectedPersona().getServiceType()) {
       case OPENAI -> CompletionClientProvider.getOpenAIClient()
           .getCompletionAsync(requestProvider.buildOpenAIRequest(), eventListener);
       case LLAMA_CPP -> CompletionClientProvider.getLlamaClient()
@@ -115,7 +115,7 @@ public final class CompletionRequestService {
         new OpenAIChatCompletionMessage("user", prompt)))
         .setModel(OpenAISettings.getCurrentState().getModel())
         .build();
-    var selectedService = GeneralSettings.getCurrentState().getSelectedService();
+    var selectedService = GeneralSettings.getCurrentState().getSelectedPersona().getServiceType();
     switch (selectedService) {
       case OPENAI:
         CompletionClientProvider.getOpenAIClient()
@@ -174,7 +174,7 @@ public final class CompletionRequestService {
   }
 
   public Optional<String> getLookupCompletion(String prompt) {
-    var selectedService = GeneralSettings.getCurrentState().getSelectedService();
+    var selectedService = GeneralSettings.getCurrentState().getSelectedPersona().getServiceType();
     if (selectedService == YOU || selectedService == LLAMA_CPP) {
       return Optional.empty();
     }
@@ -206,7 +206,7 @@ public final class CompletionRequestService {
   }
 
   public boolean isRequestAllowed() {
-    var selectedService = GeneralSettings.getCurrentState().getSelectedService();
+    var selectedService = GeneralSettings.getCurrentState().getSelectedPersona().getServiceType();
     if (selectedService == AZURE) {
       return AzureCredentialsManager.getInstance().isCredentialSet();
     }

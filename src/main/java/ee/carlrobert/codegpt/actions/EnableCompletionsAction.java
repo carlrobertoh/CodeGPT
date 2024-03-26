@@ -27,7 +27,7 @@ public class EnableCompletionsAction extends AnAction {
 
   @Override
   public void update(@NotNull AnActionEvent e) {
-    var selectedService = GeneralSettings.getCurrentState().getSelectedService();
+    var selectedService = GeneralSettings.getCurrentState().getSelectedPersona().getServiceType();
     var codeCompletionEnabled = ConfigurationSettings.getCurrentState().isCodeCompletionsEnabled();
     e.getPresentation().setEnabled(!codeCompletionEnabled);
     e.getPresentation()

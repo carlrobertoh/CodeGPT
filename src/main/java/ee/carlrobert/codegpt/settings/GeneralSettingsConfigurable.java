@@ -60,7 +60,7 @@ public class GeneralSettingsConfigurable implements Configurable {
     var settings = GeneralSettings.getCurrentState();
     var serviceSelectionForm = component.getServiceSelectionForm();
     return !component.getDisplayName().equals(settings.getDisplayName())
-        || component.getSelectedService() != settings.getSelectedService()
+        || component.getSelectedService() != settings.getSelectedPersona().getServiceType()
         || OpenAISettings.getInstance().isModified(serviceSelectionForm.getOpenAISettingsForm())
         || CustomServiceSettings.getInstance()
         .isModified(serviceSelectionForm.getCustomConfigurationSettingsForm())
@@ -75,7 +75,7 @@ public class GeneralSettingsConfigurable implements Configurable {
   public void apply() {
     var settings = GeneralSettings.getCurrentState();
     settings.setDisplayName(component.getDisplayName());
-    settings.setSelectedService(component.getSelectedService());
+    settings.getSelectedPersona().setServiceType(component.getSelectedService());
 
     var serviceSelectionForm = component.getServiceSelectionForm();
     var openAISettingsForm = serviceSelectionForm.getOpenAISettingsForm();
@@ -86,7 +86,7 @@ public class GeneralSettingsConfigurable implements Configurable {
     applyYouSettings(serviceSelectionForm.getYouSettingsForm());
     applyLlamaSettings(serviceSelectionForm.getLlamaSettingsForm());
 
-    var serviceChanged = component.getSelectedService() != settings.getSelectedService();
+    var serviceChanged = component.getSelectedService() != settings.getSelectedPersona().getServiceType();
     var modelChanged = !OpenAISettings.getCurrentState().getModel()
         .equals(openAISettingsForm.getModel());
     if (serviceChanged || modelChanged) {
@@ -135,7 +135,7 @@ public class GeneralSettingsConfigurable implements Configurable {
   public void reset() {
     var settings = GeneralSettings.getCurrentState();
     component.setDisplayName(settings.getDisplayName());
-    component.setSelectedService(settings.getSelectedService());
+    component.setSelectedService(settings.getSelectedPersona().getServiceType());
     component.getServiceSelectionForm().resetForms();
   }
 

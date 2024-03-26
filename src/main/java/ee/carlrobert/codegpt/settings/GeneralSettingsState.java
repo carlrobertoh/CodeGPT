@@ -9,15 +9,13 @@ import java.util.List;
 public class GeneralSettingsState {
 
     private String displayName = "";
-    private ServiceType selectedService = ServiceType.OPENAI;
     private Persona selectedPersona;
 
     private List<Persona> personas = new ArrayList<>();
 
-    // Apparently this is an instance initializer block
-    {
-        this.selectedService = ServiceType.OPENAI;
-        personas.add(new Persona("No Persona", "Choose this persona if you want the default system prompt.", ServiceType.OPENAI));
+    public GeneralSettingsState() {
+        selectedPersona = new Persona("Default", "Default persona", ServiceType.OPENAI);
+        personas.add(selectedPersona);
     }
 
 
@@ -34,14 +32,6 @@ public class GeneralSettingsState {
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
-    }
-
-    public ServiceType getSelectedService() {
-        return selectedService;
-    }
-
-    public void setSelectedService(ServiceType selectedService) {
-        this.selectedService = selectedService;
     }
 
     public void setSelectedPersona(Persona selectedPersona) {
