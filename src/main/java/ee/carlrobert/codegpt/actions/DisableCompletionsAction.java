@@ -7,7 +7,6 @@ import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
-import ee.carlrobert.codegpt.codecompletions.CodeGPTEditorManager;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import java.util.List;
@@ -21,7 +20,6 @@ public class DisableCompletionsAction extends AnAction {
   @Override
   public void actionPerformed(@NotNull AnActionEvent e) {
     ConfigurationSettings.getCurrentState().setCodeCompletionsEnabled(false);
-    CodeGPTEditorManager.getInstance().disposeAllInlays(e.getProject());
     ApplicationManager.getApplication()
         .getMessageBus().syncPublisher(CodeCompletionEnabledListener.TOPIC)
         .onCodeCompletionsEnabledChange(false);

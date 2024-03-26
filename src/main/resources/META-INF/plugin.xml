@@ -41,11 +41,8 @@
         <inline.completion.provider
           id="CodeGPTInlineCompletionProvider"
           implementation="ee.carlrobert.codegpt.codecompletions.CodeGPTInlineCompletionProvider"/>
-        <!--<editorFactoryListener implementation="ee.carlrobert.codegpt.codecompletions.CodeGPTEditorListener"/>-->
         <toolWindow id="CodeGPT" icon="ee.carlrobert.codegpt.Icons.DefaultSmall" anchor="right"
             factoryClass="ee.carlrobert.codegpt.toolwindow.ProjectToolWindowFactory"/>
-        <typedHandler order="first, before completionAutoPopup"
-          implementation="ee.carlrobert.codegpt.codecompletions.TypeOverHandler"/>
         <notificationGroup id="CodeGPT Notification Group" displayType="BALLOON" key="notification.group.name"/>
         <statusBarWidgetFactory order="first" id="ee.carlrobert.codegpt.statusbar.widget"
           implementation="ee.carlrobert.codegpt.statusbar.CodeGPTStatusBarWidgetFactory"/>
