@@ -89,9 +89,9 @@ public final class CodeCompletionService implements Disposable {
       return;
     }
 
-    var request = InfillRequestDetails.fromDocumentWithMaxOffset(document, offset);
+    var request = InfillRequestDetails.Companion.fromDocumentWithMaxOffset(document, offset);
     if (Stream.of(request.getSuffix(), request.getPrefix())
-        .anyMatch(item -> item == null || item.isEmpty())) {
+        .anyMatch(String::isEmpty)) {
       return;
     }
 
