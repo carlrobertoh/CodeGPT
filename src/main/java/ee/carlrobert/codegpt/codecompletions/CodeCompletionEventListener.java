@@ -18,25 +18,25 @@ import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.io.IOException;
 import javax.swing.SwingUtilities;
+import okhttp3.sse.EventSource;
 import org.jetbrains.annotations.Nullable;
 
 class CodeCompletionEventListener implements CompletionEventListener<String> {
 
   private static final Logger LOG = Logger.getInstance(CodeCompletionEventListener.class);
-
   private final Editor editor;
   private final int caretOffset;
-  private final InfillRequestDetails requestDetails;
   private final BackgroundableProcessIndicator progressIndicator;
+  private final CodeCompletionService completionService;
 
   public CodeCompletionEventListener(
       Editor editor,
       int caretOffset,
-      InfillRequestDetails requestDetails,
+      CodeCompletionService completionService,
       @Nullable BackgroundableProcessIndicator progressIndicator) {
     this.editor = editor;
     this.caretOffset = caretOffset;
-    this.requestDetails = requestDetails;
+    this.completionService = completionService;
     this.progressIndicator = progressIndicator;
   }
 
@@ -45,39 +45,24 @@ class CodeCompletionEventListener implements CompletionEventListener<String> {
     if (progressIndicator != null) {
       progressIndicator.processFinish();
     }
-
-    try {
-      var project = editor.getProject();
-      if (project != null) {
-        var fileExtension =
-            FileUtil.getFileExtension(((EditorImpl) editor).getVirtualFile().getName());
-        var processedOutput = CodeCompletionParserFactory
-            .getParserForFileExtension(fileExtension)
-            .parse(
-                requestDetails.getPrefix(),
-                requestDetails.getSuffix(),
-                messageBuilder.toString());
-        handleComplete(processedOutput);
-      }
-    } catch (IllegalArgumentException e) {
-      handleComplete(messageBuilder.toString());
-    }
+    PREVIOUS_INLAY_TEXT.set(editor, messageBuilder.toString());
   }
 
-  private void handleComplete(String processedOutput) {
-    PREVIOUS_INLAY_TEXT.set(editor, processedOutput);
-    CodeGPTEditorManager.getInstance().disposeEditorInlays(editor);
+  @Override
+  public void onMessage(String message, EventSource eventSource) {
+    CompletionEventListener.super.onMessage(message, eventSource);
+    completionService.registerTemporaryActions(editor);
     SwingUtilities.invokeLater(() -> {
-      if (editor.getCaretModel().getOffset() == caretOffset && !processedOutput.isEmpty()) {
-        CodeCompletionService
-            .getInstance(requireNonNull(editor.getProject()))
-            .addInlays(editor, caretOffset, processedOutput);
+      if (editor.getCaretModel().getOffset() == caretOffset) {
+        var service = CodeCompletionService.getInstance(requireNonNull(editor.getProject()));
+        service.updateInlays(editor, caretOffset, message);
       }
     });
   }
 
   @Override
   public void onError(ErrorDetails error, Throwable ex) {
+    completionService.unRegisterTemporaryActions();
     // TODO: temp fix
     if (ex instanceof IOException && "Canceled".equals(error.getMessage())) {
       return;
@@ -93,13 +78,16 @@ class CodeCompletionEventListener implements CompletionEventListener<String> {
                 error.getMessage()),
             NotificationType.ERROR)
         .addAction(new OpenSettingsAction()), editor.getProject());
+    CodeGPTEditorManager.getInstance().disposeEditorInlays(editor);
   }
 
   @Override
   public void onCancelled(StringBuilder messageBuilder) {
     LOG.debug("Completion cancelled");
+    completionService.unRegisterTemporaryActions();
     if (progressIndicator != null) {
       progressIndicator.processFinish();
     }
+    CodeGPTEditorManager.getInstance().disposeEditorInlays(editor);
   }
 }

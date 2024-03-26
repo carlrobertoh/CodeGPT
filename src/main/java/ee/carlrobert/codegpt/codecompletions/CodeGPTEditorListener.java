@@ -10,7 +10,24 @@ public class CodeGPTEditorListener implements EditorFactoryListener {
 
   @Override
   public void editorCreated(@NotNull EditorFactoryEvent event) {
+    var manager = CodeCompletionListenerManager.getInstance();
     Editor editor = event.getEditor();
-    EditorUtil.disposeWithEditor(editor, new CodeCompletionListenerBinder(editor));
+
+    if (manager.hasBinder(editor)) {
+      manager.removeBinder(editor);
+    }
+    var binder = new CodeCompletionListenerBinder(editor);
+    manager.setBinder(editor, binder);
+    EditorUtil.disposeWithEditor(editor, binder);
   }
+
+  @Override
+  public void editorReleased(@NotNull EditorFactoryEvent event) {
+    var manager = CodeCompletionListenerManager.getInstance();
+    Editor editor = event.getEditor();
+    if (manager.hasBinder(editor)) {
+      manager.removeBinder(editor);
+    }
+  }
+
 }

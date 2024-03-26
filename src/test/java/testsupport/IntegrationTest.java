@@ -1,6 +1,6 @@
 package testsupport;
 
-import static ee.carlrobert.codegpt.codecompletions.CodeCompletionService.APPLY_INLAY_ACTION_ID;
+import static ee.carlrobert.codegpt.codecompletions.CodeCompletionService.APPLY_INLAY_ACTION_ACCEPT_ALL_ID;
 
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
@@ -24,7 +24,7 @@ public class IntegrationTest extends BasePlatformTestCase implements
     ExternalServiceTestMixin.clearAll();
     ConfigurationSettings.getCurrentState().setCodeCompletionsEnabled(false);
     CodeGPTEditorManager.getInstance().disposeAllInlays(getProject());
-    ActionManager.getInstance().unregisterAction(APPLY_INLAY_ACTION_ID);
+    ActionManager.getInstance().unregisterAction(APPLY_INLAY_ACTION_ACCEPT_ALL_ID);
     getProject().putUserData(CodeGPTKeys.SELECTED_FILES, Collections.emptyList());
     super.tearDown();
   }

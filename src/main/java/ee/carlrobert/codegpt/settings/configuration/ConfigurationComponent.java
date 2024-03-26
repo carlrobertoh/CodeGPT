@@ -50,6 +50,7 @@ public class ConfigurationComponent {
   private final JTextArea systemPromptTextArea;
   private final JTextArea commitMessagePromptTextArea;
   private final IntegerField maxTokensField;
+  private final IntegerField maxInfillTokensField;
   private final JBTextField temperatureField;
 
   public ConfigurationComponent(Disposable parentDisposable, ConfigurationState configuration) {
@@ -91,6 +92,10 @@ public class ConfigurationComponent {
     maxTokensField = new IntegerField();
     maxTokensField.setColumns(12);
     maxTokensField.setValue(configuration.getMaxTokens());
+
+    maxInfillTokensField = new IntegerField();
+    maxInfillTokensField.setColumns(12);
+    maxInfillTokensField.setValue(configuration.getMaxInfillTokens());
 
     systemPromptTextArea = new JTextArea();
     if (configuration.getSystemPrompt().isEmpty()) {
@@ -148,6 +153,7 @@ public class ConfigurationComponent {
     var state = new ConfigurationState();
     state.setTableData(getTableData());
     state.setMaxTokens(maxTokensField.getValue());
+    state.setMaxInfillTokens(maxInfillTokensField.getValue());
     state.setTemperature(Double.parseDouble(temperatureField.getText()));
     state.setSystemPrompt(systemPromptTextArea.getText());
     state.setCommitMessagePrompt(commitMessagePromptTextArea.getText());
@@ -164,6 +170,7 @@ public class ConfigurationComponent {
     var configuration = ConfigurationSettings.getCurrentState();
     setTableData(configuration.getTableData());
     maxTokensField.setValue(configuration.getMaxTokens());
+    maxInfillTokensField.setValue(configuration.getMaxInfillTokens());
     temperatureField.setText(String.valueOf(configuration.getTemperature()));
     systemPromptTextArea.setText(configuration.getSystemPrompt());
     commitMessagePromptTextArea.setText(configuration.getCommitMessagePrompt());
@@ -235,6 +242,11 @@ public class ConfigurationComponent {
         "configurationConfigurable.section.assistant.maxTokensField.label",
         "configurationConfigurable.section.assistant.maxTokensField.comment",
         maxTokensField);
+    addAssistantFormLabeledComponent(
+        formBuilder,
+        "configurationConfigurable.section.assistant.maxInfillTokensField.label",
+        "configurationConfigurable.section.assistant.maxInfillTokensField.comment",
+        maxInfillTokensField);
 
     var form = formBuilder.getPanel();
     form.setBorder(JBUI.Borders.emptyLeft(16));

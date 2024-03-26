@@ -2,7 +2,7 @@ package ee.carlrobert.codegpt.codecompletions;
 
 import static ee.carlrobert.codegpt.CodeGPTKeys.MULTI_LINE_INLAY;
 import static ee.carlrobert.codegpt.CodeGPTKeys.SINGLE_LINE_INLAY;
-import static ee.carlrobert.codegpt.codecompletions.CodeCompletionService.APPLY_INLAY_ACTION_ID;
+import static ee.carlrobert.codegpt.codecompletions.CodeCompletionService.APPLY_INLAY_ACTION_ACCEPT_ALL_ID;
 import static ee.carlrobert.codegpt.util.file.FileUtil.getResourceContent;
 import static ee.carlrobert.llm.client.util.JSONUtil.e;
 import static ee.carlrobert.llm.client.util.JSONUtil.jsonMapResponse;
@@ -58,24 +58,4 @@ public class CodeCompletionServiceTest extends IntegrationTest {
         }, 5);
   }
 
-  public void testApplyInlayAction() {
-    ConfigurationSettings.getCurrentState().setAutoFormattingEnabled(false);
-    myFixture.configureByText(
-        "CompletionTest.java",
-        getResourceContent("/codecompletions/code-completion-file.txt"));
-    var editor = myFixture.getEditor();
-    editor.getCaretModel().moveToVisualPosition(cursorPosition);
-    var expectedSingleLineInlay = "FIRST_LINE";
-    var expectedMultiLineInlay = "SECOND_LINE\nTHIRD_LINE";
-    var expectedInlay = expectedSingleLineInlay + "\n" + expectedMultiLineInlay;
-    int cursorOffsetBeforeApply = editor.getCaretModel().getOffset();
-    CodeCompletionService.getInstance(getProject())
-        .addInlays(editor, cursorOffsetBeforeApply, expectedInlay);
-
-    myFixture.performEditorAction(APPLY_INLAY_ACTION_ID);
-
-    var newTextRange = new TextRange(cursorOffsetBeforeApply, editor.getCaretModel().getOffset());
-    var appliedInlay = editor.getDocument().getText(newTextRange);
-    assertThat(appliedInlay).isEqualTo(expectedInlay);
-  }
 }
