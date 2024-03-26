@@ -27,7 +27,7 @@ plugins {
 }
 
 group = properties("pluginGroup").get()
-version = properties("pluginVersion").get()
+version = properties("pluginVersion").get() + "-" + properties("pluginSinceBuild").get()
 
 repositories {
   mavenCentral()
@@ -89,7 +89,7 @@ tasks {
 
   patchPluginXml {
     enabled = true
-    version.set(properties("pluginVersion"))
+    version.set(properties("pluginVersion").get() + "-" + properties("pluginSinceBuild").get())
     sinceBuild.set(properties("pluginSinceBuild"))
     untilBuild.set(properties("pluginUntilBuild"))
 

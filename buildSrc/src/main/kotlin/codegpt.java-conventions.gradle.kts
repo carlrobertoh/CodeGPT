@@ -46,10 +46,6 @@ tasks {
     }
   }
 
-  jar {
-    archiveBaseName.set(properties("pluginName") + "-" + project.name)
-  }
-
   runIde {
     enabled = false
   }
