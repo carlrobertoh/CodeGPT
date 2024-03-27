@@ -10,7 +10,6 @@ import ee.carlrobert.codegpt.CodeGPTKeys
 import ee.carlrobert.codegpt.completions.CompletionRequestService
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
 import ee.carlrobert.codegpt.treesitter.CodeCompletionParserFactory
-import ee.carlrobert.codegpt.util.file.FileUtil
 import ee.carlrobert.llm.completion.CompletionEventListener
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.ProducerScope
@@ -38,27 +37,28 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
         }
 
         return InlineCompletionSuggestion.Default(channelFlow {
-            val (infillRequest, fileExtension) = withContext(Dispatchers.EDT) {
-                val infillRequest = InfillRequestDetails.fromCurrentEditorCaret(request.editor)
-                val fileExtension = FileUtil.getFileExtension(request.file.name)
-                Pair(infillRequest, fileExtension)
+            val infillRequest = withContext(Dispatchers.EDT) {
+                InfillRequestDetails.fromInlineCompletionRequest(request)
             }
             cancelCurrentCall()
             currentCall.set(
-                getCodeCompletion(
+                CompletionRequestService.getInstance().getCodeCompletionAsync(
                     infillRequest,
-                    getCodeCompletionEventListener(request.editor, infillRequest, fileExtension)
+                    getCodeCompletionEventListener(request.editor, infillRequest)
                 )
             )
             awaitClose { cancelCurrentCall() }
         })
     }
 
+    override fun isEnabled(event: InlineCompletionEvent): Boolean {
+        return ConfigurationSettings.getCurrentState().isCodeCompletionsEnabled
+    }
+
     private fun ProducerScope<InlineCompletionElement>.getCodeCompletionEventListener(
         editor: Editor,
-        infillRequest: InfillRequestDetails,
-        fileExtension: String
-    ) = CodeCompletionEventListener(infillRequest, fileExtension) {
+        infillRequest: InfillRequestDetails
+    ) = CodeCompletionEventListener(infillRequest) {
         editor.putUserData(CodeGPTKeys.PREVIOUS_INLAY_TEXT, it)
         providerScope.launch {
             try {
@@ -69,30 +69,18 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
         }
     }
 
-    override fun isEnabled(event: InlineCompletionEvent): Boolean {
-        return ConfigurationSettings.getCurrentState().isCodeCompletionsEnabled
-    }
-
-    private fun getCodeCompletion(
-        request: InfillRequestDetails,
-        eventListener: CodeCompletionEventListener,
-    ): EventSource {
-        return CompletionRequestService.getInstance().getCodeCompletionAsync(request, eventListener)
-    }
-
     private fun cancelCurrentCall() {
         currentCall.getAndSet(null)?.cancel()
     }
 
     class CodeCompletionEventListener(
         private val requestDetails: InfillRequestDetails,
-        private val fileExtension: String,
         private val completed: (String) -> Unit
     ) : CompletionEventListener<String> {
 
         override fun onComplete(messageBuilder: StringBuilder) {
             val processedOutput = CodeCompletionParserFactory
-                .getParserForFileExtension(fileExtension)
+                .getParserForFileExtension(requestDetails.fileExtension)
                 .parse(
                     requestDetails.prefix,
                     requestDetails.suffix,
