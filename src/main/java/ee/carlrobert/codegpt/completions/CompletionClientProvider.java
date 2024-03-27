@@ -2,10 +2,8 @@ package ee.carlrobert.codegpt.completions;
 
 import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.completions.you.YouUserManager;
-import ee.carlrobert.codegpt.credentials.AnthropicCredentialsManager;
-import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
-import ee.carlrobert.codegpt.credentials.LlamaCredentialManager;
-import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
+import ee.carlrobert.codegpt.credentials.CredentialsStore;
+import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey;
 import ee.carlrobert.codegpt.settings.advanced.AdvancedSettings;
 import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettings;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
@@ -23,18 +21,23 @@ import java.net.Proxy;
 import java.util.concurrent.TimeUnit;
 import okhttp3.Credentials;
 import okhttp3.OkHttpClient;
+import org.jetbrains.annotations.Nullable;
 
 public class CompletionClientProvider {
 
+  private static @Nullable String getCredential(CredentialKey key) {
+    return CredentialsStore.INSTANCE.getCredential(key);
+  }
+
   public static OpenAIClient getOpenAIClient() {
-    return new OpenAIClient.Builder(OpenAICredentialManager.getInstance().getCredential())
+    return new OpenAIClient.Builder(getCredential(CredentialKey.OPENAI_API_KEY))
         .setOrganization(OpenAISettings.getCurrentState().getOrganization())
         .build(getDefaultClientBuilder());
   }
 
   public static ClaudeClient getClaudeClient() {
     return new ClaudeClient(
-        AnthropicCredentialsManager.getInstance().getCredential(),
+        getCredential(CredentialKey.ANTHROPIC_API_KEY),
         AnthropicSettings.getCurrentState().getApiVersion(),
         getDefaultClientBuilder());
   }
@@ -45,8 +48,12 @@ public class CompletionClientProvider {
         settings.getResourceName(),
         settings.getDeploymentId(),
         settings.getApiVersion());
-    return new AzureClient.Builder(AzureCredentialsManager.getInstance().getCredential(), params)
-        .setActiveDirectoryAuthentication(settings.isUseAzureActiveDirectoryAuthentication())
+    var useAzureActiveDirectoryAuthentication = settings.isUseAzureActiveDirectoryAuthentication();
+    var credential = useAzureActiveDirectoryAuthentication
+        ? getCredential(CredentialKey.AZURE_ACTIVE_DIRECTORY_TOKEN)
+        : getCredential(CredentialKey.AZURE_OPENAI_API_KEY);
+    return new AzureClient.Builder(credential, params)
+        .setActiveDirectoryAuthentication(useAzureActiveDirectoryAuthentication)
         .build(getDefaultClientBuilder());
   }
 
@@ -77,7 +84,7 @@ public class CompletionClientProvider {
         .setPort(llamaSettings.getServerPort());
     if (!llamaSettings.isRunLocalServer()) {
       builder.setHost(llamaSettings.getBaseHost());
-      String apiKey = LlamaCredentialManager.getInstance().getCredential();
+      String apiKey = getCredential(CredentialKey.LLAMA_API_KEY);
       if (apiKey != null && !apiKey.isBlank()) {
         builder.setApiKey(apiKey);
       }

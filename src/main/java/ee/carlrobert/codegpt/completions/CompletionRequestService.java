@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.completions;
 
+import static ee.carlrobert.codegpt.settings.service.ServiceType.ANTHROPIC;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.AZURE;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.CUSTOM_OPENAI;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.LLAMA_CPP;
@@ -13,11 +14,13 @@ import ee.carlrobert.codegpt.codecompletions.CodeCompletionRequestProvider;
 import ee.carlrobert.codegpt.codecompletions.InfillRequestDetails;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
-import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
-import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
+import ee.carlrobert.codegpt.credentials.CredentialsStore;
+import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
+import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettings;
+import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
@@ -197,22 +200,31 @@ public final class CompletionRequestService {
     return tryExtractContent(response);
   }
 
+  public boolean isRequestAllowed() {
+    return isRequestAllowed(GeneralSettings.getCurrentState().getSelectedService());
+  }
+
+  public static boolean isRequestAllowed(ServiceType serviceType) {
+    if (serviceType == OPENAI
+        && CredentialsStore.INSTANCE.isCredentialSet(CredentialKey.OPENAI_API_KEY)) {
+      return true;
+    }
+
+    var azureCredentialKey = AzureSettings.getCurrentState().isUseAzureApiKeyAuthentication()
+        ? CredentialKey.AZURE_OPENAI_API_KEY
+        : CredentialKey.AZURE_ACTIVE_DIRECTORY_TOKEN;
+    if (serviceType == AZURE && CredentialsStore.INSTANCE.isCredentialSet(azureCredentialKey)) {
+      return true;
+    }
+
+    return List.of(LLAMA_CPP, ANTHROPIC, CUSTOM_OPENAI).contains(serviceType);
+  }
+
   private Optional<String> tryExtractContent(OpenAIChatCompletionResponse response) {
     return response
         .getChoices()
         .stream()
         .findFirst()
         .map(item -> item.getMessage().getContent());
-  }
-
-  public boolean isRequestAllowed() {
-    var selectedService = GeneralSettings.getCurrentState().getSelectedService();
-    if (selectedService == AZURE) {
-      return AzureCredentialsManager.getInstance().isCredentialSet();
-    }
-    if (selectedService == OPENAI) {
-      return OpenAICredentialManager.getInstance().isCredentialSet();
-    }
-    return true;
   }
 }

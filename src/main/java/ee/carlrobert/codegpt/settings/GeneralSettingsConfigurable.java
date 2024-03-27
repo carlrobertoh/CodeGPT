@@ -1,15 +1,18 @@
 package ee.carlrobert.codegpt.settings;
 
+import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.ANTHROPIC_API_KEY;
+import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.AZURE_ACTIVE_DIRECTORY_TOKEN;
+import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.AZURE_OPENAI_API_KEY;
+import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.CUSTOM_SERVICE_API_KEY;
+import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.LLAMA_API_KEY;
+import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.OPENAI_API_KEY;
+
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.util.Disposer;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
-import ee.carlrobert.codegpt.credentials.AnthropicCredentialsManager;
-import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
-import ee.carlrobert.codegpt.credentials.CustomServiceCredentialManager;
-import ee.carlrobert.codegpt.credentials.LlamaCredentialManager;
-import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
+import ee.carlrobert.codegpt.credentials.CredentialsStore;
 import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettings;
 import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettingsForm;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
@@ -100,18 +103,20 @@ public class GeneralSettingsConfigurable implements Configurable {
   }
 
   private void applyOpenAISettings(OpenAISettingsForm form) {
-    OpenAICredentialManager.getInstance().setCredential(form.getApiKey());
+    CredentialsStore.INSTANCE.setCredential(OPENAI_API_KEY, form.getApiKey());
     OpenAISettings.getInstance().loadState(form.getCurrentState());
   }
 
   private void applyCustomOpenAISettings(CustomServiceForm form) {
-    CustomServiceCredentialManager.getInstance().setCredential(form.getApiKey());
+    CredentialsStore.INSTANCE.setCredential(CUSTOM_SERVICE_API_KEY, form.getApiKey());
     CustomServiceSettings.getInstance().loadState(form.getCurrentState());
   }
 
   private void applyLlamaSettings(LlamaSettingsForm form) {
-    LlamaCredentialManager.getInstance()
-        .setCredential(form.getLlamaServerPreferencesForm().getApiKey());
+    CredentialsStore.INSTANCE.setCredential(
+        LLAMA_API_KEY,
+        form.getLlamaServerPreferencesForm().getApiKey());
+
     LlamaSettings.getInstance().loadState(form.getCurrentState());
   }
 
@@ -120,15 +125,16 @@ public class GeneralSettingsConfigurable implements Configurable {
   }
 
   private void applyAnthropicSettings(AnthropicSettingsForm form) {
+    CredentialsStore.INSTANCE.setCredential(ANTHROPIC_API_KEY, form.getApiKey());
     AnthropicSettings.getInstance().loadState(form.getCurrentState());
-    AnthropicCredentialsManager.getInstance().setCredential(form.getApiKey());
   }
 
   private void applyAzureSettings(AzureSettingsForm form) {
     AzureSettings.getInstance().loadState(form.getCurrentState());
-    var azureCredentials = AzureCredentialsManager.getInstance();
-    azureCredentials.setApiKey(form.getApiKey());
-    azureCredentials.setActiveDirectoryToken(form.getActiveDirectoryToken());
+    CredentialsStore.INSTANCE.setCredential(AZURE_OPENAI_API_KEY, form.getApiKey());
+    CredentialsStore.INSTANCE.setCredential(
+        AZURE_ACTIVE_DIRECTORY_TOKEN,
+        form.getActiveDirectoryToken());
   }
 
   @Override

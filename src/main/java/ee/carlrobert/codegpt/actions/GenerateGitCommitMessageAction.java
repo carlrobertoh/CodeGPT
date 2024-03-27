@@ -2,11 +2,6 @@ package ee.carlrobert.codegpt.actions;
 
 import static com.intellij.openapi.ui.Messages.OK;
 import static com.intellij.util.ObjectUtils.tryCast;
-import static ee.carlrobert.codegpt.settings.service.ServiceType.ANTHROPIC;
-import static ee.carlrobert.codegpt.settings.service.ServiceType.AZURE;
-import static ee.carlrobert.codegpt.settings.service.ServiceType.CUSTOM_OPENAI;
-import static ee.carlrobert.codegpt.settings.service.ServiceType.LLAMA_CPP;
-import static ee.carlrobert.codegpt.settings.service.ServiceType.OPENAI;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.YOU;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -34,10 +29,7 @@ import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.completions.CompletionRequestService;
-import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
-import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
-import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.completion.CompletionEventListener;
@@ -79,17 +71,12 @@ public class GenerateGitCommitMessageAction extends AnAction {
     var includedUnversionedChangesFilePaths = getIncludedUnversionedFilePaths(event);
     var filesSelected =
         !includedChangesFilePaths.isEmpty() || !includedUnversionedChangesFilePaths.isEmpty();
-    var callAllowed = isCallAllowed(selectedService);
+    var callAllowed = CompletionRequestService.isRequestAllowed(
+        GeneralSettings.getCurrentState().getSelectedService());
     event.getPresentation().setEnabled(callAllowed && filesSelected);
     event.getPresentation().setText(CodeGPTBundle.get(callAllowed
         ? "action.generateCommitMessage.title"
         : "action.generateCommitMessage.missingCredentials"));
-  }
-
-  private boolean isCallAllowed(ServiceType serviceType) {
-    return (serviceType == OPENAI && OpenAICredentialManager.getInstance().isCredentialSet())
-        || (serviceType == AZURE && AzureCredentialsManager.getInstance().isCredentialSet())
-        || List.of(LLAMA_CPP, ANTHROPIC, CUSTOM_OPENAI).contains(serviceType);
   }
 
   @Override
