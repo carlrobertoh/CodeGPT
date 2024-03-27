@@ -60,7 +60,7 @@ dependencies {
   implementation("org.apache.commons:commons-text:1.11.0")
   implementation("com.knuddels:jtokkit:1.0.0")
 
-  testImplementation("org.awaitility:awaitility:4.2.0")
+  testImplementation("org.awaitility:awaitility:4.2.1")
 }
 
 tasks.register<Exec>("updateSubmodules") {
