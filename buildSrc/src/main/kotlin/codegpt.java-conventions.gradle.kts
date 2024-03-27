@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 fun properties(key: String) = project.findProperty(key).toString()
 
 plugins {
@@ -5,6 +7,7 @@ plugins {
   id("java")
   id("idea")
   id("org.jetbrains.intellij")
+  id("org.jetbrains.kotlin.jvm")
 }
 
 version = properties("pluginVersion")
@@ -38,10 +41,9 @@ tasks {
       sourceCompatibility = it
       targetCompatibility = it
     }
-  }
-
-  jar {
-    archiveBaseName.set(properties("pluginName") + "-" + project.name)
+    withType<KotlinCompile> {
+      kotlinOptions.jvmTarget = it
+    }
   }
 
   runIde {
