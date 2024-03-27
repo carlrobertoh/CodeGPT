@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.settings.service.you;
 
+import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.YOU_ACCOUNT_PASSWORD;
 import static ee.carlrobert.codegpt.ui.UIUtil.withEmptyLeftBorder;
 
 import com.intellij.openapi.Disposable;
@@ -23,7 +24,8 @@ import ee.carlrobert.codegpt.completions.you.auth.YouAuthenticationError;
 import ee.carlrobert.codegpt.completions.you.auth.YouAuthenticationService;
 import ee.carlrobert.codegpt.completions.you.auth.response.YouAuthenticationResponse;
 import ee.carlrobert.codegpt.completions.you.auth.response.YouUser;
-import ee.carlrobert.codegpt.credentials.YouCredentialManager;
+import ee.carlrobert.codegpt.credentials.CredentialsStore;
+import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -51,7 +53,7 @@ public class YouSettingsForm extends JPanel {
     passwordField = new JBPasswordField();
     passwordField.setColumns(25);
     if (!settings.getEmail().isEmpty()) {
-      passwordField.setText(YouCredentialManager.getInstance().getCredential());
+      passwordField.setText(CredentialsStore.INSTANCE.getCredential(YOU_ACCOUNT_PASSWORD));
     }
     signInButton = new JButton(CodeGPTBundle.get("settingsConfigurable.service.you.signIn.label"));
     signUpTextPane = createSignUpTextPane();
@@ -255,7 +257,9 @@ public class YouSettingsForm extends JPanel {
         var email = emailField.getText();
         var password = passwordField.getPassword();
         YouSettings.getCurrentState().setEmail(email);
-        YouCredentialManager.getInstance().setCredential(new String(password));
+        CredentialsStore.INSTANCE.setCredential(
+            CredentialKey.YOU_ACCOUNT_PASSWORD,
+            new String(password));
         refreshView(createUserInformationPanel(authenticationResponse.getData().getUser()));
       });
     }

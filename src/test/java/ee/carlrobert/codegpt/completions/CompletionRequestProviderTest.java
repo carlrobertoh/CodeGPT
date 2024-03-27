@@ -6,7 +6,8 @@ import static org.assertj.core.groups.Tuple.tuple;
 
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
-import ee.carlrobert.codegpt.credentials.OpenAICredentialManager;
+import ee.carlrobert.codegpt.credentials.CredentialsStore;
+import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import testsupport.IntegrationTest;
@@ -14,7 +15,7 @@ import testsupport.IntegrationTest;
 public class CompletionRequestProviderTest extends IntegrationTest {
 
   public void testChatCompletionRequestWithSystemPromptOverride() {
-    OpenAICredentialManager.getInstance().setCredential("TEST_API_KEY");
+    CredentialsStore.INSTANCE.setCredential(CredentialKey.OPENAI_API_KEY, "TEST_API_KEY");
     ConfigurationSettings.getCurrentState().setSystemPrompt("TEST_SYSTEM_PROMPT");
     var conversation = ConversationService.getInstance().startConversation();
     var firstMessage = createDummyMessage(500);

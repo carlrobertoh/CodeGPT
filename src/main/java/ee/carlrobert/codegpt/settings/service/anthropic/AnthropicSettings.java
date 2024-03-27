@@ -4,7 +4,8 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
-import ee.carlrobert.codegpt.credentials.AnthropicCredentialsManager;
+import ee.carlrobert.codegpt.credentials.CredentialsStore;
+import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -36,6 +37,6 @@ public class AnthropicSettings implements PersistentStateComponent<AnthropicSett
     return !form.getCurrentState().equals(state)
         || !StringUtils.equals(
         form.getApiKey(),
-        AnthropicCredentialsManager.getInstance().getCredential());
+        CredentialsStore.INSTANCE.getCredential(CredentialKey.ANTHROPIC_API_KEY));
   }
 }

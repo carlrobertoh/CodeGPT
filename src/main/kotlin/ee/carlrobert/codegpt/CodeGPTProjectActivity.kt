@@ -10,7 +10,9 @@ import ee.carlrobert.codegpt.completions.you.auth.AuthenticationHandler
 import ee.carlrobert.codegpt.completions.you.auth.YouAuthenticationError
 import ee.carlrobert.codegpt.completions.you.auth.YouAuthenticationService
 import ee.carlrobert.codegpt.completions.you.auth.response.YouAuthenticationResponse
-import ee.carlrobert.codegpt.credentials.YouCredentialManager
+import ee.carlrobert.codegpt.credentials.CredentialsStore
+import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey
+import ee.carlrobert.codegpt.credentials.CredentialsStore.getCredential
 import ee.carlrobert.codegpt.settings.service.you.YouSettings
 import ee.carlrobert.codegpt.ui.OverlayUtil
 
@@ -18,6 +20,7 @@ class CodeGPTProjectActivity : ProjectActivity {
 
     override suspend fun execute(project: Project) {
         EditorActionsUtil.refreshActions()
+        CredentialsStore.loadAll()
 
         if (YouUserManager.getInstance().authenticationResponse == null) {
             ApplicationManager.getApplication()
@@ -27,8 +30,8 @@ class CodeGPTProjectActivity : ProjectActivity {
 
     private fun handleYouServiceAuthentication() {
         val settings = YouSettings.getCurrentState()
-        val password = YouCredentialManager.getInstance().credential
-        if (settings.email.isNotEmpty() && password != null && password.isNotEmpty()) {
+        val password = getCredential(CredentialKey.YOU_ACCOUNT_PASSWORD)
+        if (settings.email.isNotEmpty() && !password.isNullOrEmpty()) {
             YouAuthenticationService.getInstance()
                 .signInAsync(settings.email, password, object : AuthenticationHandler {
                     override fun handleAuthenticated(authenticationResponse: YouAuthenticationResponse) {

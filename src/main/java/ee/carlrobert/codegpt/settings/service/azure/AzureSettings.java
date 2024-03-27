@@ -1,10 +1,13 @@
 package ee.carlrobert.codegpt.settings.service.azure;
 
+import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.AZURE_ACTIVE_DIRECTORY_TOKEN;
+import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.AZURE_OPENAI_API_KEY;
+
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
-import ee.carlrobert.codegpt.credentials.AzureCredentialsManager;
+import ee.carlrobert.codegpt.credentials.CredentialsStore;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -33,11 +36,12 @@ public class AzureSettings implements PersistentStateComponent<AzureSettingsStat
   }
 
   public boolean isModified(AzureSettingsForm form) {
-    var credentialsManager = AzureCredentialsManager.getInstance();
     return !form.getCurrentState().equals(state)
         || !StringUtils.equals(
         form.getActiveDirectoryToken(),
-        credentialsManager.getActiveDirectoryToken())
-        || !StringUtils.equals(form.getApiKey(), credentialsManager.getApiKey());
+        CredentialsStore.INSTANCE.getCredential(AZURE_ACTIVE_DIRECTORY_TOKEN))
+        || !StringUtils.equals(
+        form.getApiKey(),
+        CredentialsStore.INSTANCE.getCredential(AZURE_OPENAI_API_KEY));
   }
 }
