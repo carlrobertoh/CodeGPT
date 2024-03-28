@@ -5,12 +5,10 @@ import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest
 import ee.carlrobert.llm.client.openai.completion.request.OpenAITextCompletionRequest
 
-class CodeCompletionRequestProvider(private val details: InfillRequestDetails) {
-    companion object {
-        private const val MAX_TOKENS = 24
-    }
+object CodeCompletionRequestFactory {
+    private const val MAX_TOKENS = 128
 
-    fun buildOpenAIRequest(): OpenAITextCompletionRequest {
+    fun buildOpenAIRequest(details: InfillRequestDetails): OpenAITextCompletionRequest {
         return OpenAITextCompletionRequest.Builder(details.prefix)
             .setSuffix(details.suffix)
             .setStream(true)
@@ -19,7 +17,7 @@ class CodeCompletionRequestProvider(private val details: InfillRequestDetails) {
             .build()
     }
 
-    fun buildLlamaRequest(): LlamaCompletionRequest {
+    fun buildLlamaRequest(details: InfillRequestDetails): LlamaCompletionRequest {
         val promptTemplate = getLlamaInfillPromptTemplate()
         val prompt = promptTemplate.buildPrompt(details.prefix, details.suffix)
         return LlamaCompletionRequest.Builder(prompt)

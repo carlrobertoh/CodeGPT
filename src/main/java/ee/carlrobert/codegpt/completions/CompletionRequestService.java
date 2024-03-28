@@ -10,7 +10,7 @@ import static ee.carlrobert.codegpt.settings.service.ServiceType.YOU;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.diagnostic.Logger;
-import ee.carlrobert.codegpt.codecompletions.CodeCompletionRequestProvider;
+import ee.carlrobert.codegpt.codecompletions.CodeCompletionRequestFactory;
 import ee.carlrobert.codegpt.codecompletions.InfillRequestDetails;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
@@ -97,12 +97,15 @@ public final class CompletionRequestService {
   public EventSource getCodeCompletionAsync(
       InfillRequestDetails requestDetails,
       CompletionEventListener<String> eventListener) {
-    var requestProvider = new CodeCompletionRequestProvider(requestDetails);
     return switch (GeneralSettings.getCurrentState().getSelectedService()) {
       case OPENAI -> CompletionClientProvider.getOpenAIClient()
-          .getCompletionAsync(requestProvider.buildOpenAIRequest(), eventListener);
+          .getCompletionAsync(
+              CodeCompletionRequestFactory.INSTANCE.buildOpenAIRequest(requestDetails),
+              eventListener);
       case LLAMA_CPP -> CompletionClientProvider.getLlamaClient()
-          .getChatCompletionAsync(requestProvider.buildLlamaRequest(), eventListener);
+          .getChatCompletionAsync(
+              CodeCompletionRequestFactory.INSTANCE.buildLlamaRequest(requestDetails),
+              eventListener);
       default ->
           throw new IllegalArgumentException("Code completion not supported for selected service");
     };
