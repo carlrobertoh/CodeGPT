@@ -52,7 +52,8 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
     }
 
     override fun isEnabled(event: InlineCompletionEvent): Boolean {
-        return ConfigurationSettings.getCurrentState().isCodeCompletionsEnabled
+        return event is InlineCompletionEvent.DocumentChange
+                && ConfigurationSettings.getCurrentState().isCodeCompletionsEnabled
     }
 
     private fun ProducerScope<InlineCompletionElement>.getCodeCompletionEventListener(
