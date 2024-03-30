@@ -18,7 +18,6 @@ public class IntegrationTest extends BasePlatformTestCase implements
   protected void tearDown() throws Exception {
     ExternalServiceTestMixin.clearAll();
     getProject().putUserData(CodeGPTKeys.SELECTED_FILES, Collections.emptyList());
-    getProject().putUserData(CodeGPTKeys.PREVIOUS_INLAY_TEXT, "");
     super.tearDown();
   }
 }

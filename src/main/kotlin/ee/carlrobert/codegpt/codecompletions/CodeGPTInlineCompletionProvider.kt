@@ -1,12 +1,19 @@
 package ee.carlrobert.codegpt.codecompletions
 
-import com.intellij.codeInsight.inline.completion.*
+import com.intellij.codeInsight.inline.completion.InlineCompletionEvent
+import com.intellij.codeInsight.inline.completion.InlineCompletionProvider
+import com.intellij.codeInsight.inline.completion.InlineCompletionProviderID
+import com.intellij.codeInsight.inline.completion.InlineCompletionRequest
 import com.intellij.codeInsight.inline.completion.elements.InlineCompletionElement
 import com.intellij.codeInsight.inline.completion.elements.InlineCompletionGrayTextElement
+import com.intellij.codeInsight.inline.completion.suggestion.InlineCompletionSingleSuggestion
+import com.intellij.codeInsight.inline.completion.suggestion.InlineCompletionSuggestionUpdateManager
+import com.intellij.codeInsight.inline.completion.suggestion.InlineCompletionSuggestionUpdateManager.UpdateResult
+import com.intellij.codeInsight.inline.completion.suggestion.InlineCompletionSuggestionUpdateManager.UpdateResult.Changed
+import com.intellij.codeInsight.inline.completion.suggestion.InlineCompletionSuggestionUpdateManager.UpdateResult.Invalidated
+import com.intellij.codeInsight.inline.completion.suggestion.InlineCompletionVariant
 import com.intellij.openapi.application.EDT
 import com.intellij.openapi.diagnostic.Logger
-import com.intellij.openapi.editor.Editor
-import ee.carlrobert.codegpt.CodeGPTKeys
 import ee.carlrobert.codegpt.completions.CompletionRequestService
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
 import ee.carlrobert.codegpt.treesitter.CodeCompletionParserFactory
@@ -15,6 +22,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.emptyFlow
 import okhttp3.sse.EventSource
 import java.util.concurrent.atomic.AtomicReference
 
@@ -30,13 +38,16 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
     override val id: InlineCompletionProviderID
         get() = InlineCompletionProviderID("CodeGPTInlineCompletionProvider")
 
-    override suspend fun getSuggestion(request: InlineCompletionRequest): InlineCompletionSuggestion {
+    override val suggestionUpdateManager: CodeCompletionSuggestionUpdateAdapter
+        get() = CodeCompletionSuggestionUpdateAdapter()
+
+    override suspend fun getSuggestion(request: InlineCompletionRequest): InlineCompletionSingleSuggestion {
         if (request.editor.project == null) {
             LOG.error("Could not find project")
-            return InlineCompletionSuggestion.empty()
+            return InlineCompletionSingleSuggestion.build(elements = emptyFlow())
         }
 
-        return InlineCompletionSuggestion.Default(channelFlow {
+        return InlineCompletionSingleSuggestion.build(elements = channelFlow {
             val infillRequest = withContext(Dispatchers.EDT) {
                 InfillRequestDetails.fromInlineCompletionRequest(request)
             }
@@ -44,7 +55,7 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
             currentCall.set(
                 CompletionRequestService.getInstance().getCodeCompletionAsync(
                     infillRequest,
-                    getCodeCompletionEventListener(request.editor, infillRequest)
+                    getCodeCompletionEventListener(infillRequest)
                 )
             )
             awaitClose { cancelCurrentCall() }
@@ -57,10 +68,8 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
     }
 
     private fun ProducerScope<InlineCompletionElement>.getCodeCompletionEventListener(
-        editor: Editor,
         infillRequest: InfillRequestDetails
     ) = CodeCompletionEventListener(infillRequest) {
-        editor.putUserData(CodeGPTKeys.PREVIOUS_INLAY_TEXT, it)
         providerScope.launch {
             try {
                 send(InlineCompletionGrayTextElement(it))
@@ -74,7 +83,7 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
         currentCall.getAndSet(null)?.cancel()
     }
 
-    class CodeCompletionEventListener(
+    internal class CodeCompletionEventListener(
         private val requestDetails: InfillRequestDetails,
         private val completed: (String) -> Unit
     ) : CompletionEventListener<String> {
@@ -90,4 +99,28 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
             completed(processedOutput)
         }
     }
+
+    class CodeCompletionSuggestionUpdateAdapter :
+        InlineCompletionSuggestionUpdateManager.Default() {
+
+        override fun onCustomEvent(
+            event: InlineCompletionEvent,
+            variant: InlineCompletionVariant.Snapshot
+        ): UpdateResult {
+            if (event !is ApplyNextWordInlaySuggestionEvent || variant.elements.isEmpty()) {
+                return Invalidated
+            }
+
+            val completionText = variant.elements.firstOrNull()?.text ?: return Invalidated
+            val textToInsert = event.toRequest().run {
+                CompletionSplitter.split(completionText, startOffset, endOffset)
+            }
+            return Changed(
+                variant.copy(
+                    listOf(InlineCompletionGrayTextElement(completionText.removePrefix(textToInsert)))
+                )
+            )
+        }
+    }
 }
+
