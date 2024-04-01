@@ -6,10 +6,8 @@ import static ee.carlrobert.llm.client.util.JSONUtil.e;
 import static ee.carlrobert.llm.client.util.JSONUtil.jsonArray;
 import static ee.carlrobert.llm.client.util.JSONUtil.jsonMap;
 import static ee.carlrobert.llm.client.util.JSONUtil.jsonMapResponse;
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
 
 import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.conversations.ConversationService;
@@ -50,7 +48,7 @@ public class DefaultCompletionRequestHandlerTest extends IntegrationTest {
 
     requestHandler.call(new CallParameters(conversation, ConversationType.DEFAULT, message, false));
 
-    await().atMost(5, SECONDS).until(() -> "Hello!".equals(message.getResponse()));
+    waitExpecting(() -> "Hello!".equals(message.getResponse()));
   }
 
   public void testAzureChatCompletionCall() {
@@ -86,7 +84,7 @@ public class DefaultCompletionRequestHandlerTest extends IntegrationTest {
 
     requestHandler.call(new CallParameters(conversation, ConversationType.DEFAULT, message, false));
 
-    await().atMost(5, SECONDS).until(() -> "Hello!".equals(message.getResponse()));
+    waitExpecting(() -> "Hello!".equals(message.getResponse()));
   }
 
   public void testYouChatCompletionCall() {
@@ -137,7 +135,7 @@ public class DefaultCompletionRequestHandlerTest extends IntegrationTest {
 
     requestHandler.call(new CallParameters(conversation, ConversationType.DEFAULT, message, false));
 
-    await().atMost(5, SECONDS).until(() -> "Hello!".equals(message.getResponse()));
+    waitExpecting(() -> "Hello!".equals(message.getResponse()));
   }
 
   public void testLlamaChatCompletionCall() {
@@ -171,7 +169,7 @@ public class DefaultCompletionRequestHandlerTest extends IntegrationTest {
 
     requestHandler.call(new CallParameters(conversation, ConversationType.DEFAULT, message, false));
 
-    await().atMost(5, SECONDS).until(() -> "Hello!".equals(message.getResponse()));
+    waitExpecting(() -> "Hello!".equals(message.getResponse()));
   }
 
   private CompletionResponseEventListener getRequestEventListener(Message message) {

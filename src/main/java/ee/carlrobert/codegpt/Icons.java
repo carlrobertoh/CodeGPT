@@ -17,4 +17,5 @@ public final class Icons {
   public static final Icon You = IconLoader.getIcon("/icons/you.svg", Icons.class);
   public static final Icon YouSmall = IconLoader.getIcon("/icons/you_small.png", Icons.class);
   public static final Icon User = IconLoader.getIcon("/icons/user.svg", Icons.class);
+  public static final Icon Upload = IconLoader.getIcon("/icons/upload.svg", Icons.class);
 }

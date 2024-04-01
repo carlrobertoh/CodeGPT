@@ -59,8 +59,6 @@ dependencies {
   implementation("org.jsoup:jsoup:1.17.2")
   implementation("org.apache.commons:commons-text:1.11.0")
   implementation("com.knuddels:jtokkit:1.0.0")
-
-  testImplementation("org.awaitility:awaitility:4.2.0")
 }
 
 tasks.register<Exec>("updateSubmodules") {

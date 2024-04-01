@@ -2,6 +2,7 @@ package ee.carlrobert.codegpt.completions;
 
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.message.Message;
+import org.jetbrains.annotations.Nullable;
 
 public class CallParameters {
 
@@ -9,6 +10,8 @@ public class CallParameters {
   private final ConversationType conversationType;
   private final Message message;
   private final boolean retry;
+  private @Nullable String imageMediaType;
+  private byte[] imageData;
 
   public CallParameters(Conversation conversation, Message message) {
     this(conversation, ConversationType.DEFAULT, message, false);
@@ -39,5 +42,21 @@ public class CallParameters {
 
   public boolean isRetry() {
     return retry;
+  }
+
+  public String getImageMediaType() {
+    return imageMediaType;
+  }
+
+  public void setImageMediaType(String imageMediaType) {
+    this.imageMediaType = imageMediaType;
+  }
+
+  public byte[] getImageData() {
+    return imageData;
+  }
+
+  public void setImageData(byte[] imageData) {
+    this.imageData = imageData;
   }
 }
