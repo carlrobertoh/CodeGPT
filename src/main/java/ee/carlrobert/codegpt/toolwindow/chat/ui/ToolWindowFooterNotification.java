@@ -14,7 +14,6 @@ public class ToolWindowFooterNotification extends JPanel {
 
   private final JBLabel label;
 
-  // TODO: Not allowed?
   public ToolWindowFooterNotification(Runnable onRemove) {
     this("", onRemove);
   }

@@ -41,7 +41,6 @@ public class StandardChatToolWindowPanel extends SimpleToolWindowPanel {
       @NotNull Disposable parentDisposable) {
     super(true);
     selectedFilesNotification = new ToolWindowFooterNotification(
-        getSelectedFilesNotificationLabel(project),
         () -> clearSelectedFilesNotification(project));
     imageFileAttachmentNotification = new ToolWindowFooterNotification(() ->
         project.putUserData(CodeGPTKeys.IMAGE_ATTACHMENT_FILE_PATH, ""));
@@ -151,11 +150,5 @@ public class StandardChatToolWindowPanel extends SimpleToolWindowPanel {
     project.getMessageBus()
         .syncPublisher(IncludeFilesInContextNotifier.FILES_INCLUDED_IN_CONTEXT_TOPIC)
         .filesIncluded(emptyList());
-  }
-
-  private static String getSelectedFilesNotificationLabel(Project project) {
-    var selectedFiles = project.getUserData(CodeGPTKeys.SELECTED_FILES);
-    var fileCount = selectedFiles == null ? 0 : selectedFiles.size();
-    return fileCount + " files selected";
   }
 }
