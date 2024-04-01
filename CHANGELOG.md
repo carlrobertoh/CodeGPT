@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Vision support (image understanding) for OpenAI GPT-4 and Anthropic Claude models
+
 ### Removed
 
 - Azure custom configuration (use OpenAI-compatible service to override the default configuration) 
