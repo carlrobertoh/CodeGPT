@@ -14,7 +14,7 @@ import com.intellij.ui.components.JBTextArea;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.Icons;
-import ee.carlrobert.codegpt.actions.UploadImageAction;
+import ee.carlrobert.codegpt.actions.AttachImageAction;
 import ee.carlrobert.codegpt.completions.CompletionRequestHandler;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
@@ -177,14 +177,13 @@ public class UserPromptTextArea extends JPanel {
     flowLayout.setHgap(8);
     iconsPanel = new JPanel(flowLayout);
     iconsPanel.add(createIconButton(Icons.Send, this::handleSubmit));
-    iconsPanel.add(stopButton);
-
     var selectedService = GeneralSettings.getCurrentState().getSelectedService();
     if (selectedService == ANTHROPIC
         || (selectedService == OPENAI
         && GPT_4_VISION_PREVIEW.getCode().equals(OpenAISettings.getCurrentState().getModel()))) {
-      iconsPanel.add(new IconActionButton(new UploadImageAction()));
+      iconsPanel.add(new IconActionButton(new AttachImageAction()));
     }
+    iconsPanel.add(stopButton);
     add(iconsPanel, BorderLayout.EAST);
   }
 

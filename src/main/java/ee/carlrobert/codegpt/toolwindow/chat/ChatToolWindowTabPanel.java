@@ -115,7 +115,7 @@ public abstract class ChatToolWindowTabPanel implements Disposable {
       }
 
       var userMessagePanel = new UserMessagePanel(project, message, this);
-      var attachedFilePath = CodeGPTKeys.UPLOADED_FILE_PATH.get(project);
+      var attachedFilePath = CodeGPTKeys.IMAGE_ATTACHMENT_FILE_PATH.get(project);
       var callParameters = getCallParameters(conversationType, message, attachedFilePath);
       if (callParameters.getImageData() != null) {
         message.setImageFilePath(attachedFilePath);
@@ -141,7 +141,7 @@ public abstract class ChatToolWindowTabPanel implements Disposable {
     if (attachedFilePath != null && !attachedFilePath.isEmpty()) {
       try {
         callParameters.setImageData(Files.readAllBytes(Path.of(attachedFilePath)));
-        callParameters.setImageMediaType(getImageMediaType(attachedFilePath));
+        callParameters.setImageMediaType(FileUtil.getImageMediaType(attachedFilePath));
       } catch (IOException e) {
         throw new RuntimeException(e);
       }
@@ -276,15 +276,6 @@ public abstract class ChatToolWindowTabPanel implements Disposable {
         })), BorderLayout.NORTH);
     panel.add(JBUI.Panels.simplePanel(userPromptTextArea), BorderLayout.CENTER);
     return panel;
-  }
-
-  private String getImageMediaType(String fileName) {
-    var fileExtension = FileUtil.getFileExtension(fileName);
-    return switch (fileExtension) {
-      case "png" -> "image/png";
-      case "jpg", "jpeg" -> "image/jpeg";
-      default -> throw new IllegalArgumentException("Unsupported image type: " + fileExtension);
-    };
   }
 
   private JPanel createRootPanel() {

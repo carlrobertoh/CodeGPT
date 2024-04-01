@@ -9,5 +9,6 @@ public class CodeGPTKeys {
       Key.create("codegpt.editor.inlay.prev-value");
   public static final Key<List<ReferencedFile>> SELECTED_FILES =
       Key.create("codegpt.selectedFiles");
-  public static final Key<String> UPLOADED_FILE_PATH = Key.create("codegpt.uploadedFilePath");
+  public static final Key<String> IMAGE_ATTACHMENT_FILE_PATH =
+      Key.create("codegpt.imageAttachmentFilePath");
 }

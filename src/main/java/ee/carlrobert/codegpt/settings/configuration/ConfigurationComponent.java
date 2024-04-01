@@ -44,6 +44,7 @@ public class ConfigurationComponent {
   private final JPanel mainPanel;
   private final JBTable table;
   private final JBCheckBox checkForPluginUpdatesCheckBox;
+  private final JBCheckBox checkForNewScreenshotsCheckBox;
   private final JBCheckBox openNewTabCheckBox;
   private final JBCheckBox methodNameGenerationCheckBox;
   private final JBCheckBox autoFormattingCheckBox;
@@ -111,6 +112,9 @@ public class ConfigurationComponent {
 
     checkForPluginUpdatesCheckBox = new JBCheckBox(
         CodeGPTBundle.get("configurationConfigurable.checkForPluginUpdates.label"),
+        configuration.isCheckForNewScreenshots());
+    checkForNewScreenshotsCheckBox = new JBCheckBox(
+        CodeGPTBundle.get("configurationConfigurable.checkForNewScreenshots.label"),
         configuration.isCheckForPluginUpdates());
     openNewTabCheckBox = new JBCheckBox(
         CodeGPTBundle.get("configurationConfigurable.openNewTabCheckBox.label"),
@@ -126,6 +130,7 @@ public class ConfigurationComponent {
         .addComponent(tablePanel)
         .addVerticalGap(4)
         .addComponent(checkForPluginUpdatesCheckBox)
+        .addComponent(checkForNewScreenshotsCheckBox)
         .addComponent(openNewTabCheckBox)
         .addComponent(methodNameGenerationCheckBox)
         .addComponent(autoFormattingCheckBox)
@@ -152,6 +157,7 @@ public class ConfigurationComponent {
     state.setSystemPrompt(systemPromptTextArea.getText());
     state.setCommitMessagePrompt(commitMessagePromptTextArea.getText());
     state.setCheckForPluginUpdates(checkForPluginUpdatesCheckBox.isSelected());
+    state.setCheckForNewScreenshots(checkForNewScreenshotsCheckBox.isSelected());
     state.setCreateNewChatOnEachAction(openNewTabCheckBox.isSelected());
     state.setMethodNameGenerationEnabled(methodNameGenerationCheckBox.isSelected());
     state.setAutoFormattingEnabled(autoFormattingCheckBox.isSelected());
@@ -168,6 +174,7 @@ public class ConfigurationComponent {
     systemPromptTextArea.setText(configuration.getSystemPrompt());
     commitMessagePromptTextArea.setText(configuration.getCommitMessagePrompt());
     checkForPluginUpdatesCheckBox.setSelected(configuration.isCheckForPluginUpdates());
+    checkForNewScreenshotsCheckBox.setSelected(configuration.isCheckForNewScreenshots());
     openNewTabCheckBox.setSelected(configuration.isCreateNewChatOnEachAction());
     methodNameGenerationCheckBox.setSelected(configuration.isMethodNameGenerationEnabled());
     autoFormattingCheckBox.setSelected(configuration.isAutoFormattingEnabled());

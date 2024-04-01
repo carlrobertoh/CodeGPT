@@ -14,6 +14,7 @@ public class ConfigurationState {
   private int maxTokens = 1000;
   private double temperature = 0.1;
   private boolean checkForPluginUpdates = true;
+  private boolean checkForNewScreenshots = true;
   private boolean createNewChatOnEachAction;
   private boolean ignoreGitCommitTokenLimit;
   private boolean methodNameGenerationEnabled = true;
@@ -60,6 +61,14 @@ public class ConfigurationState {
 
   public void setCreateNewChatOnEachAction(boolean createNewChatOnEachAction) {
     this.createNewChatOnEachAction = createNewChatOnEachAction;
+  }
+
+  public boolean isCheckForNewScreenshots() {
+    return checkForNewScreenshots;
+  }
+
+  public void setCheckForNewScreenshots(boolean checkForNewScreenshots) {
+    this.checkForNewScreenshots = checkForNewScreenshots;
   }
 
   public Map<String, String> getTableData() {

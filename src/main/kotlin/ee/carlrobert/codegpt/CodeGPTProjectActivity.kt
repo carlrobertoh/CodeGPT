@@ -15,11 +15,10 @@ import ee.carlrobert.codegpt.completions.you.auth.response.YouAuthenticationResp
 import ee.carlrobert.codegpt.credentials.CredentialsStore
 import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey
 import ee.carlrobert.codegpt.credentials.CredentialsStore.getCredential
+import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
 import ee.carlrobert.codegpt.settings.service.you.YouSettings
-import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.UploadImageNotifier
+import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.AttachImageNotifier
 import ee.carlrobert.codegpt.ui.OverlayUtil
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.nio.file.Paths
 
 class CodeGPTProjectActivity : ProjectActivity {
@@ -28,21 +27,21 @@ class CodeGPTProjectActivity : ProjectActivity {
         EditorActionsUtil.refreshActions()
         CredentialsStore.loadAll()
 
-        if (!ApplicationManager.getApplication().isUnitTestMode) {
+        if (YouUserManager.getInstance().authenticationResponse == null) {
+            handleYouServiceAuthenticationAsync()
+        }
+
+        if (!ApplicationManager.getApplication().isUnitTestMode
+            && ConfigurationSettings.getCurrentState().isCheckForNewScreenshots
+        ) {
             val pathToWatch = Paths.get(System.getProperty("user.home"), "Desktop")
             val fileWatcher = FileWatcher(pathToWatch)
             fileWatcher.watch { showImageAttachmentNotification(project, it.absolutePath) }
             Disposer.register(project, fileWatcher)
         }
-
-        if (YouUserManager.getInstance().authenticationResponse == null) {
-            withContext(Dispatchers.IO) {
-                handleYouServiceAuthentication()
-            }
-        }
     }
 
-    private fun handleYouServiceAuthentication() {
+    private fun handleYouServiceAuthenticationAsync() {
         val settings = YouSettings.getCurrentState()
         val password = getCredential(CredentialKey.YOU_ACCOUNT_PASSWORD)
         if (settings.email.isNotEmpty() && !password.isNullOrEmpty()) {
@@ -74,24 +73,23 @@ class CodeGPTProjectActivity : ProjectActivity {
 
     private fun showImageAttachmentNotification(project: Project, filePath: String) {
         OverlayUtil.getDefaultNotification(
-            "New image detected on desktop. Would you like to attach it to your current conversation?",
+            CodeGPTBundle.get("imageAttachmentNotification.content"),
             NotificationType.INFORMATION
         )
-            .addAction(
-                NotificationAction.createSimpleExpiring(
-                    "Attach image"
-                ) {
-                    CodeGPTKeys.UPLOADED_FILE_PATH.set(project, filePath)
-                    project.messageBus
-                        .syncPublisher<UploadImageNotifier>(UploadImageNotifier.UPLOADED_FILE_PATH_TOPIC)
-                        .fileUploaded(filePath)
-                })
-            .addAction(
-                NotificationAction.createSimpleExpiring(
-                    CodeGPTBundle.get("checkForUpdatesTask.notification.hideButton")
-                ) {
-                    TODO("Not implemented")
-                })
+            .addAction(NotificationAction.createSimpleExpiring(
+                CodeGPTBundle.get("imageAttachmentNotification.action")
+            ) {
+                CodeGPTKeys.IMAGE_ATTACHMENT_FILE_PATH.set(project, filePath)
+                project.messageBus
+                    .syncPublisher<AttachImageNotifier>(
+                        AttachImageNotifier.IMAGE_ATTACHMENT_FILE_PATH_TOPIC)
+                    .imageAttached(filePath)
+            })
+            .addAction(NotificationAction.createSimpleExpiring(
+                CodeGPTBundle.get("shared.notification.doNotShowAgain")
+            ) {
+                ConfigurationSettings.getCurrentState().isCheckForNewScreenshots = false
+            })
             .notify(project)
     }
 }

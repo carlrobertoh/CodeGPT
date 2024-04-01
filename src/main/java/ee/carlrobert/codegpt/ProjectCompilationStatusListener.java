@@ -53,7 +53,7 @@ public class ProjectCompilationStatusListener implements CompilationStatusListen
               () -> project.getService(StandardChatToolWindowContentManager.class)
                   .sendMessage(getMultiFileMessage(compileContext), FIX_COMPILE_ERRORS)))
           .addAction(NotificationAction.createSimpleExpiring(
-              CodeGPTBundle.get("checkForUpdatesTask.notification.hideButton"),
+              CodeGPTBundle.get("shared.notification.doNotShowAgain"),
               () -> ConfigurationSettings.getCurrentState().setCaptureCompileErrors(false)))
           .notify(project);
     }

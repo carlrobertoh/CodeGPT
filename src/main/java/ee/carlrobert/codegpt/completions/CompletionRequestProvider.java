@@ -30,6 +30,7 @@ import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.codegpt.settings.service.you.YouSettings;
 import ee.carlrobert.codegpt.telemetry.core.configuration.TelemetryConfiguration;
 import ee.carlrobert.codegpt.telemetry.core.service.UserId;
+import ee.carlrobert.codegpt.util.file.FileUtil;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeBase64Source;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionDetailedMessage;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionMessage;
@@ -48,7 +49,10 @@ import ee.carlrobert.llm.client.openai.completion.request.OpenAIMessageImageURLC
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIMessageTextContent;
 import ee.carlrobert.llm.client.you.completion.YouCompletionRequest;
 import ee.carlrobert.llm.client.you.completion.YouCompletionRequestMessage;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -297,9 +301,25 @@ public class CompletionRequestProvider {
       if (callParameters.isRetry() && prevMessage.getId().equals(message.getId())) {
         break;
       }
-      messages.add(new OpenAIChatCompletionStandardMessage("user", prevMessage.getPrompt()));
+      var prevMessageImageFilePath = prevMessage.getImageFilePath();
+      if (prevMessageImageFilePath != null && !prevMessageImageFilePath.isEmpty()) {
+        try {
+          var imageFilePath = Path.of(prevMessageImageFilePath);
+          var imageData = Files.readAllBytes(imageFilePath);
+          var imageMediaType = FileUtil.getImageMediaType(imageFilePath.getFileName().toString());
+          messages.add(new OpenAIChatCompletionDetailedMessage("user",
+              List.of(
+                  new OpenAIMessageImageURLContent(new OpenAIImageUrl(imageMediaType, imageData)),
+                  new OpenAIMessageTextContent(prevMessage.getPrompt()))));
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+      } else {
+        messages.add(new OpenAIChatCompletionStandardMessage("user", prevMessage.getPrompt()));
+      }
       messages.add(new OpenAIChatCompletionStandardMessage("assistant", prevMessage.getResponse()));
     }
+
     if (callParameters.getImageMediaType() != null && callParameters.getImageData().length > 0) {
       messages.add(new OpenAIChatCompletionDetailedMessage("user",
           List.of(

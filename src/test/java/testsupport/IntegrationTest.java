@@ -25,7 +25,7 @@ public class IntegrationTest extends BasePlatformTestCase implements
   private void clearKeys() {
     putUserData(CodeGPTKeys.SELECTED_FILES, Collections.emptyList());
     putUserData(CodeGPTKeys.PREVIOUS_INLAY_TEXT, "");
-    putUserData(CodeGPTKeys.UPLOADED_FILE_PATH, "");
+    putUserData(CodeGPTKeys.IMAGE_ATTACHMENT_FILE_PATH, "");
   }
 
   private <T> void putUserData(Key<T> key, T value) {

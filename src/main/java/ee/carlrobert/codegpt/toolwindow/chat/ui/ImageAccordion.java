@@ -5,6 +5,7 @@ import static com.intellij.util.ui.JBUI.Panels.simplePanel;
 import com.intellij.icons.AllIcons.General;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.JBUI;
+import ee.carlrobert.codegpt.CodeGPTBundle;
 import java.awt.BorderLayout;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -55,7 +56,9 @@ public class ImageAccordion extends JPanel {
   }
 
   private JToggleButton createToggleButton(JPanel contentPane) {
-    var accordionToggle = new JToggleButton("Attached file", General.ArrowDown);
+    var accordionToggle = new JToggleButton(
+        CodeGPTBundle.get("imageAccordion.title"),
+        General.ArrowDown);
     accordionToggle.setFocusPainted(false);
     accordionToggle.setContentAreaFilled(false);
     accordionToggle.setBackground(getBackground());

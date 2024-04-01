@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt;
+package ee.carlrobert.codegpt
 
 import com.intellij.ide.plugins.InstalledPluginsState
 import com.intellij.notification.NotificationAction
@@ -39,7 +39,7 @@ class CodeGPTUpdateActivity : ProjectActivity {
         Task.Backgroundable(project, CodeGPTBundle.get("checkForUpdatesTask.title"), true) {
         override fun run(indicator: ProgressIndicator) {
             val isLatestVersion =
-                !InstalledPluginsState.getInstance().hasNewerVersion(CodeGPTPlugin.CODEGPT_ID);
+                !InstalledPluginsState.getInstance().hasNewerVersion(CodeGPTPlugin.CODEGPT_ID)
             if (project.isDisposed || isLatestVersion) {
                 return
             }
@@ -55,7 +55,7 @@ class CodeGPTUpdateActivity : ProjectActivity {
                         .executeOnPooledThread { installCodeGPTUpdate(project) }
                 })
                 .addAction(NotificationAction.createSimpleExpiring(
-                    CodeGPTBundle.get("checkForUpdatesTask.notification.hideButton")
+                    CodeGPTBundle.get("shared.notification.doNotShowAgain")
                 ) {
                     ConfigurationSettings.getCurrentState().isCheckForPluginUpdates = false
                 })

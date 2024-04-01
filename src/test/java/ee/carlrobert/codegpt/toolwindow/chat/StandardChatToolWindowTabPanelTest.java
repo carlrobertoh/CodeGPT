@@ -1,6 +1,5 @@
 package ee.carlrobert.codegpt.toolwindow.chat;
 
-import static ee.carlrobert.codegpt.CodeGPTKeys.PREVIOUS_INLAY_TEXT;
 import static ee.carlrobert.codegpt.completions.CompletionRequestProvider.COMPLETION_SYSTEM_PROMPT;
 import static ee.carlrobert.codegpt.completions.CompletionRequestProvider.FIX_COMPILE_ERRORS_SYSTEM_PROMPT;
 import static ee.carlrobert.codegpt.completions.llama.PromptTemplate.LLAMA;
@@ -9,11 +8,9 @@ import static ee.carlrobert.llm.client.util.JSONUtil.jsonArray;
 import static ee.carlrobert.llm.client.util.JSONUtil.jsonMap;
 import static ee.carlrobert.llm.client.util.JSONUtil.jsonMapResponse;
 import static java.util.Objects.requireNonNull;
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.intellij.testFramework.PlatformTestUtil;
 import ee.carlrobert.codegpt.CodeGPTKeys;
 import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.ReferencedFile;
@@ -186,7 +183,7 @@ public class StandardChatToolWindowTabPanelTest extends IntegrationTest {
 
   public void testSendingOpenAIMessageWithImage() {
     var testImagePath = requireNonNull(getClass().getResource("/images/test-image.png")).getPath();
-    getProject().putUserData(CodeGPTKeys.UPLOADED_FILE_PATH, testImagePath);
+    getProject().putUserData(CodeGPTKeys.IMAGE_ATTACHMENT_FILE_PATH, testImagePath);
     useOpenAIService("gpt-4-vision-preview");
     ConfigurationSettings.getCurrentState().setSystemPrompt(COMPLETION_SYSTEM_PROMPT);
     var message = new Message("TEST_MESSAGE");

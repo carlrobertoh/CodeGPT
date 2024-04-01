@@ -20,7 +20,7 @@ import ee.carlrobert.codegpt.actions.toolwindow.OpenInEditorAction;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ToolWindowFooterNotification;
-import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.UploadImageNotifier;
+import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.AttachImageNotifier;
 import java.awt.BorderLayout;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -33,7 +33,7 @@ import org.jetbrains.annotations.NotNull;
 public class StandardChatToolWindowPanel extends SimpleToolWindowPanel {
 
   private final ToolWindowFooterNotification selectedFilesNotification;
-  private final ToolWindowFooterNotification uploadedFileNotification;
+  private final ToolWindowFooterNotification imageFileAttachmentNotification;
   private StandardChatToolWindowTabbedPane tabbedPane;
 
   public StandardChatToolWindowPanel(
@@ -43,8 +43,8 @@ public class StandardChatToolWindowPanel extends SimpleToolWindowPanel {
     selectedFilesNotification = new ToolWindowFooterNotification(
         getSelectedFilesNotificationLabel(project),
         () -> clearSelectedFilesNotification(project));
-    uploadedFileNotification = new ToolWindowFooterNotification(() ->
-        project.putUserData(CodeGPTKeys.UPLOADED_FILE_PATH, ""));
+    imageFileAttachmentNotification = new ToolWindowFooterNotification(() ->
+        project.putUserData(CodeGPTKeys.IMAGE_ATTACHMENT_FILE_PATH, ""));
     init(project, parentDisposable);
 
     project.getMessageBus()
@@ -53,10 +53,10 @@ public class StandardChatToolWindowPanel extends SimpleToolWindowPanel {
             (IncludeFilesInContextNotifier) this::displaySelectedFilesNotification);
     project.getMessageBus()
         .connect()
-        .subscribe(UploadImageNotifier.UPLOADED_FILE_PATH_TOPIC,
-            (UploadImageNotifier) filePath -> uploadedFileNotification.show(
+        .subscribe(AttachImageNotifier.IMAGE_ATTACHMENT_FILE_PATH_TOPIC,
+            (AttachImageNotifier) filePath -> imageFileAttachmentNotification.show(
                 Path.of(filePath).getFileName().toString(),
-                "some uploaded description"));
+                "File path: " + filePath));
   }
 
   public StandardChatToolWindowTabbedPane getChatTabbedPane() {
@@ -85,9 +85,9 @@ public class StandardChatToolWindowPanel extends SimpleToolWindowPanel {
 
   public void clearNotifications(Project project) {
     selectedFilesNotification.hideNotification();
-    uploadedFileNotification.hideNotification();
+    imageFileAttachmentNotification.hideNotification();
 
-    project.putUserData(CodeGPTKeys.UPLOADED_FILE_PATH, "");
+    project.putUserData(CodeGPTKeys.IMAGE_ATTACHMENT_FILE_PATH, "");
     project.putUserData(CodeGPTKeys.SELECTED_FILES, emptyList());
   }
 
@@ -115,7 +115,7 @@ public class StandardChatToolWindowPanel extends SimpleToolWindowPanel {
     var notificationContainer = new JPanel(new BorderLayout());
     notificationContainer.setLayout(new BoxLayout(notificationContainer, BoxLayout.PAGE_AXIS));
     notificationContainer.add(selectedFilesNotification);
-    notificationContainer.add(uploadedFileNotification);
+    notificationContainer.add(imageFileAttachmentNotification);
     setContent(JBUI.Panels.simplePanel(tabbedPane).addToBottom(notificationContainer));
 
     Disposer.register(parentDisposable, tabPanel);
