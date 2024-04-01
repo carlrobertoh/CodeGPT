@@ -30,15 +30,29 @@ import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.codegpt.settings.service.you.YouSettings;
 import ee.carlrobert.codegpt.telemetry.core.configuration.TelemetryConfiguration;
 import ee.carlrobert.codegpt.telemetry.core.service.UserId;
+import ee.carlrobert.codegpt.util.file.FileUtil;
+import ee.carlrobert.llm.client.anthropic.completion.ClaudeBase64Source;
+import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionDetailedMessage;
+import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionMessage;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionRequest;
-import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionRequestMessage;
+import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionStandardMessage;
+import ee.carlrobert.llm.client.anthropic.completion.ClaudeMessageImageContent;
+import ee.carlrobert.llm.client.anthropic.completion.ClaudeMessageTextContent;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
+import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionDetailedMessage;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
+import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionStandardMessage;
+import ee.carlrobert.llm.client.openai.completion.request.OpenAIImageUrl;
+import ee.carlrobert.llm.client.openai.completion.request.OpenAIMessageImageURLContent;
+import ee.carlrobert.llm.client.openai.completion.request.OpenAIMessageTextContent;
 import ee.carlrobert.llm.client.you.completion.YouCompletionRequest;
 import ee.carlrobert.llm.client.you.completion.YouCompletionRequestMessage;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -91,9 +105,10 @@ public class CompletionRequestProvider {
   public static OpenAIChatCompletionRequest buildOpenAILookupCompletionRequest(String context) {
     return new OpenAIChatCompletionRequest.Builder(
         List.of(
-            new OpenAIChatCompletionMessage("system",
+            new OpenAIChatCompletionStandardMessage(
+                "system",
                 getResourceContent("/prompts/method-name-generator.txt")),
-            new OpenAIChatCompletionMessage("user", context)))
+            new OpenAIChatCompletionStandardMessage("user", context)))
         .setModel(OpenAISettings.getCurrentState().getModel())
         .setStream(false)
         .build();
@@ -103,8 +118,8 @@ public class CompletionRequestProvider {
     return buildCustomOpenAIChatCompletionRequest(
         CustomServiceSettings.getCurrentState(),
         List.of(
-            new OpenAIChatCompletionMessage("system", system),
-            new OpenAIChatCompletionMessage("user", context)),
+            new OpenAIChatCompletionStandardMessage("system", system),
+            new OpenAIChatCompletionStandardMessage("user", context)),
         true);
   }
 
@@ -112,10 +127,10 @@ public class CompletionRequestProvider {
     return buildCustomOpenAIChatCompletionRequest(
         CustomServiceSettings.getCurrentState(),
         List.of(
-            new OpenAIChatCompletionMessage(
+            new OpenAIChatCompletionStandardMessage(
                 "system",
                 getResourceContent("/prompts/method-name-generator.txt")),
-            new OpenAIChatCompletionMessage("user", context)),
+            new OpenAIChatCompletionStandardMessage("user", context)),
         false);
   }
 
@@ -246,15 +261,25 @@ public class CompletionRequestProvider {
     request.setMaxTokens(configuration.getMaxTokens());
     request.setStream(true);
     request.setSystem(COMPLETION_SYSTEM_PROMPT);
-    var messages = conversation.getMessages().stream()
+    List<ClaudeCompletionMessage> messages = conversation.getMessages().stream()
         .filter(prevMessage -> prevMessage.getResponse() != null
             && !prevMessage.getResponse().isEmpty())
         .flatMap(prevMessage -> Stream.of(
-            new ClaudeCompletionRequestMessage("user", prevMessage.getPrompt()),
-            new ClaudeCompletionRequestMessage("assistant", prevMessage.getResponse())))
+            new ClaudeCompletionStandardMessage("user", prevMessage.getPrompt()),
+            new ClaudeCompletionStandardMessage("assistant", prevMessage.getResponse())))
         .collect(toList());
-    messages.add(
-        new ClaudeCompletionRequestMessage("user", callParameters.getMessage().getPrompt()));
+
+    if (callParameters.getImageMediaType() != null && callParameters.getImageData().length > 0) {
+      messages.add(new ClaudeCompletionDetailedMessage("user",
+          List.of(
+              new ClaudeMessageImageContent(new ClaudeBase64Source(
+                  callParameters.getImageMediaType(),
+                  callParameters.getImageData())),
+              new ClaudeMessageTextContent(callParameters.getMessage().getPrompt()))));
+    } else {
+      messages.add(
+          new ClaudeCompletionStandardMessage("user", callParameters.getMessage().getPrompt()));
+    }
     request.setMessages(messages);
     return request;
   }
@@ -263,22 +288,48 @@ public class CompletionRequestProvider {
     var message = callParameters.getMessage();
     var messages = new ArrayList<OpenAIChatCompletionMessage>();
     if (callParameters.getConversationType() == ConversationType.DEFAULT) {
-      messages.add(new OpenAIChatCompletionMessage(
+      messages.add(new OpenAIChatCompletionStandardMessage(
           "system",
           ConfigurationSettings.getCurrentState().getSystemPrompt()));
     }
     if (callParameters.getConversationType() == ConversationType.FIX_COMPILE_ERRORS) {
-      messages.add(new OpenAIChatCompletionMessage("system", FIX_COMPILE_ERRORS_SYSTEM_PROMPT));
+      messages.add(
+          new OpenAIChatCompletionStandardMessage("system", FIX_COMPILE_ERRORS_SYSTEM_PROMPT));
     }
 
     for (var prevMessage : conversation.getMessages()) {
       if (callParameters.isRetry() && prevMessage.getId().equals(message.getId())) {
         break;
       }
-      messages.add(new OpenAIChatCompletionMessage("user", prevMessage.getPrompt()));
-      messages.add(new OpenAIChatCompletionMessage("assistant", prevMessage.getResponse()));
+      var prevMessageImageFilePath = prevMessage.getImageFilePath();
+      if (prevMessageImageFilePath != null && !prevMessageImageFilePath.isEmpty()) {
+        try {
+          var imageFilePath = Path.of(prevMessageImageFilePath);
+          var imageData = Files.readAllBytes(imageFilePath);
+          var imageMediaType = FileUtil.getImageMediaType(imageFilePath.getFileName().toString());
+          messages.add(new OpenAIChatCompletionDetailedMessage("user",
+              List.of(
+                  new OpenAIMessageImageURLContent(new OpenAIImageUrl(imageMediaType, imageData)),
+                  new OpenAIMessageTextContent(prevMessage.getPrompt()))));
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+      } else {
+        messages.add(new OpenAIChatCompletionStandardMessage("user", prevMessage.getPrompt()));
+      }
+      messages.add(new OpenAIChatCompletionStandardMessage("assistant", prevMessage.getResponse()));
     }
-    messages.add(new OpenAIChatCompletionMessage("user", message.getPrompt()));
+
+    if (callParameters.getImageMediaType() != null && callParameters.getImageData().length > 0) {
+      messages.add(new OpenAIChatCompletionDetailedMessage("user",
+          List.of(
+              new OpenAIMessageImageURLContent(
+                  new OpenAIImageUrl(callParameters.getImageMediaType(),
+                      callParameters.getImageData())),
+              new OpenAIMessageTextContent(message.getPrompt()))));
+    } else {
+      messages.add(new OpenAIChatCompletionStandardMessage("user", message.getPrompt()));
+    }
     return messages;
   }
 
@@ -324,8 +375,11 @@ public class CompletionRequestProvider {
         break;
       }
 
-      totalUsage -= encodingManager.countMessageTokens(messages.get(i));
-      messages.set(i, null);
+      var message = messages.get(i);
+      if (message instanceof OpenAIChatCompletionStandardMessage) {
+        totalUsage -= encodingManager.countMessageTokens(message);
+        messages.set(i, null);
+      }
     }
 
     return messages.stream().filter(Objects::nonNull).collect(toList());

@@ -18,8 +18,6 @@ import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.completions.you.YouUserManager;
 import ee.carlrobert.codegpt.completions.you.auth.SignedOutNotifier;
-import ee.carlrobert.codegpt.conversations.ConversationService;
-import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.GeneralSettingsState;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
@@ -39,13 +37,13 @@ import org.jetbrains.annotations.NotNull;
 
 public class ModelComboBoxAction extends ComboBoxAction {
 
-  private final Runnable onAddNewTab;
+  private final Runnable onModelChange;
   private final GeneralSettingsState settings;
   private final OpenAISettingsState openAISettings;
   private final YouSettingsState youSettings;
 
-  public ModelComboBoxAction(Runnable onAddNewTab, ServiceType selectedService) {
-    this.onAddNewTab = onAddNewTab;
+  public ModelComboBoxAction(Runnable onModelChange, ServiceType selectedService) {
+    this.onModelChange = onModelChange;
     settings = GeneralSettings.getCurrentState();
     openAISettings = OpenAISettings.getCurrentState();
     youSettings = YouSettings.getCurrentState();
@@ -74,6 +72,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
     var actionGroup = new DefaultActionGroup();
     actionGroup.addSeparator("OpenAI");
     List.of(
+            OpenAIChatCompletionModel.GPT_4_VISION_PREVIEW,
             OpenAIChatCompletionModel.GPT_4_0125_128k,
             OpenAIChatCompletionModel.GPT_3_5_0125_16k,
             OpenAIChatCompletionModel.GPT_4_32k,
@@ -210,7 +209,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
 
       @Override
       public void actionPerformed(@NotNull AnActionEvent e) {
-        handleProviderChange(serviceType, label, icon, comboBoxPresentation);
+        handleModelChange(serviceType, label, icon, comboBoxPresentation);
       }
 
       @Override
@@ -220,7 +219,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
     };
   }
 
-  private void handleProviderChange(
+  private void handleModelChange(
       ServiceType serviceType,
       String label,
       Icon icon,
@@ -228,13 +227,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
     settings.setSelectedService(serviceType);
     comboBoxPresentation.setIcon(icon);
     comboBoxPresentation.setText(label);
-
-    var currentConversation = ConversationsState.getCurrentConversation();
-    if (currentConversation != null && !currentConversation.getMessages().isEmpty()) {
-      onAddNewTab.run();
-    } else {
-      ConversationService.getInstance().startConversation();
-    }
+    onModelChange.run();
   }
 
   private AnAction createOpenAIModelAction(
@@ -252,7 +245,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
       @Override
       public void actionPerformed(@NotNull AnActionEvent e) {
         openAISettings.setModel(model.getCode());
-        handleProviderChange(
+        handleModelChange(
             OPENAI,
             model.getDescription(),
             Icons.OpenAI,
@@ -281,7 +274,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
       @Override
       public void actionPerformed(@NotNull AnActionEvent e) {
         youSettings.setChatMode(mode);
-        handleProviderChange(
+        handleModelChange(
             YOU,
             mode.getDescription(),
             Icons.YouSmall,
@@ -311,7 +304,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
       public void actionPerformed(@NotNull AnActionEvent e) {
         youSettings.setCustomModel(model);
         youSettings.setChatMode(YouCompletionMode.CUSTOM);
-        handleProviderChange(
+        handleModelChange(
             YOU,
             model.getDescription(),
             Icons.YouSmall,

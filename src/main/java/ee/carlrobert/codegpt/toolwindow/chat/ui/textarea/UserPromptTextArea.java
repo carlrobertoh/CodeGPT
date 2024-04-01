@@ -1,6 +1,12 @@
 package ee.carlrobert.codegpt.toolwindow.chat.ui.textarea;
 
+import static ee.carlrobert.codegpt.settings.service.ServiceType.ANTHROPIC;
+import static ee.carlrobert.codegpt.settings.service.ServiceType.OPENAI;
+import static ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel.GPT_4_VISION_PREVIEW;
+
 import com.intellij.icons.AllIcons;
+import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.ex.util.EditorUtil;
 import com.intellij.openapi.util.registry.Registry;
@@ -10,11 +16,14 @@ import com.intellij.ui.components.JBTextArea;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.Icons;
+import ee.carlrobert.codegpt.actions.AttachImageAction;
 import ee.carlrobert.codegpt.completions.CompletionRequestHandler;
+import ee.carlrobert.codegpt.settings.GeneralSettings;
+import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
+import ee.carlrobert.codegpt.ui.IconActionButton;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
-import java.awt.Cursor;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -23,16 +32,14 @@ import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import javax.swing.AbstractAction;
-import javax.swing.Icon;
-import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 import javax.swing.event.DocumentEvent;
 import javax.swing.text.BadLocationException;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class UserPromptTextArea extends JPanel {
 
@@ -41,11 +48,12 @@ public class UserPromptTextArea extends JPanel {
   private static final JBColor BACKGROUND_COLOR = JBColor.namedColor(
       "Editor.SearchField.background", com.intellij.util.ui.UIUtil.getTextFieldBackground());
 
+  private final AtomicReference<CompletionRequestHandler> requestHandlerRef =
+      new AtomicReference<>();
   private final JBTextArea textArea;
-
   private final int textAreaRadius = 16;
   private final Consumer<String> onSubmit;
-  private JButton stopButton;
+  private IconActionButton stopButton;
   private JPanel iconsPanel;
   private boolean submitEnabled = true;
 
@@ -150,6 +158,10 @@ public class UserPromptTextArea extends JPanel {
     stopButton.setEnabled(!submitEnabled);
   }
 
+  public void setRequestHandler(@NotNull CompletionRequestHandler handler) {
+    requestHandlerRef.set(handler);
+  }
+
   private void handleSubmit() {
     if (submitEnabled && !textArea.getText().isEmpty()) {
       // Replacing each newline with two newlines to ensure proper Markdown formatting
@@ -163,12 +175,34 @@ public class UserPromptTextArea extends JPanel {
     setOpaque(false);
     add(textArea, BorderLayout.CENTER);
 
-    stopButton = createIconButton(AllIcons.Actions.Suspend, null);
+    stopButton = new IconActionButton(
+        new AnAction("Stop", "Stop current inference", AllIcons.Actions.Suspend) {
+          @Override
+          public void actionPerformed(@NotNull AnActionEvent e) {
+            var handler = requestHandlerRef.get();
+            if (handler != null) {
+              handler.cancel();
+            }
+          }
+        });
+    stopButton.setEnabled(false);
 
     var flowLayout = new FlowLayout(FlowLayout.RIGHT);
     flowLayout.setHgap(8);
     iconsPanel = new JPanel(flowLayout);
-    iconsPanel.add(createIconButton(Icons.Send, this::handleSubmit));
+    iconsPanel.add(new IconActionButton(
+        new AnAction("Send Message", "Send message", Icons.Send) {
+          @Override
+          public void actionPerformed(@NotNull AnActionEvent e) {
+            handleSubmit();
+          }
+        }));
+    var selectedService = GeneralSettings.getCurrentState().getSelectedService();
+    if (selectedService == ANTHROPIC
+        || (selectedService == OPENAI
+        && GPT_4_VISION_PREVIEW.getCode().equals(OpenAISettings.getCurrentState().getModel()))) {
+      iconsPanel.add(new IconActionButton(new AttachImageAction()));
+    }
     iconsPanel.add(stopButton);
     add(iconsPanel, BorderLayout.EAST);
   }
@@ -179,20 +213,5 @@ public class UserPromptTextArea extends JPanel {
     } else {
       textArea.setFont(UIManager.getFont("TextField.font"));
     }
-  }
-
-  // TODO: IconActionButton?
-  private JButton createIconButton(Icon icon, @Nullable Runnable submitListener) {
-    var button = UIUtil.createIconButton(icon);
-    if (submitListener != null) {
-      button.addActionListener((e) -> handleSubmit());
-    }
-    button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-    button.setEnabled(false);
-    return button;
-  }
-
-  public void setRequestHandler(@NotNull CompletionRequestHandler requestService) {
-    stopButton.addActionListener(e -> requestService.cancel());
   }
 }

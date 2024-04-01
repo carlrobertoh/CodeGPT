@@ -26,11 +26,11 @@ import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.llm.client.DeserializationUtil;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionRequest;
-import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionRequestMessage;
+import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionStandardMessage;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionEventSourceListener;
-import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
+import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionStandardMessage;
 import ee.carlrobert.llm.client.openai.completion.response.OpenAIChatCompletionResponse;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.io.IOException;
@@ -117,8 +117,8 @@ public final class CompletionRequestService {
     var configuration = ConfigurationSettings.getCurrentState();
     var commitMessagePrompt = configuration.getCommitMessagePrompt();
     var openaiRequest = new OpenAIChatCompletionRequest.Builder(List.of(
-        new OpenAIChatCompletionMessage("system", commitMessagePrompt),
-        new OpenAIChatCompletionMessage("user", prompt)))
+        new OpenAIChatCompletionStandardMessage("system", commitMessagePrompt),
+        new OpenAIChatCompletionStandardMessage("user", prompt)))
         .setModel(OpenAISettings.getCurrentState().getModel())
         .build();
     var selectedService = GeneralSettings.getCurrentState().getSelectedService();
@@ -142,8 +142,7 @@ public final class CompletionRequestService {
         claudeRequest.setStream(true);
         claudeRequest.setMaxTokens(configuration.getMaxTokens());
         claudeRequest.setModel(anthropicSettings.getModel());
-        claudeRequest.setMessages(
-            List.of(new ClaudeCompletionRequestMessage("user", prompt)));
+        claudeRequest.setMessages(List.of(new ClaudeCompletionStandardMessage("user", prompt)));
         CompletionClientProvider.getClaudeClient()
             .getCompletionAsync(claudeRequest, eventListener);
         break;

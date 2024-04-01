@@ -6,6 +6,7 @@ import ee.carlrobert.llm.client.you.completion.YouSerpResult;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import org.jetbrains.annotations.Nullable;
 
 public class Message {
 
@@ -15,6 +16,7 @@ public class Message {
   private String userMessage;
   private List<YouSerpResult> serpResults;
   private List<String> referencedFilePaths;
+  private @Nullable String imageFilePath;
 
   public Message(String prompt, String response) {
     this(prompt);
@@ -69,6 +71,14 @@ public class Message {
 
   public void setReferencedFilePaths(List<String> referencedFilePaths) {
     this.referencedFilePaths = referencedFilePaths;
+  }
+
+  public @Nullable String getImageFilePath() {
+    return imageFilePath;
+  }
+
+  public void setImageFilePath(@Nullable String imageFilePath) {
+    this.imageFilePath = imageFilePath;
   }
 
   @Override

@@ -39,9 +39,6 @@ public class CodeCompletionServiceTest extends IntegrationTest {
 
     myFixture.type('c');
 
-    PlatformTestUtil.waitWithEventsDispatching(
-        "Editor inlay assertions failed",
-        () -> "TEST_OUTPUT".equals(PREVIOUS_INLAY_TEXT.get(myFixture.getEditor())),
-        5);
+    waitExpecting(() -> "TEST_OUTPUT".equals(PREVIOUS_INLAY_TEXT.get(myFixture.getEditor())));
   }
 }
