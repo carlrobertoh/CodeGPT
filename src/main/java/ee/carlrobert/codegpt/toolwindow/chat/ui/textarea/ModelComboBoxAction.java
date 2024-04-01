@@ -74,6 +74,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
     var actionGroup = new DefaultActionGroup();
     actionGroup.addSeparator("OpenAI");
     List.of(
+            OpenAIChatCompletionModel.GPT_4_VISION_PREVIEW,
             OpenAIChatCompletionModel.GPT_4_0125_128k,
             OpenAIChatCompletionModel.GPT_3_5_0125_16k,
             OpenAIChatCompletionModel.GPT_4_32k,

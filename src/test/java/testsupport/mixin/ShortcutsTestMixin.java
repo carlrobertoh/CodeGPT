@@ -13,9 +13,13 @@ import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 public interface ShortcutsTestMixin {
 
   default void useOpenAIService() {
+    useOpenAIService("gpt-4");
+  }
+
+  default void useOpenAIService(String model) {
     GeneralSettings.getCurrentState().setSelectedService(ServiceType.OPENAI);
     CredentialsStore.INSTANCE.setCredential(OPENAI_API_KEY, "TEST_API_KEY");
-    OpenAISettings.getCurrentState().setModel("gpt-4");
+    OpenAISettings.getCurrentState().setModel(model);
   }
 
   default void useAzureService() {

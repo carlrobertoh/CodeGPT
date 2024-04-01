@@ -1,5 +1,6 @@
 package testsupport;
 
+import com.intellij.openapi.util.Key;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import ee.carlrobert.codegpt.CodeGPTKeys;
 import ee.carlrobert.llm.client.mixin.ExternalServiceTestMixin;
@@ -17,8 +18,17 @@ public class IntegrationTest extends BasePlatformTestCase implements
   @Override
   protected void tearDown() throws Exception {
     ExternalServiceTestMixin.clearAll();
-    getProject().putUserData(CodeGPTKeys.SELECTED_FILES, Collections.emptyList());
-    getProject().putUserData(CodeGPTKeys.PREVIOUS_INLAY_TEXT, "");
+    clearKeys();
     super.tearDown();
+  }
+
+  private void clearKeys() {
+    putUserData(CodeGPTKeys.SELECTED_FILES, Collections.emptyList());
+    putUserData(CodeGPTKeys.PREVIOUS_INLAY_TEXT, "");
+    putUserData(CodeGPTKeys.UPLOADED_FILE_PATH, "");
+  }
+
+  private <T> void putUserData(Key<T> key, T value) {
+    getProject().putUserData(key, value);
   }
 }

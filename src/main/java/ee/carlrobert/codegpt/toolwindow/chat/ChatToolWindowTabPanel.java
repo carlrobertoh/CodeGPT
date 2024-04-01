@@ -27,7 +27,6 @@ import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
-import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowPanel;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ChatMessageResponseBody;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ChatToolWindowScrollablePanel;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ResponsePanel;
@@ -41,11 +40,15 @@ import ee.carlrobert.codegpt.util.file.FileUtil;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.UUID;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class ChatToolWindowTabPanel implements Disposable {
 
@@ -62,10 +65,7 @@ public abstract class ChatToolWindowTabPanel implements Disposable {
 
   protected abstract JComponent getLandingView();
 
-  public ChatToolWindowTabPanel(
-      @NotNull Project project,
-      @NotNull Conversation conversation,
-      boolean useContextualSearch) {
+  public ChatToolWindowTabPanel(@NotNull Project project, @NotNull Conversation conversation) {
     this.project = project;
     this.conversation = conversation;
     conversationService = ConversationService.getInstance();
@@ -100,6 +100,8 @@ public abstract class ChatToolWindowTabPanel implements Disposable {
   public void sendMessage(Message message, ConversationType conversationType) {
     Runnable runnable = () -> {
       var referencedFiles = project.getUserData(CodeGPTKeys.SELECTED_FILES);
+      var chatToolWindowPanel = project.getService(StandardChatToolWindowContentManager.class)
+          .tryFindChatToolWindowPanel();
       if (referencedFiles != null && !referencedFiles.isEmpty()) {
         var referencedFilePaths = referencedFiles.stream()
             .map(ReferencedFile::getFilePath)
@@ -110,19 +112,25 @@ public abstract class ChatToolWindowTabPanel implements Disposable {
 
         totalTokensPanel.updateReferencedFilesTokens(referencedFiles);
 
-        project.getService(StandardChatToolWindowContentManager.class)
-            .tryFindChatToolWindowPanel()
-            .ifPresent(StandardChatToolWindowPanel::clearSelectedFilesNotification);
+        chatToolWindowPanel.ifPresent(panel -> panel.clearNotifications(project));
+      }
+
+      var userMessagePanel = new UserMessagePanel(project, message, this);
+      var attachedFilePath = CodeGPTKeys.UPLOADED_FILE_PATH.get(project);
+      var callParameters = getCallParameters(conversationType, message, attachedFilePath);
+      if (callParameters.getImageData() != null) {
+        message.setImageFilePath(attachedFilePath);
+        chatToolWindowPanel.ifPresent(panel -> panel.clearNotifications(project));
+        userMessagePanel.displayImage(attachedFilePath, callParameters.getImageData());
       }
 
       var messagePanel = toolWindowScrollablePanel.addMessage(message.getId());
-      messagePanel.add(new UserMessagePanel(project, message, this));
+      messagePanel.add(userMessagePanel);
+
       var responsePanel = createResponsePanel(message, conversationType);
       messagePanel.add(responsePanel);
-
       updateTotalTokens(message);
-
-      call(message, conversationType, responsePanel, false);
+      call(callParameters, responsePanel);
     };
     // TODO
     if (ApplicationManager.getApplication().isUnitTestMode()) {
@@ -130,6 +138,22 @@ public abstract class ChatToolWindowTabPanel implements Disposable {
     } else {
       SwingUtilities.invokeLater(runnable);
     }
+  }
+
+  private CallParameters getCallParameters(
+      ConversationType conversationType,
+      Message message,
+      @Nullable String attachedFilePath) {
+    var callParameters = new CallParameters(conversation, conversationType, message, false);
+    if (attachedFilePath != null && !attachedFilePath.isEmpty()) {
+      try {
+        callParameters.setImageData(Files.readAllBytes(Path.of(attachedFilePath)));
+        callParameters.setImageMediaType(getImageMediaType(attachedFilePath));
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
+    return callParameters;
   }
 
   private void updateTotalTokens(Message message) {
@@ -175,7 +199,7 @@ public abstract class ChatToolWindowTabPanel implements Disposable {
       if (responsePanel != null) {
         message.setResponse("");
         conversationService.saveMessage(conversation, message);
-        call(message, conversationType, responsePanel, true);
+        call(new CallParameters(conversation, conversationType, message, true), responsePanel);
       }
 
       totalTokensPanel.updateConversationTokens(conversation);
@@ -202,11 +226,7 @@ public abstract class ChatToolWindowTabPanel implements Disposable {
     totalTokensPanel.updateConversationTokens(conversation);
   }
 
-  private void call(
-      Message message,
-      ConversationType conversationType,
-      ResponsePanel responsePanel,
-      boolean retry) {
+  private void call(CallParameters callParameters, ResponsePanel responsePanel) {
     var responseContainer = (ChatMessageResponseBody) responsePanel.getContent();
 
     if (!CompletionRequestService.getInstance().isRequestAllowed()) {
@@ -222,13 +242,13 @@ public abstract class ChatToolWindowTabPanel implements Disposable {
             userPromptTextArea) {
           @Override
           public void handleTokensExceededPolicyAccepted() {
-            call(message, conversationType, responsePanel, true);
+            call(callParameters, responsePanel);
           }
         });
     userPromptTextArea.setRequestHandler(requestHandler);
     userPromptTextArea.setSubmitEnabled(false);
 
-    requestHandler.call(new CallParameters(conversation, conversationType, message, retry));
+    requestHandler.call(callParameters);
   }
 
   private void handleSubmit(String text) {
@@ -260,6 +280,15 @@ public abstract class ChatToolWindowTabPanel implements Disposable {
         contentManager::createNewTabPanel)), BorderLayout.NORTH);
     panel.add(JBUI.Panels.simplePanel(userPromptTextArea), BorderLayout.CENTER);
     return panel;
+  }
+
+  private String getImageMediaType(String fileName) {
+    var fileExtension = FileUtil.getFileExtension(fileName);
+    return switch (fileExtension) {
+      case "png" -> "image/png";
+      case "jpg", "jpeg" -> "image/jpeg";
+      default -> throw new IllegalArgumentException("Unsupported image type: " + fileExtension);
+    };
   }
 
   private JPanel createRootPanel() {

@@ -39,6 +39,10 @@ public class UserMessagePanel extends JPanel {
     }
   }
 
+  public void displayImage(String fileName, byte[] imageData) {
+    add(new ImageAccordion(fileName, imageData));
+  }
+
   private ChatMessageResponseBody createResponseBody(
       Project project,
       String prompt,

@@ -23,7 +23,7 @@ public class StandardChatToolWindowTabPanel extends ChatToolWindowTabPanel {
   public StandardChatToolWindowTabPanel(
       @NotNull Project project,
       @NotNull Conversation conversation) {
-    super(project, conversation, false);
+    super(project, conversation);
     if (conversation.getMessages().isEmpty()) {
       displayLandingView();
     } else {

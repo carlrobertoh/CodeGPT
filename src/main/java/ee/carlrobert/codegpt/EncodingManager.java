@@ -9,7 +9,10 @@ import com.knuddels.jtokkit.api.EncodingRegistry;
 import com.knuddels.jtokkit.api.EncodingType;
 import com.knuddels.jtokkit.api.IntArrayList;
 import ee.carlrobert.codegpt.conversations.Conversation;
+import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionDetailedMessage;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
+import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionStandardMessage;
+import ee.carlrobert.llm.client.openai.completion.request.OpenAIMessageTextContent;
 import java.util.List;
 
 @Service
@@ -38,7 +41,16 @@ public final class EncodingManager {
   }
 
   public int countMessageTokens(OpenAIChatCompletionMessage message) {
-    return countMessageTokens(message.getRole(), message.getContent());
+    if (message instanceof OpenAIChatCompletionStandardMessage standardMessage) {
+      return countMessageTokens(standardMessage.getRole(), standardMessage.getContent());
+    }
+
+    return ((OpenAIChatCompletionDetailedMessage) message).getContent().stream()
+        .filter(it -> it instanceof OpenAIMessageTextContent)
+        .map(it -> countMessageTokens(
+            ((OpenAIChatCompletionDetailedMessage) message).getRole(),
+            ((OpenAIMessageTextContent) it).getText()))
+        .reduce(0, Integer::sum);
   }
 
   public int countMessageTokens(String role, String content) {
