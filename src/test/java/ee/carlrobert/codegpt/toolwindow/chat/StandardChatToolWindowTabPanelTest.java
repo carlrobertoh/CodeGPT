@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.toolwindow.chat;
 
+import static ee.carlrobert.codegpt.CodeGPTKeys.PREVIOUS_INLAY_TEXT;
 import static ee.carlrobert.codegpt.completions.CompletionRequestProvider.COMPLETION_SYSTEM_PROMPT;
 import static ee.carlrobert.codegpt.completions.CompletionRequestProvider.FIX_COMPILE_ERRORS_SYSTEM_PROMPT;
 import static ee.carlrobert.codegpt.completions.llama.PromptTemplate.LLAMA;
@@ -11,7 +12,6 @@ import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
 
 import com.intellij.testFramework.PlatformTestUtil;
 import ee.carlrobert.codegpt.CodeGPTKeys;
@@ -63,11 +63,10 @@ public class StandardChatToolWindowTabPanelTest extends IntegrationTest {
 
     panel.sendMessage(message);
 
-    await().atMost(5, SECONDS)
-        .until(() -> {
-          var messages = conversation.getMessages();
-          return !messages.isEmpty() && "Hello!".equals(messages.get(0).getResponse());
-        });
+    waitExpecting(() -> {
+      var messages = conversation.getMessages();
+      return !messages.isEmpty() && "Hello!".equals(messages.get(0).getResponse());
+    });
     var encodingManager = EncodingManager.getInstance();
     assertThat(panel.getTokenDetails()).extracting(
             "systemPromptTokens",
@@ -151,11 +150,10 @@ public class StandardChatToolWindowTabPanelTest extends IntegrationTest {
 
     panel.sendMessage(message);
 
-    await().atMost(5, SECONDS)
-        .until(() -> {
-          var messages = conversation.getMessages();
-          return !messages.isEmpty() && "Hello!".equals(messages.get(0).getResponse());
-        });
+    waitExpecting(() -> {
+      var messages = conversation.getMessages();
+      return !messages.isEmpty() && "Hello!".equals(messages.get(0).getResponse());
+    });
     var encodingManager = EncodingManager.getInstance();
     assertThat(panel.getTokenDetails()).extracting(
             "systemPromptTokens",
@@ -225,13 +223,10 @@ public class StandardChatToolWindowTabPanelTest extends IntegrationTest {
 
     panel.sendMessage(message);
 
-    PlatformTestUtil.waitWithEventsDispatching(
-        "Waiting for message response timed out or did not meet expected conditions",
-        () -> {
-          var messages = conversation.getMessages();
-          return !messages.isEmpty() && "Hello!".equals(messages.get(0).getResponse());
-        },
-        5);
+    waitExpecting(() -> {
+      var messages = conversation.getMessages();
+      return !messages.isEmpty() && "Hello!".equals(messages.get(0).getResponse());
+    });
     var encodingManager = EncodingManager.getInstance();
     assertThat(panel.getTokenDetails()).extracting(
             "systemPromptTokens",
@@ -319,11 +314,10 @@ public class StandardChatToolWindowTabPanelTest extends IntegrationTest {
 
     panel.sendMessage(message, ConversationType.FIX_COMPILE_ERRORS);
 
-    await().atMost(5, SECONDS)
-        .until(() -> {
-          var messages = conversation.getMessages();
-          return !messages.isEmpty() && "Hello!".equals(messages.get(0).getResponse());
-        });
+    waitExpecting(() -> {
+      var messages = conversation.getMessages();
+      return !messages.isEmpty() && "Hello!".equals(messages.get(0).getResponse());
+    });
     var encodingManager = EncodingManager.getInstance();
     assertThat(panel.getTokenDetails()).extracting(
             "systemPromptTokens",
@@ -404,11 +398,10 @@ public class StandardChatToolWindowTabPanelTest extends IntegrationTest {
 
     panel.sendMessage(message, ConversationType.DEFAULT);
 
-    await().atMost(5, SECONDS)
-        .until(() -> {
-          var messages = conversation.getMessages();
-          return !messages.isEmpty() && "Hello!".equals(messages.get(0).getResponse());
-        });
+    waitExpecting(() -> {
+      var messages = conversation.getMessages();
+      return !messages.isEmpty() && "Hello!".equals(messages.get(0).getResponse());
+    });
     assertThat(panel.getConversation())
         .isNotNull()
         .extracting("id", "model", "clientCode", "discardTokenLimit")

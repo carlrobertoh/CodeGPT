@@ -6,7 +6,6 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 
 import com.intellij.openapi.Disposable;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.project.Project;
@@ -98,7 +97,7 @@ public abstract class ChatToolWindowTabPanel implements Disposable {
   }
 
   public void sendMessage(Message message, ConversationType conversationType) {
-    Runnable runnable = () -> {
+    SwingUtilities.invokeLater(() -> {
       var referencedFiles = project.getUserData(CodeGPTKeys.SELECTED_FILES);
       var chatToolWindowPanel = project.getService(StandardChatToolWindowContentManager.class)
           .tryFindChatToolWindowPanel();
@@ -131,13 +130,7 @@ public abstract class ChatToolWindowTabPanel implements Disposable {
       messagePanel.add(responsePanel);
       updateTotalTokens(message);
       call(callParameters, responsePanel);
-    };
-    // TODO
-    if (ApplicationManager.getApplication().isUnitTestMode()) {
-      runnable.run();
-    } else {
-      SwingUtilities.invokeLater(runnable);
-    }
+    });
   }
 
   private CallParameters getCallParameters(
