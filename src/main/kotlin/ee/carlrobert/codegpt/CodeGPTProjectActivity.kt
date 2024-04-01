@@ -36,7 +36,11 @@ class CodeGPTProjectActivity : ProjectActivity {
         ) {
             val pathToWatch = Paths.get(System.getProperty("user.home"), "Desktop")
             val fileWatcher = FileWatcher(pathToWatch)
-            fileWatcher.watch { showImageAttachmentNotification(project, it.absolutePath) }
+            fileWatcher.watch {
+                if (listOf("jpg", "jpeg", "png").contains(it.extension)) {
+                    showImageAttachmentNotification(project, it.absolutePath)
+                }
+            }
             Disposer.register(project, fileWatcher)
         }
     }
@@ -82,7 +86,8 @@ class CodeGPTProjectActivity : ProjectActivity {
                 CodeGPTKeys.IMAGE_ATTACHMENT_FILE_PATH.set(project, filePath)
                 project.messageBus
                     .syncPublisher<AttachImageNotifier>(
-                        AttachImageNotifier.IMAGE_ATTACHMENT_FILE_PATH_TOPIC)
+                        AttachImageNotifier.IMAGE_ATTACHMENT_FILE_PATH_TOPIC
+                    )
                     .imageAttached(filePath)
             })
             .addAction(NotificationAction.createSimpleExpiring(
