@@ -31,8 +31,10 @@ import ee.carlrobert.codegpt.settings.service.you.YouSettings;
 import ee.carlrobert.codegpt.telemetry.core.configuration.TelemetryConfiguration;
 import ee.carlrobert.codegpt.telemetry.core.service.UserId;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeBase64Source;
+import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionDetailedMessage;
+import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionMessage;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionRequest;
-import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionRequestMessage;
+import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionStandardMessage;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeMessageImageContent;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeMessageTextContent;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
@@ -255,26 +257,24 @@ public class CompletionRequestProvider {
     request.setMaxTokens(configuration.getMaxTokens());
     request.setStream(true);
     request.setSystem(COMPLETION_SYSTEM_PROMPT);
-    var messages = conversation.getMessages().stream()
+    List<ClaudeCompletionMessage> messages = conversation.getMessages().stream()
         .filter(prevMessage -> prevMessage.getResponse() != null
             && !prevMessage.getResponse().isEmpty())
         .flatMap(prevMessage -> Stream.of(
-            new ClaudeCompletionRequestMessage("user",
-                new ClaudeMessageTextContent(prevMessage.getPrompt())),
-            new ClaudeCompletionRequestMessage("assistant",
-                new ClaudeMessageTextContent(prevMessage.getResponse()))))
+            new ClaudeCompletionStandardMessage("user", prevMessage.getPrompt()),
+            new ClaudeCompletionStandardMessage("assistant", prevMessage.getResponse())))
         .collect(toList());
 
     if (callParameters.getImageMediaType() != null && callParameters.getImageData().length > 0) {
-      messages.add(new ClaudeCompletionRequestMessage("user",
+      messages.add(new ClaudeCompletionDetailedMessage("user",
           List.of(
               new ClaudeMessageImageContent(new ClaudeBase64Source(
                   callParameters.getImageMediaType(),
                   callParameters.getImageData())),
               new ClaudeMessageTextContent(callParameters.getMessage().getPrompt()))));
     } else {
-      messages.add(new ClaudeCompletionRequestMessage("user",
-          new ClaudeMessageTextContent(callParameters.getMessage().getPrompt())));
+      messages.add(
+          new ClaudeCompletionStandardMessage("user", callParameters.getMessage().getPrompt()));
     }
     request.setMessages(messages);
     return request;

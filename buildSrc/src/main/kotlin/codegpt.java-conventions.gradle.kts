@@ -14,7 +14,6 @@ version = properties("pluginVersion")
 
 repositories {
   mavenCentral()
-  mavenLocal()
 }
 
 intellij {
@@ -27,7 +26,7 @@ checkstyle {
 }
 
 dependencies {
-  implementation("ee.carlrobert:llm-client:0.6.3")
+  implementation("ee.carlrobert:llm-client:0.7.0")
 
   testImplementation("org.assertj:assertj-core:3.25.3")
   testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.2")

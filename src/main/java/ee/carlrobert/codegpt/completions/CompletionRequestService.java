@@ -26,8 +26,7 @@ import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.llm.client.DeserializationUtil;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionRequest;
-import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionRequestMessage;
-import ee.carlrobert.llm.client.anthropic.completion.ClaudeMessageTextContent;
+import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionStandardMessage;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionEventSourceListener;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
@@ -143,9 +142,7 @@ public final class CompletionRequestService {
         claudeRequest.setStream(true);
         claudeRequest.setMaxTokens(configuration.getMaxTokens());
         claudeRequest.setModel(anthropicSettings.getModel());
-        claudeRequest.setMessages(
-            List.of(
-                new ClaudeCompletionRequestMessage("user", new ClaudeMessageTextContent(prompt))));
+        claudeRequest.setMessages(List.of(new ClaudeCompletionStandardMessage("user", prompt)));
         CompletionClientProvider.getClaudeClient()
             .getCompletionAsync(claudeRequest, eventListener);
         break;
