@@ -67,8 +67,14 @@ public class StandardChatToolWindowTabPanel extends ChatToolWindowTabPanel {
       }
       messageResponseBody.hideCaret();
 
+      var userMessagePanel = new UserMessagePanel(project, message, this);
+      var imageFilePath = message.getImageFilePath();
+      if (imageFilePath != null && !imageFilePath.isEmpty()) {
+        userMessagePanel.displayImage(imageFilePath);
+      }
+
       var messagePanel = toolWindowScrollablePanel.addMessage(message.getId());
-      messagePanel.add(new UserMessagePanel(project, message, this));
+      messagePanel.add(userMessagePanel);
       messagePanel.add(new ResponsePanel()
           .withReloadAction(() -> reloadMessage(message, conversation, ConversationType.DEFAULT))
           .withDeleteAction(() -> removeMessage(message.getId(), conversation))

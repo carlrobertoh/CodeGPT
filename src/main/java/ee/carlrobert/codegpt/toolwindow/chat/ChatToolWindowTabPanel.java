@@ -120,7 +120,7 @@ public abstract class ChatToolWindowTabPanel implements Disposable {
       if (callParameters.getImageData() != null) {
         message.setImageFilePath(attachedFilePath);
         chatToolWindowPanel.ifPresent(panel -> panel.clearNotifications(project));
-        userMessagePanel.displayImage(attachedFilePath, callParameters.getImageData());
+        userMessagePanel.displayImage(attachedFilePath);
       }
 
       var messagePanel = toolWindowScrollablePanel.addMessage(message.getId());
@@ -270,7 +270,10 @@ public abstract class ChatToolWindowTabPanel implements Disposable {
     panel.add(JBUI.Panels.simplePanel(new UserPromptTextAreaHeader(
         selectedService,
         totalTokensPanel,
-        contentManager::createNewTabPanel)), BorderLayout.NORTH);
+        () -> {
+          ConversationService.getInstance().startConversation();
+          contentManager.createNewTabPanel();
+        })), BorderLayout.NORTH);
     panel.add(JBUI.Panels.simplePanel(userPromptTextArea), BorderLayout.CENTER);
     return panel;
   }

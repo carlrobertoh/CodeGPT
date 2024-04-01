@@ -11,7 +11,7 @@ public class UserPromptTextAreaHeader extends JPanel {
   public UserPromptTextAreaHeader(
       ServiceType selectedService,
       TotalTokensPanel totalTokensPanel,
-      Runnable onAddNewTab) {
+      Runnable onModelChange) {
     super(new BorderLayout());
     setOpaque(false);
     setBorder(JBUI.Borders.emptyBottom(8));
@@ -24,7 +24,7 @@ public class UserPromptTextAreaHeader extends JPanel {
         break;
       default:
     }
-    add(new ModelComboBoxAction(onAddNewTab, selectedService)
+    add(new ModelComboBoxAction(onModelChange, selectedService)
         .createCustomComponent(ActionPlaces.UNKNOWN), BorderLayout.LINE_END);
   }
 }

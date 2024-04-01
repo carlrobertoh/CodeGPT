@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.toolwindow.chat.ui;
 
+import com.intellij.icons.AllIcons.General;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.ColorUtil;
@@ -11,6 +12,9 @@ import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
 import java.awt.BorderLayout;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
@@ -39,8 +43,16 @@ public class UserMessagePanel extends JPanel {
     }
   }
 
-  public void displayImage(String fileName, byte[] imageData) {
-    add(new ImageAccordion(fileName, imageData));
+  public void displayImage(String imageFilePath) {
+    try {
+      var path = Paths.get(imageFilePath);
+      add(new ImageAccordion(path.getFileName().toString(), Files.readAllBytes(path)));
+    } catch (IOException e) {
+      add(new JBLabel(
+          "<html><small>Unable to load image %s</small></html>".formatted(imageFilePath),
+          General.Error,
+          SwingConstants.LEFT));
+    }
   }
 
   private ChatMessageResponseBody createResponseBody(
