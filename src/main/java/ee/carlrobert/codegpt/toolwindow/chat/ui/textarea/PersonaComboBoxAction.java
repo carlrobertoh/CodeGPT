@@ -156,7 +156,13 @@ public class PersonaComboBoxAction extends ComboBoxAction {
       editPanel.add(new JBLabel("Service:"));
       editPanel.add(personaModelComboBoxAction.createCustomComponent(ActionPlaces.UNKNOWN));
 
+      JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+      Dimension buttonSize = new Dimension(100, 30);
+
       JButton saveButton = new JButton("Save");
+      saveButton.setPreferredSize(buttonSize);
+      saveButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+      buttonPanel.add(saveButton);
       saveButton.addActionListener(e1 -> {
         String selectedName = personaList.getSelectedValue();
         if (selectedName != null) {
@@ -166,7 +172,15 @@ public class PersonaComboBoxAction extends ComboBoxAction {
               .orElse(null);
           if (selectedPersona != null) {
             boolean doUpdateTemplatePresentation = settings.getSelectedPersona().getName().equals(selectedName);
-            String newName = nameField.getText();
+            final String newName = nameField.getText();
+            if (settings.getPersonas().stream().anyMatch(persona -> persona.getName().equals(newName))) {
+              JOptionPane.showMessageDialog(null, "Error: Persona with this name already exists.", "Error",
+                  JOptionPane.ERROR_MESSAGE);
+              nameField.setText(selectedPersona.getName());
+              descriptionField.setText(selectedPersona.getDescription());
+              promptField.setText(selectedPersona.getPromptText());
+              return;
+            }
             String newPrompt = promptField.getText();
 
             selectedPersona.setName(newName);
@@ -196,10 +210,11 @@ public class PersonaComboBoxAction extends ComboBoxAction {
           }
         }
       });
-      saveButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-      editPanel.add(saveButton);
 
-      JButton duplicateButton = new JButton("Duplicate Persona");
+      JButton duplicateButton = new JButton("Duplicate");
+      duplicateButton.setPreferredSize(buttonSize);
+      duplicateButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+      buttonPanel.add(duplicateButton);
       duplicateButton.addActionListener(e1 -> {
         String selectedName = personaList.getSelectedValue();
         if (selectedName != null) {
@@ -208,8 +223,9 @@ public class PersonaComboBoxAction extends ComboBoxAction {
               .findFirst()
               .orElse(null);
           if (selectedPersona != null) {
+            String newName = getNewName(selectedPersona.getName());
             Persona duplicatedPersona = new Persona(
-                selectedPersona.getName() + " (copy)",
+                newName,
                 selectedPersona.getDescription(),
                 selectedPersona.getPromptText(),
                 selectedPersona.getServiceType());
@@ -223,10 +239,17 @@ public class PersonaComboBoxAction extends ComboBoxAction {
           }
         }
       });
-      duplicateButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-      editPanel.add(duplicateButton);
 
       JButton deleteButton = new JButton("Delete");
+      deleteButton.setPreferredSize(buttonSize);
+      deleteButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+      buttonPanel.add(deleteButton);
+      if (settings.getSelectedPersona().getName().equals("Default Assistant")
+          || settings.getSelectedPersona().getName().equals("Rubber Duck")) {
+        deleteButton.setEnabled(false);
+      } else {
+        deleteButton.setEnabled(true);
+      }
       deleteButton.addActionListener(e1 -> {
         String selectedName = personaList.getSelectedValue();
         if (selectedName != null
@@ -254,15 +277,6 @@ public class PersonaComboBoxAction extends ComboBoxAction {
           }
         }
       });
-      deleteButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-      if (settings.getSelectedPersona().getName().equals("Default Assistant")
-          || settings.getSelectedPersona().getName().equals("Rubber Duck")) {
-        deleteButton.setEnabled(false);
-      } else {
-        deleteButton.setEnabled(true);
-      }
-
-      editPanel.add(deleteButton);
 
       personaList.addListSelectionListener(e1 -> {
         if (!e1.getValueIsAdjusting()) {
@@ -297,19 +311,36 @@ public class PersonaComboBoxAction extends ComboBoxAction {
       personaList.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
       JButton closeButton = new JButton("Close");
+      closeButton.setPreferredSize(buttonSize);
       closeButton.addActionListener(e1 -> dialog.dispose());
       closeButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-      editPanel.add(closeButton);
+      buttonPanel.add(closeButton);
 
       panel.add(new JScrollPane(personaList), BorderLayout.WEST);
       panel.add(editPanel, BorderLayout.CENTER);
+      panel.add(buttonPanel, BorderLayout.SOUTH);
 
       dialog.getContentPane().add(panel);
-      dialog.getContentPane().setPreferredSize(new Dimension(600, 450));
+      dialog.getContentPane().setPreferredSize(new Dimension(1200, 900));
       dialog.pack();
       dialog.setLocationRelativeTo(null);
       dialog.setVisible(true);
     }
+  }
+
+  private String getNewName(String name) {
+    int duplicateCount = 1;
+    String newName;
+    boolean duplicate;
+
+    do {
+      newName = name + " (" + duplicateCount + ")";
+      final String finalNewName = newName;
+      duplicate = settings.getPersonas().stream().anyMatch(persona -> persona.getName().equals(finalNewName));
+      duplicateCount++;
+    } while (duplicate);
+
+    return newName;
   }
 
   private class NewPersonaAction extends DumbAwareAction {
@@ -361,7 +392,7 @@ public class PersonaComboBoxAction extends ComboBoxAction {
         ServiceType serviceType = personaModelComboBoxAction.getSelectedService();
 
         if (!name.isEmpty() && !description.isEmpty() && !promptText.isEmpty()) {
-          Persona newPersona = new Persona(name, description, promptText, serviceType);
+          Persona newPersona = new Persona(getNewName(name), description, promptText, serviceType);
           settings.getPersonas().add(newPersona);
           settings.setSelectedPersona(newPersona);
           updateTemplatePresentation(settings.getSelectedPersona());
