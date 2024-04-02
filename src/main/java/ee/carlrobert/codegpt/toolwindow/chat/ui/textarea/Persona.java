@@ -11,8 +11,8 @@ import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
  */
 public class Persona {
   private String name;
-  private String promptText;
   private String description;
+  private String promptText;
   private ServiceType serviceType;
   private String model;
 
@@ -34,8 +34,8 @@ public class Persona {
    */
   public Persona(String name, String description, String promptText, ServiceType serviceType) {
     this.name = name;
-    this.promptText = promptText;
     this.description = description;
+    this.promptText = promptText;
     this.serviceType = serviceType;
     this.model = OpenAISettings.getCurrentState().getModel();
   }

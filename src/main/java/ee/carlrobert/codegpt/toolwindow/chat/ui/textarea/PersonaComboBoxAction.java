@@ -1,5 +1,7 @@
 package ee.carlrobert.codegpt.toolwindow.chat.ui.textarea;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.actionSystem.ex.ComboBoxAction;
 import com.intellij.openapi.project.DumbAwareAction;
@@ -17,11 +19,15 @@ import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import static ee.carlrobert.codegpt.settings.service.ServiceType.OPENAI;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -165,7 +171,8 @@ public class PersonaComboBoxAction extends ComboBoxAction {
       editPanel.add(new JBLabel("Service:"));
       editPanel.add(personaModelComboBoxAction.createCustomComponent(ActionPlaces.UNKNOWN));
 
-      JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+      JPanel rightButtonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+      JPanel leftButtonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
       JButton saveButton = createButton("Save", event -> {
         String selectedName = personaList.getSelectedValue();
@@ -316,11 +323,77 @@ public class PersonaComboBoxAction extends ComboBoxAction {
 
       JButton closeButton = createButton("Close", event -> dialog.dispose());
 
-      buttonPanel.add(saveButton);
-      buttonPanel.add(duplicateButton);
-      buttonPanel.add(deleteButton);
-      buttonPanel.add(closeButton);
+      JButton importButton = createButton("Import", event -> {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileFilter(new FileNameExtensionFilter("JSON Files", "json"));
+        int result = fileChooser.showOpenDialog(dialog);
+        if (result == JFileChooser.APPROVE_OPTION) {
+          File selectedFile = fileChooser.getSelectedFile();
+          try {
+            String json = Files.readString(selectedFile.toPath());
+            Gson gson = new Gson();
+            Persona importedPersona = gson.fromJson(json, Persona.class);
+
+            if (settings.getPersonas().stream()
+                .anyMatch(persona -> persona.getName().equals(importedPersona.getName()))) {
+              JOptionPane.showMessageDialog(null, "Error: Persona with this name already exists.", "Error",
+                  JOptionPane.ERROR_MESSAGE);
+              return;
+            }
+
+            settings.getPersonas().add(importedPersona);
+            personaNames.add(importedPersona.getName());
+            personaList.setListData(personaNames.toArray(new String[0]));
+            personaList.setSelectedValue(importedPersona.getName(), true);
+            settings.setSelectedPersona(importedPersona);
+            updateTemplatePresentation(importedPersona);
+          } catch (IOException ex) {
+            JOptionPane.showMessageDialog(null, "Error reading JSON file: " + ex.getMessage(), "Error",
+                JOptionPane.ERROR_MESSAGE);
+          } catch (JsonSyntaxException ex) {
+            JOptionPane.showMessageDialog(null, "Invalid JSON format: " + ex.getMessage(), "Error",
+                JOptionPane.ERROR_MESSAGE);
+          }
+        }
+      });
+
+      JButton exportButton = createButton("Export", event -> {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileFilter(new FileNameExtensionFilter("JSON Files", "json"));
+        int result = fileChooser.showSaveDialog(dialog);
+        if (result == JFileChooser.APPROVE_OPTION) {
+          File selectedFile = fileChooser.getSelectedFile();
+          try {
+            Gson gson = new Gson();
+            Persona selectedPersona = settings.getPersonas().stream()
+                .filter(persona -> persona.getName().equals(personaList.getSelectedValue()))
+                .findFirst()
+                .orElse(null);
+            if (selectedPersona == null) {
+              JOptionPane.showMessageDialog(null, "Error: Persona does not exist", "Error", JOptionPane.ERROR_MESSAGE);
+              return;
+            }
+            String json = gson.toJson(selectedPersona);
+            Files.writeString(selectedFile.toPath(), json);
+          } catch (IOException ex) {
+            JOptionPane.showMessageDialog(null, "Error writing JSON file: " + ex.getMessage(), "Error",
+                JOptionPane.ERROR_MESSAGE);
+          }
+        }
+      });
+
+      leftButtonPanel.add(importButton);
+      leftButtonPanel.add(exportButton);
+      leftButtonPanel.add(duplicateButton);
+
+      rightButtonPanel.add(saveButton);
+      rightButtonPanel.add(deleteButton);
+      rightButtonPanel.add(closeButton);
+
+      JPanel buttonPanel = new JPanel(new BorderLayout());
       buttonPanel.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Color.DARK_GRAY));
+      buttonPanel.add(leftButtonPanel, BorderLayout.WEST);
+      buttonPanel.add(rightButtonPanel, BorderLayout.EAST);
 
       JScrollPane listScroller = new JScrollPane(personaList);
       listScroller.setPreferredSize(new Dimension(250, 80));
@@ -363,8 +436,6 @@ public class PersonaComboBoxAction extends ComboBoxAction {
         int duplicateCount = Integer.parseInt(matcher.group(1));
         duplicateCount++;
         name = name.substring(0, matcher.start()) + "(" + duplicateCount + ")";
-      } else {
-        name = name + " (1)";
       }
 
       final String finalNewName = name;
