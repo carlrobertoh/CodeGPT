@@ -12,6 +12,7 @@ import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 public class Persona {
   private String name;
   private String promptText;
+  private String description;
   private ServiceType serviceType;
   private String model;
 
@@ -19,7 +20,7 @@ public class Persona {
    * Constructs a new Persona with default values.
    */
   public Persona() {
-    this("", "", ServiceType.OPENAI);
+    this("", "", "", ServiceType.OPENAI);
   }
 
   /**
@@ -27,12 +28,14 @@ public class Persona {
    * type.
    *
    * @param name        the name of the persona
+   * @param description the description of the persona
    * @param promptText  the prompt text associated with the persona
    * @param serviceType the service type of the persona
    */
-  public Persona(String name, String promptText, ServiceType serviceType) {
+  public Persona(String name, String description, String promptText, ServiceType serviceType) {
     this.name = name;
     this.promptText = promptText;
+    this.description = description;
     this.serviceType = serviceType;
     this.model = OpenAISettings.getCurrentState().getModel();
   }
@@ -53,6 +56,24 @@ public class Persona {
    */
   public void setName(String name) {
     this.name = name;
+  }
+
+  /**
+   * Returns the description of the persona.
+   *
+   * @return the description of the persona
+   */
+  public String getDescription() {
+    return description;
+  }
+
+  /**
+   * Sets the description of the persona.
+   *
+   * @param description the description to set
+   */
+  public void setDescription(String description) {
+    this.description = description;
   }
 
   /**
