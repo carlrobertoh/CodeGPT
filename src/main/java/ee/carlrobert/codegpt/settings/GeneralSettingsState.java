@@ -5,11 +5,13 @@ import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.Persona;
 
 import static ee.carlrobert.codegpt.util.file.FileUtil.getResourceContent;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.List;
 
 public class GeneralSettingsState {
-
+  private PropertyChangeSupport support = new PropertyChangeSupport(this);
   private String displayName = "";
   private Persona selectedPersona;
 
@@ -48,7 +50,17 @@ public class GeneralSettingsState {
   }
 
   public void setSelectedPersona(Persona selectedPersona) {
+    Persona oldPersona = this.selectedPersona;
     this.selectedPersona = selectedPersona;
+    support.firePropertyChange("selectedPersona", oldPersona, selectedPersona);
+  }
+
+  public void addPropertyChangeListener(PropertyChangeListener pcl) {
+    support.addPropertyChangeListener(pcl);
+  }
+
+  public void removePropertyChangeListener(PropertyChangeListener pcl) {
+    support.removePropertyChangeListener(pcl);
   }
 
   public Persona getRandomPersona() {

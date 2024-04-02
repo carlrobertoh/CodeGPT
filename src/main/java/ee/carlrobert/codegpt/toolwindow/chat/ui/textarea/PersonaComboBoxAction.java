@@ -108,8 +108,12 @@ public class PersonaComboBoxAction extends ComboBoxAction {
         personaNames.add(persona.getName());
       }
 
-      JList<String> personaList = new JBList<>(personaNames);
+      JList<String> personaList = new JList<>(personaNames.toArray(new String[0]));
       personaList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+      personaList.setLayoutOrientation(JList.VERTICAL);
+      personaList.setVisibleRowCount(-1);
+      personaList.setFixedCellHeight(24);
+      personaList.setFixedCellWidth(200);
       int selectedIndex = 0;
       for (String personaName : personaNames) {
         if (personaName.equals(settings.getSelectedPersona().getName())) {
@@ -141,12 +145,12 @@ public class PersonaComboBoxAction extends ComboBoxAction {
 
       descriptionField.setLineWrap(true);
       descriptionField.setWrapStyleWord(true);
-      descriptionField.setRows(4);
+      descriptionField.setRows(8);
       descriptionField.setCaretPosition(0);
 
       promptField.setLineWrap(true);
       promptField.setWrapStyleWord(true);
-      promptField.setRows(8);
+      promptField.setRows(16);
       promptField.setCaretPosition(0);
 
       editPanel.add(new JBLabel("Name:"));
@@ -173,7 +177,8 @@ public class PersonaComboBoxAction extends ComboBoxAction {
           if (selectedPersona != null) {
             boolean doUpdateTemplatePresentation = settings.getSelectedPersona().getName().equals(selectedName);
             final String newName = nameField.getText();
-            if (settings.getPersonas().stream().anyMatch(persona -> persona.getName().equals(newName))) {
+            if (settings.getPersonas().stream().anyMatch(persona -> persona.getName().equals(newName)) &&
+                !newName.equals(selectedPersona.getName())) {
               JOptionPane.showMessageDialog(null, "Error: Persona with this name already exists.", "Error",
                   JOptionPane.ERROR_MESSAGE);
               nameField.setText(selectedPersona.getName());
@@ -184,6 +189,7 @@ public class PersonaComboBoxAction extends ComboBoxAction {
             String newPrompt = promptField.getText();
 
             selectedPersona.setName(newName);
+            selectedPersona.setDescription(descriptionField.getText());
             selectedPersona.setPromptText(newPrompt);
             selectedPersona.setServiceType(personaModelComboBoxAction.getSelectedService());
             if (selectedPersona.getServiceType() == OPENAI) {
@@ -314,8 +320,15 @@ public class PersonaComboBoxAction extends ComboBoxAction {
       buttonPanel.add(duplicateButton);
       buttonPanel.add(deleteButton);
       buttonPanel.add(closeButton);
+      buttonPanel.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Color.DARK_GRAY));
 
-      panel.add(new JScrollPane(personaList), BorderLayout.WEST);
+      JScrollPane listScroller = new JScrollPane(personaList);
+      listScroller.setPreferredSize(new Dimension(250, 80));
+      listScroller.setBorder(BorderFactory.createCompoundBorder(
+          BorderFactory.createMatteBorder(0, 0, 0, 1, Color.DARK_GRAY),
+          BorderFactory.createEmptyBorder(10, 10, 10, 10)));
+
+      panel.add(listScroller, BorderLayout.WEST);
       panel.add(editPanel, BorderLayout.CENTER);
       panel.add(buttonPanel, BorderLayout.SOUTH);
 
@@ -386,11 +399,11 @@ public class PersonaComboBoxAction extends ComboBoxAction {
 
       descriptionField.setLineWrap(true);
       descriptionField.setWrapStyleWord(true);
-      descriptionField.setRows(4);
+      descriptionField.setRows(8);
 
       promptField.setLineWrap(true);
       promptField.setWrapStyleWord(true);
-      promptField.setRows(8);
+      promptField.setRows(16);
 
       panel.add(new JBLabel("Name:"));
       panel.add(nameField);
@@ -431,8 +444,7 @@ public class PersonaComboBoxAction extends ComboBoxAction {
       dialog.getContentPane().setLayout(new BorderLayout());
       dialog.getContentPane().add(panel, BorderLayout.CENTER);
       dialog.getContentPane().add(buttonPanel, BorderLayout.SOUTH);
-
-      dialog.getContentPane().setPreferredSize(new Dimension(500, 400));
+      dialog.getContentPane().setPreferredSize(new Dimension(1000, 800));
       dialog.pack();
       dialog.setLocationRelativeTo(null);
       dialog.setVisible(true);

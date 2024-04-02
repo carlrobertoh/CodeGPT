@@ -15,10 +15,10 @@ import javax.swing.*;
 public class UserPromptTextAreaHeader extends JPanel {
 
   public UserPromptTextAreaHeader(
-          ServiceType selectedService,
-          Persona selectedPersona,
-          TotalTokensPanel totalTokensPanel,
-          Runnable onAddNewTab) {
+      ServiceType selectedService,
+      Persona selectedPersona,
+      TotalTokensPanel totalTokensPanel,
+      Runnable onAddNewTab) {
     super(new FlowLayout(FlowLayout.CENTER, 0, 0));
     setOpaque(false);
     setBorder(JBUI.Borders.emptyBottom(8));
