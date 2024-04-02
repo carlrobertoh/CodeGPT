@@ -21,10 +21,15 @@ import javax.swing.*;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.OPENAI;
 
 import java.awt.*;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class PersonaComboBoxAction extends ComboBoxAction {
   private final GeneralSettingsState settings;
+  private static final String DEFAULT_ASSISTANT = "Default Assistant";
+  private static final String RUBBER_DUCK = "Rubber Duck";
 
   public PersonaComboBoxAction(Persona selectedPersona) {
     this.settings = GeneralSettings.getCurrentState();
@@ -157,13 +162,8 @@ public class PersonaComboBoxAction extends ComboBoxAction {
       editPanel.add(personaModelComboBoxAction.createCustomComponent(ActionPlaces.UNKNOWN));
 
       JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-      Dimension buttonSize = new Dimension(100, 30);
 
-      JButton saveButton = new JButton("Save");
-      saveButton.setPreferredSize(buttonSize);
-      saveButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-      buttonPanel.add(saveButton);
-      saveButton.addActionListener(e1 -> {
+      JButton saveButton = createButton("Save", event -> {
         String selectedName = personaList.getSelectedValue();
         if (selectedName != null) {
           Persona selectedPersona = settings.getPersonas().stream()
@@ -211,11 +211,7 @@ public class PersonaComboBoxAction extends ComboBoxAction {
         }
       });
 
-      JButton duplicateButton = new JButton("Duplicate");
-      duplicateButton.setPreferredSize(buttonSize);
-      duplicateButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-      buttonPanel.add(duplicateButton);
-      duplicateButton.addActionListener(e1 -> {
+      JButton duplicateButton = createButton("Duplicate", event -> {
         String selectedName = personaList.getSelectedValue();
         if (selectedName != null) {
           Persona selectedPersona = settings.getPersonas().stream()
@@ -240,43 +236,45 @@ public class PersonaComboBoxAction extends ComboBoxAction {
         }
       });
 
-      JButton deleteButton = new JButton("Delete");
-      deleteButton.setPreferredSize(buttonSize);
-      deleteButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-      buttonPanel.add(deleteButton);
-      if (settings.getSelectedPersona().getName().equals("Default Assistant")
-          || settings.getSelectedPersona().getName().equals("Rubber Duck")) {
-        deleteButton.setEnabled(false);
-      } else {
-        deleteButton.setEnabled(true);
-      }
-      deleteButton.addActionListener(e1 -> {
+      JButton deleteButton = createButton("Delete", event -> {
         String selectedName = personaList.getSelectedValue();
-        if (selectedName != null
-            && (!selectedName.equals("Default Assistant") || !selectedName.equals("Rubber Duck"))) {
-          Persona selectedPersona = settings.getPersonas().stream()
-              .filter(persona -> persona.getName().equals(selectedName))
-              .findFirst()
-              .orElse(null);
-          if (selectedPersona != null) {
-            boolean doUpdateTemplatePresentation = settings.getSelectedPersona().getName().equals(selectedName);
-            settings.getPersonas().remove(selectedPersona);
-            personaNames.remove(selectedName);
-            personaList.setListData(personaNames.toArray(new String[0]));
-            if (!personaNames.isEmpty()) {
-              personaList.setSelectedIndex(0);
-            }
-            if (doUpdateTemplatePresentation) {
-              Persona randomPersona = settings.getRandomPersona();
-              settings.setSelectedPersona(randomPersona);
-              if (randomPersona.getServiceType() == OPENAI) {
-                OpenAISettings.getCurrentState().setModel(randomPersona.getModel());
-              }
-              updateTemplatePresentation(randomPersona);
-            }
-          }
+        int index = personaNames.indexOf(selectedName);
+        if (selectedName == null) {
+          JOptionPane.showMessageDialog(null, "Error: Persona does not exist", "Error", JOptionPane.ERROR_MESSAGE);
+          return;
         }
+        Persona selectedPersona = settings.getPersonas().stream()
+            .filter(persona -> persona.getName().equals(selectedName))
+            .findFirst()
+            .orElse(null);
+        if (selectedPersona == null) {
+          JOptionPane.showMessageDialog(null, "Error: Persona does not exist", "Error", JOptionPane.ERROR_MESSAGE);
+          return;
+        }
+        int dialogResult = JOptionPane.showConfirmDialog(null,
+            "Are you sure you want to delete " + selectedPersona.getName() + "?",
+            "Warning", JOptionPane.YES_NO_OPTION);
+        if (dialogResult == JOptionPane.NO_OPTION) {
+          return;
+        }
+        boolean doUpdateTemplatePresentation = settings.getSelectedPersona().getName().equals(selectedName);
+        settings.getPersonas().remove(selectedPersona);
+        personaNames.remove(selectedName);
+        personaList.setListData(personaNames.toArray(new String[0]));
+        if (!personaNames.isEmpty()) {
+          personaList.setSelectedIndex(index == 0 ? 0 : index - 1);
+        }
+        if (doUpdateTemplatePresentation) {
+          Persona randomPersona = settings.getRandomPersona();
+          settings.setSelectedPersona(randomPersona);
+          if (randomPersona.getServiceType() == OPENAI) {
+            OpenAISettings.getCurrentState().setModel(randomPersona.getModel());
+          }
+          updateTemplatePresentation(randomPersona);
+        }
+
       });
+      deleteButton.setEnabled(!isDefaultOrRubberDuck(settings.getSelectedPersona()));
 
       personaList.addListSelectionListener(e1 -> {
         if (!e1.getValueIsAdjusting()) {
@@ -310,10 +308,11 @@ public class PersonaComboBoxAction extends ComboBoxAction {
       });
       personaList.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-      JButton closeButton = new JButton("Close");
-      closeButton.setPreferredSize(buttonSize);
-      closeButton.addActionListener(e1 -> dialog.dispose());
-      closeButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+      JButton closeButton = createButton("Close", event -> dialog.dispose());
+
+      buttonPanel.add(saveButton);
+      buttonPanel.add(duplicateButton);
+      buttonPanel.add(deleteButton);
       buttonPanel.add(closeButton);
 
       panel.add(new JScrollPane(personaList), BorderLayout.WEST);
@@ -328,19 +327,41 @@ public class PersonaComboBoxAction extends ComboBoxAction {
     }
   }
 
-  private String getNewName(String name) {
-    int duplicateCount = 1;
-    String newName;
-    boolean duplicate;
+  private boolean isDefaultOrRubberDuck(Persona persona) {
+    String name = persona.getName();
+    return DEFAULT_ASSISTANT.equals(name) || RUBBER_DUCK.equals(name);
+  }
 
+  private JButton createButton(String text, ActionListener actionListener) {
+    JButton button = new JButton(text);
+    button.setPreferredSize(new Dimension(100, 30));
+    button.addActionListener(actionListener);
+    button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+    return button;
+  }
+
+  private String getNewName(String originalName) {
+    String name = originalName;
+    Pattern pattern = Pattern.compile("\\((\\d+)\\)$");
+    Matcher matcher = pattern.matcher(name);
+    boolean duplicate;
     do {
-      newName = name + " (" + duplicateCount + ")";
-      final String finalNewName = newName;
+      if (matcher.find()) {
+        int duplicateCount = Integer.parseInt(matcher.group(1));
+        duplicateCount++;
+        name = name.substring(0, matcher.start()) + "(" + duplicateCount + ")";
+      } else {
+        name = name + " (1)";
+      }
+
+      final String finalNewName = name;
       duplicate = settings.getPersonas().stream().anyMatch(persona -> persona.getName().equals(finalNewName));
-      duplicateCount++;
+      if (duplicate) {
+        matcher = pattern.matcher(name);
+      }
     } while (duplicate);
 
-    return newName;
+    return name;
   }
 
   private class NewPersonaAction extends DumbAwareAction {
