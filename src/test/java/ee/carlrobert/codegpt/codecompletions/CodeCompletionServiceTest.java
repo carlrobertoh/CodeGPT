@@ -8,8 +8,7 @@ import static ee.carlrobert.llm.client.util.JSONUtil.jsonMapResponse;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.intellij.openapi.editor.VisualPosition;
-import com.intellij.testFramework.PlatformTestUtil;
-import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
+import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange;
 import java.util.List;
 import testsupport.IntegrationTest;
@@ -20,7 +19,7 @@ public class CodeCompletionServiceTest extends IntegrationTest {
 
   public void testFetchCodeCompletionLlama() {
     useLlamaService();
-    ConfigurationSettings.getCurrentState().setCodeCompletionsEnabled(true);
+    LlamaSettings.getCurrentState().setCodeCompletionsEnabled(true);
     myFixture.configureByText(
         "CompletionTest.java",
         getResourceContent("/codecompletions/code-completion-file.txt"));

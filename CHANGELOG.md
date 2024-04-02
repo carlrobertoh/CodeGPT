@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Vision support (image understanding) for OpenAI GPT-4 and Anthropic Claude models
 - Total token panel for all providers
+- Support for configuring code completions via settings
 
 ### Fixed
 
