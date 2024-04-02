@@ -90,12 +90,6 @@ public class UserPromptTextArea extends JPanel {
         UserPromptTextArea.super.paintBorder(UserPromptTextArea.super.getGraphics());
       }
     });
-    textArea.getDocument().addDocumentListener(new DocumentAdapter() {
-      @Override
-      protected void textChanged(@NotNull DocumentEvent e) {
-        iconsPanel.getComponents()[0].setEnabled(e.getDocument().getLength() > 0);
-      }
-    });
     updateFont();
     init();
   }
