@@ -6,11 +6,13 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 
 import com.intellij.openapi.Disposable;
+import com.intellij.openapi.actionSystem.ActionPlaces;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
 import com.intellij.util.ui.JBUI;
+import com.intellij.util.ui.JBUI.Borders;
 import ee.carlrobert.codegpt.CodeGPTKeys;
 import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.ReferencedFile;
@@ -30,10 +32,10 @@ import ee.carlrobert.codegpt.toolwindow.chat.ui.ChatMessageResponseBody;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ChatToolWindowScrollablePanel;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ResponsePanel;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.UserMessagePanel;
+import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.ModelComboBoxAction;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.TotalTokensDetails;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.TotalTokensPanel;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.UserPromptTextArea;
-import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.UserPromptTextAreaHeader;
 import ee.carlrobert.codegpt.util.EditorUtil;
 import ee.carlrobert.codegpt.util.file.FileUtil;
 import java.awt.BorderLayout;
@@ -267,15 +269,25 @@ public abstract class ChatToolWindowTabPanel implements Disposable {
         JBUI.Borders.customLine(JBColor.border(), 1, 0, 0, 0),
         JBUI.Borders.empty(8)));
     var contentManager = project.getService(StandardChatToolWindowContentManager.class);
-    panel.add(JBUI.Panels.simplePanel(new UserPromptTextAreaHeader(
+    panel.add(JBUI.Panels.simplePanel(createUserPromptTextAreaHeader(
         selectedService,
-        totalTokensPanel,
         () -> {
           ConversationService.getInstance().startConversation();
           contentManager.createNewTabPanel();
         })), BorderLayout.NORTH);
     panel.add(JBUI.Panels.simplePanel(userPromptTextArea), BorderLayout.CENTER);
     return panel;
+  }
+
+  private JPanel createUserPromptTextAreaHeader(
+      ServiceType selectedService,
+      Runnable onModelChange) {
+    return JBUI.Panels.simplePanel()
+        .withBorder(Borders.emptyBottom(8))
+        .andTransparent()
+        .addToLeft(totalTokensPanel)
+        .addToRight(new ModelComboBoxAction(onModelChange, selectedService)
+            .createCustomComponent(ActionPlaces.UNKNOWN));
   }
 
   private JPanel createRootPanel() {
