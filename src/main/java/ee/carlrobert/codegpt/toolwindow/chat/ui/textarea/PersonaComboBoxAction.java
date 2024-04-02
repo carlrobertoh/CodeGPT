@@ -121,7 +121,7 @@ public class PersonaComboBoxAction extends ComboBoxAction {
 
             JBTextArea promptField = new JBTextArea();
             promptField.setText(settings.getSelectedPersona().getPromptText());
-            if (nameField.getText().equals("Default")) {
+            if (nameField.getText().equals("Default Assistant") || nameField.getText().equals("Rubber Duck")) {
                 nameField.setEditable(false);
                 promptField.setEditable(false);
             }
@@ -176,7 +176,7 @@ public class PersonaComboBoxAction extends ComboBoxAction {
                                 OpenAISettings.getCurrentState().setModel(selectedPersona.getModel());
                             }
                             updateTemplatePresentation(selectedPersona);
-                        }
+                            dialog.dispose();                        }
                     }
                 }
             });
@@ -213,7 +213,7 @@ public class PersonaComboBoxAction extends ComboBoxAction {
             JButton deleteButton = new JButton("Delete");
             deleteButton.addActionListener(e1 -> {
                 String selectedName = personaList.getSelectedValue();
-                if (selectedName != null && !selectedName.equals("Default")) {
+                if (selectedName != null && (!selectedName.equals("Default Assistant") || !selectedName.equals("Rubber Duck"))) {
                     Persona selectedPersona = settings.getPersonas().stream()
                     .filter(persona -> persona.getName().equals(selectedName))
                     .findFirst()
@@ -238,6 +238,12 @@ public class PersonaComboBoxAction extends ComboBoxAction {
                 }
             });
             deleteButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            if (settings.getSelectedPersona().getName().equals("Default Assistant") || settings.getSelectedPersona().getName().equals("Rubber Duck")) {
+                deleteButton.setEnabled(false);
+            } else {
+                deleteButton.setEnabled(true);
+            }
+
             editPanel.add(deleteButton);
 
             personaList.addListSelectionListener(e1 -> {
@@ -249,12 +255,14 @@ public class PersonaComboBoxAction extends ComboBoxAction {
                         .findFirst()
                         .orElse(null);
                         if (selectedPersona != null) {
-                            if (selectedName.equals("Default")) {
+                            if (selectedName.equals("Default Assistant") || selectedName.equals("Rubber Duck")) {
                                 nameField.setEditable(false);
                                 promptField.setEditable(false);
+                                deleteButton.setEnabled(false);
                             } else {
                                 nameField.setEditable(true);
                                 promptField.setEditable(true);
+                                deleteButton.setEnabled(true);
                             }
                             nameField.setText(selectedPersona.getName());
                             promptField.setText(selectedPersona.getPromptText());
