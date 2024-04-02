@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Vision support (image understanding) for OpenAI GPT-4 and Anthropic Claude models
+- Total token panel for all providers
+
+### Fixed
+
+- A couple of IntelliJ Platform errors/warnings
+- Error when adding a single file to the context
 
 ### Removed
 
