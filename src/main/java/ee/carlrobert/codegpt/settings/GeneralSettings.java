@@ -41,18 +41,18 @@ public class GeneralSettings implements PersistentStateComponent<GeneralSettings
   public void sync(Conversation conversation) {
     var clientCode = conversation.getClientCode();
     if ("chat.completion".equals(clientCode)) {
-      state.getSelectedPersona().setServiceType(ServiceType.OPENAI);
+      state.getSelectedPersona().setModelProvider(ServiceType.OPENAI);
       OpenAISettings.getCurrentState().setModel(conversation.getModel());
     }
     if ("anthropic.chat.completion".equals(clientCode)) {
-      state.getSelectedPersona().setServiceType(ServiceType.ANTHROPIC);
+      state.getSelectedPersona().setModelProvider(ServiceType.ANTHROPIC);
       AnthropicSettings.getCurrentState().setModel(conversation.getModel());
     }
     if ("azure.chat.completion".equals(clientCode)) {
-      state.getSelectedPersona().setServiceType(ServiceType.AZURE);
+      state.getSelectedPersona().setModelProvider(ServiceType.AZURE);
     }
     if ("llama.chat.completion".equals(clientCode)) {
-      state.getSelectedPersona().setServiceType(ServiceType.LLAMA_CPP);
+      state.getSelectedPersona().setModelProvider(ServiceType.LLAMA_CPP);
       var llamaSettings = LlamaSettings.getCurrentState();
       try {
         var huggingFaceModel = HuggingFaceModel.valueOf(conversation.getModel());
@@ -64,12 +64,12 @@ public class GeneralSettings implements PersistentStateComponent<GeneralSettings
       }
     }
     if ("you.chat.completion".equals(clientCode)) {
-      state.getSelectedPersona().setServiceType(ServiceType.YOU);
+      state.getSelectedPersona().setModelProvider(ServiceType.YOU);
     }
   }
 
   public String getModel() {
-    switch (state.getSelectedPersona().getServiceType()) {
+    switch (state.getSelectedPersona().getModelProvider()) {
       case OPENAI:
         return OpenAISettings.getCurrentState().getModel();
       case ANTHROPIC:

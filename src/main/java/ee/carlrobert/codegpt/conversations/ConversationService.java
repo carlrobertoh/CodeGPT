@@ -49,7 +49,7 @@ public final class ConversationService {
     conversation.setCreatedOn(LocalDateTime.now());
     conversation.setUpdatedOn(LocalDateTime.now());
     conversation.setModel(getModelForSelectedService(
-        GeneralSettings.getCurrentState().getSelectedPersona().getServiceType()));
+        GeneralSettings.getCurrentState().getSelectedPersona().getModelProvider()));
     return conversation;
   }
 
@@ -112,7 +112,7 @@ public final class ConversationService {
   }
 
   public Conversation startConversation() {
-    var completionCode = GeneralSettings.getCurrentState().getSelectedPersona().getServiceType().getCompletionCode();
+    var completionCode = GeneralSettings.getCurrentState().getSelectedPersona().getModelProvider().getCompletionCode();
     var conversation = createConversation(completionCode);
     conversationState.setCurrentConversation(conversation);
     addConversation(conversation);

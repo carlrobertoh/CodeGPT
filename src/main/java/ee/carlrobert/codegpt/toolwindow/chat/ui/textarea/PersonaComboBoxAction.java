@@ -139,7 +139,7 @@ public class PersonaComboBoxAction extends ComboBoxAction {
       descriptionField.setText(settings.getSelectedPersona().getDescription());
 
       JBTextArea promptField = new JBTextArea();
-      promptField.setText(settings.getSelectedPersona().getPromptText());
+      promptField.setText(settings.getSelectedPersona().getInstructions());
       if (nameField.getText().equals("Default Assistant") || nameField.getText().equals("Rubber Duck")) {
         nameField.setEditable(false);
         promptField.setEditable(false);
@@ -190,17 +190,17 @@ public class PersonaComboBoxAction extends ComboBoxAction {
                   JOptionPane.ERROR_MESSAGE);
               nameField.setText(selectedPersona.getName());
               descriptionField.setText(selectedPersona.getDescription());
-              promptField.setText(selectedPersona.getPromptText());
+              promptField.setText(selectedPersona.getInstructions());
               return;
             }
             String newPrompt = promptField.getText();
 
             selectedPersona.setName(newName);
             selectedPersona.setDescription(descriptionField.getText());
-            selectedPersona.setPromptText(newPrompt);
-            selectedPersona.setServiceType(personaModelComboBoxAction.getSelectedService());
-            if (selectedPersona.getServiceType() == OPENAI) {
-              selectedPersona.setModel(OpenAISettings.getCurrentState().getModel());
+            selectedPersona.setInstructions(newPrompt);
+            selectedPersona.setModelProvider(personaModelComboBoxAction.getSelectedService());
+            if (selectedPersona.getModelProvider() == OPENAI) {
+              selectedPersona.setModelId(OpenAISettings.getCurrentState().getModel());
             }
             personaModelComboBoxAction.setPersona(selectedPersona);
 
@@ -214,8 +214,8 @@ public class PersonaComboBoxAction extends ComboBoxAction {
 
             if (doUpdateTemplatePresentation) {
               settings.setSelectedPersona(selectedPersona);
-              if (selectedPersona.getServiceType() == OPENAI) {
-                OpenAISettings.getCurrentState().setModel(selectedPersona.getModel());
+              if (selectedPersona.getModelProvider() == OPENAI) {
+                OpenAISettings.getCurrentState().setModel(selectedPersona.getModelId());
               }
               updateTemplatePresentation(selectedPersona);
               dialog.dispose();
@@ -236,10 +236,10 @@ public class PersonaComboBoxAction extends ComboBoxAction {
             Persona duplicatedPersona = new Persona(
                 newName,
                 selectedPersona.getDescription(),
-                selectedPersona.getPromptText(),
-                selectedPersona.getServiceType());
-            if (selectedPersona.getServiceType() == OPENAI) {
-              duplicatedPersona.setModel(selectedPersona.getModel());
+                selectedPersona.getInstructions(),
+                selectedPersona.getModelProvider());
+            if (selectedPersona.getModelProvider() == OPENAI) {
+              duplicatedPersona.setModelId(selectedPersona.getModelId());
             }
             settings.getPersonas().add(duplicatedPersona);
             personaNames.add(duplicatedPersona.getName());
@@ -280,8 +280,8 @@ public class PersonaComboBoxAction extends ComboBoxAction {
         if (doUpdateTemplatePresentation) {
           Persona randomPersona = settings.getRandomPersona();
           settings.setSelectedPersona(randomPersona);
-          if (randomPersona.getServiceType() == OPENAI) {
-            OpenAISettings.getCurrentState().setModel(randomPersona.getModel());
+          if (randomPersona.getModelProvider() == OPENAI) {
+            OpenAISettings.getCurrentState().setModel(randomPersona.getModelId());
           }
           updateTemplatePresentation(randomPersona);
         }
@@ -312,7 +312,7 @@ public class PersonaComboBoxAction extends ComboBoxAction {
               nameField.setText(selectedPersona.getName());
               descriptionField.setText(selectedPersona.getDescription());
               descriptionField.setCaretPosition(0);
-              promptField.setText(selectedPersona.getPromptText());
+              promptField.setText(selectedPersona.getInstructions());
               promptField.setCaretPosition(0);
               personaModelComboBoxAction.setPersona(selectedPersona);
             }
@@ -430,12 +430,14 @@ public class PersonaComboBoxAction extends ComboBoxAction {
     String name = originalName;
     Pattern pattern = Pattern.compile("\\((\\d+)\\)$");
     Matcher matcher = pattern.matcher(name);
-    boolean duplicate;
+    boolean duplicate = false;
     do {
       if (matcher.find()) {
         int duplicateCount = Integer.parseInt(matcher.group(1));
         duplicateCount++;
         name = name.substring(0, matcher.start()) + "(" + duplicateCount + ")";
+      } else if (duplicate) {
+        name += " (1)";
       }
 
       final String finalNewName = name;

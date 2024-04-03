@@ -60,12 +60,12 @@ public class GeneralSettingsConfigurable implements Configurable {
     var settings = GeneralSettings.getCurrentState();
     var serviceSelectionForm = component.getServiceSelectionForm();
     return !component.getDisplayName().equals(settings.getDisplayName())
-        || component.getSelectedService() != settings.getSelectedPersona().getServiceType()
+        || component.getSelectedService() != settings.getSelectedPersona().getModelProvider()
         || OpenAISettings.getInstance().isModified(serviceSelectionForm.getOpenAISettingsForm())
         || CustomServiceSettings.getInstance()
-        .isModified(serviceSelectionForm.getCustomConfigurationSettingsForm())
+            .isModified(serviceSelectionForm.getCustomConfigurationSettingsForm())
         || AnthropicSettings.getInstance()
-        .isModified(serviceSelectionForm.getAnthropicSettingsForm())
+            .isModified(serviceSelectionForm.getAnthropicSettingsForm())
         || AzureSettings.getInstance().isModified(serviceSelectionForm.getAzureSettingsForm())
         || YouSettings.getInstance().isModified(serviceSelectionForm.getYouSettingsForm())
         || LlamaSettings.getInstance().isModified(serviceSelectionForm.getLlamaSettingsForm());
@@ -75,7 +75,7 @@ public class GeneralSettingsConfigurable implements Configurable {
   public void apply() {
     var settings = GeneralSettings.getCurrentState();
     settings.setDisplayName(component.getDisplayName());
-    settings.getSelectedPersona().setServiceType(component.getSelectedService());
+    settings.getSelectedPersona().setModelProvider(component.getSelectedService());
 
     var serviceSelectionForm = component.getServiceSelectionForm();
     var openAISettingsForm = serviceSelectionForm.getOpenAISettingsForm();
@@ -86,7 +86,7 @@ public class GeneralSettingsConfigurable implements Configurable {
     applyYouSettings(serviceSelectionForm.getYouSettingsForm());
     applyLlamaSettings(serviceSelectionForm.getLlamaSettingsForm());
 
-    var serviceChanged = component.getSelectedService() != settings.getSelectedPersona().getServiceType();
+    var serviceChanged = component.getSelectedService() != settings.getSelectedPersona().getModelProvider();
     var modelChanged = !OpenAISettings.getCurrentState().getModel()
         .equals(openAISettingsForm.getModel());
     if (serviceChanged || modelChanged) {
@@ -135,7 +135,7 @@ public class GeneralSettingsConfigurable implements Configurable {
   public void reset() {
     var settings = GeneralSettings.getCurrentState();
     component.setDisplayName(settings.getDisplayName());
-    component.setSelectedService(settings.getSelectedPersona().getServiceType());
+    component.setSelectedService(settings.getSelectedPersona().getModelProvider());
     component.getServiceSelectionForm().resetForms();
   }
 

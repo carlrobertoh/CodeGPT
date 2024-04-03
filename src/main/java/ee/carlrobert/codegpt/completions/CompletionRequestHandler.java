@@ -52,9 +52,8 @@ public class CompletionRequestHandler {
   private void handleCallException(Throwable ex) {
     var errorMessage = "Something went wrong";
     if (ex instanceof TotalUsageExceededException) {
-      errorMessage =
-          "The length of the context exceeds the maximum limit that the model can handle. "
-              + "Try reducing the input message or maximum completion token size.";
+      errorMessage = "The length of the context exceeds the maximum limit that the model can handle. "
+          + "Try reducing the input message or maximum completion token size.";
     }
     completionResponseEventListener.handleError(new ErrorDetails(errorMessage), ex);
   }
@@ -125,7 +124,7 @@ public class CompletionRequestHandler {
       TelemetryAction.COMPLETION.createActionMessage()
           .property("conversationId", callParameters.getConversation().getId().toString())
           .property("model", callParameters.getConversation().getModel())
-          .property("service", settings.getSelectedPersona().getServiceType().getCode().toLowerCase())
+          .property("service", settings.getSelectedPersona().getModelProvider().getCode().toLowerCase())
           .send();
     }
 

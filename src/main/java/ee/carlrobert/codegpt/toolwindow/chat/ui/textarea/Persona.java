@@ -12,9 +12,9 @@ import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 public class Persona {
   private String name;
   private String description;
-  private String promptText;
-  private ServiceType serviceType;
-  private String model;
+  private String instructions;
+  private ServiceType modelProvider;
+  private String modelId;
 
   /**
    * Constructs a new Persona with default values.
@@ -27,17 +27,17 @@ public class Persona {
    * Constructs a new Persona with the specified name, prompt text, and service
    * type.
    *
-   * @param name        the name of the persona
-   * @param description the description of the persona
-   * @param promptText  the prompt text associated with the persona
-   * @param serviceType the service type of the persona
+   * @param name          the name of the persona
+   * @param description   the description of the persona
+   * @param instructions  the prompt text associated with the persona
+   * @param modelProvider the service type of the persona
    */
-  public Persona(String name, String description, String promptText, ServiceType serviceType) {
+  public Persona(String name, String description, String instructions, ServiceType modelProvider) {
     this.name = name;
     this.description = description;
-    this.promptText = promptText;
-    this.serviceType = serviceType;
-    this.model = OpenAISettings.getCurrentState().getModel();
+    this.instructions = instructions;
+    this.modelProvider = modelProvider;
+    this.modelId = OpenAISettings.getCurrentState().getModel();
   }
 
   /**
@@ -81,8 +81,8 @@ public class Persona {
    *
    * @return the prompt text
    */
-  public String getPromptText() {
-    return promptText;
+  public String getInstructions() {
+    return instructions;
   }
 
   /**
@@ -90,8 +90,8 @@ public class Persona {
    *
    * @param promptText the prompt text to set
    */
-  public void setPromptText(String promptText) {
-    this.promptText = promptText;
+  public void setInstructions(String promptText) {
+    this.instructions = promptText;
   }
 
   /**
@@ -99,8 +99,8 @@ public class Persona {
    *
    * @return the service type
    */
-  public ServiceType getServiceType() {
-    return serviceType;
+  public ServiceType getModelProvider() {
+    return modelProvider;
   }
 
   /**
@@ -108,8 +108,8 @@ public class Persona {
    *
    * @param serviceType the service type to set
    */
-  public void setServiceType(ServiceType serviceType) {
-    this.serviceType = serviceType;
+  public void setModelProvider(ServiceType serviceType) {
+    this.modelProvider = serviceType;
   }
 
   /**
@@ -117,8 +117,8 @@ public class Persona {
    *
    * @return the model
    */
-  public String getModel() {
-    return model;
+  public String getModelId() {
+    return modelId;
   }
 
   /**
@@ -126,7 +126,7 @@ public class Persona {
    *
    * @param model the model to set
    */
-  public void setModel(String model) {
-    this.model = model;
+  public void setModelId(String model) {
+    this.modelId = model;
   }
 }

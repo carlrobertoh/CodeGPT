@@ -69,7 +69,7 @@ public class GenerateGitCommitMessageAction extends AnAction {
 
   @Override
   public void update(@NotNull AnActionEvent event) {
-    var selectedService = GeneralSettings.getCurrentState().getSelectedPersona().getServiceType();
+    var selectedService = GeneralSettings.getCurrentState().getSelectedPersona().getModelProvider();
     if (selectedService == YOU) {
       event.getPresentation().setVisible(false);
       return;
@@ -77,8 +77,7 @@ public class GenerateGitCommitMessageAction extends AnAction {
 
     var includedChangesFilePaths = getIncludedChangesFilePaths(event);
     var includedUnversionedChangesFilePaths = getIncludedUnversionedFilePaths(event);
-    var filesSelected =
-        !includedChangesFilePaths.isEmpty() || !includedUnversionedChangesFilePaths.isEmpty();
+    var filesSelected = !includedChangesFilePaths.isEmpty() || !includedUnversionedChangesFilePaths.isEmpty();
     var callAllowed = isCallAllowed(selectedService);
     event.getPresentation().setEnabled(callAllowed && filesSelected);
     event.getPresentation().setText(CodeGPTBundle.get(callAllowed
@@ -131,10 +130,8 @@ public class GenerateGitCommitMessageAction extends AnAction {
       public void onMessage(String message, EventSource eventSource) {
         messageBuilder.append(message);
         var application = ApplicationManager.getApplication();
-        application.invokeLater(() ->
-            application.runWriteAction(() ->
-                WriteCommandAction.runWriteCommandAction(project, () ->
-                    document.setText(messageBuilder))));
+        application.invokeLater(() -> application.runWriteAction(
+            () -> WriteCommandAction.runWriteCommandAction(project, () -> document.setText(messageBuilder))));
       }
 
       @Override
@@ -160,12 +157,11 @@ public class GenerateGitCommitMessageAction extends AnAction {
       List<String> includedChangesFilePaths,
       List<String> includedUnversionedFilePaths) {
     return Stream.of(
-            new AbstractMap.SimpleEntry<>(includedChangesFilePaths, true),
-            new AbstractMap.SimpleEntry<>(includedUnversionedFilePaths, false))
+        new AbstractMap.SimpleEntry<>(includedChangesFilePaths, true),
+        new AbstractMap.SimpleEntry<>(includedUnversionedFilePaths, false))
         .filter(entry -> !entry.getKey().isEmpty())
         .map(entry -> {
-          var process =
-              createGitDiffProcess(project.getBasePath(), entry.getKey(), entry.getValue());
+          var process = createGitDiffProcess(project.getBasePath(), entry.getKey(), entry.getValue());
           return new BufferedReader(new InputStreamReader(process.getInputStream()))
               .lines()
               .collect(joining("\n"));

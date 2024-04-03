@@ -23,7 +23,7 @@ public class GeneralSettingsTest extends BasePlatformTestCase {
 
     settings.sync(conversation);
 
-    assertThat(settings.getState().getSelectedPersona().getServiceType()).isEqualTo(ServiceType.OPENAI);
+    assertThat(settings.getState().getSelectedPersona().getModelProvider()).isEqualTo(ServiceType.OPENAI);
     assertThat(openAISettings.getModel()).isEqualTo("gpt-4");
   }
 
@@ -35,7 +35,7 @@ public class GeneralSettingsTest extends BasePlatformTestCase {
 
     settings.sync(conversation);
 
-    assertThat(settings.getState().getSelectedPersona().getServiceType()).isEqualTo(ServiceType.AZURE);
+    assertThat(settings.getState().getSelectedPersona().getModelProvider()).isEqualTo(ServiceType.AZURE);
   }
 
   public void testYouSettingsSync() {
@@ -46,7 +46,7 @@ public class GeneralSettingsTest extends BasePlatformTestCase {
 
     settings.sync(conversation);
 
-    assertThat(settings.getState().getSelectedPersona().getServiceType()).isEqualTo(ServiceType.YOU);
+    assertThat(settings.getState().getSelectedPersona().getModelProvider()).isEqualTo(ServiceType.YOU);
   }
 
   public void testLlamaSettingsModelPathSync() {
@@ -59,7 +59,7 @@ public class GeneralSettingsTest extends BasePlatformTestCase {
 
     settings.sync(conversation);
 
-    assertThat(settings.getState().getSelectedPersona().getServiceType()).isEqualTo(ServiceType.LLAMA_CPP);
+    assertThat(settings.getState().getSelectedPersona().getModelProvider()).isEqualTo(ServiceType.LLAMA_CPP);
     assertThat(llamaSettings.getCustomLlamaModelPath()).isEqualTo("TEST_LLAMA_MODEL_PATH");
     assertThat(llamaSettings.isUseCustomModel()).isTrue();
   }
@@ -74,7 +74,7 @@ public class GeneralSettingsTest extends BasePlatformTestCase {
 
     settings.sync(conversation);
 
-    assertThat(settings.getState().getSelectedPersona().getServiceType()).isEqualTo(ServiceType.LLAMA_CPP);
+    assertThat(settings.getState().getSelectedPersona().getModelProvider()).isEqualTo(ServiceType.LLAMA_CPP);
     assertThat(llamaSettings.getHuggingFaceModel()).isEqualTo(CODE_LLAMA_7B_Q3);
     assertThat(llamaSettings.isUseCustomModel()).isFalse();
   }

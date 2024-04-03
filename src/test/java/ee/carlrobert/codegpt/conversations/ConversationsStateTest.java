@@ -12,7 +12,7 @@ import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 public class ConversationsStateTest extends BasePlatformTestCase {
 
   public void testStartNewDefaultConversation() {
-    GeneralSettings.getCurrentState().getSelectedPersona().setServiceType(ServiceType.OPENAI);
+    GeneralSettings.getCurrentState().getSelectedPersona().setModelProvider(ServiceType.OPENAI);
     OpenAISettings.getCurrentState().setModel(OpenAIChatCompletionModel.GPT_3_5.getCode());
 
     var conversation = ConversationService.getInstance().startConversation();

@@ -75,7 +75,7 @@ public class CompletionRequestProvider {
   public void configureSystemPrompt() {
     Persona persona = GeneralSettings.getCurrentState().getSelectedPersona();
     if (persona != null && !persona.getName().equals("Default Assistant")) {
-      ConfigurationSettings.getCurrentState().setSystemPrompt(persona.getPromptText());
+      ConfigurationSettings.getCurrentState().setSystemPrompt(persona.getInstructions());
     } else {
       ConfigurationSettings.getCurrentState().setSystemPrompt(COMPLETION_SYSTEM_PROMPT);
     }
@@ -299,7 +299,7 @@ public class CompletionRequestProvider {
     var messages = buildMessages(callParameters);
 
     if (model == null
-        || GeneralSettings.getCurrentState().getSelectedPersona().getServiceType() == ServiceType.YOU) {
+        || GeneralSettings.getCurrentState().getSelectedPersona().getModelProvider() == ServiceType.YOU) {
       return messages;
     }
 

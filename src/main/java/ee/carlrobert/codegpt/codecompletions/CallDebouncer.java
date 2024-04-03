@@ -26,9 +26,12 @@ public class CallDebouncer {
   }
 
   /**
-   * Implements a debounce mechanism for {@code callable} with a specified {@code delay}. This means
-   * the callable is set to execute after the given {@code delay} period. However, if this method is
-   * invoked again with the same key before the {@code delay} elapses, the scheduled execution will
+   * Implements a debounce mechanism for {@code callable} with a specified
+   * {@code delay}. This means
+   * the callable is set to execute after the given {@code delay} period. However,
+   * if this method is
+   * invoked again with the same key before the {@code delay} elapses, the
+   * scheduled execution will
    * be aborted, and therefore the previous request will be cancelled.
    */
   public void debounce(Object key, CallRunnable runnable, long delay, TimeUnit unit) {
@@ -36,8 +39,8 @@ public class CallDebouncer {
 
     Future<?> prev = delayedMap.put(key, scheduler.schedule(() -> {
       try {
-        var progressIndicator =
-            LLAMA_CPP.equals(GeneralSettings.getCurrentState().getSelectedPersona().getServiceType())
+        var progressIndicator = LLAMA_CPP
+            .equals(GeneralSettings.getCurrentState().getSelectedPersona().getModelProvider())
                 ? createProgressIndicator()
                 : null;
         currentCall.set(runnable.call(progressIndicator));

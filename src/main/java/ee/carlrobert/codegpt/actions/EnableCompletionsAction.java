@@ -13,7 +13,8 @@ import java.util.List;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Enables code-completion.<br/> Publishes message to {@link CodeCompletionEnabledListener#TOPIC}
+ * Enables code-completion.<br/>
+ * Publishes message to {@link CodeCompletionEnabledListener#TOPIC}
  */
 public class EnableCompletionsAction extends AnAction {
 
@@ -27,7 +28,7 @@ public class EnableCompletionsAction extends AnAction {
 
   @Override
   public void update(@NotNull AnActionEvent e) {
-    var selectedService = GeneralSettings.getCurrentState().getSelectedPersona().getServiceType();
+    var selectedService = GeneralSettings.getCurrentState().getSelectedPersona().getModelProvider();
     var codeCompletionEnabled = ConfigurationSettings.getCurrentState().isCodeCompletionsEnabled();
     e.getPresentation().setEnabled(!codeCompletionEnabled);
     e.getPresentation()

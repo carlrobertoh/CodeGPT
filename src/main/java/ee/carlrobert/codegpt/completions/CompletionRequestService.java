@@ -62,7 +62,7 @@ public final class CompletionRequestService {
       CallParameters callParameters,
       CompletionEventListener<String> eventListener) {
     var requestProvider = new CompletionRequestProvider(callParameters.getConversation());
-    return switch (GeneralSettings.getCurrentState().getSelectedPersona().getServiceType()) {
+    return switch (GeneralSettings.getCurrentState().getSelectedPersona().getModelProvider()) {
       case OPENAI -> CompletionClientProvider.getOpenAIClient().getChatCompletionAsync(
           requestProvider.buildOpenAIChatCompletionRequest(
               OpenAISettings.getCurrentState().getModel(),
@@ -95,13 +95,13 @@ public final class CompletionRequestService {
       InfillRequestDetails requestDetails,
       CompletionEventListener<String> eventListener) {
     var requestProvider = new CodeCompletionRequestProvider(requestDetails);
-    return switch (GeneralSettings.getCurrentState().getSelectedPersona().getServiceType()) {
+    return switch (GeneralSettings.getCurrentState().getSelectedPersona().getModelProvider()) {
       case OPENAI -> CompletionClientProvider.getOpenAIClient()
           .getCompletionAsync(requestProvider.buildOpenAIRequest(), eventListener);
       case LLAMA_CPP -> CompletionClientProvider.getLlamaClient()
           .getChatCompletionAsync(requestProvider.buildLlamaRequest(), eventListener);
       default ->
-          throw new IllegalArgumentException("Code completion not supported for selected service");
+        throw new IllegalArgumentException("Code completion not supported for selected service");
     };
   }
 
@@ -115,7 +115,7 @@ public final class CompletionRequestService {
         new OpenAIChatCompletionMessage("user", prompt)))
         .setModel(OpenAISettings.getCurrentState().getModel())
         .build();
-    var selectedService = GeneralSettings.getCurrentState().getSelectedPersona().getServiceType();
+    var selectedService = GeneralSettings.getCurrentState().getSelectedPersona().getModelProvider();
     switch (selectedService) {
       case OPENAI:
         CompletionClientProvider.getOpenAIClient()
@@ -165,7 +165,8 @@ public final class CompletionRequestService {
                 .setTop_p(settings.getTopP())
                 .setMin_p(settings.getMinP())
                 .setRepeat_penalty(settings.getRepeatPenalty())
-                .build(), eventListener);
+                .build(),
+            eventListener);
         break;
       default:
         LOG.debug("Unknown service: {}", selectedService);
@@ -174,7 +175,7 @@ public final class CompletionRequestService {
   }
 
   public Optional<String> getLookupCompletion(String prompt) {
-    var selectedService = GeneralSettings.getCurrentState().getSelectedPersona().getServiceType();
+    var selectedService = GeneralSettings.getCurrentState().getSelectedPersona().getModelProvider();
     if (selectedService == YOU || selectedService == LLAMA_CPP) {
       return Optional.empty();
     }
@@ -206,7 +207,7 @@ public final class CompletionRequestService {
   }
 
   public boolean isRequestAllowed() {
-    var selectedService = GeneralSettings.getCurrentState().getSelectedPersona().getServiceType();
+    var selectedService = GeneralSettings.getCurrentState().getSelectedPersona().getModelProvider();
     if (selectedService == AZURE) {
       return AzureCredentialsManager.getInstance().isCredentialSet();
     }
