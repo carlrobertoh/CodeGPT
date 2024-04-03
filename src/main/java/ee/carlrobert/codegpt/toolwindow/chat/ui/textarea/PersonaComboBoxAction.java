@@ -26,11 +26,15 @@ import static ee.carlrobert.codegpt.settings.service.ServiceType.OPENAI;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 public class PersonaComboBoxAction extends ComboBoxAction {
   private final GeneralSettingsState settings;
@@ -115,7 +119,7 @@ public class PersonaComboBoxAction extends ComboBoxAction {
       }
 
       JList<String> personaList = new JList<>(personaNames.toArray(new String[0]));
-      personaList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+      personaList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
       personaList.setLayoutOrientation(JList.VERTICAL);
       personaList.setVisibleRowCount(-1);
       personaList.setFixedCellHeight(24);
@@ -248,81 +252,6 @@ public class PersonaComboBoxAction extends ComboBoxAction {
           }
         }
       });
-
-      JButton deleteButton = createButton("Delete", event -> {
-        String selectedName = personaList.getSelectedValue();
-        int index = personaNames.indexOf(selectedName);
-        if (selectedName == null) {
-          JOptionPane.showMessageDialog(null, "Error: Persona does not exist", "Error", JOptionPane.ERROR_MESSAGE);
-          return;
-        }
-        Persona selectedPersona = settings.getPersonas().stream()
-            .filter(persona -> persona.getName().equals(selectedName))
-            .findFirst()
-            .orElse(null);
-        if (selectedPersona == null) {
-          JOptionPane.showMessageDialog(null, "Error: Persona does not exist", "Error", JOptionPane.ERROR_MESSAGE);
-          return;
-        }
-        int dialogResult = JOptionPane.showConfirmDialog(null,
-            "Are you sure you want to delete " + selectedPersona.getName() + "?",
-            "Warning", JOptionPane.YES_NO_OPTION);
-        if (dialogResult == JOptionPane.NO_OPTION) {
-          return;
-        }
-        boolean doUpdateTemplatePresentation = settings.getSelectedPersona().getName().equals(selectedName);
-        settings.getPersonas().remove(selectedPersona);
-        personaNames.remove(selectedName);
-        personaList.setListData(personaNames.toArray(new String[0]));
-        if (!personaNames.isEmpty()) {
-          personaList.setSelectedIndex(index == 0 ? 0 : index - 1);
-        }
-        if (doUpdateTemplatePresentation) {
-          Persona randomPersona = settings.getRandomPersona();
-          settings.setSelectedPersona(randomPersona);
-          if (randomPersona.getModelProvider() == OPENAI) {
-            OpenAISettings.getCurrentState().setModel(randomPersona.getModelId());
-          }
-          updateTemplatePresentation(randomPersona);
-        }
-
-      });
-      deleteButton.setEnabled(!isDefaultOrRubberDuck(settings.getSelectedPersona()));
-
-      personaList.addListSelectionListener(e1 -> {
-        if (!e1.getValueIsAdjusting()) {
-          String selectedName = personaList.getSelectedValue();
-          if (selectedName != null) {
-            Persona selectedPersona = settings.getPersonas().stream()
-                .filter(persona -> persona.getName().equals(selectedName))
-                .findFirst()
-                .orElse(null);
-            if (selectedPersona != null) {
-              if (selectedName.equals("Default Assistant") || selectedName.equals("Rubber Duck")) {
-                nameField.setEditable(false);
-                descriptionField.setEditable(false);
-                promptField.setEditable(false);
-                deleteButton.setEnabled(false);
-              } else {
-                nameField.setEditable(true);
-                descriptionField.setEditable(true);
-                promptField.setEditable(true);
-                deleteButton.setEnabled(true);
-              }
-              nameField.setText(selectedPersona.getName());
-              descriptionField.setText(selectedPersona.getDescription());
-              descriptionField.setCaretPosition(0);
-              promptField.setText(selectedPersona.getInstructions());
-              promptField.setCaretPosition(0);
-              personaModelComboBoxAction.setPersona(selectedPersona);
-            }
-          }
-        }
-      });
-      personaList.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-
-      JButton closeButton = createButton("Close", event -> dialog.dispose());
-
       JButton importButton = createButton("Import", event -> {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setFileFilter(new FileNameExtensionFilter("JSON Files", "json"));
@@ -358,29 +287,62 @@ public class PersonaComboBoxAction extends ComboBoxAction {
       });
 
       JButton exportButton = createButton("Export", event -> {
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setFileFilter(new FileNameExtensionFilter("JSON Files", "json"));
-        int result = fileChooser.showSaveDialog(dialog);
-        if (result == JFileChooser.APPROVE_OPTION) {
-          File selectedFile = fileChooser.getSelectedFile();
-          try {
-            Gson gson = new Gson();
+        if (personaList.getSelectedValuesList().size() > 1) {
+          handleMultipleSelectionExport(personaList, dialog);
+        } else {
+          handleSingleSelectionExport(personaList, dialog);
+        }
+      });
+
+      JButton deleteButton = createButton("Delete", event -> {
+        if (personaList.getSelectedValuesList().size() > 1) {
+          handleMultipleSelectionDelete(personaList, personaNames);
+        } else {
+          handleSingleSelectionDelete(personaList, personaNames);
+        }
+      });
+      deleteButton.setEnabled(!isDefaultOrRubberDuck(settings.getSelectedPersona()));
+
+      personaList.addListSelectionListener(e1 -> {
+        if (!e1.getValueIsAdjusting()) {
+          String selectedName = personaList.getSelectedValue();
+          if (selectedName != null) {
             Persona selectedPersona = settings.getPersonas().stream()
-                .filter(persona -> persona.getName().equals(personaList.getSelectedValue()))
+                .filter(persona -> persona.getName().equals(selectedName))
                 .findFirst()
                 .orElse(null);
-            if (selectedPersona == null) {
-              JOptionPane.showMessageDialog(null, "Error: Persona does not exist", "Error", JOptionPane.ERROR_MESSAGE);
-              return;
+            if (selectedPersona != null) {
+              if (selectedName.equals("Default Assistant") || selectedName.equals("Rubber Duck")) {
+                nameField.setEditable(false);
+                descriptionField.setEditable(false);
+                promptField.setEditable(false);
+                deleteButton.setEnabled(false);
+              } else {
+                nameField.setEditable(true);
+                descriptionField.setEditable(true);
+                promptField.setEditable(true);
+                deleteButton.setEnabled(true);
+              }
+              nameField.setText(selectedPersona.getName());
+              descriptionField.setText(selectedPersona.getDescription());
+              descriptionField.setCaretPosition(0);
+              promptField.setText(selectedPersona.getInstructions());
+              promptField.setCaretPosition(0);
+              personaModelComboBoxAction.setPersona(selectedPersona);
+              if (personaList.getSelectedValuesList().size() > 1) {
+                deleteButton.setText("Delete All");
+                exportButton.setText("Export All");
+              } else {
+                deleteButton.setText("Delete");
+                exportButton.setText("Export");
+              }
             }
-            String json = gson.toJson(selectedPersona);
-            Files.writeString(selectedFile.toPath(), json);
-          } catch (IOException ex) {
-            JOptionPane.showMessageDialog(null, "Error writing JSON file: " + ex.getMessage(), "Error",
-                JOptionPane.ERROR_MESSAGE);
           }
         }
       });
+      personaList.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+      JButton closeButton = createButton("Close", event -> dialog.dispose());
 
       leftButtonPanel.add(importButton);
       leftButtonPanel.add(exportButton);
@@ -410,6 +372,146 @@ public class PersonaComboBoxAction extends ComboBoxAction {
       dialog.pack();
       dialog.setLocationRelativeTo(null);
       dialog.setVisible(true);
+    }
+
+    private void handleMultipleSelectionExport(JList<String> personaList, JDialog dialog) {
+      JFileChooser fileChooser = new JFileChooser();
+      fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+      int result = fileChooser.showSaveDialog(dialog);
+      if (result == JFileChooser.APPROVE_OPTION) {
+        File selectedDirectory = fileChooser.getSelectedFile();
+        try {
+          ZipOutputStream zipOut = new ZipOutputStream(
+              new FileOutputStream(new File(selectedDirectory, "personas.zip")));
+          Gson gson = new Gson();
+          for (String name : personaList.getSelectedValuesList()) {
+            Persona selectedPersona = settings.getPersonas().stream()
+                .filter(persona -> persona.getName().equals(name))
+                .findFirst()
+                .orElse(null);
+            if (selectedPersona != null) {
+              File tempFile = File.createTempFile(name.toString(), ".json");
+              String json = gson.toJson(selectedPersona);
+              Files.writeString(tempFile.toPath(), json);
+              FileInputStream fis = new FileInputStream(tempFile);
+              ZipEntry zipEntry = new ZipEntry(tempFile.getName());
+              zipOut.putNextEntry(zipEntry);
+              byte[] bytes = new byte[1024];
+              int length;
+              while ((length = fis.read(bytes)) >= 0) {
+                zipOut.write(bytes, 0, length);
+              }
+              fis.close();
+              tempFile.delete();
+            }
+          }
+          zipOut.close();
+        } catch (IOException ex) {
+          JOptionPane.showMessageDialog(null, "Error writing ZIP file: " + ex.getMessage(), "Error",
+              JOptionPane.ERROR_MESSAGE);
+        }
+      }
+    }
+
+    private void handleSingleSelectionExport(JList<String> personaList, JDialog dialog) {
+      JFileChooser fileChooser = new JFileChooser();
+      fileChooser.setFileFilter(new FileNameExtensionFilter("JSON Files", "json"));
+      int result = fileChooser.showSaveDialog(dialog);
+      if (result == JFileChooser.APPROVE_OPTION) {
+        File selectedFile = fileChooser.getSelectedFile();
+        try {
+          Gson gson = new Gson();
+          Persona selectedPersona = settings.getPersonas().stream()
+              .filter(persona -> persona.getName().equals(personaList.getSelectedValue()))
+              .findFirst()
+              .orElse(null);
+          if (selectedPersona == null) {
+            JOptionPane.showMessageDialog(null, "Error: Persona does not exist", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+          }
+          String json = gson.toJson(selectedPersona);
+          Files.writeString(selectedFile.toPath(), json);
+        } catch (IOException ex) {
+          JOptionPane.showMessageDialog(null, "Error writing JSON file: " + ex.getMessage(), "Error",
+              JOptionPane.ERROR_MESSAGE);
+        }
+      }
+    }
+
+    private void handleMultipleSelectionDelete(JList<String> personaList, ArrayList<String> personaNames) {
+      ArrayList<String> selectedNames = new ArrayList<>(personaList.getSelectedValuesList());
+      if (selectedNames.isEmpty()) {
+        JOptionPane.showMessageDialog(null, "Error: No personas selected", "Error", JOptionPane.ERROR_MESSAGE);
+        return;
+      }
+      int dialogResult = JOptionPane.showConfirmDialog(null,
+          "Are you sure you want to delete selected personas?",
+          "Warning", JOptionPane.YES_NO_OPTION);
+      if (dialogResult == JOptionPane.NO_OPTION) {
+        return;
+      }
+      for (String name : selectedNames) {
+        Persona selectedPersona = settings.getPersonas().stream()
+            .filter(persona -> persona.getName().equals(name))
+            .findFirst()
+            .orElse(null);
+        if (selectedPersona != null) {
+          settings.getPersonas().remove(selectedPersona);
+          personaNames.remove(name);
+        }
+      }
+      personaList.setListData(personaNames.toArray(new String[0]));
+      if (!personaNames.isEmpty()) {
+        personaList.setSelectedIndex(0);
+      }
+      Persona selectedPersona = personaList.getSelectedValue() == null ? settings.getRandomPersona()
+          : settings.getPersonas().stream()
+              .filter(persona -> persona.getName().equals(personaList.getSelectedValue()))
+              .findFirst()
+              .orElse(null);
+      settings.setSelectedPersona(selectedPersona);
+      if (selectedPersona.getModelProvider() == OPENAI) {
+        OpenAISettings.getCurrentState().setModel(selectedPersona.getModelId());
+      }
+      updateTemplatePresentation(selectedPersona);
+    }
+
+    private void handleSingleSelectionDelete(JList<String> personaList, ArrayList<String> personaNames) {
+      String selectedName = personaList.getSelectedValue();
+      int index = personaNames.indexOf(selectedName);
+      if (selectedName == null) {
+        JOptionPane.showMessageDialog(null, "Error: Persona does not exist", "Error", JOptionPane.ERROR_MESSAGE);
+        return;
+      }
+      Persona selectedPersona = settings.getPersonas().stream()
+          .filter(persona -> persona.getName().equals(selectedName))
+          .findFirst()
+          .orElse(null);
+      if (selectedPersona == null) {
+        JOptionPane.showMessageDialog(null, "Error: Persona does not exist", "Error", JOptionPane.ERROR_MESSAGE);
+        return;
+      }
+      int dialogResult = JOptionPane.showConfirmDialog(null,
+          "Are you sure you want to delete " + selectedPersona.getName() + "?",
+          "Warning", JOptionPane.YES_NO_OPTION);
+      if (dialogResult == JOptionPane.NO_OPTION) {
+        return;
+      }
+      boolean doUpdateTemplatePresentation = settings.getSelectedPersona().getName().equals(selectedName);
+      settings.getPersonas().remove(selectedPersona);
+      personaNames.remove(selectedName);
+      personaList.setListData(personaNames.toArray(new String[0]));
+      if (!personaNames.isEmpty()) {
+        personaList.setSelectedIndex(index == 0 ? 0 : index - 1);
+      }
+      if (doUpdateTemplatePresentation) {
+        Persona randomPersona = settings.getRandomPersona();
+        settings.setSelectedPersona(randomPersona);
+        if (randomPersona.getModelProvider() == OPENAI) {
+          OpenAISettings.getCurrentState().setModel(randomPersona.getModelId());
+        }
+        updateTemplatePresentation(randomPersona);
+      }
     }
   }
 
