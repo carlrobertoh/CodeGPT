@@ -11,16 +11,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Vision support (image understanding) for OpenAI GPT-4 and Anthropic Claude models
 - Total token panel for all providers
 - Support for configuring code completions via settings
+- Support for You Pro modes
+- Basic post-processing for code completions
+- Code completion feature toggle keyboard-shortcut
+- Support for git commit message generation with Custom OpenAI and Anthropic services
 
 ### Fixed
 
 - Fixed several UI/UX issues related to code completions for IDE versions starting from 233 
 - Error when adding a single file to the context
 - A couple of IntelliJ Platform errors/warnings
+- Several IntelliJ platform warnings
 
 ### Removed
 
 - Azure custom configuration (use OpenAI-compatible service to override the default configuration) 
+
+### Changed
+
+- Supported minimum IDE build from 213 to 222
 
 ## [2.5.1] - 2024-03-14
 
