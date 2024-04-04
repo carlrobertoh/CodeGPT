@@ -21,10 +21,10 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vcs.FilePath;
 import com.intellij.openapi.vcs.VcsDataKeys;
 import com.intellij.openapi.vcs.changes.Change;
-import com.intellij.openapi.vcs.changes.ui.ChangesBrowserBase;
-import com.intellij.openapi.vcs.changes.ui.CommitDialogChangesBrowser;
 import com.intellij.openapi.vcs.ui.CommitMessage;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.vcs.commit.AbstractCommitWorkflowHandler;
+import com.intellij.vcs.commit.CommitWorkflowUi;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.Icons;
@@ -37,7 +37,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.AbstractMap;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -86,7 +87,7 @@ public class GenerateGitCommitMessageAction extends AnAction {
       return;
     }
 
-    var gitDiff = getGitDiff(
+    var gitDiff = getDiffPromptPart(
         project,
         getIncludedChangesFilePaths(event),
         getIncludedUnversionedFilePaths(event));
@@ -142,31 +143,50 @@ public class GenerateGitCommitMessageAction extends AnAction {
     return commitMessage != null ? commitMessage.getEditorField().getEditor() : null;
   }
 
-  private String getGitDiff(
-      Project project,
-      List<String> includedChangesFilePaths,
-      List<String> includedUnversionedFilePaths) {
-    return Stream.of(
-            new AbstractMap.SimpleEntry<>(includedChangesFilePaths, true),
-            new AbstractMap.SimpleEntry<>(includedUnversionedFilePaths, false))
-        .filter(entry -> !entry.getKey().isEmpty())
-        .map(entry -> {
-          var process =
-              createGitDiffProcess(project.getBasePath(), entry.getKey(), entry.getValue());
-          return new BufferedReader(new InputStreamReader(process.getInputStream()))
-              .lines()
-              .collect(joining("\n"));
-        })
-        .collect(joining("\n"));
+  private String getDiffPromptPart(
+          Project project,
+          List<String> includedChangesFilePaths,
+          List<String> includedUnversionedFilePaths) {
+    var projectBasePath = project.getBasePath();
+    var gitDiff = getGitDiff(projectBasePath, includedChangesFilePaths);
+    var newFilesDiff = getNewFilesDiff(projectBasePath, includedUnversionedFilePaths);
+
+    return Stream.of(gitDiff, newFilesDiff)
+            .filter(x -> !x.isEmpty())
+            .collect(joining("\n\nNew files was created:\n"));
   }
 
-  private Process createGitDiffProcess(String projectPath, List<String> filePaths, boolean cached) {
+  private String getNewFilesDiff(String projectPath, List<String> filePaths) {
+    return filePaths.stream()
+            .map(Path::of)
+            .map(p -> {
+              var relativePath = Path.of(projectPath).relativize(p);
+              try {
+                return "New file '" + relativePath + "' content:\n" + Files.readString(p);
+              } catch (IOException ignored) {
+                return null;
+              }
+            })
+            .filter(Objects::nonNull)
+            .collect(joining("\n"));
+  }
+
+  private String getGitDiff(String projectPath, List<String> filePaths)
+  {
+    if (filePaths.isEmpty()) {
+      return "";
+    }
+
+    var process = createGitDiffProcess(projectPath, filePaths);
+    return new BufferedReader(new InputStreamReader(process.getInputStream()))
+            .lines()
+            .collect(joining("\n"));
+  }
+
+  private Process createGitDiffProcess(String projectPath, List<String> filePaths) {
     var command = new ArrayList<String>();
     command.add("git");
     command.add("diff");
-    if (cached) {
-      command.add("--cached");
-    }
     command.addAll(filePaths);
 
     var processBuilder = new ProcessBuilder(command);
@@ -180,13 +200,14 @@ public class GenerateGitCommitMessageAction extends AnAction {
 
   private @NotNull List<String> getFilePaths(
       AnActionEvent event,
-      Function<CommitDialogChangesBrowser, Stream<?>> extractor) {
-    var changesBrowserBase = event.getData(ChangesBrowserBase.DATA_KEY);
-    if (changesBrowserBase == null) {
+      Function<CommitWorkflowUi, Stream<?>> extractor) {
+
+    var commitData = event.getData(VcsDataKeys.COMMIT_WORKFLOW_HANDLER);
+    if (!(commitData instanceof AbstractCommitWorkflowHandler<?,?> commitWorkflowHandler)) {
       return List.of();
     }
 
-    return extractor.apply((CommitDialogChangesBrowser) changesBrowserBase)
+    return extractor.apply(commitWorkflowHandler.getUi())
         .map(obj -> obj instanceof Change
             ? ((Change) obj).getVirtualFile()
             : ((FilePath) obj).getVirtualFile())
@@ -197,10 +218,10 @@ public class GenerateGitCommitMessageAction extends AnAction {
   }
 
   private @NotNull List<String> getIncludedChangesFilePaths(AnActionEvent event) {
-    return getFilePaths(event, browser -> browser.getIncludedChanges().stream());
+    return getFilePaths(event, commitWorkflowUi -> commitWorkflowUi.getIncludedChanges().stream());
   }
 
   private @NotNull List<String> getIncludedUnversionedFilePaths(AnActionEvent event) {
-    return getFilePaths(event, browser -> browser.getIncludedUnversionedFiles().stream());
+    return getFilePaths(event, commitWorkflowUi -> commitWorkflowUi.getIncludedUnversionedFiles().stream());
   }
 }
