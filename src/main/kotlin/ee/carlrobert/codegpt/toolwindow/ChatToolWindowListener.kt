@@ -1,15 +1,15 @@
 package ee.carlrobert.codegpt.toolwindow;
 
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.wm.ToolWindowManager
+import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ex.ToolWindowManagerListener
 import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager
 
 class ChatToolWindowListener : ToolWindowManagerListener {
 
-    override fun stateChanged(toolWindowManager: ToolWindowManager) {
-        toolWindowManager.getToolWindow("CodeGPT")?.run {
-            if (isVisible) requestFocusForTextArea(project)
+    override fun toolWindowShown(toolWindow: ToolWindow) {
+        if ("CodeGPT" == toolWindow.id) {
+            requestFocusForTextArea(toolWindow.project)
         }
     }
 
