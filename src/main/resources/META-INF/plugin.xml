@@ -9,6 +9,8 @@
     <projectListeners>
         <listener topic="com.intellij.codeInsight.lookup.LookupManagerListener"
                   class="ee.carlrobert.codegpt.completions.MethodNameLookupListener"/>
+      <listener class="ee.carlrobert.codegpt.toolwindow.ChatToolWindowListener"
+                topic="com.intellij.openapi.wm.ex.ToolWindowManagerListener"/>
     </projectListeners>
 
     <extensions defaultExtensionNs="com.intellij">
