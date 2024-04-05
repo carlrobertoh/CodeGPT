@@ -4,7 +4,6 @@ import static com.intellij.openapi.ui.Messages.OK;
 import static com.intellij.util.ObjectUtils.tryCast;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.YOU;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
 
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
@@ -20,11 +19,8 @@ import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vcs.FilePath;
 import com.intellij.openapi.vcs.VcsDataKeys;
-import com.intellij.openapi.vcs.changes.Change;
-import com.intellij.openapi.vcs.changes.ui.ChangesBrowserBase;
-import com.intellij.openapi.vcs.changes.ui.CommitDialogChangesBrowser;
 import com.intellij.openapi.vcs.ui.CommitMessage;
-import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.vcs.commit.CommitWorkflowUi;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.Icons;
@@ -37,11 +33,13 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Function;
+import java.util.Optional;
 import java.util.stream.Stream;
 import okhttp3.sse.EventSource;
 import org.jetbrains.annotations.NotNull;
@@ -61,19 +59,17 @@ public class GenerateGitCommitMessageAction extends AnAction {
 
   @Override
   public void update(@NotNull AnActionEvent event) {
+    var commitWorkflowUi = event.getData(VcsDataKeys.COMMIT_WORKFLOW_UI);
     var selectedService = GeneralSettings.getCurrentState().getSelectedService();
-    if (selectedService == YOU) {
+    if (selectedService == YOU || commitWorkflowUi == null) {
       event.getPresentation().setVisible(false);
       return;
     }
 
-    var includedChangesFilePaths = getIncludedChangesFilePaths(event);
-    var includedUnversionedChangesFilePaths = getIncludedUnversionedFilePaths(event);
-    var filesSelected =
-        !includedChangesFilePaths.isEmpty() || !includedUnversionedChangesFilePaths.isEmpty();
     var callAllowed = CompletionRequestService.isRequestAllowed(
         GeneralSettings.getCurrentState().getSelectedService());
-    event.getPresentation().setEnabled(callAllowed && filesSelected);
+    event.getPresentation().setEnabled(callAllowed
+        && new CommitWorkflowChanges(commitWorkflowUi).isFilesSelected());
     event.getPresentation().setText(CodeGPTBundle.get(callAllowed
         ? "action.generateCommitMessage.title"
         : "action.generateCommitMessage.missingCredentials"));
@@ -86,11 +82,7 @@ public class GenerateGitCommitMessageAction extends AnAction {
       return;
     }
 
-    var gitDiff = getGitDiff(
-        project,
-        getIncludedChangesFilePaths(event),
-        getIncludedUnversionedFilePaths(event));
-
+    var gitDiff = getGitDiff(event, project);
     var tokenCount = encodingManager.countTokens(gitDiff);
     if (tokenCount > MAX_TOKEN_COUNT_WARNING
         && OverlayUtil.showTokenSoftLimitWarningDialog(tokenCount) != OK) {
@@ -142,21 +134,48 @@ public class GenerateGitCommitMessageAction extends AnAction {
     return commitMessage != null ? commitMessage.getEditorField().getEditor() : null;
   }
 
-  private String getGitDiff(
-      Project project,
-      List<String> includedChangesFilePaths,
-      List<String> includedUnversionedFilePaths) {
+  private String getGitDiff(AnActionEvent event, Project project) {
+    var commitWorkflowUi = Optional.ofNullable(event.getData(VcsDataKeys.COMMIT_WORKFLOW_UI))
+        .orElseThrow(() -> new IllegalStateException("Could not retrieve commit workflow ui."));
+    var changes = new CommitWorkflowChanges(commitWorkflowUi);
+    var projectBasePath = project.getBasePath();
+    var gitDiff = getGitDiff(projectBasePath, changes.getIncludedVersionedFilePaths(), false);
+    var stagedGitDiff = getGitDiff(projectBasePath, changes.getIncludedVersionedFilePaths(), true);
+    var newFilesContent =
+        getNewFilesDiff(projectBasePath, changes.getIncludedUnversionedFilePaths());
+
     return Stream.of(
-            new AbstractMap.SimpleEntry<>(includedChangesFilePaths, true),
-            new AbstractMap.SimpleEntry<>(includedUnversionedFilePaths, false))
-        .filter(entry -> !entry.getKey().isEmpty())
-        .map(entry -> {
-          var process =
-              createGitDiffProcess(project.getBasePath(), entry.getKey(), entry.getValue());
-          return new BufferedReader(new InputStreamReader(process.getInputStream()))
-              .lines()
-              .collect(joining("\n"));
+            new AbstractMap.SimpleEntry<>("Git diff", gitDiff),
+            new AbstractMap.SimpleEntry<>("Staged git diff", stagedGitDiff),
+            new AbstractMap.SimpleEntry<>("New files", newFilesContent))
+        .filter(entry -> !entry.getValue().isEmpty())
+        .map(entry -> "%s:\n%s".formatted(entry.getKey(), entry.getValue()))
+        .collect(joining("\n\n"));
+  }
+
+  private String getGitDiff(String projectPath, List<String> filePaths, boolean cached) {
+    if (filePaths.isEmpty()) {
+      return "";
+    }
+
+    var process = createGitDiffProcess(projectPath, filePaths, cached);
+    return new BufferedReader(new InputStreamReader(process.getInputStream()))
+        .lines()
+        .collect(joining("\n"));
+  }
+
+  private String getNewFilesDiff(String projectPath, List<String> filePaths) {
+    return filePaths.stream()
+        .map(pathString -> {
+          var filePath = Path.of(pathString);
+          var relativePath = Path.of(projectPath).relativize(filePath);
+          try {
+            return "New file '" + relativePath + "' content:\n" + Files.readString(filePath);
+          } catch (IOException ignored) {
+            return null;
+          }
         })
+        .filter(Objects::nonNull)
         .collect(joining("\n"));
   }
 
@@ -178,29 +197,31 @@ public class GenerateGitCommitMessageAction extends AnAction {
     }
   }
 
-  private @NotNull List<String> getFilePaths(
-      AnActionEvent event,
-      Function<CommitDialogChangesBrowser, Stream<?>> extractor) {
-    var changesBrowserBase = event.getData(ChangesBrowserBase.DATA_KEY);
-    if (changesBrowserBase == null) {
-      return List.of();
+  static class CommitWorkflowChanges {
+
+    private final List<String> includedVersionedFilePaths;
+    private final List<String> includedUnversionedFilePaths;
+
+    CommitWorkflowChanges(CommitWorkflowUi commitWorkflowUi) {
+      includedVersionedFilePaths = commitWorkflowUi.getIncludedChanges().stream()
+          .map(it -> it.getVirtualFile() == null ? null : it.getVirtualFile().getPath())
+          .filter(Objects::nonNull)
+          .toList();
+      includedUnversionedFilePaths = commitWorkflowUi.getIncludedUnversionedFiles().stream()
+          .map(FilePath::getPath)
+          .toList();
     }
 
-    return extractor.apply((CommitDialogChangesBrowser) changesBrowserBase)
-        .map(obj -> obj instanceof Change
-            ? ((Change) obj).getVirtualFile()
-            : ((FilePath) obj).getVirtualFile())
-        .filter(Objects::nonNull)
-        .map(VirtualFile::getPath)
-        .distinct()
-        .collect(toList());
-  }
+    public List<String> getIncludedVersionedFilePaths() {
+      return includedVersionedFilePaths;
+    }
 
-  private @NotNull List<String> getIncludedChangesFilePaths(AnActionEvent event) {
-    return getFilePaths(event, browser -> browser.getIncludedChanges().stream());
-  }
+    public List<String> getIncludedUnversionedFilePaths() {
+      return includedUnversionedFilePaths;
+    }
 
-  private @NotNull List<String> getIncludedUnversionedFilePaths(AnActionEvent event) {
-    return getFilePaths(event, browser -> browser.getIncludedUnversionedFiles().stream());
+    public boolean isFilesSelected() {
+      return !includedVersionedFilePaths.isEmpty() || !includedUnversionedFilePaths.isEmpty();
+    }
   }
 }
