@@ -1,11 +1,9 @@
 package ee.carlrobert.codegpt.codecompletions
 
 import com.intellij.codeInsight.inline.completion.*
-import com.intellij.codeInsight.inline.completion.elements.InlineCompletionElement
 import com.intellij.codeInsight.inline.completion.elements.InlineCompletionGrayTextElement
 import com.intellij.openapi.application.EDT
 import com.intellij.openapi.diagnostic.Logger
-import com.intellij.openapi.editor.Editor
 import ee.carlrobert.codegpt.CodeGPTKeys
 import ee.carlrobert.codegpt.completions.CompletionRequestService
 import ee.carlrobert.codegpt.settings.GeneralSettings
@@ -14,10 +12,11 @@ import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings
 import ee.carlrobert.codegpt.treesitter.CodeCompletionParserFactory
 import ee.carlrobert.llm.completion.CompletionEventListener
-import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.ProducerScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.sse.EventSource
 import java.util.concurrent.atomic.AtomicReference
 
@@ -28,7 +27,6 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
     }
 
     private val currentCall = AtomicReference<EventSource>(null)
-    private val providerScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
     override val id: InlineCompletionProviderID
         get() = InlineCompletionProviderID("CodeGPTInlineCompletionProvider")
@@ -43,11 +41,19 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
             val infillRequest = withContext(Dispatchers.EDT) {
                 InfillRequestDetails.fromInlineCompletionRequest(request)
             }
-            cancelCurrentCall()
             currentCall.set(
                 CompletionRequestService.getInstance().getCodeCompletionAsync(
                     infillRequest,
-                    getCodeCompletionEventListener(request.editor, infillRequest)
+                    CodeCompletionEventListener(infillRequest) {
+                        request.editor.putUserData(CodeGPTKeys.PREVIOUS_INLAY_TEXT, it)
+                        launch {
+                            try {
+                                trySend(InlineCompletionGrayTextElement(it))
+                            } catch (e: Exception) {
+                                LOG.error("Failed to send inline completion suggestion", e)
+                            }
+                        }
+                    }
                 )
             )
             awaitClose { cancelCurrentCall() }
@@ -62,20 +68,6 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
             else -> false
         }
         return event is InlineCompletionEvent.DocumentChange && codeCompletionsEnabled
-    }
-
-    private fun ProducerScope<InlineCompletionElement>.getCodeCompletionEventListener(
-        editor: Editor,
-        infillRequest: InfillRequestDetails
-    ) = CodeCompletionEventListener(infillRequest) {
-        editor.putUserData(CodeGPTKeys.PREVIOUS_INLAY_TEXT, it)
-        providerScope.launch {
-            try {
-                send(InlineCompletionGrayTextElement(it))
-            } catch (e: Exception) {
-                LOG.error("Failed to send inline completion suggestion", e)
-            }
-        }
     }
 
     private fun cancelCurrentCall() {
