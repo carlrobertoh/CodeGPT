@@ -22,7 +22,7 @@ intellij {
 }
 
 checkstyle {
-  toolVersion = "10.12.5"
+  toolVersion = "10.15.0"
 }
 
 dependencies {
