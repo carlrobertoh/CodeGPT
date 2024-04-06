@@ -216,10 +216,10 @@ public class CompletionRequestProvider {
       List<OpenAIChatCompletionMessage> messages,
       boolean streamRequest) {
     var requestBuilder = new Request.Builder().url(customConfiguration.getUrl().trim());
+    var credential = CredentialsStore.INSTANCE.getCredential(CUSTOM_SERVICE_API_KEY);
     for (var entry : customConfiguration.getHeaders().entrySet()) {
       String value = entry.getValue();
-      var credential = CredentialsStore.INSTANCE.getCredential(CUSTOM_SERVICE_API_KEY);
-      if (value.contains("$CUSTOM_SERVICE_API_KEY") && credential != null) {
+      if (credential != null && value.contains("$CUSTOM_SERVICE_API_KEY")) {
         value = value.replace("$CUSTOM_SERVICE_API_KEY", credential);
       }
       requestBuilder.addHeader(entry.getKey(), value);
