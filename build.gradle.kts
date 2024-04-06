@@ -23,7 +23,7 @@ fun environment(key: String) = providers.environmentVariable(key)
 
 plugins {
   id("codegpt.java-conventions")
-  id("org.jetbrains.changelog") version "2.2.0"
+  alias(libs.plugins.changelog)
 }
 
 group = properties("pluginGroup").get()
@@ -50,15 +50,16 @@ dependencies {
   implementation(project(":codegpt-telemetry"))
   implementation(project(":codegpt-treesitter"))
 
-  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.16.1")
-  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.2")
-  implementation("com.vladsch.flexmark:flexmark-all:0.64.8") {
+  implementation(enforcedPlatform("com.fasterxml.jackson:jackson-bom:${libs.versions.jackson.get()}"))
+  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8")
+  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+  implementation(libs.flexmark.all) {
     // vulnerable transitive dependency
     exclude(group = "org.jsoup", module = "jsoup")
   }
-  implementation("org.jsoup:jsoup:1.17.2")
-  implementation("org.apache.commons:commons-text:1.11.0")
-  implementation("com.knuddels:jtokkit:1.0.0")
+  implementation(libs.jsoup)
+  implementation(libs.commons.text)
+  implementation(libs.jtokkit)
 }
 
 tasks.register<Exec>("updateSubmodules") {
