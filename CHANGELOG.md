@@ -10,12 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Vision support (image understanding) for OpenAI GPT-4 and Anthropic Claude models
 - Total token panel for all providers
+- Autofocus for UserTextArea when the tool window is visible
 
 ### Fixed
 
-- Fixed several UI/UX issues related to code completions for IDE versions starting from 233 
+- Git commit message generation
 - Error when adding a single file to the context
-- A couple of IntelliJ Platform errors/warnings
+- Several IntelliJ platform warnings
 
 ### Removed
 
