@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.toolwindow.chat.standard;
+package ee.carlrobert.codegpt.toolwindow.chat;
 
 import static java.util.Objects.requireNonNull;
 
@@ -22,11 +22,11 @@ import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 
 @Service(Service.Level.PROJECT)
-public final class StandardChatToolWindowContentManager {
+public final class ChatToolWindowContentManager {
 
   private final Project project;
 
-  public StandardChatToolWindowContentManager(Project project) {
+  public ChatToolWindowContentManager(Project project) {
     this.project = project;
   }
 
@@ -55,15 +55,14 @@ public final class StandardChatToolWindowContentManager {
         .ifPresent(tabbedPane -> tabbedPane.tryFindTabTitle(conversation.getId())
             .ifPresentOrElse(
                 title -> tabbedPane.setSelectedIndex(tabbedPane.indexOfTab(title)),
-                () -> tabbedPane.addNewTab(
-                    new StandardChatToolWindowTabPanel(project, conversation))));
+                () -> tabbedPane.addNewTab(new ChatToolWindowTabPanel(project, conversation))));
   }
 
-  public StandardChatToolWindowTabPanel createNewTabPanel() {
+  public ChatToolWindowTabPanel createNewTabPanel() {
     displayChatTab();
     return tryFindChatTabbedPane()
         .map(item -> {
-          var panel = new StandardChatToolWindowTabPanel(
+          var panel = new ChatToolWindowTabPanel(
               project,
               ConversationService.getInstance().startConversation());
           item.addNewTab(panel);
@@ -83,26 +82,26 @@ public final class StandardChatToolWindowContentManager {
     );
   }
 
-  public Optional<StandardChatToolWindowTabbedPane> tryFindChatTabbedPane() {
+  public Optional<ChatToolWindowTabbedPane> tryFindChatTabbedPane() {
     var chatTabContent = tryFindFirstChatTabContent();
     if (chatTabContent.isPresent()) {
-      var chatToolWindowPanel = (StandardChatToolWindowPanel) chatTabContent.get().getComponent();
+      var chatToolWindowPanel = (ChatToolWindowPanel) chatTabContent.get().getComponent();
       return Optional.of(chatToolWindowPanel.getChatTabbedPane());
     }
     return Optional.empty();
   }
 
-  public Optional<StandardChatToolWindowPanel> tryFindChatToolWindowPanel() {
+  public Optional<ChatToolWindowPanel> tryFindChatToolWindowPanel() {
     return tryFindFirstChatTabContent()
         .map(ComponentContainer::getComponent)
-        .filter(component -> component instanceof StandardChatToolWindowPanel)
-        .map(component -> (StandardChatToolWindowPanel) component);
+        .filter(component -> component instanceof ChatToolWindowPanel)
+        .map(component -> (ChatToolWindowPanel) component);
   }
 
   public void resetAll() {
     tryFindChatTabbedPane().ifPresent(tabbedPane -> {
       tabbedPane.clearAll();
-      tabbedPane.addNewTab(new StandardChatToolWindowTabPanel(
+      tabbedPane.addNewTab(new ChatToolWindowTabPanel(
           project,
           ConversationService.getInstance().startConversation()));
     });

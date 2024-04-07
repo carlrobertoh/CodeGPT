@@ -20,7 +20,6 @@ import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
-import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowTabPanel;
 import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -30,14 +29,14 @@ import java.util.List;
 import java.util.Map;
 import testsupport.IntegrationTest;
 
-public class StandardChatToolWindowTabPanelTest extends IntegrationTest {
+public class ChatToolWindowTabPanelTest extends IntegrationTest {
 
   public void testSendingOpenAIMessage() {
     useOpenAIService();
     ConfigurationSettings.getCurrentState().setSystemPrompt(COMPLETION_SYSTEM_PROMPT);
     var message = new Message("Hello!");
     var conversation = ConversationService.getInstance().startConversation();
-    var panel = new StandardChatToolWindowTabPanel(getProject(), conversation);
+    var panel = new ChatToolWindowTabPanel(getProject(), conversation);
     expectOpenAI((StreamHttpExchange) request -> {
       assertThat(request.getUri().getPath()).isEqualTo("/v1/chat/completions");
       assertThat(request.getMethod()).isEqualTo("POST");
@@ -102,7 +101,7 @@ public class StandardChatToolWindowTabPanelTest extends IntegrationTest {
     message.setReferencedFilePaths(
         List.of("TEST_FILE_PATH_1", "TEST_FILE_PATH_2", "TEST_FILE_PATH_3"));
     var conversation = ConversationService.getInstance().startConversation();
-    var panel = new StandardChatToolWindowTabPanel(getProject(), conversation);
+    var panel = new ChatToolWindowTabPanel(getProject(), conversation);
     expectOpenAI((StreamHttpExchange) request -> {
       assertThat(request.getUri().getPath()).isEqualTo("/v1/chat/completions");
       assertThat(request.getMethod()).isEqualTo("POST");
@@ -188,7 +187,7 @@ public class StandardChatToolWindowTabPanelTest extends IntegrationTest {
     ConfigurationSettings.getCurrentState().setSystemPrompt(COMPLETION_SYSTEM_PROMPT);
     var message = new Message("TEST_MESSAGE");
     var conversation = ConversationService.getInstance().startConversation();
-    var panel = new StandardChatToolWindowTabPanel(getProject(), conversation);
+    var panel = new ChatToolWindowTabPanel(getProject(), conversation);
     expectOpenAI((StreamHttpExchange) request -> {
       assertThat(request.getUri().getPath()).isEqualTo("/v1/chat/completions");
       assertThat(request.getMethod()).isEqualTo("POST");
@@ -266,7 +265,7 @@ public class StandardChatToolWindowTabPanelTest extends IntegrationTest {
     message.setReferencedFilePaths(
         List.of("TEST_FILE_PATH_1", "TEST_FILE_PATH_2", "TEST_FILE_PATH_3"));
     var conversation = ConversationService.getInstance().startConversation();
-    var panel = new StandardChatToolWindowTabPanel(getProject(), conversation);
+    var panel = new ChatToolWindowTabPanel(getProject(), conversation);
     expectOpenAI((StreamHttpExchange) request -> {
       assertThat(request.getUri().getPath()).isEqualTo("/v1/chat/completions");
       assertThat(request.getMethod()).isEqualTo("POST");
@@ -360,7 +359,7 @@ public class StandardChatToolWindowTabPanelTest extends IntegrationTest {
     llamaSettings.setRepeatPenalty(1.3);
     var message = new Message("TEST_PROMPT");
     var conversation = ConversationService.getInstance().startConversation();
-    var panel = new StandardChatToolWindowTabPanel(getProject(), conversation);
+    var panel = new ChatToolWindowTabPanel(getProject(), conversation);
     expectLlama((StreamHttpExchange) request -> {
       assertThat(request.getUri().getPath()).isEqualTo("/completion");
       assertThat(request.getBody())

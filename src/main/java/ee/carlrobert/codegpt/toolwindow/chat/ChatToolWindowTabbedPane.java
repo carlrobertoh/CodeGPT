@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.toolwindow.chat.standard;
+package ee.carlrobert.codegpt.toolwindow.chat;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.Disposable;
@@ -25,9 +25,9 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 
-public class StandardChatToolWindowTabbedPane extends JBTabbedPane {
+public class ChatToolWindowTabbedPane extends JBTabbedPane {
 
-  private final Map<String, StandardChatToolWindowTabPanel> activeTabMapping = new TreeMap<>(
+  private final Map<String, ChatToolWindowTabPanel> activeTabMapping = new TreeMap<>(
       (o1, o2) -> {
         int n1 = Integer.parseInt(o1.replaceAll("\\D", ""));
         int n2 = Integer.parseInt(o2.replaceAll("\\D", ""));
@@ -35,18 +35,18 @@ public class StandardChatToolWindowTabbedPane extends JBTabbedPane {
       });
   private final Disposable parentDisposable;
 
-  public StandardChatToolWindowTabbedPane(Disposable parentDisposable) {
+  public ChatToolWindowTabbedPane(Disposable parentDisposable) {
     this.parentDisposable = parentDisposable;
     setTabComponentInsets(null);
     setComponentPopupMenu(new TabPopupMenu());
     addChangeListener(e -> refreshTabState());
   }
 
-  public Map<String, StandardChatToolWindowTabPanel> getActiveTabMapping() {
+  public Map<String, ChatToolWindowTabPanel> getActiveTabMapping() {
     return activeTabMapping;
   }
 
-  public void addNewTab(StandardChatToolWindowTabPanel toolWindowPanel) {
+  public void addNewTab(ChatToolWindowTabPanel toolWindowPanel) {
     var tabIndices = activeTabMapping.keySet().toArray(new String[0]);
     var nextIndex = 0;
     for (String title : tabIndices) {
@@ -81,7 +81,7 @@ public class StandardChatToolWindowTabbedPane extends JBTabbedPane {
         .map(Map.Entry::getKey);
   }
 
-  public Optional<StandardChatToolWindowTabPanel> tryFindActiveTabPanel() {
+  public Optional<ChatToolWindowTabPanel> tryFindActiveTabPanel() {
     var selectedIndex = getSelectedIndex();
     if (selectedIndex == -1) {
       return Optional.empty();
@@ -116,7 +116,7 @@ public class StandardChatToolWindowTabbedPane extends JBTabbedPane {
       Disposer.dispose(tabPanel);
       activeTabMapping.remove(getTitleAt(getSelectedIndex()));
       removeTabAt(getSelectedIndex());
-      addNewTab(new StandardChatToolWindowTabPanel(
+      addNewTab(new ChatToolWindowTabPanel(
           project,
           ConversationService.getInstance().startConversation()));
       repaint();
@@ -180,8 +180,8 @@ public class StandardChatToolWindowTabbedPane extends JBTabbedPane {
 
     @Override
     public void show(Component invoker, int x, int y) {
-      selectedPopupTabIndex = StandardChatToolWindowTabbedPane.this.getUI()
-          .tabForCoordinate(StandardChatToolWindowTabbedPane.this, x, y);
+      selectedPopupTabIndex = ChatToolWindowTabbedPane.this.getUI()
+          .tabForCoordinate(ChatToolWindowTabbedPane.this, x, y);
       if (selectedPopupTabIndex > 0) {
         super.show(invoker, x, y);
       }

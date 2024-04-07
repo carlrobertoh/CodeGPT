@@ -1,9 +1,8 @@
-package ee.carlrobert.codegpt.toolwindow;
+package ee.carlrobert.codegpt.toolwindow.chat
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ex.ToolWindowManagerListener
-import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager
 
 class ChatToolWindowListener : ToolWindowManagerListener {
 
@@ -14,7 +13,7 @@ class ChatToolWindowListener : ToolWindowManagerListener {
     }
 
     private fun requestFocusForTextArea(project: Project) {
-        val contentManager = project.getService(StandardChatToolWindowContentManager::class.java)
+        val contentManager = project.getService(ChatToolWindowContentManager::class.java)
         contentManager.tryFindChatTabbedPane().ifPresent { tabbedPane ->
             tabbedPane.tryFindActiveTabPanel().ifPresent { tabPanel ->
                 tabPanel.requestFocusForTextArea()
