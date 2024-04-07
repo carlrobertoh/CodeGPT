@@ -2,7 +2,7 @@ package ee.carlrobert.codegpt.codecompletions
 
 class CompletionSplitter {
     companion object {
-        fun split(completionText: String, startOffset: Int, endOffset: Int): String {
+        fun split(completionText: String): String {
             val boundaryPredicates = listOf<(Char) -> Boolean>(
                 { Character.isWhitespace(it) },
                 { isBoundaryCharacter(it) },
@@ -10,7 +10,7 @@ class CompletionSplitter {
             )
             for (predicate in boundaryPredicates) {
                 val blockIndex =
-                    findContinuousBlock(completionText, endOffset - startOffset, predicate)
+                    findContinuousBlock(completionText, predicate)
                 if (blockIndex != -1) {
                     return completionText.substring(0, blockIndex)
                 }
@@ -20,14 +20,13 @@ class CompletionSplitter {
 
         private fun findContinuousBlock(
             fullCompletion: String,
-            offset: Int,
             isBoundaryCharacter: BoundaryFinder
         ): Int {
-            if (!isBoundaryCharacter.isBoundaryCharacter(fullCompletion[offset])) {
+            if (!isBoundaryCharacter.isBoundaryCharacter(fullCompletion[0])) {
                 return -1
             }
 
-            var endIndex = offset
+            var endIndex = 0
             while (endIndex < fullCompletion.length
                 && isBoundaryCharacter.isBoundaryCharacter(fullCompletion[endIndex])
             ) {

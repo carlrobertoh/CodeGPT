@@ -115,7 +115,7 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
 
             val completionText = variant.elements.firstOrNull()?.text ?: return Invalidated
             val textToInsert = event.toRequest().run {
-                CompletionSplitter.split(completionText, startOffset, endOffset)
+                CompletionSplitter.split(completionText)
             }
             return Changed(
                 variant.copy(

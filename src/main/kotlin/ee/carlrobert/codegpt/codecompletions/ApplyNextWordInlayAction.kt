@@ -31,20 +31,17 @@ class ApplyNextWordInlayAction : EditorAction(Handler()) {
             context: InlineCompletionContext,
             editor: Editor
         ): InlineCompletionHandler.() -> Unit = {
-            val startOffset = context.startOffset() ?: 0
-            val endOffset = context.endOffset() ?: 0
-            val textToInsert =
-                CompletionSplitter.split(context.textToInsert(), startOffset, endOffset)
+            val startOffset = editor.caretModel.offset
+            val textToInsert = CompletionSplitter.split(context.textToInsert())
             withIgnoringDocumentChanges {
+                val suggestionTextRange = TextRange(startOffset - textToInsert.length, startOffset)
+                invokeEvent(ApplyNextWordInlaySuggestionEvent(request, suggestionTextRange))
+
                 runWriteAction {
                     editor.document.insertString(startOffset, textToInsert)
                     editor.caretModel.moveToOffset(startOffset + textToInsert.length)
                 }
             }
-
-            val suggestionTextRange =
-                TextRange(startOffset + textToInsert.length, endOffset + textToInsert.length)
-            invokeEvent(ApplyNextWordInlaySuggestionEvent(request, suggestionTextRange))
         }
     }
 }
