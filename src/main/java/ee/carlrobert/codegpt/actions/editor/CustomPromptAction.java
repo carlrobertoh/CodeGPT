@@ -11,7 +11,7 @@ import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.conversations.message.Message;
-import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
+import ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowContentManager;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import ee.carlrobert.codegpt.util.file.FileUtil;
 import java.awt.event.ActionEvent;
@@ -42,7 +42,7 @@ public class CustomPromptAction extends BaseEditorAction {
             format("%s\n```%s\n%s\n```", previousUserPrompt, fileExtension, selectedText));
         message.setUserMessage(previousUserPrompt);
         SwingUtilities.invokeLater(() ->
-            project.getService(StandardChatToolWindowContentManager.class).sendMessage(message));
+            project.getService(ChatToolWindowContentManager.class).sendMessage(message));
       }
     }
   }

@@ -14,7 +14,7 @@ import ee.carlrobert.codegpt.CodeGPTKeys;
 import ee.carlrobert.codegpt.ReferencedFile;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
-import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
+import ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowContentManager;
 import ee.carlrobert.codegpt.util.file.FileUtil;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -65,7 +65,7 @@ public class EditorActionsUtil {
                 format("\n```%s\n%s\n```", fileExtension, selectedText)));
             message.setUserMessage(prompt.replace("{{selectedCode}}", ""));
             var toolWindowContentManager =
-                project.getService(StandardChatToolWindowContentManager.class);
+                project.getService(ChatToolWindowContentManager.class);
             toolWindowContentManager.getToolWindow().show();
 
             message.setReferencedFilePaths(

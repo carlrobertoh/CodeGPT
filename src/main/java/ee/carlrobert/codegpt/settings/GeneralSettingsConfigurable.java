@@ -26,7 +26,7 @@ import ee.carlrobert.codegpt.settings.service.openai.OpenAISettingsForm;
 import ee.carlrobert.codegpt.settings.service.you.YouSettings;
 import ee.carlrobert.codegpt.settings.service.you.YouSettingsForm;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
-import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
+import ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowContentManager;
 import ee.carlrobert.codegpt.util.ApplicationUtil;
 import javax.swing.JComponent;
 import org.jetbrains.annotations.Nls;
@@ -160,6 +160,6 @@ public class GeneralSettingsConfigurable implements Configurable {
       throw new RuntimeException("Could not find current project.");
     }
 
-    project.getService(StandardChatToolWindowContentManager.class).resetAll();
+    project.getService(ChatToolWindowContentManager.class).resetAll();
   }
 }

@@ -6,13 +6,11 @@ import com.intellij.openapi.util.Disposer;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
-import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowTabPanel;
-import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowTabbedPane;
 
-public class StandardChatToolWindowTabbedPaneTest extends BasePlatformTestCase {
+public class ChatToolWindowTabbedPaneTest extends BasePlatformTestCase {
 
   public void testClearAllTabs() {
-    var tabbedPane = new StandardChatToolWindowTabbedPane(Disposer.newDisposable());
+    var tabbedPane = new ChatToolWindowTabbedPane(Disposer.newDisposable());
     tabbedPane.addNewTab(createNewTabPanel());
 
     tabbedPane.clearAll();
@@ -22,7 +20,7 @@ public class StandardChatToolWindowTabbedPaneTest extends BasePlatformTestCase {
 
 
   public void testAddingNewTabs() {
-    var tabbedPane = new StandardChatToolWindowTabbedPane(Disposer.newDisposable());
+    var tabbedPane = new ChatToolWindowTabbedPane(Disposer.newDisposable());
 
     tabbedPane.addNewTab(createNewTabPanel());
     tabbedPane.addNewTab(createNewTabPanel());
@@ -33,10 +31,10 @@ public class StandardChatToolWindowTabbedPaneTest extends BasePlatformTestCase {
   }
 
   public void testResetCurrentlyActiveTabPanel() {
-    var tabbedPane = new StandardChatToolWindowTabbedPane(Disposer.newDisposable());
+    var tabbedPane = new ChatToolWindowTabbedPane(Disposer.newDisposable());
     var conversation = ConversationService.getInstance().startConversation();
     conversation.addMessage(new Message("TEST_PROMPT", "TEST_RESPONSE"));
-    tabbedPane.addNewTab(new StandardChatToolWindowTabPanel(getProject(), conversation));
+    tabbedPane.addNewTab(new ChatToolWindowTabPanel(getProject(), conversation));
 
     tabbedPane.resetCurrentlyActiveTabPanel(getProject());
 
@@ -44,8 +42,8 @@ public class StandardChatToolWindowTabbedPaneTest extends BasePlatformTestCase {
     assertThat(tabPanel.getConversation().getMessages()).isEmpty();
   }
 
-  private StandardChatToolWindowTabPanel createNewTabPanel() {
-    return new StandardChatToolWindowTabPanel(
+  private ChatToolWindowTabPanel createNewTabPanel() {
+    return new ChatToolWindowTabPanel(
         getProject(),
         ConversationService.getInstance().startConversation());
   }
