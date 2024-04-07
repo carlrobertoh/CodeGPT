@@ -6,12 +6,13 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 
 import com.intellij.openapi.Disposable;
-import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.actionSystem.ActionPlaces;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
 import com.intellij.util.ui.JBUI;
+import com.intellij.util.ui.JBUI.Borders;
 import ee.carlrobert.codegpt.CodeGPTKeys;
 import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.ReferencedFile;
@@ -25,47 +26,47 @@ import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
+import ee.carlrobert.codegpt.settings.service.you.YouSettings;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
-import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
-import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowPanel;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ChatMessageResponseBody;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ChatToolWindowScrollablePanel;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ResponsePanel;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.UserMessagePanel;
+import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.ModelComboBoxAction;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.TotalTokensDetails;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.TotalTokensPanel;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.UserPromptTextArea;
-import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.UserPromptTextAreaHeader;
+import ee.carlrobert.codegpt.toolwindow.ui.ChatToolWindowLandingPanel;
+import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.codegpt.util.EditorUtil;
 import ee.carlrobert.codegpt.util.file.FileUtil;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.UUID;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import kotlin.Unit;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public abstract class ChatToolWindowTabPanel implements Disposable {
+public class ChatToolWindowTabPanel implements Disposable {
 
   private static final Logger LOG = Logger.getInstance(ChatToolWindowTabPanel.class);
 
+  private final Project project;
   private final JPanel rootPanel;
   private final Conversation conversation;
   private final UserPromptTextArea userPromptTextArea;
   private final ConversationService conversationService;
+  private final TotalTokensPanel totalTokensPanel;
+  private final ChatToolWindowScrollablePanel toolWindowScrollablePanel;
 
-  protected final Project project;
-  protected final TotalTokensPanel totalTokensPanel;
-  protected final ChatToolWindowScrollablePanel toolWindowScrollablePanel;
-
-  protected abstract JComponent getLandingView();
-
-  public ChatToolWindowTabPanel(
-      @NotNull Project project,
-      @NotNull Conversation conversation,
-      boolean useContextualSearch) {
+  public ChatToolWindowTabPanel(@NotNull Project project, @NotNull Conversation conversation) {
     this.project = project;
     this.conversation = conversation;
     conversationService = ConversationService.getInstance();
@@ -79,6 +80,12 @@ public abstract class ChatToolWindowTabPanel implements Disposable {
     rootPanel = createRootPanel();
     userPromptTextArea.requestFocusInWindow();
     userPromptTextArea.requestFocus();
+
+    if (conversation.getMessages().isEmpty()) {
+      displayLandingView();
+    } else {
+      displayConversation(conversation);
+    }
   }
 
   public void dispose() {
@@ -91,58 +98,6 @@ public abstract class ChatToolWindowTabPanel implements Disposable {
 
   public Conversation getConversation() {
     return conversation;
-  }
-
-  public void sendMessage(Message message) {
-    sendMessage(message, ConversationType.DEFAULT);
-  }
-
-  public void sendMessage(Message message, ConversationType conversationType) {
-    Runnable runnable = () -> {
-      var referencedFiles = project.getUserData(CodeGPTKeys.SELECTED_FILES);
-      if (referencedFiles != null && !referencedFiles.isEmpty()) {
-        var referencedFilePaths = referencedFiles.stream()
-            .map(ReferencedFile::getFilePath)
-            .collect(toList());
-        message.setReferencedFilePaths(referencedFilePaths);
-        message.setUserMessage(message.getPrompt());
-        message.setPrompt(getPromptWithContext(referencedFiles, message.getPrompt()));
-
-        totalTokensPanel.updateReferencedFilesTokens(referencedFiles);
-
-        project.getService(StandardChatToolWindowContentManager.class)
-            .tryFindChatToolWindowPanel()
-            .ifPresent(StandardChatToolWindowPanel::clearSelectedFilesNotification);
-      }
-
-      var messagePanel = toolWindowScrollablePanel.addMessage(message.getId());
-      messagePanel.add(new UserMessagePanel(project, message, this));
-      var responsePanel = createResponsePanel(message, conversationType);
-      messagePanel.add(responsePanel);
-
-      updateTotalTokens(message);
-
-      call(message, conversationType, responsePanel, false);
-    };
-    // TODO
-    if (ApplicationManager.getApplication().isUnitTestMode()) {
-      runnable.run();
-    } else {
-      SwingUtilities.invokeLater(runnable);
-    }
-  }
-
-  private void updateTotalTokens(Message message) {
-    int userPromptTokens = EncodingManager.getInstance().countTokens(message.getPrompt());
-    int conversationTokens = EncodingManager.getInstance().countConversationTokens(conversation);
-    totalTokensPanel.updateConversationTokens(conversationTokens + userPromptTokens);
-  }
-
-  private ResponsePanel createResponsePanel(Message message, ConversationType conversationType) {
-    return new ResponsePanel()
-        .withReloadAction(() -> reloadMessage(message, conversation, conversationType))
-        .withDeleteAction(() -> removeMessage(message.getId(), conversation))
-        .addContent(new ChatMessageResponseBody(project, true, this));
   }
 
   public TotalTokensDetails getTokenDetails() {
@@ -158,7 +113,77 @@ public abstract class ChatToolWindowTabPanel implements Disposable {
     totalTokensPanel.updateConversationTokens(conversation);
   }
 
-  protected void reloadMessage(
+  public void sendMessage(Message message) {
+    sendMessage(message, ConversationType.DEFAULT);
+  }
+
+  public void sendMessage(Message message, ConversationType conversationType) {
+    SwingUtilities.invokeLater(() -> {
+      var referencedFiles = project.getUserData(CodeGPTKeys.SELECTED_FILES);
+      var chatToolWindowPanel = project.getService(ChatToolWindowContentManager.class)
+          .tryFindChatToolWindowPanel();
+      if (referencedFiles != null && !referencedFiles.isEmpty()) {
+        var referencedFilePaths = referencedFiles.stream()
+            .map(ReferencedFile::getFilePath)
+            .collect(toList());
+        message.setReferencedFilePaths(referencedFilePaths);
+        message.setUserMessage(message.getPrompt());
+        message.setPrompt(getPromptWithContext(referencedFiles, message.getPrompt()));
+
+        totalTokensPanel.updateReferencedFilesTokens(referencedFiles);
+
+        chatToolWindowPanel.ifPresent(panel -> panel.clearNotifications(project));
+      }
+
+      var userMessagePanel = new UserMessagePanel(project, message, this);
+      var attachedFilePath = CodeGPTKeys.IMAGE_ATTACHMENT_FILE_PATH.get(project);
+      var callParameters = getCallParameters(conversationType, message, attachedFilePath);
+      if (callParameters.getImageData() != null) {
+        message.setImageFilePath(attachedFilePath);
+        chatToolWindowPanel.ifPresent(panel -> panel.clearNotifications(project));
+        userMessagePanel.displayImage(attachedFilePath);
+      }
+
+      var messagePanel = toolWindowScrollablePanel.addMessage(message.getId());
+      messagePanel.add(userMessagePanel);
+
+      var responsePanel = createResponsePanel(message, conversationType);
+      messagePanel.add(responsePanel);
+      updateTotalTokens(message);
+      call(callParameters, responsePanel);
+    });
+  }
+
+  private CallParameters getCallParameters(
+      ConversationType conversationType,
+      Message message,
+      @Nullable String attachedFilePath) {
+    var callParameters = new CallParameters(conversation, conversationType, message, false);
+    if (attachedFilePath != null && !attachedFilePath.isEmpty()) {
+      try {
+        callParameters.setImageData(Files.readAllBytes(Path.of(attachedFilePath)));
+        callParameters.setImageMediaType(FileUtil.getImageMediaType(attachedFilePath));
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
+    return callParameters;
+  }
+
+  private void updateTotalTokens(Message message) {
+    int userPromptTokens = EncodingManager.getInstance().countTokens(message.getPrompt());
+    int conversationTokens = EncodingManager.getInstance().countConversationTokens(conversation);
+    totalTokensPanel.updateConversationTokens(conversationTokens + userPromptTokens);
+  }
+
+  private ResponsePanel createResponsePanel(Message message, ConversationType conversationType) {
+    return new ResponsePanel()
+        .withReloadAction(() -> reloadMessage(message, conversation, conversationType))
+        .withDeleteAction(() -> removeMessage(message.getId(), conversation))
+        .addContent(new ChatMessageResponseBody(project, true, this));
+  }
+
+  private void reloadMessage(
       Message message,
       Conversation conversation,
       ConversationType conversationType) {
@@ -175,7 +200,7 @@ public abstract class ChatToolWindowTabPanel implements Disposable {
       if (responsePanel != null) {
         message.setResponse("");
         conversationService.saveMessage(conversation, message);
-        call(message, conversationType, responsePanel, true);
+        call(new CallParameters(conversation, conversationType, message, true), responsePanel);
       }
 
       totalTokensPanel.updateConversationTokens(conversation);
@@ -186,7 +211,7 @@ public abstract class ChatToolWindowTabPanel implements Disposable {
     }
   }
 
-  protected void removeMessage(UUID messageId, Conversation conversation) {
+  private void removeMessage(UUID messageId, Conversation conversation) {
     toolWindowScrollablePanel.removeMessage(messageId);
     conversation.removeMessage(messageId);
     conversationService.saveConversation(conversation);
@@ -197,16 +222,12 @@ public abstract class ChatToolWindowTabPanel implements Disposable {
     }
   }
 
-  protected void clearWindow() {
+  private void clearWindow() {
     toolWindowScrollablePanel.clearAll();
     totalTokensPanel.updateConversationTokens(conversation);
   }
 
-  private void call(
-      Message message,
-      ConversationType conversationType,
-      ResponsePanel responsePanel,
-      boolean retry) {
+  private void call(CallParameters callParameters, ResponsePanel responsePanel) {
     var responseContainer = (ChatMessageResponseBody) responsePanel.getContent();
 
     if (!CompletionRequestService.getInstance().isRequestAllowed()) {
@@ -222,13 +243,13 @@ public abstract class ChatToolWindowTabPanel implements Disposable {
             userPromptTextArea) {
           @Override
           public void handleTokensExceededPolicyAccepted() {
-            call(message, conversationType, responsePanel, true);
+            call(callParameters, responsePanel);
           }
         });
     userPromptTextArea.setRequestHandler(requestHandler);
     userPromptTextArea.setSubmitEnabled(false);
 
-    requestHandler.call(new CallParameters(conversation, conversationType, message, retry));
+    requestHandler.call(callParameters);
   }
 
   private void handleSubmit(String text) {
@@ -253,13 +274,77 @@ public abstract class ChatToolWindowTabPanel implements Disposable {
     panel.setBorder(JBUI.Borders.compound(
         JBUI.Borders.customLine(JBColor.border(), 1, 0, 0, 0),
         JBUI.Borders.empty(8)));
-    var contentManager = project.getService(StandardChatToolWindowContentManager.class);
-    panel.add(JBUI.Panels.simplePanel(new UserPromptTextAreaHeader(
+    var contentManager = project.getService(ChatToolWindowContentManager.class);
+    panel.add(JBUI.Panels.simplePanel(createUserPromptTextAreaHeader(
         selectedService,
-        totalTokensPanel,
-        contentManager::createNewTabPanel)), BorderLayout.NORTH);
+        () -> {
+          ConversationService.getInstance().startConversation();
+          contentManager.createNewTabPanel();
+        })), BorderLayout.NORTH);
     panel.add(JBUI.Panels.simplePanel(userPromptTextArea), BorderLayout.CENTER);
     return panel;
+  }
+
+  private JPanel createUserPromptTextAreaHeader(
+      ServiceType selectedService,
+      Runnable onModelChange) {
+    return JBUI.Panels.simplePanel()
+        .withBorder(Borders.emptyBottom(8))
+        .andTransparent()
+        .addToLeft(totalTokensPanel)
+        .addToRight(new ModelComboBoxAction(onModelChange, selectedService)
+            .createCustomComponent(ActionPlaces.UNKNOWN));
+  }
+
+  private JComponent getLandingView() {
+    return new ChatToolWindowLandingPanel((action, locationOnScreen) -> {
+      var editor = EditorUtil.getSelectedEditor(project);
+      if (editor == null || !editor.getSelectionModel().hasSelection()) {
+        OverlayUtil.showWarningBalloon(
+            editor == null ? "Unable to locate a selected editor"
+                : "Please select a target code before proceeding",
+            locationOnScreen);
+        return Unit.INSTANCE;
+      }
+
+      var fileExtension = FileUtil.getFileExtension(
+          ((EditorImpl) editor).getVirtualFile().getName());
+      var message = new Message(action.getPrompt().replace(
+          "{{selectedCode}}",
+          format("\n```%s\n%s\n```", fileExtension, editor.getSelectionModel().getSelectedText())));
+      message.setUserMessage(action.getUserMessage());
+
+      sendMessage(message, ConversationType.DEFAULT);
+      return Unit.INSTANCE;
+    });
+  }
+
+  private void displayConversation(@NotNull Conversation conversation) {
+    clearWindow();
+    conversation.getMessages().forEach(message -> {
+      var messageResponseBody =
+          new ChatMessageResponseBody(project, this).withResponse(message.getResponse());
+
+      var serpResults = message.getSerpResults();
+      if (YouSettings.getCurrentState().isDisplayWebSearchResults()
+          && serpResults != null && !serpResults.isEmpty()) {
+        messageResponseBody.displaySerpResults(serpResults);
+      }
+      messageResponseBody.hideCaret();
+
+      var userMessagePanel = new UserMessagePanel(project, message, this);
+      var imageFilePath = message.getImageFilePath();
+      if (imageFilePath != null && !imageFilePath.isEmpty()) {
+        userMessagePanel.displayImage(imageFilePath);
+      }
+
+      var messagePanel = toolWindowScrollablePanel.addMessage(message.getId());
+      messagePanel.add(userMessagePanel);
+      messagePanel.add(new ResponsePanel()
+          .withReloadAction(() -> reloadMessage(message, conversation, ConversationType.DEFAULT))
+          .withDeleteAction(() -> removeMessage(message.getId(), conversation))
+          .addContent(messageResponseBody));
+    });
   }
 
   private JPanel createRootPanel() {

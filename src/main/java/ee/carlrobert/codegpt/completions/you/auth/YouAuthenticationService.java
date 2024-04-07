@@ -60,7 +60,6 @@ public final class YouAuthenticationService {
 
       if (response.code() == 200) {
         try {
-          var messageBus = ApplicationManager.getApplication().getMessageBus();
           var userManager = YouUserManager.getInstance();
 
           var authenticationResponse =
@@ -72,6 +71,7 @@ public final class YouAuthenticationService {
               YouApiClient.getInstance().getSubscription(authenticationResponse);
           var subscribed = subscription != null && "youpro".equals(subscription.getService());
           userManager.setSubscribed(subscribed);
+          var messageBus = ApplicationManager.getApplication().getMessageBus();
           if (subscribed) {
             messageBus.syncPublisher(YouSubscriptionNotifier.SUBSCRIPTION_TOPIC).subscribed();
           }

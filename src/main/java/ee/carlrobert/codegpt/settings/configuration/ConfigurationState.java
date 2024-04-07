@@ -14,12 +14,12 @@ public class ConfigurationState {
   private int maxTokens = 1000;
   private double temperature = 0.1;
   private boolean checkForPluginUpdates = true;
+  private boolean checkForNewScreenshots = true;
   private boolean createNewChatOnEachAction;
   private boolean ignoreGitCommitTokenLimit;
   private boolean methodNameGenerationEnabled = true;
   private boolean captureCompileErrors = true;
   private boolean autoFormattingEnabled = true;
-  private boolean codeCompletionsEnabled;
   private Map<String, String> tableData = EditorActionsUtil.DEFAULT_ACTIONS;
 
   public String getSystemPrompt() {
@@ -60,6 +60,14 @@ public class ConfigurationState {
 
   public void setCreateNewChatOnEachAction(boolean createNewChatOnEachAction) {
     this.createNewChatOnEachAction = createNewChatOnEachAction;
+  }
+
+  public boolean isCheckForNewScreenshots() {
+    return checkForNewScreenshots;
+  }
+
+  public void setCheckForNewScreenshots(boolean checkForNewScreenshots) {
+    this.checkForNewScreenshots = checkForNewScreenshots;
   }
 
   public Map<String, String> getTableData() {
@@ -110,14 +118,6 @@ public class ConfigurationState {
     this.autoFormattingEnabled = autoFormattingEnabled;
   }
 
-  public boolean isCodeCompletionsEnabled() {
-    return codeCompletionsEnabled;
-  }
-
-  public void setCodeCompletionsEnabled(boolean codeCompletionsEnabled) {
-    this.codeCompletionsEnabled = codeCompletionsEnabled;
-  }
-
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -135,7 +135,6 @@ public class ConfigurationState {
         && methodNameGenerationEnabled == that.methodNameGenerationEnabled
         && captureCompileErrors == that.captureCompileErrors
         && autoFormattingEnabled == that.autoFormattingEnabled
-        && codeCompletionsEnabled == that.codeCompletionsEnabled
         && Objects.equals(systemPrompt, that.systemPrompt)
         && Objects.equals(commitMessagePrompt, that.commitMessagePrompt)
         && Objects.equals(tableData, that.tableData);
@@ -145,7 +144,6 @@ public class ConfigurationState {
   public int hashCode() {
     return Objects.hash(systemPrompt, commitMessagePrompt, maxTokens, temperature,
         checkForPluginUpdates, createNewChatOnEachAction, ignoreGitCommitTokenLimit,
-        methodNameGenerationEnabled, captureCompileErrors, autoFormattingEnabled,
-        codeCompletionsEnabled, tableData);
+        methodNameGenerationEnabled, captureCompileErrors, autoFormattingEnabled, tableData);
   }
 }

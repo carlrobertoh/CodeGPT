@@ -7,10 +7,9 @@ import static ee.carlrobert.llm.client.util.JSONUtil.e;
 import static ee.carlrobert.llm.client.util.JSONUtil.jsonArray;
 import static ee.carlrobert.llm.client.util.JSONUtil.jsonMap;
 import static ee.carlrobert.llm.client.util.JSONUtil.jsonMapResponse;
-import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.Objects.requireNonNull;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
 
 import ee.carlrobert.codegpt.CodeGPTKeys;
 import ee.carlrobert.codegpt.EncodingManager;
@@ -21,20 +20,23 @@ import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
-import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowTabPanel;
 import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import testsupport.IntegrationTest;
 
-public class StandardChatToolWindowTabPanelTest extends IntegrationTest {
+public class ChatToolWindowTabPanelTest extends IntegrationTest {
 
   public void testSendingOpenAIMessage() {
     useOpenAIService();
     ConfigurationSettings.getCurrentState().setSystemPrompt(COMPLETION_SYSTEM_PROMPT);
     var message = new Message("Hello!");
     var conversation = ConversationService.getInstance().startConversation();
-    var panel = new StandardChatToolWindowTabPanel(getProject(), conversation);
+    var panel = new ChatToolWindowTabPanel(getProject(), conversation);
     expectOpenAI((StreamHttpExchange) request -> {
       assertThat(request.getUri().getPath()).isEqualTo("/v1/chat/completions");
       assertThat(request.getMethod()).isEqualTo("POST");
@@ -57,11 +59,10 @@ public class StandardChatToolWindowTabPanelTest extends IntegrationTest {
 
     panel.sendMessage(message);
 
-    await().atMost(5, SECONDS)
-        .until(() -> {
-          var messages = conversation.getMessages();
-          return !messages.isEmpty() && "Hello!".equals(messages.get(0).getResponse());
-        });
+    waitExpecting(() -> {
+      var messages = conversation.getMessages();
+      return !messages.isEmpty() && "Hello!".equals(messages.get(0).getResponse());
+    });
     var encodingManager = EncodingManager.getInstance();
     assertThat(panel.getTokenDetails()).extracting(
             "systemPromptTokens",
@@ -100,7 +101,7 @@ public class StandardChatToolWindowTabPanelTest extends IntegrationTest {
     message.setReferencedFilePaths(
         List.of("TEST_FILE_PATH_1", "TEST_FILE_PATH_2", "TEST_FILE_PATH_3"));
     var conversation = ConversationService.getInstance().startConversation();
-    var panel = new StandardChatToolWindowTabPanel(getProject(), conversation);
+    var panel = new ChatToolWindowTabPanel(getProject(), conversation);
     expectOpenAI((StreamHttpExchange) request -> {
       assertThat(request.getUri().getPath()).isEqualTo("/v1/chat/completions");
       assertThat(request.getMethod()).isEqualTo("POST");
@@ -114,23 +115,28 @@ public class StandardChatToolWindowTabPanelTest extends IntegrationTest {
               List.of(
                   Map.of("role", "system", "content", COMPLETION_SYSTEM_PROMPT),
                   Map.of("role", "user", "content",
-                      "Use the following context to answer question at the end:\n\n"
-                          + "File Path: TEST_FILE_PATH_1\n"
-                          + "File Content:\n"
-                          + "```TEST_FILE_NAME_1\n"
-                          + "TEST_FILE_CONTENT_1\n"
-                          + "```\n\n"
-                          + "File Path: TEST_FILE_PATH_2\n"
-                          + "File Content:\n"
-                          + "```TEST_FILE_NAME_2\n"
-                          + "TEST_FILE_CONTENT_2\n"
-                          + "```\n\n"
-                          + "File Path: TEST_FILE_PATH_3\n"
-                          + "File Content:\n"
-                          + "```TEST_FILE_NAME_3\n"
-                          + "TEST_FILE_CONTENT_3\n"
-                          + "```\n\n"
-                          + "Question: TEST_MESSAGE")));
+                      """
+                          Use the following context to answer question at the end:
+
+                          File Path: TEST_FILE_PATH_1
+                          File Content:
+                          ```TEST_FILE_NAME_1
+                          TEST_FILE_CONTENT_1
+                          ```
+
+                          File Path: TEST_FILE_PATH_2
+                          File Content:
+                          ```TEST_FILE_NAME_2
+                          TEST_FILE_CONTENT_2
+                          ```
+
+                          File Path: TEST_FILE_PATH_3
+                          File Content:
+                          ```TEST_FILE_NAME_3
+                          TEST_FILE_CONTENT_3
+                          ```
+
+                          Question: TEST_MESSAGE""")));
       return List.of(
           jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("role", "assistant")))),
           jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "Hel")))),
@@ -140,11 +146,10 @@ public class StandardChatToolWindowTabPanelTest extends IntegrationTest {
 
     panel.sendMessage(message);
 
-    await().atMost(5, SECONDS)
-        .until(() -> {
-          var messages = conversation.getMessages();
-          return !messages.isEmpty() && "Hello!".equals(messages.get(0).getResponse());
-        });
+    waitExpecting(() -> {
+      var messages = conversation.getMessages();
+      return !messages.isEmpty() && "Hello!".equals(messages.get(0).getResponse());
+    });
     var encodingManager = EncodingManager.getInstance();
     assertThat(panel.getTokenDetails()).extracting(
             "systemPromptTokens",
@@ -175,6 +180,79 @@ public class StandardChatToolWindowTabPanelTest extends IntegrationTest {
             List.of("TEST_FILE_PATH_1", "TEST_FILE_PATH_2", "TEST_FILE_PATH_3"));
   }
 
+  public void testSendingOpenAIMessageWithImage() {
+    var testImagePath = requireNonNull(getClass().getResource("/images/test-image.png")).getPath();
+    getProject().putUserData(CodeGPTKeys.IMAGE_ATTACHMENT_FILE_PATH, testImagePath);
+    useOpenAIService("gpt-4-vision-preview");
+    ConfigurationSettings.getCurrentState().setSystemPrompt(COMPLETION_SYSTEM_PROMPT);
+    var message = new Message("TEST_MESSAGE");
+    var conversation = ConversationService.getInstance().startConversation();
+    var panel = new ChatToolWindowTabPanel(getProject(), conversation);
+    expectOpenAI((StreamHttpExchange) request -> {
+      assertThat(request.getUri().getPath()).isEqualTo("/v1/chat/completions");
+      assertThat(request.getMethod()).isEqualTo("POST");
+      assertThat(request.getHeaders().get(AUTHORIZATION).get(0)).isEqualTo("Bearer TEST_API_KEY");
+      try {
+        var testImageUrl = "data:image/png;base64,"
+            + Base64.getEncoder().encodeToString(Files.readAllBytes(Path.of(testImagePath)));
+        assertThat(request.getBody())
+            .extracting("model", "messages")
+            .containsExactly(
+                "gpt-4-vision-preview",
+                List.of(
+                    Map.of("role", "system", "content", COMPLETION_SYSTEM_PROMPT),
+                    Map.of("role", "user", "content", List.of(
+                        Map.of(
+                            "type", "image_url",
+                            "image_url", Map.of("url", testImageUrl)),
+                        Map.of("type", "text", "text", "TEST_MESSAGE")
+                    ))));
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+      return List.of(
+          jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("role", "assistant")))),
+          jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "Hel")))),
+          jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "lo")))),
+          jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "!")))));
+    });
+
+    panel.sendMessage(message);
+
+    waitExpecting(() -> {
+      var messages = conversation.getMessages();
+      return !messages.isEmpty() && "Hello!".equals(messages.get(0).getResponse());
+    });
+    var encodingManager = EncodingManager.getInstance();
+    assertThat(panel.getTokenDetails()).extracting(
+            "systemPromptTokens",
+            "conversationTokens",
+            "userPromptTokens",
+            "highlightedTokens")
+        .containsExactly(
+            encodingManager.countTokens(COMPLETION_SYSTEM_PROMPT),
+            encodingManager.countTokens(message.getPrompt()),
+            0,
+            0);
+    assertThat(panel.getConversation())
+        .isNotNull()
+        .extracting("id", "model", "clientCode", "discardTokenLimit")
+        .containsExactly(
+            conversation.getId(),
+            conversation.getModel(),
+            conversation.getClientCode(),
+            false);
+    var messages = panel.getConversation().getMessages();
+    assertThat(messages.size()).isOne();
+    assertThat(messages.get(0))
+        .extracting("id", "prompt", "response", "imageFilePath")
+        .containsExactly(
+            message.getId(),
+            message.getPrompt(),
+            message.getResponse(),
+            message.getImageFilePath());
+  }
+
   public void testFixCompileErrorsWithOpenAIService() {
     getProject().putUserData(CodeGPTKeys.SELECTED_FILES, List.of(
         new ReferencedFile("TEST_FILE_NAME_1", "TEST_FILE_PATH_1", "TEST_FILE_CONTENT_1"),
@@ -187,7 +265,7 @@ public class StandardChatToolWindowTabPanelTest extends IntegrationTest {
     message.setReferencedFilePaths(
         List.of("TEST_FILE_PATH_1", "TEST_FILE_PATH_2", "TEST_FILE_PATH_3"));
     var conversation = ConversationService.getInstance().startConversation();
-    var panel = new StandardChatToolWindowTabPanel(getProject(), conversation);
+    var panel = new ChatToolWindowTabPanel(getProject(), conversation);
     expectOpenAI((StreamHttpExchange) request -> {
       assertThat(request.getUri().getPath()).isEqualTo("/v1/chat/completions");
       assertThat(request.getMethod()).isEqualTo("POST");
@@ -201,23 +279,28 @@ public class StandardChatToolWindowTabPanelTest extends IntegrationTest {
               List.of(
                   Map.of("role", "system", "content", FIX_COMPILE_ERRORS_SYSTEM_PROMPT),
                   Map.of("role", "user", "content",
-                      "Use the following context to answer question at the end:\n\n"
-                          + "File Path: TEST_FILE_PATH_1\n"
-                          + "File Content:\n"
-                          + "```TEST_FILE_NAME_1\n"
-                          + "TEST_FILE_CONTENT_1\n"
-                          + "```\n\n"
-                          + "File Path: TEST_FILE_PATH_2\n"
-                          + "File Content:\n"
-                          + "```TEST_FILE_NAME_2\n"
-                          + "TEST_FILE_CONTENT_2\n"
-                          + "```\n\n"
-                          + "File Path: TEST_FILE_PATH_3\n"
-                          + "File Content:\n"
-                          + "```TEST_FILE_NAME_3\n"
-                          + "TEST_FILE_CONTENT_3\n"
-                          + "```\n\n"
-                          + "Question: TEST_MESSAGE")));
+                      """
+                          Use the following context to answer question at the end:
+
+                          File Path: TEST_FILE_PATH_1
+                          File Content:
+                          ```TEST_FILE_NAME_1
+                          TEST_FILE_CONTENT_1
+                          ```
+
+                          File Path: TEST_FILE_PATH_2
+                          File Content:
+                          ```TEST_FILE_NAME_2
+                          TEST_FILE_CONTENT_2
+                          ```
+
+                          File Path: TEST_FILE_PATH_3
+                          File Content:
+                          ```TEST_FILE_NAME_3
+                          TEST_FILE_CONTENT_3
+                          ```
+
+                          Question: TEST_MESSAGE""")));
       return List.of(
           jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("role", "assistant")))),
           jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "Hel")))),
@@ -227,11 +310,10 @@ public class StandardChatToolWindowTabPanelTest extends IntegrationTest {
 
     panel.sendMessage(message, ConversationType.FIX_COMPILE_ERRORS);
 
-    await().atMost(5, SECONDS)
-        .until(() -> {
-          var messages = conversation.getMessages();
-          return !messages.isEmpty() && "Hello!".equals(messages.get(0).getResponse());
-        });
+    waitExpecting(() -> {
+      var messages = conversation.getMessages();
+      return !messages.isEmpty() && "Hello!".equals(messages.get(0).getResponse());
+    });
     var encodingManager = EncodingManager.getInstance();
     assertThat(panel.getTokenDetails()).extracting(
             "systemPromptTokens",
@@ -277,7 +359,7 @@ public class StandardChatToolWindowTabPanelTest extends IntegrationTest {
     llamaSettings.setRepeatPenalty(1.3);
     var message = new Message("TEST_PROMPT");
     var conversation = ConversationService.getInstance().startConversation();
-    var panel = new StandardChatToolWindowTabPanel(getProject(), conversation);
+    var panel = new ChatToolWindowTabPanel(getProject(), conversation);
     expectLlama((StreamHttpExchange) request -> {
       assertThat(request.getUri().getPath()).isEqualTo("/completion");
       assertThat(request.getBody())
@@ -312,11 +394,10 @@ public class StandardChatToolWindowTabPanelTest extends IntegrationTest {
 
     panel.sendMessage(message, ConversationType.DEFAULT);
 
-    await().atMost(5, SECONDS)
-        .until(() -> {
-          var messages = conversation.getMessages();
-          return !messages.isEmpty() && "Hello!".equals(messages.get(0).getResponse());
-        });
+    waitExpecting(() -> {
+      var messages = conversation.getMessages();
+      return !messages.isEmpty() && "Hello!".equals(messages.get(0).getResponse());
+    });
     assertThat(panel.getConversation())
         .isNotNull()
         .extracting("id", "model", "clientCode", "discardTokenLimit")

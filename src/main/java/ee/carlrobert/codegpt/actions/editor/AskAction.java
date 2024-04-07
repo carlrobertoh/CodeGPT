@@ -5,7 +5,7 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
-import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
+import ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowContentManager;
 import org.jetbrains.annotations.NotNull;
 
 public class AskAction extends AnAction {
@@ -26,7 +26,7 @@ public class AskAction extends AnAction {
     if (project != null) {
       ConversationsState.getInstance().setCurrentConversation(null);
       var tabPanel =
-          project.getService(StandardChatToolWindowContentManager.class).createNewTabPanel();
+          project.getService(ChatToolWindowContentManager.class).createNewTabPanel();
       if (tabPanel != null) {
         tabPanel.displayLandingView();
       }

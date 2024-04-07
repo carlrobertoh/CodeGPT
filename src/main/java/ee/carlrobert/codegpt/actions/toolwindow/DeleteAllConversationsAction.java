@@ -11,7 +11,7 @@ import ee.carlrobert.codegpt.actions.ActionType;
 import ee.carlrobert.codegpt.actions.editor.EditorActionsUtil;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
-import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
+import ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowContentManager;
 import org.jetbrains.annotations.NotNull;
 
 public class DeleteAllConversationsAction extends AnAction {
@@ -44,7 +44,7 @@ public class DeleteAllConversationsAction extends AnAction {
       if (project != null) {
         try {
           ConversationService.getInstance().clearAll();
-          project.getService(StandardChatToolWindowContentManager.class).resetAll();
+          project.getService(ChatToolWindowContentManager.class).resetAll();
         } finally {
           TelemetryAction.IDE_ACTION.createActionMessage()
               .property("action", ActionType.DELETE_ALL_CONVERSATIONS.name())

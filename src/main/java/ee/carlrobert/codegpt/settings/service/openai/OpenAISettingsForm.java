@@ -12,6 +12,7 @@ import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.credentials.CredentialsStore;
+import ee.carlrobert.codegpt.settings.service.CodeCompletionConfigurationForm;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import javax.swing.JPanel;
@@ -22,6 +23,7 @@ public class OpenAISettingsForm {
   private final JBPasswordField apiKeyField;
   private final JBTextField organizationField;
   private final ComboBox<OpenAIChatCompletionModel> completionModelComboBox;
+  private final CodeCompletionConfigurationForm codeCompletionConfigurationForm;
 
   public OpenAISettingsForm(OpenAISettingsState settings) {
     apiKeyField = new JBPasswordField();
@@ -32,6 +34,9 @@ public class OpenAISettingsForm {
         new EnumComboBoxModel<>(OpenAIChatCompletionModel.class));
     completionModelComboBox.setSelectedItem(
         OpenAIChatCompletionModel.findByCode(settings.getModel()));
+    codeCompletionConfigurationForm = new CodeCompletionConfigurationForm(
+        settings.isCodeCompletionsEnabled(),
+        settings.getCodeCompletionMaxTokens());
   }
 
   public JPanel getForm() {
@@ -52,6 +57,8 @@ public class OpenAISettingsForm {
         .createPanel();
 
     return FormBuilder.createFormBuilder()
+        .addComponent(new TitledSeparator(CodeGPTBundle.get("shared.codeCompletions")))
+        .addComponent(withEmptyLeftBorder(codeCompletionConfigurationForm.getForm()))
         .addComponent(new TitledSeparator(CodeGPTBundle.get("shared.configuration")))
         .addComponent(withEmptyLeftBorder(configurationGrid))
         .addComponentFillVertically(new JPanel(), 0)
@@ -73,6 +80,8 @@ public class OpenAISettingsForm {
     var state = new OpenAISettingsState();
     state.setModel(getModel());
     state.setOrganization(organizationField.getText());
+    state.setCodeCompletionsEnabled(codeCompletionConfigurationForm.isCodeCompletionsEnabled());
+    state.setCodeCompletionMaxTokens(codeCompletionConfigurationForm.getMaxTokens());
     return state;
   }
 
@@ -82,5 +91,7 @@ public class OpenAISettingsForm {
     completionModelComboBox.setSelectedItem(
         OpenAIChatCompletionModel.findByCode(state.getModel()));
     organizationField.setText(state.getOrganization());
+    codeCompletionConfigurationForm.setCodeCompletionsEnabled(state.isCodeCompletionsEnabled());
+    codeCompletionConfigurationForm.setMaxTokens(state.getCodeCompletionMaxTokens());
   }
 }

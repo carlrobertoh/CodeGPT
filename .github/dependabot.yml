@@ -11,11 +11,11 @@ updates:
       interval: "daily"
 
   - package-ecosystem: "gradle"
-    directory: "/buildSrc"
+    directory: "/buildSrc/src/main/kotlin"  # /buildSrc and /codegpt-telemetry use only references
     schedule:
       interval: "daily"
 
   - package-ecosystem: "gradle"
-    directory: "/codegpt-core"
+    directory: "/codegpt-treesitter"
     schedule:
       interval: "daily"

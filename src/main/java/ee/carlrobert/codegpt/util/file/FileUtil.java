@@ -141,6 +141,15 @@ public class FileUtil {
     }
   }
 
+  public static String getImageMediaType(String fileName) {
+    var fileExtension = getFileExtension(fileName);
+    return switch (fileExtension) {
+      case "png" -> "image/png";
+      case "jpg", "jpeg" -> "image/jpeg";
+      default -> throw new IllegalArgumentException("Unsupported image type: " + fileExtension);
+    };
+  }
+
   public static String getResourceContent(String name) {
     try (var stream = Objects.requireNonNull(FileUtil.class.getResourceAsStream(name))) {
       return new String(stream.readAllBytes(), StandardCharsets.UTF_8);

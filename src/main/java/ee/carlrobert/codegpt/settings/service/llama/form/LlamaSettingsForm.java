@@ -5,6 +5,7 @@ import static ee.carlrobert.codegpt.ui.UIUtil.withEmptyLeftBorder;
 import com.intellij.ui.TitledSeparator;
 import com.intellij.util.ui.FormBuilder;
 import ee.carlrobert.codegpt.CodeGPTBundle;
+import ee.carlrobert.codegpt.settings.service.CodeCompletionConfigurationForm;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettingsState;
 import java.awt.BorderLayout;
@@ -14,10 +15,14 @@ public class LlamaSettingsForm extends JPanel {
 
   private final LlamaServerPreferencesForm llamaServerPreferencesForm;
   private final LlamaRequestPreferencesForm llamaRequestPreferencesForm;
+  private final CodeCompletionConfigurationForm codeCompletionConfigurationForm;
 
   public LlamaSettingsForm(LlamaSettingsState settings) {
     llamaServerPreferencesForm = new LlamaServerPreferencesForm(settings);
     llamaRequestPreferencesForm = new LlamaRequestPreferencesForm(settings);
+    codeCompletionConfigurationForm = new CodeCompletionConfigurationForm(
+        settings.isCodeCompletionsEnabled(),
+        settings.getCodeCompletionMaxTokens());
     init();
   }
 
@@ -44,6 +49,8 @@ public class LlamaSettingsForm extends JPanel {
     state.setLocalModelPromptTemplate(modelPreferencesForm.getPromptTemplate());
     state.setLocalModelInfillPromptTemplate(modelPreferencesForm.getInfillPromptTemplate());
 
+    state.setCodeCompletionsEnabled(codeCompletionConfigurationForm.isCodeCompletionsEnabled());
+    state.setCodeCompletionMaxTokens(codeCompletionConfigurationForm.getMaxTokens());
     return state;
   }
 
@@ -51,6 +58,8 @@ public class LlamaSettingsForm extends JPanel {
     var state = LlamaSettings.getCurrentState();
     llamaServerPreferencesForm.resetForm(state);
     llamaRequestPreferencesForm.resetForm(state);
+    codeCompletionConfigurationForm.setCodeCompletionsEnabled(state.isCodeCompletionsEnabled());
+    codeCompletionConfigurationForm.setMaxTokens(state.getCodeCompletionMaxTokens());
   }
 
   public LlamaServerPreferencesForm getLlamaServerPreferencesForm() {
@@ -60,6 +69,8 @@ public class LlamaSettingsForm extends JPanel {
   private void init() {
     setLayout(new BorderLayout());
     add(FormBuilder.createFormBuilder()
+        .addComponent(new TitledSeparator("Code Completions"))
+        .addComponent(withEmptyLeftBorder(codeCompletionConfigurationForm.getForm()))
         .addComponent(new TitledSeparator(
             CodeGPTBundle.get("settingsConfigurable.service.llama.serverPreferences.title")))
         .addComponent(llamaServerPreferencesForm.getForm())

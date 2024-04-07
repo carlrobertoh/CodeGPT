@@ -17,6 +17,8 @@ import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.ReferencedFile;
 import ee.carlrobert.codegpt.actions.IncludeFilesInContextNotifier;
 import ee.carlrobert.codegpt.conversations.Conversation;
+import ee.carlrobert.codegpt.settings.GeneralSettings;
+import ee.carlrobert.codegpt.settings.service.ServiceType;
 import java.awt.FlowLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -154,10 +156,26 @@ public class TotalTokensPanel extends JPanel {
                 entry.getKey(),
                 entry.getValue()))
             .collect(Collectors.joining());
-        iconLabel.setToolTipText("<html>" + html + "</html>");
+        iconLabel.setToolTipText(getIconToolTipText(html));
       }
     });
     return iconLabel;
+  }
+
+  private String getIconToolTipText(String html) {
+    if (GeneralSettings.getCurrentState().getSelectedService() != ServiceType.OPENAI) {
+      return """
+          <html
+          <p style="margin: 4px 0;">
+          <small>
+          <strong>ⓘ Keep in mind that the output values might vary across different
+          large language models due to variations in their encoding methods.</strong>
+          </small>
+          </p>
+          %s
+          </html>""".formatted(html);
+    }
+    return "<html" + html + "</html>";
   }
 
   private String getLabelHtml(int total) {

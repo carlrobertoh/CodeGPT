@@ -27,6 +27,8 @@ public class LlamaSettingsState {
   private double topP = 0.9;
   private double minP = 0.05;
   private double repeatPenalty = 1.1;
+  private boolean codeCompletionsEnabled = true;
+  private int codeCompletionMaxTokens = 128;
 
   public boolean isUseCustomModel() {
     return useCustomModel;
@@ -168,6 +170,22 @@ public class LlamaSettingsState {
     this.repeatPenalty = repeatPenalty;
   }
 
+  public boolean isCodeCompletionsEnabled() {
+    return codeCompletionsEnabled;
+  }
+
+  public void setCodeCompletionsEnabled(boolean codeCompletionsEnabled) {
+    this.codeCompletionsEnabled = codeCompletionsEnabled;
+  }
+
+  public int getCodeCompletionMaxTokens() {
+    return codeCompletionMaxTokens;
+  }
+
+  public void setCodeCompletionMaxTokens(int codeCompletionMaxTokens) {
+    this.codeCompletionMaxTokens = codeCompletionMaxTokens;
+  }
+
   private static Integer getRandomAvailablePortOrDefault() {
     try (ServerSocket socket = new ServerSocket(0)) {
       return socket.getLocalPort();
@@ -201,7 +219,9 @@ public class LlamaSettingsState {
         && remoteModelInfillPromptTemplate == that.remoteModelInfillPromptTemplate
         && Objects.equals(baseHost, that.baseHost)
         && Objects.equals(serverPort, that.serverPort)
-        && Objects.equals(additionalParameters, that.additionalParameters);
+        && Objects.equals(additionalParameters, that.additionalParameters)
+        && codeCompletionsEnabled == that.codeCompletionsEnabled
+        && codeCompletionMaxTokens == that.codeCompletionMaxTokens;
   }
 
   @Override
@@ -209,6 +229,7 @@ public class LlamaSettingsState {
     return Objects.hash(runLocalServer, useCustomModel, customLlamaModelPath, huggingFaceModel,
         localModelPromptTemplate, remoteModelPromptTemplate, localModelInfillPromptTemplate,
         remoteModelInfillPromptTemplate, baseHost, serverPort, contextSize, threads,
-        additionalParameters, topK, topP, minP, repeatPenalty);
+        additionalParameters, topK, topP, minP, repeatPenalty, codeCompletionsEnabled,
+        codeCompletionMaxTokens);
   }
 }

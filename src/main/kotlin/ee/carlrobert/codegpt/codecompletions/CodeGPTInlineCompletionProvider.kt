@@ -4,7 +4,6 @@ import com.intellij.codeInsight.inline.completion.InlineCompletionEvent
 import com.intellij.codeInsight.inline.completion.InlineCompletionProvider
 import com.intellij.codeInsight.inline.completion.InlineCompletionProviderID
 import com.intellij.codeInsight.inline.completion.InlineCompletionRequest
-import com.intellij.codeInsight.inline.completion.elements.InlineCompletionElement
 import com.intellij.codeInsight.inline.completion.elements.InlineCompletionGrayTextElement
 import com.intellij.codeInsight.inline.completion.suggestion.InlineCompletionSingleSuggestion
 import com.intellij.codeInsight.inline.completion.suggestion.InlineCompletionSuggestionUpdateManager
@@ -15,14 +14,18 @@ import com.intellij.codeInsight.inline.completion.suggestion.InlineCompletionVar
 import com.intellij.openapi.application.EDT
 import com.intellij.openapi.diagnostic.Logger
 import ee.carlrobert.codegpt.completions.CompletionRequestService
-import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
+import ee.carlrobert.codegpt.settings.GeneralSettings
+import ee.carlrobert.codegpt.settings.service.ServiceType
+import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
+import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings
 import ee.carlrobert.codegpt.treesitter.CodeCompletionParserFactory
 import ee.carlrobert.llm.completion.CompletionEventListener
-import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.ProducerScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.sse.EventSource
 import java.util.concurrent.atomic.AtomicReference
 
@@ -33,7 +36,6 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
     }
 
     private val currentCall = AtomicReference<EventSource>(null)
-    private val providerScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
     override val id: InlineCompletionProviderID
         get() = InlineCompletionProviderID("CodeGPTInlineCompletionProvider")
@@ -51,11 +53,18 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
             val infillRequest = withContext(Dispatchers.EDT) {
                 InfillRequestDetails.fromInlineCompletionRequest(request)
             }
-            cancelCurrentCall()
             currentCall.set(
                 CompletionRequestService.getInstance().getCodeCompletionAsync(
                     infillRequest,
-                    getCodeCompletionEventListener(infillRequest)
+                    CodeCompletionEventListener(infillRequest) {
+                        launch {
+                            try {
+                                trySend(InlineCompletionGrayTextElement(it))
+                            } catch (e: Exception) {
+                                LOG.error("Failed to send inline completion suggestion", e)
+                            }
+                        }
+                    }
                 )
             )
             awaitClose { cancelCurrentCall() }
@@ -63,20 +72,13 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
     }
 
     override fun isEnabled(event: InlineCompletionEvent): Boolean {
-        return event is InlineCompletionEvent.DocumentChange
-                && ConfigurationSettings.getCurrentState().isCodeCompletionsEnabled
-    }
-
-    private fun ProducerScope<InlineCompletionElement>.getCodeCompletionEventListener(
-        infillRequest: InfillRequestDetails
-    ) = CodeCompletionEventListener(infillRequest) {
-        providerScope.launch {
-            try {
-                send(InlineCompletionGrayTextElement(it))
-            } catch (e: Exception) {
-                LOG.error("Failed to send inline completion suggestion", e)
-            }
+        val selectedService = GeneralSettings.getCurrentState().selectedService
+        val codeCompletionsEnabled = when (selectedService) {
+            ServiceType.OPENAI -> OpenAISettings.getCurrentState().isCodeCompletionsEnabled
+            ServiceType.LLAMA_CPP -> LlamaSettings.getCurrentState().isCodeCompletionsEnabled
+            else -> false
         }
+        return event is InlineCompletionEvent.DocumentChange && codeCompletionsEnabled
     }
 
     private fun cancelCurrentCall() {

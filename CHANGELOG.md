@@ -6,9 +6,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.6.0-233] - 2024-04-07
+
+### Added
+
+- Vision support (image understanding) for OpenAI GPT-4 and Anthropic Claude models
+- Total token panel for all providers
+- Support for configuring code completions via settings
+- Autofocus for UserTextArea when the tool window is visible
+
+### Fixed
+
+- Git commit message generation
+- Fixed several UI/UX issues related to code completions for IDE versions starting from 233 
+- Error when adding a single file to the context
+- Several IntelliJ platform warnings
+
 ### Removed
 
 - Azure custom configuration (use OpenAI-compatible service to override the default configuration) 
+
+### Changed
+
+- Supported minimum IDE build from 213 to 222
 
 ## [2.5.1] - 2024-03-14
 
@@ -396,7 +416,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `OPENAI_API_KEY` persistence, key is saved in the OS password safe from now on
 
-[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.5.1...HEAD
+[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.6.0-233...HEAD
+[2.6.0-233]: https://github.com/carlrobertoh/CodeGPT/compare/v2.5.1...v2.6.0-233
 [2.5.1]: https://github.com/carlrobertoh/CodeGPT/compare/v2.5.0...v2.5.1
 [2.5.0]: https://github.com/carlrobertoh/CodeGPT/compare/v2.4.0...v2.5.0
 [2.4.0]: https://github.com/carlrobertoh/CodeGPT/compare/v2.3.1...v2.4.0

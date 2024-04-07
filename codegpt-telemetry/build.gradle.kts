@@ -3,5 +3,5 @@ plugins {
 }
 
 dependencies {
-    implementation("com.rudderstack.sdk.java.analytics:analytics:3.0.0")
+    implementation(libs.analytics)
 }

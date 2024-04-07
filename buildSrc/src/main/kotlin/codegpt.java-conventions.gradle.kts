@@ -22,17 +22,18 @@ intellij {
 }
 
 checkstyle {
-  toolVersion = "10.12.5"
+  toolVersion = "10.15.0"
 }
 
 dependencies {
-  implementation("ee.carlrobert:llm-client:0.6.2")
+  implementation("ee.carlrobert:llm-client:0.7.0")
 
+  testImplementation(enforcedPlatform("org.junit:junit-bom:5.10.2"))
   testImplementation("org.assertj:assertj-core:3.25.3")
-  testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.2")
-  testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.2")
-  testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
-  testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.10.2")
+  testImplementation("org.junit.jupiter:junit-jupiter-params")
+  testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+  testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+  testRuntimeOnly("org.junit.vintage:junit-vintage-engine")
 }
 
 tasks {

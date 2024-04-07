@@ -38,122 +38,53 @@
 
 ## About The Project
 
-This is an extension for JetBrains IDEs that integrates AI into your coding environment.
-By leveraging the power of Large Language Models (LLMs), this makes it an invaluable tool for developers looking to streamline their workflow and gain a deeper understanding of the code they're working on.
+CodeGPT is your go-to AI coding assistant, offering assistance throughout your entire software development journey while keeping privacy in mind. Access state-of-the-art large language models from leading providers such as OpenAI, Anthropic, Azure, Mistral, and others, or connect to a locally hosted model for a completely offline and transparent development experience.
 
-## Features
+## Core Features
 
-The plugin provides several key features, such as:
+Leveraging large language models, CodeGPT offers a wide range of features to enhance your coding experience, including, but not limited to:
 
-### Chat with AI
+### Code Completions
 
-<p align="center">
-  <img src="https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/chat-with-ai.png?raw=true" alt="animated" />
-</p>
+Receive single-line or whole-function autocomplete suggestions as you type.
 
-### Chat With Multiple Files
+![Code Completions](https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/new/inline-completion.png?raw=true)
 
-<p align="center">
-  <img src="https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/include-in-context.png?raw=true" alt="animated" />
-</p>
+> **Note**: Currently supported only on GPT-3.5 and locally-hosted models.
 
-### Choose Between Different Providers
+### Chat (with Vision)
 
-<p align="center">
-  <img src="https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/model-selection.png?raw=true" />
-</p>
+Get instant coding advice through a ChatGPT-like interface. Ask questions, seek explanations, or get guidance on your projects without leaving your IDE.
 
-### Method Name Suggestions
+CodeGPT also supports vision models and image understanding, allowing you to attach images for more context-aware assistance. It can detect new screenshots automatically, saving you time by eliminating the need to manually upload images each time you take a screenshot.
 
-<p align="center">
-  <img src="https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/method-name-suggestions.png?raw=true" />
-</p>
+![Chat with Vision](https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/new/chat-interface.png?raw=true)
 
-### Generate Commit Messages
+### Commit Message Generation
 
-<p align="center">
-  <img src="https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/generate-commit-message.png?raw=true" />
-</p>
+CodeGPT can generate meaningful commit messages based on the changes made in your codebase. It analyzes the diff of your staged changes and suggests concise and descriptive commit messages, saving you time and effort.
 
-### Other features
+![Commit Message Generation](https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/new/generate-commit-message.png?raw=true)
 
-- **Conversation History** - View recent conversation history and restore previous sessions, making it easy to pick up where you left off
-- **Concurrent conversations** - Chat with AI in multiple tabs simultaneously
-- **Seamless conversations** - Chat with AI regardless of the maximum token limitations
-- **Predefined Prompts** - Create your own editor prompt or override the existing ones
+### Reference Files
 
-## Getting Started
+CodeGPT allows you to reference specific files or documentation during your chat sessions, ensuring that responses are always relevant and accurate.
 
-1. **Download the Plugin**
+![Reference Files](https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/new/reference-files-modal.png?raw=true)
 
-2. **Choose Your Preferred Service**:
+### Name Suggestions
 
-   a) **OpenAI** - Requires authentication via OpenAI API key.
+Stuck on naming a method or variable? CodeGPT offers context-aware suggestions, helping you adhere to best practices and maintain readability in your codebase.
 
-   b) **Azure** - Requires authentication via Active Directory or API key.
+![Name Suggestions](https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/method-name-suggestions.png?raw=true)
 
-   c) **Custom OpenAI-compatible service** - Choose between multiple different providers, such as Together, Anyscale, Groq, Ollama and many more.
+### Offline Development Support
 
-   d) **Anthropic** - Requires authentication via API key.
+CodeGPT supports a completely offline development workflow by allowing you to connect to a locally hosted language model. This ensures that your code and data remain private and secure within your local environment, eliminating the need for an internet connection or sharing sensitive information with third-party servers.
 
-   e) **You.com** - A free, web-connected service with an optional upgrade to You⚡Pro for enhanced features.
+![Offline Development Support](https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/new/llama-settings.png?raw=true)
 
-   f) **LLaMA C/C++ Port** - Recommended to have a decent computer to handle the computational requirements of running inference.
-   > **Note**: Currently supported only on Linux and MacOS.
-
-3. **Start Using the Features**
-
-### Installation
-
-The plugin is available from [JetBrains Marketplace][plugin-repo].
-You can install it directly from your IDE via the `File | Settings/Preferences | Plugins` screen.
-On the `Marketplace` tab simply search for `codegpt` and select the `CodeGPT` suggestion:
-
-![marketplace][marketplace-img]
-
-### OpenAI
-
-After successful installation, configure your API key. Navigate to the plugin's settings via **File | Settings/Preferences | Tools | CodeGPT**. Paste your OpenAI API key into the field and click `Apply/OK`.
-
-### Azure OpenAI
-
-For Azure OpenAI services, you'll need to input three additional fields:
-
-- **Resource name**: The name of your Azure OpenAI Cognitive Services. It's the first part of the url you're provided to use the service: "https://**my-resource-name**.openai.azure.com/". You can find it in your Azure Cognitive Services page, under `Resource Management` → `Resource Management` → `Keys and Endpoints`.
-- **Deployment ID**: The name of your Deployment. You can find it in the Azure AI Studio, under `Management` → `Deployment` → `Deployment Name` column in the table.
-- **API version**: The most recent non-preview version.
-
-In addition to these, you need to input one of the two API Keys provided, found along with the `Resource Name`.
-
-### You.com (Free)
-
-**You.com** is a search engine that summarizes the best parts of the internet for **you**, with private ads and with privacy options.
-
-**You⚡Pro**
-
-Use the **CodeGPT** coupon for a free month of unlimited GPT-4 usage.
-
-Check out the full [feature list](https://about.you.com/hc/youpro/what-features-are-included-in-youpro/) for more details.
-
-### LLaMA C/C++ Port (Free, Local)
-
-> **Note**: Currently supported only on Linux and MacOS.
-
-The main goal of `llama.cpp` is to run the LLaMA model using 4-bit integer quantization on a MacBook.
-
-#### Getting Started
-
-1. **Select the Model**: Depending on your hardware capabilities, choose the appropriate model from the provided list. Once selected, click on the `Download Model` link. A progress bar will appear, indicating the download process.
-
-2. **Start the Server**: After successfully downloading the model, initiate the server by clicking on the `Start Server` button. A status message will be displayed, indicating that the server is starting up.
-
-3. **Apply Settings**: With the server running, you can now apply the settings to start using the features. Click on the `Apply/OK` button to save your settings and start using the application.
-
-<img alt="animated" style="max-width: 100%; width: 600px;" src="https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/llama-settings.png?raw=true" />
-
-> **Note**: If you're already running a server and wish to configure the plugin against that, then simply select the port and click `Apply/OK`.
-
-### Running locally
+## Running locally
 
 **Linux or macOS**
 ```shell
@@ -173,9 +104,19 @@ git submodule update
 tail -f build/idea-sandbox/system/log/idea.log
 ```
 
-## Issues
+## Privacy
 
-See the [open issues][open-issues] for a full list of proposed features (and known issues).
+**Your data stays yours.** CodeGPT **does not** collect or store any kind of sensitive information.
+
+However, with users' consent, we do collect anonymous usage data, which we use to understand how users interact with the extension, including the most-used features and preferred providers.
+
+## Feedback
+
+Your input helps us grow. Reach out through:
+
+- [Issue Tracker](https://github.com/carlrobertoh/CodeGPT/issues)
+- [Discord](https://discord.gg/8dTGGrwcnR)
+- [Email](mailto:carlrobertoh@gmail.com)
 
 ## License
 
@@ -183,7 +124,6 @@ Apache 2.0 © [Carl-Robert Linnupuu][portfolio]
 
 If you found this project interesting, kindly rate it on the marketplace and don't forget to give it a star. Thanks again!
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->

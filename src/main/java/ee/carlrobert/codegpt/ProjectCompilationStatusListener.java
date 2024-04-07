@@ -16,7 +16,7 @@ import com.intellij.openapi.project.Project;
 import ee.carlrobert.codegpt.completions.CompletionRequestProvider;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
-import ee.carlrobert.codegpt.toolwindow.chat.standard.StandardChatToolWindowContentManager;
+import ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowContentManager;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import java.io.File;
 import java.util.ArrayList;
@@ -50,10 +50,10 @@ public class ProjectCompilationStatusListener implements CompilationStatusListen
               NotificationType.INFORMATION)
           .addAction(NotificationAction.createSimpleExpiring(
               CodeGPTBundle.get("notification.compilationError.okLabel"),
-              () -> project.getService(StandardChatToolWindowContentManager.class)
+              () -> project.getService(ChatToolWindowContentManager.class)
                   .sendMessage(getMultiFileMessage(compileContext), FIX_COMPILE_ERRORS)))
           .addAction(NotificationAction.createSimpleExpiring(
-              CodeGPTBundle.get("checkForUpdatesTask.notification.hideButton"),
+              CodeGPTBundle.get("shared.notification.doNotShowAgain"),
               () -> ConfigurationSettings.getCurrentState().setCaptureCompileErrors(false)))
           .notify(project);
     }
