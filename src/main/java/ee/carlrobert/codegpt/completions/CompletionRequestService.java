@@ -32,9 +32,12 @@ import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionEventSourc
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionStandardMessage;
 import ee.carlrobert.llm.client.openai.completion.response.OpenAIChatCompletionResponse;
+import ee.carlrobert.llm.client.openai.completion.response.OpenAIChatCompletionResponseChoice;
+import ee.carlrobert.llm.client.openai.completion.response.OpenAIChatCompletionResponseChoiceDelta;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import okhttp3.Request;
 import okhttp3.sse.EventSource;
@@ -219,11 +222,25 @@ public final class CompletionRequestService {
     return List.of(LLAMA_CPP, ANTHROPIC, CUSTOM_OPENAI).contains(serviceType);
   }
 
+  /**
+   * Content of the first choice.
+   * <ul>
+   *     <li>Search all choices which are not null</li>
+   *     <li>Search all messages which are not null</li>
+   *     <li>Use first content which is not null or blank (whitespace)</li>
+   * </ul>
+   *
+   * @return First non-blank content or {@code Optional.empty()}
+   */
   private Optional<String> tryExtractContent(OpenAIChatCompletionResponse response) {
     return response
         .getChoices()
         .stream()
-        .findFirst()
-        .map(item -> item.getMessage().getContent());
+        .filter(Objects::nonNull)
+        .map(OpenAIChatCompletionResponseChoice::getMessage)
+        .filter(Objects::nonNull)
+        .map(OpenAIChatCompletionResponseChoiceDelta::getContent)
+        .filter(c -> c != null && !c.isBlank())
+        .findFirst();
   }
 }
