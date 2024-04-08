@@ -6,13 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [2.6.0-233] - 2024-04-07
+## [2.6.0-241] - 2024-04-08
 
 ### Added
 
 - Vision support (image understanding) for OpenAI GPT-4 and Anthropic Claude models
 - Total token panel for all providers
 - Support for configuring code completions via settings
+- Support for multi-line partial completion acceptance
 - Autofocus for UserTextArea when the tool window is visible
 
 ### Fixed
@@ -416,8 +417,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `OPENAI_API_KEY` persistence, key is saved in the OS password safe from now on
 
-[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.6.0-233...HEAD
-[2.6.0-233]: https://github.com/carlrobertoh/CodeGPT/compare/v2.5.1...v2.6.0-233
+[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.6.0-241...HEAD
+[2.6.0-241]: https://github.com/carlrobertoh/CodeGPT/compare/v2.5.1...v2.6.0-241
 [2.5.1]: https://github.com/carlrobertoh/CodeGPT/compare/v2.5.0...v2.5.1
 [2.5.0]: https://github.com/carlrobertoh/CodeGPT/compare/v2.4.0...v2.5.0
 [2.4.0]: https://github.com/carlrobertoh/CodeGPT/compare/v2.3.1...v2.4.0
