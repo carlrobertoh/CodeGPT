@@ -3,9 +3,6 @@ package ee.carlrobert.codegpt.toolwindow.chat.ui.textarea;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 
-//TODO: Implement Import/Export
-//TODO: Write a note to Carl Robert about the persona refactor and why we thinks it's a good idea.
-
 /**
  * Represents a persona with a name, prompt text, service type, and model.
  */
