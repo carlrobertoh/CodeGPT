@@ -53,9 +53,8 @@ public class IdentifyTraits {
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-            if (!(o instanceof IdentifyTraits)) return false;
-            IdentifyTraits identifyTraits = (IdentifyTraits) o;
-            return Objects.equals(locale, identifyTraits.locale)
+            if (!(o instanceof IdentifyTraits identifyTraits)) return false;
+          return Objects.equals(locale, identifyTraits.locale)
                     && Objects.equals(timezone, identifyTraits.timezone)
                     && Objects.equals(osName, identifyTraits.osName)
                     && Objects.equals(osVersion, identifyTraits.osVersion)

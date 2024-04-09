@@ -71,6 +71,7 @@ public class IdentifyTraitsPersistence {
         String event = null;
         try(Stream<String> lines = getLines(file)) {
             event = lines
+                    .filter(l -> !l.isBlank())
                     .findAny()
                     .map(String::trim)
                     .orElse(null);

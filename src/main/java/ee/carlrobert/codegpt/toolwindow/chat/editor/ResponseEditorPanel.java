@@ -178,7 +178,10 @@ public class ResponseEditorPanel extends JPanel implements Disposable {
     actionGroup.add(new AnAction("Editor Actions", "Editor Actions", General.GearPlain) {
       @Override
       public void actionPerformed(@NotNull AnActionEvent e) {
-        menu.show(e.getInputEvent().getComponent(), 0, 0);
+        var inputEvent = e.getInputEvent();
+        if (inputEvent != null) {
+          menu.show(inputEvent.getComponent(), 0, 0);
+        }
       }
     });
     toolbar.setLayoutPolicy(ActionToolbar.NOWRAP_LAYOUT_POLICY);

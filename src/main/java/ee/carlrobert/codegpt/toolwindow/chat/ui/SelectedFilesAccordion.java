@@ -46,7 +46,7 @@ public class SelectedFilesAccordion extends JPanel {
         .map(virtualFile -> {
           var actionLink = new ActionLink(
               Paths.get(virtualFile.getPath()).getFileName().toString(),
-              (event) -> {
+              event -> {
                 FileEditorManager.getInstance(project)
                     .openFile(Objects.requireNonNull(virtualFile), true);
               });

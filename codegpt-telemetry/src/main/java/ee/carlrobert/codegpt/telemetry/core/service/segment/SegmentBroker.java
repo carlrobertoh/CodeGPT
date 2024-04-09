@@ -71,22 +71,17 @@ public class SegmentBroker implements IMessageBroker {
         public abstract MessageBuilder toMessage(TelemetryEvent event, Map<String, Object> context, SegmentBroker broker);
 
         public static SegmentType valueOf(TelemetryEvent.Type eventType) {
-            switch (eventType) {
-                case USER:
-                    return IDENTIFY;
-                case ACTION:
-                case STARTUP:
-                case SHUTDOWN:
-                default:
-                    return TRACK;
-            }
+          return switch (eventType) {
+            case USER -> IDENTIFY;
+            default -> TRACK;
+          };
         }
     }
 
     private final String userId;
     private final IdentifyTraitsPersistence identifyTraitsPersistence;
     private final Environment environment;
-    private Lazy<RudderAnalytics> analytics;
+    private final Lazy<RudderAnalytics> analytics;
 
     public SegmentBroker(boolean isDebug, String userId, Environment environment, ISegmentConfiguration configuration) {
         this(isDebug, userId, IdentifyTraitsPersistence.INSTANCE, environment, configuration, new AnalyticsFactory());

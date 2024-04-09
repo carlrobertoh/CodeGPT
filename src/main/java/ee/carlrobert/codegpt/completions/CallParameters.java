@@ -44,11 +44,11 @@ public class CallParameters {
     return retry;
   }
 
-  public String getImageMediaType() {
+  public @Nullable String getImageMediaType() {
     return imageMediaType;
   }
 
-  public void setImageMediaType(String imageMediaType) {
+  public void setImageMediaType(@Nullable String imageMediaType) {
     this.imageMediaType = imageMediaType;
   }
 

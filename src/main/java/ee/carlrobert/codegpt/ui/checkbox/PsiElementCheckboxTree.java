@@ -1,7 +1,5 @@
 package ee.carlrobert.codegpt.ui.checkbox;
 
-import static java.util.stream.Collectors.toList;
-
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.util.Iconable;
 import com.intellij.psi.PsiDirectory;
@@ -36,7 +34,7 @@ public class PsiElementCheckboxTree extends FileCheckboxTree {
     return Arrays.stream(checkedNodes)
         .map(item -> new ReferencedFile(
             new File(item.getContainingFile().getVirtualFile().getPath())))
-        .collect(toList());
+        .toList();
   }
 
   private static CheckedTreeNode createNode(PsiElement element) {

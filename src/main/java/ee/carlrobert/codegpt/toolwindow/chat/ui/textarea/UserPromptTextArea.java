@@ -54,7 +54,6 @@ public class UserPromptTextArea extends JPanel {
   private final int textAreaRadius = 16;
   private final Consumer<String> onSubmit;
   private IconActionButton stopButton;
-  private JPanel iconsPanel;
   private boolean submitEnabled = true;
 
   public UserPromptTextArea(Consumer<String> onSubmit, TotalTokensPanel totalTokensPanel) {
@@ -183,7 +182,7 @@ public class UserPromptTextArea extends JPanel {
 
     var flowLayout = new FlowLayout(FlowLayout.RIGHT);
     flowLayout.setHgap(8);
-    iconsPanel = new JPanel(flowLayout);
+    JPanel iconsPanel = new JPanel(flowLayout);
     iconsPanel.add(new IconActionButton(
         new AnAction("Send Message", "Send message", Icons.Send) {
           @Override

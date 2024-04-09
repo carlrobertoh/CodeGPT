@@ -10,7 +10,6 @@
  ******************************************************************************/
 package ee.carlrobert.codegpt.telemetry.core.configuration;
 
-import com.intellij.openapi.diagnostic.Logger;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -19,8 +18,6 @@ import java.nio.file.Path;
 import java.time.LocalDate;
 
 public class SaveableFileConfiguration extends FileConfiguration {
-
-    private static final Logger LOGGER = Logger.getInstance(SaveableFileConfiguration.class);
 
     public SaveableFileConfiguration(Path file) {
         super(file);

@@ -7,7 +7,6 @@ import com.intellij.openapi.components.Service;
 import ee.carlrobert.codegpt.completions.you.auth.response.YouAuthenticationResponse;
 import java.io.IOException;
 import java.util.List;
-import okhttp3.Headers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import org.jetbrains.annotations.Nullable;

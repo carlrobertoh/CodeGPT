@@ -6,6 +6,9 @@ import ee.carlrobert.codegpt.util.file.FileUtil;
 
 public class DownloadingUtil {
 
+  private DownloadingUtil() {
+  }
+
   private static final int BYTES_IN_MB = 1024 * 1024;
 
   public static String getFormattedDownloadProgress(long startTime, long fileSize, long bytesRead) {

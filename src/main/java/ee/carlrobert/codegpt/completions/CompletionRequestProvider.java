@@ -9,7 +9,6 @@ import static java.util.stream.Collectors.toList;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.diagnostic.Logger;
 import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.ReferencedFile;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
@@ -67,8 +66,6 @@ import org.jetbrains.annotations.Nullable;
 
 public class CompletionRequestProvider {
 
-  private static final Logger LOG = Logger.getInstance(CompletionRequestProvider.class);
-
   public static final String COMPLETION_SYSTEM_PROMPT = getResourceContent(
       "/prompts/default-completion-system-prompt.txt");
 
@@ -92,7 +89,7 @@ public class CompletionRequestProvider {
         .map(item -> includedFilesSettings.getRepeatableContext()
             .replace("{FILE_PATH}", item.getFilePath())
             .replace("{FILE_CONTENT}", format(
-                "```%s\n%s\n```",
+                "```%s%n%s%n```",
                 item.getFileExtension(),
                 item.getFileContent().trim())))
         .collect(joining("\n\n"));
@@ -183,7 +180,7 @@ public class CompletionRequestProvider {
             .map(prevMessage -> new YouCompletionRequestMessage(
                 prevMessage.getPrompt(),
                 prevMessage.getResponse()))
-            .collect(toList()));
+            .toList());
     if (TelemetryConfiguration.getInstance().isEnabled()
         && !ApplicationManager.getApplication().isUnitTestMode()) {
       requestBuilder.setUserId(UUID.fromString(UserId.INSTANCE.get()));
@@ -234,7 +231,7 @@ public class CompletionRequestProvider {
               }
 
               var value = entry.getValue();
-              if (value instanceof String && "$OPENAI_MESSAGES".equals(((String) value).trim())) {
+              if (value instanceof String string && "$OPENAI_MESSAGES".equals(string.trim())) {
                 return messages;
               }
               return value;
@@ -382,6 +379,6 @@ public class CompletionRequestProvider {
       }
     }
 
-    return messages.stream().filter(Objects::nonNull).collect(toList());
+    return messages.stream().filter(Objects::nonNull).toList();
   }
 }

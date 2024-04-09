@@ -137,8 +137,8 @@ public class IncludeFilesInContextAction extends AnAction {
 
     private @Nullable String getNodeFileContent(CheckedTreeNode checkedNode) {
       var userObject = checkedNode.getUserObject();
-      if (userObject instanceof PsiElement) {
-        var psiFile = ((PsiElement) userObject).getContainingFile();
+      if (userObject instanceof PsiElement psiElement) {
+        var psiFile = psiElement.getContainingFile();
         if (psiFile != null) {
           var virtualFile = psiFile.getVirtualFile();
           if (virtualFile != null) {
@@ -146,8 +146,8 @@ public class IncludeFilesInContextAction extends AnAction {
           }
         }
       }
-      if (userObject instanceof VirtualFile) {
-        return getVirtualFileContent((VirtualFile) userObject);
+      if (userObject instanceof VirtualFile virtualFile) {
+        return getVirtualFileContent(virtualFile);
       }
       return null;
     }

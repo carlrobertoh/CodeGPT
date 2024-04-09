@@ -30,11 +30,14 @@ public class CopyAction extends TrackableAction {
     Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
     clipboard.setContents(stringSelection, null);
 
-    var locationOnScreen = ((MouseEvent) event.getInputEvent()).getLocationOnScreen();
-    locationOnScreen.y = locationOnScreen.y - 16;
+    var mouseEvent = (MouseEvent) event.getInputEvent();
+    if (mouseEvent != null) {
+      var locationOnScreen = mouseEvent.getLocationOnScreen();
+      locationOnScreen.y = locationOnScreen.y - 16;
 
-    OverlayUtil.showInfoBalloon(
-        CodeGPTBundle.get("toolwindow.chat.editor.action.copy.success"),
-        locationOnScreen);
+      OverlayUtil.showInfoBalloon(
+              CodeGPTBundle.get("toolwindow.chat.editor.action.copy.success"),
+              locationOnScreen);
+    }
   }
 }

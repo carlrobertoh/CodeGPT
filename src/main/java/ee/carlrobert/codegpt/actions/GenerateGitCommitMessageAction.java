@@ -19,7 +19,9 @@ import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vcs.FilePath;
 import com.intellij.openapi.vcs.VcsDataKeys;
+import com.intellij.openapi.vcs.changes.Change;
 import com.intellij.openapi.vcs.ui.CommitMessage;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.vcs.commit.CommitWorkflowUi;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.EncodingManager;
@@ -35,12 +37,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Stream;
 import okhttp3.sse.EventSource;
 import org.jetbrains.annotations.NotNull;
 
@@ -144,12 +145,13 @@ public class GenerateGitCommitMessageAction extends AnAction {
     var newFilesContent =
         getNewFilesDiff(projectBasePath, changes.getIncludedUnversionedFilePaths());
 
-    return Stream.of(
-            new AbstractMap.SimpleEntry<>("Git diff", gitDiff),
-            new AbstractMap.SimpleEntry<>("Staged git diff", stagedGitDiff),
-            new AbstractMap.SimpleEntry<>("New files", newFilesContent))
+    return Map.of(
+            "Git diff", gitDiff,
+            "Staged git diff", stagedGitDiff,
+            "New files", newFilesContent)
+        .entrySet().stream()
         .filter(entry -> !entry.getValue().isEmpty())
-        .map(entry -> "%s:\n%s".formatted(entry.getKey(), entry.getValue()))
+        .map(entry -> "%s:%n%s".formatted(entry.getKey(), entry.getValue()))
         .collect(joining("\n\n"));
   }
 
@@ -204,8 +206,9 @@ public class GenerateGitCommitMessageAction extends AnAction {
 
     CommitWorkflowChanges(CommitWorkflowUi commitWorkflowUi) {
       includedVersionedFilePaths = commitWorkflowUi.getIncludedChanges().stream()
-          .map(it -> it.getVirtualFile() == null ? null : it.getVirtualFile().getPath())
+          .map(Change::getVirtualFile)
           .filter(Objects::nonNull)
+          .map(VirtualFile::getPath)
           .toList();
       includedUnversionedFilePaths = commitWorkflowUi.getIncludedUnversionedFiles().stream()
           .map(FilePath::getPath)

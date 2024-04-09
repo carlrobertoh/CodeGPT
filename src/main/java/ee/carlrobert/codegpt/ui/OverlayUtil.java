@@ -31,6 +31,9 @@ import org.jetbrains.annotations.NotNull;
 
 public class OverlayUtil {
 
+  private OverlayUtil() {
+  }
+
   public static Notification getDefaultNotification(String content, NotificationType type) {
     return new Notification("CodeGPT Notification Group", "CodeGPT", content, type);
   }
@@ -105,9 +108,12 @@ public class OverlayUtil {
   }
 
   public static void showSelectedEditorSelectionWarning(AnActionEvent event) {
-    var locationOnScreen = ((MouseEvent) event.getInputEvent()).getLocationOnScreen();
-    locationOnScreen.y = locationOnScreen.y - 16;
-    showSelectedEditorSelectionWarning(requireNonNull(event.getProject()), locationOnScreen);
+    var mouseEvent = (MouseEvent) event.getInputEvent();
+    if (mouseEvent != null) {
+      var locationOnScreen = mouseEvent.getLocationOnScreen();
+      locationOnScreen.y = locationOnScreen.y - 16;
+      showSelectedEditorSelectionWarning(requireNonNull(event.getProject()), locationOnScreen);
+    }
   }
 
   public static void showSelectedEditorSelectionWarning(

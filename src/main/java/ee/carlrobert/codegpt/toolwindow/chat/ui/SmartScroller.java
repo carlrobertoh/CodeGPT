@@ -1,6 +1,5 @@
 package ee.carlrobert.codegpt.toolwindow.chat.ui;
 
-import java.awt.Component;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 import javax.swing.BoundedRangeModel;
@@ -65,11 +64,7 @@ public class SmartScroller implements AdjustmentListener {
     scrollBar.addAdjustmentListener(this);
 
     //  Turn off automatic scrolling for text components
-
-    Component view = scrollPane.getViewport().getView();
-
-    if (view instanceof JTextComponent) {
-      JTextComponent textComponent = (JTextComponent) view;
+    if (scrollPane.getViewport().getView() instanceof JTextComponent textComponent) {
       DefaultCaret caret = (DefaultCaret) textComponent.getCaret();
       caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
     }
@@ -77,11 +72,7 @@ public class SmartScroller implements AdjustmentListener {
 
   @Override
   public void adjustmentValueChanged(final AdjustmentEvent e) {
-    SwingUtilities.invokeLater(new Runnable() {
-      public void run() {
-        checkScrollBar(e);
-      }
-    });
+    SwingUtilities.invokeLater(() -> checkScrollBar(e));
   }
 
   /*

@@ -7,7 +7,6 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import ee.carlrobert.codegpt.credentials.CredentialsStore;
-import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 

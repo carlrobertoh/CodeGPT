@@ -83,10 +83,9 @@ public class AdvancedSettingsState {
     if (this == o) {
       return true;
     }
-    if (!(o instanceof AdvancedSettingsState)) {
+    if (!(o instanceof AdvancedSettingsState that)) {
       return false;
     }
-    AdvancedSettingsState that = (AdvancedSettingsState) o;
     return getProxyPort() == that.getProxyPort()
         && isProxyAuthSelected() == that.isProxyAuthSelected()
         && getConnectTimeout() == that.getConnectTimeout()
