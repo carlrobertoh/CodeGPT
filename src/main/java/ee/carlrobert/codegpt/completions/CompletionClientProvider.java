@@ -68,9 +68,9 @@ public class CompletionClientProvider {
     var accessToken = "";
     var youUserManager = YouUserManager.getInstance();
     if (youUserManager.isAuthenticated()) {
-      var authenticationResponse = youUserManager.getAuthenticationResponse().getData();
-      sessionId = authenticationResponse.getSession().getSessionId();
-      accessToken = authenticationResponse.getSessionJwt();
+      var authenticationResponse = youUserManager.getAuthenticationResponse().data();
+      sessionId = authenticationResponse.session().sessionId();
+      accessToken = authenticationResponse.sessionJwt();
     }
 
     return new YouClient.Builder(sessionId, accessToken)
@@ -116,5 +116,3 @@ public class CompletionClientProvider {
         .readTimeout(advancedSettings.getReadTimeout(), TimeUnit.SECONDS);
   }
 }
-
-

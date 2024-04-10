@@ -90,7 +90,7 @@ public class YouSettingsForm extends JPanel {
     if (authResponse == null) {
       formBuilder.addComponent(createUserAuthenticationPanel(emailField, passwordField, null));
     } else {
-      formBuilder.addComponent(createUserInformationPanel(authResponse.getData().getUser()));
+      formBuilder.addComponent(createUserInformationPanel(authResponse.data().user()));
     }
     return formBuilder
         .addComponent(new TitledSeparator(
@@ -199,7 +199,7 @@ public class YouSettingsForm extends JPanel {
         .addVerticalGap(4);
 
     if (error != null) {
-      var invalidCredentialsLabel = new JBLabel(error.getErrorMessage());
+      var invalidCredentialsLabel = new JBLabel(error.errorMessage());
       invalidCredentialsLabel.setForeground(JBColor.red);
       invalidCredentialsLabel.setBorder(JBUI.Borders.emptyLeft(4));
       contentPanelBuilder.addComponentToRightColumn(invalidCredentialsLabel);
@@ -220,7 +220,7 @@ public class YouSettingsForm extends JPanel {
     var userManager = YouUserManager.getInstance();
     var contentPanelBuilder = FormBuilder.createFormBuilder()
         .addLabeledComponent(CodeGPTBundle.get("settingsConfigurable.service.you.email.label"),
-            new JBLabel(user.getEmails().get(0).getEmail()).withFont(JBFont.label().asBold()));
+            new JBLabel(user.emails().get(0).email()).withFont(JBFont.label().asBold()));
 
     var signOutButton = new JButton(
         CodeGPTBundle.get("settingsConfigurable.service.you.signOut.label"));
@@ -260,7 +260,7 @@ public class YouSettingsForm extends JPanel {
         CredentialsStore.INSTANCE.setCredential(
             CredentialKey.YOU_ACCOUNT_PASSWORD,
             new String(password));
-        refreshView(createUserInformationPanel(authenticationResponse.getData().getUser()));
+        refreshView(createUserInformationPanel(authenticationResponse.data().user()));
       });
     }
 

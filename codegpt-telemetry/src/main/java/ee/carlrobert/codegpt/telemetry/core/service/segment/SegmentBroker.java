@@ -150,11 +150,11 @@ public class SegmentBroker implements IMessageBroker {
     }
 
     private Map<String, ?> addIdentifyTraits(final IdentifyTraits identifyTraits, final Map<String, String> properties) {
-        putIfNotNull(PROP_LOCALE, identifyTraits.getLocale(), properties);
-        putIfNotNull(PROP_TIMEZONE, identifyTraits.getTimezone(), properties);
-        putIfNotNull(PROP_OS_NAME, identifyTraits.getOsName(), properties);
-        putIfNotNull(PROP_OS_DISTRIBUTION, identifyTraits.getOsDistribution(), properties);
-        putIfNotNull(PROP_OS_VERSION, identifyTraits.getOsVersion(), properties);
+        putIfNotNull(PROP_LOCALE, identifyTraits.locale(), properties);
+        putIfNotNull(PROP_TIMEZONE, identifyTraits.timezone(), properties);
+        putIfNotNull(PROP_OS_NAME, identifyTraits.osName(), properties);
+        putIfNotNull(PROP_OS_DISTRIBUTION, identifyTraits.osDistribution(), properties);
+        putIfNotNull(PROP_OS_VERSION, identifyTraits.osVersion(), properties);
         return properties;
     }
 
