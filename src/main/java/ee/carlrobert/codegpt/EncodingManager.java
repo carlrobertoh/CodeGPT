@@ -60,9 +60,10 @@ public final class EncodingManager {
 
   public int countTokens(String text) {
     try {
+      // #444: Cl100kParser.split() throws AssertionError "Input is not UTF-8: "
       return encoding.countTokens(text);
-    } catch (Exception ex) {
-      LOG.warn(ex);
+    } catch (Exception | Error ex) {
+      LOG.warn("Could not count tokens for: " + text, ex);
       return 0;
     }
   }
