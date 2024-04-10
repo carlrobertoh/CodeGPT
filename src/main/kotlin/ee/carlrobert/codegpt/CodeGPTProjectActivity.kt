@@ -4,7 +4,7 @@ import com.intellij.notification.NotificationAction
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.startup.ProjectActivity
+import com.intellij.openapi.startup.StartupActivity
 import com.intellij.openapi.util.Disposer
 import ee.carlrobert.codegpt.actions.editor.EditorActionsUtil
 import ee.carlrobert.codegpt.completions.you.YouUserManager
@@ -21,9 +21,9 @@ import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.AttachImageNotifier
 import ee.carlrobert.codegpt.ui.OverlayUtil
 import java.nio.file.Paths
 
-class CodeGPTProjectActivity : ProjectActivity {
+class CodeGPTProjectActivity : StartupActivity.Background {
 
-    override suspend fun execute(project: Project) {
+    override fun runActivity(project: Project) {
         EditorActionsUtil.refreshActions()
         CredentialsStore.loadAll()
 

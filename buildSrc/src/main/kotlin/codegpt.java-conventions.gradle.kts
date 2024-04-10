@@ -26,6 +26,7 @@ checkstyle {
 }
 
 dependencies {
+  implementation("org.jetbrains.kotlin:kotlin-stdlib")
   implementation("ee.carlrobert:llm-client:0.7.0")
 
   testImplementation(enforcedPlatform("org.junit:junit-bom:5.10.2"))

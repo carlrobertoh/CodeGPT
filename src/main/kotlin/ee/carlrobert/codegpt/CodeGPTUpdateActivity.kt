@@ -7,7 +7,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.startup.ProjectActivity
+import com.intellij.openapi.startup.StartupActivity
 import com.intellij.openapi.updateSettings.impl.UpdateChecker.updateAndShowResult
 import com.intellij.openapi.updateSettings.impl.UpdateSettings
 import com.intellij.util.concurrency.AppExecutorUtil
@@ -15,9 +15,9 @@ import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
 import ee.carlrobert.codegpt.ui.OverlayUtil
 import java.util.concurrent.TimeUnit
 
-class CodeGPTUpdateActivity : ProjectActivity {
+class CodeGPTUpdateActivity : StartupActivity.Background {
 
-    override suspend fun execute(project: Project) {
+    override fun runActivity(project: Project) {
         if (ApplicationManager.getApplication().isUnitTestMode) {
             return
         }
