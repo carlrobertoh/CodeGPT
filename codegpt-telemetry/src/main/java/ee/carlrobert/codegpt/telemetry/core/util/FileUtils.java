@@ -17,6 +17,9 @@ import java.nio.file.Path;
 
 public class FileUtils {
 
+    private FileUtils() {
+    }
+
     /**
      * Creates the file for the given path and the folder that contains it.
      * Does nothing if it any of those already exist.

@@ -22,81 +22,83 @@ public class PromptTemplateTest {
   public void shouldBuildLlamaPromptWithHistory() {
     var prompt = LLAMA.buildPrompt(SYSTEM_PROMPT, USER_PROMPT, HISTORY);
 
-    assertThat(prompt).isEqualTo(
-        "<<SYS>>TEST_SYSTEM_PROMPT<</SYS>>\n"
-            + "[INST]TEST_PREV_PROMPT_1[/INST]\n"
-            + "TEST_PREV_RESPONSE_1\n"
-            + "[INST]TEST_PREV_PROMPT_2[/INST]\n"
-            + "TEST_PREV_RESPONSE_2\n"
-            + "[INST]TEST_USER_PROMPT[/INST]");
+    assertThat(prompt).isEqualTo("""
+            <<SYS>>TEST_SYSTEM_PROMPT<</SYS>>
+            [INST]TEST_PREV_PROMPT_1[/INST]
+            TEST_PREV_RESPONSE_1
+            [INST]TEST_PREV_PROMPT_2[/INST]
+            TEST_PREV_RESPONSE_2
+            [INST]TEST_USER_PROMPT[/INST]""");
   }
 
   @Test
   public void shouldBuildLlamaPromptWithoutHistory() {
     var prompt = LLAMA.buildPrompt(SYSTEM_PROMPT, USER_PROMPT, List.of());
 
-    assertThat(prompt).isEqualTo(
-        "<<SYS>>TEST_SYSTEM_PROMPT<</SYS>>\n"
-            + "[INST]TEST_USER_PROMPT[/INST]");
+    assertThat(prompt).isEqualTo("""
+            <<SYS>>TEST_SYSTEM_PROMPT<</SYS>>
+            [INST]TEST_USER_PROMPT[/INST]""");
   }
 
   @Test
   public void shouldBuildAlpacaPromptWithHistory() {
     var prompt = ALPACA.buildPrompt(SYSTEM_PROMPT, USER_PROMPT, HISTORY);
 
-    assertThat(prompt).isEqualTo(
-        "Below is an instruction that describes a task. "
-            + "Write a response that appropriately completes the request.\n"
-            + "\n"
-            + "### Instruction\n"
-            + "TEST_PREV_PROMPT_1\n"
-            + "\n"
-            + "### Response:\n"
-            + "TEST_PREV_RESPONSE_1\n"
-            + "\n"
-            + "### Instruction\n"
-            + "TEST_PREV_PROMPT_2\n"
-            + "\n"
-            + "### Response:\n"
-            + "TEST_PREV_RESPONSE_2\n"
-            + "\n"
-            + "### Instruction\n"
-            + "TEST_USER_PROMPT\n"
-            + "\n"
-            + "### Response:\n");
+    assertThat(prompt).isEqualTo("""
+            Below is an instruction that describes a task. \
+            Write a response that appropriately completes the request.
+
+            ### Instruction
+            TEST_PREV_PROMPT_1
+
+            ### Response:
+            TEST_PREV_RESPONSE_1
+
+            ### Instruction
+            TEST_PREV_PROMPT_2
+
+            ### Response:
+            TEST_PREV_RESPONSE_2
+
+            ### Instruction
+            TEST_USER_PROMPT
+
+            ### Response:
+            """);
   }
 
   @Test
   public void shouldBuildAlpacaPromptWithoutHistory() {
     var prompt = ALPACA.buildPrompt(SYSTEM_PROMPT, USER_PROMPT, List.of());
 
-    assertThat(prompt).isEqualTo(
-        "Below is an instruction that describes a task. "
-            + "Write a response that appropriately completes the request.\n"
-            + "\n"
-            + "### Instruction\n"
-            + "TEST_USER_PROMPT\n"
-            + "\n"
-            + "### Response:\n");
+    assertThat(prompt).isEqualTo("""
+            Below is an instruction that describes a task. \
+            Write a response that appropriately completes the request.
+
+            ### Instruction
+            TEST_USER_PROMPT
+
+            ### Response:
+            """);
   }
 
   @Test
   public void shouldBuildChatMLPromptWithHistory() {
     var prompt = CHAT_ML.buildPrompt(SYSTEM_PROMPT, USER_PROMPT, HISTORY);
 
-    assertThat(prompt).isEqualTo(
-        "<|im_start|>system\n"
-            + "TEST_SYSTEM_PROMPT<|im_end|>\n"
-            + "<|im_start|>user\n"
-            + "TEST_PREV_PROMPT_1<|im_end|>\n"
-            + "<|im_start|>assistant\n"
-            + "TEST_PREV_RESPONSE_1<|im_end|>\n"
-            + "<|im_start|>user\n"
-            + "TEST_PREV_PROMPT_2<|im_end|>\n"
-            + "<|im_start|>assistant\n"
-            + "TEST_PREV_RESPONSE_2<|im_end|>\n"
-            + "<|im_start|>user\n"
-            + "TEST_USER_PROMPT<|im_end|>"
+    assertThat(prompt).isEqualTo("""
+            <|im_start|>system
+            TEST_SYSTEM_PROMPT<|im_end|>
+            <|im_start|>user
+            TEST_PREV_PROMPT_1<|im_end|>
+            <|im_start|>assistant
+            TEST_PREV_RESPONSE_1<|im_end|>
+            <|im_start|>user
+            TEST_PREV_PROMPT_2<|im_end|>
+            <|im_start|>assistant
+            TEST_PREV_RESPONSE_2<|im_end|>
+            <|im_start|>user
+            TEST_USER_PROMPT<|im_end|>"""
     );
   }
 
@@ -104,29 +106,29 @@ public class PromptTemplateTest {
   public void shouldBuildChatMLPromptWithoutHistory() {
     var prompt = CHAT_ML.buildPrompt(SYSTEM_PROMPT, USER_PROMPT, List.of());
 
-    assertThat(prompt).isEqualTo(
-        "<|im_start|>system\n"
-            + "TEST_SYSTEM_PROMPT<|im_end|>\n"
-            + "<|im_start|>user\n"
-            + "TEST_USER_PROMPT<|im_end|>");
+    assertThat(prompt).isEqualTo("""
+            <|im_start|>system
+            TEST_SYSTEM_PROMPT<|im_end|>
+            <|im_start|>user
+            TEST_USER_PROMPT<|im_end|>""");
   }
 
   @Test
   public void shouldBuildToRAPromptWithHistory() {
     var prompt = TORA.buildPrompt(SYSTEM_PROMPT, USER_PROMPT, HISTORY);
 
-    assertThat(prompt).isEqualTo(
-        "<|user|>\n"
-            + "TEST_PREV_PROMPT_1\n"
-            + "<|assistant|>\n"
-            + "TEST_PREV_RESPONSE_1\n"
-            + "<|user|>\n"
-            + "TEST_PREV_PROMPT_2\n"
-            + "<|assistant|>\n"
-            + "TEST_PREV_RESPONSE_2\n"
-            + "<|user|>\n"
-            + "TEST_USER_PROMPT\n"
-            + "<|assistant|>"
+    assertThat(prompt).isEqualTo("""
+            <|user|>
+            TEST_PREV_PROMPT_1
+            <|assistant|>
+            TEST_PREV_RESPONSE_1
+            <|user|>
+            TEST_PREV_PROMPT_2
+            <|assistant|>
+            TEST_PREV_RESPONSE_2
+            <|user|>
+            TEST_USER_PROMPT
+            <|assistant|>"""
     );
   }
 
@@ -134,10 +136,10 @@ public class PromptTemplateTest {
   public void shouldBuildToRAPromptWithoutHistory() {
     var prompt = TORA.buildPrompt(SYSTEM_PROMPT, USER_PROMPT, List.of());
 
-    assertThat(prompt).isEqualTo(
-        "<|user|>\n"
-            + "TEST_USER_PROMPT\n"
-            + "<|assistant|>"
+    assertThat(prompt).isEqualTo("""
+            <|user|>
+            TEST_USER_PROMPT
+            <|assistant|>"""
     );
   }
 }

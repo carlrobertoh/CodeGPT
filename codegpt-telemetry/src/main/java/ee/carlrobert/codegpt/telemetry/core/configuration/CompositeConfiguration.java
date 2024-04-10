@@ -12,17 +12,15 @@ package ee.carlrobert.codegpt.telemetry.core.configuration;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 public abstract class CompositeConfiguration implements IConfiguration {
 
     @Override
     public String get(final String key) {
         List<IConfiguration> configurations = getConfigurations();
-        if (configurations == null
-                || configurations.isEmpty()) {
-            return null;
-        }
-        return configurations.stream()
+        return (configurations == null ? Stream.<IConfiguration>empty() : configurations.stream())
+                .filter(Objects::nonNull)
                 .map(configuration -> configuration.get(key))
                 .filter(Objects::nonNull)
                 .findFirst()

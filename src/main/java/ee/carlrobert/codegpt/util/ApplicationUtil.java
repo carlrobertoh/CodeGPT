@@ -10,6 +10,9 @@ import org.jetbrains.annotations.Nullable;
 
 public class ApplicationUtil {
 
+  private ApplicationUtil() {
+  }
+
   public static boolean isUnitTestingMode() {
     Application app = ApplicationManager.getApplication();
     return app != null && app.isUnitTestMode();

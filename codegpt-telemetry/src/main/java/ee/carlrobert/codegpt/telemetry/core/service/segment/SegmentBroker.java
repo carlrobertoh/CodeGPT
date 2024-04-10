@@ -71,22 +71,17 @@ public class SegmentBroker implements IMessageBroker {
         public abstract MessageBuilder toMessage(TelemetryEvent event, Map<String, Object> context, SegmentBroker broker);
 
         public static SegmentType valueOf(TelemetryEvent.Type eventType) {
-            switch (eventType) {
-                case USER:
-                    return IDENTIFY;
-                case ACTION:
-                case STARTUP:
-                case SHUTDOWN:
-                default:
-                    return TRACK;
-            }
+          return switch (eventType) {
+            case USER -> IDENTIFY;
+            default -> TRACK;
+          };
         }
     }
 
     private final String userId;
     private final IdentifyTraitsPersistence identifyTraitsPersistence;
     private final Environment environment;
-    private Lazy<RudderAnalytics> analytics;
+    private final Lazy<RudderAnalytics> analytics;
 
     public SegmentBroker(boolean isDebug, String userId, Environment environment, ISegmentConfiguration configuration) {
         this(isDebug, userId, IdentifyTraitsPersistence.INSTANCE, environment, configuration, new AnalyticsFactory());
@@ -155,11 +150,11 @@ public class SegmentBroker implements IMessageBroker {
     }
 
     private Map<String, ?> addIdentifyTraits(final IdentifyTraits identifyTraits, final Map<String, String> properties) {
-        putIfNotNull(PROP_LOCALE, identifyTraits.getLocale(), properties);
-        putIfNotNull(PROP_TIMEZONE, identifyTraits.getTimezone(), properties);
-        putIfNotNull(PROP_OS_NAME, identifyTraits.getOsName(), properties);
-        putIfNotNull(PROP_OS_DISTRIBUTION, identifyTraits.getOsDistribution(), properties);
-        putIfNotNull(PROP_OS_VERSION, identifyTraits.getOsVersion(), properties);
+        putIfNotNull(PROP_LOCALE, identifyTraits.locale(), properties);
+        putIfNotNull(PROP_TIMEZONE, identifyTraits.timezone(), properties);
+        putIfNotNull(PROP_OS_NAME, identifyTraits.osName(), properties);
+        putIfNotNull(PROP_OS_DISTRIBUTION, identifyTraits.osDistribution(), properties);
+        putIfNotNull(PROP_OS_VERSION, identifyTraits.osVersion(), properties);
         return properties;
     }
 

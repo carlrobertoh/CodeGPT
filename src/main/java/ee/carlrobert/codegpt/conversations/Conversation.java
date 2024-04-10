@@ -1,7 +1,5 @@
 package ee.carlrobert.codegpt.conversations;
 
-import static java.util.stream.Collectors.toList;
-
 import ee.carlrobert.codegpt.conversations.message.Message;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -81,6 +79,6 @@ public class Conversation {
   public void removeMessage(UUID messageId) {
     setMessages(messages.stream()
         .filter(message -> !message.getId().equals(messageId))
-        .collect(toList()));
+        .toList());
   }
 }

@@ -42,104 +42,40 @@ public class CodeCompletionParserFactory {
   }
 
   private static TSLanguage getLanguageForExtension(String extension) {
-    switch (extension) {
-      case "java":
-        return new TreeSitterJava();
-      case "php":
-        return new TreeSitterPhp();
-      case "py":
-        return new TreeSitterPython();
-      case "ts":
-      case "tsx":
-        return new TreeSitterTypescript();
-      case "js":
-      case "jsx":
-        return new TreeSitterJavascript();
-      case "c":
-      case "h":
-      case "cpp":
-      case "cxx":
-      case "cc":
-      case "c++":
-      case "hpp":
-      case "hxx":
-      case "hh":
-      case "h++":
-        return new TreeSitterCpp();
-      case "cs":
-        return new TreeSitterCSharp();
-      case "css":
-        return new TreeSitterCss();
-      case "dart":
-        return new TreeSitterDart();
-      case "dockerfile":
-        return new TreeSitterDockerfile();
-      case "elixir":
-      case "ex":
-      case "exs":
-        return new TreeSitterElixir();
-      case "erl":
-      case "hrl":
-        return new TreeSitterErlang();
-      case "f90":
-      case "f95":
-      case "f03":
-      case "f08":
-        return new TreeSitterFortran();
-      case "gitattributes":
-        return new TreeSitterGitattributes();
-      case "go":
-        return new TreeSitterGo();
-      case "graphql":
-      case "gql":
-        return new TreeSitterGraphql();
-      case "html":
-      case "htm":
-        return new TreeSitterHtml();
-      case "json":
-        return new TreeSitterJson();
-      case "kotlin":
-      case "kt":
-      case "kts":
-        return new TreeSitterKotlin();
-      case "latex":
-      case "tex":
-        return new TreeSitterLatex();
-      case "lua":
-        return new TreeSitterLua();
-      case "m68k":
-        return new TreeSitterM68k();
-      case "markdown":
-      case "md":
-        return new TreeSitterMarkdown();
-      case "objc":
-      case "m":
-      case "mm":
-        return new TreeSitterObjc();
-      case "perl":
-      case "pl":
-      case "pm":
-        return new TreeSitterPerl();
-      case "ruby":
-      case "rb":
-        return new TreeSitterRuby();
-      case "rust":
-      case "rs":
-        return new TreeSitterRust();
-      case "scala":
-      case "sc":
-        return new TreeSitterScala();
-      case "scss":
-        return new TreeSitterScss();
-      case "svelte":
-        return new TreeSitterSvelte();
-      case "swift":
-        return new TreeSitterSwift();
-      case "yml":
-      case "yaml":
-        return new TreeSitterYaml();
-      default:
-        throw new IllegalArgumentException("Unsupported file extension: " + extension);
-    }
+    return switch (extension) {
+      case "java" -> new TreeSitterJava();
+      case "php" -> new TreeSitterPhp();
+      case "py" -> new TreeSitterPython();
+      case "ts", "tsx" -> new TreeSitterTypescript();
+      case "js", "jsx" -> new TreeSitterJavascript();
+      case "c", "h", "cpp", "cxx", "cc", "c++", "hpp", "hxx", "hh", "h++" -> new TreeSitterCpp();
+      case "cs" -> new TreeSitterCSharp();
+      case "css" -> new TreeSitterCss();
+      case "dart" -> new TreeSitterDart();
+      case "dockerfile" -> new TreeSitterDockerfile();
+      case "elixir", "ex", "exs" -> new TreeSitterElixir();
+      case "erl", "hrl" -> new TreeSitterErlang();
+      case "f90", "f95", "f03", "f08" -> new TreeSitterFortran();
+      case "gitattributes" -> new TreeSitterGitattributes();
+      case "go" -> new TreeSitterGo();
+      case "graphql", "gql" -> new TreeSitterGraphql();
+      case "html", "htm" -> new TreeSitterHtml();
+      case "json" -> new TreeSitterJson();
+      case "kotlin", "kt", "kts" -> new TreeSitterKotlin();
+      case "latex", "tex" -> new TreeSitterLatex();
+      case "lua" -> new TreeSitterLua();
+      case "m68k" -> new TreeSitterM68k();
+      case "markdown", "md" -> new TreeSitterMarkdown();
+      case "objc", "m", "mm" -> new TreeSitterObjc();
+      case "perl", "pl", "pm" -> new TreeSitterPerl();
+      case "ruby", "rb" -> new TreeSitterRuby();
+      case "rust", "rs" -> new TreeSitterRust();
+      case "scala", "sc" -> new TreeSitterScala();
+      case "scss" -> new TreeSitterScss();
+      case "svelte" -> new TreeSitterSvelte();
+      case "swift" -> new TreeSitterSwift();
+      case "yml", "yaml" -> new TreeSitterYaml();
+      default -> throw new IllegalArgumentException("Unsupported file extension: " + extension);
+    };
   }
 }

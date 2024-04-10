@@ -1,5 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+val libs = versionCatalogs.named("libs")
+fun lib(reference: String) = libs.findLibrary(reference).get()
 fun properties(key: String) = project.findProperty(key).toString()
 
 plugins {
@@ -27,10 +29,15 @@ checkstyle {
 
 dependencies {
   implementation("org.jetbrains.kotlin:kotlin-stdlib")
-  implementation("ee.carlrobert:llm-client:0.7.0")
+  implementation(lib("llm.client"))
+  constraints {
+    implementation(lib("okio")) {
+      because("llm-client 0.7.0 uses okio 3.2.0: https://avd.aquasec.com/nvd/cve-2023-3635")
+    }
+  }
 
-  testImplementation(enforcedPlatform("org.junit:junit-bom:5.10.2"))
-  testImplementation("org.assertj:assertj-core:3.25.3")
+  testImplementation(platform(lib("junit.bom")))
+  testImplementation(lib("assertj.core"))
   testImplementation("org.junit.jupiter:junit-jupiter-params")
   testRuntimeOnly("org.junit.platform:junit-platform-launcher")
   testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")

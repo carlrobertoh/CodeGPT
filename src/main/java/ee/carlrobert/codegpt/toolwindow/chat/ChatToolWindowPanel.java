@@ -69,7 +69,7 @@ public class ChatToolWindowPanel extends SimpleToolWindowPanel {
 
     var referencedFilePaths = referencedFiles.stream()
         .map(ReferencedFile::getFilePath)
-        .collect(Collectors.toList());
+        .toList();
     selectedFilesNotification.show(
         referencedFiles.size() + " files selected",
         selectedFilesNotificationDescription(referencedFilePaths));

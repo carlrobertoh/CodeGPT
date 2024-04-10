@@ -1,6 +1,5 @@
 package ee.carlrobert.codegpt.completions;
 
-import com.intellij.openapi.diagnostic.Logger;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.GeneralSettingsState;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
@@ -13,8 +12,6 @@ import javax.swing.SwingWorker;
 import okhttp3.sse.EventSource;
 
 public class CompletionRequestHandler {
-
-  private static final Logger LOG = Logger.getInstance(CompletionRequestHandler.class);
 
   private final StringBuilder messageBuilder = new StringBuilder();
   private final CompletionResponseEventListener completionResponseEventListener;

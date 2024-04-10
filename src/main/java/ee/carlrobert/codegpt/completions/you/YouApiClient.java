@@ -7,7 +7,6 @@ import com.intellij.openapi.components.Service;
 import ee.carlrobert.codegpt.completions.you.auth.response.YouAuthenticationResponse;
 import java.io.IOException;
 import java.util.List;
-import okhttp3.Headers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import org.jetbrains.annotations.Nullable;
@@ -22,8 +21,8 @@ public final class YouApiClient {
   }
 
   public @Nullable YouSubscription getSubscription(YouAuthenticationResponse auth) {
-    var sessionId = auth.getData().getSession().getSessionId();
-    var sessionJwt = auth.getData().getSessionJwt();
+    var sessionId = auth.data().session().sessionId();
+    var sessionJwt = auth.data().sessionJwt();
     var request = new Request.Builder()
         .url(API_BASE_URL + "/payments/orders/subscriptions/current")
         .header("Accept", "application/json")

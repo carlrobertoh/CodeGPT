@@ -39,7 +39,7 @@ public class UserId {
     }
 
     private String loadOrCreate(Path file) {
-        String uuid = null;
+        String uuid;
         if (exists(file)) {
             uuid = load(file);
             if (isValid(uuid)) {
@@ -61,6 +61,7 @@ public class UserId {
         String uuid = null;
         try(Stream<String> lines = Files.lines(uuidFile)) {
             uuid = lines
+                    .filter(l -> !l.isBlank())
                     .findAny()
                     .map(String::trim)
                     .orElse(null);

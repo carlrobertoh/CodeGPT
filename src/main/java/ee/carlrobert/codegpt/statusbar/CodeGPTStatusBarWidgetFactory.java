@@ -1,7 +1,6 @@
 package ee.carlrobert.codegpt.statusbar;
 
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.wm.StatusBarWidget;
 import com.intellij.openapi.wm.impl.status.widget.StatusBarEditorBasedWidgetFactory;
 import ee.carlrobert.codegpt.CodeGPTBundle;
@@ -26,8 +25,4 @@ public class CodeGPTStatusBarWidgetFactory extends StatusBarEditorBasedWidgetFac
     return new CodeGPTStatusBarWidget(project);
   }
 
-  @Override
-  public void disposeWidget(@NotNull StatusBarWidget widget) {
-    Disposer.dispose(widget);
-  }
 }

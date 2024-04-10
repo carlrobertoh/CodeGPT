@@ -30,10 +30,9 @@ public class MapBuilder {
     }
 
     public MapBuilder pairs(Collection<AbstractMap.SimpleEntry<String, Object>> entries) {
-        if (entries == null) {
-            return this;
+        if (entries != null) {
+            entries.forEach(entry -> map.put(entry.getKey(), entry.getValue()));
         }
-        entries.stream().forEach(entry -> map.put(entry.getKey(), entry.getValue()));
         return this;
     }
 
@@ -59,10 +58,9 @@ public class MapBuilder {
         }
 
         public MapValueBuilder pairs(Collection<AbstractMap.SimpleEntry<String, Object>> entries) {
-            if (entries == null) {
-                return this;
+            if (entries != null) {
+                entries.forEach(entry -> map.put(entry.getKey(), entry.getValue()));
             }
-            entries.stream().forEach(entry -> map.put(entry.getKey(), entry.getValue()));
             return this;
         }
 

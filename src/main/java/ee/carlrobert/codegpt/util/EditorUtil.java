@@ -27,6 +27,9 @@ import org.jetbrains.annotations.Nullable;
 
 public final class EditorUtil {
 
+  private EditorUtil() {
+  }
+
   public static Editor createEditor(@NotNull Project project, String fileExtension, String code) {
     var timestamp = DateTimeFormatter.ofPattern("yyyyMMddHHmmss").format(LocalDateTime.now());
     var fileName = "temp_" + timestamp + fileExtension;

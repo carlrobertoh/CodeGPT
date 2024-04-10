@@ -49,9 +49,8 @@ public class Platform {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Platform)) return false;
-        Platform platform = (Platform) o;
-        return Objects.equals(name, platform.name)
+        if (!(o instanceof Platform platform)) return false;
+      return Objects.equals(name, platform.name)
                 && Objects.equals(distribution, platform.distribution)
                 && Objects.equals(version, platform.version);
     }
