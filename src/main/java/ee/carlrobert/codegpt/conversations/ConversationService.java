@@ -1,7 +1,5 @@
 package ee.carlrobert.codegpt.conversations;
 
-import static java.util.stream.Collectors.toList;
-
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
 import ee.carlrobert.codegpt.completions.CallParameters;
@@ -39,7 +37,7 @@ public final class ConversationService {
         .stream()
         .flatMap(List::stream)
         .sorted(Comparator.comparing(Conversation::getUpdatedOn).reversed())
-        .collect(toList());
+        .toList();
   }
 
   public Conversation createConversation(String clientCode) {
@@ -92,7 +90,7 @@ public final class ConversationService {
               return message;
             }
             return item;
-          }).collect(toList()));
+          }).toList());
       if (next.getId().equals(conversation.getId())) {
         iterator.set(conversation);
       }
@@ -188,24 +186,18 @@ public final class ConversationService {
   }
 
   private static String getModelForSelectedService(ServiceType serviceType) {
-    switch (serviceType) {
-      case OPENAI:
-        return OpenAISettings.getCurrentState().getModel();
-      case CUSTOM_OPENAI:
-        return "CustomService";
-      case ANTHROPIC:
-        return AnthropicSettings.getCurrentState().getModel();
-      case AZURE:
-        return AzureSettings.getCurrentState().getDeploymentId();
-      case YOU:
-        return "YouCode";
-      case LLAMA_CPP:
+    return switch (serviceType) {
+      case OPENAI -> OpenAISettings.getCurrentState().getModel();
+      case CUSTOM_OPENAI -> "CustomService";
+      case ANTHROPIC -> AnthropicSettings.getCurrentState().getModel();
+      case AZURE -> AzureSettings.getCurrentState().getDeploymentId();
+      case YOU -> "YouCode";
+      case LLAMA_CPP -> {
         var llamaSettings = LlamaSettings.getCurrentState();
-        return llamaSettings.isUseCustomModel()
-            ? llamaSettings.getCustomLlamaModelPath()
-            : llamaSettings.getHuggingFaceModel().getCode();
-      default:
-        throw new RuntimeException("Could not find corresponding service mapping");
-    }
+        yield llamaSettings.isUseCustomModel()
+                ? llamaSettings.getCustomLlamaModelPath()
+                : llamaSettings.getHuggingFaceModel().getCode();
+      }
+    };
   }
 }

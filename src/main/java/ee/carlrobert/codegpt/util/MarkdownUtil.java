@@ -1,7 +1,5 @@
 package ee.carlrobert.codegpt.util;
 
-import static java.util.stream.Collectors.toList;
-
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.data.MutableDataSet;
@@ -12,6 +10,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MarkdownUtil {
+
+  private MarkdownUtil() {
+  }
 
   /**
    * Splits a given string into a list of strings where each element is either a code block
@@ -32,7 +33,7 @@ public class MarkdownUtil {
       start = matcher.end();
     }
     result.add(inputMarkdown.substring(start));
-    return result.stream().filter(item -> !item.isBlank()).collect(toList());
+    return result.stream().filter(item -> !item.isBlank()).toList();
   }
 
   public static String convertMdToHtml(String message) {

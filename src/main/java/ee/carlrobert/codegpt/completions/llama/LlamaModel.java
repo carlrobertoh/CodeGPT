@@ -1,7 +1,6 @@
 package ee.carlrobert.codegpt.completions.llama;
 
 import static java.lang.String.format;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 import ee.carlrobert.codegpt.codecompletions.InfillPromptTemplate;
@@ -163,6 +162,6 @@ public enum LlamaModel {
         .collect(toSet())
         .stream()
         .sorted()
-        .collect(toList());
+        .toList();
   }
 }

@@ -1,7 +1,6 @@
 package ee.carlrobert.codegpt.actions.editor;
 
 import static java.lang.String.format;
-import static java.util.stream.Collectors.toList;
 
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.AnAction;
@@ -24,7 +23,7 @@ import org.apache.commons.text.CaseUtils;
 
 public class EditorActionsUtil {
 
-  public static Map<String, String> DEFAULT_ACTIONS = new LinkedHashMap<>(Map.of(
+  public static final Map<String, String> DEFAULT_ACTIONS = new LinkedHashMap<>(Map.of(
       "Find Bugs", "Find bugs and output code with bugs "
           + "fixed in the following code: {{selectedCode}}",
       "Write Tests", "Write Tests for the selected code {{selectedCode}}",
@@ -32,14 +31,13 @@ public class EditorActionsUtil {
       "Refactor", "Refactor the selected code {{selectedCode}}",
       "Optimize", "Optimize the selected code {{selectedCode}}"));
 
-  public static String[][] DEFAULT_ACTIONS_ARRAY = toArray(DEFAULT_ACTIONS);
+  public static final String[][] DEFAULT_ACTIONS_ARRAY = toArray(DEFAULT_ACTIONS);
 
   public static String[][] toArray(Map<String, String> actionsMap) {
     return actionsMap.entrySet()
         .stream()
-        .map((entry) -> new String[]{entry.getKey(), entry.getValue()})
-        .toList()
-        .toArray(new String[0][0]);
+        .map(entry -> new String[]{entry.getKey(), entry.getValue()})
+        .toArray(String[][]::new);
   }
 
   public static void refreshActions() {
@@ -58,11 +56,10 @@ public class EditorActionsUtil {
         var action = new BaseEditorAction(label, label) {
           @Override
           protected void actionPerformed(Project project, Editor editor, String selectedText) {
-            var fileExtension = FileUtil.getFileExtension(
-                ((EditorImpl) editor).getVirtualFile().getName());
+            var fileExtension = FileUtil.getFileExtension(editor.getVirtualFile().getName());
             var message = new Message(prompt.replace(
                 "{{selectedCode}}",
-                format("\n```%s\n%s\n```", fileExtension, selectedText)));
+                format("%n```%s%n%s%n```", fileExtension, selectedText)));
             message.setUserMessage(prompt.replace("{{selectedCode}}", ""));
             var toolWindowContentManager =
                 project.getService(ChatToolWindowContentManager.class);
@@ -72,7 +69,7 @@ public class EditorActionsUtil {
                 Stream.ofNullable(project.getUserData(CodeGPTKeys.SELECTED_FILES))
                     .flatMap(Collection::stream)
                     .map(ReferencedFile::getFilePath)
-                    .collect(toList()));
+                    .toList());
             toolWindowContentManager.sendMessage(message);
           }
         };

@@ -24,7 +24,7 @@ public class TelemetryConfiguration extends CompositeConfiguration {
     private static final SaveableFileConfiguration FILE = new SaveableFileConfiguration(
             Directories.PATH.resolve("ee.carlrobert.intellij.telemetry"));
 
-    private static TelemetryConfiguration INSTANCE = new TelemetryConfiguration();
+    private static final TelemetryConfiguration INSTANCE = new TelemetryConfiguration();
 
     public static TelemetryConfiguration getInstance() {
         return INSTANCE;

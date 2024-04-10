@@ -6,7 +6,6 @@ import static ee.carlrobert.codegpt.settings.service.ServiceType.CUSTOM_OPENAI;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.LLAMA_CPP;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.OPENAI;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.YOU;
-import static java.util.stream.Collectors.toList;
 
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.ui.ComboBox;
@@ -46,8 +45,7 @@ public class GeneralSettingsComponent {
     cards.add(serviceSelectionForm.getYouSettingsForm(), YOU.getCode());
     cards.add(serviceSelectionForm.getLlamaSettingsForm(), LLAMA_CPP.getCode());
     var serviceComboBoxModel = new DefaultComboBoxModel<ServiceType>();
-    serviceComboBoxModel.addAll(Arrays.stream(ServiceType.values())
-        .collect(toList()));
+    serviceComboBoxModel.addAll(Arrays.stream(ServiceType.values()).toList());
     serviceComboBox = new ComboBox<>(serviceComboBoxModel);
     serviceComboBox.setSelectedItem(OPENAI);
     serviceComboBox.setPreferredSize(displayNameField.getPreferredSize());

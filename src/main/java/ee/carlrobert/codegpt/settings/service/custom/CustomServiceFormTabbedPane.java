@@ -97,9 +97,8 @@ class CustomServiceFormTabbedPane extends JBTabbedPane {
   public static Object[][] toArray(Map<?, ?> actionsMap) {
     return actionsMap.entrySet()
         .stream()
-        .map((entry) -> new Object[]{entry.getKey(), entry.getValue()})
-        .toList()
-        .toArray(new Object[0][0]);
+        .map(entry -> new Object[]{entry.getKey(), entry.getValue()})
+        .toArray(Object[][]::new);
   }
 
   private JPanel createTablePanel(JBTable table) {

@@ -117,7 +117,7 @@ public class Environment {
             }
         }
 
-        class Buildable {
+        public class Buildable {
             public Environment build() {
                 ensureIDE();
                 ensurePlatform();
@@ -171,9 +171,8 @@ public class Environment {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Environment)) return false;
-        Environment that = (Environment) o;
-        return Objects.equals(plugin, that.plugin)
+        if (!(o instanceof Environment that)) return false;
+      return Objects.equals(plugin, that.plugin)
                 && Objects.equals(ide, that.ide)
                 && Objects.equals(platform, that.platform)
                 && Objects.equals(timezone, that.timezone)
@@ -187,4 +186,3 @@ public class Environment {
     }
 
 }
-

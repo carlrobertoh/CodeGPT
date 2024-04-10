@@ -1,7 +1,6 @@
 package ee.carlrobert.codegpt.settings.service.llama.form;
 
 import static java.lang.String.format;
-import static java.util.stream.Collectors.toList;
 
 import com.intellij.icons.AllIcons.Actions;
 import com.intellij.icons.AllIcons.General;
@@ -94,7 +93,7 @@ public class LlamaModelPreferencesForm {
 
     var selectableModels = llamaModel.getHuggingFaceModels().stream()
         .filter(model -> model.getParameterSize() == llm.getParameterSize())
-        .collect(toList());
+        .toList();
     huggingFaceComboBoxModel.addAll(selectableModels);
     huggingFaceComboBoxModel.setSelectedItem(selectableModels.get(0));
     downloadModelActionLinkWrapper = new JPanel(new BorderLayout());
@@ -116,7 +115,7 @@ public class LlamaModelPreferencesForm {
     var modelSizeComboBoxModel = new DefaultComboBoxModel<ModelSize>();
     var initialModelSizes = llamaModel.getSortedUniqueModelSizes().stream()
         .map(ModelSize::new)
-        .collect(toList());
+        .toList();
     modelSizeComboBoxModel.addAll(initialModelSizes);
     modelSizeComboBoxModel.setSelectedItem(initialModelSizes.get(0));
     var modelComboBoxModel = new EnumComboBoxModel<>(LlamaModel.class);
@@ -318,7 +317,7 @@ public class LlamaModelPreferencesForm {
       var selectedModel = (LlamaModel) e.getItem();
       var modelSizes = selectedModel.getSortedUniqueModelSizes().stream()
           .map(ModelSize::new)
-          .collect(toList());
+          .toList();
 
       modelSizeComboBoxModel.removeAllElements();
       modelSizeComboBoxModel.addAll(modelSizes);
@@ -327,10 +326,11 @@ public class LlamaModelPreferencesForm {
 
       var huggingFaceModels = selectedModel.getHuggingFaceModels().stream()
           .filter(model -> {
-            var size = ((ModelSize) modelSizeComboBoxModel.getSelectedItem()).getSize();
-            return size == model.getParameterSize();
+            var selectedModelSize = (ModelSize) modelSizeComboBoxModel.getSelectedItem();
+            return selectedModelSize != null
+                    && selectedModelSize.size() == model.getParameterSize();
           })
-          .collect(toList());
+          .toList();
 
       huggingFaceComboBoxModel.removeAllElements();
       huggingFaceComboBoxModel.addAll(huggingFaceModels);
@@ -352,9 +352,9 @@ public class LlamaModelPreferencesForm {
           .filter(model -> {
             var selectedModelSize = (ModelSize) modelSizeComboBoxModel.getSelectedItem();
             return selectedModelSize != null
-                && selectedModelSize.getSize() == model.getParameterSize();
+                && selectedModelSize.size() == model.getParameterSize();
           })
-          .collect(toList());
+          .toList();
       if (!models.isEmpty()) {
         huggingFaceComboBoxModel.removeAllElements();
         huggingFaceComboBoxModel.addAll(models);
@@ -445,18 +445,16 @@ public class LlamaModelPreferencesForm {
     return new AnActionLink(
         CodeGPTBundle.get("settingsConfigurable.service.llama.downloadModelLink.label"),
         new DownloadModelAction(
-            progressIndicator -> {
-              SwingUtilities.invokeLater(() -> {
-                configureFieldsForDownloading(true);
-                updateActionLink(
-                    actionLinkWrapper,
-                    createCancelDownloadLink(
-                        progressLabel,
-                        actionLinkWrapper,
-                        huggingFaceComboBoxModel,
-                        progressIndicator));
-              });
-            },
+            progressIndicator -> SwingUtilities.invokeLater(() -> {
+              configureFieldsForDownloading(true);
+              updateActionLink(
+                  actionLinkWrapper,
+                  createCancelDownloadLink(
+                      progressLabel,
+                      actionLinkWrapper,
+                      huggingFaceComboBoxModel,
+                      progressIndicator));
+            }),
             () -> SwingUtilities.invokeLater(() -> {
               configureFieldsForDownloading(false);
               updateActionLink(
@@ -488,29 +486,10 @@ public class LlamaModelPreferencesForm {
         .installOn(helpIcon);
   }
 
-  private static class ModelDetails {
-
-    double fileSize;
-    double maxRAMRequired;
-
-    public ModelDetails(double fileSize, double maxRAMRequired) {
-      this.fileSize = fileSize;
-      this.maxRAMRequired = maxRAMRequired;
-    }
+  private record ModelDetails(double fileSize, double maxRAMRequired) {
   }
 
-  private static class ModelSize {
-
-    private final int size;
-
-    ModelSize(int size) {
-      this.size = size;
-    }
-
-    int getSize() {
-      return size;
-    }
-
+  private record ModelSize(int size) {
     @Override
     public String toString() {
       return size + "B";

@@ -25,7 +25,7 @@ public class ChatToolWindowScrollablePanel extends ScrollablePanel {
 
   public ResponsePanel getMessageResponsePanel(UUID messageId) {
     return (ResponsePanel) Arrays.stream(visibleMessagePanels.get(messageId).getComponents())
-        .filter(component -> component instanceof ResponsePanel)
+        .filter(ResponsePanel.class::isInstance)
         .findFirst().orElseThrow();
   }
 

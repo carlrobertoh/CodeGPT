@@ -13,7 +13,6 @@ package ee.carlrobert.codegpt.telemetry.core.service;
 import static ee.carlrobert.codegpt.telemetry.core.configuration.TelemetryConfiguration.KEY_MODE;
 
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.util.messages.MessageBusConnection;
 import ee.carlrobert.codegpt.telemetry.core.IMessageBroker;
 import ee.carlrobert.codegpt.telemetry.core.ITelemetryService;
@@ -26,8 +25,6 @@ import ee.carlrobert.codegpt.telemetry.ui.TelemetryNotifications;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TelemetryService implements ITelemetryService {
-
-    private static final Logger LOGGER = Logger.getInstance(TelemetryService.class);
 
     private static final int BUFFER_SIZE = 35;
 

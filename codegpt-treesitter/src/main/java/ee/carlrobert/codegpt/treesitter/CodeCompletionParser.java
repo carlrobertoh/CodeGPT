@@ -15,7 +15,7 @@ public class CodeCompletionParser {
 
   public String parse(String prefix, String suffix, String output) {
     var result = new StringBuilder(output);
-    while (result.length() > 0) {
+    while (!result.isEmpty()) {
       if (containsSyntaxErrors(prefix + result + suffix)) {
         result.deleteCharAt(result.length() - 1);
       } else {
