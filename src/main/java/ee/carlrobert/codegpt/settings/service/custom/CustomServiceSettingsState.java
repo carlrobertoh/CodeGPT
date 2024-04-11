@@ -14,6 +14,8 @@ public class CustomServiceSettingsState {
   @OptionTag(converter = MapConverter.class)
   private Map<String, ?> body = OPENAI.getBody();
   private CustomServiceTemplate template = OPENAI;
+  private boolean codeCompletionsEnabled = true;
+  private int codeCompletionMaxTokens = 128;
 
   public String getUrl() {
     return url;
@@ -45,6 +47,22 @@ public class CustomServiceSettingsState {
 
   public void setTemplate(CustomServiceTemplate template) {
     this.template = template;
+  }
+
+  public boolean isCodeCompletionsEnabled() {
+    return codeCompletionsEnabled;
+  }
+
+  public void setCodeCompletionsEnabled(boolean codeCompletionsEnabled) {
+    this.codeCompletionsEnabled = codeCompletionsEnabled;
+  }
+
+  public int getCodeCompletionMaxTokens() {
+    return codeCompletionMaxTokens;
+  }
+
+  public void setCodeCompletionMaxTokens(int codeCompletionMaxTokens) {
+    this.codeCompletionMaxTokens = codeCompletionMaxTokens;
   }
 
   @Override
