@@ -13,6 +13,14 @@ import java.util.function.BooleanSupplier
 
 interface ShortcutsTestMixin {
 
+  fun useAnthropicService() {
+    GeneralSettings.getCurrentState().selectedService = ServiceType.ANTHROPIC
+  }
+
+  fun useCustomOpenAIService() {
+    GeneralSettings.getCurrentState().selectedService = ServiceType.CUSTOM_OPENAI
+  }
+
   fun useOpenAIService() {
     useOpenAIService("gpt-4")
   }
