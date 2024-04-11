@@ -112,10 +112,10 @@ public class ConfigurationComponent {
 
     checkForPluginUpdatesCheckBox = new JBCheckBox(
         CodeGPTBundle.get("configurationConfigurable.checkForPluginUpdates.label"),
-        configuration.isCheckForNewScreenshots());
+        configuration.isCheckForPluginUpdates());
     checkForNewScreenshotsCheckBox = new JBCheckBox(
         CodeGPTBundle.get("configurationConfigurable.checkForNewScreenshots.label"),
-        configuration.isCheckForPluginUpdates());
+        configuration.isCheckForNewScreenshots());
     openNewTabCheckBox = new JBCheckBox(
         CodeGPTBundle.get("configurationConfigurable.openNewTabCheckBox.label"),
         configuration.isCreateNewChatOnEachAction());
