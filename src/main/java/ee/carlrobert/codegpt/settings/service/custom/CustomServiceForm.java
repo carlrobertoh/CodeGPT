@@ -86,8 +86,6 @@ public class CustomServiceForm {
         .addLabeledComponent(
             CodeGPTBundle.get("settingsConfigurable.service.custom.openai.presetTemplate.label"),
             templateComboBoxWrapper)
-        .addComponent(new TitledSeparator(CodeGPTBundle.get("shared.codeCompletions")))
-        .addComponent(withEmptyLeftBorder(codeCompletionConfigurationForm.getForm()))
         .addLabeledComponent(
             CodeGPTBundle.get("settingsConfigurable.shared.apiKey.label"),
             apiKeyField)
@@ -97,6 +95,8 @@ public class CustomServiceForm {
             CodeGPTBundle.get("settingsConfigurable.service.custom.openai.url.label"),
             urlPanel)
         .addComponent(tabbedPane)
+        .addComponent(new TitledSeparator(CodeGPTBundle.get("shared.codeCompletions")))
+        .addComponent(withEmptyLeftBorder(codeCompletionConfigurationForm.getForm()))
         .getPanel();
 
     return FormBuilder.createFormBuilder()
