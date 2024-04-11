@@ -10,7 +10,6 @@ import ee.carlrobert.codegpt.settings.GeneralSettings
 import ee.carlrobert.codegpt.settings.service.ServiceType
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings
-import ee.carlrobert.codegpt.treesitter.CodeCompletionParserFactory
 import ee.carlrobert.llm.completion.CompletionEventListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
@@ -80,14 +79,19 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
     ) : CompletionEventListener<String> {
 
         override fun onComplete(messageBuilder: StringBuilder) {
-            val processedOutput = CodeCompletionParserFactory
+            // TODO: https://youtrack.jetbrains.com/issue/CPP-38312/CLion-crashes-around-every-10-minutes-of-work
+            /*val processedOutput = CodeCompletionParserFactory
                 .getParserForFileExtension(requestDetails.fileExtension)
                 .parse(
                     requestDetails.prefix,
                     requestDetails.suffix,
                     messageBuilder.toString()
-                )
-            completed(processedOutput)
+                )*/
+            val output =
+                if (messageBuilder.contains("\n"))
+                    messageBuilder.substring(0, messageBuilder.indexOf("\n"))
+                else messageBuilder.toString()
+            completed(output)
         }
     }
 }
