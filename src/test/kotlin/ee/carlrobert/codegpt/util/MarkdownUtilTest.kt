@@ -1,14 +1,13 @@
-package ee.carlrobert.codegpt.util;
+package ee.carlrobert.codegpt.util
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.Test
 
-import org.junit.Test;
-
-public class MarkdownUtilTest {
+class MarkdownUtilTest {
 
   @Test
-  public void shouldExtractMarkdownCodeBlocks() {
-    String testInput = """
+  fun shouldExtractMarkdownCodeBlocks() {
+    val testInput = """
             **C++ Code Block**
             ```cpp
             #include <iostream>
@@ -29,60 +28,68 @@ public class MarkdownUtilTest {
             ```
             1. We define a **public class** called **Main**.
             2. We define the **main** method which is the entry point of the program.
-            """;
 
-    var result = MarkdownUtil.splitCodeBlocks(testInput);
+            """.trimIndent()
+
+    val result = MarkdownUtil.splitCodeBlocks(testInput)
 
     assertThat(result).containsExactly("""
             **C++ Code Block**
-            """, """
+
+            """.trimIndent(), """
             ```cpp
             #include <iostream>
 
             int main() {
                 return 0;
             }
-            ```""", """
+            ```""".trimIndent(), """
 
             1. We include the **iostream** header file.
             2. We define the main function.
 
             **Java Code Block**
-            """, """
+
+            """.trimIndent(), """
             ```java
             public class Main {
                 public static void main(String[] args) {
                 }
             }
-            ```""", """
+            ```""".trimIndent(), """
 
             1. We define a **public class** called **Main**.
             2. We define the **main** method which is the entry point of the program.
-            """);
+
+            """.trimIndent())
   }
 
   @Test
-  public void shouldExtractMarkdownWithoutCode() {
-    String testInput = """
+  fun shouldExtractMarkdownWithoutCode() {
+    val testInput = """
             **C++ Code Block**
             1. We include the **iostream** header file.
             2. We define the main function.
 
-            """;
 
-    var result = MarkdownUtil.splitCodeBlocks(testInput);
+
+            """.trimIndent()
+
+    val result = MarkdownUtil.splitCodeBlocks(testInput)
 
     assertThat(result).containsExactly("""
             **C++ Code Block**
             1. We include the **iostream** header file.
             2. We define the main function.
 
-            """);
+
+
+            """.trimIndent())
   }
 
   @Test
-  public void shouldExtractMarkdownCodeOnly() {
-    String testInput = """
+  fun shouldExtractMarkdownCodeOnly() {
+    val testInput = """
             ```cpp
             #include <iostream>
 
@@ -96,9 +103,10 @@ public class MarkdownUtilTest {
                 }
             }
             ```
-            """;
 
-    var result = MarkdownUtil.splitCodeBlocks(testInput);
+            """.trimIndent()
+
+    val result = MarkdownUtil.splitCodeBlocks(testInput)
 
     assertThat(result).containsExactly("""
             ```cpp
@@ -107,12 +115,12 @@ public class MarkdownUtilTest {
             int main() {
                 return 0;
             }
-            ```""", """
+            ```""".trimIndent(), """
             ```java
             public class Main {
                 public static void main(String[] args) {
                 }
             }
-            ```""");
+            ```""".trimIndent())
   }
 }
