@@ -64,6 +64,7 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
         val selectedService = GeneralSettings.getCurrentState().selectedService
         val codeCompletionsEnabled = when (selectedService) {
             ServiceType.OPENAI -> OpenAISettings.getCurrentState().isCodeCompletionsEnabled
+            ServiceType.CUSTOM_OPENAI -> OpenAISettings.getCurrentState().isCodeCompletionsEnabled
             ServiceType.LLAMA_CPP -> LlamaSettings.getCurrentState().isCodeCompletionsEnabled
             else -> false
         }

@@ -20,6 +20,7 @@ import ee.carlrobert.codegpt.completions.CompletionRequestService;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.credentials.CredentialsStore;
+import ee.carlrobert.codegpt.settings.service.CodeCompletionConfigurationForm;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
@@ -43,6 +44,7 @@ public class CustomServiceForm {
   private final JButton testConnectionButton;
   private final JBLabel templateHelpText;
   private final ComboBox<CustomServiceTemplate> templateComboBox;
+  private final CodeCompletionConfigurationForm codeCompletionConfigurationForm;
 
   public CustomServiceForm(CustomServiceSettingsState settings) {
     apiKeyField = new JBPasswordField();
@@ -65,6 +67,9 @@ public class CustomServiceForm {
       tabbedPane.setBody(template.getBody());
     });
     updateTemplateHelpTextTooltip(settings.getTemplate());
+    codeCompletionConfigurationForm = new CodeCompletionConfigurationForm(
+            settings.isCodeCompletionsEnabled(),
+            settings.getCodeCompletionMaxTokens());
   }
 
   public JPanel getForm() {
@@ -81,6 +86,8 @@ public class CustomServiceForm {
         .addLabeledComponent(
             CodeGPTBundle.get("settingsConfigurable.service.custom.openai.presetTemplate.label"),
             templateComboBoxWrapper)
+        .addComponent(new TitledSeparator(CodeGPTBundle.get("shared.codeCompletions")))
+        .addComponent(withEmptyLeftBorder(codeCompletionConfigurationForm.getForm()))
         .addLabeledComponent(
             CodeGPTBundle.get("settingsConfigurable.shared.apiKey.label"),
             apiKeyField)
@@ -110,6 +117,8 @@ public class CustomServiceForm {
     state.setTemplate(templateComboBox.getItem());
     state.setHeaders(tabbedPane.getHeaders());
     state.setBody(tabbedPane.getBody());
+    state.setCodeCompletionsEnabled(codeCompletionConfigurationForm.isCodeCompletionsEnabled());
+    state.setCodeCompletionMaxTokens(codeCompletionConfigurationForm.getMaxTokens());
     return state;
   }
 
@@ -120,6 +129,8 @@ public class CustomServiceForm {
     templateComboBox.setSelectedItem(state.getTemplate());
     tabbedPane.setHeaders(state.getHeaders());
     tabbedPane.setBody(state.getBody());
+    codeCompletionConfigurationForm.setCodeCompletionsEnabled(state.isCodeCompletionsEnabled());
+    codeCompletionConfigurationForm.setMaxTokens(state.getCodeCompletionMaxTokens());
   }
 
   private void updateTemplateHelpTextTooltip(CustomServiceTemplate template) {

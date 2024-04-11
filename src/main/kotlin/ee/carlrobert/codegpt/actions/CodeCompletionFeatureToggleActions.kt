@@ -5,8 +5,10 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.project.DumbAwareAction
 import ee.carlrobert.codegpt.settings.GeneralSettings
 import ee.carlrobert.codegpt.settings.service.ServiceType
+import ee.carlrobert.codegpt.settings.service.ServiceType.CUSTOM_OPENAI
 import ee.carlrobert.codegpt.settings.service.ServiceType.LLAMA_CPP
 import ee.carlrobert.codegpt.settings.service.ServiceType.OPENAI
+import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings
 
@@ -43,6 +45,7 @@ abstract class CodeCompletionFeatureToggleActions(
     private fun isCodeCompletionsEnabled(serviceType: ServiceType): Boolean {
         return when (serviceType) {
             OPENAI -> OpenAISettings.getCurrentState().isCodeCompletionsEnabled
+            CUSTOM_OPENAI -> CustomServiceSettings.getCurrentState().isCodeCompletionsEnabled
             LLAMA_CPP -> LlamaSettings.getCurrentState().isCodeCompletionsEnabled
             else -> false
         }
