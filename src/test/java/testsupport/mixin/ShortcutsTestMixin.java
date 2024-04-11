@@ -8,6 +8,8 @@ import ee.carlrobert.codegpt.credentials.CredentialsStore;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
+import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings;
+import ee.carlrobert.codegpt.settings.service.custom.CustomServiceTemplate;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import java.util.function.BooleanSupplier;
@@ -22,6 +24,12 @@ public interface ShortcutsTestMixin {
     GeneralSettings.getCurrentState().setSelectedService(ServiceType.OPENAI);
     CredentialsStore.INSTANCE.setCredential(OPENAI_API_KEY, "TEST_API_KEY");
     OpenAISettings.getCurrentState().setModel(model);
+  }
+
+  default void useCustomOpenAIService() {
+    GeneralSettings.getCurrentState().setSelectedService(ServiceType.CUSTOM_OPENAI);
+    var customServiceSettings = CustomServiceSettings.getCurrentState();
+    customServiceSettings.setTemplate(CustomServiceTemplate.OLLAMA);
   }
 
   default void useAzureService() {
