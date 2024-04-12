@@ -25,4 +25,8 @@ public class CodeGPTStatusBarWidgetFactory extends StatusBarEditorBasedWidgetFac
     return new CodeGPTStatusBarWidget(project);
   }
 
+  @Override
+  public void disposeWidget(@NotNull StatusBarWidget widget) {
+    widget.dispose();
+  }
 }

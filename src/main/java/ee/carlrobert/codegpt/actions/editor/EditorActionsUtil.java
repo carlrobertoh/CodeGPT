@@ -56,7 +56,8 @@ public class EditorActionsUtil {
         var action = new BaseEditorAction(label, label) {
           @Override
           protected void actionPerformed(Project project, Editor editor, String selectedText) {
-            var fileExtension = FileUtil.getFileExtension(editor.getVirtualFile().getName());
+            var fileExtension = FileUtil.getFileExtension(
+                ((EditorImpl) editor).getVirtualFile().getName());
             var message = new Message(prompt.replace(
                 "{{selectedCode}}",
                 format("%n```%s%n%s%n```", fileExtension, selectedText)));

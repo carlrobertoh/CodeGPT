@@ -33,7 +33,8 @@ public class CustomPromptAction extends BaseEditorAction {
   @Override
   protected void actionPerformed(Project project, Editor editor, String selectedText) {
     if (selectedText != null && !selectedText.isEmpty()) {
-      var fileExtension = FileUtil.getFileExtension(editor.getVirtualFile().getName());
+      var fileExtension = FileUtil.getFileExtension(
+          ((EditorImpl) editor).getVirtualFile().getName());
       var dialog = new CustomPromptDialog(previousUserPrompt);
       if (dialog.showAndGet()) {
         previousUserPrompt = dialog.getUserPrompt();
