@@ -8,13 +8,18 @@ public class CodeCompletionParserTest {
 
   @Test
   public void shouldGetValidReturnValue() {
-    var prefix = "class Main {\n"
-        + "  public int getRandomNumber() {\n"
-        + "    return ";
-    var suffix = "\n"
-        + "  }\n"
-        + "}";
-    var output = "10;}\n}\npublic int getRandomNumber(int k) {";
+    var prefix = """
+            class Main {
+              public int getRandomNumber() {
+                return\s""";
+    var suffix = """
+
+              }
+            }""";
+    var output = """
+            10;}
+            }
+            public int getRandomNumber(int k) {""";
 
     var parsedResponse = CodeCompletionParserFactory
         .getParserForFileExtension("java")
@@ -25,13 +30,17 @@ public class CodeCompletionParserTest {
 
   @Test
   public void shouldGetValidParenthesisValue() {
-    var prefix = "class Main {\n"
-        + "  public int getRandomNumber(int ";
-    var suffix = ") {\n"
-        + "    return 10;\n"
-        + "  }\n"
-        + "}";
-    var output = "prevNumber) {\n    if() {";
+    var prefix = """
+            class Main {
+              public int getRandomNumber(int\s""";
+    var suffix = """
+            ) {
+                return 10;
+              }
+            }""";
+    var output = """
+            prevNumber) {
+                if() {""";
 
     var parsedResponse = CodeCompletionParserFactory
         .getParserForFileExtension("java")
@@ -42,18 +51,21 @@ public class CodeCompletionParserTest {
 
   @Test
   public void shouldHandleFieldDeclaration() {
-    var prefix = "class Main {\n"
-        + "\t\n"
-        + "    private i";
-    var suffix = "\n"
-        + "\n"
-        + "  public int getRandomNumber(int prevNumber) {\n"
-        + "    return Math.of()\n"
-        + "  }\n"
-        + "}";
-    var output = "nt randomNumber;\n"
-        + "    \n"
-        + "    public void get() {";
+    var prefix = """
+            class Main {
+            \t
+                private i""";
+    var suffix = """
+
+
+              public int getRandomNumber(int prevNumber) {
+                return Math.of()
+              }
+            }""";
+    var output = """
+            nt randomNumber;
+               \s
+                public void get() {""";
 
     var result = CodeCompletionParserFactory
         .getParserForFileExtension("java")
@@ -64,12 +76,14 @@ public class CodeCompletionParserTest {
 
   @Test
   public void shouldHandleFormalParameters() {
-    var prefix = "class Main {\n"
-        + "  public int getRandomNumber(";
-    var suffix = ") {\n"
-        + "    return 10;\n"
-        + "  }\n"
-        + "}";
+    var prefix = """
+            class Main {
+              public int getRandomNumber(""";
+    var suffix = """
+            ) {
+                return 10;
+              }
+            }""";
     var output = "int prevNumber) }";
 
     var result = CodeCompletionParserFactory

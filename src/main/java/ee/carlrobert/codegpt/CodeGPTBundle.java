@@ -12,10 +12,6 @@ public class CodeGPTBundle extends DynamicBundle {
     super("messages.codegpt");
   }
 
-  public static String get(@NotNull @PropertyKey(resourceBundle = "messages.codegpt") String key) {
-    return INSTANCE.getMessage(key);
-  }
-
   public static String get(
       @NotNull @PropertyKey(resourceBundle = "messages.codegpt") String key,
       Object... params) {

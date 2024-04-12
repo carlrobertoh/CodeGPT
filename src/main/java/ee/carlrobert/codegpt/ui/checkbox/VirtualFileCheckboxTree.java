@@ -1,7 +1,5 @@
 package ee.carlrobert.codegpt.ui.checkbox;
 
-import static java.util.stream.Collectors.toList;
-
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.CheckedTreeNode;
@@ -27,7 +25,7 @@ public class VirtualFileCheckboxTree extends FileCheckboxTree {
 
     return Arrays.stream(checkedNodes)
         .map(item -> new ReferencedFile(new File(item.getPath())))
-        .collect(toList());
+        .toList();
   }
 
   private static CheckedTreeNode createRootNode(VirtualFile[] files) {

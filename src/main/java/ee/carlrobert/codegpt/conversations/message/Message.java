@@ -86,10 +86,9 @@ public class Message {
     if (obj == this) {
       return true;
     }
-    if (!(obj instanceof Message)) {
+    if (!(obj instanceof Message other)) {
       return false;
     }
-    Message other = (Message) obj;
     return Objects.equals(id, other.id);
   }
 

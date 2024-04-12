@@ -15,7 +15,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class Application {
 
@@ -43,15 +42,14 @@ public class Application {
 
     public Collection<AbstractMap.SimpleEntry<String, Object>> getProperties() {
         return properties.entrySet().stream()
-                .map(entry -> new AbstractMap.SimpleEntry<String, Object>(entry.getKey(), entry.getValue()))
-                .collect(Collectors.toList());
+                .map(entry -> new AbstractMap.SimpleEntry<String, Object>(entry))
+                .toList();
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Application)) return false;
-        Application that = (Application) o;
+        if (!(o instanceof Application that)) return false;
         return Objects.equals(name, that.name)
                 && Objects.equals(version, that.version)
                 && Objects.equals(properties, that.properties);

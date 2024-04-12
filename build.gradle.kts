@@ -54,7 +54,7 @@ dependencies {
   implementation(project(":codegpt-telemetry"))
   implementation(project(":codegpt-treesitter"))
 
-  implementation(enforcedPlatform(libs.jackson.bom))
+  implementation(platform(libs.jackson.bom))
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8")
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
   implementation(libs.flexmark.all) {

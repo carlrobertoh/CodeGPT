@@ -69,7 +69,7 @@ public final class YouAuthenticationService {
 
           var subscription =
               YouApiClient.getInstance().getSubscription(authenticationResponse);
-          var subscribed = subscription != null && "youpro".equals(subscription.getService());
+          var subscribed = subscription != null && "youpro".equals(subscription.service());
           userManager.setSubscribed(subscribed);
           var messageBus = ApplicationManager.getApplication().getMessageBus();
           if (subscribed) {

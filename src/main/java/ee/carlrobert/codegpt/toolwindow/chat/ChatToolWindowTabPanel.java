@@ -3,7 +3,6 @@ package ee.carlrobert.codegpt.toolwindow.chat;
 import static ee.carlrobert.codegpt.completions.CompletionRequestProvider.getPromptWithContext;
 import static ee.carlrobert.codegpt.ui.UIUtil.createScrollPaneWithSmartScroller;
 import static java.lang.String.format;
-import static java.util.stream.Collectors.toList;
 
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.ActionPlaces;
@@ -125,7 +124,7 @@ public class ChatToolWindowTabPanel implements Disposable {
       if (referencedFiles != null && !referencedFiles.isEmpty()) {
         var referencedFilePaths = referencedFiles.stream()
             .map(ReferencedFile::getFilePath)
-            .collect(toList());
+            .toList();
         message.setReferencedFilePaths(referencedFilePaths);
         message.setUserMessage(message.getPrompt());
         message.setPrompt(getPromptWithContext(referencedFiles, message.getPrompt()));
@@ -259,9 +258,8 @@ public class ChatToolWindowTabPanel implements Disposable {
       var selectionModel = editor.getSelectionModel();
       var selectedText = selectionModel.getSelectedText();
       if (selectedText != null && !selectedText.isEmpty()) {
-        var fileExtension = FileUtil.getFileExtension(
-            ((EditorImpl) editor).getVirtualFile().getName());
-        message = new Message(text + format("\n```%s\n%s\n```", fileExtension, selectedText));
+        var fileExtension = FileUtil.getFileExtension(editor.getVirtualFile().getName());
+        message = new Message(text + format("%n```%s%n%s%n```", fileExtension, selectedText));
         selectionModel.removeSelection();
       }
     }
@@ -307,11 +305,10 @@ public class ChatToolWindowTabPanel implements Disposable {
         return Unit.INSTANCE;
       }
 
-      var fileExtension = FileUtil.getFileExtension(
-          ((EditorImpl) editor).getVirtualFile().getName());
+      var fileExtension = FileUtil.getFileExtension(editor.getVirtualFile().getName());
       var message = new Message(action.getPrompt().replace(
           "{{selectedCode}}",
-          format("\n```%s\n%s\n```", fileExtension, editor.getSelectionModel().getSelectedText())));
+          format("%n```%s%n%s%n```", fileExtension, editor.getSelectionModel().getSelectedText())));
       message.setUserMessage(action.getUserMessage());
 
       sendMessage(message, ConversationType.DEFAULT);

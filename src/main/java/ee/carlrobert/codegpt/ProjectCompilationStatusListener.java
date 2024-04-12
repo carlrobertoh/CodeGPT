@@ -3,7 +3,6 @@ package ee.carlrobert.codegpt;
 import static ee.carlrobert.codegpt.completions.ConversationType.FIX_COMPILE_ERRORS;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
 
 import com.intellij.compiler.CompilerMessageImpl;
 import com.intellij.notification.NotificationAction;
@@ -68,7 +67,7 @@ public class ProjectCompilationStatusListener implements CompilationStatusListen
     var message = new Message("Fix the following compile errors:\n\n" + prompt);
     message.setReferencedFilePaths(errorMapping.keySet().stream()
         .map(ReferencedFile::getFilePath)
-        .collect(toList()));
+        .toList());
     message.setUserMessage(message.getPrompt());
     message.setPrompt(CompletionRequestProvider.getPromptWithContext(
         new ArrayList<>(errorMapping.keySet()),
@@ -91,12 +90,12 @@ public class ProjectCompilationStatusListener implements CompilationStatusListen
   }
 
   private String getCompilerErrorDetails(CompilerMessage compilerMessage) {
-    if (compilerMessage instanceof CompilerMessageImpl) {
+    if (compilerMessage instanceof CompilerMessageImpl compilerMessageImpl) {
       return format(
           "%s:%d:%d - `%s`",
           compilerMessage.getVirtualFile().getName(),
-          ((CompilerMessageImpl) compilerMessage).getLine(),
-          ((CompilerMessageImpl) compilerMessage).getColumn(),
+          compilerMessageImpl.getLine(),
+          compilerMessageImpl.getColumn(),
           compilerMessage.getMessage());
     }
     return format(

@@ -12,7 +12,7 @@
 </div>
 
 [![Downloads][downloads-shield]][plugin-repo]
-[![Rating][Rating-shield]][plugin-repo]
+[![Rating][rating-shield]][plugin-repo]
 [![Discord][discord-shield]][invite-link]
 [![Version][version-shield]][plugin-repo]
 

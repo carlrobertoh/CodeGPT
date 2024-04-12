@@ -72,7 +72,7 @@ public class Country {
         try {
             ObjectMapper mapper = new ObjectMapper();
             InputStream input = getClass().getResourceAsStream(file);
-            TypeReference<Map<String, V>> typeRef = new TypeReference<Map<String, V>>() {};
+            TypeReference<Map<String, V>> typeRef = new TypeReference<>() {};
             return mapper.readValue(input, typeRef);
         } catch (IOException e) {
             LOGGER.warn("Could not load file " + file, e);

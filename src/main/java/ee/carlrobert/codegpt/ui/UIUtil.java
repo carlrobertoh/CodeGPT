@@ -23,8 +23,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -151,7 +149,7 @@ public class UIUtil {
       String initialLayout) {
     JPanel finalPanel = new JPanel(new BorderLayout());
     finalPanel.add(createRadioButtonsPanel(layouts.values().stream().map(
-            RadioButtonWithLayout::getRadioButton).collect(Collectors.toList())),
+            RadioButtonWithLayout::getRadioButton).toList()),
         BorderLayout.NORTH);
     finalPanel.add(createRadioButtonGroupLayouts(layouts, initialLayout), BorderLayout.CENTER);
     return finalPanel;
@@ -172,14 +170,12 @@ public class UIUtil {
       public void show(Container parent, String name) {
         super.show(parent, name);
         // Set height to selected components height instead of consistent height
-        Optional<Component> selectedComponent = Arrays.stream(parent.getComponents())
+        Arrays.stream(parent.getComponents())
             .filter(component -> name.equals(component.getName()))
-            .findFirst();
-        if (selectedComponent.isEmpty()) {
-          return;
-        }
-        parent.setPreferredSize(new Dimension(parent.getPreferredSize().width,
-            (int) selectedComponent.get().getPreferredSize().getHeight()));
+            .findFirst()
+            .map(component -> (int) component.getPreferredSize().getHeight())
+            .map(height -> new Dimension(parent.getPreferredSize().width, height))
+            .ifPresent(parent::setPreferredSize);
       }
     };
 
@@ -216,4 +212,3 @@ public class UIUtil {
     }
   }
 }
-

@@ -10,7 +10,6 @@
  ******************************************************************************/
 package ee.carlrobert.codegpt.telemetry.core.configuration;
 
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.nio.file.Path;
 
@@ -28,7 +27,7 @@ public class ClasspathConfiguration extends FileConfiguration {
 	}
 
 	@Override
-	protected InputStream createInputStream(Path path) throws FileNotFoundException {
+	protected InputStream createInputStream(Path path) {
 		if (path == null) {
 			return null;
 		}

@@ -4,7 +4,6 @@ import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.L
 import static ee.carlrobert.codegpt.ui.UIUtil.createComment;
 import static ee.carlrobert.codegpt.ui.UIUtil.createForm;
 import static ee.carlrobert.codegpt.ui.UIUtil.withEmptyLeftBorder;
-import static java.util.stream.Collectors.toList;
 
 import com.intellij.icons.AllIcons.Actions;
 import com.intellij.openapi.application.ApplicationManager;
@@ -35,7 +34,6 @@ import ee.carlrobert.codegpt.ui.UIUtil;
 import ee.carlrobert.codegpt.ui.UIUtil.RadioButtonWithLayout;
 import java.io.File;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import javax.swing.JButton;
@@ -338,13 +336,10 @@ public class LlamaServerPreferencesForm {
   }
 
   public List<String> getListOfAdditionalParameters() {
-    if (additionalParametersField.getText().trim().isEmpty()) {
-      return Collections.emptyList();
-    }
-    var parameters = additionalParametersField.getText().split(",");
-    return Arrays.stream(parameters)
-        .map(String::trim)
-        .collect(toList());
+    return Arrays.stream(additionalParametersField.getText().split(","))
+      .map(String::trim)
+      .filter(s -> !s.isBlank())
+      .toList();
   }
 
   public PromptTemplate getPromptTemplate() {

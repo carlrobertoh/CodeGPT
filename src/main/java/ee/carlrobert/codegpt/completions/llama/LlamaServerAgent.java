@@ -86,7 +86,7 @@ public final class LlamaServerAgent implements Disposable {
               CodeGPTBundle.get("llamaServerAgent.serverBootup.description"));
           startServerProcessHandler = new OSProcessHandler.Silent(getServerCommandLine(params));
           startServerProcessHandler.addProcessListener(
-              getProcessListener(params.getPort(), onSuccess, onServerTerminated));
+              getProcessListener(params.port(), onSuccess, onServerTerminated));
           startServerProcessHandler.startNotify();
         } catch (ExecutionException ex) {
           LOG.error("Unable to start llama server", ex);
@@ -127,7 +127,7 @@ public final class LlamaServerAgent implements Disposable {
 
           try {
             var serverMessage = objectMapper.readValue(event.getText(), LlamaServerMessage.class);
-            if ("HTTP server listening".equals(serverMessage.getMessage())) {
+            if ("HTTP server listening".equals(serverMessage.message())) {
               LOG.info("Server up and running!");
 
               LlamaSettings.getCurrentState().setServerPort(port);
@@ -155,11 +155,11 @@ public final class LlamaServerAgent implements Disposable {
     commandLine.setExePath("./server");
     commandLine.withWorkDirectory(CodeGPTPlugin.getLlamaSourcePath());
     commandLine.addParameters(
-        "-m", params.getModelPath(),
-        "-c", String.valueOf(params.getContextLength()),
-        "--port", String.valueOf(params.getPort()),
-        "-t", String.valueOf(params.getThreads()));
-    commandLine.addParameters(params.getAdditionalParameters());
+        "-m", params.modelPath(),
+        "-c", String.valueOf(params.contextLength()),
+        "--port", String.valueOf(params.port()),
+        "-t", String.valueOf(params.threads()));
+    commandLine.addParameters(params.additionalParameters());
     commandLine.setRedirectErrorStream(false);
     return commandLine;
   }

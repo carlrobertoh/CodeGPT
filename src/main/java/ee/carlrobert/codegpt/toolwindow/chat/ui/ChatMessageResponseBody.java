@@ -83,7 +83,7 @@ public class ChatMessageResponseBody extends JPanel {
 
   public void update(String partialMessage) {
     for (var item : streamParser.parse(partialMessage)) {
-      processResponse(item.getResponse(), CODE.equals(item.getType()), true);
+      processResponse(item.response(), CODE.equals(item.type()), true);
     }
   }
 

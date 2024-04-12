@@ -30,7 +30,7 @@ public class CodeGPTStatusBarWidget extends EditorBasedStatusBarPopup {
   }
 
   @Override
-  protected @Nullable ListPopup createPopup(DataContext context) {
+  protected @Nullable ListPopup createPopup(@NotNull DataContext context) {
     return JBPopupFactory.getInstance()
         .createActionGroupPopup(
             CodeGPTBundle.get("project.label"),

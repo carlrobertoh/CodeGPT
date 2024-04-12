@@ -32,6 +32,9 @@ import org.jetbrains.annotations.NotNull;
 
 public class FileUtil {
 
+  private FileUtil() {
+  }
+
   private static final Logger LOG = Logger.getInstance(FileUtil.class);
 
   public static File createFile(String directoryPath, String fileName, String fileContent) {
@@ -120,12 +123,11 @@ public class FileUtil {
     }
 
     return findFirstExtension(languageToExtensionMappings, language)
-        .orElseGet(() -> extensionToLanguageMappings.stream()
+        .or(() -> extensionToLanguageMappings.stream()
             .filter(it -> it.getExtension().equalsIgnoreCase(language))
             .findFirst()
-            .map(it -> findFirstExtension(languageToExtensionMappings, it.getValue())
-                .orElse(defaultValue))
-            .orElse(defaultValue));
+            .flatMap(it -> findFirstExtension(languageToExtensionMappings, it.getValue()))
+        ).orElse(defaultValue);
   }
 
   public static boolean isUtf8File(String filePath) {
