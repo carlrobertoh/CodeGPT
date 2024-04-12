@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- EncodingManager error handling for invalid inputs (#444)
+- Initial default values for `checkForPluginUpdatesCheckBox` and `checkForNewScreenshotsCheckBox` (#446)
+- Random IDE crashes caused by tree-sitter (#452, #446)
+- Azure base url creation (#449)
+
 ## [2.6.0-233] - 2024-04-08
 
 ### Added
