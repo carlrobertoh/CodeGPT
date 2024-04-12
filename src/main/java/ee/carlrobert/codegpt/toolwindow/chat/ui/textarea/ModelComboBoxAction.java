@@ -134,7 +134,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
           if (!YouUserManager.getInstance().isSubscribed()
               && youSettings.getChatMode() != YouCompletionMode.DEFAULT) {
             youSettings.setChatMode(YouCompletionMode.DEFAULT);
-            updateTemplatePresentation(GeneralSettings.getCurrentState().getSelectedService());
+            updateTemplatePresentation(GeneralSettings.getSelectedService());
           }
         }
     );

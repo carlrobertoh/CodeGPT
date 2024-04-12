@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.settings.service.azure;
 
+import ee.carlrobert.codegpt.credentials.CredentialsStore;
 import java.util.Objects;
 
 public class AzureSettingsState {
@@ -49,6 +50,16 @@ public class AzureSettingsState {
   public void setUseAzureActiveDirectoryAuthentication(
       boolean useAzureActiveDirectoryAuthentication) {
     this.useAzureActiveDirectoryAuthentication = useAzureActiveDirectoryAuthentication;
+  }
+
+  public CredentialsStore.CredentialKey getCredentialKey() {
+    return isUseAzureApiKeyAuthentication()
+            ? CredentialsStore.CredentialKey.AZURE_OPENAI_API_KEY
+            : CredentialsStore.CredentialKey.AZURE_ACTIVE_DIRECTORY_TOKEN;
+  }
+
+  public boolean isCredentialSet() {
+    return CredentialsStore.INSTANCE.isCredentialSet(getCredentialKey());
   }
 
   @Override

@@ -7,7 +7,6 @@ import static java.lang.String.format;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.ActionPlaces;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
 import com.intellij.util.ui.JBUI;
@@ -358,8 +357,7 @@ public class ChatToolWindowTabPanel implements Disposable {
     gbc.weighty = 0;
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.gridy = 1;
-    rootPanel.add(
-        createUserPromptPanel(GeneralSettings.getCurrentState().getSelectedService()), gbc);
+    rootPanel.add(createUserPromptPanel(GeneralSettings.getSelectedService()), gbc);
     return rootPanel;
   }
 }

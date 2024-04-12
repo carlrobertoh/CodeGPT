@@ -34,6 +34,13 @@ public class GeneralSettings implements PersistentStateComponent<GeneralSettings
     return getInstance().getState();
   }
 
+  /**
+   * Selected service of current state.
+   */
+  public static ServiceType getSelectedService() {
+    return getCurrentState().getSelectedService();
+  }
+
   public static GeneralSettings getInstance() {
     return ApplicationManager.getApplication().getService(GeneralSettings.class);
   }

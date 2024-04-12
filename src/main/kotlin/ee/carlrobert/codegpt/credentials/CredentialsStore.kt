@@ -9,7 +9,7 @@ object CredentialsStore {
     private val credentialsMap = mutableMapOf<CredentialKey, String?>()
 
     fun loadAll() {
-        CredentialKey.values().forEach {
+        CredentialKey.entries.forEach {
             val credentialAttributes = CredentialAttributes(generateServiceName("CodeGPT", it.name))
             val password = PasswordSafe.instance.getPassword(credentialAttributes)
             setCredential(it, password)
@@ -22,7 +22,7 @@ object CredentialsStore {
         credentialsMap[key] = password
     }
 
-    fun isCredentialSet(key: CredentialKey): Boolean = !getCredential(key).isNullOrEmpty()
+    fun isCredentialSet(key: CredentialKey): Boolean = !getCredential(key).isNullOrBlank()
 
     enum class CredentialKey {
         OPENAI_API_KEY,

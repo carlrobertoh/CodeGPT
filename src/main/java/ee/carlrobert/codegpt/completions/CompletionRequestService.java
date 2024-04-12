@@ -1,7 +1,5 @@
 package ee.carlrobert.codegpt.completions;
 
-import static ee.carlrobert.codegpt.settings.service.ServiceType.ANTHROPIC;
-import static ee.carlrobert.codegpt.settings.service.ServiceType.AZURE;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.CUSTOM_OPENAI;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.LLAMA_CPP;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.OPENAI;
@@ -14,8 +12,6 @@ import ee.carlrobert.codegpt.codecompletions.CodeCompletionRequestFactory;
 import ee.carlrobert.codegpt.codecompletions.InfillRequestDetails;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
-import ee.carlrobert.codegpt.credentials.CredentialsStore;
-import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
@@ -68,7 +64,7 @@ public final class CompletionRequestService {
       CallParameters callParameters,
       CompletionEventListener<String> eventListener) {
     var requestProvider = new CompletionRequestProvider(callParameters.getConversation());
-    return switch (GeneralSettings.getCurrentState().getSelectedService()) {
+    return switch (GeneralSettings.getSelectedService()) {
       case OPENAI -> CompletionClientProvider.getOpenAIClient().getChatCompletionAsync(
           requestProvider.buildOpenAIChatCompletionRequest(
               OpenAISettings.getCurrentState().getModel(),
@@ -100,7 +96,7 @@ public final class CompletionRequestService {
   public EventSource getCodeCompletionAsync(
       InfillRequestDetails requestDetails,
       CompletionEventListener<String> eventListener) {
-    return switch (GeneralSettings.getCurrentState().getSelectedService()) {
+    return switch (GeneralSettings.getSelectedService()) {
       case OPENAI -> CompletionClientProvider.getOpenAIClient()
           .getCompletionAsync(
               CodeCompletionRequestFactory.INSTANCE.buildOpenAIRequest(requestDetails),
@@ -124,7 +120,7 @@ public final class CompletionRequestService {
         new OpenAIChatCompletionStandardMessage("user", prompt)))
         .setModel(OpenAISettings.getCurrentState().getModel())
         .build();
-    var selectedService = GeneralSettings.getCurrentState().getSelectedService();
+    var selectedService = GeneralSettings.getSelectedService();
     switch (selectedService) {
       case OPENAI:
         CompletionClientProvider.getOpenAIClient()
@@ -182,7 +178,7 @@ public final class CompletionRequestService {
   }
 
   public Optional<String> getLookupCompletion(String prompt) {
-    var selectedService = GeneralSettings.getCurrentState().getSelectedService();
+    var selectedService = GeneralSettings.getSelectedService();
     if (selectedService == YOU || selectedService == LLAMA_CPP) {
       return Optional.empty();
     }
@@ -206,23 +202,16 @@ public final class CompletionRequestService {
   }
 
   public boolean isRequestAllowed() {
-    return isRequestAllowed(GeneralSettings.getCurrentState().getSelectedService());
+    return isRequestAllowed(GeneralSettings.getSelectedService());
   }
 
   public static boolean isRequestAllowed(ServiceType serviceType) {
-    if (serviceType == OPENAI
-        && CredentialsStore.INSTANCE.isCredentialSet(CredentialKey.OPENAI_API_KEY)) {
-      return true;
-    }
-
-    var azureCredentialKey = AzureSettings.getCurrentState().isUseAzureApiKeyAuthentication()
-        ? CredentialKey.AZURE_OPENAI_API_KEY
-        : CredentialKey.AZURE_ACTIVE_DIRECTORY_TOKEN;
-    if (serviceType == AZURE && CredentialsStore.INSTANCE.isCredentialSet(azureCredentialKey)) {
-      return true;
-    }
-
-    return List.of(LLAMA_CPP, ANTHROPIC, CUSTOM_OPENAI).contains(serviceType);
+    return switch (serviceType) {
+      case OPENAI -> OpenAISettings.isCredentialSet();
+      case AZURE -> AzureSettings.isCredentialSet();
+      case LLAMA_CPP, ANTHROPIC, CUSTOM_OPENAI -> true;
+      case YOU -> false;
+    };
   }
 
   /**

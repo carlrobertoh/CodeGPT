@@ -335,8 +335,7 @@ public class CompletionRequestProvider {
       CallParameters callParameters) {
     var messages = buildMessages(callParameters);
 
-    if (model == null
-        || GeneralSettings.getCurrentState().getSelectedService() == ServiceType.YOU) {
+    if (model == null || GeneralSettings.getSelectedService() == ServiceType.YOU) {
       return messages;
     }
 
