@@ -16,6 +16,7 @@ import com.intellij.ui.TitledSeparator;
 import com.intellij.ui.ToolbarDecorator;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBLabel;
+import com.intellij.ui.components.JBList;
 import com.intellij.ui.components.JBTextArea;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.ui.components.fields.IntegerField;
@@ -26,6 +27,7 @@ import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.actions.editor.EditorActionsUtil;
 import ee.carlrobert.codegpt.ui.UIUtil;
+import ee.carlrobert.codegpt.util.PlaceholderUtil;
 import java.awt.Dimension;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -52,6 +54,7 @@ public class ConfigurationComponent {
   private final JTextArea commitMessagePromptTextArea;
   private final IntegerField maxTokensField;
   private final JBTextField temperatureField;
+  private final JBList<Object> placeholderList;
 
   public ConfigurationComponent(Disposable parentDisposable, ConfigurationState configuration) {
     table = new JBTable(new DefaultTableModel(
@@ -109,6 +112,11 @@ public class ConfigurationComponent {
         3, 60);
     commitMessagePromptTextArea.setLineWrap(true);
     commitMessagePromptTextArea.setBorder(JBUI.Borders.empty(8, 4));
+    commitMessagePromptTextArea.setPreferredSize(new Dimension(600, 300));
+
+    placeholderList = new JBList<Object>(PlaceholderUtil.getPlaceholderList());
+    placeholderList.setBorder(JBUI.Borders.empty(8, 4));
+    placeholderList.setFocusable(true);
 
     checkForPluginUpdatesCheckBox = new JBCheckBox(
         CodeGPTBundle.get("configurationConfigurable.checkForPluginUpdates.label"),
@@ -141,6 +149,7 @@ public class ConfigurationComponent {
         .addComponent(new TitledSeparator(
             CodeGPTBundle.get("configurationConfigurable.section.commitMessage.title")))
         .addComponent(createCommitMessageConfigurationForm())
+        .addComponent(placeholderList)
         .addComponentFillVertically(new JPanel(), 0)
         .getPanel();
   }

@@ -42,7 +42,7 @@ intellij {
   pluginName.set(properties("pluginName"))
   version.set(properties("platformVersion"))
   type.set(properties("platformType"))
-  plugins.set(listOf("java"))
+  plugins.set(listOf("java", "Git4Idea"))
 }
 
 changelog {

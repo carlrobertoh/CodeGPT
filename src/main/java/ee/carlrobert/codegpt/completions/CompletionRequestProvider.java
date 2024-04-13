@@ -29,6 +29,7 @@ import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.codegpt.settings.service.you.YouSettings;
 import ee.carlrobert.codegpt.telemetry.core.configuration.TelemetryConfiguration;
 import ee.carlrobert.codegpt.telemetry.core.service.UserId;
+import ee.carlrobert.codegpt.util.PlaceholderUtil;
 import ee.carlrobert.codegpt.util.file.FileUtil;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeBase64Source;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionDetailedMessage;
@@ -285,9 +286,9 @@ public class CompletionRequestProvider {
     var message = callParameters.getMessage();
     var messages = new ArrayList<OpenAIChatCompletionMessage>();
     if (callParameters.getConversationType() == ConversationType.DEFAULT) {
-      messages.add(new OpenAIChatCompletionStandardMessage(
-          "system",
-          ConfigurationSettings.getCurrentState().getSystemPrompt()));
+      String systemPrompt = ConfigurationSettings.getCurrentState().getSystemPrompt();
+      systemPrompt = new PlaceholderUtil().replacePlaceholder(systemPrompt);
+      messages.add(new OpenAIChatCompletionStandardMessage("system", systemPrompt));
     }
     if (callParameters.getConversationType() == ConversationType.FIX_COMPILE_ERRORS) {
       messages.add(

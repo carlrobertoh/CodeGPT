@@ -24,6 +24,7 @@ import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
+import ee.carlrobert.codegpt.util.PlaceholderUtil;
 import ee.carlrobert.llm.client.DeserializationUtil;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionRequest;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionStandardMessage;
@@ -118,7 +119,8 @@ public final class CompletionRequestService {
       String prompt,
       CompletionEventListener<String> eventListener) {
     var configuration = ConfigurationSettings.getCurrentState();
-    var commitMessagePrompt = configuration.getCommitMessagePrompt();
+    var commitMessagePrompt = new PlaceholderUtil()
+        .replacePlaceholder(configuration.getCommitMessagePrompt());
     var openaiRequest = new OpenAIChatCompletionRequest.Builder(List.of(
         new OpenAIChatCompletionStandardMessage("system", commitMessagePrompt),
         new OpenAIChatCompletionStandardMessage("user", prompt)))
