@@ -252,14 +252,10 @@ public class YouSettingsForm extends JPanel {
   }
 
   class UserAuthenticationHandler implements AuthenticationHandler {
-
     @Override
     public void handleAuthenticated(YouAuthenticationResponse authenticationResponse) {
       SwingUtilities.invokeLater(() -> {
-        var email = emailField.getText();
-        var password = getPassword();
-        YouSettings.getCurrentState().setEmail(email);
-        CredentialsStore.INSTANCE.setCredential(YOU_ACCOUNT_PASSWORD, password);
+        YouSettings.getCurrentState().setEmail(emailField.getText());
         refreshView(createUserInformationPanel(authenticationResponse.data().user()));
       });
     }

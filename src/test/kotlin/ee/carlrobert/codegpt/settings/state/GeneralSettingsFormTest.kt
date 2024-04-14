@@ -270,23 +270,27 @@ class GeneralSettingsFormTest : BasePlatformTestCase() {
     form.resetForm()
     assertThat(form.password).isEqualTo("123")
 
-    // change text in form field only, not store
-    form.passwordField.text = "456"
-    assertThat(form.password).isEqualTo("456")
-    assertThat(getPassword(YOU_ACCOUNT_PASSWORD)).isEqualTo("123")
-
-    // blank email resets form to null (not from store)
-    newState.email = "   "
+    // blank email resets form password to null (but still stored in store)
+    YouSettings.getCurrentState().email = "   "
     form.resetForm()
     assertThat(form.password).isNull()
     assertThat(getPassword(YOU_ACCOUNT_PASSWORD)).isEqualTo("123")
 
-    // Attention: password changed, but form is not modified!
+    // state is equal, but form is modified (password changed)
     assertThat(YouSettings.getCurrentState()).isEqualTo(form.currentState)
-    assertThat(YouSettings.getInstance().isModified(form)).isFalse()
+    assertThat(YouSettings.getInstance().isModified(form)).isTrue()
 
-    // Attention: apply form DOES NOT store changed password!
+    // apply form stores changed password (deleting it)
     generalSettingsConfigurable.applyYouSettings(form)
-    assertThat(getPassword(YOU_ACCOUNT_PASSWORD)).isEqualTo("123")
+    assertThat(getPassword(YOU_ACCOUNT_PASSWORD)).isNull()
+
+    // store new password with blank email possible without reset
+    assertThat(YouSettings.getCurrentState().email).isEqualTo(form.email).isBlank()
+    form.passwordField.text = "456"
+    assertThat(form.password).isEqualTo("456")
+    assertThat(YouSettings.getCurrentState()).isEqualTo(form.currentState)
+    assertThat(YouSettings.getInstance().isModified(form)).isTrue()
+    generalSettingsConfigurable.applyYouSettings(form)
+    assertThat(getPassword(YOU_ACCOUNT_PASSWORD)).isEqualTo("456")
   }
 }

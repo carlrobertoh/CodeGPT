@@ -1,9 +1,13 @@
 package ee.carlrobert.codegpt.settings.service.you;
 
+import static ee.carlrobert.codegpt.credentials.Credential.getCredential;
+import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.YOU_ACCOUNT_PASSWORD;
+
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 @State(name = "CodeGPT_YouSettings", storages = @Storage("CodeGPT_YouSettings.xml"))
@@ -31,6 +35,7 @@ public class YouSettings implements PersistentStateComponent<YouSettingsState> {
   }
 
   public boolean isModified(YouSettingsForm form) {
-    return !form.getCurrentState().equals(state);
+    return !form.getCurrentState().equals(state)
+            || !StringUtils.equals(form.getPassword(), getCredential(YOU_ACCOUNT_PASSWORD));
   }
 }

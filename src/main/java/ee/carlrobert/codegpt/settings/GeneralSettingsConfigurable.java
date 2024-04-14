@@ -6,6 +6,7 @@ import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.A
 import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.CUSTOM_SERVICE_API_KEY;
 import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.LLAMA_API_KEY;
 import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.OPENAI_API_KEY;
+import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.YOU_ACCOUNT_PASSWORD;
 
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.options.Configurable;
@@ -121,6 +122,7 @@ public class GeneralSettingsConfigurable implements Configurable {
   }
 
   public void applyYouSettings(YouSettingsForm form) {
+    CredentialsStore.INSTANCE.setCredential(YOU_ACCOUNT_PASSWORD, form.getPassword());
     YouSettings.getInstance().loadState(form.getCurrentState());
   }
 
