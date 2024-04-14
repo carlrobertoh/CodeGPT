@@ -1,12 +1,13 @@
 package ee.carlrobert.codegpt.settings.service.you;
 
+import static ee.carlrobert.codegpt.credentials.Credential.getCredential;
+import static ee.carlrobert.codegpt.credentials.Credential.sanitize;
 import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.YOU_ACCOUNT_PASSWORD;
 import static ee.carlrobert.codegpt.ui.UIUtil.withEmptyLeftBorder;
 
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.ui.ComponentValidator;
 import com.intellij.openapi.ui.ValidationInfo;
-import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.TitledSeparator;
 import com.intellij.ui.components.JBCheckBox;
@@ -25,7 +26,6 @@ import ee.carlrobert.codegpt.completions.you.auth.YouAuthenticationService;
 import ee.carlrobert.codegpt.completions.you.auth.response.YouAuthenticationResponse;
 import ee.carlrobert.codegpt.completions.you.auth.response.YouUser;
 import ee.carlrobert.codegpt.credentials.CredentialsStore;
-import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -52,8 +52,8 @@ public class YouSettingsForm extends JPanel {
     emailField = new JBTextField(settings.getEmail(), 25);
     passwordField = new JBPasswordField();
     passwordField.setColumns(25);
-    if (!settings.getEmail().isEmpty()) {
-      passwordField.setText(CredentialsStore.INSTANCE.getCredential(YOU_ACCOUNT_PASSWORD));
+    if (!settings.getEmail().isBlank()) {
+      passwordField.setText(getCredential(YOU_ACCOUNT_PASSWORD));
     }
     signInButton = new JButton(CodeGPTBundle.get("settingsConfigurable.service.you.signIn.label"));
     signUpTextPane = createSignUpTextPane();
@@ -104,6 +104,8 @@ public class YouSettingsForm extends JPanel {
     var state = YouSettings.getCurrentState();
     setDisplayWebSearchResults(state.isDisplayWebSearchResults());
     setEmail(state.getEmail());
+    var password = state.getEmail().isBlank() ? null : getCredential(YOU_ACCOUNT_PASSWORD);
+    passwordField.setText(password);
   }
 
   public String getEmail() {
@@ -115,11 +117,11 @@ public class YouSettingsForm extends JPanel {
   }
 
   public @Nullable String getPassword() {
-    var password = new String(passwordField.getPassword());
-    if (password.isEmpty()) {
-      return null;
-    }
-    return password;
+    return sanitize(new String(passwordField.getPassword()));
+  }
+
+  public JBPasswordField getPasswordField() {
+    return passwordField;
   }
 
   public void setDisplayWebSearchResults(boolean displayWebSearchResults) {
@@ -147,7 +149,7 @@ public class YouSettingsForm extends JPanel {
             value = new String(((JPasswordField) component).getPassword());
           }
 
-          if (StringUtil.isEmpty(value)) {
+          if (value == null || value.isBlank()) {
             return new ValidationInfo(
                 CodeGPTBundle.get("validation.error.fieldRequired"), component)
                 .withOKEnabled();
@@ -255,11 +257,9 @@ public class YouSettingsForm extends JPanel {
     public void handleAuthenticated(YouAuthenticationResponse authenticationResponse) {
       SwingUtilities.invokeLater(() -> {
         var email = emailField.getText();
-        var password = passwordField.getPassword();
+        var password = getPassword();
         YouSettings.getCurrentState().setEmail(email);
-        CredentialsStore.INSTANCE.setCredential(
-            CredentialKey.YOU_ACCOUNT_PASSWORD,
-            new String(password));
+        CredentialsStore.INSTANCE.setCredential(YOU_ACCOUNT_PASSWORD, password);
         refreshView(createUserInformationPanel(authenticationResponse.data().user()));
       });
     }

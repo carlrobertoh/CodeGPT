@@ -1,5 +1,7 @@
 package ee.carlrobert.codegpt.settings.service.openai;
 
+import static ee.carlrobert.codegpt.credentials.Credential.getCredential;
+import static ee.carlrobert.codegpt.credentials.Credential.sanitize;
 import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.OPENAI_API_KEY;
 import static ee.carlrobert.codegpt.ui.UIUtil.withEmptyLeftBorder;
 
@@ -11,7 +13,6 @@ import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
-import ee.carlrobert.codegpt.credentials.CredentialsStore;
 import ee.carlrobert.codegpt.settings.service.CodeCompletionConfigurationForm;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
@@ -28,7 +29,7 @@ public class OpenAISettingsForm {
   public OpenAISettingsForm(OpenAISettingsState settings) {
     apiKeyField = new JBPasswordField();
     apiKeyField.setColumns(30);
-    apiKeyField.setText(CredentialsStore.INSTANCE.getCredential(OPENAI_API_KEY));
+    apiKeyField.setText(getCredential(OPENAI_API_KEY));
     organizationField = new JBTextField(settings.getOrganization(), 30);
     completionModelComboBox = new ComboBox<>(
         new EnumComboBoxModel<>(OpenAIChatCompletionModel.class));
@@ -66,8 +67,11 @@ public class OpenAISettingsForm {
   }
 
   public @Nullable String getApiKey() {
-    var apiKey = new String(apiKeyField.getPassword());
-    return apiKey.isEmpty() ? null : apiKey;
+    return sanitize(new String(apiKeyField.getPassword()));
+  }
+
+  public JBPasswordField getApiKeyField() {
+    return apiKeyField;
   }
 
   public String getModel() {
@@ -87,7 +91,7 @@ public class OpenAISettingsForm {
 
   public void resetForm() {
     var state = OpenAISettings.getCurrentState();
-    apiKeyField.setText(CredentialsStore.INSTANCE.getCredential(OPENAI_API_KEY));
+    apiKeyField.setText(getCredential(OPENAI_API_KEY));
     completionModelComboBox.setSelectedItem(
         OpenAIChatCompletionModel.findByCode(state.getModel()));
     organizationField.setText(state.getOrganization());

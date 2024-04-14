@@ -1,5 +1,9 @@
 package ee.carlrobert.codegpt.settings.service.azure;
 
+import static ee.carlrobert.codegpt.credentials.Credential.getCredential;
+import static ee.carlrobert.codegpt.credentials.Credential.sanitize;
+import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.AZURE_ACTIVE_DIRECTORY_TOKEN;
+import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.AZURE_OPENAI_API_KEY;
 import static ee.carlrobert.codegpt.ui.UIUtil.withEmptyLeftBorder;
 
 import com.intellij.ui.TitledSeparator;
@@ -9,8 +13,6 @@ import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
-import ee.carlrobert.codegpt.credentials.CredentialsStore;
-import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey;
 import java.util.List;
 import java.util.Map;
 import javax.swing.ButtonGroup;
@@ -38,16 +40,14 @@ public class AzureSettingsForm {
         settings.isUseAzureActiveDirectoryAuthentication());
     azureApiKeyField = new JBPasswordField();
     azureApiKeyField.setColumns(30);
-    azureApiKeyField.setText(
-        CredentialsStore.INSTANCE.getCredential(CredentialKey.AZURE_OPENAI_API_KEY));
+    azureApiKeyField.setText(getCredential(AZURE_OPENAI_API_KEY));
     azureApiKeyFieldPanel = UI.PanelFactory.panel(azureApiKeyField)
         .withLabel(CodeGPTBundle.get("settingsConfigurable.shared.apiKey.label"))
         .resizeX(false)
         .createPanel();
     azureActiveDirectoryTokenField = new JBPasswordField();
     azureActiveDirectoryTokenField.setColumns(30);
-    azureActiveDirectoryTokenField.setText(
-        CredentialsStore.INSTANCE.getCredential(CredentialKey.AZURE_ACTIVE_DIRECTORY_TOKEN));
+    azureActiveDirectoryTokenField.setText(getCredential(AZURE_ACTIVE_DIRECTORY_TOKEN));
     azureActiveDirectoryTokenFieldPanel = UI.PanelFactory.panel(azureActiveDirectoryTokenField)
         .withLabel(CodeGPTBundle.get("settingsConfigurable.service.azure.bearerToken.label"))
         .resizeX(false)
@@ -119,10 +119,8 @@ public class AzureSettingsForm {
 
   public void resetForm() {
     var state = AzureSettings.getCurrentState();
-    azureApiKeyField.setText(
-        CredentialsStore.INSTANCE.getCredential(CredentialKey.AZURE_OPENAI_API_KEY));
-    azureActiveDirectoryTokenField.setText(
-        CredentialsStore.INSTANCE.getCredential(CredentialKey.AZURE_ACTIVE_DIRECTORY_TOKEN));
+    azureApiKeyField.setText(getCredential(AZURE_OPENAI_API_KEY));
+    azureActiveDirectoryTokenField.setText(getCredential(AZURE_ACTIVE_DIRECTORY_TOKEN));
     useAzureApiKeyAuthenticationRadioButton.setSelected(state.isUseAzureApiKeyAuthentication());
     useAzureActiveDirectoryAuthenticationRadioButton.setSelected(
         state.isUseAzureActiveDirectoryAuthentication());
@@ -132,16 +130,19 @@ public class AzureSettingsForm {
   }
 
   public @Nullable String getActiveDirectoryToken() {
-    var activeDirToken = new String(azureActiveDirectoryTokenField.getPassword());
-    if (activeDirToken.isEmpty()) {
-      return null;
-    }
-    return activeDirToken;
+    return sanitize(new String(azureActiveDirectoryTokenField.getPassword()));
+  }
+
+  public JBPasswordField getActiveDirectoryTokenField() {
+    return azureActiveDirectoryTokenField;
   }
 
   public @Nullable String getApiKey() {
-    var apiKey = new String(azureApiKeyField.getPassword());
-    return apiKey.isEmpty() ? null : apiKey;
+    return sanitize(new String(azureApiKeyField.getPassword()));
+  }
+
+  public JBPasswordField getApiKeyField() {
+    return azureApiKeyField;
   }
 
   private void registerPanelsVisibility(AzureSettingsState azureSettings) {

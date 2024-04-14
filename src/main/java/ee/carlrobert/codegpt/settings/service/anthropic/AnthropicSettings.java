@@ -1,11 +1,12 @@
 package ee.carlrobert.codegpt.settings.service.anthropic;
 
+import static ee.carlrobert.codegpt.credentials.Credential.getCredential;
+import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.ANTHROPIC_API_KEY;
+
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
-import ee.carlrobert.codegpt.credentials.CredentialsStore;
-import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -35,8 +36,6 @@ public class AnthropicSettings implements PersistentStateComponent<AnthropicSett
 
   public boolean isModified(AnthropicSettingsForm form) {
     return !form.getCurrentState().equals(state)
-        || !StringUtils.equals(
-        form.getApiKey(),
-        CredentialsStore.INSTANCE.getCredential(CredentialKey.ANTHROPIC_API_KEY));
+            || !StringUtils.equals(form.getApiKey(), getCredential(ANTHROPIC_API_KEY));
   }
 }

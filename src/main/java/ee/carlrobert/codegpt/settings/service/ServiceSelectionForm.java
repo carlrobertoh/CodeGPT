@@ -25,8 +25,7 @@ public class ServiceSelectionForm {
 
   public ServiceSelectionForm(Disposable parentDisposable) {
     openAISettingsForm = new OpenAISettingsForm(OpenAISettings.getCurrentState());
-    customServiceForm = new CustomServiceForm(
-        CustomServiceSettings.getCurrentState());
+    customServiceForm = new CustomServiceForm(CustomServiceSettings.getCurrentState());
     anthropicSettingsForm = new AnthropicSettingsForm(AnthropicSettings.getCurrentState());
     azureSettingsForm = new AzureSettingsForm(AzureSettings.getCurrentState());
     youSettingsForm = new YouSettingsForm(YouSettings.getCurrentState(), parentDisposable);

@@ -102,17 +102,17 @@ public class GeneralSettingsConfigurable implements Configurable {
     }
   }
 
-  private void applyOpenAISettings(OpenAISettingsForm form) {
+  public void applyOpenAISettings(OpenAISettingsForm form) {
     CredentialsStore.INSTANCE.setCredential(OPENAI_API_KEY, form.getApiKey());
     OpenAISettings.getInstance().loadState(form.getCurrentState());
   }
 
-  private void applyCustomOpenAISettings(CustomServiceForm form) {
+  public void applyCustomOpenAISettings(CustomServiceForm form) {
     CredentialsStore.INSTANCE.setCredential(CUSTOM_SERVICE_API_KEY, form.getApiKey());
     CustomServiceSettings.getInstance().loadState(form.getCurrentState());
   }
 
-  private void applyLlamaSettings(LlamaSettingsForm form) {
+  public void applyLlamaSettings(LlamaSettingsForm form) {
     CredentialsStore.INSTANCE.setCredential(
         LLAMA_API_KEY,
         form.getLlamaServerPreferencesForm().getApiKey());
@@ -120,16 +120,16 @@ public class GeneralSettingsConfigurable implements Configurable {
     LlamaSettings.getInstance().loadState(form.getCurrentState());
   }
 
-  private void applyYouSettings(YouSettingsForm form) {
+  public void applyYouSettings(YouSettingsForm form) {
     YouSettings.getInstance().loadState(form.getCurrentState());
   }
 
-  private void applyAnthropicSettings(AnthropicSettingsForm form) {
+  public void applyAnthropicSettings(AnthropicSettingsForm form) {
     CredentialsStore.INSTANCE.setCredential(ANTHROPIC_API_KEY, form.getApiKey());
     AnthropicSettings.getInstance().loadState(form.getCurrentState());
   }
 
-  private void applyAzureSettings(AzureSettingsForm form) {
+  public void applyAzureSettings(AzureSettingsForm form) {
     AzureSettings.getInstance().loadState(form.getCurrentState());
     CredentialsStore.INSTANCE.setCredential(AZURE_OPENAI_API_KEY, form.getApiKey());
     CredentialsStore.INSTANCE.setCredential(

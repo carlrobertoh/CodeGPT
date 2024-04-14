@@ -1,5 +1,7 @@
 package ee.carlrobert.codegpt.settings.service.anthropic;
 
+import static ee.carlrobert.codegpt.credentials.Credential.getCredential;
+import static ee.carlrobert.codegpt.credentials.Credential.sanitize;
 import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.ANTHROPIC_API_KEY;
 import static ee.carlrobert.codegpt.ui.UIUtil.withEmptyLeftBorder;
 
@@ -9,7 +11,6 @@ import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
-import ee.carlrobert.codegpt.credentials.CredentialsStore;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import javax.swing.JPanel;
 import org.jetbrains.annotations.Nullable;
@@ -23,7 +24,7 @@ public class AnthropicSettingsForm {
   public AnthropicSettingsForm(AnthropicSettingsState settings) {
     apiKeyField = new JBPasswordField();
     apiKeyField.setColumns(30);
-    apiKeyField.setText(CredentialsStore.INSTANCE.getCredential(ANTHROPIC_API_KEY));
+    apiKeyField.setText(getCredential(ANTHROPIC_API_KEY));
     apiVersionField = new JBTextField(settings.getApiVersion(), 35);
     modelField = new JBTextField(settings.getModel(), 35);
   }
@@ -63,13 +64,16 @@ public class AnthropicSettingsForm {
 
   public void resetForm() {
     var state = AnthropicSettings.getCurrentState();
-    apiKeyField.setText(CredentialsStore.INSTANCE.getCredential(ANTHROPIC_API_KEY));
+    apiKeyField.setText(getCredential(ANTHROPIC_API_KEY));
     apiVersionField.setText(state.getApiVersion());
     modelField.setText(state.getModel());
   }
 
   public @Nullable String getApiKey() {
-    var apiKey = new String(apiKeyField.getPassword());
-    return apiKey.isEmpty() ? null : apiKey;
+    return sanitize(new String(apiKeyField.getPassword()));
+  }
+
+  public JBPasswordField getApiKeyField() {
+    return apiKeyField;
   }
 }

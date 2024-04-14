@@ -1,12 +1,12 @@
 package ee.carlrobert.codegpt.settings.service.llama;
 
+import static ee.carlrobert.codegpt.credentials.Credential.getCredential;
 import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.LLAMA_API_KEY;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
-import ee.carlrobert.codegpt.credentials.CredentialsStore;
 import ee.carlrobert.codegpt.settings.service.llama.form.LlamaSettingsForm;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -39,6 +39,6 @@ public class LlamaSettings implements PersistentStateComponent<LlamaSettingsStat
     return !form.getCurrentState().equals(state)
         || !StringUtils.equals(
         form.getLlamaServerPreferencesForm().getApiKey(),
-        CredentialsStore.INSTANCE.getCredential(LLAMA_API_KEY));
+        getCredential(LLAMA_API_KEY));
   }
 }

@@ -1,5 +1,7 @@
 package ee.carlrobert.codegpt.settings.service.llama.form;
 
+import static ee.carlrobert.codegpt.credentials.Credential.getCredential;
+import static ee.carlrobert.codegpt.credentials.Credential.sanitize;
 import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.LLAMA_API_KEY;
 import static ee.carlrobert.codegpt.ui.UIUtil.createComment;
 import static ee.carlrobert.codegpt.ui.UIUtil.createForm;
@@ -27,7 +29,6 @@ import ee.carlrobert.codegpt.completions.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaServerAgent;
 import ee.carlrobert.codegpt.completions.llama.LlamaServerStartupParams;
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
-import ee.carlrobert.codegpt.credentials.CredentialsStore;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettingsState;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.codegpt.ui.UIUtil;
@@ -82,7 +83,7 @@ public class LlamaServerPreferencesForm {
     baseHostField = new JBTextField(settings.getBaseHost(), 30);
     apiKeyField = new JBPasswordField();
     apiKeyField.setColumns(30);
-    apiKeyField.setText(CredentialsStore.INSTANCE.getCredential(LLAMA_API_KEY));
+    apiKeyField.setText(getCredential(LLAMA_API_KEY));
 
     llamaModelPreferencesForm = new LlamaModelPreferencesForm();
     runLocalServerRadioButton = new JBRadioButton("Run local server",
@@ -126,7 +127,7 @@ public class LlamaServerPreferencesForm {
     additionalParametersField.setText(state.getAdditionalParameters());
     remotePromptTemplatePanel.setPromptTemplate(state.getRemoteModelPromptTemplate()); // ?
     infillPromptTemplatePanel.setPromptTemplate(state.getRemoteModelInfillPromptTemplate());
-    apiKeyField.setText(CredentialsStore.INSTANCE.getCredential(LLAMA_API_KEY));
+    apiKeyField.setText(getCredential(LLAMA_API_KEY));
   }
 
   public JComponent createUseExistingServerForm() {
@@ -249,7 +250,7 @@ public class LlamaServerPreferencesForm {
   private boolean validateCustomModelPath() {
     if (llamaModelPreferencesForm.isUseCustomLlamaModel()) {
       var customModelPath = llamaModelPreferencesForm.getCustomLlamaModelPath();
-      if (customModelPath == null || customModelPath.isEmpty()) {
+      if (customModelPath == null || customModelPath.isBlank()) {
         OverlayUtil.showBalloon(
             CodeGPTBundle.get("validation.error.fieldRequired"),
             MessageType.ERROR,
@@ -348,8 +349,11 @@ public class LlamaServerPreferencesForm {
   }
 
   public @Nullable String getApiKey() {
-    var apiKey = new String(apiKeyField.getPassword());
-    return apiKey.isEmpty() ? null : apiKey;
+    return sanitize(new String(apiKeyField.getPassword()));
+  }
+
+  public JBPasswordField getApiKeyField() {
+    return apiKeyField;
   }
 
   public InfillPromptTemplate getInfillPromptTemplate() {

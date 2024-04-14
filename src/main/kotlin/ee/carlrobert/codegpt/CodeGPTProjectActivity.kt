@@ -12,9 +12,9 @@ import ee.carlrobert.codegpt.completions.you.auth.AuthenticationHandler
 import ee.carlrobert.codegpt.completions.you.auth.YouAuthenticationError
 import ee.carlrobert.codegpt.completions.you.auth.YouAuthenticationService
 import ee.carlrobert.codegpt.completions.you.auth.response.YouAuthenticationResponse
+import ee.carlrobert.codegpt.credentials.Credential.Companion.getCredential
 import ee.carlrobert.codegpt.credentials.CredentialsStore
 import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey
-import ee.carlrobert.codegpt.credentials.CredentialsStore.getCredential
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
 import ee.carlrobert.codegpt.settings.service.you.YouSettings
 import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.AttachImageNotifier
@@ -48,7 +48,7 @@ class CodeGPTProjectActivity : ProjectActivity {
     private fun handleYouServiceAuthenticationAsync() {
         val settings = YouSettings.getCurrentState()
         val password = getCredential(CredentialKey.YOU_ACCOUNT_PASSWORD)
-        if (settings.email.isNotEmpty() && !password.isNullOrEmpty()) {
+        if (settings.email.isNotBlank() && !password.isNullOrBlank()) {
             YouAuthenticationService.getInstance()
                 .signInAsync(settings.email, password, object : AuthenticationHandler {
                     override fun handleAuthenticated(authenticationResponse: YouAuthenticationResponse) {

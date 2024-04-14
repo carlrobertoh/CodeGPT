@@ -1,5 +1,7 @@
 package ee.carlrobert.codegpt.settings.service.custom;
 
+import static ee.carlrobert.codegpt.credentials.Credential.getCredential;
+import static ee.carlrobert.codegpt.credentials.Credential.sanitize;
 import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.CUSTOM_SERVICE_API_KEY;
 import static ee.carlrobert.codegpt.ui.UIUtil.withEmptyLeftBorder;
 
@@ -19,7 +21,6 @@ import ee.carlrobert.codegpt.completions.CompletionRequestProvider;
 import ee.carlrobert.codegpt.completions.CompletionRequestService;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.message.Message;
-import ee.carlrobert.codegpt.credentials.CredentialsStore;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
@@ -47,7 +48,7 @@ public class CustomServiceForm {
   public CustomServiceForm(CustomServiceSettingsState settings) {
     apiKeyField = new JBPasswordField();
     apiKeyField.setColumns(30);
-    apiKeyField.setText(CredentialsStore.INSTANCE.getCredential(CUSTOM_SERVICE_API_KEY));
+    apiKeyField.setText(getCredential(CUSTOM_SERVICE_API_KEY));
     urlField = new JBTextField(settings.getUrl(), 30);
     tabbedPane = new CustomServiceFormTabbedPane(settings);
     testConnectionButton = new JButton(CodeGPTBundle.get(
@@ -100,8 +101,11 @@ public class CustomServiceForm {
   }
 
   public @Nullable String getApiKey() {
-    var apiKey = new String(apiKeyField.getPassword());
-    return apiKey.isEmpty() ? null : apiKey;
+    return sanitize(new String(apiKeyField.getPassword()));
+  }
+
+  public JBPasswordField getApiKeyField() {
+    return apiKeyField;
   }
 
   public CustomServiceSettingsState getCurrentState() {
@@ -115,7 +119,7 @@ public class CustomServiceForm {
 
   public void resetForm() {
     var state = CustomServiceSettings.getCurrentState();
-    apiKeyField.setText(CredentialsStore.INSTANCE.getCredential(CUSTOM_SERVICE_API_KEY));
+    apiKeyField.setText(getCredential(CUSTOM_SERVICE_API_KEY));
     urlField.setText(state.getUrl());
     templateComboBox.setSelectedItem(state.getTemplate());
     tabbedPane.setHeaders(state.getHeaders());

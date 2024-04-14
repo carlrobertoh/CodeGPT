@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.completions;
 
+import static ee.carlrobert.codegpt.credentials.Credential.getCredential;
 import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.CUSTOM_SERVICE_API_KEY;
 import static ee.carlrobert.codegpt.util.file.FileUtil.getResourceContent;
 import static java.lang.String.format;
@@ -16,7 +17,6 @@ import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.conversations.message.Message;
-import ee.carlrobert.codegpt.credentials.CredentialsStore;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.IncludedFilesSettings;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
@@ -213,7 +213,7 @@ public class CompletionRequestProvider {
       List<OpenAIChatCompletionMessage> messages,
       boolean streamRequest) {
     var requestBuilder = new Request.Builder().url(customConfiguration.getUrl().trim());
-    var credential = CredentialsStore.INSTANCE.getCredential(CUSTOM_SERVICE_API_KEY);
+    var credential = getCredential(CUSTOM_SERVICE_API_KEY);
     for (var entry : customConfiguration.getHeaders().entrySet()) {
       String value = entry.getValue();
       if (credential != null && value.contains("$CUSTOM_SERVICE_API_KEY")) {
