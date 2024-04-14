@@ -82,8 +82,9 @@ public class GeneralSettingsConfigurable implements Configurable {
     settings.setSelectedService(component.getSelectedService());
 
     var serviceSelectionForm = component.getServiceSelectionForm();
-    var openAISettingsForm = serviceSelectionForm.getOpenAISettingsForm();
-    applyOpenAISettings(openAISettingsForm);
+    final var modelChanged = !OpenAISettings.getCurrentState().getModel()
+            .equals(serviceSelectionForm.getOpenAISettingsForm().getModel());
+    applyOpenAISettings(serviceSelectionForm.getOpenAISettingsForm());
     applyCustomOpenAISettings(serviceSelectionForm.getCustomConfigurationSettingsForm());
     applyAnthropicSettings(serviceSelectionForm.getAnthropicSettingsForm());
     applyAzureSettings(serviceSelectionForm.getAzureSettingsForm());
@@ -91,8 +92,6 @@ public class GeneralSettingsConfigurable implements Configurable {
     applyLlamaSettings(serviceSelectionForm.getLlamaSettingsForm());
 
     var serviceChanged = component.getSelectedService() != settings.getSelectedService();
-    var modelChanged = !OpenAISettings.getCurrentState().getModel()
-        .equals(openAISettingsForm.getModel());
     if (serviceChanged || modelChanged) {
       resetActiveTab();
       if (serviceChanged) {
