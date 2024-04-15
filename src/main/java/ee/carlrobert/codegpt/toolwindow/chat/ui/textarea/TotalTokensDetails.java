@@ -12,8 +12,7 @@ public class TotalTokensDetails {
   private int referencedFilesTokens;
 
   public TotalTokensDetails(EncodingManager encodingManager) {
-    systemPromptTokens = encodingManager.countTokens(
-        ConfigurationSettings.getCurrentState().getSystemPrompt());
+    systemPromptTokens = encodingManager.countTokens(ConfigurationSettings.getSystemPrompt());
   }
 
   public int getSystemPromptTokens() {
