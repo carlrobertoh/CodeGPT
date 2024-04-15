@@ -1,5 +1,7 @@
 package ee.carlrobert.codegpt.completions;
 
+import static ee.carlrobert.codegpt.completions.ConversationType.DEFAULT;
+import static ee.carlrobert.codegpt.completions.ConversationType.FIX_COMPILE_ERRORS;
 import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.CUSTOM_SERVICE_API_KEY;
 import static ee.carlrobert.codegpt.util.file.FileUtil.getResourceContent;
 import static java.lang.String.format;
@@ -58,6 +60,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -75,6 +78,8 @@ public class CompletionRequestProvider {
 
   public static final String FIX_COMPILE_ERRORS_SYSTEM_PROMPT = getResourceContent(
       "/prompts/fix-compile-errors.txt");
+  private static final Set<ConversationType> OPENAI_SYSTEM_CONVERSATION_TYPES = Set.of(
+          DEFAULT, FIX_COMPILE_ERRORS);
 
   private final EncodingManager encodingManager = EncodingManager.getInstance();
   private final Conversation conversation;
@@ -152,10 +157,8 @@ public class CompletionRequestProvider {
       promptTemplate = settings.getRemoteModelPromptTemplate();
     }
 
-    var systemPrompt = COMPLETION_SYSTEM_PROMPT;
-    if (conversationType == ConversationType.FIX_COMPILE_ERRORS) {
-      systemPrompt = FIX_COMPILE_ERRORS_SYSTEM_PROMPT;
-    }
+    var systemPrompt = conversationType == FIX_COMPILE_ERRORS
+            ? FIX_COMPILE_ERRORS_SYSTEM_PROMPT : ConfigurationSettings.getSystemPrompt();
 
     var prompt = promptTemplate.buildPrompt(
         systemPrompt,
@@ -258,7 +261,7 @@ public class CompletionRequestProvider {
     request.setModel(settings.getModel());
     request.setMaxTokens(configuration.getMaxTokens());
     request.setStream(true);
-    request.setSystem(COMPLETION_SYSTEM_PROMPT);
+    request.setSystem(ConfigurationSettings.getSystemPrompt());
     List<ClaudeCompletionMessage> messages = conversation.getMessages().stream()
         .filter(prevMessage -> prevMessage.getResponse() != null
             && !prevMessage.getResponse().isEmpty())

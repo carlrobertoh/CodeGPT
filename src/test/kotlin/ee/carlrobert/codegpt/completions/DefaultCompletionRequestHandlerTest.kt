@@ -1,7 +1,6 @@
 package ee.carlrobert.codegpt.completions
 
 import ee.carlrobert.codegpt.CodeGPTPlugin
-import ee.carlrobert.codegpt.completions.CompletionRequestProvider.COMPLETION_SYSTEM_PROMPT
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate.LLAMA
 import ee.carlrobert.codegpt.conversations.ConversationService
 import ee.carlrobert.codegpt.conversations.message.Message
@@ -20,6 +19,7 @@ class DefaultCompletionRequestHandlerTest : IntegrationTest() {
 
   fun testOpenAIChatCompletionCall() {
     useOpenAIService()
+    ConfigurationSettings.getCurrentState().systemPrompt = "TEST_SYSTEM_PROMPT"
     val message = Message("TEST_PROMPT")
     val conversation = ConversationService.getInstance().startConversation()
     val requestHandler = CompletionRequestHandler(getRequestEventListener(message))
@@ -34,7 +34,7 @@ class DefaultCompletionRequestHandlerTest : IntegrationTest() {
         .containsExactly(
           "gpt-4",
           listOf(
-            mapOf("role" to "system", "content" to COMPLETION_SYSTEM_PROMPT),
+            mapOf("role" to "system", "content" to "TEST_SYSTEM_PROMPT"),
             mapOf("role" to "user", "content" to "TEST_PROMPT")))
       listOf(
         jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("role", "assistant")))),
@@ -50,6 +50,7 @@ class DefaultCompletionRequestHandlerTest : IntegrationTest() {
 
   fun testAzureChatCompletionCall() {
     useAzureService()
+    ConfigurationSettings.getCurrentState().systemPrompt = "TEST_SYSTEM_PROMPT"
     val conversationService = ConversationService.getInstance()
     val prevMessage = Message("TEST_PREV_PROMPT")
     prevMessage.response = "TEST_PREV_RESPONSE"
@@ -66,7 +67,7 @@ class DefaultCompletionRequestHandlerTest : IntegrationTest() {
         .extracting("messages")
         .isEqualTo(
           listOf(
-            mapOf("role" to "system", "content" to COMPLETION_SYSTEM_PROMPT),
+            mapOf("role" to "system", "content" to "TEST_SYSTEM_PROMPT"),
             mapOf("role" to "user", "content" to "TEST_PREV_PROMPT"),
             mapOf("role" to "assistant", "content" to "TEST_PREV_RESPONSE"),
             mapOf("role" to "user", "content" to "TEST_PROMPT")))
@@ -138,6 +139,7 @@ class DefaultCompletionRequestHandlerTest : IntegrationTest() {
   fun testLlamaChatCompletionCall() {
     useLlamaService()
     ConfigurationSettings.getCurrentState().maxTokens = 99
+    ConfigurationSettings.getCurrentState().systemPrompt = "TEST_SYSTEM_PROMPT"
     val message = Message("TEST_PROMPT")
     val conversation = ConversationService.getInstance().startConversation()
     conversation.addMessage(Message("Ping", "Pong"))
@@ -151,7 +153,7 @@ class DefaultCompletionRequestHandlerTest : IntegrationTest() {
           "stream")
         .containsExactly(
           LLAMA.buildPrompt(
-            COMPLETION_SYSTEM_PROMPT,
+            "TEST_SYSTEM_PROMPT",
             "TEST_PROMPT",
             conversation.messages),
           99,

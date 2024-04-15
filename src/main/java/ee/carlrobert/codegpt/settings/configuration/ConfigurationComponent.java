@@ -97,7 +97,7 @@ public class ConfigurationComponent {
     maxTokensField.setValue(configuration.getMaxTokens());
 
     systemPromptTextArea = new JTextArea();
-    if (configuration.getSystemPrompt().isEmpty()) {
+    if (configuration.getSystemPrompt().isBlank()) {
       // for backward compatibility
       systemPromptTextArea.setText(COMPLETION_SYSTEM_PROMPT);
     } else {
