@@ -43,11 +43,14 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
             currentCall.set(
                 CompletionRequestService.getInstance().getCodeCompletionAsync(
                     infillRequest,
-                    CodeCompletionEventListener(infillRequest) {
-                        request.editor.putUserData(CodeGPTKeys.PREVIOUS_INLAY_TEXT, it)
+                    CodeCompletionEventListener(infillRequest) { suggestion, needCancel ->
+                        if (needCancel) {
+                            cancelCurrentCall()
+                        }
+                        request.editor.putUserData(CodeGPTKeys.PREVIOUS_INLAY_TEXT, suggestion)
                         launch {
                             try {
-                                trySend(InlineCompletionGrayTextElement(it))
+                                trySend(InlineCompletionGrayTextElement(suggestion))
                             } catch (e: Exception) {
                                 LOG.error("Failed to send inline completion suggestion", e)
                             }
@@ -75,8 +78,18 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
 
     class CodeCompletionEventListener(
         private val requestDetails: InfillRequestDetails,
-        private val completed: (String) -> Unit
+        private val completed: (String, Boolean) -> Unit
     ) : CompletionEventListener<String> {
+
+        private var isStreaming = false
+
+        override fun onMessage(message: String?, eventSource: EventSource?) {
+            if (message != null) {
+                isStreaming = true
+                val needCancel = message.contains('\n')
+                completed(message.takeWhile { it != '\n' }, needCancel)
+            }
+        }
 
         override fun onComplete(messageBuilder: StringBuilder) {
             // TODO: https://youtrack.jetbrains.com/issue/CPP-38312/CLion-crashes-around-every-10-minutes-of-work
@@ -87,11 +100,10 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
                     requestDetails.suffix,
                     messageBuilder.toString()
                 )*/
-            val output =
-                if (messageBuilder.contains("\n"))
-                    messageBuilder.substring(0, messageBuilder.indexOf("\n"))
-                else messageBuilder.toString()
-            completed(output)
+            if (!isStreaming) {
+                val output = messageBuilder.toString().takeWhile { it != '\n' }
+                completed(output, false)
+            }
         }
     }
 }
