@@ -52,7 +52,14 @@ public enum HuggingFaceModel {
   LLAMA_3_8B_Q8_0(8, 8, "Meta-Llama-3-8B-Instruct-Q8_0.gguf", "lmstudio-community"),
   LLAMA_3_70B_IQ1(70, 1, "Meta-Llama-3-70B-Instruct-IQ1_M.gguf", "lmstudio-community"),
   LLAMA_3_70B_IQ2_XS(70, 2, "Meta-Llama-3-70B-Instruct-IQ2_XS.gguf", "lmstudio-community"),
-  LLAMA_3_70B_Q4_K_M(70, 4, "Meta-Llama-3-70B-Instruct-Q4_K_M.gguf", "lmstudio-community");
+  LLAMA_3_70B_Q4_K_M(70, 4, "Meta-Llama-3-70B-Instruct-Q4_K_M.gguf", "lmstudio-community"),
+
+  DBRX_12B_Q3_K_M(12, 3, "dbrx-16x12b-instruct-q3_k_m-gguf", "phymbert"),
+  DBRX_12B_Q4_0(12, 4, "dbrx-16x12b-instruct-q4_0-gguf", "phymbert"),
+  DBRX_12B_Q6_K(12, 6, "dbrx-16x12b-instruct-q6_k-gguf", "phymbert"),
+  DBRX_12B_Q8_0(12, 8, "dbrx-16x12b-instruct-q8_0-gguf", "phymbert"),
+  DBRX_12B_Q3_S(12, 3, "dbrx-16x12b-instruct-iq3_s-gguf", "phymbert"),
+  DBRX_12B_Q3_XXS(12, 3, "dbrx-16x12b-instruct-iq3_xxs-gguf", "phymbert");
 
   private final int parameterSize;
   private final int quantization;
@@ -86,7 +93,8 @@ public enum HuggingFaceModel {
     if ("TheBloke".equals(user)) {
       return modelName.toLowerCase().replace("-gguf", format(".Q%d_K_M.gguf", quantization));
     }
-    return modelName;
+    // TODO: Download all 10 files ;(
+    return modelName.toLowerCase().replace("-gguf", "-00001-of-00010.gguf");
   }
 
   public URL getFileURL() {
