@@ -82,7 +82,31 @@ public enum LlamaModel {
           HuggingFaceModel.WIZARD_CODER_PYTHON_13B_Q5,
           HuggingFaceModel.WIZARD_CODER_PYTHON_34B_Q3,
           HuggingFaceModel.WIZARD_CODER_PYTHON_34B_Q4,
-          HuggingFaceModel.WIZARD_CODER_PYTHON_34B_Q5));
+          HuggingFaceModel.WIZARD_CODER_PYTHON_34B_Q5)),
+  LLAMA_3(
+      "Llama 3",
+      "Llama 3 is a family of large language models (LLMs), a collection of pretrained and "
+          + "instruction tuned generative text models in 8 and 70B sizes. The Llama 3 instruction "
+          + "tuned models are optimized for dialogue use cases and outperform many of the available"
+          + " open source chat models on common industry benchmarks. Further, in developing these "
+          + "models, we took great care to optimize helpfulness and safety.",
+      PromptTemplate.LLAMA,
+      InfillPromptTemplate.LLAMA,
+      List.of(
+          HuggingFaceModel.LLAMA_3_8B_Q2_K,
+          HuggingFaceModel.LLAMA_3_8B_Q3_K_L,
+          HuggingFaceModel.LLAMA_3_8B_Q3_K_M,
+          HuggingFaceModel.LLAMA_3_8B_Q3_K_S,
+          HuggingFaceModel.LLAMA_3_8B_Q4_0,
+          HuggingFaceModel.LLAMA_3_8B_Q4_1,
+          HuggingFaceModel.LLAMA_3_8B_Q4_K_M,
+          HuggingFaceModel.LLAMA_3_8B_Q4_K_S,
+          HuggingFaceModel.LLAMA_3_8B_Q5_0,
+          HuggingFaceModel.LLAMA_3_8B_Q5_1,
+          HuggingFaceModel.LLAMA_3_8B_Q5_K_M,
+          HuggingFaceModel.LLAMA_3_8B_Q5_K_S,
+          HuggingFaceModel.LLAMA_3_8B_Q6_K,
+          HuggingFaceModel.LLAMA_3_8B_Q8_0));
 
   private final String label;
   private final String description;
