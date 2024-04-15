@@ -31,4 +31,8 @@ public class ConfigurationSettings implements PersistentStateComponent<Configura
   public static ConfigurationSettings getInstance() {
     return ApplicationManager.getApplication().getService(ConfigurationSettings.class);
   }
+
+  public static String getSystemPrompt() {
+    return getCurrentState().getSystemPrompt();
+  }
 }
