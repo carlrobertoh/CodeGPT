@@ -190,7 +190,7 @@ public class UserPromptTextArea extends JPanel {
             handleSubmit();
           }
         }));
-    var selectedService = GeneralSettings.getCurrentState().getSelectedService();
+    var selectedService = GeneralSettings.getSelectedService();
     if (selectedService == ANTHROPIC
         || (selectedService == OPENAI
         && GPT_4_VISION_PREVIEW.getCode().equals(OpenAISettings.getCurrentState().getModel()))) {

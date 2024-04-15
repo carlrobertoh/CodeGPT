@@ -34,6 +34,10 @@ public class OpenAISettings implements PersistentStateComponent<OpenAISettingsSt
     return ApplicationManager.getApplication().getService(OpenAISettings.class);
   }
 
+  public static boolean isCredentialSet() {
+    return CredentialsStore.INSTANCE.isCredentialSet(OPENAI_API_KEY);
+  }
+
   public boolean isModified(OpenAISettingsForm form) {
     return !form.getCurrentState().equals(state)
         || !StringUtils.equals(

@@ -35,6 +35,10 @@ public class AzureSettings implements PersistentStateComponent<AzureSettingsStat
     return ApplicationManager.getApplication().getService(AzureSettings.class);
   }
 
+  public static boolean isCredentialSet() {
+    return getCurrentState().isCredentialSet();
+  }
+
   public boolean isModified(AzureSettingsForm form) {
     return !form.getCurrentState().equals(state)
         || !StringUtils.equals(
