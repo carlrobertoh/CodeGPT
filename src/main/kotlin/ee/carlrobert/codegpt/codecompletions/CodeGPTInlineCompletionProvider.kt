@@ -43,14 +43,14 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
             currentCall.set(
                 CompletionRequestService.getInstance().getCodeCompletionAsync(
                     infillRequest,
-                    CodeCompletionEventListener(infillRequest) { suggestion, needCancel ->
-                        if (needCancel) {
+                    CodeCompletionEventListener(infillRequest) { message, cancel ->
+                        if (cancel) {
                             cancelCurrentCall()
                         }
-                        request.editor.putUserData(CodeGPTKeys.PREVIOUS_INLAY_TEXT, suggestion)
+                        request.editor.putUserData(CodeGPTKeys.PREVIOUS_INLAY_TEXT, message)
                         launch {
                             try {
-                                trySend(InlineCompletionGrayTextElement(suggestion))
+                                trySend(InlineCompletionGrayTextElement(message))
                             } catch (e: Exception) {
                                 LOG.error("Failed to send inline completion suggestion", e)
                             }
