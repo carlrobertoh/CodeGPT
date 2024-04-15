@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.completions
 
+import ee.carlrobert.codegpt.completions.CompletionRequestProvider.COMPLETION_SYSTEM_PROMPT
 import ee.carlrobert.codegpt.conversations.ConversationService
 import ee.carlrobert.codegpt.conversations.message.Message
 import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey
@@ -42,6 +43,7 @@ class CompletionRequestProviderTest : IntegrationTest() {
   }
 
   fun testChatCompletionRequestWithoutSystemPromptOverride() {
+    ConfigurationSettings.getCurrentState().systemPrompt = COMPLETION_SYSTEM_PROMPT
     val conversation = ConversationService.getInstance().startConversation()
     val firstMessage = createDummyMessage(500)
     val secondMessage = createDummyMessage(250)
@@ -60,7 +62,7 @@ class CompletionRequestProviderTest : IntegrationTest() {
     assertThat(request.messages)
       .extracting("role", "content")
       .containsExactly(
-        Tuple.tuple("system", CompletionRequestProvider.COMPLETION_SYSTEM_PROMPT),
+        Tuple.tuple("system", COMPLETION_SYSTEM_PROMPT),
         Tuple.tuple("user", "TEST_PROMPT"),
         Tuple.tuple("assistant", firstMessage.response),
         Tuple.tuple("user", "TEST_PROMPT"),
@@ -69,7 +71,7 @@ class CompletionRequestProviderTest : IntegrationTest() {
   }
 
   fun testChatCompletionRequestRetry() {
-    ConfigurationSettings.getCurrentState().systemPrompt = CompletionRequestProvider.COMPLETION_SYSTEM_PROMPT
+    ConfigurationSettings.getCurrentState().systemPrompt = "TEST_SYSTEM_PROMPT"
     val conversation = ConversationService.getInstance().startConversation()
     val firstMessage = createDummyMessage("FIRST_TEST_PROMPT", 500)
     val secondMessage = createDummyMessage("SECOND_TEST_PROMPT", 250)
@@ -88,13 +90,14 @@ class CompletionRequestProviderTest : IntegrationTest() {
     assertThat(request.messages)
       .extracting("role", "content")
       .containsExactly(
-        Tuple.tuple("system", CompletionRequestProvider.COMPLETION_SYSTEM_PROMPT),
+        Tuple.tuple("system", "TEST_SYSTEM_PROMPT"),
         Tuple.tuple("user", "FIRST_TEST_PROMPT"),
         Tuple.tuple("assistant", firstMessage.response),
         Tuple.tuple("user", "SECOND_TEST_PROMPT"))
   }
 
   fun testReducedChatCompletionRequest() {
+    ConfigurationSettings.getCurrentState().systemPrompt = COMPLETION_SYSTEM_PROMPT
     val conversation = ConversationService.getInstance().startConversation()
     conversation.addMessage(createDummyMessage(50))
     conversation.addMessage(createDummyMessage(100))
@@ -116,7 +119,7 @@ class CompletionRequestProviderTest : IntegrationTest() {
     assertThat(request.messages)
       .extracting("role", "content")
       .containsExactly(
-        Tuple.tuple("system", CompletionRequestProvider.COMPLETION_SYSTEM_PROMPT),
+        Tuple.tuple("system", COMPLETION_SYSTEM_PROMPT),
         Tuple.tuple("user", "TEST_PROMPT"),
         Tuple.tuple("assistant", remainingMessage.response),
         Tuple.tuple("user", "TEST_CHAT_COMPLETION_PROMPT"))
