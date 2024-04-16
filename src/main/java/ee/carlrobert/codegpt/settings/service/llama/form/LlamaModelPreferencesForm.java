@@ -195,7 +195,8 @@ public class LlamaModelPreferencesForm {
   public String getActualModelPath() {
     return isUseCustomLlamaModel()
         ? getCustomLlamaModelPath()
-        : CodeGPTPlugin.getLlamaModelsPath() + File.separator + getSelectedModel().getFileName();
+        : CodeGPTPlugin.getLlamaModelsPath() + File.separator
+            + getSelectedModel().getFileNames().get(0);
   }
 
   private JPanel createFormPanelCards() {
@@ -394,8 +395,9 @@ public class LlamaModelPreferencesForm {
   }
 
   private boolean isModelExists(HuggingFaceModel model) {
-    return FileUtil.exists(
-        CodeGPTPlugin.getLlamaModelsPath() + File.separator + model.getFileName());
+    return model.getFileNames().stream().allMatch(filename ->
+            FileUtil.exists(CodeGPTPlugin.getLlamaModelsPath() + File.separator + filename)
+    );
   }
 
   private AnActionLink createCancelDownloadLink(

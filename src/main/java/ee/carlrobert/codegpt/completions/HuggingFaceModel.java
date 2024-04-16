@@ -4,6 +4,8 @@ import static java.lang.String.format;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
+import java.util.stream.IntStream;
 
 public enum HuggingFaceModel {
 
@@ -89,21 +91,26 @@ public enum HuggingFaceModel {
     return name();
   }
 
-  public String getFileName() {
+  public List<String> getFileNames() {
     if ("TheBloke".equals(user)) {
-      return modelName.toLowerCase().replace("-gguf", format(".Q%d_K_M.gguf", quantization));
+      return List.of(modelName.toLowerCase()
+              .replace("-gguf", format(".Q%d_K_M.gguf", quantization)));
     }
-    // TODO: Download all 10 files ;(
-    return modelName.toLowerCase().replace("-gguf", "-00001-of-00010.gguf");
+    if ("phymbert".equals(user)) {
+      return IntStream.range(1, 11).mapToObj(i -> modelName
+              .replace("-gguf", "-000%02d-of-00010.gguf".formatted(i))).toList();
+    }
+    return List.of(modelName);
   }
 
-  public URL getFileURL() {
-    try {
-      return new URL(
-          "https://huggingface.co/%s/%s/resolve/main/%s".formatted(user, getDirectory(), getFileName()));
-    } catch (MalformedURLException ex) {
-      throw new RuntimeException(ex);
-    }
+  public List<URL> getFileURLs() {
+    return getFileNames().stream().map(file -> {
+      try {
+        return new URL("https://huggingface.co/%s/%s/resolve/main/%s".formatted(user, getDirectory(), file));
+      } catch (MalformedURLException ex) {
+        throw new RuntimeException(ex);
+      }
+    }).toList();
   }
 
   public URL getHuggingFaceURL() {

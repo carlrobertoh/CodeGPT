@@ -290,7 +290,7 @@ public class LlamaServerPreferencesForm {
 
   private boolean isModelExists(HuggingFaceModel model) {
     return FileUtil.exists(
-        CodeGPTPlugin.getLlamaModelsPath() + File.separator + model.getFileName());
+        CodeGPTPlugin.getLlamaModelsPath() + File.separator + model.getFileNames());
   }
 
   private void enableForm(JButton serverButton, ServerProgressPanel progressPanel) {
