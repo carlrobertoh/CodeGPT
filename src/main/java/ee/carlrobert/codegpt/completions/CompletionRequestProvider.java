@@ -1,6 +1,5 @@
 package ee.carlrobert.codegpt.completions;
 
-import static ee.carlrobert.codegpt.completions.ConversationType.DEFAULT;
 import static ee.carlrobert.codegpt.completions.ConversationType.FIX_COMPILE_ERRORS;
 import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.CUSTOM_SERVICE_API_KEY;
 import static ee.carlrobert.codegpt.util.file.FileUtil.getResourceContent;
@@ -31,7 +30,6 @@ import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.codegpt.settings.service.you.YouSettings;
 import ee.carlrobert.codegpt.telemetry.core.configuration.TelemetryConfiguration;
 import ee.carlrobert.codegpt.telemetry.core.service.UserId;
-import ee.carlrobert.codegpt.util.PlaceholderUtil;
 import ee.carlrobert.codegpt.util.file.FileUtil;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeBase64Source;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionDetailedMessage;
@@ -60,7 +58,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -78,8 +75,6 @@ public class CompletionRequestProvider {
 
   public static final String FIX_COMPILE_ERRORS_SYSTEM_PROMPT = getResourceContent(
       "/prompts/fix-compile-errors.txt");
-  private static final Set<ConversationType> OPENAI_SYSTEM_CONVERSATION_TYPES = Set.of(
-          DEFAULT, FIX_COMPILE_ERRORS);
 
   private final EncodingManager encodingManager = EncodingManager.getInstance();
   private final Conversation conversation;
@@ -158,7 +153,7 @@ public class CompletionRequestProvider {
     }
 
     var systemPrompt = conversationType == FIX_COMPILE_ERRORS
-            ? FIX_COMPILE_ERRORS_SYSTEM_PROMPT : ConfigurationSettings.getSystemPrompt();
+        ? FIX_COMPILE_ERRORS_SYSTEM_PROMPT : ConfigurationSettings.getSystemPrompt();
 
     var prompt = promptTemplate.buildPrompt(
         systemPrompt,
@@ -290,7 +285,6 @@ public class CompletionRequestProvider {
     var messages = new ArrayList<OpenAIChatCompletionMessage>();
     if (callParameters.getConversationType() == ConversationType.DEFAULT) {
       String systemPrompt = ConfigurationSettings.getCurrentState().getSystemPrompt();
-      systemPrompt = new PlaceholderUtil().replacePlaceholder(systemPrompt);
       messages.add(new OpenAIChatCompletionStandardMessage("system", systemPrompt));
     }
     if (callParameters.getConversationType() == ConversationType.FIX_COMPILE_ERRORS) {

@@ -28,6 +28,7 @@ import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.completions.CompletionRequestService;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
+import ee.carlrobert.codegpt.settings.configuration.CommitMessageTemplate;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.completion.CompletionEventListener;
@@ -94,7 +95,10 @@ public class GenerateGitCommitMessageAction extends AnAction {
     if (editor != null) {
       ((EditorEx) editor).setCaretVisible(false);
       CompletionRequestService.getInstance()
-          .generateCommitMessageAsync(gitDiff, getEventListener(project, editor.getDocument()));
+          .generateCommitMessageAsync(
+              project.getService(CommitMessageTemplate.class).getSystemPrompt(),
+              gitDiff,
+              getEventListener(project, editor.getDocument()));
     }
   }
 

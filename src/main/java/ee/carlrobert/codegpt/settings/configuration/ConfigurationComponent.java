@@ -16,8 +16,6 @@ import com.intellij.ui.TitledSeparator;
 import com.intellij.ui.ToolbarDecorator;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBLabel;
-import com.intellij.ui.components.JBList;
-import com.intellij.ui.components.JBTextArea;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.ui.components.fields.IntegerField;
 import com.intellij.ui.table.JBTable;
@@ -27,10 +25,10 @@ import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.actions.editor.EditorActionsUtil;
 import ee.carlrobert.codegpt.ui.UIUtil;
-import ee.carlrobert.codegpt.util.PlaceholderUtil;
 import java.awt.Dimension;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
@@ -54,7 +52,6 @@ public class ConfigurationComponent {
   private final JTextArea commitMessagePromptTextArea;
   private final IntegerField maxTokensField;
   private final JBTextField temperatureField;
-  private final JBList<Object> placeholderList;
 
   public ConfigurationComponent(Disposable parentDisposable, ConfigurationState configuration) {
     table = new JBTable(new DefaultTableModel(
@@ -96,7 +93,7 @@ public class ConfigurationComponent {
     maxTokensField.setColumns(12);
     maxTokensField.setValue(configuration.getMaxTokens());
 
-    systemPromptTextArea = new JTextArea();
+    systemPromptTextArea = new JTextArea(3, 60);
     if (configuration.getSystemPrompt().isBlank()) {
       // for backward compatibility
       systemPromptTextArea.setText(COMPLETION_SYSTEM_PROMPT);
@@ -104,19 +101,13 @@ public class ConfigurationComponent {
       systemPromptTextArea.setText(configuration.getSystemPrompt());
     }
     systemPromptTextArea.setLineWrap(true);
+    systemPromptTextArea.setWrapStyleWord(true);
     systemPromptTextArea.setBorder(JBUI.Borders.empty(8, 4));
-    systemPromptTextArea.setColumns(60);
-    systemPromptTextArea.setRows(3);
 
-    commitMessagePromptTextArea = new JBTextArea(configuration.getCommitMessagePrompt(),
-        3, 60);
+    commitMessagePromptTextArea = new JTextArea(configuration.getCommitMessagePrompt(), 3, 60);
     commitMessagePromptTextArea.setLineWrap(true);
+    commitMessagePromptTextArea.setWrapStyleWord(true);
     commitMessagePromptTextArea.setBorder(JBUI.Borders.empty(8, 4));
-    commitMessagePromptTextArea.setPreferredSize(new Dimension(600, 300));
-
-    placeholderList = new JBList<Object>(PlaceholderUtil.getPlaceholderList());
-    placeholderList.setBorder(JBUI.Borders.empty(8, 4));
-    placeholderList.setFocusable(true);
 
     checkForPluginUpdatesCheckBox = new JBCheckBox(
         CodeGPTBundle.get("configurationConfigurable.checkForPluginUpdates.label"),
@@ -149,7 +140,6 @@ public class ConfigurationComponent {
         .addComponent(new TitledSeparator(
             CodeGPTBundle.get("configurationConfigurable.section.commitMessage.title")))
         .addComponent(createCommitMessageConfigurationForm())
-        .addComponent(placeholderList)
         .addComponentFillVertically(new JPanel(), 0)
         .getPanel();
   }
@@ -256,20 +246,19 @@ public class ConfigurationComponent {
   }
 
   private JPanel createCommitMessageConfigurationForm() {
-    var formBuilder = FormBuilder.createFormBuilder();
-    addAssistantFormLabeledComponent(
-        formBuilder,
-        "configurationConfigurable.section.commitMessage.systemPromptField.label",
-        "configurationConfigurable.section.commitMessage.systemPromptField.comment",
-        JBUI.Panels
-            .simplePanel(commitMessagePromptTextArea)
-            .withBorder(JBUI.Borders.customLine(
-                JBUI.CurrentTheme.CustomFrameDecorations.separatorForeground())));
-    formBuilder.addVerticalGap(8);
-
-    var form = formBuilder.getPanel();
-    form.setBorder(JBUI.Borders.emptyLeft(16));
-    return form;
+    return FormBuilder.createFormBuilder()
+        .setFormLeftIndent(16)
+        .addLabeledComponent(
+            new JBLabel(CodeGPTBundle.get(
+                "configurationConfigurable.section.commitMessage.systemPromptField.label"))
+                .withBorder(JBUI.Borders.emptyLeft(2)),
+            UI.PanelFactory.panel(commitMessagePromptTextArea)
+                .resizeX(false)
+                .withComment(CommitMessageTemplate.Companion.getHtmlDescription())
+                .createPanel(),
+            true
+        )
+        .getPanel();
   }
 
   private ComponentValidator createTemperatureInputValidator(
