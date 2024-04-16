@@ -8,10 +8,10 @@ import java.time.LocalDate
 
 class CommitMessageTemplateTest : VcsTestCase() {
 
-    fun testGetReplacedSystemPrompt() {
+    fun `test commit message system prompt construction`() {
         git(GitCommand.INIT)
         git(GitCommand.CHECKOUT, listOf("-b", "feature/my-cool-feature"))
-        waitUntilChangesApplied()
+        registerRepository()
         service<ConfigurationSettings>().state.commitMessagePrompt = buildString {
             append("Branch: {BRANCH_NAME}\n")
             append("Date: {DATE_ISO_8601}")

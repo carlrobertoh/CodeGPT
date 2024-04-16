@@ -4,49 +4,51 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.vcs.ProjectLevelVcsManager
 import com.intellij.openapi.vcs.VcsDirectoryMapping
 import com.intellij.openapi.vfs.LocalFileSystem
-import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.testFramework.fixtures.BasePlatformTestCase
-import com.intellij.testFramework.waitUntil
-import git4idea.GitUtil
+import com.intellij.testFramework.HeavyPlatformTestCase
 import git4idea.GitVcs
 import git4idea.commands.Git
 import git4idea.commands.GitCommand
 import git4idea.commands.GitLineHandler
+import git4idea.repo.GitRepository
+import git4idea.repo.GitRepositoryManager
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.Assert
+import java.nio.file.Files
 import java.nio.file.Path
 
-open class VcsTestCase : BasePlatformTestCase() {
+open class VcsTestCase : HeavyPlatformTestCase() {
 
-    private lateinit var projectDir: VirtualFile
+    private lateinit var projectDir: Path
 
     @Throws(Exception::class)
     override fun setUp() {
         super.setUp()
-
-        projectDir =
-            LocalFileSystem.getInstance().findFileByNioFile(Path.of(project.basePath!!))
-                ?: error("Project directory not found")
-    }
-
-    @Throws(Exception::class)
-    override fun tearDown() {
-        project.service<ProjectLevelVcsManager>().directoryMappings = emptyList()
-        super.tearDown()
+        projectDir = tempDir.createDir()
     }
 
     fun git(command: GitCommand, parameters: List<String> = emptyList()) {
-        val checkoutHandler = GitLineHandler(project, projectDir, command)
+        val checkoutHandler = GitLineHandler(project, projectDir.toFile(), command)
         checkoutHandler.addParameters(parameters)
         service<Git>().runCommand(checkoutHandler).throwOnError()
     }
 
-    fun waitUntilChangesApplied() {
-        project.service<ProjectLevelVcsManager>().directoryMappings =
-            listOf(VcsDirectoryMapping("", GitVcs.NAME))
-        runBlocking {
-            waitUntil {
-                GitUtil.getRepositories(project).isNotEmpty()
+    fun registerRepository(): GitRepository =
+        ProjectLevelVcsManager.getInstance(project).run {
+            directoryMappings = listOf(VcsDirectoryMapping(projectDir.toString(), GitVcs.NAME))
+            Files.createDirectories(projectDir)
+            Assert.assertFalse(
+                "There are no VCS roots. Active VCSs: $allActiveVcss",
+                allVcsRoots.isEmpty()
+            )
+            val file = LocalFileSystem.getInstance().refreshAndFindFileByNioFile(projectDir)
+
+            runBlocking(Dispatchers.IO) {
+                val repository = project.service<GitRepositoryManager>().getRepositoryForRoot(file)
+                assertThat(repository).describedAs("Couldn't find repository for root $projectDir")
+                    .isNotNull()
+                repository!!
             }
         }
-    }
 }
