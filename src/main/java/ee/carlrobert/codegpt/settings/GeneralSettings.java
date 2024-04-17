@@ -41,8 +41,18 @@ public class GeneralSettings implements PersistentStateComponent<GeneralSettings
   public void sync(Conversation conversation) {
     var clientCode = conversation.getClientCode();
     if ("chat.completion".equals(clientCode)) {
-      state.setSelectedService(ServiceType.OPENAI);
-      OpenAISettings.getCurrentState().setModel(conversation.getModel());
+      switch (state.getSelectedService()) {
+        case CUSTOM_OPENAI:
+          // Empty on purpose; we should not set
+          // the selected service back to OPENAI.
+          break;
+
+        case OPENAI:
+        default:
+          state.setSelectedService(ServiceType.OPENAI);
+          OpenAISettings.getCurrentState().setModel(conversation.getModel());
+          break;
+      }
     }
     if ("anthropic.chat.completion".equals(clientCode)) {
       state.setSelectedService(ServiceType.ANTHROPIC);

@@ -25,6 +25,17 @@ class GeneralSettingsTest : BasePlatformTestCase() {
     assertThat(openAISettings.model).isEqualTo("gpt-4")
   }
 
+  fun testCustomOpenAISettingsSync() {
+    val conversation = Conversation()
+    conversation.clientCode = "chat.completion"
+    val settings = GeneralSettings.getInstance()
+    settings.state.selectedService = ServiceType.CUSTOM_OPENAI
+
+    settings.sync(conversation)
+
+    assertThat(settings.state.selectedService).isEqualTo(ServiceType.CUSTOM_OPENAI)
+  }
+
   fun testAzureSettingsSync() {
     val settings = GeneralSettings.getInstance()
     val conversation = Conversation()
