@@ -93,7 +93,6 @@ public final class CompletionRequestService {
               callParameters.getMessage(),
               callParameters.getConversationType()),
           eventListener);
-      default -> throw new IllegalArgumentException();
     };
   }
 
@@ -112,13 +111,13 @@ public final class CompletionRequestService {
   }
 
   public void generateCommitMessageAsync(
-      String prompt,
+      String systemPrompt,
+      String gitDiff,
       CompletionEventListener<String> eventListener) {
     var configuration = ConfigurationSettings.getCurrentState();
-    var commitMessagePrompt = configuration.getCommitMessagePrompt();
     var openaiRequest = new OpenAIChatCompletionRequest.Builder(List.of(
-        new OpenAIChatCompletionStandardMessage("system", commitMessagePrompt),
-        new OpenAIChatCompletionStandardMessage("user", prompt)))
+        new OpenAIChatCompletionStandardMessage("system", systemPrompt),
+        new OpenAIChatCompletionStandardMessage("user", gitDiff)))
         .setModel(OpenAISettings.getCurrentState().getModel())
         .build();
     var selectedService = GeneralSettings.getCurrentState().getSelectedService();
@@ -131,18 +130,18 @@ public final class CompletionRequestService {
         var httpClient = CompletionClientProvider.getDefaultClientBuilder().build();
         EventSources.createFactory(httpClient).newEventSource(
             CompletionRequestProvider.buildCustomOpenAICompletionRequest(
-                commitMessagePrompt,
-                prompt),
+                systemPrompt,
+                gitDiff),
             new OpenAIChatCompletionEventSourceListener(eventListener));
         break;
       case ANTHROPIC:
         var anthropicSettings = AnthropicSettings.getCurrentState();
         var claudeRequest = new ClaudeCompletionRequest();
-        claudeRequest.setSystem(commitMessagePrompt);
+        claudeRequest.setSystem(systemPrompt);
         claudeRequest.setStream(true);
         claudeRequest.setMaxTokens(configuration.getMaxTokens());
         claudeRequest.setModel(anthropicSettings.getModel());
-        claudeRequest.setMessages(List.of(new ClaudeCompletionStandardMessage("user", prompt)));
+        claudeRequest.setMessages(List.of(new ClaudeCompletionStandardMessage("user", gitDiff)));
         CompletionClientProvider.getClaudeClient()
             .getCompletionAsync(claudeRequest, eventListener);
         break;
@@ -161,7 +160,7 @@ public final class CompletionRequestService {
         } else {
           promptTemplate = settings.getRemoteModelPromptTemplate();
         }
-        var finalPrompt = promptTemplate.buildPrompt(commitMessagePrompt, prompt, List.of());
+        var finalPrompt = promptTemplate.buildPrompt(systemPrompt, gitDiff, List.of());
         CompletionClientProvider.getLlamaClient().getChatCompletionAsync(
             new LlamaCompletionRequest.Builder(finalPrompt)
                 .setN_predict(configuration.getMaxTokens())
