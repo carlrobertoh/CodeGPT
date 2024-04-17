@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt.codecompletions
 
 import ee.carlrobert.codegpt.completions.llama.LlamaModel
+import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettingsState
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings
@@ -13,6 +14,15 @@ object CodeCompletionRequestFactory {
             .setSuffix(details.suffix)
             .setStream(true)
             .setMaxTokens(OpenAISettings.getCurrentState().codeCompletionMaxTokens)
+            .setTemperature(0.4)
+            .build()
+    }
+
+    fun buildCustomOpenAIRequest(details: InfillRequestDetails): OpenAITextCompletionRequest {
+        return OpenAITextCompletionRequest.Builder(details.prefix)
+            .setSuffix(details.suffix)
+            .setStream(true)
+            .setMaxTokens(CustomServiceSettings.getCurrentState().codeCompletionMaxTokens)
             .setTemperature(0.4)
             .build()
     }

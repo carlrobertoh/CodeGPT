@@ -8,6 +8,7 @@ import ee.carlrobert.codegpt.CodeGPTKeys
 import ee.carlrobert.codegpt.completions.CompletionRequestService
 import ee.carlrobert.codegpt.settings.GeneralSettings
 import ee.carlrobert.codegpt.settings.service.ServiceType
+import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings
 import ee.carlrobert.codegpt.treesitter.CodeCompletionParserFactory
@@ -64,7 +65,7 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
         val selectedService = GeneralSettings.getCurrentState().selectedService
         val codeCompletionsEnabled = when (selectedService) {
             ServiceType.OPENAI -> OpenAISettings.getCurrentState().isCodeCompletionsEnabled
-            ServiceType.CUSTOM_OPENAI -> OpenAISettings.getCurrentState().isCodeCompletionsEnabled
+            ServiceType.CUSTOM_OPENAI -> CustomServiceSettings.getCurrentState().isCodeCompletionsEnabled
             ServiceType.LLAMA_CPP -> LlamaSettings.getCurrentState().isCodeCompletionsEnabled
             else -> false
         }

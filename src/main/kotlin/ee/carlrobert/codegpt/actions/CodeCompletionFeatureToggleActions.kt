@@ -18,10 +18,12 @@ abstract class CodeCompletionFeatureToggleActions(
 
     override fun actionPerformed(e: AnActionEvent) {
         GeneralSettings.getCurrentState().selectedService
-            .takeIf { it in listOf(OPENAI, LLAMA_CPP) }
+            .takeIf { it in listOf(OPENAI, CUSTOM_OPENAI, LLAMA_CPP) }
             ?.also { selectedService ->
                 if (OPENAI == selectedService) {
                     OpenAISettings.getCurrentState().isCodeCompletionsEnabled = enableFeatureAction
+                } else if (CUSTOM_OPENAI == selectedService) {
+                    CustomServiceSettings.getCurrentState().isCodeCompletionsEnabled = enableFeatureAction
                 } else {
                     LlamaSettings.getCurrentState().isCodeCompletionsEnabled = enableFeatureAction
                 }
@@ -33,7 +35,7 @@ abstract class CodeCompletionFeatureToggleActions(
         val codeCompletionEnabled = isCodeCompletionsEnabled(selectedService)
         e.presentation.isEnabled = codeCompletionEnabled != enableFeatureAction
         e.presentation.isVisible =
-            e.presentation.isEnabled && listOf(OPENAI, LLAMA_CPP).contains(
+            e.presentation.isEnabled && listOf(OPENAI, CUSTOM_OPENAI, LLAMA_CPP).contains(
                 selectedService
             )
     }
