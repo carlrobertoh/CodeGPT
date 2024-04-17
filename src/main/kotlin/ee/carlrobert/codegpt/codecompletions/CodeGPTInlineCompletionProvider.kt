@@ -43,11 +43,12 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
             currentCall.set(
                 CompletionRequestService.getInstance().getCodeCompletionAsync(
                     infillRequest,
-                    CodeCompletionEventListener(infillRequest) {
-                        request.editor.putUserData(CodeGPTKeys.PREVIOUS_INLAY_TEXT, it)
+                    CodeCompletionEventListener {
+                        val inlineText = it.takeWhile { message -> message != '\n' }.toString()
+                        request.editor.putUserData(CodeGPTKeys.PREVIOUS_INLAY_TEXT, inlineText)
                         launch {
                             try {
-                                trySend(InlineCompletionGrayTextElement(it))
+                                trySend(InlineCompletionGrayTextElement(inlineText))
                             } catch (e: Exception) {
                                 LOG.error("Failed to send inline completion suggestion", e)
                             }
@@ -74,17 +75,21 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
     }
 
     class CodeCompletionEventListener(
-        private val requestDetails: InfillRequestDetails,
-        private val completed: (String) -> Unit
+        private val completed: (StringBuilder) -> Unit
     ) : CompletionEventListener<String> {
 
         override fun onMessage(message: String?, eventSource: EventSource?) {
-            if (message != null) {
-                completed(message.takeWhile { it != '\n' })
-                if (message.contains('\n') && eventSource != null) {
-                    eventSource.cancel()
-                }
+            if (message != null && message.contains('\n')) {
+                eventSource?.cancel()
             }
+        }
+
+        override fun onComplete(messageBuilder: StringBuilder) {
+            completed(messageBuilder)
+        }
+
+        override fun onCancelled(messageBuilder: StringBuilder) {
+            completed(messageBuilder)
         }
     }
 }
