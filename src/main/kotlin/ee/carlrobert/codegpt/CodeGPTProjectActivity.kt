@@ -3,9 +3,9 @@ package ee.carlrobert.codegpt
 import com.intellij.notification.NotificationAction
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.startup.StartupActivity
-import com.intellij.openapi.util.Disposer
 import ee.carlrobert.codegpt.actions.editor.EditorActionsUtil
 import ee.carlrobert.codegpt.completions.you.YouUserManager
 import ee.carlrobert.codegpt.completions.you.auth.AuthenticationHandler
@@ -34,14 +34,12 @@ class CodeGPTProjectActivity : StartupActivity.Background {
         if (!ApplicationManager.getApplication().isUnitTestMode
             && ConfigurationSettings.getCurrentState().isCheckForNewScreenshots
         ) {
-            val pathToWatch = Paths.get(System.getProperty("user.home"), "Desktop")
-            val fileWatcher = FileWatcher(pathToWatch)
-            fileWatcher.watch {
-                if (listOf("jpg", "jpeg", "png").contains(it.extension)) {
-                    showImageAttachmentNotification(project, it.absolutePath)
+            project.service<FileWatcher>()
+                .watch(Paths.get(System.getProperty("user.home"), "Desktop").toFile()) {
+                    if (listOf("jpg", "jpeg", "png").contains(it.extension)) {
+                        showImageAttachmentNotification(project, it.absolutePath)
+                    }
                 }
-            }
-            Disposer.register(project, fileWatcher)
         }
     }
 
