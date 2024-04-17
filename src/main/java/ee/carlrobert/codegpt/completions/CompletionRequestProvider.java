@@ -1,6 +1,5 @@
 package ee.carlrobert.codegpt.completions;
 
-import static ee.carlrobert.codegpt.completions.ConversationType.DEFAULT;
 import static ee.carlrobert.codegpt.completions.ConversationType.FIX_COMPILE_ERRORS;
 import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.CUSTOM_SERVICE_API_KEY;
 import static ee.carlrobert.codegpt.util.file.FileUtil.getResourceContent;
@@ -59,7 +58,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -77,8 +75,6 @@ public class CompletionRequestProvider {
 
   public static final String FIX_COMPILE_ERRORS_SYSTEM_PROMPT = getResourceContent(
       "/prompts/fix-compile-errors.txt");
-  private static final Set<ConversationType> OPENAI_SYSTEM_CONVERSATION_TYPES = Set.of(
-          DEFAULT, FIX_COMPILE_ERRORS);
 
   private final EncodingManager encodingManager = EncodingManager.getInstance();
   private final Conversation conversation;
@@ -157,7 +153,7 @@ public class CompletionRequestProvider {
     }
 
     var systemPrompt = conversationType == FIX_COMPILE_ERRORS
-            ? FIX_COMPILE_ERRORS_SYSTEM_PROMPT : ConfigurationSettings.getSystemPrompt();
+        ? FIX_COMPILE_ERRORS_SYSTEM_PROMPT : ConfigurationSettings.getSystemPrompt();
 
     var prompt = promptTemplate.buildPrompt(
         systemPrompt,
@@ -287,10 +283,13 @@ public class CompletionRequestProvider {
   private List<OpenAIChatCompletionMessage> buildMessages(CallParameters callParameters) {
     var message = callParameters.getMessage();
     var messages = new ArrayList<OpenAIChatCompletionMessage>();
-    if (OPENAI_SYSTEM_CONVERSATION_TYPES.contains(callParameters.getConversationType())) {
-      String content = DEFAULT == callParameters.getConversationType()
-              ? ConfigurationSettings.getSystemPrompt() : FIX_COMPILE_ERRORS_SYSTEM_PROMPT;
-      messages.add(new OpenAIChatCompletionStandardMessage("system", content));
+    if (callParameters.getConversationType() == ConversationType.DEFAULT) {
+      String systemPrompt = ConfigurationSettings.getCurrentState().getSystemPrompt();
+      messages.add(new OpenAIChatCompletionStandardMessage("system", systemPrompt));
+    }
+    if (callParameters.getConversationType() == ConversationType.FIX_COMPILE_ERRORS) {
+      messages.add(
+          new OpenAIChatCompletionStandardMessage("system", FIX_COMPILE_ERRORS_SYSTEM_PROMPT));
     }
 
     for (var prevMessage : conversation.getMessages()) {
