@@ -43,14 +43,11 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
             currentCall.set(
                 CompletionRequestService.getInstance().getCodeCompletionAsync(
                     infillRequest,
-                    CodeCompletionEventListener(infillRequest) { message, cancel ->
-                        if (cancel) {
-                            cancelCurrentCall()
-                        }
-                        request.editor.putUserData(CodeGPTKeys.PREVIOUS_INLAY_TEXT, message)
+                    CodeCompletionEventListener(infillRequest) {
+                        request.editor.putUserData(CodeGPTKeys.PREVIOUS_INLAY_TEXT, it)
                         launch {
                             try {
-                                trySend(InlineCompletionGrayTextElement(message))
+                                trySend(InlineCompletionGrayTextElement(it))
                             } catch (e: Exception) {
                                 LOG.error("Failed to send inline completion suggestion", e)
                             }
@@ -78,7 +75,7 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
 
     class CodeCompletionEventListener(
         private val requestDetails: InfillRequestDetails,
-        private val completed: (String, Boolean) -> Unit
+        private val completed: (String) -> Unit
     ) : CompletionEventListener<String> {
 
         private var isStreaming = false
@@ -86,8 +83,10 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
         override fun onMessage(message: String?, eventSource: EventSource?) {
             if (message != null) {
                 isStreaming = true
-                val needCancel = message.contains('\n')
-                completed(message.takeWhile { it != '\n' }, needCancel)
+                completed(message.takeWhile { it != '\n' })
+                if (message.contains('\n') && eventSource != null) {
+                    eventSource.cancel()
+                }
             }
         }
 
@@ -102,7 +101,7 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
                 )*/
             if (!isStreaming) {
                 val output = messageBuilder.toString().takeWhile { it != '\n' }
-                completed(output, false)
+                completed(output)
             }
         }
     }
