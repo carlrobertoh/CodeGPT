@@ -78,30 +78,12 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
         private val completed: (String) -> Unit
     ) : CompletionEventListener<String> {
 
-        private var isStreaming = false
-
         override fun onMessage(message: String?, eventSource: EventSource?) {
             if (message != null) {
-                isStreaming = true
                 completed(message.takeWhile { it != '\n' })
                 if (message.contains('\n') && eventSource != null) {
                     eventSource.cancel()
                 }
-            }
-        }
-
-        override fun onComplete(messageBuilder: StringBuilder) {
-            // TODO: https://youtrack.jetbrains.com/issue/CPP-38312/CLion-crashes-around-every-10-minutes-of-work
-            /*val processedOutput = CodeCompletionParserFactory
-                .getParserForFileExtension(requestDetails.fileExtension)
-                .parse(
-                    requestDetails.prefix,
-                    requestDetails.suffix,
-                    messageBuilder.toString()
-                )*/
-            if (!isStreaming) {
-                val output = messageBuilder.toString().takeWhile { it != '\n' }
-                completed(output)
             }
         }
     }
