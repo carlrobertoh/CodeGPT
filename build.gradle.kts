@@ -148,6 +148,7 @@ tasks {
   runIde {
     enabled = true
     environment("ENVIRONMENT", "LOCAL")
+    autoReloadPlugins.set(false) // is triggered when building llama server
   }
 
   test {
