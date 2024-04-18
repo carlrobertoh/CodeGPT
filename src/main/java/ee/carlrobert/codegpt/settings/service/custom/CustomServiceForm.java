@@ -6,55 +6,42 @@ import static ee.carlrobert.codegpt.ui.UIUtil.withEmptyLeftBorder;
 import com.intellij.icons.AllIcons.General;
 import com.intellij.ide.HelpTooltip;
 import com.intellij.openapi.ui.ComboBox;
-import com.intellij.openapi.ui.MessageType;
 import com.intellij.ui.EnumComboBoxModel;
 import com.intellij.ui.TitledSeparator;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPasswordField;
-import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
 import ee.carlrobert.codegpt.CodeGPTBundle;
-import ee.carlrobert.codegpt.completions.CallParameters;
-import ee.carlrobert.codegpt.completions.CompletionRequestProvider;
-import ee.carlrobert.codegpt.completions.CompletionRequestService;
-import ee.carlrobert.codegpt.conversations.Conversation;
-import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.credentials.CredentialsStore;
 import ee.carlrobert.codegpt.settings.service.CodeCompletionConfigurationForm;
-import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.codegpt.ui.UIUtil;
-import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
-import ee.carlrobert.llm.completion.CompletionEventListener;
-import java.awt.BorderLayout;
+
 import java.awt.FlowLayout;
 import java.net.MalformedURLException;
 import java.net.URL;
 import javax.swing.Box;
-import javax.swing.JButton;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
-import okhttp3.sse.EventSource;
+
 import org.jetbrains.annotations.Nullable;
 
 public class CustomServiceForm {
 
+  private final CustomServiceChatCompletionsForm chatCompletionsForm;
+  private final CustomServiceCompletionsForm completionsForm;
+
   private final JBPasswordField apiKeyField;
-  private final JBTextField urlField;
-  private final CustomServiceFormTabbedPane tabbedPane;
-  private final JButton testConnectionButton;
   private final JBLabel templateHelpText;
   private final ComboBox<CustomServiceTemplate> templateComboBox;
   private final CodeCompletionConfigurationForm codeCompletionConfigurationForm;
 
   public CustomServiceForm(CustomServiceSettingsState settings) {
+    chatCompletionsForm = new CustomServiceChatCompletionsForm(settings.getChatCompletionSettings());
+    completionsForm = new CustomServiceCompletionsForm(settings.getCompletionSettings());
+
     apiKeyField = new JBPasswordField();
     apiKeyField.setColumns(30);
     apiKeyField.setText(CredentialsStore.INSTANCE.getCredential(CUSTOM_SERVICE_API_KEY));
-    urlField = new JBTextField(settings.getUrl(), 30);
-    tabbedPane = new CustomServiceFormTabbedPane(settings);
-    testConnectionButton = new JButton(CodeGPTBundle.get(
-        "settingsConfigurable.service.custom.openai.testConnection.label"));
-    testConnectionButton.addActionListener(e -> testConnection(getCurrentState()));
+
     templateHelpText = new JBLabel(General.ContextHelp);
     templateComboBox = new ComboBox<>(
         new EnumComboBoxModel<>(CustomServiceTemplate.class));
@@ -62,9 +49,14 @@ public class CustomServiceForm {
     templateComboBox.addItemListener(e -> {
       var template = (CustomServiceTemplate) e.getItem();
       updateTemplateHelpTextTooltip(template);
-      urlField.setText(template.getUrl());
-      tabbedPane.setHeaders(template.getHeaders());
-      tabbedPane.setBody(template.getBody());
+
+      chatCompletionsForm.setUrl(template.getUrl());
+      chatCompletionsForm.setHeaders(template.getHeaders());
+      chatCompletionsForm.setBody(template.getBody());
+
+      completionsForm.setUrl(template.getUrl());
+      completionsForm.setHeaders(template.getHeaders());
+      completionsForm.setBody(template.getBody());
     });
     updateTemplateHelpTextTooltip(settings.getTemplate());
     codeCompletionConfigurationForm = new CodeCompletionConfigurationForm(
@@ -73,10 +65,6 @@ public class CustomServiceForm {
   }
 
   public JPanel getForm() {
-    var urlPanel = new JPanel(new BorderLayout(8, 0));
-    urlPanel.add(urlField, BorderLayout.CENTER);
-    urlPanel.add(testConnectionButton, BorderLayout.EAST);
-
     var templateComboBoxWrapper = new JPanel(new FlowLayout(FlowLayout.LEADING, 0, 0));
     templateComboBoxWrapper.add(templateComboBox);
     templateComboBoxWrapper.add(Box.createHorizontalStrut(8));
@@ -91,12 +79,13 @@ public class CustomServiceForm {
             apiKeyField)
         .addComponentToRightColumn(
             UIUtil.createComment("settingsConfigurable.service.custom.openai.apiKey.comment"))
-        .addLabeledComponent(
-            CodeGPTBundle.get("settingsConfigurable.service.custom.openai.url.label"),
-            urlPanel)
-        .addComponent(tabbedPane)
+
+        .addComponent(chatCompletionsForm.getForm())
+        .addComponent(completionsForm.getForm())
+
         .addComponent(new TitledSeparator(CodeGPTBundle.get("shared.codeCompletions")))
         .addComponent(withEmptyLeftBorder(codeCompletionConfigurationForm.getForm()))
+
         .getPanel();
 
     return FormBuilder.createFormBuilder()
@@ -113,10 +102,10 @@ public class CustomServiceForm {
 
   public CustomServiceSettingsState getCurrentState() {
     var state = new CustomServiceSettingsState();
-    state.setUrl(urlField.getText());
+    chatCompletionsForm.populateState(state.getChatCompletionSettings());
+    completionsForm.populateState(state.getCompletionSettings());
+
     state.setTemplate(templateComboBox.getItem());
-    state.setHeaders(tabbedPane.getHeaders());
-    state.setBody(tabbedPane.getBody());
     state.setCodeCompletionsEnabled(codeCompletionConfigurationForm.isCodeCompletionsEnabled());
     state.setCodeCompletionMaxTokens(codeCompletionConfigurationForm.getMaxTokens());
     return state;
@@ -124,11 +113,11 @@ public class CustomServiceForm {
 
   public void resetForm() {
     var state = CustomServiceSettings.getCurrentState();
+    chatCompletionsForm.resetForm(state.getChatCompletionSettings());
+    completionsForm.resetForm(state.getCompletionSettings());
+
     apiKeyField.setText(CredentialsStore.INSTANCE.getCredential(CUSTOM_SERVICE_API_KEY));
-    urlField.setText(state.getUrl());
     templateComboBox.setSelectedItem(state.getTemplate());
-    tabbedPane.setHeaders(state.getHeaders());
-    tabbedPane.setBody(state.getBody());
     codeCompletionConfigurationForm.setCodeCompletionsEnabled(state.isCodeCompletionsEnabled());
     codeCompletionConfigurationForm.setMaxTokens(state.getCodeCompletionMaxTokens());
   }
@@ -144,43 +133,6 @@ public class CustomServiceForm {
           .installOn(templateHelpText);
     } catch (MalformedURLException e) {
       throw new RuntimeException(e);
-    }
-  }
-
-  private void testConnection(CustomServiceSettingsState customConfiguration) {
-    var conversation = new Conversation();
-    var request = new CompletionRequestProvider(conversation)
-        .buildCustomOpenAIChatCompletionRequest(
-            customConfiguration,
-            new CallParameters(conversation, new Message("Hello!")));
-    CompletionRequestService.getInstance()
-        .getCustomOpenAIChatCompletionAsync(request, new TestConnectionEventListener());
-  }
-
-  class TestConnectionEventListener implements CompletionEventListener<String> {
-
-    @Override
-    public void onMessage(String value, EventSource eventSource) {
-      if (value != null && !value.isEmpty()) {
-        SwingUtilities.invokeLater(() -> {
-          OverlayUtil.showBalloon(
-              CodeGPTBundle.get("settingsConfigurable.service.custom.openai.connectionSuccess"),
-              MessageType.INFO,
-              testConnectionButton);
-          eventSource.cancel();
-        });
-      }
-    }
-
-    @Override
-    public void onError(ErrorDetails error, Throwable ex) {
-      SwingUtilities.invokeLater(() ->
-          OverlayUtil.showBalloon(
-              CodeGPTBundle.get("settingsConfigurable.service.custom.openai.connectionFailed")
-                  + "\n\n"
-                  + error.getMessage(),
-              MessageType.ERROR,
-              testConnectionButton));
     }
   }
 }

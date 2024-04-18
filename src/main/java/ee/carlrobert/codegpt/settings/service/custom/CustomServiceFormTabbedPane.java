@@ -18,12 +18,13 @@ class CustomServiceFormTabbedPane extends JBTabbedPane {
   private final JBTable headersTable;
   private final JBTable bodyTable;
 
-  CustomServiceFormTabbedPane(CustomServiceSettingsState customConfiguration) {
+  CustomServiceFormTabbedPane(Map<String, String> headers, Map<String, ?> body) {
     headersTable = new JBTable(
-        new DefaultTableModel(toArray(customConfiguration.getHeaders()),
+        new DefaultTableModel(toArray(headers),
             new Object[]{"Key", "Value"}));
+
     bodyTable = new JBTable(
-        new DefaultTableModel(toArray(customConfiguration.getBody()),
+        new DefaultTableModel(toArray(body),
             new Object[]{"Key", "Value"}));
 
     setTabComponentInsets(JBUI.insetsTop(8));
@@ -46,11 +47,11 @@ class CustomServiceFormTabbedPane extends JBTabbedPane {
         .collect(toMap(Entry::getKey, entry -> (String) entry.getValue()));
   }
 
-  public void setBody(Map<String, ?> body) {
+  public void setBody(Map<String, Object> body) {
     setTableData(bodyTable, body);
   }
 
-  public Map<String, ?> getBody() {
+  public Map<String, Object> getBody() {
     return getTableData(bodyTable);
   }
 

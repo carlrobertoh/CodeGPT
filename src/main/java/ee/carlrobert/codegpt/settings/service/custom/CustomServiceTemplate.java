@@ -87,14 +87,14 @@ public enum CustomServiceTemplate {
   private final String docsUrl;
   private final String url;
   private final Map<String, String> headers;
-  private final Map<String, ?> body;
+  private final Map<String, Object> body;
 
   CustomServiceTemplate(
       String name,
       String docsUrl,
       String url,
       Map<String, String> headers,
-      Map<String, ?> body) {
+      Map<String, Object> body) {
     this.name = name;
     this.docsUrl = docsUrl;
     this.url = url;
@@ -118,7 +118,7 @@ public enum CustomServiceTemplate {
     return headers;
   }
 
-  public Map<String, ?> getBody() {
+  public Map<String, Object> getBody() {
     return body;
   }
 
@@ -147,7 +147,7 @@ public enum CustomServiceTemplate {
     return defaultHeaders;
   }
 
-  private static Map<String, ?> getDefaultBodyParams(Map<String, ?> additionalParams) {
+  private static Map<String, Object> getDefaultBodyParams(Map<String, ?> additionalParams) {
     var defaultParams = new HashMap<String, Object>(Map.of(
         "stream", true,
         "messages", "$OPENAI_MESSAGES",
