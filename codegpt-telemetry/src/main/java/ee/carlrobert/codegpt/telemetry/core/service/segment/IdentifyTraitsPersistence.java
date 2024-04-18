@@ -28,9 +28,9 @@ public class IdentifyTraitsPersistence {
     public static final IdentifyTraitsPersistence INSTANCE = new IdentifyTraitsPersistence();
     private static final Logger LOGGER = Logger.getInstance(IdentifyTraitsPersistence.class);
 
-    private static final Path FILE = Directories.PATH.resolve("segment-identify-traits.json");
+    static Path FILE = Directories.PATH.resolve("segment-identify-traits.json");
 
-    private IdentifyTraits identifyTraits = null;
+    IdentifyTraits identifyTraits = null;
     private Gson gson = new Gson();
 
     protected IdentifyTraitsPersistence() {}
@@ -42,23 +42,23 @@ public class IdentifyTraitsPersistence {
         return identifyTraits;
     }
 
-    public synchronized void set(IdentifyTraits identifyTraits) {
+    public synchronized boolean set(IdentifyTraits identifyTraits) {
         if (Objects.equals(identifyTraits, this.identifyTraits)) {
-            return;
+            return true;
         }
         this.identifyTraits = identifyTraits;
-        save(serialize(identifyTraits), FILE);
+        return save(serialize(identifyTraits), FILE);
     }
 
-    private String serialize(IdentifyTraits identifyTraits) {
+    String serialize(IdentifyTraits identifyTraits) {
         return identifyTraits == null ? null : gson.toJson(identifyTraits);
     }
 
-    private IdentifyTraits deserialize(String identity) {
+    IdentifyTraits deserialize(String identity) {
         return identity == null ? null : gson.fromJson(identity, IdentifyTraits.class);
     }
 
-    private String load(Path file) {
+    String load(Path file) {
         try(Stream<String> lines = getLines(file)) {
             return lines
                     .filter(l -> !l.isBlank())
@@ -76,13 +76,15 @@ public class IdentifyTraitsPersistence {
         return Files.lines(file);
     }
 
-    private void save(String event, Path file) {
+    boolean save(String event, Path file) {
         try {
             createFileAndParent(file);
             writeFile(event, file);
+            return true;
         } catch (IOException e) {
             LOGGER.warn("Could not write identity to file at " + FILE.toAbsolutePath(), e);
         }
+        return false;
     }
 
     /* for testing purposes */
