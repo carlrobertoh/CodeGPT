@@ -7,7 +7,7 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.intellij.util.xmlb.Converter
 
-abstract class BaseConverter<T> protected constructor(private val typeReference: TypeReference<T>) : Converter<T?>() {
+abstract class BaseConverter<T> protected constructor(private val typeReference: TypeReference<T>) : Converter<T>() {
   private val objectMapper: ObjectMapper = ObjectMapper()
     .registerModule(Jdk8Module())
     .registerModule(JavaTimeModule())
