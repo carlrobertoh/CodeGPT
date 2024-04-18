@@ -123,13 +123,13 @@ public class ConfigurationState {
     if (this == o) {
       return true;
     }
-    if (o == null || getClass() != o.getClass()) {
+    if (!(o instanceof ConfigurationState that)) {
       return false;
     }
-    ConfigurationState that = (ConfigurationState) o;
     return maxTokens == that.maxTokens
-        && Double.compare(that.temperature, temperature) == 0
+        && Double.compare(temperature, that.temperature) == 0
         && checkForPluginUpdates == that.checkForPluginUpdates
+        && checkForNewScreenshots == that.checkForNewScreenshots
         && createNewChatOnEachAction == that.createNewChatOnEachAction
         && ignoreGitCommitTokenLimit == that.ignoreGitCommitTokenLimit
         && methodNameGenerationEnabled == that.methodNameGenerationEnabled
@@ -143,7 +143,8 @@ public class ConfigurationState {
   @Override
   public int hashCode() {
     return Objects.hash(systemPrompt, commitMessagePrompt, maxTokens, temperature,
-        checkForPluginUpdates, createNewChatOnEachAction, ignoreGitCommitTokenLimit,
-        methodNameGenerationEnabled, captureCompileErrors, autoFormattingEnabled, tableData);
+        checkForPluginUpdates, checkForNewScreenshots, createNewChatOnEachAction,
+        ignoreGitCommitTokenLimit, methodNameGenerationEnabled, captureCompileErrors,
+        autoFormattingEnabled, tableData);
   }
 }

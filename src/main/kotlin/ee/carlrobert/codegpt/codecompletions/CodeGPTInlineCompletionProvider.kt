@@ -11,7 +11,6 @@ import ee.carlrobert.codegpt.settings.service.ServiceType
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings
-import ee.carlrobert.codegpt.treesitter.CodeCompletionParserFactory
 import ee.carlrobert.llm.completion.CompletionEventListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
@@ -45,11 +44,12 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
             currentCall.set(
                 CompletionRequestService.getInstance().getCodeCompletionAsync(
                     infillRequest,
-                    CodeCompletionEventListener(infillRequest) {
-                        request.editor.putUserData(CodeGPTKeys.PREVIOUS_INLAY_TEXT, it)
+                    CodeCompletionEventListener {
+                        val inlineText = it.takeWhile { message -> message != '\n' }.toString()
+                        request.editor.putUserData(CodeGPTKeys.PREVIOUS_INLAY_TEXT, inlineText)
                         launch {
                             try {
-                                trySend(InlineCompletionGrayTextElement(it))
+                                trySend(InlineCompletionGrayTextElement(inlineText))
                             } catch (e: Exception) {
                                 LOG.error("Failed to send inline completion suggestion", e)
                             }
@@ -77,19 +77,21 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
     }
 
     class CodeCompletionEventListener(
-        private val requestDetails: InfillRequestDetails,
-        private val completed: (String) -> Unit
+        private val completed: (StringBuilder) -> Unit
     ) : CompletionEventListener<String> {
 
+        override fun onMessage(message: String?, eventSource: EventSource?) {
+            if (message != null && message.contains('\n')) {
+                eventSource?.cancel()
+            }
+        }
+
         override fun onComplete(messageBuilder: StringBuilder) {
-            val processedOutput = CodeCompletionParserFactory
-                .getParserForFileExtension(requestDetails.fileExtension)
-                .parse(
-                    requestDetails.prefix,
-                    requestDetails.suffix,
-                    messageBuilder.toString()
-                )
-            completed(processedOutput)
+            completed(messageBuilder)
+        }
+
+        override fun onCancelled(messageBuilder: StringBuilder) {
+            completed(messageBuilder)
         }
     }
 }

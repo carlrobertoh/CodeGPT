@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.completions;
 
+import static ee.carlrobert.codegpt.completions.ConversationType.FIX_COMPILE_ERRORS;
 import static ee.carlrobert.codegpt.util.file.FileUtil.getResourceContent;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
@@ -144,10 +145,8 @@ public class CompletionRequestProvider {
       promptTemplate = settings.getRemoteModelPromptTemplate();
     }
 
-    var systemPrompt = COMPLETION_SYSTEM_PROMPT;
-    if (conversationType == ConversationType.FIX_COMPILE_ERRORS) {
-      systemPrompt = FIX_COMPILE_ERRORS_SYSTEM_PROMPT;
-    }
+    var systemPrompt = conversationType == FIX_COMPILE_ERRORS
+        ? FIX_COMPILE_ERRORS_SYSTEM_PROMPT : ConfigurationSettings.getSystemPrompt();
 
     var prompt = promptTemplate.buildPrompt(
         systemPrompt,
@@ -209,7 +208,7 @@ public class CompletionRequestProvider {
     request.setModel(settings.getModel());
     request.setMaxTokens(configuration.getMaxTokens());
     request.setStream(true);
-    request.setSystem(COMPLETION_SYSTEM_PROMPT);
+    request.setSystem(ConfigurationSettings.getSystemPrompt());
     List<ClaudeCompletionMessage> messages = conversation.getMessages().stream()
         .filter(prevMessage -> prevMessage.getResponse() != null
             && !prevMessage.getResponse().isEmpty())
@@ -237,9 +236,8 @@ public class CompletionRequestProvider {
     var message = callParameters.getMessage();
     var messages = new ArrayList<OpenAIChatCompletionMessage>();
     if (callParameters.getConversationType() == ConversationType.DEFAULT) {
-      messages.add(new OpenAIChatCompletionStandardMessage(
-          "system",
-          ConfigurationSettings.getCurrentState().getSystemPrompt()));
+      String systemPrompt = ConfigurationSettings.getCurrentState().getSystemPrompt();
+      messages.add(new OpenAIChatCompletionStandardMessage("system", systemPrompt));
     }
     if (callParameters.getConversationType() == ConversationType.FIX_COMPILE_ERRORS) {
       messages.add(

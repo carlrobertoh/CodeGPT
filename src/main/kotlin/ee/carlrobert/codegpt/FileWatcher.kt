@@ -1,29 +1,34 @@
 package ee.carlrobert.codegpt
 
 import com.intellij.openapi.Disposable
-import org.apache.commons.io.monitor.FileAlterationListenerAdaptor
-import org.apache.commons.io.monitor.FileAlterationMonitor
-import org.apache.commons.io.monitor.FileAlterationObserver
-import java.io.File
+import com.intellij.openapi.components.Service
+import java.nio.file.FileSystems
 import java.nio.file.Path
+import java.nio.file.StandardWatchEventKinds.ENTRY_CREATE
+import java.nio.file.WatchKey
+import kotlin.concurrent.thread
 
-class FileWatcher(private val pathToWatch: Path) : Disposable {
 
-    private val fileMonitor =
-        FileAlterationMonitor(500, FileAlterationObserver(pathToWatch.toFile()))
+@Service(Service.Level.PROJECT)
+class FileWatcher : Disposable {
 
-    fun watch(onFileCreated: (File) -> Unit) {
-        val observer = FileAlterationObserver(pathToWatch.toFile())
-        observer.addListener(object : FileAlterationListenerAdaptor() {
-            override fun onFileCreate(file: File) {
-                onFileCreated(file)
+    private var fileMonitor: Thread? = null
+
+    fun watch(pathToWatch: Path, onFileCreated: (Path) -> Unit) {
+        val watchService = FileSystems.getDefault().newWatchService()
+        pathToWatch.register(watchService, ENTRY_CREATE) // watch for new files
+        fileMonitor = thread {
+            var key: WatchKey
+            while ((watchService.take().also { key = it }) != null) {
+                for (event in key.pollEvents()) {
+                    onFileCreated(event.context() as Path)
+                }
+                key.reset()
             }
-        })
-        fileMonitor.addObserver(observer)
-        fileMonitor.start()
+        }
     }
 
     override fun dispose() {
-        fileMonitor.stop()
+        fileMonitor?.interrupt()
     }
 }

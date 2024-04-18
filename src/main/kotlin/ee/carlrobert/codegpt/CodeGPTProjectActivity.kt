@@ -3,9 +3,9 @@ package ee.carlrobert.codegpt
 import com.intellij.notification.NotificationAction
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.startup.ProjectActivity
-import com.intellij.openapi.util.Disposer
 import ee.carlrobert.codegpt.actions.editor.EditorActionsUtil
 import ee.carlrobert.codegpt.completions.you.YouUserManager
 import ee.carlrobert.codegpt.completions.you.auth.AuthenticationHandler
@@ -19,9 +19,13 @@ import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
 import ee.carlrobert.codegpt.settings.service.you.YouSettings
 import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.AttachImageNotifier
 import ee.carlrobert.codegpt.ui.OverlayUtil
+import io.ktor.util.*
 import java.nio.file.Paths
+import kotlin.io.path.absolutePathString
 
 class CodeGPTProjectActivity : ProjectActivity {
+
+    private val watchExtensions = listOf("jpg", "jpeg", "png")
 
     override suspend fun execute(project: Project) {
         EditorActionsUtil.refreshActions()
@@ -34,14 +38,13 @@ class CodeGPTProjectActivity : ProjectActivity {
         if (!ApplicationManager.getApplication().isUnitTestMode
             && ConfigurationSettings.getCurrentState().isCheckForNewScreenshots
         ) {
-            val pathToWatch = Paths.get(System.getProperty("user.home"), "Desktop")
-            val fileWatcher = FileWatcher(pathToWatch)
-            fileWatcher.watch {
-                if (listOf("jpg", "jpeg", "png").contains(it.extension)) {
-                    showImageAttachmentNotification(project, it.absolutePath)
+            val desktopPath = Paths.get(System.getProperty("user.home"), "Desktop")
+            project.service<FileWatcher>()
+                .watch(desktopPath) {
+                    if (watchExtensions.contains(it.extension.lowercase())) {
+                        showImageAttachmentNotification(project, desktopPath.resolve(it).absolutePathString())
+                    }
                 }
-            }
-            Disposer.register(project, fileWatcher)
         }
     }
 
