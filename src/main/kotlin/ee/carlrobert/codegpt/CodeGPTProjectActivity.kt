@@ -38,10 +38,11 @@ class CodeGPTProjectActivity : ProjectActivity {
         if (!ApplicationManager.getApplication().isUnitTestMode
             && ConfigurationSettings.getCurrentState().isCheckForNewScreenshots
         ) {
+            val desktopPath = Paths.get(System.getProperty("user.home"), "Desktop")
             project.service<FileWatcher>()
-                .watch(Paths.get(System.getProperty("user.home"), "Desktop")) {
+                .watch(desktopPath) {
                     if (watchExtensions.contains(it.extension.lowercase())) {
-                        showImageAttachmentNotification(project, it.absolutePathString())
+                        showImageAttachmentNotification(project, desktopPath.resolve(it).absolutePathString())
                     }
                 }
         }
