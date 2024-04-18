@@ -46,7 +46,6 @@ import ee.carlrobert.llm.client.openai.completion.request.OpenAIMessageImageURLC
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIMessageTextContent;
 import ee.carlrobert.llm.client.you.completion.YouCompletionRequest;
 import ee.carlrobert.llm.client.you.completion.YouCompletionRequestMessage;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -56,7 +55,6 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Stream;
-
 import okhttp3.Request;
 import org.jetbrains.annotations.Nullable;
 

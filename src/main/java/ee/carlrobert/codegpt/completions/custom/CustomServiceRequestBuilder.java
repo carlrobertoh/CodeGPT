@@ -1,21 +1,20 @@
 package ee.carlrobert.codegpt.completions.custom;
 
+import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.CUSTOM_SERVICE_API_KEY;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.codegpt.codecompletions.InfillRequestDetails;
 import ee.carlrobert.codegpt.credentials.CredentialsStore;
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettingsState;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.CUSTOM_SERVICE_API_KEY;
+import okhttp3.Request;
+import okhttp3.RequestBody;
 
 public class CustomServiceRequestBuilder {
   public static Request buildCompletionRequest(

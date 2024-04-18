@@ -4,7 +4,6 @@ import static ee.carlrobert.codegpt.settings.service.custom.CustomServiceTemplat
 
 import com.intellij.util.xmlb.annotations.OptionTag;
 import ee.carlrobert.codegpt.util.MapConverter;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;

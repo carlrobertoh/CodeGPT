@@ -41,7 +41,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-
 import okhttp3.Request;
 import okhttp3.sse.EventSource;
 import okhttp3.sse.EventSources;
@@ -122,7 +121,7 @@ public final class CompletionRequestService {
             CustomServiceRequestBuilder.buildCompletionRequest(
                 CustomServiceSettings.getCurrentState(),
                 requestDetails),
-          new OpenAITextCompletionEventSourceListener(eventListener));
+            new OpenAITextCompletionEventSourceListener(eventListener));
       case LLAMA_CPP -> CompletionClientProvider.getLlamaClient()
           .getChatCompletionAsync(
               CodeCompletionRequestFactory.INSTANCE.buildLlamaRequest(requestDetails),

@@ -1,5 +1,7 @@
 package ee.carlrobert.codegpt.settings.service.custom;
 
+import static ee.carlrobert.codegpt.ui.UIUtil.withEmptyLeftBorder;
+
 import com.intellij.openapi.ui.MessageType;
 import com.intellij.ui.TitledSeparator;
 import com.intellij.ui.components.JBTextField;
@@ -10,13 +12,12 @@ import ee.carlrobert.codegpt.completions.CompletionRequestService;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.completion.CompletionEventListener;
-import okhttp3.sse.EventSource;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
 import java.util.Map;
-
-import static ee.carlrobert.codegpt.ui.UIUtil.withEmptyLeftBorder;
+import javax.swing.JButton;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+import okhttp3.sse.EventSource;
 
 public class CustomServiceCompletionsForm {
 

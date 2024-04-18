@@ -15,13 +15,11 @@ import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.credentials.CredentialsStore;
 import ee.carlrobert.codegpt.settings.service.CodeCompletionConfigurationForm;
 import ee.carlrobert.codegpt.ui.UIUtil;
-
 import java.awt.FlowLayout;
 import java.net.MalformedURLException;
 import java.net.URL;
 import javax.swing.Box;
 import javax.swing.JPanel;
-
 import org.jetbrains.annotations.Nullable;
 
 public class CustomServiceForm {
@@ -35,8 +33,10 @@ public class CustomServiceForm {
   private final CodeCompletionConfigurationForm codeCompletionConfigurationForm;
 
   public CustomServiceForm(CustomServiceSettingsState settings) {
-    chatCompletionsForm = new CustomServiceChatCompletionsForm(settings.getChatCompletionSettings());
-    completionsForm = new CustomServiceCompletionsForm(settings.getCompletionSettings());
+    chatCompletionsForm = new CustomServiceChatCompletionsForm(
+        settings.getChatCompletionSettings());
+    completionsForm = new CustomServiceCompletionsForm(
+        settings.getCompletionSettings());
 
     apiKeyField = new JBPasswordField();
     apiKeyField.setColumns(30);
