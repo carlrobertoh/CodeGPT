@@ -77,7 +77,7 @@ public class EditorActionsUtil {
         group.add(action);
       });
       group.addSeparator();
-      group.add(new IncludeFilesInContextAction());
+      group.add(new IncludeFilesInContextAction("action.includeFileInContext.title"));
     }
   }
 

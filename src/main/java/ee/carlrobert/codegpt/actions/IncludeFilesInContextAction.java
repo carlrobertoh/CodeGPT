@@ -52,6 +52,10 @@ public class IncludeFilesInContextAction extends AnAction {
     super(CodeGPTBundle.get("action.includeFilesInContext.title"));
   }
 
+  public IncludeFilesInContextAction(String customTitleKey) {
+    super(CodeGPTBundle.get(customTitleKey));
+  }
+
   @Override
   public void actionPerformed(@NotNull AnActionEvent e) {
     var project = e.getProject();
