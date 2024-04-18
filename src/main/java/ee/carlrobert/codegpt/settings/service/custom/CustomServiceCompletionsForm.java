@@ -82,7 +82,7 @@ public class CustomServiceCompletionsForm {
     var request = CompletionRequestProvider
         .buildCustomOpenAICompletionRequest("Hello!");
     CompletionRequestService.getInstance()
-        .getCustomOpenAIChatCompletionAsync(request, new TestConnectionEventListener());
+        .getCustomOpenAICompletionAsync(request, new TestConnectionEventListener());
   }
 
   class TestConnectionEventListener implements CompletionEventListener<String> {

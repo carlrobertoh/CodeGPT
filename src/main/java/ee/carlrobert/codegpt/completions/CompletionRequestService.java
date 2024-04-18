@@ -12,6 +12,7 @@ import com.intellij.openapi.components.Service;
 import com.intellij.openapi.diagnostic.Logger;
 import ee.carlrobert.codegpt.codecompletions.CodeCompletionRequestFactory;
 import ee.carlrobert.codegpt.codecompletions.InfillRequestDetails;
+import ee.carlrobert.codegpt.completions.custom.CustomServiceRequestBuilder;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
 import ee.carlrobert.codegpt.credentials.CredentialsStore;
@@ -29,6 +30,7 @@ import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionRequest;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionStandardMessage;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionEventSourceListener;
+import ee.carlrobert.llm.client.openai.completion.OpenAITextCompletionEventSourceListener;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionStandardMessage;
 import ee.carlrobert.llm.client.openai.completion.response.OpenAIChatCompletionResponse;
@@ -39,6 +41,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+
 import okhttp3.Request;
 import okhttp3.sse.EventSource;
 import okhttp3.sse.EventSources;
@@ -53,6 +56,15 @@ public final class CompletionRequestService {
 
   public static CompletionRequestService getInstance() {
     return ApplicationManager.getApplication().getService(CompletionRequestService.class);
+  }
+
+  public EventSource getCustomOpenAICompletionAsync(
+      Request customRequest,
+      CompletionEventListener<String> eventListener) {
+    var httpClient = CompletionClientProvider.getDefaultClientBuilder().build();
+    return EventSources.createFactory(httpClient).newEventSource(
+        customRequest,
+        new OpenAITextCompletionEventSourceListener(eventListener));
   }
 
   public EventSource getCustomOpenAIChatCompletionAsync(
@@ -100,11 +112,18 @@ public final class CompletionRequestService {
   public EventSource getCodeCompletionAsync(
       InfillRequestDetails requestDetails,
       CompletionEventListener<String> eventListener) {
+    var httpClient = CompletionClientProvider.getDefaultClientBuilder().build();
     return switch (GeneralSettings.getCurrentState().getSelectedService()) {
       case OPENAI -> CompletionClientProvider.getOpenAIClient()
           .getCompletionAsync(
               CodeCompletionRequestFactory.INSTANCE.buildOpenAIRequest(requestDetails),
               eventListener);
+      case CUSTOM_OPENAI ->
+          EventSources.createFactory(httpClient).newEventSource(
+            CustomServiceRequestBuilder.buildCompletionRequest(
+                CustomServiceSettings.getCurrentState(),
+                requestDetails),
+          new OpenAITextCompletionEventSourceListener(eventListener));
       case LLAMA_CPP -> CompletionClientProvider.getLlamaClient()
           .getChatCompletionAsync(
               CodeCompletionRequestFactory.INSTANCE.buildLlamaRequest(requestDetails),
@@ -133,9 +152,12 @@ public final class CompletionRequestService {
       case CUSTOM_OPENAI:
         var httpClient = CompletionClientProvider.getDefaultClientBuilder().build();
         EventSources.createFactory(httpClient).newEventSource(
-            CompletionRequestProvider.buildCustomOpenAICompletionRequest(
-                commitMessagePrompt,
-                prompt),
+            CustomServiceRequestBuilder.buildChatCompletionRequest(
+                CustomServiceSettings.getCurrentState(),
+                List.of(
+                    new OpenAIChatCompletionStandardMessage("system", commitMessagePrompt),
+                    new OpenAIChatCompletionStandardMessage("user", prompt))
+            ),
             new OpenAIChatCompletionEventSourceListener(eventListener));
         break;
       case ANTHROPIC:
