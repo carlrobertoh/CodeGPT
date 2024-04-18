@@ -1,0 +1,213 @@
+package ee.carlrobert.codegpt.util.file
+
+import com.fasterxml.jackson.core.JsonProcessingException
+import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.fileEditor.FileDocumentManager
+import com.intellij.openapi.progress.ProgressIndicator
+import com.intellij.openapi.vfs.VirtualFile
+import ee.carlrobert.codegpt.CodeGPTPlugin
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.Writer
+import java.net.URL
+import java.nio.ByteBuffer
+import java.nio.channels.Channels
+import java.nio.charset.StandardCharsets
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
+import java.nio.file.StandardOpenOption
+import java.text.DecimalFormat
+import java.util.Objects
+import java.util.Optional
+import java.util.regex.Pattern
+
+object FileUtil {
+  private val LOG = Logger.getInstance(FileUtil::class.java)
+
+  @JvmStatic
+  fun createFile(directoryPath: String, fileName: String?, fileContent: String?): File {
+    try {
+      tryCreateDirectory(directoryPath)
+      return Files.writeString(
+        Path.of(directoryPath, fileName),
+        fileContent,
+        StandardOpenOption.CREATE
+      ).toFile()
+    } catch (e: IOException) {
+      throw RuntimeException("Failed to create file", e)
+    }
+  }
+
+  @JvmStatic
+  @Throws(IOException::class)
+  fun copyFileWithProgress(
+    fileName: String,
+    url: URL,
+    bytesRead: LongArray,
+    fileSize: Long,
+    indicator: ProgressIndicator
+  ) {
+    tryCreateDirectory(CodeGPTPlugin.getLlamaModelsPath())
+
+    Channels.newChannel(url.openStream()).use { readableByteChannel ->
+      FileOutputStream(
+        CodeGPTPlugin.getLlamaModelsPath() + File.separator + fileName
+      ).use { fileOutputStream ->
+        val buffer = ByteBuffer.allocateDirect(1024 * 10)
+        while (readableByteChannel.read(buffer) != -1) {
+          if (indicator.isCanceled) {
+            readableByteChannel.close()
+            break
+          }
+          buffer.flip()
+          bytesRead[0] += fileOutputStream.channel.write(buffer).toLong()
+          buffer.clear()
+          indicator.fraction = bytesRead[0].toDouble() / fileSize
+        }
+      }
+    }
+  }
+
+  @JvmStatic
+  fun getEditorFile(editor: Editor): VirtualFile? {
+    return FileDocumentManager.getInstance().getFile(editor.document)
+  }
+
+  private fun tryCreateDirectory(directoryPath: String) {
+    try {
+      if (!com.intellij.openapi.util.io.FileUtil.exists(directoryPath)) {
+        if (!com.intellij.openapi.util.io.FileUtil.createDirectory(
+            Path.of(directoryPath).toFile()
+          )
+        ) {
+          throw IOException("Failed to create directory: $directoryPath")
+        }
+      }
+    } catch (e: IOException) {
+      throw RuntimeException("Failed to create directory", e)
+    }
+  }
+
+
+  @JvmStatic
+  fun getFileExtension(filename: String?): String {
+    val pattern = Pattern.compile("[^.]+$")
+    val matcher = filename?.let { pattern.matcher(it) }
+
+    if (matcher?.find() == true) {
+      return matcher.group()
+    }
+    return ""
+  }
+
+  @JvmStatic
+  fun findLanguageExtensionMapping(language: String): Map.Entry<String, String> {
+    val defaultValue = mapOf("Text" to ".txt").entries.first()
+    val mapper = ObjectMapper()
+
+    val extensionToLanguageMappings: List<FileExtensionLanguageDetails>
+    val languageToExtensionMappings: List<LanguageFileExtensionDetails>
+    try {
+      extensionToLanguageMappings = mapper.readValue(
+        getResourceContent("/fileExtensionLanguageMappings.json"),
+        object : TypeReference<List<FileExtensionLanguageDetails>>() {
+        })
+      languageToExtensionMappings = mapper.readValue(
+        getResourceContent("/languageFileExtensionMappings.json"),
+        object : TypeReference<List<LanguageFileExtensionDetails>>() {
+        })
+    } catch (e: JsonProcessingException) {
+      LOG.error("Unable to extract file extension", e)
+      return defaultValue
+    }
+
+    return findFirstExtension(languageToExtensionMappings, language)
+      .or {
+        extensionToLanguageMappings.stream()
+          .filter { it.extension.equals(language, ignoreCase = true) }
+          .findFirst()
+          .flatMap { findFirstExtension(languageToExtensionMappings, it.value) }
+      }.orElse(defaultValue)
+  }
+
+  fun isUtf8File(filePath: String?): Boolean {
+    val path = filePath?.let { Paths.get(it) }
+    try {
+      Files.newBufferedReader(path).use { reader ->
+        val c = reader.read()
+        if (c >= 0) {
+          reader.transferTo(Writer.nullWriter())
+        }
+        return true
+      }
+    } catch (e: Exception) {
+      return false
+    }
+  }
+
+  @JvmStatic
+  fun getImageMediaType(fileName: String?): String {
+    return when (val fileExtension = getFileExtension(fileName)) {
+      "png" -> "image/png"
+      "jpg", "jpeg" -> "image/jpeg"
+      else -> throw IllegalArgumentException("Unsupported image type: $fileExtension")
+    }
+  }
+
+  @JvmStatic
+  fun getResourceContent(name: String?): String {
+    try {
+      Objects.requireNonNull(name?.let { FileUtil::class.java.getResourceAsStream(it) }).use { stream ->
+        return String(stream.readAllBytes(), StandardCharsets.UTF_8)
+      }
+    } catch (e: IOException) {
+      throw RuntimeException("Unable to read resource", e)
+    }
+  }
+
+  @JvmStatic
+  fun convertFileSize(fileSizeInBytes: Long): String {
+    val units = arrayOf("B", "KB", "MB", "GB")
+    var unitIndex = 0
+    var fileSize = fileSizeInBytes.toDouble()
+
+    while (fileSize >= 1024 && unitIndex < units.size - 1) {
+      fileSize /= 1024.0
+      unitIndex++
+    }
+
+    return DecimalFormat("#.##").format(fileSize) + " " + units[unitIndex]
+  }
+
+  @JvmStatic
+  fun convertLongValue(value: Long): String {
+    if (value >= 1000000) {
+      return (value / 1000000).toString() + "M"
+    }
+    if (value >= 1000) {
+      return (value / 1000).toString() + "K"
+    }
+
+    return value.toString()
+  }
+
+  @JvmStatic
+  fun findFirstExtension(
+    languageFileExtensionMappings: List<LanguageFileExtensionDetails>,
+    language: String
+  ): Optional<Map.Entry<String, String>> {
+    return languageFileExtensionMappings.stream()
+      .filter { language.equals(it.name, ignoreCase = true)
+              && it.extensions != null
+              && it.extensions.stream().anyMatch(String::isNotBlank) }
+      .findFirst()
+      .map { java.util.Map.entry(it.name,
+        it.extensions?.stream()?.filter(String::isNotBlank)?.findFirst()?.orElse("") ?: ""
+      ) }
+  }
+}
