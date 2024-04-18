@@ -49,7 +49,7 @@ public class IncludeFilesInContextAction extends AnAction {
   private static final Logger LOG = Logger.getInstance(IncludeFilesInContextAction.class);
 
   public IncludeFilesInContextAction() {
-    super(CodeGPTBundle.get("action.includeFilesInContext.title"));
+    this("action.includeFilesInContext.title");
   }
 
   public IncludeFilesInContextAction(String customTitleKey) {

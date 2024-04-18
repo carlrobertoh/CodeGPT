@@ -31,6 +31,7 @@ public class IdentifyTraitsPersistence {
     private static final Path FILE = Directories.PATH.resolve("segment-identify-traits.json");
 
     private IdentifyTraits identifyTraits = null;
+    private Gson gson = new Gson();
 
     protected IdentifyTraitsPersistence() {}
 
@@ -46,31 +47,20 @@ public class IdentifyTraitsPersistence {
             return;
         }
         this.identifyTraits = identifyTraits;
-        String string = null;
-        if (identifyTraits != null) {
-            string = serialize(identifyTraits);
-        }
-        save(string, FILE);
+        save(serialize(identifyTraits), FILE);
     }
 
     private String serialize(IdentifyTraits identifyTraits) {
-        if (identifyTraits == null) {
-            return null;
-        }
-        return new Gson().toJson(identifyTraits);
+        return identifyTraits == null ? null : gson.toJson(identifyTraits);
     }
 
     private IdentifyTraits deserialize(String identity) {
-        if (identity == null) {
-            return null;
-        }
-        return new Gson().fromJson(identity, IdentifyTraits.class);
+        return identity == null ? null : gson.fromJson(identity, IdentifyTraits.class);
     }
 
     private String load(Path file) {
-        String event = null;
         try(Stream<String> lines = getLines(file)) {
-            event = lines
+            return lines
                     .filter(l -> !l.isBlank())
                     .findAny()
                     .map(String::trim)
@@ -78,7 +68,7 @@ public class IdentifyTraitsPersistence {
         } catch (IOException e) {
             LOGGER.warn("Could not read identity file at " + file.toAbsolutePath(), e);
         }
-        return event;
+        return null;
     }
 
     /* for testing purposes */
