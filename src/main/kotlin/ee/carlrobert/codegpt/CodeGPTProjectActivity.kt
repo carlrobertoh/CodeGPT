@@ -19,9 +19,13 @@ import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
 import ee.carlrobert.codegpt.settings.service.you.YouSettings
 import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.AttachImageNotifier
 import ee.carlrobert.codegpt.ui.OverlayUtil
+import io.ktor.util.*
 import java.nio.file.Paths
+import kotlin.io.path.absolutePathString
 
 class CodeGPTProjectActivity : StartupActivity.Background {
+
+    private val watchExtensions = listOf("jpg", "jpeg", "png")
 
     override fun runActivity(project: Project) {
         EditorActionsUtil.refreshActions()
@@ -34,10 +38,14 @@ class CodeGPTProjectActivity : StartupActivity.Background {
         if (!ApplicationManager.getApplication().isUnitTestMode
             && ConfigurationSettings.getCurrentState().isCheckForNewScreenshots
         ) {
+            val desktopPath = Paths.get(System.getProperty("user.home"), "Desktop")
             project.service<FileWatcher>()
-                .watch(Paths.get(System.getProperty("user.home"), "Desktop").toFile()) {
-                    if (listOf("jpg", "jpeg", "png").contains(it.extension)) {
-                        showImageAttachmentNotification(project, it.absolutePath)
+                .watch(desktopPath) {
+                    if (watchExtensions.contains(it.extension.lowercase())) {
+                        showImageAttachmentNotification(
+                            project,
+                            desktopPath.resolve(it).absolutePathString()
+                        )
                     }
                 }
         }
