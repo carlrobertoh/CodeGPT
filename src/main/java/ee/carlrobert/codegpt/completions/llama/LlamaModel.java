@@ -91,7 +91,7 @@ public enum LlamaModel {
           + " open source chat models on common industry benchmarks. Further, in developing these "
           + "models, we took great care to optimize helpfulness and safety.",
       PromptTemplate.LLAMA,
-      InfillPromptTemplate.LLAMA,
+      InfillPromptTemplate.LLAMA_3,
       List.of(
           HuggingFaceModel.LLAMA_3_8B_Q2_K,
           HuggingFaceModel.LLAMA_3_8B_Q3_K_L,
