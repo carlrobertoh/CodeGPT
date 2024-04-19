@@ -4,4 +4,5 @@ plugins {
 
 dependencies {
     implementation(libs.analytics)
+    implementation(libs.gson)
 }
