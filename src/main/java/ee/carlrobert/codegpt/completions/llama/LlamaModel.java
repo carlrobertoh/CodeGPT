@@ -93,18 +93,9 @@ public enum LlamaModel {
       PromptTemplate.LLAMA,
       InfillPromptTemplate.LLAMA_3,
       List.of(
-          HuggingFaceModel.LLAMA_3_8B_Q2_K,
-          HuggingFaceModel.LLAMA_3_8B_Q3_K_L,
-          HuggingFaceModel.LLAMA_3_8B_Q3_K_M,
-          HuggingFaceModel.LLAMA_3_8B_Q3_K_S,
-          HuggingFaceModel.LLAMA_3_8B_Q4_0,
-          HuggingFaceModel.LLAMA_3_8B_Q4_1,
+          HuggingFaceModel.LLAMA_3_8B_IQ3_M,
           HuggingFaceModel.LLAMA_3_8B_Q4_K_M,
-          HuggingFaceModel.LLAMA_3_8B_Q4_K_S,
-          HuggingFaceModel.LLAMA_3_8B_Q5_0,
-          HuggingFaceModel.LLAMA_3_8B_Q5_1,
           HuggingFaceModel.LLAMA_3_8B_Q5_K_M,
-          HuggingFaceModel.LLAMA_3_8B_Q5_K_S,
           HuggingFaceModel.LLAMA_3_8B_Q6_K,
           HuggingFaceModel.LLAMA_3_8B_Q8_0));
 

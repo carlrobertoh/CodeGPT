@@ -45,20 +45,11 @@ public enum HuggingFaceModel {
   WIZARD_CODER_PYTHON_34B_Q4(34, 4, "WizardCoder-Python-34B-V1.0-GGUF"),
   WIZARD_CODER_PYTHON_34B_Q5(34, 5, "WizardCoder-Python-34B-V1.0-GGUF"),
 
-  LLAMA_3_8B_Q2_K(8, 2, "Meta-Llama-3-8B-Instruct.Q2_K.gguf", "QuantFactory"),
-  LLAMA_3_8B_Q3_K_L(8, 3, "Meta-Llama-3-8B-Instruct.Q3_K_L.gguf", "QuantFactory"),
-  LLAMA_3_8B_Q3_K_M(8, 3, "Meta-Llama-3-8B-Instruct.Q3_K_M.gguf", "QuantFactory"),
-  LLAMA_3_8B_Q3_K_S(8, 3, "Meta-Llama-3-8B-Instruct.Q3_K_S.gguf", "QuantFactory"),
-  LLAMA_3_8B_Q4_0(8, 4, "Meta-Llama-3-8B-Instruct.Q4_0.gguf", "QuantFactory"),
-  LLAMA_3_8B_Q4_1(8, 4, "Meta-Llama-3-8B-Instruct.Q4_1.gguf", "QuantFactory"),
-  LLAMA_3_8B_Q4_K_M(8, 4, "Meta-Llama-3-8B-Instruct.Q4_K_M.gguf", "QuantFactory"),
-  LLAMA_3_8B_Q4_K_S(8, 4, "Meta-Llama-3-8B-Instruct.Q4_K_S.gguf", "QuantFactory"),
-  LLAMA_3_8B_Q5_0(8, 5, "Meta-Llama-3-8B-Instruct.Q5_0.gguf", "QuantFactory"),
-  LLAMA_3_8B_Q5_1(8, 5, "Meta-Llama-3-8B-Instruct.Q5_1.gguf", "QuantFactory"),
-  LLAMA_3_8B_Q5_K_M(8, 5, "Meta-Llama-3-8B-Instruct.Q5_K_M.gguf", "QuantFactory"),
-  LLAMA_3_8B_Q5_K_S(8, 5, "Meta-Llama-3-8B-Instruct.Q5_K_S.gguf", "QuantFactory"),
-  LLAMA_3_8B_Q6_K(8, 6, "Meta-Llama-3-8B-Instruct.Q6_K.gguf", "QuantFactory"),
-  LLAMA_3_8B_Q8_0(8, 8, "Meta-Llama-3-8B-Instruct.Q8_0.gguf", "QuantFactory");
+  LLAMA_3_8B_IQ3_M(8, 3, "Meta-Llama-3-8B-Instruct-IQ3_M.gguf", "lmstudio-community"),
+  LLAMA_3_8B_Q4_K_M(8, 4, "Meta-Llama-3-8B-Instruct-Q4_K_M.gguf", "lmstudio-community"),
+  LLAMA_3_8B_Q5_K_M(8, 5, "Meta-Llama-3-8B-Instruct-Q5_K_M.gguf", "lmstudio-community"),
+  LLAMA_3_8B_Q6_K(8, 6, "Meta-Llama-3-8B-Instruct-Q6_K.gguf", "lmstudio-community"),
+  LLAMA_3_8B_Q8_0(8, 8, "Meta-Llama-3-8B-Instruct-Q8_0.gguf", "lmstudio-community");
 
   private final int parameterSize;
   private final int quantization;
@@ -113,9 +104,9 @@ public enum HuggingFaceModel {
   }
 
   private String getDirectory() {
-    if ("QuantFactory".equals(user)) {
-      // Meta-Llama-3-8B-Instruct.Q4_K_M.gguf -> Meta-Llama-3-8B-Instruct-GGUF
-      return modelName.replaceFirst("\\.[^.]+\\.gguf$", "-GGUF");
+    if ("lmstudio-community".equals(user)) {
+      // Meta-Llama-3-8B-Instruct-Q4_K_M.gguf -> Meta-Llama-3-8B-Instruct-GGUF
+      return modelName.replaceFirst("-[^.-]+\\.gguf$", "-GGUF");
     }
     return modelName;
   }
