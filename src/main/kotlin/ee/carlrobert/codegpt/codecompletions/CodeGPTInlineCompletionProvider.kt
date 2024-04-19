@@ -3,12 +3,13 @@ package ee.carlrobert.codegpt.codecompletions
 import com.intellij.codeInsight.inline.completion.*
 import com.intellij.codeInsight.inline.completion.elements.InlineCompletionGrayTextElement
 import com.intellij.openapi.application.EDT
+import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import ee.carlrobert.codegpt.CodeGPTKeys
 import ee.carlrobert.codegpt.completions.CompletionRequestService
+import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings
 import ee.carlrobert.codegpt.settings.GeneralSettings
 import ee.carlrobert.codegpt.settings.service.ServiceType
-import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings
 import ee.carlrobert.llm.completion.CompletionEventListener
@@ -65,7 +66,7 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
         val selectedService = GeneralSettings.getCurrentState().selectedService
         val codeCompletionsEnabled = when (selectedService) {
             ServiceType.OPENAI -> OpenAISettings.getCurrentState().isCodeCompletionsEnabled
-            ServiceType.CUSTOM_OPENAI -> CustomServiceSettings.getCurrentState().isCodeCompletionsEnabled
+            ServiceType.CUSTOM_OPENAI -> service<CustomServiceSettings>().state.codeCompletionSettings.codeCompletionsEnabled
             ServiceType.LLAMA_CPP -> LlamaSettings.getCurrentState().isCodeCompletionsEnabled
             else -> false
         }

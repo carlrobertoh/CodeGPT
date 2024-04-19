@@ -82,7 +82,10 @@ public class ModelComboBoxAction extends ComboBoxAction {
     actionGroup.addSeparator("Custom OpenAI Service");
     actionGroup.add(createModelAction(
         CUSTOM_OPENAI,
-        CustomServiceSettings.getCurrentState().getTemplate().getName(),
+        ApplicationManager.getApplication().getService(CustomServiceSettings.class)
+            .getState()
+            .getTemplate()
+            .getProviderName(),
         Icons.OpenAI,
         presentation));
     actionGroup.addSeparator();
@@ -150,9 +153,11 @@ public class ModelComboBoxAction extends ComboBoxAction {
         break;
       case CUSTOM_OPENAI:
         templatePresentation.setIcon(Icons.OpenAI);
-        templatePresentation.setText(CustomServiceSettings.getCurrentState()
-            .getTemplate()
-            .getName());
+        templatePresentation.setText(
+            ApplicationManager.getApplication().getService(CustomServiceSettings.class)
+                .getState()
+                .getTemplate()
+                .getProviderName());
         break;
       case ANTHROPIC:
         templatePresentation.setIcon(Icons.Anthropic);

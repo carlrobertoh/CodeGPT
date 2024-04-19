@@ -12,7 +12,6 @@ import com.intellij.openapi.components.Service;
 import com.intellij.openapi.diagnostic.Logger;
 import ee.carlrobert.codegpt.codecompletions.CodeCompletionRequestFactory;
 import ee.carlrobert.codegpt.codecompletions.InfillRequestDetails;
-import ee.carlrobert.codegpt.completions.custom.CustomServiceRequestBuilder;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
 import ee.carlrobert.codegpt.credentials.CredentialsStore;
@@ -87,7 +86,10 @@ public final class CompletionRequestService {
           eventListener);
       case CUSTOM_OPENAI -> getCustomOpenAIChatCompletionAsync(
           requestProvider.buildCustomOpenAIChatCompletionRequest(
-              CustomServiceSettings.getCurrentState(),
+              ApplicationManager.getApplication()
+                  .getService(CustomServiceSettings.class)
+                  .getState()
+                  .getChatCompletionSettings(),
               callParameters),
           eventListener);
       case ANTHROPIC -> CompletionClientProvider.getClaudeClient().getCompletionAsync(
@@ -114,17 +116,14 @@ public final class CompletionRequestService {
     return switch (GeneralSettings.getCurrentState().getSelectedService()) {
       case OPENAI -> CompletionClientProvider.getOpenAIClient()
           .getCompletionAsync(
-              CodeCompletionRequestFactory.INSTANCE.buildOpenAIRequest(requestDetails),
+              CodeCompletionRequestFactory.buildOpenAIRequest(requestDetails),
               eventListener);
-      case CUSTOM_OPENAI ->
-          EventSources.createFactory(httpClient).newEventSource(
-            CustomServiceRequestBuilder.buildCompletionRequest(
-                CustomServiceSettings.getCurrentState(),
-                requestDetails),
-            new OpenAITextCompletionEventSourceListener(eventListener));
+      case CUSTOM_OPENAI -> EventSources.createFactory(httpClient).newEventSource(
+          CodeCompletionRequestFactory.buildCustomRequest(requestDetails),
+          new OpenAITextCompletionEventSourceListener(eventListener));
       case LLAMA_CPP -> CompletionClientProvider.getLlamaClient()
           .getChatCompletionAsync(
-              CodeCompletionRequestFactory.INSTANCE.buildLlamaRequest(requestDetails),
+              CodeCompletionRequestFactory.buildLlamaRequest(requestDetails),
               eventListener);
       default ->
           throw new IllegalArgumentException("Code completion not supported for selected service");
@@ -150,12 +149,9 @@ public final class CompletionRequestService {
       case CUSTOM_OPENAI:
         var httpClient = CompletionClientProvider.getDefaultClientBuilder().build();
         EventSources.createFactory(httpClient).newEventSource(
-            CustomServiceRequestBuilder.buildChatCompletionRequest(
-                CustomServiceSettings.getCurrentState(),
-                List.of(
-                    new OpenAIChatCompletionStandardMessage("system", systemPrompt),
-                    new OpenAIChatCompletionStandardMessage("user", gitDiff))
-            ),
+            CompletionRequestProvider.buildCustomOpenAICompletionRequest(
+                systemPrompt,
+                gitDiff),
             new OpenAIChatCompletionEventSourceListener(eventListener));
         break;
       case ANTHROPIC:
