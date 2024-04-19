@@ -58,7 +58,7 @@ public enum PromptTemplate {
   LLAMA_3("Llama 3") {
     @Override
     public String buildPrompt(String systemPrompt, String userPrompt, List<Message> history) {
-      StringBuilder prompt = new StringBuilder("<|begin_of_text|>");
+      StringBuilder prompt = new StringBuilder();
 
       if (systemPrompt != null && !systemPrompt.isBlank()) {
         prompt.append("<|start_header_id|>system<|end_header_id|>\n\n")
