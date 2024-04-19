@@ -90,7 +90,7 @@ public enum LlamaModel {
           + "tuned models are optimized for dialogue use cases and outperform many of the available"
           + " open source chat models on common industry benchmarks. Further, in developing these "
           + "models, we took great care to optimize helpfulness and safety.",
-      PromptTemplate.LLAMA,
+      PromptTemplate.LLAMA_3,
       InfillPromptTemplate.LLAMA_3,
       List.of(
           HuggingFaceModel.LLAMA_3_8B_IQ3_M,

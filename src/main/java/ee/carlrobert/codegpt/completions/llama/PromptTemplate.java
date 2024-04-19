@@ -55,6 +55,30 @@ public enum PromptTemplate {
           .toString();
     }
   },
+  LLAMA_3("Llama 3") {
+    @Override
+    public String buildPrompt(String systemPrompt, String userPrompt, List<Message> history) {
+      StringBuilder prompt = new StringBuilder("<|begin_of_text|>");
+
+      if (systemPrompt != null && !systemPrompt.isBlank()) {
+        prompt.append("<|start_header_id|>system<|end_header_id|>\n\n")
+            .append(systemPrompt)
+            .append("<|eot_id|>");
+      }
+
+      for (Message message : history) {
+        prompt.append("<|start_header_id|>user<|end_header_id|>\n\n")
+                .append(message.getPrompt())
+                .append("<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n")
+                .append(message.getResponse()).append("<|eot_id|>");
+      }
+
+      return prompt.append("<|start_header_id|>user<|end_header_id|>\n\n")
+          .append(userPrompt)
+          .append("<|eot_id|>")
+          .toString();
+    }
+  },
   MIXTRAL_INSTRUCT("Mixtral Instruct") {
     @Override
     public String buildPrompt(String systemPrompt, String userPrompt, List<Message> history) {
