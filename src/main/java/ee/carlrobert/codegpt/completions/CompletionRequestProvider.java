@@ -25,6 +25,7 @@ import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettings;
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceChatCompletionSettingsState;
+import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings;
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceState;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
@@ -125,14 +126,14 @@ public class CompletionRequestProvider {
 
   public static Request buildCustomOpenAICompletionRequest(String input) {
     return buildCustomOpenAIChatCompletionRequest(
-        ApplicationManager.getApplication().getService(CustomServiceState.class)
+        ApplicationManager.getApplication().getService(CustomServiceSettings.class)
+            .getState()
             .getChatCompletionSettings(),
         List.of(new OpenAIChatCompletionStandardMessage("user", input)),
-        false);
+        true);
   }
 
   public static Request buildCustomOpenAILookupCompletionRequest(String context) {
-
     return buildCustomOpenAIChatCompletionRequest(
         ApplicationManager.getApplication().getService(CustomServiceState.class)
             .getChatCompletionSettings(),
