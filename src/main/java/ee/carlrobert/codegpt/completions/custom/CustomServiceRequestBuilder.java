@@ -22,11 +22,13 @@ public class CustomServiceRequestBuilder {
       List<String> messages) {
     var settings = customConfiguration.getCompletionSettings();
 
+    var body = settings.getBody();
+    body = replacePlaceholder(body, "$OPENAI_MESSAGES", messages);
+
     return buildRequest(
         settings.getUrl(),
         settings.getHeaders(),
-        settings.getBody(),
-        messages,
+        body,
         true);
   }
 
@@ -35,16 +37,15 @@ public class CustomServiceRequestBuilder {
       InfillRequestDetails details) {
     var settings = customConfiguration.getCompletionSettings();
 
-    var body = new HashMap<>(settings.getBody());
-    body.put("prompt", details.getPrefix());
-    body.put("suffix", details.getSuffix());
+    var body = settings.getBody();
+    body = replacePlaceholder(body, "$OPENAI_PREFIX", details.getPrefix());
+    body = replacePlaceholder(body, "$OPENAI_SUFFIX", details.getSuffix());
     body.put("stop", "\n"); // Autocomplete one line at a time.
 
     return buildRequest(
         settings.getUrl(),
         settings.getHeaders(),
         body,
-        List.of(),
         true);
   }
 
@@ -53,11 +54,13 @@ public class CustomServiceRequestBuilder {
       List<OpenAIChatCompletionMessage> messages) {
     var settings = customConfiguration.getChatCompletionSettings();
 
+    var body = settings.getBody();
+    body = replacePlaceholder(body, "$OPENAI_MESSAGES", messages);
+
     return buildRequest(
         settings.getUrl(),
         settings.getHeaders(),
-        settings.getBody(),
-        messages,
+        body,
         true);
   }
 
@@ -66,19 +69,37 @@ public class CustomServiceRequestBuilder {
       List<OpenAIChatCompletionMessage> messages) {
     var settings = customConfiguration.getChatCompletionSettings();
 
+    var body = settings.getBody();
+    body = replacePlaceholder(body, "$OPENAI_MESSAGES", messages);
+
     return buildRequest(
         settings.getUrl(),
         settings.getHeaders(),
-        settings.getBody(),
-        messages,
+        body,
         false);
+  }
+
+  private static Map<String, Object> replacePlaceholder(
+      Map<String, Object> body,
+      String placeholder,
+      Object newValue) {
+    return body.entrySet().stream()
+        .collect(Collectors.toMap(
+            Map.Entry::getKey,
+            entry -> {
+              var value = entry.getValue();
+              if (value instanceof String string && placeholder.equals(string.trim())) {
+                return newValue;
+              }
+              return value;
+            }
+        ));
   }
 
   private static <T> Request buildRequest(
       String url,
       Map<String, String> headers,
       Map<String, ?> body,
-      List<T> messages,
       boolean streamRequest) {
     var requestBuilder = new Request.Builder().url(url.trim());
     var credential = CredentialsStore.INSTANCE.getCredential(CUSTOM_SERVICE_API_KEY);
@@ -98,11 +119,7 @@ public class CustomServiceRequestBuilder {
                 return false;
               }
 
-              var value = entry.getValue();
-              if (value instanceof String string && "$OPENAI_MESSAGES".equals(string.trim())) {
-                return messages;
-              }
-              return value;
+              return entry.getValue();
             }
         ));
 

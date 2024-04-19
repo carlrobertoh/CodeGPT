@@ -40,9 +40,10 @@ public class CustomServiceSettingsState {
     // Change default model for /v1/completions
     completionBody.put("model", "gpt-3.5-turbo-instruct");
 
-    // Change from messages to prompt
+    // Change from messages to prefix + suffix, add stop sequence
     completionBody.remove("messages");
-    completionBody.put("prompt", "$OPENAI_MESSAGES");
+    completionBody.put("prompt", "$OPENAI_PREFIX");
+    completionBody.put("suffix", "$OPENAI_SUFFIX");
   }
 
   public ChatCompletionsSettings getChatCompletionSettings() {
