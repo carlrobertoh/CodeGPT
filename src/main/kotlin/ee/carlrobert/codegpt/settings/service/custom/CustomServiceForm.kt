@@ -61,6 +61,7 @@ class CustomServiceForm {
                 tabbedPane.setEnabledAt(1, false)
             }
         }
+        updateTemplateHelpTextTooltip(state.template)
     }
 
     fun getForm(): JPanel = FormBuilder.createFormBuilder()
@@ -124,19 +125,10 @@ class CustomServiceForm {
     }
 
     fun resetForm() {
-        val state = service<CustomServiceSettings>().state
-        templateComboBox.item = state.template
-        chatCompletionsForm.run {
-            url = state.chatCompletionSettings.url ?: ""
-            headers = state.chatCompletionSettings.headers
-            body = state.chatCompletionSettings.body
-        }
-        codeCompletionsForm.run {
-            codeCompletionsEnabled = state.codeCompletionSettings.codeCompletionsEnabled
-            infillTemplate = state.codeCompletionSettings.infillTemplate
-            url = state.codeCompletionSettings.url ?: ""
-            headers = state.codeCompletionSettings.headers
-            body = state.codeCompletionSettings.body
+        service<CustomServiceSettings>().state.run {
+            templateComboBox.item = template
+            chatCompletionsForm.resetForm(chatCompletionSettings)
+            codeCompletionsForm.resetForm(codeCompletionSettings)
         }
     }
 

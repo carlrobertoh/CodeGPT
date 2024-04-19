@@ -1,9 +1,12 @@
 package ee.carlrobert.codegpt.settings.service.custom
 
+import com.intellij.icons.AllIcons.General
+import com.intellij.ide.HelpTooltip
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.ui.MessageType
 import com.intellij.ui.EnumComboBoxModel
 import com.intellij.ui.components.JBCheckBox
+import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTextField
 import com.intellij.util.ui.FormBuilder
 import ee.carlrobert.codegpt.CodeGPTBundle
@@ -15,7 +18,10 @@ import ee.carlrobert.codegpt.ui.OverlayUtil
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails
 import ee.carlrobert.llm.completion.CompletionEventListener
 import okhttp3.sse.EventSource
+import org.apache.commons.text.StringEscapeUtils
 import java.awt.BorderLayout
+import java.awt.FlowLayout
+import javax.swing.Box
 import javax.swing.JButton
 import javax.swing.JPanel
 import javax.swing.SwingUtilities
@@ -30,7 +36,11 @@ class CustomServiceCodeCompletionForm(state: CustomServiceCodeCompletionSettings
         ComboBox(EnumComboBoxModel(InfillPromptTemplate::class.java)).apply {
             selectedItem = state.infillTemplate
             setSelectedItem(InfillPromptTemplate.LLAMA)
+            addItemListener {
+                updatePromptTemplateHelpTooltip(it.item as InfillPromptTemplate)
+            }
         }
+    private val promptTemplateHelpText = JBLabel(General.ContextHelp)
     private val urlField = JBTextField(state.url, 30)
     private val tabbedPane = CustomServiceFormTabbedPane(state.headers, state.body)
     private val testConnectionButton = JButton(
@@ -39,6 +49,7 @@ class CustomServiceCodeCompletionForm(state: CustomServiceCodeCompletionSettings
 
     init {
         testConnectionButton.addActionListener { testConnection() }
+        updatePromptTemplateHelpTooltip(state.infillTemplate)
     }
 
     var codeCompletionsEnabled: Boolean
@@ -76,7 +87,13 @@ class CustomServiceCodeCompletionForm(state: CustomServiceCodeCompletionSettings
             .addVerticalGap(8)
             .addComponent(featureEnabledCheckBox)
             .addVerticalGap(4)
-            .addLabeledComponent("FIM template:", promptTemplateComboBox)
+            .addLabeledComponent(
+                "FIM template:",
+                JPanel(FlowLayout(FlowLayout.LEADING, 0, 0)).apply {
+                    add(promptTemplateComboBox)
+                    add(Box.createHorizontalStrut(4))
+                    add(promptTemplateHelpText)
+                })
             .addLabeledComponent(
                 CodeGPTBundle.get("settingsConfigurable.service.custom.openai.url.label"),
                 JPanel(BorderLayout(8, 0)).apply {
@@ -88,10 +105,13 @@ class CustomServiceCodeCompletionForm(state: CustomServiceCodeCompletionSettings
             .addComponentFillVertically(JPanel(), 0)
             .panel
 
-    fun resetForm(settings: CustomServiceChatCompletionSettingsState) {
+    fun resetForm(settings: CustomServiceCodeCompletionSettingsState) {
+        featureEnabledCheckBox.isSelected = settings.codeCompletionsEnabled
+        promptTemplateComboBox.selectedItem = settings.infillTemplate
         urlField.text = settings.url
         tabbedPane.headers = settings.headers
         tabbedPane.body = settings.body
+        updatePromptTemplateHelpTooltip(settings.infillTemplate)
     }
 
     private fun testConnection() {
@@ -126,5 +146,15 @@ class CustomServiceCodeCompletionForm(state: CustomServiceCodeCompletionSettings
                 )
             }
         }
+    }
+
+    private fun updatePromptTemplateHelpTooltip(template: InfillPromptTemplate) {
+        promptTemplateHelpText.setToolTipText(null)
+
+        val description = StringEscapeUtils.escapeHtml4(template.buildPrompt("PREFIX", "SUFFIX"))
+        HelpTooltip()
+            .setTitle(template.toString())
+            .setDescription("<html><p>$description</p></html>")
+            .installOn(promptTemplateHelpText)
     }
 }
