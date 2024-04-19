@@ -3,6 +3,7 @@ package ee.carlrobert.codegpt.completions
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate.ALPACA
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate.CHAT_ML
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate.LLAMA
+import ee.carlrobert.codegpt.completions.llama.PromptTemplate.LLAMA_3
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate.TORA
 import ee.carlrobert.codegpt.conversations.message.Message
 import org.assertj.core.api.Assertions.assertThat
@@ -32,6 +33,39 @@ class PromptTemplateTest {
             <<SYS>>TEST_SYSTEM_PROMPT<</SYS>>
             [INST]TEST_USER_PROMPT[/INST]
             """.trimIndent())
+  }
+
+  @Test
+  fun shouldBuildLlama3PromptWithoutHistory() {
+    val prompt = LLAMA_3.buildPrompt(SYSTEM_PROMPT, USER_PROMPT, listOf())
+
+    assertThat(prompt).isEqualTo("""
+      <|start_header_id|>system<|end_header_id|>
+
+      TEST_SYSTEM_PROMPT<|eot_id|><|start_header_id|>user<|end_header_id|>
+
+      TEST_USER_PROMPT<|eot_id|>""".trimIndent()
+    )
+  }
+
+  @Test
+  fun shouldBuildLlama3PromptWithHistory() {
+    val prompt = LLAMA_3.buildPrompt(SYSTEM_PROMPT, USER_PROMPT, HISTORY)
+
+    assertThat(prompt).isEqualTo("""
+      <|start_header_id|>system<|end_header_id|>
+
+      TEST_SYSTEM_PROMPT<|eot_id|><|start_header_id|>user<|end_header_id|>
+  
+      TEST_PREV_PROMPT_1<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+
+      TEST_PREV_RESPONSE_1<|eot_id|><|start_header_id|>user<|end_header_id|>
+
+      TEST_PREV_PROMPT_2<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+
+      TEST_PREV_RESPONSE_2<|eot_id|><|start_header_id|>user<|end_header_id|>
+
+      TEST_USER_PROMPT<|eot_id|>""".trimIndent())
   }
 
   @Test
