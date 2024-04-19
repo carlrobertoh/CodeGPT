@@ -64,6 +64,7 @@ dependencies {
   implementation(libs.jsoup)
   implementation(libs.commons.text)
   implementation(libs.jtokkit)
+  testImplementation(kotlin("test"))
 }
 
 tasks.register<Exec>("updateSubmodules") {
