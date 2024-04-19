@@ -10,10 +10,10 @@ import com.intellij.ui.EnumComboBoxModel;
 import com.intellij.ui.TitledSeparator;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPasswordField;
+import com.intellij.ui.components.JBTabbedPane;
 import com.intellij.util.ui.FormBuilder;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.credentials.CredentialsStore;
-import ee.carlrobert.codegpt.settings.service.CodeCompletionConfigurationForm;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import java.awt.FlowLayout;
 import java.net.MalformedURLException;
@@ -24,19 +24,23 @@ import org.jetbrains.annotations.Nullable;
 
 public class CustomServiceForm {
 
+  private final JBTabbedPane tabbedPane;
   private final CustomServiceChatCompletionsForm chatCompletionsForm;
   private final CustomServiceCompletionsForm completionsForm;
 
   private final JBPasswordField apiKeyField;
   private final JBLabel templateHelpText;
   private final ComboBox<CustomServiceTemplate> templateComboBox;
-  private final CodeCompletionConfigurationForm codeCompletionConfigurationForm;
 
   public CustomServiceForm(CustomServiceSettingsState settings) {
     chatCompletionsForm = new CustomServiceChatCompletionsForm(
         settings.getChatCompletionSettings());
     completionsForm = new CustomServiceCompletionsForm(
         settings.getCompletionSettings());
+
+    tabbedPane = new JBTabbedPane();
+    tabbedPane.addTab(CodeGPTBundle.get("shared.chatCompletions"), chatCompletionsForm.getForm());
+    tabbedPane.addTab(CodeGPTBundle.get("shared.codeCompletions"), completionsForm.getForm());
 
     apiKeyField = new JBPasswordField();
     apiKeyField.setColumns(30);
@@ -59,9 +63,6 @@ public class CustomServiceForm {
       completionsForm.setBody(template.getBody());
     });
     updateTemplateHelpTextTooltip(settings.getTemplate());
-    codeCompletionConfigurationForm = new CodeCompletionConfigurationForm(
-            settings.isCodeCompletionsEnabled(),
-            settings.getCodeCompletionMaxTokens());
   }
 
   public JPanel getForm() {
@@ -80,11 +81,7 @@ public class CustomServiceForm {
         .addComponentToRightColumn(
             UIUtil.createComment("settingsConfigurable.service.custom.openai.apiKey.comment"))
 
-        .addComponent(chatCompletionsForm.getForm())
-        .addComponent(completionsForm.getForm())
-
-        .addComponent(new TitledSeparator(CodeGPTBundle.get("shared.codeCompletions")))
-        .addComponent(withEmptyLeftBorder(codeCompletionConfigurationForm.getForm()))
+        .addComponent(tabbedPane)
 
         .getPanel();
 
@@ -106,8 +103,6 @@ public class CustomServiceForm {
     completionsForm.populateState(state.getCompletionSettings());
 
     state.setTemplate(templateComboBox.getItem());
-    state.setCodeCompletionsEnabled(codeCompletionConfigurationForm.isCodeCompletionsEnabled());
-    state.setCodeCompletionMaxTokens(codeCompletionConfigurationForm.getMaxTokens());
     return state;
   }
 
@@ -118,8 +113,6 @@ public class CustomServiceForm {
 
     apiKeyField.setText(CredentialsStore.INSTANCE.getCredential(CUSTOM_SERVICE_API_KEY));
     templateComboBox.setSelectedItem(state.getTemplate());
-    codeCompletionConfigurationForm.setCodeCompletionsEnabled(state.isCodeCompletionsEnabled());
-    codeCompletionConfigurationForm.setMaxTokens(state.getCodeCompletionMaxTokens());
   }
 
   private void updateTemplateHelpTextTooltip(CustomServiceTemplate template) {

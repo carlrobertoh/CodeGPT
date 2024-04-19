@@ -70,14 +70,6 @@ public class CustomServiceSettingsState {
     this.codeCompletionsEnabled = codeCompletionsEnabled;
   }
 
-  public int getCodeCompletionMaxTokens() {
-    return codeCompletionMaxTokens;
-  }
-
-  public void setCodeCompletionMaxTokens(int codeCompletionMaxTokens) {
-    this.codeCompletionMaxTokens = codeCompletionMaxTokens;
-  }
-
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -169,6 +161,14 @@ public class CustomServiceSettingsState {
 
     public void setBody(Map<String, Object> body) {
       state.completionBody = body;
+    }
+
+    public boolean isEnabled() {
+      return state.codeCompletionsEnabled;
+    }
+
+    public void setEnabled(boolean codeCompletionsEnabled) {
+      state.codeCompletionsEnabled = codeCompletionsEnabled;
     }
   }
 }

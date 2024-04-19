@@ -54,17 +54,11 @@ public class CustomServiceChatCompletionsForm {
     urlPanel.add(urlField, BorderLayout.CENTER);
     urlPanel.add(testConnectionButton, BorderLayout.EAST);
 
-    var form = FormBuilder.createFormBuilder()
+    return FormBuilder.createFormBuilder()
         .addLabeledComponent(
             CodeGPTBundle.get("settingsConfigurable.service.custom.openai.url.label"),
             urlPanel)
         .addComponent(tabbedPane)
-        .getPanel();
-
-    return FormBuilder.createFormBuilder()
-        .addComponent(new TitledSeparator("/v1/chat/completions"))
-        .addComponent(withEmptyLeftBorder(form))
-        .addComponentFillVertically(new JPanel(), 0)
         .getPanel();
   }
 

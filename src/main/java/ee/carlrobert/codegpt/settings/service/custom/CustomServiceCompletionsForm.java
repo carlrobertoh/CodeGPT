@@ -1,9 +1,7 @@
 package ee.carlrobert.codegpt.settings.service.custom;
 
-import static ee.carlrobert.codegpt.ui.UIUtil.withEmptyLeftBorder;
-
 import com.intellij.openapi.ui.MessageType;
-import com.intellij.ui.TitledSeparator;
+import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
 import ee.carlrobert.codegpt.CodeGPTBundle;
@@ -21,11 +19,15 @@ import okhttp3.sse.EventSource;
 
 public class CustomServiceCompletionsForm {
 
+  private final JBCheckBox isEnabledCheckbox;
   private final JBTextField urlField;
   private final CustomServiceFormTabbedPane tabbedPane;
   private final JButton testConnectionButton;
 
   public CustomServiceCompletionsForm(CustomServiceSettingsState.CompletionsSettings settings) {
+    isEnabledCheckbox = new JBCheckBox(
+        CodeGPTBundle.get("codeCompletionsForm.enableFeatureText"),
+        settings.isEnabled());
     urlField = new JBTextField(settings.getUrl(), 30);
     tabbedPane = new CustomServiceFormTabbedPane(settings.getHeaders(), settings.getBody());
     testConnectionButton = new JButton(CodeGPTBundle.get(
@@ -50,27 +52,24 @@ public class CustomServiceCompletionsForm {
     urlPanel.add(urlField, BorderLayout.CENTER);
     urlPanel.add(testConnectionButton, BorderLayout.EAST);
 
-    var form = FormBuilder.createFormBuilder()
+    return FormBuilder.createFormBuilder()
+        .addComponent(isEnabledCheckbox)
         .addLabeledComponent(
             CodeGPTBundle.get("settingsConfigurable.service.custom.openai.url.label"),
             urlPanel)
         .addComponent(tabbedPane)
         .getPanel();
-
-    return FormBuilder.createFormBuilder()
-        .addComponent(new TitledSeparator("/v1/completions"))
-        .addComponent(withEmptyLeftBorder(form))
-        .addComponentFillVertically(new JPanel(), 0)
-        .getPanel();
   }
 
   public void populateState(CustomServiceSettingsState.CompletionsSettings settings) {
+    settings.setEnabled(isEnabledCheckbox.isSelected());
     settings.setUrl(urlField.getText());
     settings.setHeaders(tabbedPane.getHeaders());
     settings.setBody(tabbedPane.getBody());
   }
 
   public void resetForm(CustomServiceSettingsState.CompletionsSettings settings) {
+    isEnabledCheckbox.setSelected(settings.isEnabled());
     urlField.setText(settings.getUrl());
     tabbedPane.setHeaders(settings.getHeaders());
     tabbedPane.setBody(settings.getBody());
