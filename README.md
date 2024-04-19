@@ -50,7 +50,7 @@ Receive single-line or whole-function autocomplete suggestions as you type.
 
 ![Code Completions](https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/new/inline-completion.png?raw=true)
 
-> **Note**: Currently supported only on GPT-3.5 and locally-hosted models.
+> **Note**: Currently only supported with OpenAI, Custom OpenAI, or LLaMA.
 
 ### Chat (with Vision)
 
