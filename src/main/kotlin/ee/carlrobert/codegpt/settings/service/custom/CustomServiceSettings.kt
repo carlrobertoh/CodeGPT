@@ -7,16 +7,41 @@ import ee.carlrobert.codegpt.util.MapConverter
 
 @Service
 @State(
-    name = "CodeGPT_CustomServiceSettings_V2",
-    storages = [Storage("CodeGPT_CustomServiceSettings_V2.xml")]
+    name = "CodeGPT_CustomServiceSettings",
+    storages = [Storage("CodeGPT_CustomServiceSettings.xml")]
 )
 class CustomServiceSettings :
-    SimplePersistentStateComponent<CustomServiceState>(CustomServiceState())
+    SimplePersistentStateComponent<CustomServiceState>(CustomServiceState()) {
+
+    override fun loadState(state: CustomServiceState) {
+        state.run {
+            // Migrate old settings
+            if (url != null || body.isNotEmpty() || headers.isNotEmpty()) {
+                chatCompletionSettings.url = url
+                chatCompletionSettings.body = body
+                chatCompletionSettings.headers = headers
+                url = null
+                body = mutableMapOf()
+                headers = mutableMapOf()
+            }
+        }
+    }
+}
 
 class CustomServiceState : BaseState() {
     var template by enum(CustomServiceTemplate.OPENAI)
     var chatCompletionSettings by property(CustomServiceChatCompletionSettingsState())
     var codeCompletionSettings by property(CustomServiceCodeCompletionSettingsState())
+
+    @Deprecated("", ReplaceWith("this.chatCompletionSettings.url"))
+    var url by string()
+
+    @Deprecated("", ReplaceWith("this.chatCompletionSettings.headers"))
+    var headers by map<String, String>()
+
+    @get:OptionTag(converter = MapConverter::class)
+    @Deprecated("", ReplaceWith("this.chatCompletionSettings.body"))
+    var body by map<String, Any>()
 }
 
 class CustomServiceChatCompletionSettingsState : BaseState() {
