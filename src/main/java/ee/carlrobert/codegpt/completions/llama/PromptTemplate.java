@@ -1,7 +1,11 @@
 package ee.carlrobert.codegpt.completions.llama;
 
+import static java.util.stream.Stream.concat;
+
 import ee.carlrobert.codegpt.conversations.message.Message;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public enum PromptTemplate {
 
@@ -58,25 +62,21 @@ public enum PromptTemplate {
   LLAMA_3("Llama 3") {
     @Override
     public String buildPrompt(String systemPrompt, String userPrompt, List<Message> history) {
-      StringBuilder prompt = new StringBuilder();
-
-      if (systemPrompt != null && !systemPrompt.isBlank()) {
-        prompt.append("<|start_header_id|>system<|end_header_id|>\n\n")
-            .append(systemPrompt)
-            .append("<|eot_id|>");
-      }
-
-      for (Message message : history) {
-        prompt.append("<|start_header_id|>user<|end_header_id|>\n\n")
-                .append(message.getPrompt())
-                .append("<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n")
-                .append(message.getResponse()).append("<|eot_id|>");
-      }
-
-      return prompt.append("<|start_header_id|>user<|end_header_id|>\n\n")
-          .append(userPrompt)
-          .append("<|eot_id|>")
-          .toString();
+      return concat(concat(Stream.ofNullable(systemPrompt)
+                      .filter(s -> !s.isBlank())
+                      .flatMap(system -> Stream.of(
+                              "<|start_header_id|>system<|end_header_id|>\n\n",
+                              system,
+                              "<|eot_id|>")),
+              history.stream().flatMap(message -> mapMessage(
+                      message,
+                      "<|start_header_id|>user<|end_header_id|>\n\n",
+                      "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n",
+                      "<|eot_id|>"))), Stream.of(
+              "<|start_header_id|>user<|end_header_id|>\n\n",
+              userPrompt,
+              "<|eot_id|>"))
+              .collect(Collectors.joining());
     }
   },
   MIXTRAL_INSTRUCT("Mixtral Instruct") {
@@ -194,5 +194,16 @@ public enum PromptTemplate {
   @Override
   public String toString() {
     return label;
+  }
+
+  private static Stream<String> mapMessage(Message message,
+                                           String prefix, String infix, String suffix) {
+    return Stream.of(
+            prefix,
+            message.getPrompt(),
+            infix,
+            message.getResponse(),
+            suffix
+    );
   }
 }
