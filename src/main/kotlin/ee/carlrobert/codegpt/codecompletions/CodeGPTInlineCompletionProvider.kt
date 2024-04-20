@@ -12,6 +12,7 @@ import ee.carlrobert.codegpt.settings.GeneralSettings
 import ee.carlrobert.codegpt.settings.service.ServiceType
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
+import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings
 import ee.carlrobert.codegpt.ui.OverlayUtil.showNotification
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails
@@ -70,6 +71,7 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
             ServiceType.OPENAI -> OpenAISettings.getCurrentState().isCodeCompletionsEnabled
             ServiceType.CUSTOM_OPENAI -> service<CustomServiceSettings>().state.codeCompletionSettings.codeCompletionsEnabled
             ServiceType.LLAMA_CPP -> LlamaSettings.getCurrentState().isCodeCompletionsEnabled
+            ServiceType.OLLAMA -> OllamaSettings.getCurrentState().isCodeCompletionsEnabled
             else -> false
         }
         return event is InlineCompletionEvent.DocumentChange && codeCompletionsEnabled

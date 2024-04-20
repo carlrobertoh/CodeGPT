@@ -1,12 +1,5 @@
 package ee.carlrobert.codegpt.completions;
 
-import static ee.carlrobert.codegpt.settings.service.ServiceType.ANTHROPIC;
-import static ee.carlrobert.codegpt.settings.service.ServiceType.AZURE;
-import static ee.carlrobert.codegpt.settings.service.ServiceType.CUSTOM_OPENAI;
-import static ee.carlrobert.codegpt.settings.service.ServiceType.LLAMA_CPP;
-import static ee.carlrobert.codegpt.settings.service.ServiceType.OPENAI;
-import static ee.carlrobert.codegpt.settings.service.ServiceType.YOU;
-
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.diagnostic.Logger;
@@ -23,11 +16,14 @@ import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettings;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
+import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.llm.client.DeserializationUtil;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionRequest;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionStandardMessage;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
+import ee.carlrobert.llm.client.ollama.completion.request.OllamaChatCompletionMessage;
+import ee.carlrobert.llm.client.ollama.completion.request.OllamaChatCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionEventSourceListener;
 import ee.carlrobert.llm.client.openai.completion.OpenAITextCompletionEventSourceListener;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
@@ -43,6 +39,8 @@ import java.util.Optional;
 import okhttp3.Request;
 import okhttp3.sse.EventSource;
 import okhttp3.sse.EventSources;
+
+import static ee.carlrobert.codegpt.settings.service.ServiceType.*;
 
 @Service
 public final class CompletionRequestService {
@@ -106,6 +104,9 @@ public final class CompletionRequestService {
               callParameters.getMessage(),
               callParameters.getConversationType()),
           eventListener);
+      case OLLAMA -> CompletionClientProvider.getOllamaClient().getChatCompletionAsync(
+              requestProvider.buildOllamaChatCompletionRequest(callParameters),
+              eventListener);
     };
   }
 
@@ -124,6 +125,9 @@ public final class CompletionRequestService {
       case LLAMA_CPP -> CompletionClientProvider.getLlamaClient()
           .getChatCompletionAsync(
               CodeCompletionRequestFactory.buildLlamaRequest(requestDetails),
+              eventListener);
+      case OLLAMA -> CompletionClientProvider.getOllamaClient().getCompletionAsync(
+              CodeCompletionRequestFactory.INSTANCE.buildOllamaRequest(requestDetails),
               eventListener);
       default ->
           throw new IllegalArgumentException("Code completion not supported for selected service");
@@ -191,6 +195,18 @@ public final class CompletionRequestService {
                 .setRepeat_penalty(settings.getRepeatPenalty())
                 .build(), eventListener);
         break;
+      case OLLAMA:
+        var ollamaSettings = OllamaSettings.getCurrentState();
+        var request = new OllamaChatCompletionRequest.Builder(
+                ollamaSettings.getModel(),
+                List.of(
+                        new OllamaChatCompletionMessage("system", systemPrompt, null),
+                        new OllamaChatCompletionMessage("user", gitDiff, null)
+                )
+        ).build();
+        CompletionClientProvider.getOllamaClient()
+                .getChatCompletionAsync(request, eventListener);
+        break;
       default:
         LOG.debug("Unknown service: {}", selectedService);
         break;
@@ -238,7 +254,7 @@ public final class CompletionRequestService {
       return true;
     }
 
-    return List.of(LLAMA_CPP, ANTHROPIC, CUSTOM_OPENAI).contains(serviceType);
+    return List.of(LLAMA_CPP, ANTHROPIC, CUSTOM_OPENAI, OLLAMA).contains(serviceType);
   }
 
   /**

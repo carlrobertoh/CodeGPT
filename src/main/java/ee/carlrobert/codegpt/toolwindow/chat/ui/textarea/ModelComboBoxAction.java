@@ -103,6 +103,8 @@ public class ModelComboBoxAction extends ComboBoxAction {
         getLlamaCppPresentationText(),
         Icons.Llama,
         presentation));
+    actionGroup.addSeparator();
+    actionGroup.add(createModelAction(ServiceType.OLLAMA, "Ollama", Icons.Default, presentation));
 
     if (YouUserManager.getInstance().isSubscribed()) {
       actionGroup.addSeparator("You.com");

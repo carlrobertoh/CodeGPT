@@ -1,12 +1,5 @@
 package ee.carlrobert.codegpt.settings;
 
-import static ee.carlrobert.codegpt.settings.service.ServiceType.ANTHROPIC;
-import static ee.carlrobert.codegpt.settings.service.ServiceType.AZURE;
-import static ee.carlrobert.codegpt.settings.service.ServiceType.CUSTOM_OPENAI;
-import static ee.carlrobert.codegpt.settings.service.ServiceType.LLAMA_CPP;
-import static ee.carlrobert.codegpt.settings.service.ServiceType.OPENAI;
-import static ee.carlrobert.codegpt.settings.service.ServiceType.YOU;
-
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.components.JBTextField;
@@ -20,6 +13,8 @@ import ee.carlrobert.codegpt.settings.service.azure.AzureSettingsForm;
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceForm;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.llama.form.LlamaSettingsForm;
+import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
+import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettingsForm;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettingsForm;
 import ee.carlrobert.codegpt.settings.service.you.YouSettings;
@@ -34,6 +29,8 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
+import static ee.carlrobert.codegpt.settings.service.ServiceType.*;
+
 public class GeneralSettingsComponent {
 
   private final JPanel mainPanel;
@@ -45,6 +42,7 @@ public class GeneralSettingsComponent {
   private final AzureSettingsForm azureSettingsForm;
   private final YouSettingsForm youSettingsForm;
   private final LlamaSettingsForm llamaSettingsForm;
+  private final OllamaSettingsForm ollamaSettingsForm;
 
   public GeneralSettingsComponent(Disposable parentDisposable, GeneralSettings settings) {
     displayNameField = new JBTextField(settings.getState().getDisplayName(), 20);
@@ -54,6 +52,7 @@ public class GeneralSettingsComponent {
     azureSettingsForm = new AzureSettingsForm(AzureSettings.getCurrentState());
     youSettingsForm = new YouSettingsForm(YouSettings.getCurrentState(), parentDisposable);
     llamaSettingsForm = new LlamaSettingsForm(LlamaSettings.getCurrentState());
+    ollamaSettingsForm = new OllamaSettingsForm(OllamaSettings.getCurrentState());
 
     var cardLayout = new DynamicCardLayout();
     var cards = new JPanel(cardLayout);
@@ -63,6 +62,7 @@ public class GeneralSettingsComponent {
     cards.add(azureSettingsForm.getForm(), AZURE.getCode());
     cards.add(youSettingsForm, YOU.getCode());
     cards.add(llamaSettingsForm, LLAMA_CPP.getCode());
+    cards.add(ollamaSettingsForm, OLLAMA.getCode());
     var serviceComboBoxModel = new DefaultComboBoxModel<ServiceType>();
     serviceComboBoxModel.addAll(Arrays.stream(ServiceType.values()).toList());
     serviceComboBox = new ComboBox<>(serviceComboBoxModel);
@@ -106,6 +106,10 @@ public class GeneralSettingsComponent {
     return youSettingsForm;
   }
 
+  public OllamaSettingsForm getOllamaSettingsForm() {
+    return ollamaSettingsForm;
+  }
+
   public ServiceType getSelectedService() {
     return serviceComboBox.getItem();
   }
@@ -137,6 +141,7 @@ public class GeneralSettingsComponent {
     azureSettingsForm.resetForm();
     youSettingsForm.resetForm();
     llamaSettingsForm.resetForm();
+    ollamaSettingsForm.resetForm();
   }
 
   static class DynamicCardLayout extends CardLayout {

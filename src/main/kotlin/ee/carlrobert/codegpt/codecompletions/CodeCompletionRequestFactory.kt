@@ -10,8 +10,11 @@ import ee.carlrobert.codegpt.settings.configuration.Placeholder
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettingsState
+import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest
+import ee.carlrobert.llm.client.ollama.completion.request.OllamaCompletionRequest
+import ee.carlrobert.llm.client.ollama.completion.request.OllamaParameters
 import ee.carlrobert.llm.client.openai.completion.request.OpenAITextCompletionRequest
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
@@ -69,6 +72,19 @@ object CodeCompletionRequestFactory {
             .setTemperature(0.4)
             .setStop(promptTemplate.stopTokens)
             .build()
+    }
+
+    fun buildOllamaRequest(details: InfillRequestDetails): OllamaCompletionRequest {
+        val settings = OllamaSettings.getCurrentState()
+        return OllamaCompletionRequest.Builder(settings.model, getOllamaInfillPrompt(details.prefix, details.suffix))
+            .setOptions(OllamaParameters.Builder().numPredict(settings.codeCompletionMaxTokens).build())
+            .setRaw(true)
+            .build()
+    }
+
+    private fun getOllamaInfillPrompt(prefix: String, suffix: String): String {
+        // TODO these still vary by model, we need a way of figuring that out, preferably on the ollama side.
+        return "<｜fim▁begin｜>$prefix<｜fim▁hole｜>$suffix<｜fim▁end｜>"
     }
 
     private fun getLlamaInfillPromptTemplate(settings: LlamaSettingsState): InfillPromptTemplate {

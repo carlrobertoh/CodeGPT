@@ -11,6 +11,7 @@ import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettings;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
+import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import org.jetbrains.annotations.NotNull;
 
@@ -69,6 +70,9 @@ public class GeneralSettings implements PersistentStateComponent<GeneralSettings
     if ("you.chat.completion".equals(clientCode)) {
       state.setSelectedService(ServiceType.YOU);
     }
+    if ("ollama.chat.completion".equals(clientCode)) {
+      state.setSelectedService(ServiceType.OLLAMA);
+    }
   }
 
   public String getModel() {
@@ -98,6 +102,8 @@ public class GeneralSettings implements PersistentStateComponent<GeneralSettings
             llamaModel.getLabel(),
             huggingFaceModel.getParameterSize(),
             huggingFaceModel.getQuantization());
+      case OLLAMA:
+        return OllamaSettings.getCurrentState().getModel();
       default:
         return "Unknown";
     }

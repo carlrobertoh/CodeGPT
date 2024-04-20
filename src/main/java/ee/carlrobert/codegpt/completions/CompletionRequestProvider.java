@@ -28,6 +28,7 @@ import ee.carlrobert.codegpt.settings.service.custom.CustomServiceChatCompletion
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings;
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceState;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
+import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.codegpt.settings.service.you.YouSettings;
 import ee.carlrobert.codegpt.telemetry.core.configuration.TelemetryConfiguration;
@@ -41,6 +42,8 @@ import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionStandardMes
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeMessageImageContent;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeMessageTextContent;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
+import ee.carlrobert.llm.client.ollama.completion.request.OllamaChatCompletionMessage;
+import ee.carlrobert.llm.client.ollama.completion.request.OllamaChatCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionDetailedMessage;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
@@ -55,12 +58,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import okhttp3.Request;
@@ -205,7 +203,7 @@ public class CompletionRequestProvider {
       @Nullable String model,
       CallParameters callParameters) {
     var configuration = ConfigurationSettings.getCurrentState();
-    return new OpenAIChatCompletionRequest.Builder(buildMessages(model, callParameters))
+    return new OpenAIChatCompletionRequest.Builder(buildOpenAIMessages(model, callParameters))
         .setModel(model)
         .setMaxTokens(configuration.getMaxTokens())
         .setStream(true)
@@ -217,7 +215,7 @@ public class CompletionRequestProvider {
       CallParameters callParameters) {
     return buildCustomOpenAIChatCompletionRequest(
         settings,
-        buildMessages(callParameters),
+        buildOpenAIMessages(callParameters),
         true);
   }
 
@@ -294,7 +292,53 @@ public class CompletionRequestProvider {
     return request;
   }
 
-  private List<OpenAIChatCompletionMessage> buildMessages(CallParameters callParameters) {
+  public OllamaChatCompletionRequest buildOllamaChatCompletionRequest(CallParameters callParameters) {
+    var settings = OllamaSettings.getCurrentState();
+    var builder = new OllamaChatCompletionRequest.Builder(settings.getModel(), buildOllamaMessages(callParameters));
+    return builder.build();
+  }
+
+  private List<OllamaChatCompletionMessage> buildOllamaMessages(CallParameters callParameters) {
+    var message = callParameters.getMessage();
+    var messages = new ArrayList<OllamaChatCompletionMessage>();
+    if (callParameters.getConversationType() == ConversationType.DEFAULT) {
+      String systemPrompt = ConfigurationSettings.getCurrentState().getSystemPrompt();
+      messages.add(new OllamaChatCompletionMessage("system", systemPrompt, null));
+    }
+    if (callParameters.getConversationType() == ConversationType.FIX_COMPILE_ERRORS) {
+      messages.add(new OllamaChatCompletionMessage("system", FIX_COMPILE_ERRORS_SYSTEM_PROMPT, null));
+    }
+
+    for (var prevMessage : conversation.getMessages()) {
+      if (callParameters.isRetry() && prevMessage.getId().equals(message.getId())) {
+        break;
+      }
+      var prevMessageImageFilePath = prevMessage.getImageFilePath();
+      if (prevMessageImageFilePath != null && !prevMessageImageFilePath.isEmpty()) {
+        try {
+          var imageFilePath = Path.of(prevMessageImageFilePath);
+          var imageBytes = Files.readAllBytes(imageFilePath);
+          var imageBase64 = Base64.getEncoder().encodeToString(imageBytes);
+          messages.add(new OllamaChatCompletionMessage("user", prevMessage.getPrompt(), List.of(imageBase64)));
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+      } else {
+        messages.add(new OllamaChatCompletionMessage("user", prevMessage.getPrompt(), null));
+      }
+      messages.add(new OllamaChatCompletionMessage("assistant", prevMessage.getResponse(), null));
+    }
+
+    if (callParameters.getImageMediaType() != null && callParameters.getImageData().length > 0) {
+      var imageBase64 = Base64.getEncoder().encodeToString(callParameters.getImageData());
+      messages.add(new OllamaChatCompletionMessage("user", message.getPrompt(), List.of(imageBase64)));
+    } else {
+      messages.add(new OllamaChatCompletionMessage("user", message.getPrompt(), null));
+    }
+    return messages;
+  }
+
+  private List<OpenAIChatCompletionMessage> buildOpenAIMessages(CallParameters callParameters) {
     var message = callParameters.getMessage();
     var messages = new ArrayList<OpenAIChatCompletionMessage>();
     if (callParameters.getConversationType() == ConversationType.DEFAULT) {
@@ -342,10 +386,10 @@ public class CompletionRequestProvider {
     return messages;
   }
 
-  private List<OpenAIChatCompletionMessage> buildMessages(
+  private List<OpenAIChatCompletionMessage> buildOpenAIMessages(
       @Nullable String model,
       CallParameters callParameters) {
-    var messages = buildMessages(callParameters);
+    var messages = buildOpenAIMessages(callParameters);
 
     if (model == null
         || GeneralSettings.getCurrentState().getSelectedService() == ServiceType.YOU) {
