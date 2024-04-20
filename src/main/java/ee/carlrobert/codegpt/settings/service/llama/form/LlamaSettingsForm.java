@@ -36,6 +36,7 @@ public class LlamaSettingsForm extends JPanel {
     state.setContextSize(llamaServerPreferencesForm.getContextSize());
     state.setThreads(llamaServerPreferencesForm.getThreads());
     state.setAdditionalParameters(llamaServerPreferencesForm.getAdditionalParameters());
+    state.setAdditionalBuildParameters(llamaServerPreferencesForm.getAdditionalBuildParameters());
 
     var modelPreferencesForm = llamaServerPreferencesForm.getLlamaModelPreferencesForm();
     state.setCustomLlamaModelPath(modelPreferencesForm.getCustomLlamaModelPath());
