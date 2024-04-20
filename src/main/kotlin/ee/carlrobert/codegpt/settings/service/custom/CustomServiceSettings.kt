@@ -14,12 +14,13 @@ class CustomServiceSettings :
     SimplePersistentStateComponent<CustomServiceState>(CustomServiceState()) {
 
     override fun loadState(state: CustomServiceState) {
-        state.run {
+        this.state.run {
             // Migrate old settings
-            if (url != null || body.isNotEmpty() || headers.isNotEmpty()) {
-                chatCompletionSettings.url = url
-                chatCompletionSettings.body = body
-                chatCompletionSettings.headers = headers
+            if (state.url != null || state.body.isNotEmpty() || state.headers.isNotEmpty()) {
+                template = state.template
+                chatCompletionSettings.url = state.url
+                chatCompletionSettings.body = state.body
+                chatCompletionSettings.headers = state.headers
                 url = null
                 body = mutableMapOf()
                 headers = mutableMapOf()
