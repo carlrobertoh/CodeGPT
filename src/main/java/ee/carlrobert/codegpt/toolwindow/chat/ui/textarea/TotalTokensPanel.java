@@ -115,7 +115,7 @@ public class TotalTokensPanel extends JPanel {
     update();
   }
 
-  public void updateReferencedFilesTokens(List<ReferencedFile> includedFiles) {
+  public void updateReferencedFilesTokens(List<? extends ReferencedFile> includedFiles) {
     totalTokensDetails.setReferencedFilesTokens(includedFiles.stream()
         .mapToInt(file -> encodingManager.countTokens(file.getFileContent()))
         .sum());
