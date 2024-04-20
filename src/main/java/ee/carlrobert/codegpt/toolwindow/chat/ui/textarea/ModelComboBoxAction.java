@@ -23,6 +23,8 @@ import ee.carlrobert.codegpt.settings.GeneralSettingsState;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
+import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
+import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettingsState;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.service.you.YouSettings;
@@ -41,12 +43,14 @@ public class ModelComboBoxAction extends ComboBoxAction {
   private final GeneralSettingsState settings;
   private final OpenAISettingsState openAISettings;
   private final YouSettingsState youSettings;
+  private final OllamaSettingsState ollamaSettings;
 
   public ModelComboBoxAction(Runnable onModelChange, ServiceType selectedService) {
     this.onModelChange = onModelChange;
     settings = GeneralSettings.getCurrentState();
     openAISettings = OpenAISettings.getCurrentState();
     youSettings = YouSettings.getCurrentState();
+    ollamaSettings = OllamaSettings.getCurrentState();
     updateTemplatePresentation(selectedService);
 
     subscribeToYouSignedOutTopic(ApplicationManager.getApplication().getMessageBus().connect());
@@ -181,6 +185,9 @@ public class ModelComboBoxAction extends ComboBoxAction {
         templatePresentation.setText(getLlamaCppPresentationText());
         templatePresentation.setIcon(Icons.Llama);
         break;
+      case OLLAMA:
+        templatePresentation.setIcon(Icons.Default);
+        templatePresentation.setText(ollamaSettings.getModel());
       default:
     }
   }
