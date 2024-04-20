@@ -4,6 +4,7 @@ import static ee.carlrobert.codegpt.completions.ConversationType.FIX_COMPILE_ERR
 import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.CUSTOM_SERVICE_API_KEY;
 import static ee.carlrobert.codegpt.util.file.FileUtil.getResourceContent;
 import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
@@ -23,8 +24,9 @@ import ee.carlrobert.codegpt.settings.IncludedFilesSettings;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettings;
+import ee.carlrobert.codegpt.settings.service.custom.CustomServiceChatCompletionSettingsState;
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings;
-import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettingsState;
+import ee.carlrobert.codegpt.settings.service.custom.CustomServiceState;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.codegpt.settings.service.you.YouSettings;
@@ -114,16 +116,27 @@ public class CompletionRequestProvider {
 
   public static Request buildCustomOpenAICompletionRequest(String system, String context) {
     return buildCustomOpenAIChatCompletionRequest(
-        CustomServiceSettings.getCurrentState(),
+        ApplicationManager.getApplication().getService(CustomServiceState.class)
+            .getChatCompletionSettings(),
         List.of(
             new OpenAIChatCompletionStandardMessage("system", system),
             new OpenAIChatCompletionStandardMessage("user", context)),
         true);
   }
 
+  public static Request buildCustomOpenAICompletionRequest(String input) {
+    return buildCustomOpenAIChatCompletionRequest(
+        ApplicationManager.getApplication().getService(CustomServiceSettings.class)
+            .getState()
+            .getChatCompletionSettings(),
+        List.of(new OpenAIChatCompletionStandardMessage("user", input)),
+        true);
+  }
+
   public static Request buildCustomOpenAILookupCompletionRequest(String context) {
     return buildCustomOpenAIChatCompletionRequest(
-        CustomServiceSettings.getCurrentState(),
+        ApplicationManager.getApplication().getService(CustomServiceState.class)
+            .getChatCompletionSettings(),
         List.of(
             new OpenAIChatCompletionStandardMessage(
                 "system",
@@ -199,21 +212,21 @@ public class CompletionRequestProvider {
   }
 
   public Request buildCustomOpenAIChatCompletionRequest(
-      CustomServiceSettingsState customConfiguration,
+      CustomServiceChatCompletionSettingsState settings,
       CallParameters callParameters) {
     return buildCustomOpenAIChatCompletionRequest(
-        customConfiguration,
+        settings,
         buildMessages(callParameters),
         true);
   }
 
   private static Request buildCustomOpenAIChatCompletionRequest(
-      CustomServiceSettingsState customConfiguration,
+      CustomServiceChatCompletionSettingsState settings,
       List<OpenAIChatCompletionMessage> messages,
       boolean streamRequest) {
-    var requestBuilder = new Request.Builder().url(customConfiguration.getUrl().trim());
+    var requestBuilder = new Request.Builder().url(requireNonNull(settings.getUrl()).trim());
     var credential = CredentialsStore.INSTANCE.getCredential(CUSTOM_SERVICE_API_KEY);
-    for (var entry : customConfiguration.getHeaders().entrySet()) {
+    for (var entry : settings.getHeaders().entrySet()) {
       String value = entry.getValue();
       if (credential != null && value.contains("$CUSTOM_SERVICE_API_KEY")) {
         value = value.replace("$CUSTOM_SERVICE_API_KEY", credential);
@@ -221,7 +234,7 @@ public class CompletionRequestProvider {
       requestBuilder.addHeader(entry.getKey(), value);
     }
 
-    var body = customConfiguration.getBody().entrySet().stream()
+    var body = settings.getBody().entrySet().stream()
         .collect(Collectors.toMap(
             Map.Entry::getKey,
             entry -> {

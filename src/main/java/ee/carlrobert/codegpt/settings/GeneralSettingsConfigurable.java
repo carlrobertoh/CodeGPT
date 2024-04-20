@@ -18,7 +18,6 @@ import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettingsForm;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettingsForm;
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceForm;
-import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.llama.form.LlamaSettingsForm;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
@@ -61,17 +60,15 @@ public class GeneralSettingsConfigurable implements Configurable {
   @Override
   public boolean isModified() {
     var settings = GeneralSettings.getCurrentState();
-    var serviceSelectionForm = component.getServiceSelectionForm();
+
     return !component.getDisplayName().equals(settings.getDisplayName())
         || component.getSelectedService() != settings.getSelectedService()
-        || OpenAISettings.getInstance().isModified(serviceSelectionForm.getOpenAISettingsForm())
-        || CustomServiceSettings.getInstance()
-        .isModified(serviceSelectionForm.getCustomConfigurationSettingsForm())
-        || AnthropicSettings.getInstance()
-        .isModified(serviceSelectionForm.getAnthropicSettingsForm())
-        || AzureSettings.getInstance().isModified(serviceSelectionForm.getAzureSettingsForm())
-        || YouSettings.getInstance().isModified(serviceSelectionForm.getYouSettingsForm())
-        || LlamaSettings.getInstance().isModified(serviceSelectionForm.getLlamaSettingsForm());
+        || OpenAISettings.getInstance().isModified(component.getOpenAISettingsForm())
+        || component.getCustomConfigurationSettingsForm().isModified()
+        || AnthropicSettings.getInstance().isModified(component.getAnthropicSettingsForm())
+        || AzureSettings.getInstance().isModified(component.getAzureSettingsForm())
+        || YouSettings.getInstance().isModified(component.getYouSettingsForm())
+        || LlamaSettings.getInstance().isModified(component.getLlamaSettingsForm());
   }
 
   @Override
@@ -80,14 +77,13 @@ public class GeneralSettingsConfigurable implements Configurable {
     settings.setDisplayName(component.getDisplayName());
     settings.setSelectedService(component.getSelectedService());
 
-    var serviceSelectionForm = component.getServiceSelectionForm();
-    var openAISettingsForm = serviceSelectionForm.getOpenAISettingsForm();
+    var openAISettingsForm = component.getOpenAISettingsForm();
     applyOpenAISettings(openAISettingsForm);
-    applyCustomOpenAISettings(serviceSelectionForm.getCustomConfigurationSettingsForm());
-    applyAnthropicSettings(serviceSelectionForm.getAnthropicSettingsForm());
-    applyAzureSettings(serviceSelectionForm.getAzureSettingsForm());
-    applyYouSettings(serviceSelectionForm.getYouSettingsForm());
-    applyLlamaSettings(serviceSelectionForm.getLlamaSettingsForm());
+    applyCustomOpenAISettings(component.getCustomConfigurationSettingsForm());
+    applyAnthropicSettings(component.getAnthropicSettingsForm());
+    applyAzureSettings(component.getAzureSettingsForm());
+    applyYouSettings(component.getYouSettingsForm());
+    applyLlamaSettings(component.getLlamaSettingsForm());
 
     var serviceChanged = component.getSelectedService() != settings.getSelectedService();
     var modelChanged = !OpenAISettings.getCurrentState().getModel()
@@ -109,7 +105,7 @@ public class GeneralSettingsConfigurable implements Configurable {
 
   private void applyCustomOpenAISettings(CustomServiceForm form) {
     CredentialsStore.INSTANCE.setCredential(CUSTOM_SERVICE_API_KEY, form.getApiKey());
-    CustomServiceSettings.getInstance().loadState(form.getCurrentState());
+    form.applyChanges();
   }
 
   private void applyLlamaSettings(LlamaSettingsForm form) {
@@ -142,7 +138,7 @@ public class GeneralSettingsConfigurable implements Configurable {
     var settings = GeneralSettings.getCurrentState();
     component.setDisplayName(settings.getDisplayName());
     component.setSelectedService(settings.getSelectedService());
-    component.getServiceSelectionForm().resetForms();
+    component.resetForms();
   }
 
   @Override
