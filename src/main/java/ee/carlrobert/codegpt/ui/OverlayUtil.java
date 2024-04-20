@@ -149,4 +149,13 @@ public class OverlayUtil {
         .createBalloon()
         .show(RelativePoint.getSouthOf(component), Position.below);
   }
+
+  public static void showClosableBalloon(String content, MessageType messageType,
+      JComponent component) {
+    JBPopupFactory.getInstance()
+        .createHtmlTextBalloonBuilder(content, messageType, null)
+        .setCloseButtonEnabled(true)
+        .createBalloon()
+        .show(RelativePoint.getSouthOf(component), Position.below);
+  }
 }

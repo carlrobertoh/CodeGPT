@@ -14,14 +14,17 @@ import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.ui.MessageType;
 import com.intellij.openapi.util.Key;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.llama.form.ServerProgressPanel;
+import ee.carlrobert.codegpt.ui.OverlayUtil;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -32,65 +35,94 @@ public final class LlamaServerAgent implements Disposable {
 
   private @Nullable OSProcessHandler makeProcessHandler;
   private @Nullable OSProcessHandler startServerProcessHandler;
+  private ServerProgressPanel activeServerProgressPanel;
+  private boolean stoppedByUser;
 
   public void startAgent(
       LlamaServerStartupParams params,
       ServerProgressPanel serverProgressPanel,
       Runnable onSuccess,
-      Runnable onServerTerminated) {
+      Consumer<ServerProgressPanel> onServerTerminated) {
+    this.activeServerProgressPanel = serverProgressPanel;
     ApplicationManager.getApplication().invokeLater(() -> {
       try {
-        serverProgressPanel.updateText(
+        stoppedByUser = false;
+        serverProgressPanel.displayText(
             CodeGPTBundle.get("llamaServerAgent.buildingProject.description"));
-        makeProcessHandler = new OSProcessHandler(getMakeCommandLinde());
+        makeProcessHandler = new OSProcessHandler(
+            getMakeCommandLine(params.additionalBuildParameters()));
         makeProcessHandler.addProcessListener(
-            getMakeProcessListener(params, serverProgressPanel, onSuccess, onServerTerminated));
+            getMakeProcessListener(params, onSuccess, onServerTerminated));
         makeProcessHandler.startNotify();
       } catch (ExecutionException e) {
-        throw new RuntimeException(e);
+        showServerError(e.getMessage(), onServerTerminated);
       }
     });
   }
 
   public void stopAgent() {
+    stoppedByUser = true;
+    if (makeProcessHandler != null) {
+      makeProcessHandler.destroyProcess();
+    }
     if (startServerProcessHandler != null) {
       startServerProcessHandler.destroyProcess();
     }
   }
 
   public boolean isServerRunning() {
-    return startServerProcessHandler != null
+    return (makeProcessHandler != null
+        && makeProcessHandler.isStartNotified()
+        && !makeProcessHandler.isProcessTerminated())
+        || (startServerProcessHandler != null
         && startServerProcessHandler.isStartNotified()
-        && !startServerProcessHandler.isProcessTerminated();
+        && !startServerProcessHandler.isProcessTerminated());
   }
 
   private ProcessListener getMakeProcessListener(
       LlamaServerStartupParams params,
-      ServerProgressPanel serverProgressPanel,
       Runnable onSuccess,
-      Runnable onServerTerminated) {
+      Consumer<ServerProgressPanel> onServerTerminated) {
     LOG.info("Building llama project");
 
     return new ProcessAdapter() {
+
+      private final List<String> errorLines = new CopyOnWriteArrayList<>();
+
       @Override
       public void onTextAvailable(@NotNull ProcessEvent event, @NotNull Key outputType) {
+        if (ProcessOutputType.isStderr(outputType)) {
+          errorLines.add(event.getText());
+          return;
+        }
         LOG.info(event.getText());
       }
 
       @Override
       public void processTerminated(@NotNull ProcessEvent event) {
+        int exitCode = event.getExitCode();
+        LOG.info(format("Server build exited with code %d", exitCode));
+        if (stoppedByUser) {
+          onServerTerminated.accept(activeServerProgressPanel);
+          return;
+        }
+        if (exitCode != 0) {
+          showServerError(String.join(",", errorLines), onServerTerminated);
+          return;
+        }
+
         try {
           LOG.info("Booting up llama server");
 
-          serverProgressPanel.updateText(
+          activeServerProgressPanel.displayText(
               CodeGPTBundle.get("llamaServerAgent.serverBootup.description"));
           startServerProcessHandler = new OSProcessHandler.Silent(getServerCommandLine(params));
           startServerProcessHandler.addProcessListener(
-              getProcessListener(params.port(), onSuccess, onServerTerminated));
+              getProcessListener(params.port(), onSuccess,
+                  onServerTerminated));
           startServerProcessHandler.startNotify();
         } catch (ExecutionException ex) {
-          LOG.error("Unable to start llama server", ex);
-          throw new RuntimeException(ex);
+          showServerError(ex.getMessage(), onServerTerminated);
         }
       }
     };
@@ -99,27 +131,25 @@ public final class LlamaServerAgent implements Disposable {
   private ProcessListener getProcessListener(
       int port,
       Runnable onSuccess,
-      Runnable onServerTerminated) {
+      Consumer<ServerProgressPanel> onServerTerminated) {
     return new ProcessAdapter() {
       private final ObjectMapper objectMapper = new ObjectMapper();
       private final List<String> errorLines = new CopyOnWriteArrayList<>();
 
       @Override
       public void processTerminated(@NotNull ProcessEvent event) {
-        if (errorLines.isEmpty()) {
-          LOG.info(format("Server terminated with code %d", event.getExitCode()));
+        LOG.info(format("Server terminated with code %d", event.getExitCode()));
+        if (stoppedByUser) {
+          onServerTerminated.accept(activeServerProgressPanel);
         } else {
-          LOG.info(String.join("", errorLines));
+          showServerError(String.join(",", errorLines), onServerTerminated);
         }
-
-        onServerTerminated.run();
       }
 
       @Override
       public void onTextAvailable(@NotNull ProcessEvent event, @NotNull Key outputType) {
         if (ProcessOutputType.isStderr(outputType)) {
           errorLines.add(event.getText());
-          return;
         }
 
         if (ProcessOutputType.isStdout(outputType)) {
@@ -141,11 +171,18 @@ public final class LlamaServerAgent implements Disposable {
     };
   }
 
-  private static GeneralCommandLine getMakeCommandLinde() {
+  private void showServerError(String errorText, Consumer<ServerProgressPanel> onServerTerminated) {
+    onServerTerminated.accept(activeServerProgressPanel);
+    LOG.info("Unable to start llama server:\n" + errorText);
+    OverlayUtil.showClosableBalloon(errorText, MessageType.ERROR, activeServerProgressPanel);
+  }
+
+  private static GeneralCommandLine getMakeCommandLine(List<String> additionalCompileParameters) {
     GeneralCommandLine commandLine = new GeneralCommandLine().withCharset(StandardCharsets.UTF_8);
     commandLine.setExePath("make");
     commandLine.withWorkDirectory(CodeGPTPlugin.getLlamaSourcePath());
     commandLine.addParameters("-j");
+    commandLine.addParameters(additionalCompileParameters);
     commandLine.setRedirectErrorStream(false);
     return commandLine;
   }
@@ -159,9 +196,14 @@ public final class LlamaServerAgent implements Disposable {
         "-c", String.valueOf(params.contextLength()),
         "--port", String.valueOf(params.port()),
         "-t", String.valueOf(params.threads()));
-    commandLine.addParameters(params.additionalParameters());
+    commandLine.addParameters(params.additionalRunParameters());
     commandLine.setRedirectErrorStream(false);
     return commandLine;
+  }
+
+  public void setActiveServerProgressPanel(
+      ServerProgressPanel activeServerProgressPanel) {
+    this.activeServerProgressPanel = activeServerProgressPanel;
   }
 
   @Override
