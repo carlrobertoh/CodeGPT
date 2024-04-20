@@ -6,14 +6,16 @@ import com.intellij.openapi.components.service
 import ee.carlrobert.codegpt.completions.llama.LlamaModel
 import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey
 import ee.carlrobert.codegpt.credentials.CredentialsStore.getCredential
+import ee.carlrobert.codegpt.settings.configuration.Placeholder
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettingsState
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest
 import ee.carlrobert.llm.client.openai.completion.request.OpenAITextCompletionRequest
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
-import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.nio.charset.StandardCharsets
 
 object CodeCompletionRequestFactory {
@@ -41,20 +43,15 @@ object CodeCompletionRequestFactory {
             requestBuilder.addHeader(entry.key, value)
         }
         val transformedBody = settings.body.entries.associate { (key, value) ->
-            if (value is String && "\$FIM_PROMPT" == value) {
-                key to settings.infillTemplate.buildPrompt(details.prefix, details.suffix)
-            } else {
-                key to value
-            }
+            key to transformValue(value, settings.infillTemplate, details)
         }
 
         try {
-            val requestBody = RequestBody.create(
-                null, ObjectMapper()
-                    .writerWithDefaultPrettyPrinter()
-                    .writeValueAsString(transformedBody)
-                    .toByteArray(StandardCharsets.UTF_8)
-            )
+            val requestBody = ObjectMapper()
+                .writerWithDefaultPrettyPrinter()
+                .writeValueAsString(transformedBody)
+                .toByteArray(StandardCharsets.UTF_8)
+                .toRequestBody("application/json".toMediaType())
             return requestBuilder.post(requestBody).build()
         } catch (e: JsonProcessingException) {
             throw RuntimeException(e)
@@ -82,5 +79,19 @@ object CodeCompletionRequestFactory {
             return settings.localModelInfillPromptTemplate
         }
         return LlamaModel.findByHuggingFaceModel(settings.huggingFaceModel).infillPromptTemplate
+    }
+
+    private fun transformValue(
+        value: Any,
+        template: InfillPromptTemplate,
+        details: InfillRequestDetails
+    ): Any {
+        if (value !is String) return value
+        return when (value) {
+            "$" + Placeholder.FIM_PROMPT -> template.buildPrompt(details.prefix, details.suffix)
+            "$" + Placeholder.PREFIX -> details.prefix
+            "$" + Placeholder.SUFFIX -> details.suffix
+            else -> value
+        }
     }
 }

@@ -106,22 +106,21 @@ class CustomServiceForm {
     }
 
     fun applyChanges() {
-        service<CustomServiceSettings>().loadState(
-            CustomServiceState().apply {
-                template = templateComboBox.item
-                chatCompletionSettings = CustomServiceChatCompletionSettingsState().apply {
-                    url = chatCompletionsForm.url
-                    headers = chatCompletionsForm.headers
-                    body = chatCompletionsForm.body
-                }
-                codeCompletionSettings = CustomServiceCodeCompletionSettingsState().apply {
-                    codeCompletionsEnabled = codeCompletionsForm.codeCompletionsEnabled
-                    infillTemplate = codeCompletionsForm.infillTemplate
-                    url = codeCompletionsForm.url
-                    headers = codeCompletionsForm.headers
-                    body = codeCompletionsForm.body
-                }
-            })
+        service<CustomServiceSettings>().state.run {
+            template = templateComboBox.item
+            chatCompletionSettings = CustomServiceChatCompletionSettingsState().apply {
+                url = chatCompletionsForm.url
+                headers = chatCompletionsForm.headers
+                body = chatCompletionsForm.body
+            }
+            codeCompletionSettings = CustomServiceCodeCompletionSettingsState().apply {
+                codeCompletionsEnabled = codeCompletionsForm.codeCompletionsEnabled
+                infillTemplate = codeCompletionsForm.infillTemplate
+                url = codeCompletionsForm.url
+                headers = codeCompletionsForm.headers
+                body = codeCompletionsForm.body
+            }
+        }
     }
 
     fun resetForm() {

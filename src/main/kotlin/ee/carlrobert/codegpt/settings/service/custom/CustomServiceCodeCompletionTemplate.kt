@@ -28,7 +28,14 @@ enum class CustomServiceCodeCompletionTemplate(
     OPENAI(
         "https://api.openai.com/v1/completions",
         getDefaultHeaders("Authorization", "Bearer \$CUSTOM_SERVICE_API_KEY"),
-        getDefaultBodyParams(mapOf("model" to "gpt-3.5-turbo-instruct"))
+        mutableMapOf(
+            "stream" to true,
+            "prompt" to "\$PREFIX",
+            "suffix" to "\$SUFFIX",
+            "model" to "gpt-3.5-turbo-instruct",
+            "temperature" to 0.2,
+            "max_tokens" to 24
+        )
     ),
     TOGETHER(
         "https://api.together.xyz/v1/completions",

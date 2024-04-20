@@ -4,6 +4,7 @@ import com.intellij.icons.AllIcons.General
 import com.intellij.ide.HelpTooltip
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.ui.MessageType
+import com.intellij.openapi.ui.panel.ComponentPanelBuilder
 import com.intellij.ui.EnumComboBoxModel
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBLabel
@@ -14,6 +15,7 @@ import ee.carlrobert.codegpt.codecompletions.CodeCompletionRequestFactory
 import ee.carlrobert.codegpt.codecompletions.InfillPromptTemplate
 import ee.carlrobert.codegpt.codecompletions.InfillRequestDetails
 import ee.carlrobert.codegpt.completions.CompletionRequestService
+import ee.carlrobert.codegpt.settings.configuration.Placeholder
 import ee.carlrobert.codegpt.ui.OverlayUtil
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails
 import ee.carlrobert.llm.completion.CompletionEventListener
@@ -102,8 +104,28 @@ class CustomServiceCodeCompletionForm(state: CustomServiceCodeCompletionSettings
                 }
             )
             .addComponent(tabbedPane)
+            .addComponent(ComponentPanelBuilder.createCommentComponent(getHtmlDescription(), true, 100))
             .addComponentFillVertically(JPanel(), 0)
             .panel
+
+    private fun getHtmlDescription(): String {
+        val placeholderDescriptions = listOf(
+            Placeholder.FIM_PROMPT,
+            Placeholder.PREFIX,
+            Placeholder.SUFFIX
+        ).joinToString("\n") {
+            "<li><strong>\$${it.name}</strong>: ${it.description}</li>"
+        }
+
+        return buildString {
+            append("<html>\n")
+            append("<body>\n")
+            append("<p>Use the following placeholders to insert dynamic values:</p>\n")
+            append("<ul>$placeholderDescriptions</ul>\n")
+            append("</body>\n")
+            append("</html>")
+        }
+    }
 
     fun resetForm(settings: CustomServiceCodeCompletionSettingsState) {
         featureEnabledCheckBox.isSelected = settings.codeCompletionsEnabled
