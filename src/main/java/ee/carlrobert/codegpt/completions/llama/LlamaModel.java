@@ -97,7 +97,10 @@ public enum LlamaModel {
           HuggingFaceModel.LLAMA_3_8B_Q4_K_M,
           HuggingFaceModel.LLAMA_3_8B_Q5_K_M,
           HuggingFaceModel.LLAMA_3_8B_Q6_K,
-          HuggingFaceModel.LLAMA_3_8B_Q8_0));
+          HuggingFaceModel.LLAMA_3_8B_Q8_0,
+          HuggingFaceModel.LLAMA_3_70B_IQ1,
+          HuggingFaceModel.LLAMA_3_70B_IQ2_XS,
+          HuggingFaceModel.LLAMA_3_70B_Q4_K_M));
 
   private final String label;
   private final String description;
