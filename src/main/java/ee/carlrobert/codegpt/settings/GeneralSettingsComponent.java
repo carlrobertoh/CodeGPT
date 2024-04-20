@@ -12,8 +12,18 @@ import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
 import ee.carlrobert.codegpt.CodeGPTBundle;
-import ee.carlrobert.codegpt.settings.service.ServiceSelectionForm;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
+import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettings;
+import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettingsForm;
+import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
+import ee.carlrobert.codegpt.settings.service.azure.AzureSettingsForm;
+import ee.carlrobert.codegpt.settings.service.custom.CustomServiceForm;
+import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
+import ee.carlrobert.codegpt.settings.service.llama.form.LlamaSettingsForm;
+import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
+import ee.carlrobert.codegpt.settings.service.openai.OpenAISettingsForm;
+import ee.carlrobert.codegpt.settings.service.you.YouSettings;
+import ee.carlrobert.codegpt.settings.service.you.YouSettingsForm;
 import java.awt.CardLayout;
 import java.awt.Component;
 import java.awt.Container;
@@ -29,21 +39,30 @@ public class GeneralSettingsComponent {
   private final JPanel mainPanel;
   private final JBTextField displayNameField;
   private final ComboBox<ServiceType> serviceComboBox;
-  private final ServiceSelectionForm serviceSelectionForm;
+  private final OpenAISettingsForm openAISettingsForm;
+  private final CustomServiceForm customConfigurationSettingsForm;
+  private final AnthropicSettingsForm anthropicSettingsForm;
+  private final AzureSettingsForm azureSettingsForm;
+  private final YouSettingsForm youSettingsForm;
+  private final LlamaSettingsForm llamaSettingsForm;
 
   public GeneralSettingsComponent(Disposable parentDisposable, GeneralSettings settings) {
     displayNameField = new JBTextField(settings.getState().getDisplayName(), 20);
-    serviceSelectionForm = new ServiceSelectionForm(parentDisposable);
+    openAISettingsForm = new OpenAISettingsForm(OpenAISettings.getCurrentState());
+    customConfigurationSettingsForm = new CustomServiceForm();
+    anthropicSettingsForm = new AnthropicSettingsForm(AnthropicSettings.getCurrentState());
+    azureSettingsForm = new AzureSettingsForm(AzureSettings.getCurrentState());
+    youSettingsForm = new YouSettingsForm(YouSettings.getCurrentState(), parentDisposable);
+    llamaSettingsForm = new LlamaSettingsForm(LlamaSettings.getCurrentState());
+
     var cardLayout = new DynamicCardLayout();
     var cards = new JPanel(cardLayout);
-    cards.add(serviceSelectionForm.getOpenAISettingsForm().getForm(), OPENAI.getCode());
-    cards.add(
-        serviceSelectionForm.getCustomConfigurationSettingsForm().getForm(),
-        CUSTOM_OPENAI.getCode());
-    cards.add(serviceSelectionForm.getAnthropicSettingsForm().getForm(), ANTHROPIC.getCode());
-    cards.add(serviceSelectionForm.getAzureSettingsForm().getForm(), AZURE.getCode());
-    cards.add(serviceSelectionForm.getYouSettingsForm(), YOU.getCode());
-    cards.add(serviceSelectionForm.getLlamaSettingsForm(), LLAMA_CPP.getCode());
+    cards.add(openAISettingsForm.getForm(), OPENAI.getCode());
+    cards.add(customConfigurationSettingsForm.getForm(), CUSTOM_OPENAI.getCode());
+    cards.add(anthropicSettingsForm.getForm(), ANTHROPIC.getCode());
+    cards.add(azureSettingsForm.getForm(), AZURE.getCode());
+    cards.add(youSettingsForm, YOU.getCode());
+    cards.add(llamaSettingsForm, LLAMA_CPP.getCode());
     var serviceComboBoxModel = new DefaultComboBoxModel<ServiceType>();
     serviceComboBoxModel.addAll(Arrays.stream(ServiceType.values()).toList());
     serviceComboBox = new ComboBox<>(serviceComboBoxModel);
@@ -63,6 +82,30 @@ public class GeneralSettingsComponent {
         .getPanel();
   }
 
+  public OpenAISettingsForm getOpenAISettingsForm() {
+    return openAISettingsForm;
+  }
+
+  public CustomServiceForm getCustomConfigurationSettingsForm() {
+    return customConfigurationSettingsForm;
+  }
+
+  public AnthropicSettingsForm getAnthropicSettingsForm() {
+    return anthropicSettingsForm;
+  }
+
+  public AzureSettingsForm getAzureSettingsForm() {
+    return azureSettingsForm;
+  }
+
+  public LlamaSettingsForm getLlamaSettingsForm() {
+    return llamaSettingsForm;
+  }
+
+  public YouSettingsForm getYouSettingsForm() {
+    return youSettingsForm;
+  }
+
   public ServiceType getSelectedService() {
     return serviceComboBox.getItem();
   }
@@ -79,16 +122,21 @@ public class GeneralSettingsComponent {
     return displayNameField;
   }
 
-  public ServiceSelectionForm getServiceSelectionForm() {
-    return serviceSelectionForm;
-  }
-
   public String getDisplayName() {
     return displayNameField.getText();
   }
 
   public void setDisplayName(String displayName) {
     displayNameField.setText(displayName);
+  }
+
+  public void resetForms() {
+    openAISettingsForm.resetForm();
+    customConfigurationSettingsForm.resetForm();
+    anthropicSettingsForm.resetForm();
+    azureSettingsForm.resetForm();
+    youSettingsForm.resetForm();
+    llamaSettingsForm.resetForm();
   }
 
   static class DynamicCardLayout extends CardLayout {

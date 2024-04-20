@@ -9,8 +9,8 @@
     <projectListeners>
         <listener topic="com.intellij.codeInsight.lookup.LookupManagerListener"
                   class="ee.carlrobert.codegpt.completions.MethodNameLookupListener"/>
-      <listener class="ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowListener"
-                topic="com.intellij.openapi.wm.ex.ToolWindowManagerListener"/>
+        <listener topic="com.intellij.openapi.wm.ex.ToolWindowManagerListener"
+                  class="ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowListener"/>
     </projectListeners>
 
     <extensions defaultExtensionNs="com.intellij">
@@ -33,7 +33,6 @@
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.service.azure.AzureSettings"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettings"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.service.openai.OpenAISettings"/>
-        <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.service.you.YouSettings"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.service.llama.LlamaSettings"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.IncludedFilesSettings"/>
