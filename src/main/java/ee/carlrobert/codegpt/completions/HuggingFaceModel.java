@@ -43,16 +43,31 @@ public enum HuggingFaceModel {
   WIZARD_CODER_PYTHON_13B_Q5(13, 5, "WizardCoder-Python-13B-V1.0-GGUF"),
   WIZARD_CODER_PYTHON_34B_Q3(34, 3, "WizardCoder-Python-34B-V1.0-GGUF"),
   WIZARD_CODER_PYTHON_34B_Q4(34, 4, "WizardCoder-Python-34B-V1.0-GGUF"),
-  WIZARD_CODER_PYTHON_34B_Q5(34, 5, "WizardCoder-Python-34B-V1.0-GGUF");
+  WIZARD_CODER_PYTHON_34B_Q5(34, 5, "WizardCoder-Python-34B-V1.0-GGUF"),
+
+  LLAMA_3_8B_IQ3_M(8, 3, "Meta-Llama-3-8B-Instruct-IQ3_M.gguf", "lmstudio-community"),
+  LLAMA_3_8B_Q4_K_M(8, 4, "Meta-Llama-3-8B-Instruct-Q4_K_M.gguf", "lmstudio-community"),
+  LLAMA_3_8B_Q5_K_M(8, 5, "Meta-Llama-3-8B-Instruct-Q5_K_M.gguf", "lmstudio-community"),
+  LLAMA_3_8B_Q6_K(8, 6, "Meta-Llama-3-8B-Instruct-Q6_K.gguf", "lmstudio-community"),
+  LLAMA_3_8B_Q8_0(8, 8, "Meta-Llama-3-8B-Instruct-Q8_0.gguf", "lmstudio-community"),
+  LLAMA_3_70B_IQ1(70, 1, "Meta-Llama-3-70B-Instruct-IQ1_M.gguf", "lmstudio-community"),
+  LLAMA_3_70B_IQ2_XS(70, 2, "Meta-Llama-3-70B-Instruct-IQ2_XS.gguf", "lmstudio-community"),
+  LLAMA_3_70B_Q4_K_M(70, 4, "Meta-Llama-3-70B-Instruct-Q4_K_M.gguf", "lmstudio-community");
 
   private final int parameterSize;
   private final int quantization;
   private final String modelName;
+  private final String user;
 
   HuggingFaceModel(int parameterSize, int quantization, String modelName) {
+    this(parameterSize, quantization, modelName, "TheBloke");
+  }
+
+  HuggingFaceModel(int parameterSize, int quantization, String modelName, String user) {
     this.parameterSize = parameterSize;
     this.quantization = quantization;
     this.modelName = modelName;
+    this.user = user;
   }
 
   public int getParameterSize() {
@@ -68,13 +83,16 @@ public enum HuggingFaceModel {
   }
 
   public String getFileName() {
-    return modelName.toLowerCase().replace("-gguf", format(".Q%d_K_M.gguf", quantization));
+    if ("TheBloke".equals(user)) {
+      return modelName.toLowerCase().replace("-gguf", format(".Q%d_K_M.gguf", quantization));
+    }
+    return modelName;
   }
 
   public URL getFileURL() {
     try {
       return new URL(
-          format("https://huggingface.co/TheBloke/%s/resolve/main/%s", modelName, getFileName()));
+          "https://huggingface.co/%s/%s/resolve/main/%s".formatted(user, getDirectory(), getFileName()));
     } catch (MalformedURLException ex) {
       throw new RuntimeException(ex);
     }
@@ -82,10 +100,18 @@ public enum HuggingFaceModel {
 
   public URL getHuggingFaceURL() {
     try {
-      return new URL("https://huggingface.co/TheBloke/" + modelName);
+      return new URL("https://huggingface.co/%s/%s".formatted(user, getDirectory()));
     } catch (MalformedURLException ex) {
       throw new RuntimeException(ex);
     }
+  }
+
+  private String getDirectory() {
+    if ("lmstudio-community".equals(user)) {
+      // Meta-Llama-3-8B-Instruct-Q4_K_M.gguf -> Meta-Llama-3-8B-Instruct-GGUF
+      return modelName.replaceFirst("-[^.-]+\\.gguf$", "-GGUF");
+    }
+    return modelName;
   }
 
   @Override
