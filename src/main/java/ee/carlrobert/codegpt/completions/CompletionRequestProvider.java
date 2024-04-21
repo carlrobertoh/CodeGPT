@@ -180,6 +180,7 @@ public class CompletionRequestProvider {
         .setTop_p(settings.getTopP())
         .setMin_p(settings.getMinP())
         .setRepeat_penalty(settings.getRepeatPenalty())
+        .setStop(promptTemplate.getStopTokens())
         .build();
   }
 
