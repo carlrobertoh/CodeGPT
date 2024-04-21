@@ -1,6 +1,5 @@
 package ee.carlrobert.codegpt.codecompletions
 
-import com.intellij.codeInsight.inline.completion.InlineCompletionRequest
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.util.TextRange
 import ee.carlrobert.codegpt.EncodingManager
@@ -11,13 +10,6 @@ class InfillRequestDetails(val prefix: String, val suffix: String) {
     companion object {
         private const val MAX_OFFSET = 10_000
         private const val MAX_PROMPT_TOKENS = 128
-
-        fun fromInlineCompletionRequest(request: InlineCompletionRequest): InfillRequestDetails {
-            return fromDocumentWithMaxOffset(
-                request.editor.document,
-                request.editor.caretModel.offset,
-            )
-        }
 
         fun fromDocumentWithMaxOffset(
             document: Document,
