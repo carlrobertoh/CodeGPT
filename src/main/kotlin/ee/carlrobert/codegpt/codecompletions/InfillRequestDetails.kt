@@ -19,7 +19,7 @@ class InfillRequestDetails(val prefix: String, val suffix: String) {
             )
         }
 
-        private fun fromDocumentWithMaxOffset(
+        fun fromDocumentWithMaxOffset(
             document: Document,
             caretOffset: Int,
         ): InfillRequestDetails {

@@ -189,17 +189,17 @@ public class LlamaServerPreferencesForm {
                 createComment("settingsConfigurable.service.llama.threads.comment"))
             .addLabeledComponent(
                 CodeGPTBundle.get("settingsConfigurable.service.llama.additionalParameters.label"),
-                    additionalParametersField)
-                .addComponentToRightColumn(
-                        createComment(
-                            "settingsConfigurable.service.llama.additionalParameters.comment"))
-                .addLabeledComponent(
-                    CodeGPTBundle.get(
-                        "settingsConfigurable.service.llama.additionalBuildParameters.label"),
-                    additionalBuildParametersField)
-                .addComponentToRightColumn(
-                    createComment(
-                        "settingsConfigurable.service.llama.additionalBuildParameters.comment"))
+                additionalParametersField)
+            .addComponentToRightColumn(
+                createComment(
+                    "settingsConfigurable.service.llama.additionalParameters.comment"))
+            .addLabeledComponent(
+                CodeGPTBundle.get(
+                    "settingsConfigurable.service.llama.additionalBuildParameters.label"),
+                additionalBuildParametersField)
+            .addComponentToRightColumn(
+                createComment(
+                    "settingsConfigurable.service.llama.additionalBuildParameters.comment"))
             .addVerticalGap(4)
             .addComponentFillVertically(new JPanel(), 0)
             .getPanel()))
@@ -354,9 +354,9 @@ public class LlamaServerPreferencesForm {
 
   public List<String> getListOfAdditionalParameters() {
     return Arrays.stream(additionalParametersField.getText().split(","))
-            .map(String::trim)
-            .filter(s -> !s.isBlank())
-            .toList();
+        .map(String::trim)
+        .filter(s -> !s.isBlank())
+        .toList();
   }
 
   public String getAdditionalBuildParameters() {
@@ -365,9 +365,9 @@ public class LlamaServerPreferencesForm {
 
   public List<String> getListOfAdditionalBuildParameters() {
     return Arrays.stream(additionalBuildParametersField.getText().split(","))
-            .map(String::trim)
-            .filter(s -> !s.isBlank())
-            .toList();
+        .map(String::trim)
+        .filter(s -> !s.isBlank())
+        .toList();
   }
 
   public PromptTemplate getPromptTemplate() {
