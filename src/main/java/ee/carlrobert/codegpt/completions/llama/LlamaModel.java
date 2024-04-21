@@ -99,7 +99,21 @@ public enum LlamaModel {
           HuggingFaceModel.LLAMA_3_8B_Q8_0,
           HuggingFaceModel.LLAMA_3_70B_IQ1,
           HuggingFaceModel.LLAMA_3_70B_IQ2_XS,
-          HuggingFaceModel.LLAMA_3_70B_Q4_K_M));
+          HuggingFaceModel.LLAMA_3_70B_Q4_K_M)),
+  DBRX(
+      "DBRX",
+      "DBRX is a Mixture-of-Experts (MoE) model with 132B total parameters and 36B live parameters."
+          + "Generation speed is significantly faster than LLaMA2-70B, while at the same time "
+          + "beating other open source models, such as, LLaMA2-70B, Mixtral, and Grok-1 on "
+          + "language understanding, programming, math, and logic.",
+      PromptTemplate.CHAT_ML,
+      List.of(
+          HuggingFaceModel.DBRX_12B_Q3_K_M,
+          HuggingFaceModel.DBRX_12B_Q4_0,
+          HuggingFaceModel.DBRX_12B_Q6_K,
+          HuggingFaceModel.DBRX_12B_Q8_0,
+          HuggingFaceModel.DBRX_12B_Q3_S,
+          HuggingFaceModel.DBRX_12B_Q3_XXS));
 
   private final String label;
   private final String description;
