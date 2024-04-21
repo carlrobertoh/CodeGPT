@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.settings.service.custom
+package ee.carlrobert.codegpt.settings.service.custom.form
 
 import com.intellij.icons.AllIcons.General
 import com.intellij.ide.HelpTooltip
@@ -16,6 +16,8 @@ import ee.carlrobert.codegpt.codecompletions.InfillPromptTemplate
 import ee.carlrobert.codegpt.codecompletions.InfillRequestDetails
 import ee.carlrobert.codegpt.completions.CompletionRequestService
 import ee.carlrobert.codegpt.settings.configuration.Placeholder
+import ee.carlrobert.codegpt.settings.service.custom.CustomServiceCodeCompletionSettingsState
+import ee.carlrobert.codegpt.settings.service.custom.CustomServiceFormTabbedPane
 import ee.carlrobert.codegpt.ui.OverlayUtil
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails
 import ee.carlrobert.llm.completion.CompletionEventListener

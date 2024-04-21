@@ -18,6 +18,20 @@
         <postStartupActivity implementation="ee.carlrobert.codegpt.CodeGPTUpdateActivity"/>
         <applicationConfigurable id="settings.codegpt" parentId="tools" displayName="CodeGPT"
             instance="ee.carlrobert.codegpt.settings.GeneralSettingsConfigurable"/>
+        <applicationConfigurable id="settings.codegpt.services" parentId="settings.codegpt" displayName="Services"
+          instance="ee.carlrobert.codegpt.settings.service.ServiceConfigurable"/>
+        <applicationConfigurable id="settings.codegpt.services.openai" parentId="settings.codegpt.services" displayName="OpenAI"
+          instance="ee.carlrobert.codegpt.settings.service.OpenAIServiceConfigurable"/>
+        <applicationConfigurable id="settings.codegpt.services.custom" parentId="settings.codegpt.services" displayName="Custom OpenAI"
+          instance="ee.carlrobert.codegpt.settings.service.custom.CustomServiceConfigurable"/>
+        <applicationConfigurable id="settings.codegpt.services.azure" parentId="settings.codegpt.services" displayName="Azure"
+          instance="ee.carlrobert.codegpt.settings.service.AzureServiceConfigurable"/>
+        <applicationConfigurable id="settings.codegpt.services.anthropic" parentId="settings.codegpt.services" displayName="Anthropic"
+          instance="ee.carlrobert.codegpt.settings.service.AnthropicServiceConfigurable"/>
+        <applicationConfigurable id="settings.codegpt.services.you" parentId="settings.codegpt.services" displayName="You.com"
+          instance="ee.carlrobert.codegpt.settings.service.YouServiceConfigurable"/>
+        <applicationConfigurable id="settings.codegpt.services.llama_cpp" parentId="settings.codegpt.services" displayName="LLaMA C/C++ Port"
+          instance="ee.carlrobert.codegpt.settings.service.LlamaServiceConfigurable"/>
         <applicationConfigurable id="settings.codegpt.configuration" parentId="settings.codegpt" displayName="Configuration"
             instance="ee.carlrobert.codegpt.settings.configuration.ConfigurationConfigurable"/>
         <applicationConfigurable id="settings.codegpt.advanced" parentId="settings.codegpt" displayName="Advanced Settings"

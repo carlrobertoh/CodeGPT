@@ -1,9 +1,7 @@
 package ee.carlrobert.codegpt.settings.service.anthropic;
 
 import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.ANTHROPIC_API_KEY;
-import static ee.carlrobert.codegpt.ui.UIUtil.withEmptyLeftBorder;
 
-import com.intellij.ui.TitledSeparator;
 import com.intellij.ui.components.JBPasswordField;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
@@ -30,8 +28,7 @@ public class AnthropicSettingsForm {
 
   public JPanel getForm() {
     return FormBuilder.createFormBuilder()
-        .addComponent(new TitledSeparator(CodeGPTBundle.get("shared.configuration")))
-        .addComponent(withEmptyLeftBorder(UI.PanelFactory.grid()
+        .addComponent(UI.PanelFactory.grid()
             .add(UI.PanelFactory.panel(apiKeyField)
                 .withLabel(CodeGPTBundle.get("settingsConfigurable.shared.apiKey.label"))
                 .resizeX(false)
@@ -49,7 +46,7 @@ public class AnthropicSettingsForm {
                 .withComment(CodeGPTBundle.get(
                     "settingsConfigurable.service.anthropic.model.comment"))
                 .resizeX(false))
-            .createPanel()))
+            .createPanel())
         .addComponentFillVertically(new JPanel(), 0)
         .getPanel();
   }

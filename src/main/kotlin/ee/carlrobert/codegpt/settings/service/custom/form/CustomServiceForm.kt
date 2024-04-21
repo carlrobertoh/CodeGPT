@@ -1,17 +1,20 @@
-package ee.carlrobert.codegpt.settings.service.custom
+package ee.carlrobert.codegpt.settings.service.custom.form
 
 import com.intellij.icons.AllIcons.General
 import com.intellij.ide.HelpTooltip
 import com.intellij.openapi.components.service
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.EnumComboBoxModel
-import com.intellij.ui.TitledSeparator
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBPasswordField
 import com.intellij.util.ui.FormBuilder
 import ee.carlrobert.codegpt.CodeGPTBundle
 import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey
 import ee.carlrobert.codegpt.credentials.CredentialsStore.getCredential
+import ee.carlrobert.codegpt.settings.service.custom.CustomServiceChatCompletionSettingsState
+import ee.carlrobert.codegpt.settings.service.custom.CustomServiceCodeCompletionSettingsState
+import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings
+import ee.carlrobert.codegpt.settings.service.custom.template.CustomServiceTemplate
 import ee.carlrobert.codegpt.ui.UIUtil
 import java.awt.FlowLayout
 import java.net.MalformedURLException
@@ -65,29 +68,24 @@ class CustomServiceForm {
     }
 
     fun getForm(): JPanel = FormBuilder.createFormBuilder()
-        .addComponent(TitledSeparator(CodeGPTBundle.get("shared.configuration")))
-        .addComponent(
-            FormBuilder.createFormBuilder()
-                .setFormLeftIndent(16)
-                .addLabeledComponent(
-                    CodeGPTBundle.get("settingsConfigurable.service.custom.openai.presetTemplate.label"),
-                    JPanel(FlowLayout(FlowLayout.LEADING, 0, 0)).apply {
-                        add(templateComboBox)
-                        add(Box.createHorizontalStrut(8))
-                        add(templateHelpText)
-                    }
-                )
-                .addLabeledComponent(
-                    CodeGPTBundle.get("settingsConfigurable.shared.apiKey.label"),
-                    apiKeyField
-                )
-                .addComponentToRightColumn(
-                    UIUtil.createComment("settingsConfigurable.service.custom.openai.apiKey.comment")
-                )
-                .addVerticalGap(4)
-                .addComponent(tabbedPane)
-                .panel
+        .addLabeledComponent(
+            CodeGPTBundle.get("settingsConfigurable.service.custom.openai.presetTemplate.label"),
+            JPanel(FlowLayout(FlowLayout.LEADING, 0, 0)).apply {
+                add(templateComboBox)
+                add(Box.createHorizontalStrut(8))
+                add(templateHelpText)
+            }
         )
+        .addLabeledComponent(
+            CodeGPTBundle.get("settingsConfigurable.shared.apiKey.label"),
+            apiKeyField
+        )
+        .addComponentToRightColumn(
+            UIUtil.createComment("settingsConfigurable.service.custom.openai.apiKey.comment")
+        )
+        .addVerticalGap(4)
+        .addComponent(tabbedPane)
+        .addComponentFillVertically(JPanel(), 0)
         .panel
 
     fun getApiKey() = String(apiKeyField.password).ifEmpty { null }
@@ -102,7 +100,6 @@ class CustomServiceForm {
                 || codeCompletionsForm.url != codeCompletionSettings.url
                 || codeCompletionsForm.headers != codeCompletionSettings.headers
                 || codeCompletionsForm.body != codeCompletionSettings.body
-                || getApiKey() != getCredential(CredentialKey.CUSTOM_SERVICE_API_KEY)
     }
 
     fun applyChanges() {
@@ -126,6 +123,7 @@ class CustomServiceForm {
     fun resetForm() {
         service<CustomServiceSettings>().state.run {
             templateComboBox.item = template
+            apiKeyField.text = getCredential(CredentialKey.CUSTOM_SERVICE_API_KEY)
             chatCompletionsForm.resetForm(chatCompletionSettings)
             codeCompletionsForm.resetForm(codeCompletionSettings)
         }

@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.settings.service.custom
+package ee.carlrobert.codegpt.settings.service.custom.template
 
 enum class CustomServiceTemplate(
     val providerName: String,
