@@ -43,11 +43,11 @@ class PromptTemplateTest {
     val prompt = LLAMA_3.buildPrompt(SYSTEM_PROMPT, USER_PROMPT, listOf())
 
     assertThat(prompt).isEqualTo("""
-      <|start_header_id|>system<|end_header_id|>
+      <|begin_of_text|><|start_header_id|>system<|end_header_id|>
 
       TEST_SYSTEM_PROMPT<|eot_id|><|start_header_id|>user<|end_header_id|>
 
-      TEST_USER_PROMPT<|eot_id|>""".trimIndent()
+      TEST_USER_PROMPT<|eot_id|><|start_header_id|>assistant<|end_header_id|>""".trimIndent()
     )
   }
 
@@ -58,9 +58,9 @@ class PromptTemplateTest {
     val prompt = LLAMA_3.buildPrompt(systemPrompt, USER_PROMPT, listOf())
 
     assertThat(prompt).isEqualTo("""
-      <|start_header_id|>user<|end_header_id|>
+      <|begin_of_text|><|start_header_id|>user<|end_header_id|>
 
-      TEST_USER_PROMPT<|eot_id|>""".trimIndent()
+      TEST_USER_PROMPT<|eot_id|><|start_header_id|>assistant<|end_header_id|>""".trimIndent()
     )
   }
 
@@ -69,7 +69,7 @@ class PromptTemplateTest {
     val prompt = LLAMA_3.buildPrompt(SYSTEM_PROMPT, USER_PROMPT, HISTORY)
 
     assertThat(prompt).isEqualTo("""
-      <|start_header_id|>system<|end_header_id|>
+      <|begin_of_text|><|start_header_id|>system<|end_header_id|>
 
       TEST_SYSTEM_PROMPT<|eot_id|><|start_header_id|>user<|end_header_id|>
   
@@ -81,7 +81,7 @@ class PromptTemplateTest {
 
       TEST_PREV_RESPONSE_2<|eot_id|><|start_header_id|>user<|end_header_id|>
 
-      TEST_USER_PROMPT<|eot_id|>""".trimIndent())
+      TEST_USER_PROMPT<|eot_id|><|start_header_id|>assistant<|end_header_id|>""".trimIndent())
   }
 
   @ParameterizedTest
@@ -91,7 +91,7 @@ class PromptTemplateTest {
     val prompt = LLAMA_3.buildPrompt(systemPrompt, USER_PROMPT, HISTORY)
 
     assertThat(prompt).isEqualTo("""
-      <|start_header_id|>user<|end_header_id|>
+      <|begin_of_text|><|start_header_id|>user<|end_header_id|>
   
       TEST_PREV_PROMPT_1<|eot_id|><|start_header_id|>assistant<|end_header_id|>
 
@@ -101,7 +101,7 @@ class PromptTemplateTest {
 
       TEST_PREV_RESPONSE_2<|eot_id|><|start_header_id|>user<|end_header_id|>
 
-      TEST_USER_PROMPT<|eot_id|>""".trimIndent())
+      TEST_USER_PROMPT<|eot_id|><|start_header_id|>assistant<|end_header_id|>""".trimIndent())
   }
 
   @Test
