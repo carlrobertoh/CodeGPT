@@ -42,6 +42,12 @@ Stuck on naming a method or variable? CodeGPT offers context-aware suggestions, 
 
 ![Name Suggestions](https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/method-name-suggestions.png?raw=true)
 
+### OpenAI Compatibility
+
+Interested in trying out 800t/s or getting access to new models as soon as they're released? We provide integration with most cloud providers that are OpenAI-compatible, such as Together.ai, Grok, Anyscale, and others, as well as the option to customize your own setup.
+
+![OpenAI Compatibility](https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/openai-compatibility.png?raw=true)
+
 ### Offline Development Support
 
 CodeGPT supports a completely offline development workflow by allowing you to connect to a locally hosted language model. This ensures that your code and data remain private and secure within your local environment, eliminating the need for an internet connection or sharing sensitive information with third-party servers.
