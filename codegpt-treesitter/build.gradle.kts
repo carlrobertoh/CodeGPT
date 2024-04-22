@@ -9,7 +9,7 @@ dependencies {
     implementation("io.github.bonede:tree-sitter-dockerfile:0.1.2")
     implementation("io.github.bonede:tree-sitter-dart:master")
     implementation("io.github.bonede:tree-sitter-css:0.20.0")
-    implementation("io.github.bonede:tree-sitter-cpp:0.20.3")
+    implementation("io.github.bonede:tree-sitter-cpp:0.22.0")
     implementation("io.github.bonede:tree-sitter-c-sharp:0.20.0")
     implementation("io.github.bonede:tree-sitter-fortran:master")
     implementation("io.github.bonede:tree-sitter-gitattributes:0.1.3")
