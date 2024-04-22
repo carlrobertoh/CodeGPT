@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.6.3-233] - 2024-04-22
+
 ### Added
 
 - Support for Llama 3 model via llama.cpp port (#479)
@@ -444,7 +446,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `OPENAI_API_KEY` persistence, key is saved in the OS password safe from now on
 
-[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.6.2-233...HEAD
+[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.6.3-233...HEAD
+[2.6.3-233]: https://github.com/carlrobertoh/CodeGPT/compare/v2.6.2-233...v2.6.3-233
 [2.6.2-233]: https://github.com/carlrobertoh/CodeGPT/compare/v2.6.1-233...v2.6.2-233
 [2.6.1-233]: https://github.com/carlrobertoh/CodeGPT/compare/v2.6.0-233...v2.6.1-233
 [2.6.0-233]: https://github.com/carlrobertoh/CodeGPT/compare/v2.5.1...v2.6.0-233
