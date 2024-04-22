@@ -27,7 +27,7 @@ dependencies {
     implementation("io.github.bonede:tree-sitter-perl:0.4.0")
     implementation("io.github.bonede:tree-sitter-ruby:0.19.0")
     implementation("io.github.bonede:tree-sitter-rust:0.20.4")
-    implementation("io.github.bonede:tree-sitter-scala:0.20.2")
+    implementation("io.github.bonede:tree-sitter-scala:0.21.0")
     implementation("io.github.bonede:tree-sitter-scss:1.0.0")
     implementation("io.github.bonede:tree-sitter-svelte:0.11.0")
     implementation("io.github.bonede:tree-sitter-swift:0.3.6")
