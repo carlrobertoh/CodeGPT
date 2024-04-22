@@ -29,6 +29,7 @@ import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionRequest;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionStandardMessage;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionEventSourceListener;
+import ee.carlrobert.llm.client.openai.completion.OpenAITextCompletionEventSourceListener;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionStandardMessage;
 import ee.carlrobert.llm.client.openai.completion.response.OpenAIChatCompletionResponse;
@@ -55,6 +56,15 @@ public final class CompletionRequestService {
     return ApplicationManager.getApplication().getService(CompletionRequestService.class);
   }
 
+  public EventSource getCustomOpenAICompletionAsync(
+      Request customRequest,
+      CompletionEventListener<String> eventListener) {
+    var httpClient = CompletionClientProvider.getDefaultClientBuilder().build();
+    return EventSources.createFactory(httpClient).newEventSource(
+        customRequest,
+        new OpenAITextCompletionEventSourceListener(eventListener));
+  }
+
   public EventSource getCustomOpenAIChatCompletionAsync(
       Request customRequest,
       CompletionEventListener<String> eventListener) {
@@ -76,7 +86,10 @@ public final class CompletionRequestService {
           eventListener);
       case CUSTOM_OPENAI -> getCustomOpenAIChatCompletionAsync(
           requestProvider.buildCustomOpenAIChatCompletionRequest(
-              CustomServiceSettings.getCurrentState(),
+              ApplicationManager.getApplication()
+                  .getService(CustomServiceSettings.class)
+                  .getState()
+                  .getChatCompletionSettings(),
               callParameters),
           eventListener);
       case ANTHROPIC -> CompletionClientProvider.getClaudeClient().getCompletionAsync(
@@ -93,21 +106,24 @@ public final class CompletionRequestService {
               callParameters.getMessage(),
               callParameters.getConversationType()),
           eventListener);
-      default -> throw new IllegalArgumentException();
     };
   }
 
   public EventSource getCodeCompletionAsync(
       InfillRequestDetails requestDetails,
       CompletionEventListener<String> eventListener) {
+    var httpClient = CompletionClientProvider.getDefaultClientBuilder().build();
     return switch (GeneralSettings.getCurrentState().getSelectedService()) {
       case OPENAI -> CompletionClientProvider.getOpenAIClient()
           .getCompletionAsync(
-              CodeCompletionRequestFactory.INSTANCE.buildOpenAIRequest(requestDetails),
+              CodeCompletionRequestFactory.buildOpenAIRequest(requestDetails),
               eventListener);
+      case CUSTOM_OPENAI -> EventSources.createFactory(httpClient).newEventSource(
+          CodeCompletionRequestFactory.buildCustomRequest(requestDetails),
+          new OpenAITextCompletionEventSourceListener(eventListener));
       case LLAMA_CPP -> CompletionClientProvider.getLlamaClient()
           .getChatCompletionAsync(
-              CodeCompletionRequestFactory.INSTANCE.buildLlamaRequest(requestDetails),
+              CodeCompletionRequestFactory.buildLlamaRequest(requestDetails),
               eventListener);
       default ->
           throw new IllegalArgumentException("Code completion not supported for selected service");
@@ -115,13 +131,13 @@ public final class CompletionRequestService {
   }
 
   public void generateCommitMessageAsync(
-      String prompt,
+      String systemPrompt,
+      String gitDiff,
       CompletionEventListener<String> eventListener) {
     var configuration = ConfigurationSettings.getCurrentState();
-    var commitMessagePrompt = configuration.getCommitMessagePrompt();
     var openaiRequest = new OpenAIChatCompletionRequest.Builder(List.of(
-        new OpenAIChatCompletionStandardMessage("system", commitMessagePrompt),
-        new OpenAIChatCompletionStandardMessage("user", prompt)))
+        new OpenAIChatCompletionStandardMessage("system", systemPrompt),
+        new OpenAIChatCompletionStandardMessage("user", gitDiff)))
         .setModel(OpenAISettings.getCurrentState().getModel())
         .build();
     var selectedService = GeneralSettings.getCurrentState().getSelectedService();
@@ -134,18 +150,18 @@ public final class CompletionRequestService {
         var httpClient = CompletionClientProvider.getDefaultClientBuilder().build();
         EventSources.createFactory(httpClient).newEventSource(
             CompletionRequestProvider.buildCustomOpenAICompletionRequest(
-                commitMessagePrompt,
-                prompt),
+                systemPrompt,
+                gitDiff),
             new OpenAIChatCompletionEventSourceListener(eventListener));
         break;
       case ANTHROPIC:
         var anthropicSettings = AnthropicSettings.getCurrentState();
         var claudeRequest = new ClaudeCompletionRequest();
-        claudeRequest.setSystem(commitMessagePrompt);
+        claudeRequest.setSystem(systemPrompt);
         claudeRequest.setStream(true);
         claudeRequest.setMaxTokens(configuration.getMaxTokens());
         claudeRequest.setModel(anthropicSettings.getModel());
-        claudeRequest.setMessages(List.of(new ClaudeCompletionStandardMessage("user", prompt)));
+        claudeRequest.setMessages(List.of(new ClaudeCompletionStandardMessage("user", gitDiff)));
         CompletionClientProvider.getClaudeClient()
             .getCompletionAsync(claudeRequest, eventListener);
         break;
@@ -164,7 +180,7 @@ public final class CompletionRequestService {
         } else {
           promptTemplate = settings.getRemoteModelPromptTemplate();
         }
-        var finalPrompt = promptTemplate.buildPrompt(commitMessagePrompt, prompt, List.of());
+        var finalPrompt = promptTemplate.buildPrompt(systemPrompt, gitDiff, List.of());
         CompletionClientProvider.getLlamaClient().getChatCompletionAsync(
             new LlamaCompletionRequest.Builder(finalPrompt)
                 .setN_predict(configuration.getMaxTokens())

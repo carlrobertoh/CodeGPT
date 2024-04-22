@@ -1,5 +1,7 @@
 package ee.carlrobert.codegpt.completions.llama;
 
+import static java.util.Collections.emptyList;
+
 import ee.carlrobert.codegpt.conversations.message.Message;
 import java.util.List;
 
@@ -55,6 +57,33 @@ public enum PromptTemplate {
           .toString();
     }
   },
+  LLAMA_3("Llama 3", List.of("<|eot_id|>")) {
+    @Override
+    public String buildPrompt(String systemPrompt, String userPrompt, List<Message> history) {
+      var prompt = new StringBuilder("<|begin_of_text|>");
+      if (systemPrompt != null && !systemPrompt.isBlank()) {
+        prompt
+            .append("<|start_header_id|>system<|end_header_id|>\n\n")
+            .append(systemPrompt)
+            .append("<|eot_id|>");
+      }
+
+      for (var message : history) {
+        prompt
+            .append("<|start_header_id|>user<|end_header_id|>\n\n")
+            .append(message.getPrompt())
+            .append("<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n")
+            .append(message.getResponse())
+            .append("<|eot_id|>");
+      }
+
+      return prompt
+          .append("<|start_header_id|>user<|end_header_id|>\n\n")
+          .append(userPrompt)
+          .append("<|eot_id|><|start_header_id|>assistant<|end_header_id|>")
+          .toString();
+    }
+  },
   MIXTRAL_INSTRUCT("Mixtral Instruct") {
     @Override
     public String buildPrompt(String systemPrompt, String userPrompt, List<Message> history) {
@@ -102,10 +131,10 @@ public enum PromptTemplate {
       StringBuilder prompt = new StringBuilder();
 
       prompt.append("""
-              Below is an instruction that describes a task. \
-              Write a response that appropriately completes the request.
+          Below is an instruction that describes a task. \
+          Write a response that appropriately completes the request.
 
-              """);
+          """);
 
       for (Message message : history) {
         prompt.append("### Instruction\n")
@@ -160,12 +189,22 @@ public enum PromptTemplate {
   };
 
   private final String label;
+  private final List<String> stopTokens;
 
   PromptTemplate(String label) {
+    this(label, emptyList());
+  }
+
+  PromptTemplate(String label, List<String> stopTokens) {
     this.label = label;
+    this.stopTokens = stopTokens;
   }
 
   public abstract String buildPrompt(String systemPrompt, String userPrompt, List<Message> history);
+
+  public List<String> getStopTokens() {
+    return stopTokens;
+  }
 
   @Override
   public String toString() {

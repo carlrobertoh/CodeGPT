@@ -23,6 +23,7 @@ public class LlamaSettingsState {
   private int contextSize = 2048;
   private int threads = 8;
   private String additionalParameters = "";
+  private String additionalBuildParameters = "";
   private int topK = 40;
   private double topP = 0.9;
   private double minP = 0.05;
@@ -138,6 +139,14 @@ public class LlamaSettingsState {
     this.additionalParameters = additionalParameters;
   }
 
+  public String getAdditionalBuildParameters() {
+    return additionalBuildParameters;
+  }
+
+  public void setAdditionalBuildParameters(String additionalBuildParameters) {
+    this.additionalBuildParameters = additionalBuildParameters;
+  }
+
   public int getTopK() {
     return topK;
   }
@@ -220,6 +229,7 @@ public class LlamaSettingsState {
         && Objects.equals(baseHost, that.baseHost)
         && Objects.equals(serverPort, that.serverPort)
         && Objects.equals(additionalParameters, that.additionalParameters)
+        && Objects.equals(additionalBuildParameters, that.additionalBuildParameters)
         && codeCompletionsEnabled == that.codeCompletionsEnabled
         && codeCompletionMaxTokens == that.codeCompletionMaxTokens;
   }
@@ -229,7 +239,7 @@ public class LlamaSettingsState {
     return Objects.hash(runLocalServer, useCustomModel, customLlamaModelPath, huggingFaceModel,
         localModelPromptTemplate, remoteModelPromptTemplate, localModelInfillPromptTemplate,
         remoteModelInfillPromptTemplate, baseHost, serverPort, contextSize, threads,
-        additionalParameters, topK, topP, minP, repeatPenalty, codeCompletionsEnabled,
-        codeCompletionMaxTokens);
+        additionalParameters, additionalBuildParameters, topK, topP, minP, repeatPenalty,
+        codeCompletionsEnabled, codeCompletionMaxTokens);
   }
 }

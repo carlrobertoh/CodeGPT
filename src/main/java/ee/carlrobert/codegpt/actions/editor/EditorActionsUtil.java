@@ -11,6 +11,7 @@ import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.project.Project;
 import ee.carlrobert.codegpt.CodeGPTKeys;
 import ee.carlrobert.codegpt.ReferencedFile;
+import ee.carlrobert.codegpt.actions.IncludeFilesInContextAction;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowContentManager;
@@ -75,6 +76,8 @@ public class EditorActionsUtil {
         };
         group.add(action);
       });
+      group.addSeparator();
+      group.add(new IncludeFilesInContextAction("action.includeFileInContext.title"));
     }
   }
 

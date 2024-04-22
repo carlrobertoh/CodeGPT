@@ -42,7 +42,7 @@ intellij {
   pluginName.set(properties("pluginName"))
   version.set(properties("platformVersion"))
   type.set(properties("platformType"))
-  plugins.set(listOf("java"))
+  plugins.set(listOf("java", "Git4Idea"))
 }
 
 changelog {
@@ -64,6 +64,7 @@ dependencies {
   implementation(libs.jsoup)
   implementation(libs.commons.text)
   implementation(libs.jtokkit)
+  testImplementation(kotlin("test"))
 }
 
 tasks.register<Exec>("updateSubmodules") {
@@ -148,6 +149,7 @@ tasks {
   runIde {
     enabled = true
     environment("ENVIRONMENT", "LOCAL")
+    autoReloadPlugins.set(false) // is triggered when building llama server
   }
 
   test {

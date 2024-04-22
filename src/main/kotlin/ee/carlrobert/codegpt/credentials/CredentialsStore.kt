@@ -12,14 +12,23 @@ object CredentialsStore {
         CredentialKey.values().forEach {
             val credentialAttributes = CredentialAttributes(generateServiceName("CodeGPT", it.name))
             val password = PasswordSafe.instance.getPassword(credentialAttributes)
-            setCredential(it, password)
+
+            // Avoid calling setCredential here since it will persist
+            // the password back into the PasswordSafe unnecessarily.
+            credentialsMap[it] = password
         }
     }
 
     fun getCredential(key: CredentialKey): String? = credentialsMap[key]
 
     fun setCredential(key: CredentialKey, password: String?) {
+        val prevPassword = credentialsMap[key]
         credentialsMap[key] = password
+
+        if (prevPassword != password) {
+            val credentialAttributes = CredentialAttributes(generateServiceName("CodeGPT", key.name))
+            PasswordSafe.instance.setPassword(credentialAttributes, password)
+        }
     }
 
     fun isCredentialSet(key: CredentialKey): Boolean = !getCredential(key).isNullOrEmpty()

@@ -6,6 +6,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Support for Llama 3 model via llama.cpp port (#479)
+- Code completion for "Custom OpenAI Service" (#476)
+- Support for configuring llama.cpp server build parameters (#481)
+- "Include file in context" to editor context menu (#475)
+- Support for placeholders in the commit message system prompt (#458)
+
+### Fixed
+
+- High CPU usage during new files check (#474)
+- Persistence of credentials back into the PasswordSafe (#465)
+
 ## [2.6.2-241] - 2024-04-15
 
 ### Fixed

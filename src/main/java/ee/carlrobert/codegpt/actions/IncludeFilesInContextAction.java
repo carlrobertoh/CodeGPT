@@ -49,7 +49,11 @@ public class IncludeFilesInContextAction extends AnAction {
   private static final Logger LOG = Logger.getInstance(IncludeFilesInContextAction.class);
 
   public IncludeFilesInContextAction() {
-    super(CodeGPTBundle.get("action.includeFilesInContext.title"));
+    this("action.includeFilesInContext.title");
+  }
+
+  public IncludeFilesInContextAction(String customTitleKey) {
+    super(CodeGPTBundle.get(customTitleKey));
   }
 
   @Override
@@ -93,11 +97,6 @@ public class IncludeFilesInContextAction extends AnAction {
   }
 
   private @Nullable FileCheckboxTree getCheckboxTree(DataContext dataContext) {
-    var psiElement = CommonDataKeys.PSI_ELEMENT.getData(dataContext);
-    if (psiElement != null) {
-      return new PsiElementCheckboxTree(psiElement);
-    }
-
     var selectedVirtualFiles = VIRTUAL_FILE_ARRAY.getData(dataContext);
     if (selectedVirtualFiles != null) {
       return new VirtualFileCheckboxTree(selectedVirtualFiles);

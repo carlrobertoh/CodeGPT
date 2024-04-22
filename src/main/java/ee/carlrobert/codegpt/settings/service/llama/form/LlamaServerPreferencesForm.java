@@ -57,6 +57,7 @@ public class LlamaServerPreferencesForm {
   private final IntegerField maxTokensField;
   private final IntegerField threadsField;
   private final JBTextField additionalParametersField;
+  private final JBTextField additionalBuildParametersField;
   private final ChatPromptTemplatePanel remotePromptTemplatePanel;
   private final InfillPromptTemplatePanel infillPromptTemplatePanel;
 
@@ -78,6 +79,9 @@ public class LlamaServerPreferencesForm {
 
     additionalParametersField = new JBTextField(settings.getAdditionalParameters(), 30);
     additionalParametersField.setEnabled(!serverRunning);
+
+    additionalBuildParametersField = new JBTextField(settings.getAdditionalBuildParameters(), 30);
+    additionalBuildParametersField.setEnabled(!serverRunning);
 
     baseHostField = new JBTextField(settings.getBaseHost(), 30);
     apiKeyField = new JBPasswordField();
@@ -124,6 +128,7 @@ public class LlamaServerPreferencesForm {
     maxTokensField.setValue(state.getContextSize());
     threadsField.setValue(state.getThreads());
     additionalParametersField.setText(state.getAdditionalParameters());
+    additionalBuildParametersField.setText(state.getAdditionalBuildParameters());
     remotePromptTemplatePanel.setPromptTemplate(state.getRemoteModelPromptTemplate()); // ?
     infillPromptTemplatePanel.setPromptTemplate(state.getRemoteModelInfillPromptTemplate());
     apiKeyField.setText(CredentialsStore.INSTANCE.getCredential(LLAMA_API_KEY));
@@ -184,9 +189,17 @@ public class LlamaServerPreferencesForm {
                 createComment("settingsConfigurable.service.llama.threads.comment"))
             .addLabeledComponent(
                 CodeGPTBundle.get("settingsConfigurable.service.llama.additionalParameters.label"),
-                additionalParametersField)
-            .addComponentToRightColumn(
-                createComment("settingsConfigurable.service.llama.additionalParameters.comment"))
+                    additionalParametersField)
+                .addComponentToRightColumn(
+                        createComment(
+                            "settingsConfigurable.service.llama.additionalParameters.comment"))
+                .addLabeledComponent(
+                    CodeGPTBundle.get(
+                        "settingsConfigurable.service.llama.additionalBuildParameters.label"),
+                    additionalBuildParametersField)
+                .addComponentToRightColumn(
+                    createComment(
+                        "settingsConfigurable.service.llama.additionalBuildParameters.comment"))
             .addVerticalGap(4)
             .addComponentFillVertically(new JPanel(), 0)
             .getPanel()))
@@ -196,6 +209,7 @@ public class LlamaServerPreferencesForm {
   private JButton getServerButton(
       LlamaServerAgent llamaServerAgent,
       ServerProgressPanel serverProgressPanel) {
+    llamaServerAgent.setActiveServerProgressPanel(serverProgressPanel);
     var serverRunning = llamaServerAgent.isServerRunning();
     var serverButton = new JButton();
     serverButton.setText(serverRunning
@@ -218,7 +232,9 @@ public class LlamaServerPreferencesForm {
                 getContextSize(),
                 getThreads(),
                 getServerPort(),
-                getListOfAdditionalParameters()),
+                getListOfAdditionalParameters(),
+                getListOfAdditionalBuildParameters()
+            ),
             serverProgressPanel,
             () -> {
               setFormEnabled(false);
@@ -227,12 +243,12 @@ public class LlamaServerPreferencesForm {
                   Actions.Checked,
                   SwingConstants.LEADING));
             },
-            () -> {
+            (activeServerProgressPanel) -> {
               setFormEnabled(true);
               serverButton.setText(
                   CodeGPTBundle.get("settingsConfigurable.service.llama.startServer.label"));
               serverButton.setIcon(Actions.Execute);
-              serverProgressPanel.displayComponent(new JBLabel(
+              activeServerProgressPanel.displayComponent(new JBLabel(
                   CodeGPTBundle.get("settingsConfigurable.service.llama.progress.serverTerminated"),
                   Actions.Cancel,
                   SwingConstants.LEADING));
@@ -282,7 +298,7 @@ public class LlamaServerPreferencesForm {
     serverButton.setText(
         CodeGPTBundle.get("settingsConfigurable.service.llama.startServer.label"));
     serverButton.setIcon(Actions.Execute);
-    progressPanel.updateText(
+    progressPanel.displayText(
         CodeGPTBundle.get("settingsConfigurable.service.llama.progress.stoppingServer"));
   }
 
@@ -291,7 +307,7 @@ public class LlamaServerPreferencesForm {
     serverButton.setText(
         CodeGPTBundle.get("settingsConfigurable.service.llama.stopServer.label"));
     serverButton.setIcon(Actions.Suspend);
-    progressPanel.startProgress(
+    progressPanel.displayText(
         CodeGPTBundle.get("settingsConfigurable.service.llama.progress.startingServer"));
   }
 
@@ -301,6 +317,7 @@ public class LlamaServerPreferencesForm {
     maxTokensField.setEnabled(enabled);
     threadsField.setEnabled(enabled);
     additionalParametersField.setEnabled(enabled);
+    additionalBuildParametersField.setEnabled(enabled);
   }
 
   public boolean isRunLocalServer() {
@@ -337,9 +354,20 @@ public class LlamaServerPreferencesForm {
 
   public List<String> getListOfAdditionalParameters() {
     return Arrays.stream(additionalParametersField.getText().split(","))
-      .map(String::trim)
-      .filter(s -> !s.isBlank())
-      .toList();
+            .map(String::trim)
+            .filter(s -> !s.isBlank())
+            .toList();
+  }
+
+  public String getAdditionalBuildParameters() {
+    return additionalBuildParametersField.getText();
+  }
+
+  public List<String> getListOfAdditionalBuildParameters() {
+    return Arrays.stream(additionalBuildParametersField.getText().split(","))
+            .map(String::trim)
+            .filter(s -> !s.isBlank())
+            .toList();
   }
 
   public PromptTemplate getPromptTemplate() {
