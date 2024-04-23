@@ -3,7 +3,7 @@ analytics = "3.0.0"
 assertj = "3.25.3"
 changelog = "2.2.0"
 checkstyle = "10.15.0"
-commons-text = "1.11.0"
+commons-text = "1.12.0"
 flexmark = "0.64.8"
 gradle-intellij-plugin-version = "1.17.3"
 gson = "2.10.1"
@@ -14,7 +14,7 @@ junit = "5.10.2"
 kotlin = "1.9.23"
 llm-client = "0.7.2"
 okio = "3.9.0"
-tree-sitter = "0.22.2"
+tree-sitter = "0.22.5"
 
 [libraries]
 analytics = { module = "com.rudderstack.sdk.java.analytics:analytics", version.ref = "analytics" }
