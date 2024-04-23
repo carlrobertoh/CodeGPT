@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt.settings.service.llama.form;
 
 import static java.lang.String.format;
+import static java.util.Collections.emptyMap;
 
 import com.intellij.icons.AllIcons.Actions;
 import com.intellij.icons.AllIcons.General;
@@ -291,15 +292,15 @@ public class LlamaModelPreferencesForm {
     int parameterSize = model.getParameterSize();
     int quantization = model.getQuantization();
 
-    if (!modelDetailsMap.containsKey(parameterSize)) {
+    var details = modelDetailsMap.getOrDefault(parameterSize, emptyMap()).get(quantization);
+    if (details == null && model.getDownloadSize() == null) {
       return "";
     }
-
-    ModelDetails details = modelDetailsMap.get(parameterSize).get(quantization);
     if (details == null) {
-      return "";
+      return format("<html>"
+          + "<p style=\"margin: 0\"><small>File Size: <strong>%.2f GB</strong></small></p>"
+          + "</html>", model.getDownloadSize());
     }
-
     return format("<html>"
         + "<p style=\"margin: 0\"><small>File Size: <strong>%.2f GB</strong></small></p>"
         + "<p style=\"margin: 0\"><small>Max RAM Required: <strong>%.2f GB</strong></small></p>"
