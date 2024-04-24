@@ -71,7 +71,7 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
             ServiceType.OPENAI -> OpenAISettings.getCurrentState().isCodeCompletionsEnabled
             ServiceType.CUSTOM_OPENAI -> service<CustomServiceSettings>().state.codeCompletionSettings.codeCompletionsEnabled
             ServiceType.LLAMA_CPP -> LlamaSettings.getCurrentState().isCodeCompletionsEnabled
-            ServiceType.OLLAMA -> OllamaSettings.getCurrentState().isCodeCompletionsEnabled
+            ServiceType.OLLAMA -> OllamaSettings.getCurrentState().isCodeCompletionEnabled()
             else -> false
         }
         return event is InlineCompletionEvent.DocumentChange && codeCompletionsEnabled

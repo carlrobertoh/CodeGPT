@@ -13,7 +13,7 @@ class OllamaSettingsForm(settings: OllamaSettingsState) {
     private val modelField: JBTextField = JBTextField()
     private val codeCompletionConfigurationForm: CodeCompletionConfigurationForm =
         CodeCompletionConfigurationForm(
-            settings.isCodeCompletionsEnabled,
+            settings.isCodeCompletionEnabled(),
             settings.codeCompletionMaxTokens
         )
 
@@ -45,19 +45,19 @@ class OllamaSettingsForm(settings: OllamaSettingsState) {
     }
 
     fun getCurrentState(): OllamaSettingsState {
-        val state = OllamaSettingsState()
-        state.host = getHost()
-        state.model = getModel()
-        state.isCodeCompletionsEnabled = codeCompletionConfigurationForm.isCodeCompletionsEnabled
-        state.codeCompletionMaxTokens = codeCompletionConfigurationForm.maxTokens
-        return state
+        return OllamaSettingsState(
+            host = getHost(),
+            model = getModel(),
+            codeCompletionMaxTokens = codeCompletionConfigurationForm.maxTokens,
+            codeCompletionsEnabled = codeCompletionConfigurationForm.isCodeCompletionsEnabled
+        )
     }
 
     fun resetForm() {
         val state = OllamaSettings.getCurrentState()
         hostField.text = state.host
         modelField.text = state.model
-        codeCompletionConfigurationForm.isCodeCompletionsEnabled = state.isCodeCompletionsEnabled
+        codeCompletionConfigurationForm.isCodeCompletionsEnabled = state.isCodeCompletionEnabled()
         codeCompletionConfigurationForm.maxTokens = state.codeCompletionMaxTokens
     }
 }
