@@ -46,4 +46,9 @@ class CodeCompletionConfigurationForm(codeCompletionsEnabled: Boolean, maxTokens
         set(maxTokens) {
             codeCompletionMaxTokensField.value = maxTokens
         }
+
+    fun setComponentsEnabled(enabled: Boolean) {
+        codeCompletionsEnabledCheckBox.isEnabled = enabled
+        codeCompletionMaxTokensField.isEnabled = enabled
+    }
 }
