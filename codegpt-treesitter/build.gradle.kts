@@ -32,7 +32,7 @@ dependencies {
     implementation("io.github.bonede:tree-sitter-svelte:0.11.0")
     implementation("io.github.bonede:tree-sitter-swift:0.3.6")
     implementation("io.github.bonede:tree-sitter-yaml:0.5.0")
-    implementation("io.github.bonede:tree-sitter-java:0.20.2")
+    implementation("io.github.bonede:tree-sitter-java:0.21.0")
     implementation("io.github.bonede:tree-sitter-python:0.20.4")
     implementation("io.github.bonede:tree-sitter-php:0.20.0")
     implementation("io.github.bonede:tree-sitter-typescript:0.20.3")
