@@ -8,9 +8,9 @@ data class OllamaSettingsState(
     var codeCompletionMaxTokens: Int = 128,
     var codeCompletionsEnabled: Boolean = true,
 ) {
-    val codeCompletionSupported = OllamaInlineCompletionModel.entries.any { model.contains(it.identifier) }
+    val fimTemplate = OllamaInlineCompletionModel.entries.firstOrNull { model.contains(it.identifier) }?.fimTemplate
 
     fun isCodeCompletionEnabled(): Boolean {
-        return codeCompletionSupported && codeCompletionsEnabled
+        return fimTemplate != null && codeCompletionsEnabled
     }
 }

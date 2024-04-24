@@ -20,7 +20,7 @@ class OllamaSettingsForm(settings: OllamaSettingsState) {
 
     init {
         modelField.whenTextChangedFromUi {
-            codeCompletionConfigurationForm.setComponentsEnabled(getCurrentState().codeCompletionSupported)
+            codeCompletionConfigurationForm.setComponentsEnabled(getCurrentState().fimTemplate != null)
         }
     }
 
@@ -66,6 +66,6 @@ class OllamaSettingsForm(settings: OllamaSettingsState) {
         modelField.text = state.model
         codeCompletionConfigurationForm.isCodeCompletionsEnabled = state.isCodeCompletionEnabled()
         codeCompletionConfigurationForm.maxTokens = state.codeCompletionMaxTokens
-        codeCompletionConfigurationForm.setComponentsEnabled(state.codeCompletionSupported)
+        codeCompletionConfigurationForm.setComponentsEnabled(state.fimTemplate != null)
     }
 }

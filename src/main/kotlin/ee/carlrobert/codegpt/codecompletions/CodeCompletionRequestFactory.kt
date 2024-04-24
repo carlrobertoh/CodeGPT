@@ -77,17 +77,10 @@ object CodeCompletionRequestFactory {
 
     fun buildOllamaRequest(details: InfillRequestDetails): OllamaCompletionRequest {
         val settings = OllamaSettings.getCurrentState()
-        return OllamaCompletionRequest.Builder(settings.model, getOllamaInfillPrompt(settings.model, details.prefix, details.suffix))
+        return OllamaCompletionRequest.Builder(settings.model, settings.fimTemplate!!.buildPrompt(details.prefix, details.suffix))
             .setOptions(OllamaParameters.Builder().numPredict(settings.codeCompletionMaxTokens).build())
             .setRaw(true)
             .build()
-    }
-
-    private fun getOllamaInfillPrompt(model: String, prefix: String, suffix: String): String {
-        return OllamaInlineCompletionModel.entries
-            .first { model.contains(it.identifier) }
-            .fimTemplate
-            .buildPrompt(prefix, suffix)
     }
 
     private fun getLlamaInfillPromptTemplate(settings: LlamaSettingsState): InfillPromptTemplate {

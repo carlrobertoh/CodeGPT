@@ -22,8 +22,11 @@ abstract class CodeCompletionFeatureToggleActions(
             LLAMA_CPP -> LlamaSettings.getCurrentState().isCodeCompletionsEnabled = enableFeatureAction
             OLLAMA -> {
                 val ollamaSettings = OllamaSettings.getCurrentState()
-                if (ollamaSettings.codeCompletionSupported) {
+                if (ollamaSettings.fimTemplate != null) {
                     OllamaSettings.getCurrentState().codeCompletionsEnabled = enableFeatureAction
+                } else {
+                    // TODO Show the user enabling code completion failed because of the model they
+                    //  have selected
                 }
             }
             CUSTOM_OPENAI -> service<CustomServiceSettings>().state.codeCompletionSettings.codeCompletionsEnabled =
@@ -40,13 +43,14 @@ abstract class CodeCompletionFeatureToggleActions(
         val codeCompletionEnabled = isCodeCompletionsEnabled(selectedService)
         e.presentation.isEnabled = codeCompletionEnabled != enableFeatureAction
         e.presentation.isVisible = when (selectedService) {
-            OPENAI -> true
-            CUSTOM_OPENAI -> true
-            LLAMA_CPP -> true
-            OLLAMA -> OllamaSettings.getCurrentState().codeCompletionSupported
+            OPENAI,
+            CUSTOM_OPENAI,
+            LLAMA_CPP,
+            OLLAMA -> true
             ANTHROPIC,
             AZURE,
-            YOU -> false
+            YOU,
+            null -> false
         }
     }
 
