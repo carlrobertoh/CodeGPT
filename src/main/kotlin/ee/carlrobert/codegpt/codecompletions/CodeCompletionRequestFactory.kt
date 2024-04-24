@@ -3,6 +3,7 @@ package ee.carlrobert.codegpt.codecompletions
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.intellij.openapi.components.service
+import ee.carlrobert.codegpt.codecompletions.ollama.OllamaInlineCompletionModel
 import ee.carlrobert.codegpt.completions.llama.LlamaModel
 import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey
 import ee.carlrobert.codegpt.credentials.CredentialsStore.getCredential
@@ -76,15 +77,17 @@ object CodeCompletionRequestFactory {
 
     fun buildOllamaRequest(details: InfillRequestDetails): OllamaCompletionRequest {
         val settings = OllamaSettings.getCurrentState()
-        return OllamaCompletionRequest.Builder(settings.model, getOllamaInfillPrompt(details.prefix, details.suffix))
+        return OllamaCompletionRequest.Builder(settings.model, getOllamaInfillPrompt(settings.model, details.prefix, details.suffix))
             .setOptions(OllamaParameters.Builder().numPredict(settings.codeCompletionMaxTokens).build())
             .setRaw(true)
             .build()
     }
 
-    private fun getOllamaInfillPrompt(prefix: String, suffix: String): String {
-        // TODO these still vary by model, we need a way of figuring that out, preferably on the ollama side.
-        return "<｜fim▁begin｜>$prefix<｜fim▁hole｜>$suffix<｜fim▁end｜>"
+    private fun getOllamaInfillPrompt(model: String, prefix: String, suffix: String): String {
+        return OllamaInlineCompletionModel.entries
+            .first { model.contains(it.identifier) }
+            .fimTemplate
+            .buildPrompt(prefix, suffix)
     }
 
     private fun getLlamaInfillPromptTemplate(settings: LlamaSettingsState): InfillPromptTemplate {
