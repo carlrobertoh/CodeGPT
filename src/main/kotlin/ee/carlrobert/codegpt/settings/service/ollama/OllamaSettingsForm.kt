@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.settings.service.ollama
 
+import com.intellij.openapi.observable.util.whenTextChangedFromUi
 import com.intellij.ui.TitledSeparator
 import com.intellij.ui.components.JBTextField
 import com.intellij.util.ui.FormBuilder
@@ -16,6 +17,12 @@ class OllamaSettingsForm(settings: OllamaSettingsState) {
             settings.isCodeCompletionEnabled(),
             settings.codeCompletionMaxTokens
         )
+
+    init {
+        modelField.whenTextChangedFromUi {
+            codeCompletionConfigurationForm.setComponentsEnabled(getCurrentState().codeCompletionSupported)
+        }
+    }
 
     fun getForm() = FormBuilder.createFormBuilder()
         .addComponent(TitledSeparator(CodeGPTBundle.get("shared.configuration")))
@@ -59,5 +66,6 @@ class OllamaSettingsForm(settings: OllamaSettingsState) {
         modelField.text = state.model
         codeCompletionConfigurationForm.isCodeCompletionsEnabled = state.isCodeCompletionEnabled()
         codeCompletionConfigurationForm.maxTokens = state.codeCompletionMaxTokens
+        codeCompletionConfigurationForm.setComponentsEnabled(state.codeCompletionSupported)
     }
 }
