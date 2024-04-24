@@ -62,7 +62,7 @@ public class GeneralSettingsComponent {
     cards.add(azureSettingsForm.getForm(), AZURE.getCode());
     cards.add(youSettingsForm, YOU.getCode());
     cards.add(llamaSettingsForm, LLAMA_CPP.getCode());
-    cards.add(ollamaSettingsForm, OLLAMA.getCode());
+    cards.add(ollamaSettingsForm.getForm(), OLLAMA.getCode());
     var serviceComboBoxModel = new DefaultComboBoxModel<ServiceType>();
     serviceComboBoxModel.addAll(Arrays.stream(ServiceType.values()).toList());
     serviceComboBox = new ComboBox<>(serviceComboBoxModel);
