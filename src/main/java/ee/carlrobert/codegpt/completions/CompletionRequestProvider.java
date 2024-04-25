@@ -116,7 +116,8 @@ public class CompletionRequestProvider {
 
   public static Request buildCustomOpenAICompletionRequest(String system, String context) {
     return buildCustomOpenAIChatCompletionRequest(
-        ApplicationManager.getApplication().getService(CustomServiceState.class)
+        ApplicationManager.getApplication().getService(CustomServiceSettings.class)
+            .getState()
             .getChatCompletionSettings(),
         List.of(
             new OpenAIChatCompletionStandardMessage("system", system),
