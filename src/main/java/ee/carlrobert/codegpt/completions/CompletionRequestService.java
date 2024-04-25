@@ -122,7 +122,7 @@ public final class CompletionRequestService {
           CodeCompletionRequestFactory.buildCustomRequest(requestDetails),
           new OpenAITextCompletionEventSourceListener(eventListener));
       case LLAMA_CPP -> CompletionClientProvider.getLlamaClient()
-          .getChatCompletionAsync(requestProvider.buildLlamaRequest(), eventListener);
+          .getInfillAsync(requestProvider.buildLlamaRequest(), eventListener);
       default ->
           throw new IllegalArgumentException("Code completion not supported for selected service");
     };
