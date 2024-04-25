@@ -122,7 +122,7 @@ public final class CompletionRequestService {
           CodeCompletionRequestFactory.buildCustomRequest(requestDetails),
           new OpenAITextCompletionEventSourceListener(eventListener));
       case LLAMA_CPP -> CompletionClientProvider.getLlamaClient()
-          .getChatCompletionAsync(
+          .getInfillAsync(
               CodeCompletionRequestFactory.buildLlamaRequest(requestDetails),
               eventListener);
       default ->

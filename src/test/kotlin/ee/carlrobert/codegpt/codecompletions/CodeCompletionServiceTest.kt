@@ -35,11 +35,11 @@ class CodeCompletionServiceTest : IntegrationTest() {
          ${"z".repeat(247)}
          """.trimIndent() // 128 tokens
     expectLlama(StreamHttpExchange { request: RequestEntity ->
-      assertThat(request.uri.path).isEqualTo("/completion")
+      assertThat(request.uri.path).isEqualTo("/infill")
       assertThat(request.method).isEqualTo("POST")
       assertThat(request.body)
-        .extracting("prompt")
-        .isEqualTo(InfillPromptTemplate.LLAMA.buildPrompt(prefix, suffix))
+        .extracting("input_prefix", "input_suffix")
+        .containsExactly(prefix, suffix)
       listOf(jsonMapResponse(e("content", expectedCompletion), e("stop", true)))
     })
 
