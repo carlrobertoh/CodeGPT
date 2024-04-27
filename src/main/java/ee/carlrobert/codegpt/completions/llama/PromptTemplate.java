@@ -125,6 +125,25 @@ public enum PromptTemplate {
           .toString();
     }
   },
+  PHI_3("Phi-3 Mini", List.of("<|end|>")) {
+    @Override
+    public String buildPrompt(String systemPrompt, String userPrompt, List<Message> history) {
+      StringBuilder prompt = new StringBuilder();
+
+      for (Message message : history) {
+        prompt.append("<|user|>\n")
+            .append(message.getPrompt())
+            .append("<|end|>\n<|assistant|>\n")
+            .append(message.getResponse())
+            .append("<|end|>\n");
+      }
+
+      return prompt.append("<|user|>\n")
+          .append(userPrompt)
+          .append("<|end|>\n<|assistant|>")
+          .toString();
+    }
+  },
   ALPACA("Alpaca/Vicuna") {
     @Override
     public String buildPrompt(String systemPrompt, String userPrompt, List<Message> history) {

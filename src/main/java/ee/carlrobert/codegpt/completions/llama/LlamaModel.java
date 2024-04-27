@@ -99,7 +99,21 @@ public enum LlamaModel {
           HuggingFaceModel.LLAMA_3_8B_Q8_0,
           HuggingFaceModel.LLAMA_3_70B_IQ1,
           HuggingFaceModel.LLAMA_3_70B_IQ2_XS,
-          HuggingFaceModel.LLAMA_3_70B_Q4_K_M));
+          HuggingFaceModel.LLAMA_3_70B_Q4_K_M)),
+  PHI_3(
+      "Phi-3 Mini",
+      "Phi-3 Mini is a 3.8B parameters, lightweight, state-of-the-art open model. "
+          + "When assessed against benchmarks testing common sense, language understanding, math, "
+          + "code, long context and logical reasoning, Phi-3 Mini-4K-Instruct showcased a robust "
+          + "and state-of-the-art performance among models with less than 13 billion parameters.",
+      PromptTemplate.PHI_3,
+      List.of(
+          HuggingFaceModel.PHI_3_3_8B_4K_IQ4_NL,
+          HuggingFaceModel.PHI_3_3_8B_4K_Q5_K_M,
+          HuggingFaceModel.PHI_3_3_8B_4K_Q5_K_S,
+          HuggingFaceModel.PHI_3_3_8B_4K_Q6_K,
+          HuggingFaceModel.PHI_3_3_8B_4K_Q8_0,
+          HuggingFaceModel.PHI_3_3_8B_4K_FP16));
 
   private final String label;
   private final String description;
