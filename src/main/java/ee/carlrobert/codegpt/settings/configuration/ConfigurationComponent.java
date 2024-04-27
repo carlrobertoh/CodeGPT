@@ -28,7 +28,6 @@ import ee.carlrobert.codegpt.ui.UIUtil;
 import java.awt.Dimension;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
@@ -193,7 +192,12 @@ public class ConfigurationComponent {
   private JPanel createTablePanel() {
     return ToolbarDecorator.createDecorator(table)
         .setPreferredSize(new Dimension(table.getPreferredSize().width, 140))
-        .setAddAction(anActionButton -> getModel().addRow(new Object[]{"", ""}))
+        .setAddAction(anActionButton -> {
+          getModel().addRow(new Object[]{"", ""});
+          int lastRowIndex = getModel().getRowCount() - 1;
+          table.changeSelection(lastRowIndex, 0, false, false);
+          table.editCellAt(lastRowIndex, 0);
+        })
         .setRemoveAction(anActionButton -> getModel().removeRow(table.getSelectedRow()))
         .disableUpAction()
         .disableDownAction()
