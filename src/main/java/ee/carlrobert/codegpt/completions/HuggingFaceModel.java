@@ -52,7 +52,14 @@ public enum HuggingFaceModel {
   LLAMA_3_8B_Q8_0(8, 8, "Meta-Llama-3-8B-Instruct-Q8_0.gguf", "lmstudio-community", 8.54),
   LLAMA_3_70B_IQ1(70, 1, "Meta-Llama-3-70B-Instruct-IQ1_M.gguf", "lmstudio-community", 16.8),
   LLAMA_3_70B_IQ2_XS(70, 2, "Meta-Llama-3-70B-Instruct-IQ2_XS.gguf", "lmstudio-community", 21.1),
-  LLAMA_3_70B_Q4_K_M(70, 4, "Meta-Llama-3-70B-Instruct-Q4_K_M.gguf", "lmstudio-community", 42.5);
+  LLAMA_3_70B_Q4_K_M(70, 4, "Meta-Llama-3-70B-Instruct-Q4_K_M.gguf", "lmstudio-community", 42.5),
+
+  PHI_3_3_8B_4K_IQ4_NL(4, 4, "Phi-3-mini-4k-instruct-IQ4_NL.gguf", "lmstudio-community", 2.18),
+  PHI_3_3_8B_4K_Q5_K_M(4, 5, "Phi-3-mini-4k-instruct-Q5_K_M.gguf", "lmstudio-community", 2.64),
+  PHI_3_3_8B_4K_Q5_K_S(4, 5, "Phi-3-mini-4k-instruct-Q5_K_S.gguf", "lmstudio-community", 2.82),
+  PHI_3_3_8B_4K_Q6_K(4, 6, "Phi-3-mini-4k-instruct-Q6_K.gguf", "lmstudio-community", 3.14),
+  PHI_3_3_8B_4K_Q8_0(4, 8, "Phi-3-mini-4k-instruct-Q8_0.gguf", "lmstudio-community", 4.06),
+  PHI_3_3_8B_4K_FP16(4, 16, "Phi-3-mini-4k-instruct-fp16.gguf", "lmstudio-community", 7.64);
 
   private final int parameterSize;
   private final int quantization;
