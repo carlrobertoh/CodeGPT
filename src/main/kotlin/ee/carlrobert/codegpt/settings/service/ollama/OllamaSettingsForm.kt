@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.settings.service.ollama
 
+import com.intellij.openapi.observable.util.whenTextChangedFromUi
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.TitledSeparator
 import com.intellij.ui.components.JBTextField
@@ -15,8 +16,8 @@ import javax.swing.JPanel
 
 class OllamaSettingsForm(settings: OllamaSettingsState) {
 
-    private val loadingModelsComboBoxModel = DefaultComboBoxModel(arrayOf("Loading"))
-    private val modelComboBox: ComboBox<String> = ComboBox(loadingModelsComboBoxModel).apply {
+    private val needsRefreshModelsComboBox = DefaultComboBoxModel(arrayOf("Hit refresh to see models for this host"))
+    private val modelComboBox: ComboBox<String> = ComboBox(needsRefreshModelsComboBox).apply {
         isEnabled = false
     }
     private val refreshModelsButton = JButton(CodeGPTBundle.get("settingsConfigurable.service.ollama.models.refresh"))
@@ -29,13 +30,17 @@ class OllamaSettingsForm(settings: OllamaSettingsState) {
         )
 
     init {
+        hostField.whenTextChangedFromUi {
+            modelComboBox.model = needsRefreshModelsComboBox
+            modelComboBox.isEnabled = false
+        }
         refreshModelsButton.addActionListener { refreshModels() }
     }
 
     fun refreshModels() {
         Thread {
             modelComboBox.apply {
-                model = loadingModelsComboBoxModel
+                model = DefaultComboBoxModel(arrayOf("Loading"))
                 isEnabled = false
 
                 val models = OllamaClient.Builder()
@@ -45,8 +50,12 @@ class OllamaSettingsForm(settings: OllamaSettingsState) {
                     .models
                     .map { it.name }
 
-                model = DefaultComboBoxModel(models.toTypedArray())
-                isEnabled = true
+                if (models.isNotEmpty()) {
+                    model = DefaultComboBoxModel(models.toTypedArray())
+                    isEnabled = true
+                } else {
+                    model = DefaultComboBoxModel(arrayOf("No models"))
+                }
             }
         }.start()
     }
