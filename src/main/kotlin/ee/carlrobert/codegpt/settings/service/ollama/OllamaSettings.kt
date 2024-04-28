@@ -22,14 +22,6 @@ class OllamaSettings : PersistentStateComponent<OllamaSettingsState> {
         return form.getCurrentState() != state
     }
 
-    fun setCodeCompletionsEnabled(enabled: Boolean) {
-        state = state.copy(codeCompletionsEnabled = enabled)
-    }
-
-    fun setModel(model: String) {
-        state = state.copy(model = model)
-    }
-
     companion object {
         fun getCurrentState(): OllamaSettingsState {
             return getInstance().getState()

@@ -43,14 +43,14 @@ public class ModelComboBoxAction extends ComboBoxAction {
   private final GeneralSettingsState settings;
   private final OpenAISettingsState openAISettings;
   private final YouSettingsState youSettings;
-  private final OllamaSettings ollamaSettings;
+  private final OllamaSettingsState ollamaSettings;
 
   public ModelComboBoxAction(Runnable onModelChange, ServiceType selectedService) {
     this.onModelChange = onModelChange;
     settings = GeneralSettings.getCurrentState();
     openAISettings = OpenAISettings.getCurrentState();
     youSettings = YouSettings.getCurrentState();
-    ollamaSettings = OllamaSettings.Companion.getInstance();
+    ollamaSettings = OllamaSettings.Companion.getCurrentState();
     updateTemplatePresentation(selectedService);
 
     subscribeToYouSignedOutTopic(ApplicationManager.getApplication().getMessageBus().connect());
@@ -108,7 +108,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
         Icons.Llama,
         presentation));
     actionGroup.addSeparator("Ollama");
-    List.of(ollamaSettings.getState().getModel())
+    List.of(ollamaSettings.getModel())
         .forEach(model -> actionGroup.add(createOllamaModelAction(model, presentation)));
 
     if (YouUserManager.getInstance().isSubscribed()) {
@@ -188,7 +188,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
         break;
       case OLLAMA:
         templatePresentation.setIcon(Icons.Ollama);
-        templatePresentation.setText(ollamaSettings.getState().getModel());
+        templatePresentation.setText(ollamaSettings.getModel());
       default:
     }
   }
