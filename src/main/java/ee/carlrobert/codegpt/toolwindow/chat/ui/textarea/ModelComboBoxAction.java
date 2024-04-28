@@ -107,8 +107,9 @@ public class ModelComboBoxAction extends ComboBoxAction {
         getLlamaCppPresentationText(),
         Icons.Llama,
         presentation));
-    actionGroup.addSeparator();
-    actionGroup.add(createModelAction(ServiceType.OLLAMA, "Ollama", Icons.Default, presentation));
+    actionGroup.addSeparator("Ollama");
+    List.of(ollamaSettings.getModel())
+        .forEach(model -> actionGroup.add(createOllamaModelAction(model, presentation)));
 
     if (YouUserManager.getInstance().isSubscribed()) {
       actionGroup.addSeparator("You.com");
@@ -186,7 +187,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
         templatePresentation.setIcon(Icons.Llama);
         break;
       case OLLAMA:
-        templatePresentation.setIcon(Icons.Default);
+        templatePresentation.setIcon(Icons.Ollama);
         templatePresentation.setText(ollamaSettings.getModel());
       default:
     }
@@ -242,6 +243,34 @@ public class ModelComboBoxAction extends ComboBoxAction {
     comboBoxPresentation.setIcon(icon);
     comboBoxPresentation.setText(label);
     onModelChange.run();
+  }
+
+  private AnAction createOllamaModelAction(
+      String model,
+      Presentation comboBoxPresentation
+  ) {
+    return new DumbAwareAction(model, "", Icons.Ollama) {
+      @Override
+      public void update(@NotNull AnActionEvent event) {
+        var presentation = event.getPresentation();
+        presentation.setEnabled(!presentation.getText().equals(comboBoxPresentation.getText()));
+      }
+
+      @Override
+      public void actionPerformed(@NotNull AnActionEvent e) {
+        ollamaSettings.setModel(model);
+        handleModelChange(
+            OPENAI,
+            model,
+            Icons.OpenAI,
+            comboBoxPresentation);
+      }
+
+      @Override
+      public @NotNull ActionUpdateThread getActionUpdateThread() {
+        return ActionUpdateThread.BGT;
+      }
+    };
   }
 
   private AnAction createOpenAIModelAction(
