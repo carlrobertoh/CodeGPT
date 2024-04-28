@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt.toolwindow.chat.ui.textarea;
 
 import static ee.carlrobert.codegpt.settings.service.ServiceType.CUSTOM_OPENAI;
+import static ee.carlrobert.codegpt.settings.service.ServiceType.OLLAMA;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.OPENAI;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.YOU;
 import static java.lang.String.format;
@@ -108,7 +109,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
         Icons.Llama,
         presentation));
     actionGroup.addSeparator("Ollama");
-    List.of(ollamaSettings.getModel())
+    ollamaSettings.getAvailableModels()
         .forEach(model -> actionGroup.add(createOllamaModelAction(model, presentation)));
 
     if (YouUserManager.getInstance().isSubscribed()) {
@@ -260,9 +261,9 @@ public class ModelComboBoxAction extends ComboBoxAction {
       public void actionPerformed(@NotNull AnActionEvent e) {
         ollamaSettings.setModel(model);
         handleModelChange(
-            OPENAI,
+            OLLAMA,
             model,
-            Icons.OpenAI,
+            Icons.Ollama,
             comboBoxPresentation);
       }
 
