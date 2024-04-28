@@ -16,8 +16,10 @@ import javax.swing.JPanel
 
 class OllamaSettingsForm(settings: OllamaSettingsState) {
 
-    private val needsRefreshModelsComboBox = DefaultComboBoxModel(arrayOf("Hit refresh to see models for this host"))
-    private val modelComboBox: ComboBox<String> = ComboBox(needsRefreshModelsComboBox).apply {
+    private val needsRefreshModelsComboBoxModel = DefaultComboBoxModel(arrayOf("Hit refresh to see models for this host"))
+    private val loadingModelsComboBoxModel = DefaultComboBoxModel(arrayOf("Loading"))
+    private val emptyModelsComboBoxModel = DefaultComboBoxModel(arrayOf("No models"))
+    private val modelComboBox: ComboBox<String> = ComboBox(needsRefreshModelsComboBoxModel).apply {
         isEnabled = false
     }
     private val refreshModelsButton = JButton(CodeGPTBundle.get("settingsConfigurable.service.ollama.models.refresh"))
@@ -31,7 +33,7 @@ class OllamaSettingsForm(settings: OllamaSettingsState) {
 
     init {
         hostField.whenTextChangedFromUi {
-            modelComboBox.model = needsRefreshModelsComboBox
+            modelComboBox.model = needsRefreshModelsComboBoxModel
             modelComboBox.isEnabled = false
         }
         refreshModelsButton.addActionListener { refreshModels() }
@@ -40,7 +42,7 @@ class OllamaSettingsForm(settings: OllamaSettingsState) {
     fun refreshModels() {
         Thread {
             modelComboBox.apply {
-                model = DefaultComboBoxModel(arrayOf("Loading"))
+                model = loadingModelsComboBoxModel
                 isEnabled = false
 
                 val models = OllamaClient.Builder()
@@ -54,7 +56,7 @@ class OllamaSettingsForm(settings: OllamaSettingsState) {
                     model = DefaultComboBoxModel(models.toTypedArray())
                     isEnabled = true
                 } else {
-                    model = DefaultComboBoxModel(arrayOf("No models"))
+                    model = emptyModelsComboBoxModel
                 }
             }
         }.start()
@@ -82,10 +84,18 @@ class OllamaSettingsForm(settings: OllamaSettingsState) {
         .addComponent(UIUtil.withEmptyLeftBorder(codeCompletionConfigurationForm.getForm()))
         .panel
 
+    fun getModel(): String {
+        return if (modelComboBox.isEnabled) {
+            modelComboBox.item
+        } else {
+            ""
+        }
+    }
+
     fun getCurrentState(): OllamaSettingsState {
         return OllamaSettingsState(
             host = hostField.text,
-            model = modelComboBox.item,
+            model = getModel(),
             codeCompletionMaxTokens = codeCompletionConfigurationForm.maxTokens,
             codeCompletionsEnabled = codeCompletionConfigurationForm.isCodeCompletionsEnabled
         )
