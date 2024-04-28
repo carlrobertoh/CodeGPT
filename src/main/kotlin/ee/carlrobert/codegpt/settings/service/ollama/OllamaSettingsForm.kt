@@ -8,7 +8,10 @@ import ee.carlrobert.codegpt.CodeGPTBundle
 import ee.carlrobert.codegpt.settings.service.CodeCompletionConfigurationForm
 import ee.carlrobert.codegpt.ui.UIUtil
 import ee.carlrobert.llm.client.ollama.OllamaClient
+import java.awt.BorderLayout
 import javax.swing.DefaultComboBoxModel
+import javax.swing.JButton
+import javax.swing.JPanel
 
 class OllamaSettingsForm(settings: OllamaSettingsState) {
 
@@ -16,6 +19,7 @@ class OllamaSettingsForm(settings: OllamaSettingsState) {
     private val modelComboBox: ComboBox<String> = ComboBox(loadingModelsComboBoxModel).apply {
         isEnabled = false
     }
+    private val refreshModelsButton = JButton(CodeGPTBundle.get("settingsConfigurable.service.ollama.models.refresh"))
 
     private val hostField: JBTextField = JBTextField()
     private val codeCompletionConfigurationForm: CodeCompletionConfigurationForm =
@@ -23,6 +27,10 @@ class OllamaSettingsForm(settings: OllamaSettingsState) {
             settings.isCodeCompletionPossible(),
             settings.codeCompletionMaxTokens
         )
+
+    init {
+        refreshModelsButton.addActionListener { refreshModels() }
+    }
 
     fun refreshModels() {
         Thread {
@@ -54,7 +62,10 @@ class OllamaSettingsForm(settings: OllamaSettingsState) {
                 )
                 .addLabeledComponent(
                     CodeGPTBundle.get("settingsConfigurable.shared.model.label"),
-                    modelComboBox
+                    JPanel(BorderLayout(8, 0)).apply {
+                        add(modelComboBox, BorderLayout.CENTER)
+                        add(refreshModelsButton, BorderLayout.EAST)
+                    }
                 )
                 .panel
         )
