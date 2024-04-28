@@ -20,7 +20,7 @@ class OllamaSettingsForm(settings: OllamaSettingsState) {
     private val hostField: JBTextField = JBTextField()
     private val codeCompletionConfigurationForm: CodeCompletionConfigurationForm =
         CodeCompletionConfigurationForm(
-            settings.isCodeCompletionEnabled(),
+            settings.isCodeCompletionPossible(),
             settings.codeCompletionMaxTokens
         )
 
@@ -75,7 +75,7 @@ class OllamaSettingsForm(settings: OllamaSettingsState) {
         val state = OllamaSettings.getCurrentState()
         hostField.text = state.host
         modelComboBox.item = state.model
-        codeCompletionConfigurationForm.isCodeCompletionsEnabled = state.isCodeCompletionEnabled()
+        codeCompletionConfigurationForm.isCodeCompletionsEnabled = state.isCodeCompletionPossible()
         codeCompletionConfigurationForm.maxTokens = state.codeCompletionMaxTokens
 
         refreshModels()

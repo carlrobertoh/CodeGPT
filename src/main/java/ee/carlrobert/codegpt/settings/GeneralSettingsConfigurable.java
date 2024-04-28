@@ -71,7 +71,7 @@ public class GeneralSettingsConfigurable implements Configurable {
         || AzureSettings.getInstance().isModified(component.getAzureSettingsForm())
         || YouSettings.getInstance().isModified(component.getYouSettingsForm())
         || LlamaSettings.getInstance().isModified(component.getLlamaSettingsForm())
-        || OllamaSettings.getInstance().isModified(component.getOllamaSettingsForm());
+        || OllamaSettings.Companion.getInstance().isModified(component.getOllamaSettingsForm());
   }
 
   @Override
@@ -138,7 +138,7 @@ public class GeneralSettingsConfigurable implements Configurable {
   }
 
   private void applyOllamaSettings(OllamaSettingsForm form) {
-    OllamaSettings.getInstance().loadState(form.getCurrentState());
+    OllamaSettings.Companion.getInstance().loadState(form.getCurrentState());
   }
 
   @Override

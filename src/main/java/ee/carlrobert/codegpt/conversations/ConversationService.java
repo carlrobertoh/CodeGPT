@@ -199,7 +199,7 @@ public final class ConversationService {
                 ? llamaSettings.getCustomLlamaModelPath()
                 : llamaSettings.getHuggingFaceModel().getCode();
       }
-      case OLLAMA -> OllamaSettings.getCurrentState().getModel();
+      case OLLAMA -> OllamaSettings.Companion.getCurrentState().getModel();
     };
   }
 }

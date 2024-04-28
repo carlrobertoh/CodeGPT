@@ -3,7 +3,6 @@ package ee.carlrobert.codegpt.codecompletions
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.intellij.openapi.components.service
-import ee.carlrobert.codegpt.codecompletions.ollama.OllamaInlineCompletionModel
 import ee.carlrobert.codegpt.completions.llama.LlamaModel
 import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey
 import ee.carlrobert.codegpt.credentials.CredentialsStore.getCredential

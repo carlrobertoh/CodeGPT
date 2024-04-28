@@ -23,7 +23,7 @@ abstract class CodeCompletionFeatureToggleActions(
             OLLAMA -> {
                 val ollamaSettings = OllamaSettings.getCurrentState()
                 if (ollamaSettings.fimTemplate != null) {
-                    OllamaSettings.getCurrentState().codeCompletionsEnabled = enableFeatureAction
+                    OllamaSettings.getInstance().setCodeCompletionsEnabled(enableFeatureAction)
                 } else {
                     // TODO Show the user enabling code completion failed because of the model they
                     //  have selected
@@ -63,7 +63,7 @@ abstract class CodeCompletionFeatureToggleActions(
             OPENAI -> OpenAISettings.getCurrentState().isCodeCompletionsEnabled
             CUSTOM_OPENAI -> service<CustomServiceSettings>().state.codeCompletionSettings.codeCompletionsEnabled
             LLAMA_CPP -> LlamaSettings.isCodeCompletionsPossible()
-            OLLAMA -> OllamaSettings.getCurrentState().isCodeCompletionEnabled()
+            OLLAMA -> OllamaSettings.getCurrentState().isCodeCompletionPossible()
             else -> false
         }
     }

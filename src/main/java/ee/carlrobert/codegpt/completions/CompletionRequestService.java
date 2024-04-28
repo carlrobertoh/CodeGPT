@@ -196,7 +196,7 @@ public final class CompletionRequestService {
                 .build(), eventListener);
         break;
       case OLLAMA:
-        var ollamaSettings = OllamaSettings.getCurrentState();
+        var ollamaSettings = OllamaSettings.Companion.getCurrentState();
         var request = new OllamaChatCompletionRequest.Builder(
                 ollamaSettings.getModel(),
                 List.of(

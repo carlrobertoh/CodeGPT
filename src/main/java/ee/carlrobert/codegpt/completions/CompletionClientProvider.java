@@ -95,7 +95,7 @@ public class CompletionClientProvider {
   }
 
   public static OllamaClient getOllamaClient() {
-    var ollamaSettings = OllamaSettings.getCurrentState();
+    var ollamaSettings = OllamaSettings.Companion.getCurrentState();
     return new OllamaClient.Builder()
             .setHost(ollamaSettings.getHost())
             .build(getDefaultClientBuilder());
