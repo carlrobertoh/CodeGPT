@@ -62,7 +62,7 @@ abstract class CodeCompletionFeatureToggleActions(
         return when (serviceType) {
             OPENAI -> OpenAISettings.getCurrentState().isCodeCompletionsEnabled
             CUSTOM_OPENAI -> service<CustomServiceSettings>().state.codeCompletionSettings.codeCompletionsEnabled
-            LLAMA_CPP -> LlamaSettings.getCurrentState().isCodeCompletionsEnabled
+            LLAMA_CPP -> LlamaSettings.isCodeCompletionsPossible()
             OLLAMA -> OllamaSettings.getCurrentState().isCodeCompletionEnabled()
             else -> false
         }

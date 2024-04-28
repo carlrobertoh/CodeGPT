@@ -4,6 +4,7 @@ import ee.carlrobert.codegpt.completions.llama.PromptTemplate.ALPACA
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate.CHAT_ML
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate.LLAMA
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate.LLAMA_3
+import ee.carlrobert.codegpt.completions.llama.PromptTemplate.PHI_3
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate.TORA
 import ee.carlrobert.codegpt.conversations.message.Message
 import org.assertj.core.api.Assertions.assertThat
@@ -102,6 +103,68 @@ class PromptTemplateTest {
       TEST_PREV_RESPONSE_2<|eot_id|><|start_header_id|>user<|end_header_id|>
 
       TEST_USER_PROMPT<|eot_id|><|start_header_id|>assistant<|end_header_id|>""".trimIndent())
+  }
+
+  @Test
+  fun shouldBuildPhi3PromptWithoutHistory() {
+    val prompt = PHI_3.buildPrompt(SYSTEM_PROMPT, USER_PROMPT, listOf())
+
+    assertThat(prompt).isEqualTo("""
+      <|user|>
+      TEST_USER_PROMPT<|end|>
+      <|assistant|>""".trimIndent()
+    )
+  }
+
+  @ParameterizedTest
+  @NullAndEmptySource
+  @ValueSource(strings = [" ", "\t", "\n"])
+  fun shouldBuildPhi3PromptWithoutHistorySkippingBlankSystemPrompt(systemPrompt: String?) {
+    val prompt = PHI_3.buildPrompt(systemPrompt, USER_PROMPT, listOf())
+
+    assertThat(prompt).isEqualTo("""
+      <|user|>
+      TEST_USER_PROMPT<|end|>
+      <|assistant|>""".trimIndent()
+    )
+  }
+
+  @Test
+  fun shouldBuildPhi3PromptWithHistory() {
+    val prompt = PHI_3.buildPrompt(SYSTEM_PROMPT, USER_PROMPT, HISTORY)
+
+    assertThat(prompt).isEqualTo("""
+      <|user|>
+      TEST_PREV_PROMPT_1<|end|>
+      <|assistant|>
+      TEST_PREV_RESPONSE_1<|end|>
+      <|user|>
+      TEST_PREV_PROMPT_2<|end|>
+      <|assistant|>
+      TEST_PREV_RESPONSE_2<|end|>
+      <|user|>
+      TEST_USER_PROMPT<|end|>
+      <|assistant|>""".trimIndent())
+  }
+
+  @ParameterizedTest
+  @NullAndEmptySource
+  @ValueSource(strings = [" ", "\t", "\n"])
+  fun shouldBuildPhi3PromptWithHistorySkippingBlankSystemPrompt(systemPrompt: String?) {
+    val prompt = PHI_3.buildPrompt(systemPrompt, USER_PROMPT, HISTORY)
+
+    assertThat(prompt).isEqualTo("""
+      <|user|>
+      TEST_PREV_PROMPT_1<|end|>
+      <|assistant|>
+      TEST_PREV_RESPONSE_1<|end|>
+      <|user|>
+      TEST_PREV_PROMPT_2<|end|>
+      <|assistant|>
+      TEST_PREV_RESPONSE_2<|end|>
+      <|user|>
+      TEST_USER_PROMPT<|end|>
+      <|assistant|>""".trimIndent())
   }
 
   @Test
