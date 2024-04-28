@@ -92,10 +92,20 @@ class OllamaSettingsForm(settings: OllamaSettingsState) {
         }
     }
 
+    fun getAvailableModels(): List<String> {
+        return if (modelComboBox.isEnabled) {
+            (0 until modelComboBox.itemCount).map {
+                modelComboBox.getItemAt(it)
+            }
+        } else {
+            emptyList()
+        }
+    }
     fun getCurrentState(): OllamaSettingsState {
         return OllamaSettingsState(
             host = hostField.text,
             model = getModel(),
+            availableModels = getAvailableModels(),
             codeCompletionMaxTokens = codeCompletionConfigurationForm.maxTokens,
             codeCompletionsEnabled = codeCompletionConfigurationForm.isCodeCompletionsEnabled
         )
@@ -104,10 +114,15 @@ class OllamaSettingsForm(settings: OllamaSettingsState) {
     fun resetForm() {
         val state = OllamaSettings.getCurrentState()
         hostField.text = state.host
-        modelComboBox.item = state.model
+        if (state.availableModels.isNotEmpty()) {
+            modelComboBox.model = DefaultComboBoxModel(state.availableModels.toTypedArray())
+            modelComboBox.item = state.model
+            modelComboBox.isEnabled = true
+        } else {
+            modelComboBox.model = emptyModelsComboBoxModel
+            modelComboBox.isEnabled = false
+        }
         codeCompletionConfigurationForm.isCodeCompletionsEnabled = state.isCodeCompletionPossible()
         codeCompletionConfigurationForm.maxTokens = state.codeCompletionMaxTokens
-
-        refreshModels()
     }
 }
