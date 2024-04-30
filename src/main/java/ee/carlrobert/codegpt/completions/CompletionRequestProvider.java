@@ -26,7 +26,6 @@ import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettings;
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceChatCompletionSettingsState;
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings;
-import ee.carlrobert.codegpt.settings.service.custom.CustomServiceState;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
@@ -58,7 +57,13 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import okhttp3.Request;
@@ -134,7 +139,8 @@ public class CompletionRequestProvider {
 
   public static Request buildCustomOpenAILookupCompletionRequest(String context) {
     return buildCustomOpenAIChatCompletionRequest(
-        ApplicationManager.getApplication().getService(CustomServiceState.class)
+        ApplicationManager.getApplication().getService(CustomServiceSettings.class)
+            .getState()
             .getChatCompletionSettings(),
         List.of(
             new OpenAIChatCompletionStandardMessage(
@@ -295,7 +301,9 @@ public class CompletionRequestProvider {
 
   public OllamaChatCompletionRequest buildOllamaChatCompletionRequest(CallParameters callParameters) {
     var settings = OllamaSettings.Companion.getCurrentState();
-    var builder = new OllamaChatCompletionRequest.Builder(settings.getModel(), buildOllamaMessages(callParameters));
+    var builder = new OllamaChatCompletionRequest.Builder(
+        settings.getModel(), buildOllamaMessages(callParameters)
+    );
     return builder.build();
   }
 
@@ -307,7 +315,9 @@ public class CompletionRequestProvider {
       messages.add(new OllamaChatCompletionMessage("system", systemPrompt, null));
     }
     if (callParameters.getConversationType() == ConversationType.FIX_COMPILE_ERRORS) {
-      messages.add(new OllamaChatCompletionMessage("system", FIX_COMPILE_ERRORS_SYSTEM_PROMPT, null));
+      messages.add(
+          new OllamaChatCompletionMessage("system", FIX_COMPILE_ERRORS_SYSTEM_PROMPT, null)
+      );
     }
 
     for (var prevMessage : conversation.getMessages()) {
@@ -320,19 +330,29 @@ public class CompletionRequestProvider {
           var imageFilePath = Path.of(prevMessageImageFilePath);
           var imageBytes = Files.readAllBytes(imageFilePath);
           var imageBase64 = Base64.getEncoder().encodeToString(imageBytes);
-          messages.add(new OllamaChatCompletionMessage("user", prevMessage.getPrompt(), List.of(imageBase64)));
+          messages.add(
+              new OllamaChatCompletionMessage(
+                  "user", prevMessage.getPrompt(), List.of(imageBase64)
+              )
+          );
         } catch (IOException e) {
           throw new RuntimeException(e);
         }
       } else {
-        messages.add(new OllamaChatCompletionMessage("user", prevMessage.getPrompt(), null));
+        messages.add(
+            new OllamaChatCompletionMessage("user", prevMessage.getPrompt(), null)
+        );
       }
-      messages.add(new OllamaChatCompletionMessage("assistant", prevMessage.getResponse(), null));
+      messages.add(
+          new OllamaChatCompletionMessage("assistant", prevMessage.getResponse(), null)
+      );
     }
 
     if (callParameters.getImageMediaType() != null && callParameters.getImageData().length > 0) {
       var imageBase64 = Base64.getEncoder().encodeToString(callParameters.getImageData());
-      messages.add(new OllamaChatCompletionMessage("user", message.getPrompt(), List.of(imageBase64)));
+      messages.add(
+          new OllamaChatCompletionMessage("user", message.getPrompt(), List.of(imageBase64))
+      );
     } else {
       messages.add(new OllamaChatCompletionMessage("user", message.getPrompt(), null));
     }
@@ -371,7 +391,9 @@ public class CompletionRequestProvider {
       } else {
         messages.add(new OpenAIChatCompletionStandardMessage("user", prevMessage.getPrompt()));
       }
-      messages.add(new OpenAIChatCompletionStandardMessage("assistant", prevMessage.getResponse()));
+      messages.add(
+          new OpenAIChatCompletionStandardMessage("assistant", prevMessage.getResponse())
+      );
     }
 
     if (callParameters.getImageMediaType() != null && callParameters.getImageData().length > 0) {
