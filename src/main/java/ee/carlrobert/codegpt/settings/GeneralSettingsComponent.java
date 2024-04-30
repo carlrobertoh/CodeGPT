@@ -1,5 +1,13 @@
 package ee.carlrobert.codegpt.settings;
 
+import static ee.carlrobert.codegpt.settings.service.ServiceType.ANTHROPIC;
+import static ee.carlrobert.codegpt.settings.service.ServiceType.AZURE;
+import static ee.carlrobert.codegpt.settings.service.ServiceType.CUSTOM_OPENAI;
+import static ee.carlrobert.codegpt.settings.service.ServiceType.LLAMA_CPP;
+import static ee.carlrobert.codegpt.settings.service.ServiceType.OLLAMA;
+import static ee.carlrobert.codegpt.settings.service.ServiceType.OPENAI;
+import static ee.carlrobert.codegpt.settings.service.ServiceType.YOU;
+
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.components.JBTextField;
@@ -28,8 +36,6 @@ import java.util.Arrays;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
-
-import static ee.carlrobert.codegpt.settings.service.ServiceType.*;
 
 public class GeneralSettingsComponent {
 

@@ -299,7 +299,9 @@ public class CompletionRequestProvider {
     return request;
   }
 
-  public OllamaChatCompletionRequest buildOllamaChatCompletionRequest(CallParameters callParameters) {
+  public OllamaChatCompletionRequest buildOllamaChatCompletionRequest(
+      CallParameters callParameters
+  ) {
     var settings = OllamaSettings.Companion.getCurrentState();
     var builder = new OllamaChatCompletionRequest.Builder(
         settings.getModel(), buildOllamaMessages(callParameters)

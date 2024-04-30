@@ -1,6 +1,8 @@
 package ee.carlrobert.codegpt.toolwindow.chat.ui.textarea;
 
-import static ee.carlrobert.codegpt.settings.service.ServiceType.*;
+import static ee.carlrobert.codegpt.settings.service.ServiceType.ANTHROPIC;
+import static ee.carlrobert.codegpt.settings.service.ServiceType.OLLAMA;
+import static ee.carlrobert.codegpt.settings.service.ServiceType.OPENAI;
 import static ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel.GPT_4_VISION_PREVIEW;
 
 import com.intellij.icons.AllIcons;

@@ -1,5 +1,13 @@
 package ee.carlrobert.codegpt.completions;
 
+import static ee.carlrobert.codegpt.settings.service.ServiceType.ANTHROPIC;
+import static ee.carlrobert.codegpt.settings.service.ServiceType.AZURE;
+import static ee.carlrobert.codegpt.settings.service.ServiceType.CUSTOM_OPENAI;
+import static ee.carlrobert.codegpt.settings.service.ServiceType.LLAMA_CPP;
+import static ee.carlrobert.codegpt.settings.service.ServiceType.OLLAMA;
+import static ee.carlrobert.codegpt.settings.service.ServiceType.OPENAI;
+import static ee.carlrobert.codegpt.settings.service.ServiceType.YOU;
+
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.diagnostic.Logger;
@@ -39,8 +47,6 @@ import java.util.Optional;
 import okhttp3.Request;
 import okhttp3.sse.EventSource;
 import okhttp3.sse.EventSources;
-
-import static ee.carlrobert.codegpt.settings.service.ServiceType.*;
 
 @Service
 public final class CompletionRequestService {

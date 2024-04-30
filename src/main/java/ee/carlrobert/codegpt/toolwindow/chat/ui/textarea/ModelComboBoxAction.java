@@ -190,7 +190,9 @@ public class ModelComboBoxAction extends ComboBoxAction {
       case OLLAMA:
         templatePresentation.setIcon(Icons.Ollama);
         templatePresentation.setText(ollamaSettings.getModel());
+        break;
       default:
+        break;
     }
   }
 
