@@ -4,47 +4,46 @@ import static java.lang.String.format;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.regex.Pattern;
 
 public enum HuggingFaceModel {
 
-  CODE_LLAMA_7B_Q3(7, 3, "codellama-7b-instruct.Q3_K_M.gguf"),
-  CODE_LLAMA_7B_Q4(7, 4, "codellama-7b-instruct.Q4_K_M.gguf"),
-  CODE_LLAMA_7B_Q5(7, 5, "codellama-7b-instruct.Q5_K_M.gguf"),
-  CODE_LLAMA_13B_Q3(13, 3, "codellama-13b-instruct.Q3_K_M.gguf"),
-  CODE_LLAMA_13B_Q4(13, 4, "codellama-13b-instruct.Q4_K_M.gguf"),
-  CODE_LLAMA_13B_Q5(13, 5, "codellama-13b-instruct.Q5_K_M.gguf"),
-  CODE_LLAMA_34B_Q3(34, 3, "codellama-34b-instruct.Q3_K_M.gguf"),
-  CODE_LLAMA_34B_Q4(34, 4, "codellama-34b-instruct.Q4_K_M.gguf"),
-  CODE_LLAMA_34B_Q5(34, 5, "codellama-34b-instruct.Q5_K_M.gguf"),
+  CODE_LLAMA_7B_Q3(7, 3, "CodeLlama-7B-Instruct-GGUF"),
+  CODE_LLAMA_7B_Q4(7, 4, "CodeLlama-7B-Instruct-GGUF"),
+  CODE_LLAMA_7B_Q5(7, 5, "CodeLlama-7B-Instruct-GGUF"),
+  CODE_LLAMA_13B_Q3(13, 3, "CodeLlama-13B-Instruct-GGUF"),
+  CODE_LLAMA_13B_Q4(13, 4, "CodeLlama-13B-Instruct-GGUF"),
+  CODE_LLAMA_13B_Q5(13, 5, "CodeLlama-13B-Instruct-GGUF"),
+  CODE_LLAMA_34B_Q3(34, 3, "CodeLlama-34B-Instruct-GGUF"),
+  CODE_LLAMA_34B_Q4(34, 4, "CodeLlama-34B-Instruct-GGUF"),
+  CODE_LLAMA_34B_Q5(34, 5, "CodeLlama-34B-Instruct-GGUF"),
 
-  CODE_BOOGA_34B_Q3(34, 3, "codebooga-34b-v0.1.Q3_K_M.gguf"),
-  CODE_BOOGA_34B_Q4(34, 4, "codebooga-34b-v0.1.Q4_K_M.gguf"),
-  CODE_BOOGA_34B_Q5(34, 5, "codebooga-34b-v0.1.Q5_K_M.gguf"),
+  CODE_BOOGA_34B_Q3(34, 3, "CodeBooga-34B-v0.1-GGUF"),
+  CODE_BOOGA_34B_Q4(34, 4, "CodeBooga-34B-v0.1-GGUF"),
+  CODE_BOOGA_34B_Q5(34, 5, "CodeBooga-34B-v0.1-GGUF"),
 
-  DEEPSEEK_CODER_1_3B_Q3(1, 3, "deepseek-coder-1.3b-instruct.Q3_K_M.gguf", 0.705),
-  DEEPSEEK_CODER_1_3B_Q4(1, 4, "deepseek-coder-1.3b-instruct.Q4_K_M.gguf", 0.874),
-  DEEPSEEK_CODER_1_3B_Q5(1, 5, "deepseek-coder-1.3b-instruct.Q5_K_M.gguf", 1.0),
-  DEEPSEEK_CODER_6_7B_Q3(7, 3, "deepseek-coder-6.7b-instruct.Q3_K_M.gguf"),
-  DEEPSEEK_CODER_6_7B_Q4(7, 4, "deepseek-coder-6.7b-instruct.Q4_K_M.gguf"),
-  DEEPSEEK_CODER_6_7B_Q5(7, 5, "deepseek-coder-6.7b-instruct.Q5_K_M.gguf"),
-  DEEPSEEK_CODER_33B_Q3(33, 3, "deepseek-coder-33b-instruct.Q3_K_M.gguf", 16.1),
-  DEEPSEEK_CODER_33B_Q4(33, 4, "deepseek-coder-33b-instruct.Q4_K_M.gguf", 19.9),
-  DEEPSEEK_CODER_33B_Q5(33, 5, "deepseek-coder-33b-instruct.Q5_K_M.gguf", 23.5),
+  DEEPSEEK_CODER_1_3B_Q3(1, 3, "deepseek-coder-1.3b-instruct-GGUF", 0.705),
+  DEEPSEEK_CODER_1_3B_Q4(1, 4, "deepseek-coder-1.3b-instruct-GGUF", 0.874),
+  DEEPSEEK_CODER_1_3B_Q5(1, 5, "deepseek-coder-1.3b-instruct-GGUF", 1.0),
+  DEEPSEEK_CODER_6_7B_Q3(7, 3, "deepseek-coder-6.7b-instruct-GGUF"),
+  DEEPSEEK_CODER_6_7B_Q4(7, 4, "deepseek-coder-6.7b-instruct-GGUF"),
+  DEEPSEEK_CODER_6_7B_Q5(7, 5, "deepseek-coder-6.7b-instruct-GGUF"),
+  DEEPSEEK_CODER_33B_Q3(33, 3, "deepseek-coder-33b-instruct-GGUF", 16.1),
+  DEEPSEEK_CODER_33B_Q4(33, 4, "deepseek-coder-33b-instruct-GGUF", 19.9),
+  DEEPSEEK_CODER_33B_Q5(33, 5, "deepseek-coder-33b-instruct-GGUF", 23.5),
 
-  PHIND_CODE_LLAMA_34B_Q3(34, 3, "phind-codellama-34b-v2.Q3_K_M.gguf"),
-  PHIND_CODE_LLAMA_34B_Q4(34, 4, "phind-codellama-34b-v2.Q4_K_M.gguf"),
-  PHIND_CODE_LLAMA_34B_Q5(34, 5, "phind-codellama-34b-v2.Q5_K_M.gguf"),
+  PHIND_CODE_LLAMA_34B_Q3(34, 3, "Phind-CodeLlama-34B-v2-GGUF"),
+  PHIND_CODE_LLAMA_34B_Q4(34, 4, "Phind-CodeLlama-34B-v2-GGUF"),
+  PHIND_CODE_LLAMA_34B_Q5(34, 5, "Phind-CodeLlama-34B-v2-GGUF"),
 
-  WIZARD_CODER_PYTHON_7B_Q3(7, 3, "wizardcoder-python-7b-v1.0.Q3_K_M.gguf"),
-  WIZARD_CODER_PYTHON_7B_Q4(7, 4, "wizardcoder-python-7b-v1.0.Q4_K_M.gguf"),
-  WIZARD_CODER_PYTHON_7B_Q5(7, 5, "wizardcoder-python-7b-v1.0.Q5_K_M.gguf"),
-  WIZARD_CODER_PYTHON_13B_Q3(13, 3, "wizardcoder-python-13b-v1.0.Q3_K_M.gguf"),
-  WIZARD_CODER_PYTHON_13B_Q4(13, 4, "wizardcoder-python-13b-v1.0.Q4_K_M.gguf"),
-  WIZARD_CODER_PYTHON_13B_Q5(13, 5, "wizardcoder-python-13b-v1.0.Q5_K_M.gguf"),
-  WIZARD_CODER_PYTHON_34B_Q3(34, 3, "wizardcoder-python-34b-v1.0.Q3_K_M.gguf"),
-  WIZARD_CODER_PYTHON_34B_Q4(34, 4, "wizardcoder-python-34b-v1.0.Q4_K_M.gguf"),
-  WIZARD_CODER_PYTHON_34B_Q5(34, 5, "wizardcoder-python-34b-v1.0.Q5_K_M.gguf"),
+  WIZARD_CODER_PYTHON_7B_Q3(7, 3, "WizardCoder-Python-7B-V1.0-GGUF"),
+  WIZARD_CODER_PYTHON_7B_Q4(7, 4, "WizardCoder-Python-7B-V1.0-GGUF"),
+  WIZARD_CODER_PYTHON_7B_Q5(7, 5, "WizardCoder-Python-7B-V1.0-GGUF"),
+  WIZARD_CODER_PYTHON_13B_Q3(13, 3, "WizardCoder-Python-13B-V1.0-GGUF"),
+  WIZARD_CODER_PYTHON_13B_Q4(13, 4, "WizardCoder-Python-13B-V1.0-GGUF"),
+  WIZARD_CODER_PYTHON_13B_Q5(13, 5, "WizardCoder-Python-13B-V1.0-GGUF"),
+  WIZARD_CODER_PYTHON_34B_Q3(34, 3, "WizardCoder-Python-34B-V1.0-GGUF"),
+  WIZARD_CODER_PYTHON_34B_Q4(34, 4, "WizardCoder-Python-34B-V1.0-GGUF"),
+  WIZARD_CODER_PYTHON_34B_Q5(34, 5, "WizardCoder-Python-34B-V1.0-GGUF"),
 
   LLAMA_3_8B_IQ3_M(8, 3, "Meta-Llama-3-8B-Instruct-IQ3_M.gguf", "lmstudio-community", 3.78),
   LLAMA_3_8B_Q4_K_M(8, 4, "Meta-Llama-3-8B-Instruct-Q4_K_M.gguf", "lmstudio-community", 4.92),
@@ -66,6 +65,11 @@ public enum HuggingFaceModel {
   CODE_GEMMA_7B_Q5_K_M(7, 5, "codegemma-7b-it-Q5_K_M.gguf", "lmstudio-community", 6.14),
   CODE_GEMMA_7B_Q6_K(7, 6, "codegemma-7b-it-Q6_K.gguf", "lmstudio-community", 7.01),
   CODE_GEMMA_7B_Q8_0(7, 8, "codegemma-7b-it-Q8_0.gguf", "lmstudio-community", 9.08),
+
+  CODE_QWEN_1_5_7B_Q3_K_M(7, 3, "CodeQwen1.5-7B-Chat.Q3_K_M.gguf", "RichardErkhov", 3.81),
+  CODE_QWEN_1_5_7B_Q4_K_M(7, 4, "CodeQwen1.5-7B-Chat.Q4_K_M.gguf", "RichardErkhov", 4.74),
+  CODE_QWEN_1_5_7B_Q5_K_M(7, 5, "CodeQwen1.5-7B-Chat.Q5_K_M.gguf", "RichardErkhov", 5.43),
+  CODE_QWEN_1_5_7B_Q6_K(7, 6, "CodeQwen1.5-7B-Chat.Q6_K.gguf", "RichardErkhov", 6.38),
   ;
 
   private final int parameterSize;
@@ -132,7 +136,15 @@ public enum HuggingFaceModel {
   }
 
   private String getDirectory() {
-    return modelName.replaceFirst("-[^.-]+\\.gguf$", "-GGUF");
+    if ("lmstudio-community".equals(user)) {
+      // Meta-Llama-3-8B-Instruct-Q4_K_M.gguf → Meta-Llama-3-8B-Instruct-GGUF
+      return modelName.replaceFirst("-[^.-]+\\.gguf$", "-GGUF");
+    }
+    if ("RichardErkhov".equals(user)) {
+      // CodeQwen1.5-7B-Chat.Q6_K.gguf → Qwen_-_CodeQwen1.5-7B-Chat-gguf
+      return modelName.replaceFirst("(Code)(Qwen)(1\\.5.+)\\.[^.]+\\.", "$2_-_$1$2$3-");
+    }
+    return modelName;
   }
 
   public String getQuantizationLabel() {

@@ -20,6 +20,11 @@ enum class InfillPromptTemplate(val label: String, val stopTokens: List<String>?
             return "<|fim_prefix|>$prefix<|fim_suffix|>$suffix<|fim_middle|>"
         }
     },
+    CODE_QWEN("CodeQwen1.5", listOf("<|endoftext|>")) {
+        override fun buildPrompt(prefix: String, suffix: String): String {
+            return "<fim_prefix>$prefix<fim_suffix>$suffix<fim_middle>"
+        }
+    },
     STABILITY("Stability AI", listOf("<|endoftext|>")) {
         override fun buildPrompt(prefix: String, suffix: String): String {
             return "<fim_prefix>$prefix<fim_suffix>$suffix<fim_middle>"
