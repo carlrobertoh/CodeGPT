@@ -71,7 +71,7 @@ public class GeneralSettingsConfigurable implements Configurable {
         || AzureSettings.getInstance().isModified(component.getAzureSettingsForm())
         || YouSettings.getInstance().isModified(component.getYouSettingsForm())
         || LlamaSettings.getInstance().isModified(component.getLlamaSettingsForm())
-        || OllamaSettings.Companion.getInstance().isModified(component.getOllamaSettingsForm());
+        || component.getOllamaSettingsForm().isModified();
   }
 
   @Override
@@ -87,7 +87,7 @@ public class GeneralSettingsConfigurable implements Configurable {
     applyAzureSettings(component.getAzureSettingsForm());
     applyYouSettings(component.getYouSettingsForm());
     applyLlamaSettings(component.getLlamaSettingsForm());
-    applyOllamaSettings(component.getOllamaSettingsForm());
+    component.getOllamaSettingsForm().applyChanges();
 
     var serviceChanged = component.getSelectedService() != settings.getSelectedService();
     var modelChanged = !OpenAISettings.getCurrentState().getModel()
@@ -138,7 +138,7 @@ public class GeneralSettingsConfigurable implements Configurable {
   }
 
   private void applyOllamaSettings(OllamaSettingsForm form) {
-    OllamaSettings.Companion.getInstance().loadState(form.getCurrentState());
+    form.applyChanges();
   }
 
   @Override

@@ -314,11 +314,10 @@ public class CompletionRequestProvider {
   public OllamaChatCompletionRequest buildOllamaChatCompletionRequest(
       CallParameters callParameters
   ) {
-    var settings = OllamaSettings.Companion.getCurrentState();
-    var builder = new OllamaChatCompletionRequest.Builder(
-        settings.getModel(), buildOllamaMessages(callParameters)
-    );
-    return builder.build();
+    var settings = ApplicationManager.getApplication().getService(OllamaSettings.class).getState();
+    return new OllamaChatCompletionRequest
+        .Builder(settings.getModel(), buildOllamaMessages(callParameters))
+        .build();
   }
 
   private List<OllamaChatCompletionMessage> buildOllamaMessages(CallParameters callParameters) {

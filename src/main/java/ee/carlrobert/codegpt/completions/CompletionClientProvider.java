@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.completions;
 
+import com.intellij.openapi.application.ApplicationManager;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.completions.you.YouUserManager;
 import ee.carlrobert.codegpt.credentials.CredentialsStore;
@@ -95,10 +96,13 @@ public class CompletionClientProvider {
   }
 
   public static OllamaClient getOllamaClient() {
-    var ollamaSettings = OllamaSettings.Companion.getCurrentState();
+    var host = ApplicationManager.getApplication()
+        .getService(OllamaSettings.class)
+        .getState()
+        .getHost();
     return new OllamaClient.Builder()
-            .setHost(ollamaSettings.getHost())
-            .build(getDefaultClientBuilder());
+        .setHost(host)
+        .build(getDefaultClientBuilder());
   }
 
   public static OkHttpClient.Builder getDefaultClientBuilder() {

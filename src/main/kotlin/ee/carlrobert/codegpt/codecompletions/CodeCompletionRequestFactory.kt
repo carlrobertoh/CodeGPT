@@ -85,17 +85,24 @@ object CodeCompletionRequestFactory {
     fun buildLlamaRequest(details: InfillRequestDetails): LlamaInfillRequest {
         val settings = LlamaSettings.getCurrentState()
         val promptTemplate = getLlamaInfillPromptTemplate(settings)
-        return LlamaInfillRequest(LlamaCompletionRequest.Builder(null)
-            .setN_predict(settings.codeCompletionMaxTokens)
-            .setStream(true)
-            .setTemperature(0.4)
-            .setStop(promptTemplate.stopTokens), details.prefix, details.suffix)
+        return LlamaInfillRequest(
+            LlamaCompletionRequest.Builder(null)
+                .setN_predict(settings.codeCompletionMaxTokens)
+                .setStream(true)
+                .setTemperature(0.4)
+                .setStop(promptTemplate.stopTokens), details.prefix, details.suffix
+        )
     }
 
     fun buildOllamaRequest(details: InfillRequestDetails): OllamaCompletionRequest {
-        val settings = OllamaSettings.getCurrentState()
-        return OllamaCompletionRequest.Builder(settings.model, settings.fimTemplate!!.buildPrompt(details.prefix, details.suffix))
-            .setOptions(OllamaParameters.Builder().numPredict(settings.codeCompletionMaxTokens).build())
+        val settings = service<OllamaSettings>().state
+        return OllamaCompletionRequest.Builder(
+            settings.model,
+            settings.fimTemplate.buildPrompt(details.prefix, details.suffix)
+        )
+            .setOptions(
+                OllamaParameters.Builder().numPredict(settings.codeCompletionMaxTokens).build()
+            )
             .setRaw(true)
             .build()
     }

@@ -103,7 +103,10 @@ public class GeneralSettings implements PersistentStateComponent<GeneralSettings
             huggingFaceModel.getParameterSize(),
             huggingFaceModel.getQuantization());
       case OLLAMA:
-        return OllamaSettings.Companion.getCurrentState().getModel();
+        return ApplicationManager.getApplication()
+            .getService(OllamaSettings.class)
+            .getState()
+            .getModel();
       default:
         return "Unknown";
     }

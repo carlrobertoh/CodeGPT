@@ -58,7 +58,7 @@ public class GeneralSettingsComponent {
     azureSettingsForm = new AzureSettingsForm(AzureSettings.getCurrentState());
     youSettingsForm = new YouSettingsForm(YouSettings.getCurrentState(), parentDisposable);
     llamaSettingsForm = new LlamaSettingsForm(LlamaSettings.getCurrentState());
-    ollamaSettingsForm = new OllamaSettingsForm(OllamaSettings.Companion.getCurrentState());
+    ollamaSettingsForm = new OllamaSettingsForm();
 
     var cardLayout = new DynamicCardLayout();
     var cards = new JPanel(cardLayout);

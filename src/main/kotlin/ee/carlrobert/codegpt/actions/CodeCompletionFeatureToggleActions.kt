@@ -18,15 +18,22 @@ abstract class CodeCompletionFeatureToggleActions(
 
     override fun actionPerformed(e: AnActionEvent) {
         when (GeneralSettings.getCurrentState().selectedService) {
-            OPENAI -> OpenAISettings.getCurrentState().isCodeCompletionsEnabled = enableFeatureAction
-            LLAMA_CPP -> LlamaSettings.getCurrentState().isCodeCompletionsEnabled = enableFeatureAction
-            OLLAMA -> OllamaSettings.getCurrentState().codeCompletionsEnabled = enableFeatureAction
-            CUSTOM_OPENAI -> service<CustomServiceSettings>().state.codeCompletionSettings.codeCompletionsEnabled =
-                enableFeatureAction
+            OPENAI ->
+                OpenAISettings.getCurrentState().isCodeCompletionsEnabled = enableFeatureAction
+
+            LLAMA_CPP ->
+                LlamaSettings.getCurrentState().isCodeCompletionsEnabled = enableFeatureAction
+
+            OLLAMA -> service<OllamaSettings>().state.codeCompletionsEnabled = enableFeatureAction
+            CUSTOM_OPENAI -> service<CustomServiceSettings>().state
+                .codeCompletionSettings
+                .codeCompletionsEnabled = enableFeatureAction
+
             ANTHROPIC,
             AZURE,
             YOU,
-            null -> { /* no-op for these services */ }
+            null -> { /* no-op for these services */
+            }
         }
     }
 
@@ -38,7 +45,8 @@ abstract class CodeCompletionFeatureToggleActions(
             OPENAI,
             CUSTOM_OPENAI,
             LLAMA_CPP,
-            OLLAMA-> true
+            OLLAMA -> true
+
             ANTHROPIC,
             AZURE,
             YOU,
@@ -55,7 +63,7 @@ abstract class CodeCompletionFeatureToggleActions(
             OPENAI -> OpenAISettings.getCurrentState().isCodeCompletionsEnabled
             CUSTOM_OPENAI -> service<CustomServiceSettings>().state.codeCompletionSettings.codeCompletionsEnabled
             LLAMA_CPP -> LlamaSettings.isCodeCompletionsPossible()
-            OLLAMA -> OllamaSettings.getCurrentState().isCodeCompletionPossible()
+            OLLAMA -> service<OllamaSettings>().state.codeCompletionsEnabled
             ANTHROPIC,
             AZURE,
             YOU -> false

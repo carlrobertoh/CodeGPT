@@ -196,10 +196,13 @@ public final class ConversationService {
       case LLAMA_CPP -> {
         var llamaSettings = LlamaSettings.getCurrentState();
         yield llamaSettings.isUseCustomModel()
-                ? llamaSettings.getCustomLlamaModelPath()
-                : llamaSettings.getHuggingFaceModel().getCode();
+            ? llamaSettings.getCustomLlamaModelPath()
+            : llamaSettings.getHuggingFaceModel().getCode();
       }
-      case OLLAMA -> OllamaSettings.Companion.getCurrentState().getModel();
+      case OLLAMA -> ApplicationManager.getApplication()
+          .getService(OllamaSettings.class)
+          .getState()
+          .getModel();
     };
   }
 }

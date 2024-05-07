@@ -36,7 +36,8 @@ public class OpenAISettingsForm {
         OpenAIChatCompletionModel.findByCode(settings.getModel()));
     codeCompletionConfigurationForm = new CodeCompletionConfigurationForm(
         settings.isCodeCompletionsEnabled(),
-        settings.getCodeCompletionMaxTokens());
+        settings.getCodeCompletionMaxTokens(),
+        null);
   }
 
   public JPanel getForm() {
