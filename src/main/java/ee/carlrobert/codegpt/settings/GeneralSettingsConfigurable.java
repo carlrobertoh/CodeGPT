@@ -20,6 +20,8 @@ import ee.carlrobert.codegpt.settings.service.azure.AzureSettingsForm;
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceForm;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.llama.form.LlamaSettingsForm;
+import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
+import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettingsForm;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettingsForm;
 import ee.carlrobert.codegpt.settings.service.you.YouSettings;
@@ -68,7 +70,8 @@ public class GeneralSettingsConfigurable implements Configurable {
         || AnthropicSettings.getInstance().isModified(component.getAnthropicSettingsForm())
         || AzureSettings.getInstance().isModified(component.getAzureSettingsForm())
         || YouSettings.getInstance().isModified(component.getYouSettingsForm())
-        || LlamaSettings.getInstance().isModified(component.getLlamaSettingsForm());
+        || LlamaSettings.getInstance().isModified(component.getLlamaSettingsForm())
+        || component.getOllamaSettingsForm().isModified();
   }
 
   @Override
@@ -84,6 +87,7 @@ public class GeneralSettingsConfigurable implements Configurable {
     applyAzureSettings(component.getAzureSettingsForm());
     applyYouSettings(component.getYouSettingsForm());
     applyLlamaSettings(component.getLlamaSettingsForm());
+    component.getOllamaSettingsForm().applyChanges();
 
     var serviceChanged = component.getSelectedService() != settings.getSelectedService();
     var modelChanged = !OpenAISettings.getCurrentState().getModel()
@@ -131,6 +135,10 @@ public class GeneralSettingsConfigurable implements Configurable {
     CredentialsStore.INSTANCE.setCredential(
         AZURE_ACTIVE_DIRECTORY_TOKEN,
         form.getActiveDirectoryToken());
+  }
+
+  private void applyOllamaSettings(OllamaSettingsForm form) {
+    form.applyChanges();
   }
 
   @Override

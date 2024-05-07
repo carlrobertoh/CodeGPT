@@ -9,6 +9,7 @@ import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettings;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
+import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -195,9 +196,13 @@ public final class ConversationService {
       case LLAMA_CPP -> {
         var llamaSettings = LlamaSettings.getCurrentState();
         yield llamaSettings.isUseCustomModel()
-                ? llamaSettings.getCustomLlamaModelPath()
-                : llamaSettings.getHuggingFaceModel().getCode();
+            ? llamaSettings.getCustomLlamaModelPath()
+            : llamaSettings.getHuggingFaceModel().getCode();
       }
+      case OLLAMA -> ApplicationManager.getApplication()
+          .getService(OllamaSettings.class)
+          .getState()
+          .getModel();
     };
   }
 }

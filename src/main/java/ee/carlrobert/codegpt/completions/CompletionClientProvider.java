@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.completions;
 
+import com.intellij.openapi.application.ApplicationManager;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.completions.you.YouUserManager;
 import ee.carlrobert.codegpt.credentials.CredentialsStore;
@@ -8,11 +9,13 @@ import ee.carlrobert.codegpt.settings.advanced.AdvancedSettings;
 import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettings;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
+import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.llm.client.anthropic.ClaudeClient;
 import ee.carlrobert.llm.client.azure.AzureClient;
 import ee.carlrobert.llm.client.azure.AzureCompletionRequestParams;
 import ee.carlrobert.llm.client.llama.LlamaClient;
+import ee.carlrobert.llm.client.ollama.OllamaClient;
 import ee.carlrobert.llm.client.openai.OpenAIClient;
 import ee.carlrobert.llm.client.you.UTMParameters;
 import ee.carlrobert.llm.client.you.YouClient;
@@ -90,6 +93,16 @@ public class CompletionClientProvider {
       }
     }
     return builder.build(getDefaultClientBuilder());
+  }
+
+  public static OllamaClient getOllamaClient() {
+    var host = ApplicationManager.getApplication()
+        .getService(OllamaSettings.class)
+        .getState()
+        .getHost();
+    return new OllamaClient.Builder()
+        .setHost(host)
+        .build(getDefaultClientBuilder());
   }
 
   public static OkHttpClient.Builder getDefaultClientBuilder() {
