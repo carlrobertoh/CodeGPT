@@ -34,10 +34,10 @@ public class LlamaSettings implements PersistentStateComponent<LlamaSettingsStat
       this.state.setHuggingFaceModel(HuggingFaceModel.CODE_LLAMA_7B_Q4);
     }
     if (this.state.getRemoteModelInfillPromptTemplate() == null) {
-      this.state.setRemoteModelInfillPromptTemplate(InfillPromptTemplate.LLAMA);
+      this.state.setRemoteModelInfillPromptTemplate(InfillPromptTemplate.CODE_LLAMA);
     }
     if (this.state.getLocalModelPromptTemplate() == null) {
-      this.state.setLocalModelInfillPromptTemplate(InfillPromptTemplate.LLAMA);
+      this.state.setLocalModelInfillPromptTemplate(InfillPromptTemplate.CODE_LLAMA);
     }
   }
 
