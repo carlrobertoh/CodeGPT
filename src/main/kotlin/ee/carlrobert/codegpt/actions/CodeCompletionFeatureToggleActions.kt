@@ -17,28 +17,31 @@ abstract class CodeCompletionFeatureToggleActions(
 
 
     override fun actionPerformed(e: AnActionEvent) {
-        GeneralSettings.getCurrentState().selectedService
-            .takeIf { it in listOf(OPENAI, CUSTOM_OPENAI, LLAMA_CPP) }
-            ?.also { selectedService ->
-                if (OPENAI == selectedService) {
-                    OpenAISettings.getCurrentState().isCodeCompletionsEnabled = enableFeatureAction
-                } else if (CUSTOM_OPENAI == selectedService) {
-                    service<CustomServiceSettings>().state.codeCompletionSettings.codeCompletionsEnabled =
-                        enableFeatureAction
-                } else {
-                    LlamaSettings.getCurrentState().isCodeCompletionsEnabled = enableFeatureAction
-                }
-            }
+        when (GeneralSettings.getCurrentState().selectedService) {
+            OPENAI -> OpenAISettings.getCurrentState().isCodeCompletionsEnabled = enableFeatureAction
+            LLAMA_CPP -> LlamaSettings.getCurrentState().isCodeCompletionsEnabled = enableFeatureAction
+            CUSTOM_OPENAI -> service<CustomServiceSettings>().state.codeCompletionSettings.codeCompletionsEnabled =
+                enableFeatureAction
+            ANTHROPIC,
+            AZURE,
+            YOU,
+            null -> { /* no-op for these services */ }
+        }
     }
 
     override fun update(e: AnActionEvent) {
         val selectedService = GeneralSettings.getCurrentState().selectedService
         val codeCompletionEnabled = isCodeCompletionsEnabled(selectedService)
         e.presentation.isEnabled = codeCompletionEnabled != enableFeatureAction
-        e.presentation.isVisible =
-            e.presentation.isEnabled && listOf(OPENAI, CUSTOM_OPENAI, LLAMA_CPP).contains(
-                selectedService
-            )
+        e.presentation.isVisible = when (selectedService) {
+            OPENAI,
+            CUSTOM_OPENAI,
+            LLAMA_CPP -> true
+            ANTHROPIC,
+            AZURE,
+            YOU,
+            null -> false
+        }
     }
 
     override fun getActionUpdateThread(): ActionUpdateThread {
@@ -50,7 +53,9 @@ abstract class CodeCompletionFeatureToggleActions(
             OPENAI -> OpenAISettings.getCurrentState().isCodeCompletionsEnabled
             CUSTOM_OPENAI -> service<CustomServiceSettings>().state.codeCompletionSettings.codeCompletionsEnabled
             LLAMA_CPP -> LlamaSettings.isCodeCompletionsPossible()
-            else -> false
+            ANTHROPIC,
+            AZURE,
+            YOU -> false
         }
     }
 }

@@ -1,7 +1,5 @@
 package ee.carlrobert.codegpt.completions;
 
-import static ee.carlrobert.codegpt.settings.service.ServiceType.ANTHROPIC;
-import static ee.carlrobert.codegpt.settings.service.ServiceType.AZURE;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.CUSTOM_OPENAI;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.LLAMA_CPP;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.OPENAI;
@@ -226,19 +224,15 @@ public final class CompletionRequestService {
   }
 
   public static boolean isRequestAllowed(ServiceType serviceType) {
-    if (serviceType == OPENAI
-        && CredentialsStore.INSTANCE.isCredentialSet(CredentialKey.OPENAI_API_KEY)) {
-      return true;
-    }
-
-    var azureCredentialKey = AzureSettings.getCurrentState().isUseAzureApiKeyAuthentication()
-        ? CredentialKey.AZURE_OPENAI_API_KEY
-        : CredentialKey.AZURE_ACTIVE_DIRECTORY_TOKEN;
-    if (serviceType == AZURE && CredentialsStore.INSTANCE.isCredentialSet(azureCredentialKey)) {
-      return true;
-    }
-
-    return List.of(LLAMA_CPP, ANTHROPIC, CUSTOM_OPENAI).contains(serviceType);
+    return switch (serviceType) {
+      case OPENAI -> CredentialsStore.INSTANCE.isCredentialSet(CredentialKey.OPENAI_API_KEY);
+      case AZURE -> CredentialsStore.INSTANCE.isCredentialSet(
+          AzureSettings.getCurrentState().isUseAzureApiKeyAuthentication()
+            ? CredentialKey.AZURE_OPENAI_API_KEY
+            : CredentialKey.AZURE_ACTIVE_DIRECTORY_TOKEN);
+      case CUSTOM_OPENAI, ANTHROPIC, LLAMA_CPP -> true;
+      case YOU -> false;
+    };
   }
 
   /**
