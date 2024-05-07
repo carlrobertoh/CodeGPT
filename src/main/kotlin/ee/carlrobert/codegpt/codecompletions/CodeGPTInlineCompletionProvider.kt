@@ -75,6 +75,7 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
             ServiceType.ANTHROPIC,
             ServiceType.AZURE,
             ServiceType.YOU,
+            ServiceType.GOOGLE,
             null -> false
         }
         return event is InlineCompletionEvent.DocumentChange && codeCompletionsEnabled

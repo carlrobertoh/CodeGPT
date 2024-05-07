@@ -10,6 +10,7 @@ import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettings;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
+import ee.carlrobert.codegpt.settings.service.google.GoogleSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
@@ -105,6 +106,11 @@ public class GeneralSettings implements PersistentStateComponent<GeneralSettings
       case OLLAMA:
         return ApplicationManager.getApplication()
             .getService(OllamaSettings.class)
+            .getState()
+            .getModel();
+      case GOOGLE:
+        return ApplicationManager.getApplication()
+            .getService(GoogleSettings.class)
             .getState()
             .getModel();
       default:

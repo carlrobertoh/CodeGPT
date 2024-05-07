@@ -8,6 +8,7 @@ import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettings;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
+import ee.carlrobert.codegpt.settings.service.google.GoogleSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
@@ -203,6 +204,11 @@ public final class ConversationService {
           .getService(OllamaSettings.class)
           .getState()
           .getModel();
+      case GOOGLE ->
+          ApplicationManager.getApplication()
+              .getService(GoogleSettings.class)
+              .getState()
+              .getModel();
     };
   }
 }
