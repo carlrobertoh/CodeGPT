@@ -33,6 +33,7 @@ import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettingsState;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.io.File;
@@ -41,6 +42,8 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import org.jetbrains.annotations.NotNull;
@@ -106,7 +109,7 @@ public class LlamaModelPreferencesForm {
             huggingFaceComboBoxModel),
         BorderLayout.WEST);
     modelDetailsLabel = new JBLabel();
-    huggingFaceModelComboBox = createHuggingFaceComboBox(
+    huggingFaceModelComboBox = createModelQuantizationComboBox(
         huggingFaceComboBoxModel,
         modelExistsIcon,
         modelDetailsLabel,
@@ -365,7 +368,7 @@ public class LlamaModelPreferencesForm {
     return comboBox;
   }
 
-  private ComboBox<HuggingFaceModel> createHuggingFaceComboBox(
+  private ComboBox<HuggingFaceModel> createModelQuantizationComboBox(
       DefaultComboBoxModel<HuggingFaceModel> huggingFaceComboBoxModel,
       JBLabel modelExistsIcon,
       JBLabel modelDetailsLabel,
@@ -379,6 +382,17 @@ public class LlamaModelPreferencesForm {
       modelDetailsLabel.setText(getHuggingFaceModelDetailsHtml(selectedModel));
       modelExistsIcon.setVisible(modelExists);
       downloadModelActionLinkWrapper.setVisible(!modelExists);
+    });
+    comboBox.setRenderer(new DefaultListCellRenderer() {
+      @Override
+      public Component getListCellRendererComponent(JList list, Object value, int index,
+          boolean isSelected, boolean cellHasFocus) {
+        Object item = value;
+        if (item instanceof HuggingFaceModel) {
+          item = ((HuggingFaceModel) item).getQuantizationLabel();
+        }
+        return super.getListCellRendererComponent(list, item, index, isSelected, cellHasFocus);
+      }
     });
     return comboBox;
   }
