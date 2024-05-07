@@ -40,8 +40,8 @@ abstract class CodeCompletionFeatureToggleActions(
     override fun update(e: AnActionEvent) {
         val selectedService = GeneralSettings.getCurrentState().selectedService
         val codeCompletionEnabled = isCodeCompletionsEnabled(selectedService)
-        e.presentation.isEnabled = codeCompletionEnabled != enableFeatureAction
-        e.presentation.isVisible = when (selectedService) {
+        e.presentation.isVisible = codeCompletionEnabled != enableFeatureAction
+        e.presentation.isEnabled = when (selectedService) {
             OPENAI,
             CUSTOM_OPENAI,
             LLAMA_CPP,

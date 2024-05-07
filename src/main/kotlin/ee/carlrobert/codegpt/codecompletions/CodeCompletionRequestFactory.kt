@@ -101,7 +101,10 @@ object CodeCompletionRequestFactory {
             settings.fimTemplate.buildPrompt(details.prefix, details.suffix)
         )
             .setOptions(
-                OllamaParameters.Builder().numPredict(settings.codeCompletionMaxTokens).build()
+                OllamaParameters.Builder()
+                    .stop(settings.fimTemplate.stopTokens)
+                    .numPredict(settings.codeCompletionMaxTokens)
+                    .build()
             )
             .setRaw(true)
             .build()
