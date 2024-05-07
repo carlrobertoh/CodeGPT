@@ -21,11 +21,14 @@ import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettings;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
+import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.llm.client.DeserializationUtil;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionRequest;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionStandardMessage;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
+import ee.carlrobert.llm.client.ollama.completion.request.OllamaChatCompletionMessage;
+import ee.carlrobert.llm.client.ollama.completion.request.OllamaChatCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionEventSourceListener;
 import ee.carlrobert.llm.client.openai.completion.OpenAITextCompletionEventSourceListener;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
@@ -104,6 +107,9 @@ public final class CompletionRequestService {
               callParameters.getMessage(),
               callParameters.getConversationType()),
           eventListener);
+      case OLLAMA -> CompletionClientProvider.getOllamaClient().getChatCompletionAsync(
+          requestProvider.buildOllamaChatCompletionRequest(callParameters),
+          eventListener);
     };
   }
 
@@ -123,6 +129,9 @@ public final class CompletionRequestService {
           .getInfillAsync(
               CodeCompletionRequestFactory.buildLlamaRequest(requestDetails),
               eventListener);
+      case OLLAMA -> CompletionClientProvider.getOllamaClient().getCompletionAsync(
+          CodeCompletionRequestFactory.INSTANCE.buildOllamaRequest(requestDetails),
+          eventListener);
       default ->
           throw new IllegalArgumentException("Code completion not supported for selected service");
     };
@@ -189,6 +198,20 @@ public final class CompletionRequestService {
                 .setRepeat_penalty(settings.getRepeatPenalty())
                 .build(), eventListener);
         break;
+      case OLLAMA:
+        var model = ApplicationManager.getApplication()
+            .getService(OllamaSettings.class)
+            .getState()
+            .getModel();
+        var request = new OllamaChatCompletionRequest.Builder(
+            model,
+            List.of(
+                new OllamaChatCompletionMessage("system", systemPrompt, null),
+                new OllamaChatCompletionMessage("user", gitDiff, null)
+            )
+        ).build();
+        CompletionClientProvider.getOllamaClient().getChatCompletionAsync(request, eventListener);
+        break;
       default:
         LOG.debug("Unknown service: {}", selectedService);
         break;
@@ -228,9 +251,9 @@ public final class CompletionRequestService {
       case OPENAI -> CredentialsStore.INSTANCE.isCredentialSet(CredentialKey.OPENAI_API_KEY);
       case AZURE -> CredentialsStore.INSTANCE.isCredentialSet(
           AzureSettings.getCurrentState().isUseAzureApiKeyAuthentication()
-            ? CredentialKey.AZURE_OPENAI_API_KEY
-            : CredentialKey.AZURE_ACTIVE_DIRECTORY_TOKEN);
-      case CUSTOM_OPENAI, ANTHROPIC, LLAMA_CPP -> true;
+              ? CredentialKey.AZURE_OPENAI_API_KEY
+              : CredentialKey.AZURE_ACTIVE_DIRECTORY_TOKEN);
+      case CUSTOM_OPENAI, ANTHROPIC, LLAMA_CPP, OLLAMA -> true;
       case YOU -> false;
     };
   }

@@ -10,9 +10,12 @@ import ee.carlrobert.codegpt.settings.configuration.Placeholder
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettingsState
+import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest
 import ee.carlrobert.llm.client.llama.completion.LlamaInfillRequest
+import ee.carlrobert.llm.client.ollama.completion.request.OllamaCompletionRequest
+import ee.carlrobert.llm.client.ollama.completion.request.OllamaParameters
 import ee.carlrobert.llm.client.openai.completion.request.OpenAITextCompletionRequest
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
@@ -82,11 +85,29 @@ object CodeCompletionRequestFactory {
     fun buildLlamaRequest(details: InfillRequestDetails): LlamaInfillRequest {
         val settings = LlamaSettings.getCurrentState()
         val promptTemplate = getLlamaInfillPromptTemplate(settings)
-        return LlamaInfillRequest(LlamaCompletionRequest.Builder(null)
-            .setN_predict(settings.codeCompletionMaxTokens)
-            .setStream(true)
-            .setTemperature(0.4)
-            .setStop(promptTemplate.stopTokens), details.prefix, details.suffix)
+        return LlamaInfillRequest(
+            LlamaCompletionRequest.Builder(null)
+                .setN_predict(settings.codeCompletionMaxTokens)
+                .setStream(true)
+                .setTemperature(0.4)
+                .setStop(promptTemplate.stopTokens), details.prefix, details.suffix
+        )
+    }
+
+    fun buildOllamaRequest(details: InfillRequestDetails): OllamaCompletionRequest {
+        val settings = service<OllamaSettings>().state
+        return OllamaCompletionRequest.Builder(
+            settings.model,
+            settings.fimTemplate.buildPrompt(details.prefix, details.suffix)
+        )
+            .setOptions(
+                OllamaParameters.Builder()
+                    .stop(settings.fimTemplate.stopTokens)
+                    .numPredict(settings.codeCompletionMaxTokens)
+                    .build()
+            )
+            .setRaw(true)
+            .build()
     }
 
     private fun getLlamaInfillPromptTemplate(settings: LlamaSettingsState): InfillPromptTemplate {
