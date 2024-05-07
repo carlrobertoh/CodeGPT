@@ -15,7 +15,10 @@ import javax.swing.JButton
 import javax.swing.JPanel
 import javax.swing.SwingUtilities
 
-class CustomServiceChatCompletionForm(state: CustomServiceChatCompletionSettingsState) {
+class CustomServiceChatCompletionForm(
+    state: CustomServiceChatCompletionSettingsState,
+    val getApiKey: () -> String?
+) {
 
     private val urlField = JBTextField(state.url, 30)
     private val tabbedPane = CustomServiceFormTabbedPane(state.headers, state.body)
@@ -67,7 +70,13 @@ class CustomServiceChatCompletionForm(state: CustomServiceChatCompletionSettings
 
     private fun testConnection() {
         CompletionRequestService.getInstance().getCustomOpenAIChatCompletionAsync(
-            CompletionRequestProvider.buildCustomOpenAICompletionRequest("Hello!"),
+            CompletionRequestProvider.buildCustomOpenAICompletionRequest(
+                "Test",
+                urlField.text,
+                tabbedPane.headers,
+                tabbedPane.body,
+                getApiKey.invoke()
+            ),
             TestConnectionEventListener()
         )
     }

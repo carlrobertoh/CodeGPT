@@ -125,13 +125,17 @@ public class CompletionRequestProvider {
         true);
   }
 
-  public static Request buildCustomOpenAICompletionRequest(String input) {
+  public static Request buildCustomOpenAICompletionRequest(String context, String url,
+      Map<String, String> headers, Map<String, Object> body, String credential) {
+    var usedSettings = new CustomServiceChatCompletionSettingsState();
+    usedSettings.setBody(body);
+    usedSettings.setHeaders(headers);
+    usedSettings.setUrl(url);
     return buildCustomOpenAIChatCompletionRequest(
-        ApplicationManager.getApplication().getService(CustomServiceSettings.class)
-            .getState()
-            .getChatCompletionSettings(),
-        List.of(new OpenAIChatCompletionStandardMessage("user", input)),
-        true);
+        usedSettings,
+        List.of(new OpenAIChatCompletionStandardMessage("user", context)),
+        true,
+        credential);
   }
 
   public static Request buildCustomOpenAILookupCompletionRequest(String context) {
@@ -226,8 +230,16 @@ public class CompletionRequestProvider {
       CustomServiceChatCompletionSettingsState settings,
       List<OpenAIChatCompletionMessage> messages,
       boolean streamRequest) {
+    return buildCustomOpenAIChatCompletionRequest(settings, messages, streamRequest,
+        CredentialsStore.INSTANCE.getCredential(CUSTOM_SERVICE_API_KEY));
+  }
+
+  private static Request buildCustomOpenAIChatCompletionRequest(
+      CustomServiceChatCompletionSettingsState settings,
+      List<OpenAIChatCompletionMessage> messages,
+      boolean streamRequest,
+      String credential) {
     var requestBuilder = new Request.Builder().url(requireNonNull(settings.getUrl()).trim());
-    var credential = CredentialsStore.INSTANCE.getCredential(CUSTOM_SERVICE_API_KEY);
     for (var entry : settings.getHeaders().entrySet()) {
       String value = entry.getValue();
       if (credential != null && value.contains("$CUSTOM_SERVICE_API_KEY")) {

@@ -34,17 +34,36 @@ object CodeCompletionRequestFactory {
     @JvmStatic
     fun buildCustomRequest(details: InfillRequestDetails): Request {
         val settings = service<CustomServiceSettings>().state.codeCompletionSettings
-        val requestBuilder = Request.Builder().url(settings.url!!)
         val credential = getCredential(CredentialKey.CUSTOM_SERVICE_API_KEY)
-        for (entry in settings.headers.entries) {
+        return buildCustomRequest(
+            details,
+            settings.url!!,
+            settings.headers,
+            settings.body,
+            settings.infillTemplate,
+            credential
+        )
+    }
+
+    @JvmStatic
+    fun buildCustomRequest(
+        details: InfillRequestDetails,
+        url: String,
+        headers: Map<String, String>,
+        body: Map<String, Any>,
+        infillTemplate: InfillPromptTemplate,
+        credential: String?
+    ): Request {
+        val requestBuilder = Request.Builder().url(url)
+        for (entry in headers.entries) {
             var value = entry.value
             if (credential != null && value.contains("\$CUSTOM_SERVICE_API_KEY")) {
                 value = value.replace("\$CUSTOM_SERVICE_API_KEY", credential)
             }
             requestBuilder.addHeader(entry.key, value)
         }
-        val transformedBody = settings.body.entries.associate { (key, value) ->
-            key to transformValue(value, settings.infillTemplate, details)
+        val transformedBody = body.entries.associate { (key, value) ->
+            key to transformValue(value, infillTemplate, details)
         }
 
         try {
