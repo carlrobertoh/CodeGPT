@@ -144,6 +144,24 @@ public enum PromptTemplate {
           .toString();
     }
   },
+  CODE_GEMMA("CodeGemma 7b Instruct") {
+    @Override
+    public String buildPrompt(String systemPrompt, String userPrompt, List<Message> history) {
+      StringBuilder prompt = new StringBuilder();
+
+      for (Message message : history) {
+        prompt.append("<start_of_turn>user\n")
+                .append(message.getPrompt())
+                .append("<end_of_turn>\n<start_of_turn>model\n")
+                .append(message.getResponse()).append("<end_of_turn>\n");
+      }
+
+      return prompt.append("<start_of_turn>user\n")
+              .append(userPrompt)
+              .append("<end_of_turn>\n<start_of_turn>model\n")
+              .toString();
+    }
+  },
   ALPACA("Alpaca/Vicuna") {
     @Override
     public String buildPrompt(String systemPrompt, String userPrompt, List<Message> history) {

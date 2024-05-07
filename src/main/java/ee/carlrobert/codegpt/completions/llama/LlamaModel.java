@@ -113,7 +113,38 @@ public enum LlamaModel {
           HuggingFaceModel.PHI_3_3_8B_4K_Q5_K_S,
           HuggingFaceModel.PHI_3_3_8B_4K_Q6_K,
           HuggingFaceModel.PHI_3_3_8B_4K_Q8_0,
-          HuggingFaceModel.PHI_3_3_8B_4K_FP16));
+          HuggingFaceModel.PHI_3_3_8B_4K_FP16)),
+  CODE_GEMMA(
+      "CodeGemma 7b Instruct",
+      "CodeGemma 7b Instruct is the first in a series of coding models released by Google. "
+          + "As an instruct model, it specializes in being asked coding related questions, but can "
+          + "also function as an autocomplete/fill-in-middle model for tools like co-pilot.\n"
+          + "This model is perfect for general coding questions or code generation.",
+      PromptTemplate.CODE_GEMMA,
+      List.of(
+          HuggingFaceModel.CODE_GEMMA_7B_IQ1_S,
+          HuggingFaceModel.CODE_GEMMA_7B_IQ1_M,
+          HuggingFaceModel.CODE_GEMMA_7B_IQ2_XXS,
+          HuggingFaceModel.CODE_GEMMA_7B_IQ2_XS,
+          HuggingFaceModel.CODE_GEMMA_7B_IQ2_S,
+          HuggingFaceModel.CODE_GEMMA_7B_IQ2_M,
+          HuggingFaceModel.CODE_GEMMA_7B_Q2_K,
+          HuggingFaceModel.CODE_GEMMA_7B_IQ3_XXS,
+          HuggingFaceModel.CODE_GEMMA_7B_IQ3_XS,
+          HuggingFaceModel.CODE_GEMMA_7B_IQ3_S,
+          HuggingFaceModel.CODE_GEMMA_7B_Q3_K_S,
+          HuggingFaceModel.CODE_GEMMA_7B_IQ3_M,
+          HuggingFaceModel.CODE_GEMMA_7B_Q3_K_M,
+          HuggingFaceModel.CODE_GEMMA_7B_Q3_K_L,
+          HuggingFaceModel.CODE_GEMMA_7B_IQ4_XS,
+          HuggingFaceModel.CODE_GEMMA_7B_IQ4_NL,
+          HuggingFaceModel.CODE_GEMMA_7B_Q4_K_S,
+          HuggingFaceModel.CODE_GEMMA_7B_Q4_K_M,
+          HuggingFaceModel.CODE_GEMMA_7B_Q5_K_S,
+          HuggingFaceModel.CODE_GEMMA_7B_Q5_K_M,
+          HuggingFaceModel.CODE_GEMMA_7B_Q6_K,
+          HuggingFaceModel.CODE_GEMMA_7B_Q8_0)),
+  ;
 
   private final String label;
   private final String description;

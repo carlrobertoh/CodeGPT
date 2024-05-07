@@ -2,6 +2,7 @@ package ee.carlrobert.codegpt.completions
 
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate.ALPACA
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate.CHAT_ML
+import ee.carlrobert.codegpt.completions.llama.PromptTemplate.CODE_GEMMA
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate.LLAMA
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate.LLAMA_3
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate.PHI_3
@@ -165,6 +166,74 @@ class PromptTemplateTest {
       <|user|>
       TEST_USER_PROMPT<|end|>
       <|assistant|>""".trimIndent())
+  }
+
+  @Test
+  fun shouldBuildCodeGemmaPromptWithoutHistory() {
+    val prompt = CODE_GEMMA.buildPrompt(SYSTEM_PROMPT, USER_PROMPT, listOf())
+
+    assertThat(prompt).isEqualTo("""
+      <start_of_turn>user
+      TEST_USER_PROMPT<end_of_turn>
+      <start_of_turn>model
+
+      """.trimIndent())
+  }
+
+  @ParameterizedTest
+  @NullAndEmptySource
+  @ValueSource(strings = [" ", "\t", "\n"])
+  fun shouldBuildCodeGemmaPromptWithoutHistorySkippingBlankSystemPrompt(systemPrompt: String?) {
+    val prompt = CODE_GEMMA.buildPrompt(systemPrompt, USER_PROMPT, listOf())
+
+    assertThat(prompt).isEqualTo("""
+      <start_of_turn>user
+      TEST_USER_PROMPT<end_of_turn>
+      <start_of_turn>model
+
+      """.trimIndent())
+  }
+
+  @Test
+  fun shouldBuildCodeGemmaPromptWithHistory() {
+    val prompt = CODE_GEMMA.buildPrompt(SYSTEM_PROMPT, USER_PROMPT, HISTORY)
+
+    assertThat(prompt).isEqualTo("""
+      <start_of_turn>user
+      TEST_PREV_PROMPT_1<end_of_turn>
+      <start_of_turn>model
+      TEST_PREV_RESPONSE_1<end_of_turn>
+      <start_of_turn>user
+      TEST_PREV_PROMPT_2<end_of_turn>
+      <start_of_turn>model
+      TEST_PREV_RESPONSE_2<end_of_turn>
+      <start_of_turn>user
+      TEST_USER_PROMPT<end_of_turn>
+      <start_of_turn>model
+
+      """.trimIndent())
+  }
+
+  @ParameterizedTest
+  @NullAndEmptySource
+  @ValueSource(strings = [" ", "\t", "\n"])
+  fun shouldBuildCodeGemmaPromptWithHistorySkippingBlankSystemPrompt(systemPrompt: String?) {
+    val prompt = CODE_GEMMA.buildPrompt(systemPrompt, USER_PROMPT, HISTORY)
+
+    assertThat(prompt).isEqualTo("""
+      <start_of_turn>user
+      TEST_PREV_PROMPT_1<end_of_turn>
+      <start_of_turn>model
+      TEST_PREV_RESPONSE_1<end_of_turn>
+      <start_of_turn>user
+      TEST_PREV_PROMPT_2<end_of_turn>
+      <start_of_turn>model
+      TEST_PREV_RESPONSE_2<end_of_turn>
+      <start_of_turn>user
+      TEST_USER_PROMPT<end_of_turn>
+      <start_of_turn>model
+
+      """.trimIndent())
   }
 
   @Test
