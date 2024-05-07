@@ -26,7 +26,7 @@ abstract class CodeCompletionFeatureToggleActions(
             ANTHROPIC,
             AZURE,
             YOU,
-                null -> { /* no-op for these services */ }
+            null -> { /* no-op for these services */ }
         }
     }
 
@@ -38,7 +38,7 @@ abstract class CodeCompletionFeatureToggleActions(
             OPENAI,
             CUSTOM_OPENAI,
             LLAMA_CPP,
-            OLLAMA -> true
+            OLLAMA-> true
             ANTHROPIC,
             AZURE,
             YOU,
@@ -56,7 +56,9 @@ abstract class CodeCompletionFeatureToggleActions(
             CUSTOM_OPENAI -> service<CustomServiceSettings>().state.codeCompletionSettings.codeCompletionsEnabled
             LLAMA_CPP -> LlamaSettings.isCodeCompletionsPossible()
             OLLAMA -> OllamaSettings.getCurrentState().isCodeCompletionPossible()
-            else -> false
+            ANTHROPIC,
+            AZURE,
+            YOU -> false
         }
     }
 }
