@@ -136,6 +136,7 @@ class OllamaSettingsForm {
                     .models
                     .map { it.name }
             }
+            service<OllamaSettings>().state.availableModels = models.toMutableList()
             invokeLater {
                 modelComboBox.apply {
                     if (models.isNotEmpty()) {

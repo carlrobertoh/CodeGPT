@@ -16,4 +16,5 @@ class OllamaSettingsState : BaseState() {
     var codeCompletionsEnabled by property(true)
     var codeCompletionMaxTokens by property(128)
     var fimTemplate by enum<InfillPromptTemplate>(InfillPromptTemplate.CODE_LLAMA)
+    var availableModels by list<String>()
 }
