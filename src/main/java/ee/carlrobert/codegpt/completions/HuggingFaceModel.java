@@ -59,7 +59,31 @@ public enum HuggingFaceModel {
   PHI_3_3_8B_4K_Q5_K_S(4, 5, "Phi-3-mini-4k-instruct-Q5_K_S.gguf", "lmstudio-community", 2.82),
   PHI_3_3_8B_4K_Q6_K(4, 6, "Phi-3-mini-4k-instruct-Q6_K.gguf", "lmstudio-community", 3.14),
   PHI_3_3_8B_4K_Q8_0(4, 8, "Phi-3-mini-4k-instruct-Q8_0.gguf", "lmstudio-community", 4.06),
-  PHI_3_3_8B_4K_FP16(4, 16, "Phi-3-mini-4k-instruct-fp16.gguf", "lmstudio-community", 7.64);
+  PHI_3_3_8B_4K_FP16(4, 16, "Phi-3-mini-4k-instruct-fp16.gguf", "lmstudio-community", 7.64),
+
+  CODE_GEMMA_7B_IQ1_S(7, 1, "codegemma-7b-it-IQ1_S.gguf", "lmstudio-community", 2.16),
+  CODE_GEMMA_7B_IQ1_M(7, 1, "codegemma-7b-it-IQ1_M.gguf", "lmstudio-community", 2.32),
+  CODE_GEMMA_7B_IQ2_XXS(7, 2, "codegemma-7b-it-IQ2_XXS.gguf", "lmstudio-community", 2.59),
+  CODE_GEMMA_7B_IQ2_XS(7, 2, "codegemma-7b-it-IQ2_XS.gguf", "lmstudio-community", 2.81),
+  CODE_GEMMA_7B_IQ2_S(7, 2, "codegemma-7b-it-IQ2_S.gguf", "lmstudio-community", 2.92),
+  CODE_GEMMA_7B_IQ2_M(7, 2, "codegemma-7b-it-IQ2_M.gguf", "lmstudio-community", 3.13),
+  CODE_GEMMA_7B_Q2_K(7, 2, "codegemma-7b-it-Q2_K.gguf", "lmstudio-community", 3.48),
+  CODE_GEMMA_7B_IQ3_XXS(7, 3, "codegemma-7b-it-IQ3_XXS.gguf", "lmstudio-community", 3.49),
+  CODE_GEMMA_7B_IQ3_XS(7, 3, "codegemma-7b-it-IQ3_XS.gguf", "lmstudio-community", 3.80),
+  CODE_GEMMA_7B_IQ3_S(7, 3, "codegemma-7b-it-IQ3_S.gguf", "lmstudio-community", 3.98),
+  CODE_GEMMA_7B_Q3_K_S(7, 3, "codegemma-7b-it-Q3_K_S.gguf", "lmstudio-community", 3.98),
+  CODE_GEMMA_7B_IQ3_M(7, 3, "codegemma-7b-it-IQ3_M.gguf", "lmstudio-community", 4.11),
+  CODE_GEMMA_7B_Q3_K_M(7, 3, "codegemma-7b-it-Q3_K_M.gguf", "lmstudio-community", 4.37),
+  CODE_GEMMA_7B_Q3_K_L(7, 3, "codegemma-7b-it-Q3_K_L.gguf", "lmstudio-community", 4.71),
+  CODE_GEMMA_7B_IQ4_XS(7, 4, "codegemma-7b-it-IQ4_XS.gguf", "lmstudio-community", 4.77),
+  CODE_GEMMA_7B_IQ4_NL(7, 4, "codegemma-7b-it-IQ4_NL.gguf", "lmstudio-community", 5.01),
+  CODE_GEMMA_7B_Q4_K_S(7, 4, "codegemma-7b-it-Q4_K_S.gguf", "lmstudio-community", 5.05),
+  CODE_GEMMA_7B_Q4_K_M(7, 4, "codegemma-7b-it-Q4_K_M.gguf", "lmstudio-community", 5.33),
+  CODE_GEMMA_7B_Q5_K_S(7, 5, "codegemma-7b-it-Q5_K_S.gguf", "lmstudio-community", 5.98),
+  CODE_GEMMA_7B_Q5_K_M(7, 5, "codegemma-7b-it-Q5_K_M.gguf", "lmstudio-community", 6.14),
+  CODE_GEMMA_7B_Q6_K(7, 6, "codegemma-7b-it-Q6_K.gguf", "lmstudio-community", 7.01),
+  CODE_GEMMA_7B_Q8_0(7, 8, "codegemma-7b-it-Q8_0.gguf", "lmstudio-community", 9.08),
+  ;
 
   private final int parameterSize;
   private final int quantization;
