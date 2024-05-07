@@ -28,7 +28,10 @@ import javax.swing.JButton
 import javax.swing.JPanel
 import javax.swing.SwingUtilities
 
-class CustomServiceCodeCompletionForm(state: CustomServiceCodeCompletionSettingsState) {
+class CustomServiceCodeCompletionForm(
+    state: CustomServiceCodeCompletionSettingsState,
+    val getApiKey: () -> String?
+) {
 
     private val featureEnabledCheckBox = JBCheckBox(
         CodeGPTBundle.get("codeCompletionsForm.enableFeatureText"),
@@ -37,7 +40,7 @@ class CustomServiceCodeCompletionForm(state: CustomServiceCodeCompletionSettings
     private val promptTemplateComboBox =
         ComboBox(EnumComboBoxModel(InfillPromptTemplate::class.java)).apply {
             selectedItem = state.infillTemplate
-            setSelectedItem(InfillPromptTemplate.LLAMA)
+            setSelectedItem(InfillPromptTemplate.CODE_LLAMA)
             addItemListener {
                 updatePromptTemplateHelpTooltip(it.item as InfillPromptTemplate)
             }
@@ -138,7 +141,14 @@ class CustomServiceCodeCompletionForm(state: CustomServiceCodeCompletionSettings
 
     private fun testConnection() {
         CompletionRequestService.getInstance().getCustomOpenAICompletionAsync(
-            CodeCompletionRequestFactory.buildCustomRequest(InfillRequestDetails("Hello", "!")),
+            CodeCompletionRequestFactory.buildCustomRequest(
+                InfillRequestDetails("Hello", "!"),
+                urlField.text,
+                tabbedPane.headers,
+                tabbedPane.body,
+                promptTemplateComboBox.selectedItem as InfillPromptTemplate,
+                getApiKey.invoke()
+            ),
             TestConnectionEventListener()
         )
     }
