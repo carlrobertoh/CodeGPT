@@ -111,8 +111,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
         Icons.Llama,
         presentation));
     actionGroup.addSeparator("Ollama");
-    /*ollamaSettings.getAvailableModels()
-        .forEach(model -> actionGroup.add(createOllamaModelAction(model, presentation)));*/
+    actionGroup.add(createOllamaModelAction(ollamaSettings.getModel(), presentation));
 
     if (YouUserManager.getInstance().isSubscribed()) {
       actionGroup.addSeparator("You.com");
