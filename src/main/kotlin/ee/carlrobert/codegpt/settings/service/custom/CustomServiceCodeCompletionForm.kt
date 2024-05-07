@@ -37,7 +37,7 @@ class CustomServiceCodeCompletionForm(state: CustomServiceCodeCompletionSettings
     private val promptTemplateComboBox =
         ComboBox(EnumComboBoxModel(InfillPromptTemplate::class.java)).apply {
             selectedItem = state.infillTemplate
-            setSelectedItem(InfillPromptTemplate.LLAMA)
+            setSelectedItem(InfillPromptTemplate.CODE_LLAMA)
             addItemListener {
                 updatePromptTemplateHelpTooltip(it.item as InfillPromptTemplate)
             }

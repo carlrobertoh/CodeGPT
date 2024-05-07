@@ -17,7 +17,7 @@ public enum LlamaModel {
           + "support for large input contexts, and zero-shot instruction following ability for "
           + "programming tasks.",
       PromptTemplate.LLAMA,
-      InfillPromptTemplate.LLAMA,
+      InfillPromptTemplate.CODE_LLAMA,
       List.of(
           HuggingFaceModel.CODE_LLAMA_7B_Q3,
           HuggingFaceModel.CODE_LLAMA_7B_Q4,
@@ -115,12 +115,13 @@ public enum LlamaModel {
           HuggingFaceModel.PHI_3_3_8B_4K_Q8_0,
           HuggingFaceModel.PHI_3_3_8B_4K_FP16)),
   CODE_GEMMA(
-      "CodeGemma 7b Instruct",
-      "CodeGemma 7b Instruct is the first in a series of coding models released by Google. "
+      "CodeGemma Instruct",
+      "CodeGemma Instruct is the first in a series of coding models released by Google. "
           + "As an instruct model, it specializes in being asked coding related questions, but can "
           + "also function as an autocomplete/fill-in-middle model for tools like co-pilot.\n"
           + "This model is perfect for general coding questions or code generation.",
       PromptTemplate.CODE_GEMMA,
+      InfillPromptTemplate.CODE_GEMMA,
       List.of(
           HuggingFaceModel.CODE_GEMMA_7B_IQ1_S,
           HuggingFaceModel.CODE_GEMMA_7B_IQ1_M,
