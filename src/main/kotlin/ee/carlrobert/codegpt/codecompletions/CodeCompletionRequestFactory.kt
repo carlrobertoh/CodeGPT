@@ -12,7 +12,6 @@ import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettingsState
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest
-import ee.carlrobert.llm.client.llama.completion.LlamaInfillRequest
 import ee.carlrobert.llm.client.openai.completion.request.OpenAITextCompletionRequest
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
@@ -60,14 +59,16 @@ object CodeCompletionRequestFactory {
     }
 
     @JvmStatic
-    fun buildLlamaRequest(details: InfillRequestDetails): LlamaInfillRequest {
+    fun buildLlamaRequest(details: InfillRequestDetails): LlamaCompletionRequest {
         val settings = LlamaSettings.getCurrentState()
         val promptTemplate = getLlamaInfillPromptTemplate(settings)
-        return LlamaInfillRequest(LlamaCompletionRequest.Builder(null)
+        val prompt = promptTemplate.buildPrompt(details.prefix, details.suffix)
+        return LlamaCompletionRequest.Builder(prompt)
             .setN_predict(settings.codeCompletionMaxTokens)
             .setStream(true)
             .setTemperature(0.4)
-            .setStop(promptTemplate.stopTokens), details.prefix, details.suffix)
+            .setStop(promptTemplate.stopTokens)
+            .build()
     }
 
     private fun getLlamaInfillPromptTemplate(settings: LlamaSettingsState): InfillPromptTemplate {
