@@ -6,6 +6,7 @@ import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.AZURE_AC
 import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.AZURE_OPENAI_API_KEY
 import ee.carlrobert.codegpt.credentials.CredentialsStore.getCredential
 import ee.carlrobert.codegpt.credentials.CredentialsStore.setCredential
+import ee.carlrobert.codegpt.settings.GeneralSettings
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettings
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettingsForm
 import javax.swing.JComponent
@@ -30,6 +31,7 @@ class AzureServiceConfigurable : Configurable {
     }
 
     override fun apply() {
+        service<GeneralSettings>().state.selectedService = ServiceType.AZURE
         service<AzureSettings>().loadState(component.currentState)
         setCredential(AZURE_OPENAI_API_KEY, component.getApiKey())
         setCredential(AZURE_ACTIVE_DIRECTORY_TOKEN, component.getActiveDirectoryToken())

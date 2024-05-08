@@ -5,6 +5,7 @@ import com.intellij.openapi.options.Configurable
 import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.LLAMA_API_KEY
 import ee.carlrobert.codegpt.credentials.CredentialsStore.getCredential
 import ee.carlrobert.codegpt.credentials.CredentialsStore.setCredential
+import ee.carlrobert.codegpt.settings.GeneralSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
 import ee.carlrobert.codegpt.settings.service.llama.form.LlamaSettingsForm
 import javax.swing.JComponent
@@ -28,6 +29,7 @@ class LlamaServiceConfigurable : Configurable {
     }
 
     override fun apply() {
+        service<GeneralSettings>().state.selectedService = ServiceType.LLAMA_CPP
         setCredential(LLAMA_API_KEY, component.llamaServerPreferencesForm.getApiKey())
         service<LlamaSettings>().loadState(component.currentState)
     }

@@ -3,6 +3,7 @@ package ee.carlrobert.codegpt.settings.service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.util.Disposer
+import ee.carlrobert.codegpt.settings.GeneralSettings
 import ee.carlrobert.codegpt.settings.service.you.YouSettings
 import ee.carlrobert.codegpt.settings.service.you.YouSettingsForm
 import javax.swing.JComponent
@@ -27,6 +28,7 @@ class YouServiceConfigurable : Configurable {
     }
 
     override fun apply() {
+        service<GeneralSettings>().state.selectedService = ServiceType.YOU
         service<YouSettings>().loadState(component.currentState)
     }
 

@@ -40,7 +40,7 @@ class ServiceConfigurableComponent {
             serviceComboBox
         )
         .addVerticalGap(8)
-        .addComponent(JBLabel("All available services that can be used with CodeGPT:"))
+        .addComponent(JBLabel("All available providers that can be used with CodeGPT:"))
         .addVerticalGap(8)
         .addComponent(FormBuilder.createFormBuilder()
             .setFormLeftIndent(16).apply {
