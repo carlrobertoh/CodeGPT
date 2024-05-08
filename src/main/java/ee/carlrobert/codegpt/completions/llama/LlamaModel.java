@@ -127,6 +127,23 @@ public enum LlamaModel {
           HuggingFaceModel.CODE_GEMMA_7B_Q5_K_M,
           HuggingFaceModel.CODE_GEMMA_7B_Q6_K,
           HuggingFaceModel.CODE_GEMMA_7B_Q8_0)),
+  CODE_QWEN(
+      "CodeQwen1.5", """
+          A specialized codeLLM built upon the Qwen1.5 language model. \
+          CodeQwen1.5-7B has been pretrained with around 3 trillion tokens of code-related data. \
+          It supports an extensive repertoire of 92 programming languages, and it exhibits \
+          exceptional capacity in long-context understanding and generation with the ability to \
+          process information of 64K tokens. In terms of performance, CodeQwen1.5 demonstrates \
+          impressive capabilities in basic code generation, long-context modelling, code editing \
+          and SQL. We believe this model can significantly enhance developer productivity and \
+          streamline software development workflows within diverse technological environments.""",
+      PromptTemplate.CODE_QWEN,
+      InfillPromptTemplate.CODE_QWEN,
+      List.of(
+          HuggingFaceModel.CODE_QWEN_1_5_7B_Q3_K_M,
+          HuggingFaceModel.CODE_QWEN_1_5_7B_Q4_K_M,
+          HuggingFaceModel.CODE_QWEN_1_5_7B_Q5_K_M,
+          HuggingFaceModel.CODE_QWEN_1_5_7B_Q6_K)),
   ;
 
   private final String label;

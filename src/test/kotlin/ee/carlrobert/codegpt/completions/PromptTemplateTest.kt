@@ -3,6 +3,7 @@ package ee.carlrobert.codegpt.completions
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate.ALPACA
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate.CHAT_ML
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate.CODE_GEMMA
+import ee.carlrobert.codegpt.completions.llama.PromptTemplate.CODE_QWEN
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate.LLAMA
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate.LLAMA_3
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate.PHI_3
@@ -232,6 +233,78 @@ class PromptTemplateTest {
       <start_of_turn>user
       TEST_USER_PROMPT<end_of_turn>
       <start_of_turn>model
+
+      """.trimIndent())
+  }
+
+  @Test
+  fun shouldBuildCodeQwenPromptWithoutHistory() {
+    val prompt = CODE_QWEN.buildPrompt(SYSTEM_PROMPT, USER_PROMPT, listOf())
+
+    assertThat(prompt).isEqualTo("""
+      <|im_start|>system
+      TEST_SYSTEM_PROMPT<|im_end|>
+      <|im_start|>user
+      TEST_USER_PROMPT<|im_end|>
+      <|im_start|>assistant
+
+      """.trimIndent())
+  }
+
+  @ParameterizedTest
+  @NullAndEmptySource
+  @ValueSource(strings = [" ", "\t", "\n"])
+  fun shouldBuildCodeQwenPromptWithoutHistorySkippingBlankSystemPrompt(systemPrompt: String?) {
+    val prompt = CODE_QWEN.buildPrompt(systemPrompt, USER_PROMPT, listOf())
+
+    assertThat(prompt).isEqualTo("""
+      <|im_start|>user
+      TEST_USER_PROMPT<|im_end|>
+      <|im_start|>assistant
+
+      """.trimIndent())
+  }
+
+  @Test
+  fun shouldBuildCodeQwenPromptWithHistory() {
+    val prompt = CODE_QWEN.buildPrompt(SYSTEM_PROMPT, USER_PROMPT, HISTORY)
+
+    assertThat(prompt).isEqualTo("""
+      <|im_start|>system
+      TEST_SYSTEM_PROMPT<|im_end|>
+      <|im_start|>user
+      TEST_PREV_PROMPT_1<|im_end|>
+      <|im_start|>assistant
+      TEST_PREV_RESPONSE_1<|im_end|>
+      <|im_start|>user
+      TEST_PREV_PROMPT_2<|im_end|>
+      <|im_start|>assistant
+      TEST_PREV_RESPONSE_2<|im_end|>
+      <|im_start|>user
+      TEST_USER_PROMPT<|im_end|>
+      <|im_start|>assistant
+
+      """.trimIndent())
+  }
+
+  @ParameterizedTest
+  @NullAndEmptySource
+  @ValueSource(strings = [" ", "\t", "\n"])
+  fun shouldBuildCodeQwenPromptWithHistorySkippingBlankSystemPrompt(systemPrompt: String?) {
+    val prompt = CODE_QWEN.buildPrompt(systemPrompt, USER_PROMPT, HISTORY)
+
+    assertThat(prompt).isEqualTo("""
+      <|im_start|>user
+      TEST_PREV_PROMPT_1<|im_end|>
+      <|im_start|>assistant
+      TEST_PREV_RESPONSE_1<|im_end|>
+      <|im_start|>user
+      TEST_PREV_PROMPT_2<|im_end|>
+      <|im_start|>assistant
+      TEST_PREV_RESPONSE_2<|im_end|>
+      <|im_start|>user
+      TEST_USER_PROMPT<|im_end|>
+      <|im_start|>assistant
 
       """.trimIndent())
   }
