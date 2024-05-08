@@ -1,14 +1,16 @@
 package testsupport.mixin
 
+import com.intellij.openapi.components.service
 import com.intellij.testFramework.PlatformTestUtil
-import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.AZURE_OPENAI_API_KEY
-import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.OPENAI_API_KEY
+import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.*
 import ee.carlrobert.codegpt.credentials.CredentialsStore.setCredential
 import ee.carlrobert.codegpt.settings.GeneralSettings
 import ee.carlrobert.codegpt.settings.service.ServiceType
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettings
+import ee.carlrobert.codegpt.settings.service.google.GoogleSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings
+import ee.carlrobert.llm.client.google.models.GoogleModel
 import java.util.function.BooleanSupplier
 
 interface ShortcutsTestMixin {
@@ -40,6 +42,13 @@ interface ShortcutsTestMixin {
     GeneralSettings.getCurrentState().selectedService = ServiceType.LLAMA_CPP
     LlamaSettings.getCurrentState().serverPort = null
   }
+
+  fun useGoogleService() {
+    GeneralSettings.getCurrentState().selectedService = ServiceType.GOOGLE
+    setCredential(GOOGLE_API_KEY, "TEST_API_KEY")
+    service<GoogleSettings>().state.model = GoogleModel.GEMINI_PRO.code
+  }
+
 
   fun waitExpecting(condition: BooleanSupplier?) {
     PlatformTestUtil.waitWithEventsDispatching(

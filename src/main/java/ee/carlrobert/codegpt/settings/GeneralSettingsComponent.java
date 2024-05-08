@@ -3,6 +3,7 @@ package ee.carlrobert.codegpt.settings;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.ANTHROPIC;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.AZURE;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.CUSTOM_OPENAI;
+import static ee.carlrobert.codegpt.settings.service.ServiceType.GOOGLE;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.LLAMA_CPP;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.OLLAMA;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.OPENAI;
@@ -19,9 +20,9 @@ import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettingsForm;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettingsForm;
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceForm;
+import ee.carlrobert.codegpt.settings.service.google.GoogleSettingsForm;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.llama.form.LlamaSettingsForm;
-import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
 import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettingsForm;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettingsForm;
@@ -49,6 +50,7 @@ public class GeneralSettingsComponent {
   private final YouSettingsForm youSettingsForm;
   private final LlamaSettingsForm llamaSettingsForm;
   private final OllamaSettingsForm ollamaSettingsForm;
+  private final GoogleSettingsForm googleSettingsForm;
 
   public GeneralSettingsComponent(Disposable parentDisposable, GeneralSettings settings) {
     displayNameField = new JBTextField(settings.getState().getDisplayName(), 20);
@@ -59,6 +61,7 @@ public class GeneralSettingsComponent {
     youSettingsForm = new YouSettingsForm(YouSettings.getCurrentState(), parentDisposable);
     llamaSettingsForm = new LlamaSettingsForm(LlamaSettings.getCurrentState());
     ollamaSettingsForm = new OllamaSettingsForm();
+    googleSettingsForm = new GoogleSettingsForm();
 
     var cardLayout = new DynamicCardLayout();
     var cards = new JPanel(cardLayout);
@@ -69,6 +72,7 @@ public class GeneralSettingsComponent {
     cards.add(youSettingsForm, YOU.getCode());
     cards.add(llamaSettingsForm, LLAMA_CPP.getCode());
     cards.add(ollamaSettingsForm.getForm(), OLLAMA.getCode());
+    cards.add(googleSettingsForm.getForm(), GOOGLE.getCode());
     var serviceComboBoxModel = new DefaultComboBoxModel<ServiceType>();
     serviceComboBoxModel.addAll(Arrays.stream(ServiceType.values()).toList());
     serviceComboBox = new ComboBox<>(serviceComboBoxModel);
@@ -121,6 +125,10 @@ public class GeneralSettingsComponent {
     return ollamaSettingsForm;
   }
 
+  public GoogleSettingsForm getGoogleSettingsForm() {
+    return googleSettingsForm;
+  }
+
   public ServiceType getSelectedService() {
     return serviceComboBox.getItem();
   }
@@ -153,6 +161,7 @@ public class GeneralSettingsComponent {
     youSettingsForm.resetForm();
     llamaSettingsForm.resetForm();
     ollamaSettingsForm.resetForm();
+    googleSettingsForm.resetForm();
   }
 
   static class DynamicCardLayout extends CardLayout {

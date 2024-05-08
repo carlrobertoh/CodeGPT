@@ -40,6 +40,7 @@ object CredentialsStore {
         AZURE_OPENAI_API_KEY,
         AZURE_ACTIVE_DIRECTORY_TOKEN,
         YOU_ACCOUNT_PASSWORD,
-        LLAMA_API_KEY
+        LLAMA_API_KEY,
+        GOOGLE_API_KEY
     }
 }

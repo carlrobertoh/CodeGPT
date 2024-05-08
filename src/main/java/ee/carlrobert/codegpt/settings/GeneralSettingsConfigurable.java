@@ -4,6 +4,7 @@ import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.A
 import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.AZURE_ACTIVE_DIRECTORY_TOKEN;
 import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.AZURE_OPENAI_API_KEY;
 import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.CUSTOM_SERVICE_API_KEY;
+import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.GOOGLE_API_KEY;
 import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.LLAMA_API_KEY;
 import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.OPENAI_API_KEY;
 
@@ -18,10 +19,9 @@ import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettingsForm;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettingsForm;
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceForm;
+import ee.carlrobert.codegpt.settings.service.google.GoogleSettingsForm;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.llama.form.LlamaSettingsForm;
-import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
-import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettingsForm;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettingsForm;
 import ee.carlrobert.codegpt.settings.service.you.YouSettings;
@@ -71,7 +71,8 @@ public class GeneralSettingsConfigurable implements Configurable {
         || AzureSettings.getInstance().isModified(component.getAzureSettingsForm())
         || YouSettings.getInstance().isModified(component.getYouSettingsForm())
         || LlamaSettings.getInstance().isModified(component.getLlamaSettingsForm())
-        || component.getOllamaSettingsForm().isModified();
+        || component.getOllamaSettingsForm().isModified()
+        || component.getGoogleSettingsForm().isModified();
   }
 
   @Override
@@ -88,6 +89,7 @@ public class GeneralSettingsConfigurable implements Configurable {
     applyYouSettings(component.getYouSettingsForm());
     applyLlamaSettings(component.getLlamaSettingsForm());
     component.getOllamaSettingsForm().applyChanges();
+    applyGoogleSettings(component.getGoogleSettingsForm());
 
     var serviceChanged = component.getSelectedService() != settings.getSelectedService();
     var modelChanged = !OpenAISettings.getCurrentState().getModel()
@@ -137,8 +139,9 @@ public class GeneralSettingsConfigurable implements Configurable {
         form.getActiveDirectoryToken());
   }
 
-  private void applyOllamaSettings(OllamaSettingsForm form) {
+  private void applyGoogleSettings(GoogleSettingsForm form) {
     form.applyChanges();
+    CredentialsStore.INSTANCE.setCredential(GOOGLE_API_KEY, form.getApiKey());
   }
 
   @Override

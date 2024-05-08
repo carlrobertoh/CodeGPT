@@ -14,6 +14,7 @@ import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.llm.client.anthropic.ClaudeClient;
 import ee.carlrobert.llm.client.azure.AzureClient;
 import ee.carlrobert.llm.client.azure.AzureCompletionRequestParams;
+import ee.carlrobert.llm.client.google.GoogleClient;
 import ee.carlrobert.llm.client.llama.LlamaClient;
 import ee.carlrobert.llm.client.ollama.OllamaClient;
 import ee.carlrobert.llm.client.openai.OpenAIClient;
@@ -102,6 +103,12 @@ public class CompletionClientProvider {
         .getHost();
     return new OllamaClient.Builder()
         .setHost(host)
+        .build(getDefaultClientBuilder());
+  }
+
+
+  public static GoogleClient getGoogleClient() {
+    return new GoogleClient.Builder(getCredential(CredentialKey.GOOGLE_API_KEY))
         .build(getDefaultClientBuilder());
   }
 

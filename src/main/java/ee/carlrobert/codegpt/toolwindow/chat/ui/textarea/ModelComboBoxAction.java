@@ -113,6 +113,12 @@ public class ModelComboBoxAction extends ComboBoxAction {
     actionGroup.addSeparator("Ollama");
     ollamaSettings.getAvailableModels().forEach(model ->
         actionGroup.add(createOllamaModelAction(model, presentation)));
+    actionGroup.addSeparator();
+    actionGroup.add(createModelAction(
+        ServiceType.GOOGLE,
+        "Google (Gemini)",
+        Icons.Google,
+        presentation));
 
     if (YouUserManager.getInstance().isSubscribed()) {
       actionGroup.addSeparator("You.com");
@@ -192,6 +198,10 @@ public class ModelComboBoxAction extends ComboBoxAction {
       case OLLAMA:
         templatePresentation.setIcon(Icons.Ollama);
         templatePresentation.setText(ollamaSettings.getModel());
+        break;
+      case GOOGLE:
+        templatePresentation.setText("Google (Gemini)");
+        templatePresentation.setIcon(Icons.Google);
         break;
       default:
         break;
