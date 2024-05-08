@@ -2,8 +2,11 @@ package ee.carlrobert.codegpt.completions
 
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate.ALPACA
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate.CHAT_ML
+import ee.carlrobert.codegpt.completions.llama.PromptTemplate.CODE_GEMMA
+import ee.carlrobert.codegpt.completions.llama.PromptTemplate.CODE_QWEN
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate.LLAMA
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate.LLAMA_3
+import ee.carlrobert.codegpt.completions.llama.PromptTemplate.PHI_3
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate.TORA
 import ee.carlrobert.codegpt.conversations.message.Message
 import org.assertj.core.api.Assertions.assertThat
@@ -43,11 +46,11 @@ class PromptTemplateTest {
     val prompt = LLAMA_3.buildPrompt(SYSTEM_PROMPT, USER_PROMPT, listOf())
 
     assertThat(prompt).isEqualTo("""
-      <|start_header_id|>system<|end_header_id|>
+      <|begin_of_text|><|start_header_id|>system<|end_header_id|>
 
       TEST_SYSTEM_PROMPT<|eot_id|><|start_header_id|>user<|end_header_id|>
 
-      TEST_USER_PROMPT<|eot_id|>""".trimIndent()
+      TEST_USER_PROMPT<|eot_id|><|start_header_id|>assistant<|end_header_id|>""".trimIndent()
     )
   }
 
@@ -58,9 +61,9 @@ class PromptTemplateTest {
     val prompt = LLAMA_3.buildPrompt(systemPrompt, USER_PROMPT, listOf())
 
     assertThat(prompt).isEqualTo("""
-      <|start_header_id|>user<|end_header_id|>
+      <|begin_of_text|><|start_header_id|>user<|end_header_id|>
 
-      TEST_USER_PROMPT<|eot_id|>""".trimIndent()
+      TEST_USER_PROMPT<|eot_id|><|start_header_id|>assistant<|end_header_id|>""".trimIndent()
     )
   }
 
@@ -69,7 +72,7 @@ class PromptTemplateTest {
     val prompt = LLAMA_3.buildPrompt(SYSTEM_PROMPT, USER_PROMPT, HISTORY)
 
     assertThat(prompt).isEqualTo("""
-      <|start_header_id|>system<|end_header_id|>
+      <|begin_of_text|><|start_header_id|>system<|end_header_id|>
 
       TEST_SYSTEM_PROMPT<|eot_id|><|start_header_id|>user<|end_header_id|>
   
@@ -81,7 +84,7 @@ class PromptTemplateTest {
 
       TEST_PREV_RESPONSE_2<|eot_id|><|start_header_id|>user<|end_header_id|>
 
-      TEST_USER_PROMPT<|eot_id|>""".trimIndent())
+      TEST_USER_PROMPT<|eot_id|><|start_header_id|>assistant<|end_header_id|>""".trimIndent())
   }
 
   @ParameterizedTest
@@ -91,7 +94,7 @@ class PromptTemplateTest {
     val prompt = LLAMA_3.buildPrompt(systemPrompt, USER_PROMPT, HISTORY)
 
     assertThat(prompt).isEqualTo("""
-      <|start_header_id|>user<|end_header_id|>
+      <|begin_of_text|><|start_header_id|>user<|end_header_id|>
   
       TEST_PREV_PROMPT_1<|eot_id|><|start_header_id|>assistant<|end_header_id|>
 
@@ -101,7 +104,209 @@ class PromptTemplateTest {
 
       TEST_PREV_RESPONSE_2<|eot_id|><|start_header_id|>user<|end_header_id|>
 
-      TEST_USER_PROMPT<|eot_id|>""".trimIndent())
+      TEST_USER_PROMPT<|eot_id|><|start_header_id|>assistant<|end_header_id|>""".trimIndent())
+  }
+
+  @Test
+  fun shouldBuildPhi3PromptWithoutHistory() {
+    val prompt = PHI_3.buildPrompt(SYSTEM_PROMPT, USER_PROMPT, listOf())
+
+    assertThat(prompt).isEqualTo("""
+      <|user|>
+      TEST_USER_PROMPT<|end|>
+      <|assistant|>""".trimIndent()
+    )
+  }
+
+  @ParameterizedTest
+  @NullAndEmptySource
+  @ValueSource(strings = [" ", "\t", "\n"])
+  fun shouldBuildPhi3PromptWithoutHistorySkippingBlankSystemPrompt(systemPrompt: String?) {
+    val prompt = PHI_3.buildPrompt(systemPrompt, USER_PROMPT, listOf())
+
+    assertThat(prompt).isEqualTo("""
+      <|user|>
+      TEST_USER_PROMPT<|end|>
+      <|assistant|>""".trimIndent()
+    )
+  }
+
+  @Test
+  fun shouldBuildPhi3PromptWithHistory() {
+    val prompt = PHI_3.buildPrompt(SYSTEM_PROMPT, USER_PROMPT, HISTORY)
+
+    assertThat(prompt).isEqualTo("""
+      <|user|>
+      TEST_PREV_PROMPT_1<|end|>
+      <|assistant|>
+      TEST_PREV_RESPONSE_1<|end|>
+      <|user|>
+      TEST_PREV_PROMPT_2<|end|>
+      <|assistant|>
+      TEST_PREV_RESPONSE_2<|end|>
+      <|user|>
+      TEST_USER_PROMPT<|end|>
+      <|assistant|>""".trimIndent())
+  }
+
+  @ParameterizedTest
+  @NullAndEmptySource
+  @ValueSource(strings = [" ", "\t", "\n"])
+  fun shouldBuildPhi3PromptWithHistorySkippingBlankSystemPrompt(systemPrompt: String?) {
+    val prompt = PHI_3.buildPrompt(systemPrompt, USER_PROMPT, HISTORY)
+
+    assertThat(prompt).isEqualTo("""
+      <|user|>
+      TEST_PREV_PROMPT_1<|end|>
+      <|assistant|>
+      TEST_PREV_RESPONSE_1<|end|>
+      <|user|>
+      TEST_PREV_PROMPT_2<|end|>
+      <|assistant|>
+      TEST_PREV_RESPONSE_2<|end|>
+      <|user|>
+      TEST_USER_PROMPT<|end|>
+      <|assistant|>""".trimIndent())
+  }
+
+  @Test
+  fun shouldBuildCodeGemmaPromptWithoutHistory() {
+    val prompt = CODE_GEMMA.buildPrompt(SYSTEM_PROMPT, USER_PROMPT, listOf())
+
+    assertThat(prompt).isEqualTo("""
+      <start_of_turn>user
+      TEST_USER_PROMPT<end_of_turn>
+      <start_of_turn>model
+
+      """.trimIndent())
+  }
+
+  @ParameterizedTest
+  @NullAndEmptySource
+  @ValueSource(strings = [" ", "\t", "\n"])
+  fun shouldBuildCodeGemmaPromptWithoutHistorySkippingBlankSystemPrompt(systemPrompt: String?) {
+    val prompt = CODE_GEMMA.buildPrompt(systemPrompt, USER_PROMPT, listOf())
+
+    assertThat(prompt).isEqualTo("""
+      <start_of_turn>user
+      TEST_USER_PROMPT<end_of_turn>
+      <start_of_turn>model
+
+      """.trimIndent())
+  }
+
+  @Test
+  fun shouldBuildCodeGemmaPromptWithHistory() {
+    val prompt = CODE_GEMMA.buildPrompt(SYSTEM_PROMPT, USER_PROMPT, HISTORY)
+
+    assertThat(prompt).isEqualTo("""
+      <start_of_turn>user
+      TEST_PREV_PROMPT_1<end_of_turn>
+      <start_of_turn>model
+      TEST_PREV_RESPONSE_1<end_of_turn>
+      <start_of_turn>user
+      TEST_PREV_PROMPT_2<end_of_turn>
+      <start_of_turn>model
+      TEST_PREV_RESPONSE_2<end_of_turn>
+      <start_of_turn>user
+      TEST_USER_PROMPT<end_of_turn>
+      <start_of_turn>model
+
+      """.trimIndent())
+  }
+
+  @ParameterizedTest
+  @NullAndEmptySource
+  @ValueSource(strings = [" ", "\t", "\n"])
+  fun shouldBuildCodeGemmaPromptWithHistorySkippingBlankSystemPrompt(systemPrompt: String?) {
+    val prompt = CODE_GEMMA.buildPrompt(systemPrompt, USER_PROMPT, HISTORY)
+
+    assertThat(prompt).isEqualTo("""
+      <start_of_turn>user
+      TEST_PREV_PROMPT_1<end_of_turn>
+      <start_of_turn>model
+      TEST_PREV_RESPONSE_1<end_of_turn>
+      <start_of_turn>user
+      TEST_PREV_PROMPT_2<end_of_turn>
+      <start_of_turn>model
+      TEST_PREV_RESPONSE_2<end_of_turn>
+      <start_of_turn>user
+      TEST_USER_PROMPT<end_of_turn>
+      <start_of_turn>model
+
+      """.trimIndent())
+  }
+
+  @Test
+  fun shouldBuildCodeQwenPromptWithoutHistory() {
+    val prompt = CODE_QWEN.buildPrompt(SYSTEM_PROMPT, USER_PROMPT, listOf())
+
+    assertThat(prompt).isEqualTo("""
+      <|im_start|>system
+      TEST_SYSTEM_PROMPT<|im_end|>
+      <|im_start|>user
+      TEST_USER_PROMPT<|im_end|>
+      <|im_start|>assistant
+
+      """.trimIndent())
+  }
+
+  @ParameterizedTest
+  @NullAndEmptySource
+  @ValueSource(strings = [" ", "\t", "\n"])
+  fun shouldBuildCodeQwenPromptWithoutHistorySkippingBlankSystemPrompt(systemPrompt: String?) {
+    val prompt = CODE_QWEN.buildPrompt(systemPrompt, USER_PROMPT, listOf())
+
+    assertThat(prompt).isEqualTo("""
+      <|im_start|>user
+      TEST_USER_PROMPT<|im_end|>
+      <|im_start|>assistant
+
+      """.trimIndent())
+  }
+
+  @Test
+  fun shouldBuildCodeQwenPromptWithHistory() {
+    val prompt = CODE_QWEN.buildPrompt(SYSTEM_PROMPT, USER_PROMPT, HISTORY)
+
+    assertThat(prompt).isEqualTo("""
+      <|im_start|>system
+      TEST_SYSTEM_PROMPT<|im_end|>
+      <|im_start|>user
+      TEST_PREV_PROMPT_1<|im_end|>
+      <|im_start|>assistant
+      TEST_PREV_RESPONSE_1<|im_end|>
+      <|im_start|>user
+      TEST_PREV_PROMPT_2<|im_end|>
+      <|im_start|>assistant
+      TEST_PREV_RESPONSE_2<|im_end|>
+      <|im_start|>user
+      TEST_USER_PROMPT<|im_end|>
+      <|im_start|>assistant
+
+      """.trimIndent())
+  }
+
+  @ParameterizedTest
+  @NullAndEmptySource
+  @ValueSource(strings = [" ", "\t", "\n"])
+  fun shouldBuildCodeQwenPromptWithHistorySkippingBlankSystemPrompt(systemPrompt: String?) {
+    val prompt = CODE_QWEN.buildPrompt(systemPrompt, USER_PROMPT, HISTORY)
+
+    assertThat(prompt).isEqualTo("""
+      <|im_start|>user
+      TEST_PREV_PROMPT_1<|im_end|>
+      <|im_start|>assistant
+      TEST_PREV_RESPONSE_1<|im_end|>
+      <|im_start|>user
+      TEST_PREV_PROMPT_2<|im_end|>
+      <|im_start|>assistant
+      TEST_PREV_RESPONSE_2<|im_end|>
+      <|im_start|>user
+      TEST_USER_PROMPT<|im_end|>
+      <|im_start|>assistant
+
+      """.trimIndent())
   }
 
   @Test

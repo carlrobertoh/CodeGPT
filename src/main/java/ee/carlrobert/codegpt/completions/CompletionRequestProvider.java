@@ -26,8 +26,8 @@ import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettings;
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceChatCompletionSettingsState;
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings;
-import ee.carlrobert.codegpt.settings.service.custom.CustomServiceState;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
+import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.codegpt.settings.service.you.YouSettings;
 import ee.carlrobert.codegpt.telemetry.core.configuration.TelemetryConfiguration;
@@ -40,7 +40,15 @@ import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionRequest;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionStandardMessage;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeMessageImageContent;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeMessageTextContent;
+import ee.carlrobert.llm.client.google.completion.GoogleCompletionContent;
+import ee.carlrobert.llm.client.google.completion.GoogleCompletionRequest;
+import ee.carlrobert.llm.client.google.completion.GoogleContentPart;
+import ee.carlrobert.llm.client.google.completion.GoogleContentPart.Blob;
+import ee.carlrobert.llm.client.google.completion.GoogleGenerationConfig;
+import ee.carlrobert.llm.client.google.models.GoogleModel;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
+import ee.carlrobert.llm.client.ollama.completion.request.OllamaChatCompletionMessage;
+import ee.carlrobert.llm.client.ollama.completion.request.OllamaChatCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionDetailedMessage;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
@@ -56,6 +64,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -116,7 +125,8 @@ public class CompletionRequestProvider {
 
   public static Request buildCustomOpenAICompletionRequest(String system, String context) {
     return buildCustomOpenAIChatCompletionRequest(
-        ApplicationManager.getApplication().getService(CustomServiceState.class)
+        ApplicationManager.getApplication().getService(CustomServiceSettings.class)
+            .getState()
             .getChatCompletionSettings(),
         List.of(
             new OpenAIChatCompletionStandardMessage("system", system),
@@ -124,18 +134,23 @@ public class CompletionRequestProvider {
         true);
   }
 
-  public static Request buildCustomOpenAICompletionRequest(String input) {
+  public static Request buildCustomOpenAICompletionRequest(String context, String url,
+      Map<String, String> headers, Map<String, Object> body, String credential) {
+    var usedSettings = new CustomServiceChatCompletionSettingsState();
+    usedSettings.setBody(body);
+    usedSettings.setHeaders(headers);
+    usedSettings.setUrl(url);
     return buildCustomOpenAIChatCompletionRequest(
-        ApplicationManager.getApplication().getService(CustomServiceSettings.class)
-            .getState()
-            .getChatCompletionSettings(),
-        List.of(new OpenAIChatCompletionStandardMessage("user", input)),
-        true);
+        usedSettings,
+        List.of(new OpenAIChatCompletionStandardMessage("user", context)),
+        true,
+        credential);
   }
 
   public static Request buildCustomOpenAILookupCompletionRequest(String context) {
     return buildCustomOpenAIChatCompletionRequest(
-        ApplicationManager.getApplication().getService(CustomServiceState.class)
+        ApplicationManager.getApplication().getService(CustomServiceSettings.class)
+            .getState()
             .getChatCompletionSettings(),
         List.of(
             new OpenAIChatCompletionStandardMessage(
@@ -180,6 +195,7 @@ public class CompletionRequestProvider {
         .setTop_p(settings.getTopP())
         .setMin_p(settings.getMinP())
         .setRepeat_penalty(settings.getRepeatPenalty())
+        .setStop(promptTemplate.getStopTokens())
         .build();
   }
 
@@ -204,11 +220,21 @@ public class CompletionRequestProvider {
       @Nullable String model,
       CallParameters callParameters) {
     var configuration = ConfigurationSettings.getCurrentState();
-    return new OpenAIChatCompletionRequest.Builder(buildMessages(model, callParameters))
+    return new OpenAIChatCompletionRequest.Builder(buildOpenAIMessages(model, callParameters))
         .setModel(model)
         .setMaxTokens(configuration.getMaxTokens())
         .setStream(true)
         .setTemperature(configuration.getTemperature()).build();
+  }
+
+  public GoogleCompletionRequest buildGoogleChatCompletionRequest(
+      @Nullable String model,
+      CallParameters callParameters) {
+    var configuration = ConfigurationSettings.getCurrentState();
+    return new GoogleCompletionRequest.Builder(buildGoogleMessages(model, callParameters))
+        .generationConfig(new GoogleGenerationConfig.Builder()
+            .maxOutputTokens(configuration.getMaxTokens())
+            .temperature(configuration.getTemperature()).build()).build();
   }
 
   public Request buildCustomOpenAIChatCompletionRequest(
@@ -216,7 +242,7 @@ public class CompletionRequestProvider {
       CallParameters callParameters) {
     return buildCustomOpenAIChatCompletionRequest(
         settings,
-        buildMessages(callParameters),
+        buildOpenAIMessages(callParameters),
         true);
   }
 
@@ -224,8 +250,16 @@ public class CompletionRequestProvider {
       CustomServiceChatCompletionSettingsState settings,
       List<OpenAIChatCompletionMessage> messages,
       boolean streamRequest) {
+    return buildCustomOpenAIChatCompletionRequest(settings, messages, streamRequest,
+        CredentialsStore.getCredential(CUSTOM_SERVICE_API_KEY));
+  }
+
+  private static Request buildCustomOpenAIChatCompletionRequest(
+      CustomServiceChatCompletionSettingsState settings,
+      List<OpenAIChatCompletionMessage> messages,
+      boolean streamRequest,
+      String credential) {
     var requestBuilder = new Request.Builder().url(requireNonNull(settings.getUrl()).trim());
-    var credential = CredentialsStore.INSTANCE.getCredential(CUSTOM_SERVICE_API_KEY);
     for (var entry : settings.getHeaders().entrySet()) {
       String value = entry.getValue();
       if (credential != null && value.contains("$CUSTOM_SERVICE_API_KEY")) {
@@ -293,7 +327,68 @@ public class CompletionRequestProvider {
     return request;
   }
 
-  private List<OpenAIChatCompletionMessage> buildMessages(CallParameters callParameters) {
+  public OllamaChatCompletionRequest buildOllamaChatCompletionRequest(
+      CallParameters callParameters
+  ) {
+    var settings = ApplicationManager.getApplication().getService(OllamaSettings.class).getState();
+    return new OllamaChatCompletionRequest
+        .Builder(settings.getModel(), buildOllamaMessages(callParameters))
+        .build();
+  }
+
+  private List<OllamaChatCompletionMessage> buildOllamaMessages(CallParameters callParameters) {
+    var message = callParameters.getMessage();
+    var messages = new ArrayList<OllamaChatCompletionMessage>();
+    if (callParameters.getConversationType() == ConversationType.DEFAULT) {
+      String systemPrompt = ConfigurationSettings.getCurrentState().getSystemPrompt();
+      messages.add(new OllamaChatCompletionMessage("system", systemPrompt, null));
+    }
+    if (callParameters.getConversationType() == ConversationType.FIX_COMPILE_ERRORS) {
+      messages.add(
+          new OllamaChatCompletionMessage("system", FIX_COMPILE_ERRORS_SYSTEM_PROMPT, null)
+      );
+    }
+
+    for (var prevMessage : conversation.getMessages()) {
+      if (callParameters.isRetry() && prevMessage.getId().equals(message.getId())) {
+        break;
+      }
+      var prevMessageImageFilePath = prevMessage.getImageFilePath();
+      if (prevMessageImageFilePath != null && !prevMessageImageFilePath.isEmpty()) {
+        try {
+          var imageFilePath = Path.of(prevMessageImageFilePath);
+          var imageBytes = Files.readAllBytes(imageFilePath);
+          var imageBase64 = Base64.getEncoder().encodeToString(imageBytes);
+          messages.add(
+              new OllamaChatCompletionMessage(
+                  "user", prevMessage.getPrompt(), List.of(imageBase64)
+              )
+          );
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+      } else {
+        messages.add(
+            new OllamaChatCompletionMessage("user", prevMessage.getPrompt(), null)
+        );
+      }
+      messages.add(
+          new OllamaChatCompletionMessage("assistant", prevMessage.getResponse(), null)
+      );
+    }
+
+    if (callParameters.getImageMediaType() != null && callParameters.getImageData().length > 0) {
+      var imageBase64 = Base64.getEncoder().encodeToString(callParameters.getImageData());
+      messages.add(
+          new OllamaChatCompletionMessage("user", message.getPrompt(), List.of(imageBase64))
+      );
+    } else {
+      messages.add(new OllamaChatCompletionMessage("user", message.getPrompt(), null));
+    }
+    return messages;
+  }
+
+  private List<OpenAIChatCompletionMessage> buildOpenAIMessages(CallParameters callParameters) {
     var message = callParameters.getMessage();
     var messages = new ArrayList<OpenAIChatCompletionMessage>();
     if (callParameters.getConversationType() == ConversationType.DEFAULT) {
@@ -325,7 +420,9 @@ public class CompletionRequestProvider {
       } else {
         messages.add(new OpenAIChatCompletionStandardMessage("user", prevMessage.getPrompt()));
       }
-      messages.add(new OpenAIChatCompletionStandardMessage("assistant", prevMessage.getResponse()));
+      messages.add(
+          new OpenAIChatCompletionStandardMessage("assistant", prevMessage.getResponse())
+      );
     }
 
     if (callParameters.getImageMediaType() != null && callParameters.getImageData().length > 0) {
@@ -341,10 +438,10 @@ public class CompletionRequestProvider {
     return messages;
   }
 
-  private List<OpenAIChatCompletionMessage> buildMessages(
+  private List<OpenAIChatCompletionMessage> buildOpenAIMessages(
       @Nullable String model,
       CallParameters callParameters) {
-    var messages = buildMessages(callParameters);
+    var messages = buildOpenAIMessages(callParameters);
 
     if (model == null
         || GeneralSettings.getCurrentState().getSelectedService() == ServiceType.YOU) {
@@ -365,6 +462,83 @@ public class CompletionRequestProvider {
       return messages;
     }
     return tryReducingMessagesOrThrow(messages, totalUsage, modelMaxTokens);
+  }
+
+  private List<GoogleCompletionContent> buildGoogleMessages(CallParameters callParameters) {
+    var message = callParameters.getMessage();
+    var messages = new ArrayList<GoogleCompletionContent>();
+    // Gemini API does not support direct 'system' prompts:
+    // see https://www.reddit.com/r/Bard/comments/1b90i8o/does_gemini_have_a_system_prompt_option_while/
+    if (callParameters.getConversationType() == ConversationType.DEFAULT) {
+      String systemPrompt = ConfigurationSettings.getCurrentState().getSystemPrompt();
+      messages.add(new GoogleCompletionContent("user", List.of(systemPrompt)));
+      messages.add(new GoogleCompletionContent("model", List.of("Understood.")));
+    }
+    if (callParameters.getConversationType() == ConversationType.FIX_COMPILE_ERRORS) {
+      messages.add(
+          new GoogleCompletionContent("user", List.of(FIX_COMPILE_ERRORS_SYSTEM_PROMPT)));
+      messages.add(new GoogleCompletionContent("model", List.of("Understood.")));
+    }
+
+    for (var prevMessage : conversation.getMessages()) {
+      if (callParameters.isRetry() && prevMessage.getId().equals(message.getId())) {
+        break;
+      }
+      var prevMessageImageFilePath = prevMessage.getImageFilePath();
+      if (prevMessageImageFilePath != null && !prevMessageImageFilePath.isEmpty()) {
+        try {
+          var imageFilePath = Path.of(prevMessageImageFilePath);
+          var imageData = Files.readAllBytes(imageFilePath);
+          var imageMediaType = FileUtil.getImageMediaType(imageFilePath.getFileName().toString());
+          messages.add(new GoogleCompletionContent(
+              List.of(
+                  new GoogleContentPart(null, new Blob(imageMediaType, imageData)),
+                  new GoogleContentPart(prevMessage.getPrompt())), "user"));
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+      } else {
+        messages.add(new GoogleCompletionContent("user", List.of(prevMessage.getPrompt())));
+      }
+      messages.add(new GoogleCompletionContent("model", List.of(prevMessage.getResponse())));
+    }
+
+    if (callParameters.getImageMediaType() != null && callParameters.getImageData().length > 0) {
+      messages.add(new GoogleCompletionContent(
+          List.of(
+              new GoogleContentPart(null,
+                  new Blob(callParameters.getImageMediaType(), callParameters.getImageData())),
+              new GoogleContentPart(message.getPrompt())), "user"));
+    } else {
+      messages.add(new GoogleCompletionContent("user", List.of(message.getPrompt())));
+    }
+    return messages;
+  }
+
+  private List<GoogleCompletionContent> buildGoogleMessages(
+      @Nullable String model,
+      CallParameters callParameters) {
+    var messages = buildGoogleMessages(callParameters);
+
+    if (model == null) {
+      return messages;
+    }
+
+    int totalUsage = messages.parallelStream()
+        .mapToInt(message -> encodingManager.countMessageTokens(message.getRole(),
+            String.join(",", message.getParts().stream().map(GoogleContentPart::getText).toList())))
+        .sum() + ConfigurationSettings.getCurrentState().getMaxTokens();
+    int modelMaxTokens;
+    try {
+      modelMaxTokens = GoogleModel.findByCode(model).getMaxTokens();
+
+      if (totalUsage <= modelMaxTokens) {
+        return messages;
+      }
+    } catch (NoSuchElementException ex) {
+      return messages;
+    }
+    return tryReducingGoogleMessagesOrThrow(messages, totalUsage, modelMaxTokens);
   }
 
   private List<OpenAIChatCompletionMessage> tryReducingMessagesOrThrow(
@@ -388,6 +562,31 @@ public class CompletionRequestProvider {
         totalUsage -= encodingManager.countMessageTokens(message);
         messages.set(i, null);
       }
+    }
+
+    return messages.stream().filter(Objects::nonNull).toList();
+  }
+
+  private List<GoogleCompletionContent> tryReducingGoogleMessagesOrThrow(
+      List<GoogleCompletionContent> messages,
+      int totalUsage,
+      int modelMaxTokens) {
+    if (!ConversationsState.getInstance().discardAllTokenLimits) {
+      if (!conversation.isDiscardTokenLimit()) {
+        throw new TotalUsageExceededException();
+      }
+    }
+
+    // skip the system prompt
+    for (int i = 1; i < messages.size(); i++) {
+      if (totalUsage <= modelMaxTokens) {
+        break;
+      }
+
+      var message = messages.get(i);
+      totalUsage -= encodingManager.countMessageTokens(message.getRole(),
+          String.join(",", message.getParts().stream().map(GoogleContentPart::getText).toList()));
+      messages.set(i, null);
     }
 
     return messages.stream().filter(Objects::nonNull).toList();

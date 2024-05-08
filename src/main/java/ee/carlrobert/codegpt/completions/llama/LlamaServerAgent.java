@@ -157,7 +157,8 @@ public final class LlamaServerAgent implements Disposable {
 
           try {
             var serverMessage = objectMapper.readValue(event.getText(), LlamaServerMessage.class);
-            if ("HTTP server listening".equals(serverMessage.message())) {
+            // hack
+            if ("HTTP server listening".equals(serverMessage.msg())) {
               LOG.info("Server up and running!");
 
               LlamaSettings.getCurrentState().setServerPort(port);

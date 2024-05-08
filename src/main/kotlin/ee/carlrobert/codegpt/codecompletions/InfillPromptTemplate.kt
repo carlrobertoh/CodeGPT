@@ -7,9 +7,22 @@ enum class InfillPromptTemplate(val label: String, val stopTokens: List<String>?
             return "<|fim_prefix|> $prefix <|fim_suffix|>$suffix <|fim_middle|>"
         }
     },
-    LLAMA("Llama", listOf("<EOT>")) {
+    CODE_LLAMA("Code Llama", listOf("<EOT>")) {
         override fun buildPrompt(prefix: String, suffix: String): String {
             return "<PRE> $prefix <SUF>$suffix <MID>"
+        }
+    },
+    CODE_GEMMA(
+        "CodeGemma Instruct",
+        listOf("<|file_separator|>", "<|fim_prefix|>", "<|fim_suffix|>", "<|fim_middle|>", "<eos>")
+    ) {
+        override fun buildPrompt(prefix: String, suffix: String): String {
+            return "<|fim_prefix|>$prefix<|fim_suffix|>$suffix<|fim_middle|>"
+        }
+    },
+    CODE_QWEN("CodeQwen1.5", listOf("<|endoftext|>")) {
+        override fun buildPrompt(prefix: String, suffix: String): String {
+            return "<fim_prefix>$prefix<fim_suffix>$suffix<fim_middle>"
         }
     },
     STABILITY("Stability AI", listOf("<|endoftext|>")) {

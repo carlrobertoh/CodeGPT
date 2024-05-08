@@ -27,6 +27,9 @@ public class ModelIconLabel extends JBLabel {
     if ("llama.chat.completion".equals(clientCode)) {
       setIcon(Icons.Llama);
     }
+    if ("google.chat.completion".equals(clientCode)) {
+      setIcon(Icons.Google);
+    }
     setText(formatModelName(modelCode));
     setFont(JBFont.small());
     setHorizontalAlignment(SwingConstants.LEADING);

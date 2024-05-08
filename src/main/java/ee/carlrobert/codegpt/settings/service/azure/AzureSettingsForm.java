@@ -38,8 +38,7 @@ public class AzureSettingsForm {
         settings.isUseAzureActiveDirectoryAuthentication());
     azureApiKeyField = new JBPasswordField();
     azureApiKeyField.setColumns(30);
-    azureApiKeyField.setText(
-        CredentialsStore.INSTANCE.getCredential(CredentialKey.AZURE_OPENAI_API_KEY));
+    azureApiKeyField.setText(CredentialsStore.getCredential(CredentialKey.AZURE_OPENAI_API_KEY));
     azureApiKeyFieldPanel = UI.PanelFactory.panel(azureApiKeyField)
         .withLabel(CodeGPTBundle.get("settingsConfigurable.shared.apiKey.label"))
         .resizeX(false)
@@ -47,7 +46,7 @@ public class AzureSettingsForm {
     azureActiveDirectoryTokenField = new JBPasswordField();
     azureActiveDirectoryTokenField.setColumns(30);
     azureActiveDirectoryTokenField.setText(
-        CredentialsStore.INSTANCE.getCredential(CredentialKey.AZURE_ACTIVE_DIRECTORY_TOKEN));
+        CredentialsStore.getCredential(CredentialKey.AZURE_ACTIVE_DIRECTORY_TOKEN));
     azureActiveDirectoryTokenFieldPanel = UI.PanelFactory.panel(azureActiveDirectoryTokenField)
         .withLabel(CodeGPTBundle.get("settingsConfigurable.service.azure.bearerToken.label"))
         .resizeX(false)
@@ -119,10 +118,9 @@ public class AzureSettingsForm {
 
   public void resetForm() {
     var state = AzureSettings.getCurrentState();
-    azureApiKeyField.setText(
-        CredentialsStore.INSTANCE.getCredential(CredentialKey.AZURE_OPENAI_API_KEY));
+    azureApiKeyField.setText(CredentialsStore.getCredential(CredentialKey.AZURE_OPENAI_API_KEY));
     azureActiveDirectoryTokenField.setText(
-        CredentialsStore.INSTANCE.getCredential(CredentialKey.AZURE_ACTIVE_DIRECTORY_TOKEN));
+        CredentialsStore.getCredential(CredentialKey.AZURE_ACTIVE_DIRECTORY_TOKEN));
     useAzureApiKeyAuthenticationRadioButton.setSelected(state.isUseAzureApiKeyAuthentication());
     useAzureActiveDirectoryAuthenticationRadioButton.setSelected(
         state.isUseAzureActiveDirectoryAuthentication());

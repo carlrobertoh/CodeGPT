@@ -19,6 +19,7 @@ object CredentialsStore {
         }
     }
 
+    @JvmStatic
     fun getCredential(key: CredentialKey): String? = credentialsMap[key]
 
     fun setCredential(key: CredentialKey, password: String?) {
@@ -26,7 +27,8 @@ object CredentialsStore {
         credentialsMap[key] = password
 
         if (prevPassword != password) {
-            val credentialAttributes = CredentialAttributes(generateServiceName("CodeGPT", key.name))
+            val credentialAttributes =
+                CredentialAttributes(generateServiceName("CodeGPT", key.name))
             PasswordSafe.instance.setPassword(credentialAttributes, password)
         }
     }
@@ -34,12 +36,14 @@ object CredentialsStore {
     fun isCredentialSet(key: CredentialKey): Boolean = !getCredential(key).isNullOrEmpty()
 
     enum class CredentialKey {
+        CODEGPT_API_KEY,
         OPENAI_API_KEY,
         CUSTOM_SERVICE_API_KEY,
         ANTHROPIC_API_KEY,
         AZURE_OPENAI_API_KEY,
         AZURE_ACTIVE_DIRECTORY_TOKEN,
         YOU_ACCOUNT_PASSWORD,
-        LLAMA_API_KEY
+        LLAMA_API_KEY,
+        GOOGLE_API_KEY
     }
 }

@@ -37,8 +37,10 @@ class CustomServiceForm {
 
     init {
         val state = service<CustomServiceSettings>().state
-        chatCompletionsForm = CustomServiceChatCompletionForm(state.chatCompletionSettings)
-        codeCompletionsForm = CustomServiceCodeCompletionForm(state.codeCompletionSettings)
+        chatCompletionsForm =
+            CustomServiceChatCompletionForm(state.chatCompletionSettings, this::getApiKey)
+        codeCompletionsForm =
+            CustomServiceCodeCompletionForm(state.codeCompletionSettings, this::getApiKey)
         tabbedPane = JTabbedPane().apply {
             add(CodeGPTBundle.get("shared.chatCompletions"), chatCompletionsForm.form)
             add(CodeGPTBundle.get("shared.codeCompletions"), codeCompletionsForm.form)

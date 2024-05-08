@@ -4,6 +4,7 @@ import com.intellij.openapi.Disposable;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.util.Disposer;
 import ee.carlrobert.codegpt.CodeGPTBundle;
+import ee.carlrobert.codegpt.actions.editor.EditorActionsUtil;
 import javax.swing.JComponent;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
@@ -39,6 +40,7 @@ public class ConfigurationConfigurable implements Configurable {
   @Override
   public void apply() {
     ConfigurationSettings.getInstance().loadState(component.getCurrentFormState());
+    EditorActionsUtil.refreshActions();
   }
 
   @Override

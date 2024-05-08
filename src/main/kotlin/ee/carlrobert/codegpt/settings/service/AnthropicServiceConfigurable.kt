@@ -13,7 +13,6 @@ class AnthropicServiceConfigurable : Configurable {
 
     private lateinit var component: AnthropicSettingsForm
 
-
     override fun getDisplayName(): String {
         return "CodeGPT: Anthropic Service"
     }
