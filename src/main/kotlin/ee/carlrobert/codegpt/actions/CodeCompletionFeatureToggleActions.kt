@@ -32,6 +32,7 @@ abstract class CodeCompletionFeatureToggleActions(
             ANTHROPIC,
             AZURE,
             YOU,
+            GOOGLE,
             null -> { /* no-op for these services */
             }
         }
@@ -50,6 +51,7 @@ abstract class CodeCompletionFeatureToggleActions(
             ANTHROPIC,
             AZURE,
             YOU,
+            GOOGLE,
             null -> false
         }
     }
@@ -66,6 +68,7 @@ abstract class CodeCompletionFeatureToggleActions(
             OLLAMA -> service<OllamaSettings>().state.codeCompletionsEnabled
             ANTHROPIC,
             AZURE,
+            GOOGLE,
             YOU -> false
         }
     }

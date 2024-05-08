@@ -40,6 +40,12 @@ import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionRequest;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionStandardMessage;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeMessageImageContent;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeMessageTextContent;
+import ee.carlrobert.llm.client.google.completion.GoogleCompletionContent;
+import ee.carlrobert.llm.client.google.completion.GoogleCompletionRequest;
+import ee.carlrobert.llm.client.google.completion.GoogleContentPart;
+import ee.carlrobert.llm.client.google.completion.GoogleContentPart.Blob;
+import ee.carlrobert.llm.client.google.completion.GoogleGenerationConfig;
+import ee.carlrobert.llm.client.google.models.GoogleModel;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
 import ee.carlrobert.llm.client.ollama.completion.request.OllamaChatCompletionMessage;
 import ee.carlrobert.llm.client.ollama.completion.request.OllamaChatCompletionRequest;
@@ -219,6 +225,16 @@ public class CompletionRequestProvider {
         .setMaxTokens(configuration.getMaxTokens())
         .setStream(true)
         .setTemperature(configuration.getTemperature()).build();
+  }
+
+  public GoogleCompletionRequest buildGoogleChatCompletionRequest(
+      @Nullable String model,
+      CallParameters callParameters) {
+    var configuration = ConfigurationSettings.getCurrentState();
+    return new GoogleCompletionRequest.Builder(buildGoogleMessages(model, callParameters))
+        .generationConfig(new GoogleGenerationConfig.Builder()
+            .maxOutputTokens(configuration.getMaxTokens())
+            .temperature(configuration.getTemperature()).build()).build();
   }
 
   public Request buildCustomOpenAIChatCompletionRequest(
@@ -448,6 +464,83 @@ public class CompletionRequestProvider {
     return tryReducingMessagesOrThrow(messages, totalUsage, modelMaxTokens);
   }
 
+  private List<GoogleCompletionContent> buildGoogleMessages(CallParameters callParameters) {
+    var message = callParameters.getMessage();
+    var messages = new ArrayList<GoogleCompletionContent>();
+    // Gemini API does not support direct 'system' prompts:
+    // see https://www.reddit.com/r/Bard/comments/1b90i8o/does_gemini_have_a_system_prompt_option_while/
+    if (callParameters.getConversationType() == ConversationType.DEFAULT) {
+      String systemPrompt = ConfigurationSettings.getCurrentState().getSystemPrompt();
+      messages.add(new GoogleCompletionContent("user", List.of(systemPrompt)));
+      messages.add(new GoogleCompletionContent("model", List.of("Understood.")));
+    }
+    if (callParameters.getConversationType() == ConversationType.FIX_COMPILE_ERRORS) {
+      messages.add(
+          new GoogleCompletionContent("user", List.of(FIX_COMPILE_ERRORS_SYSTEM_PROMPT)));
+      messages.add(new GoogleCompletionContent("model", List.of("Understood.")));
+    }
+
+    for (var prevMessage : conversation.getMessages()) {
+      if (callParameters.isRetry() && prevMessage.getId().equals(message.getId())) {
+        break;
+      }
+      var prevMessageImageFilePath = prevMessage.getImageFilePath();
+      if (prevMessageImageFilePath != null && !prevMessageImageFilePath.isEmpty()) {
+        try {
+          var imageFilePath = Path.of(prevMessageImageFilePath);
+          var imageData = Files.readAllBytes(imageFilePath);
+          var imageMediaType = FileUtil.getImageMediaType(imageFilePath.getFileName().toString());
+          messages.add(new GoogleCompletionContent(
+              List.of(
+                  new GoogleContentPart(null, new Blob(imageMediaType, imageData)),
+                  new GoogleContentPart(prevMessage.getPrompt())), "user"));
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+      } else {
+        messages.add(new GoogleCompletionContent("user", List.of(prevMessage.getPrompt())));
+      }
+      messages.add(new GoogleCompletionContent("model", List.of(prevMessage.getResponse())));
+    }
+
+    if (callParameters.getImageMediaType() != null && callParameters.getImageData().length > 0) {
+      messages.add(new GoogleCompletionContent(
+          List.of(
+              new GoogleContentPart(null,
+                  new Blob(callParameters.getImageMediaType(), callParameters.getImageData())),
+              new GoogleContentPart(message.getPrompt())), "user"));
+    } else {
+      messages.add(new GoogleCompletionContent("user", List.of(message.getPrompt())));
+    }
+    return messages;
+  }
+
+  private List<GoogleCompletionContent> buildGoogleMessages(
+      @Nullable String model,
+      CallParameters callParameters) {
+    var messages = buildGoogleMessages(callParameters);
+
+    if (model == null) {
+      return messages;
+    }
+
+    int totalUsage = messages.parallelStream()
+        .mapToInt(message -> encodingManager.countMessageTokens(message.getRole(),
+            String.join(",", message.getParts().stream().map(GoogleContentPart::getText).toList())))
+        .sum() + ConfigurationSettings.getCurrentState().getMaxTokens();
+    int modelMaxTokens;
+    try {
+      modelMaxTokens = GoogleModel.findByCode(model).getMaxTokens();
+
+      if (totalUsage <= modelMaxTokens) {
+        return messages;
+      }
+    } catch (NoSuchElementException ex) {
+      return messages;
+    }
+    return tryReducingGoogleMessagesOrThrow(messages, totalUsage, modelMaxTokens);
+  }
+
   private List<OpenAIChatCompletionMessage> tryReducingMessagesOrThrow(
       List<OpenAIChatCompletionMessage> messages,
       int totalUsage,
@@ -469,6 +562,31 @@ public class CompletionRequestProvider {
         totalUsage -= encodingManager.countMessageTokens(message);
         messages.set(i, null);
       }
+    }
+
+    return messages.stream().filter(Objects::nonNull).toList();
+  }
+
+  private List<GoogleCompletionContent> tryReducingGoogleMessagesOrThrow(
+      List<GoogleCompletionContent> messages,
+      int totalUsage,
+      int modelMaxTokens) {
+    if (!ConversationsState.getInstance().discardAllTokenLimits) {
+      if (!conversation.isDiscardTokenLimit()) {
+        throw new TotalUsageExceededException();
+      }
+    }
+
+    // skip the system prompt
+    for (int i = 1; i < messages.size(); i++) {
+      if (totalUsage <= modelMaxTokens) {
+        break;
+      }
+
+      var message = messages.get(i);
+      totalUsage -= encodingManager.countMessageTokens(message.getRole(),
+          String.join(",", message.getParts().stream().map(GoogleContentPart::getText).toList()));
+      messages.set(i, null);
     }
 
     return messages.stream().filter(Objects::nonNull).toList();
