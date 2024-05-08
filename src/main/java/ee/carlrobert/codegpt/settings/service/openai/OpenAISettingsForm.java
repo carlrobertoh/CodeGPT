@@ -58,10 +58,10 @@ public class OpenAISettingsForm {
         .createPanel();
 
     return FormBuilder.createFormBuilder()
-        .addComponent(new TitledSeparator(CodeGPTBundle.get("shared.codeCompletions")))
-        .addComponent(withEmptyLeftBorder(codeCompletionConfigurationForm.getForm()))
         .addComponent(new TitledSeparator(CodeGPTBundle.get("shared.configuration")))
         .addComponent(withEmptyLeftBorder(configurationGrid))
+        .addComponent(new TitledSeparator(CodeGPTBundle.get("shared.codeCompletions")))
+        .addComponent(withEmptyLeftBorder(codeCompletionConfigurationForm.getForm()))
         .addComponentFillVertically(new JPanel(), 0)
         .getPanel();
   }

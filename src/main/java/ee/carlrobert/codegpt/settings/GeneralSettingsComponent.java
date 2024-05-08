@@ -2,6 +2,7 @@ package ee.carlrobert.codegpt.settings;
 
 import static ee.carlrobert.codegpt.settings.service.ServiceType.ANTHROPIC;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.AZURE;
+import static ee.carlrobert.codegpt.settings.service.ServiceType.CODEGPT;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.CUSTOM_OPENAI;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.GOOGLE;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.LLAMA_CPP;
@@ -19,6 +20,7 @@ import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettings;
 import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettingsForm;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettingsForm;
+import ee.carlrobert.codegpt.settings.service.codegpt.CodeGPTServiceForm;
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceForm;
 import ee.carlrobert.codegpt.settings.service.google.GoogleSettingsForm;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
@@ -33,7 +35,6 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Insets;
-import java.util.Arrays;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -43,6 +44,7 @@ public class GeneralSettingsComponent {
   private final JPanel mainPanel;
   private final JBTextField displayNameField;
   private final ComboBox<ServiceType> serviceComboBox;
+  private final CodeGPTServiceForm codeGPTSettingsForm;
   private final OpenAISettingsForm openAISettingsForm;
   private final CustomServiceForm customConfigurationSettingsForm;
   private final AnthropicSettingsForm anthropicSettingsForm;
@@ -54,6 +56,7 @@ public class GeneralSettingsComponent {
 
   public GeneralSettingsComponent(Disposable parentDisposable, GeneralSettings settings) {
     displayNameField = new JBTextField(settings.getState().getDisplayName(), 20);
+    codeGPTSettingsForm = new CodeGPTServiceForm();
     openAISettingsForm = new OpenAISettingsForm(OpenAISettings.getCurrentState());
     customConfigurationSettingsForm = new CustomServiceForm();
     anthropicSettingsForm = new AnthropicSettingsForm(AnthropicSettings.getCurrentState());
@@ -65,6 +68,7 @@ public class GeneralSettingsComponent {
 
     var cardLayout = new DynamicCardLayout();
     var cards = new JPanel(cardLayout);
+    cards.add(codeGPTSettingsForm.getForm(), CODEGPT.getCode());
     cards.add(openAISettingsForm.getForm(), OPENAI.getCode());
     cards.add(customConfigurationSettingsForm.getForm(), CUSTOM_OPENAI.getCode());
     cards.add(anthropicSettingsForm.getForm(), ANTHROPIC.getCode());
@@ -73,10 +77,9 @@ public class GeneralSettingsComponent {
     cards.add(llamaSettingsForm, LLAMA_CPP.getCode());
     cards.add(ollamaSettingsForm.getForm(), OLLAMA.getCode());
     cards.add(googleSettingsForm.getForm(), GOOGLE.getCode());
-    var serviceComboBoxModel = new DefaultComboBoxModel<ServiceType>();
-    serviceComboBoxModel.addAll(Arrays.stream(ServiceType.values()).toList());
-    serviceComboBox = new ComboBox<>(serviceComboBoxModel);
-    serviceComboBox.setSelectedItem(OPENAI);
+    cardLayout.show(cards, settings.getState().getSelectedService().getCode());
+    serviceComboBox = new ComboBox<>(new DefaultComboBoxModel<>(ServiceType.values()));
+    serviceComboBox.setSelectedItem(settings.getState().getSelectedService());
     serviceComboBox.setPreferredSize(displayNameField.getPreferredSize());
     serviceComboBox.addItemListener(e -> {
       ServiceType selectedService = (ServiceType) e.getItem();
@@ -95,6 +98,10 @@ public class GeneralSettingsComponent {
         .addComponent(cards)
         .addComponentFillVertically(new JPanel(), 0)
         .getPanel();
+  }
+
+  public CodeGPTServiceForm getCodeGPTSettingsForm() {
+    return codeGPTSettingsForm;
   }
 
   public OpenAISettingsForm getOpenAISettingsForm() {
@@ -154,6 +161,7 @@ public class GeneralSettingsComponent {
   }
 
   public void resetForms() {
+    codeGPTSettingsForm.resetForm();
     openAISettingsForm.resetForm();
     customConfigurationSettingsForm.resetForm();
     anthropicSettingsForm.resetForm();

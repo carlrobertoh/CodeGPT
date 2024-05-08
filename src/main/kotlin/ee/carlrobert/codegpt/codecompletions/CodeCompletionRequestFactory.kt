@@ -7,6 +7,7 @@ import ee.carlrobert.codegpt.completions.llama.LlamaModel
 import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey
 import ee.carlrobert.codegpt.credentials.CredentialsStore.getCredential
 import ee.carlrobert.codegpt.settings.configuration.Placeholder
+import ee.carlrobert.codegpt.settings.service.codegpt.CodeGPTServiceSettings
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettingsState
@@ -22,6 +23,18 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import java.nio.charset.StandardCharsets
 
 object CodeCompletionRequestFactory {
+
+    @JvmStatic
+    fun buildCodeGPTRequest(details: InfillRequestDetails): OpenAITextCompletionRequest {
+        val settings = service<CodeGPTServiceSettings>().state.codeCompletionSettings
+        return OpenAITextCompletionRequest.Builder(details.prefix)
+            .setSuffix(details.suffix)
+            .setStream(true)
+            .setModel(settings.model)
+            .setMaxTokens(settings.maxTokens)
+            .setTemperature(0.4)
+            .build()
+    }
 
     @JvmStatic
     fun buildOpenAIRequest(details: InfillRequestDetails): OpenAITextCompletionRequest {

@@ -14,6 +14,7 @@ import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.llm.client.anthropic.ClaudeClient;
 import ee.carlrobert.llm.client.azure.AzureClient;
 import ee.carlrobert.llm.client.azure.AzureCompletionRequestParams;
+import ee.carlrobert.llm.client.codegpt.CodeGPTClient;
 import ee.carlrobert.llm.client.google.GoogleClient;
 import ee.carlrobert.llm.client.llama.LlamaClient;
 import ee.carlrobert.llm.client.ollama.OllamaClient;
@@ -31,6 +32,12 @@ public class CompletionClientProvider {
 
   private static @Nullable String getCredential(CredentialKey key) {
     return CredentialsStore.INSTANCE.getCredential(key);
+  }
+
+  public static CodeGPTClient getCodeGPTClient() {
+    return new CodeGPTClient(
+        getCredential(CredentialKey.CODEGPT_API_KEY),
+        getDefaultClientBuilder());
   }
 
   public static OpenAIClient getOpenAIClient() {
