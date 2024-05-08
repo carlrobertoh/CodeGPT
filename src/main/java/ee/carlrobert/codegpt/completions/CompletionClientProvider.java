@@ -1,9 +1,10 @@
 package ee.carlrobert.codegpt.completions;
 
+import static ee.carlrobert.codegpt.credentials.CredentialsStore.getCredential;
+
 import com.intellij.openapi.application.ApplicationManager;
 import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.completions.you.YouUserManager;
-import ee.carlrobert.codegpt.credentials.CredentialsStore;
 import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey;
 import ee.carlrobert.codegpt.settings.advanced.AdvancedSettings;
 import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettings;
@@ -26,13 +27,8 @@ import java.net.Proxy;
 import java.util.concurrent.TimeUnit;
 import okhttp3.Credentials;
 import okhttp3.OkHttpClient;
-import org.jetbrains.annotations.Nullable;
 
 public class CompletionClientProvider {
-
-  private static @Nullable String getCredential(CredentialKey key) {
-    return CredentialsStore.INSTANCE.getCredential(key);
-  }
 
   public static CodeGPTClient getCodeGPTClient() {
     return new CodeGPTClient(

@@ -82,11 +82,12 @@ public final class CompletionRequestService {
   public EventSource getChatCompletionAsync(
       CallParameters callParameters,
       CompletionEventListener<String> eventListener) {
+    var application = ApplicationManager.getApplication();
     var requestProvider = new CompletionRequestProvider(callParameters.getConversation());
     return switch (GeneralSettings.getCurrentState().getSelectedService()) {
       case CODEGPT -> CompletionClientProvider.getCodeGPTClient().getChatCompletionAsync(
           requestProvider.buildOpenAIChatCompletionRequest(
-              ApplicationManager.getApplication().getService(CodeGPTServiceSettings.class)
+              application.getService(CodeGPTServiceSettings.class)
                   .getState()
                   .getChatCompletionSettings()
                   .getModel(),
@@ -100,8 +101,7 @@ public final class CompletionRequestService {
           eventListener);
       case CUSTOM_OPENAI -> getCustomOpenAIChatCompletionAsync(
           requestProvider.buildCustomOpenAIChatCompletionRequest(
-              ApplicationManager.getApplication()
-                  .getService(CustomServiceSettings.class)
+              application.getService(CustomServiceSettings.class)
                   .getState()
                   .getChatCompletionSettings(),
               callParameters),
@@ -124,8 +124,7 @@ public final class CompletionRequestService {
           requestProvider.buildOllamaChatCompletionRequest(callParameters),
           eventListener);
       case GOOGLE -> {
-        var settings = ApplicationManager.getApplication()
-            .getService(GoogleSettings.class).getState();
+        var settings = application.getService(GoogleSettings.class).getState();
         yield CompletionClientProvider.getGoogleClient().getChatCompletionAsync(
             requestProvider.buildGoogleChatCompletionRequest(
                 settings.getModel(),

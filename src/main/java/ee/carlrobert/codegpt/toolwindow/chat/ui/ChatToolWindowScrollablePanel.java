@@ -38,7 +38,7 @@ public class ChatToolWindowScrollablePanel extends ScrollablePanel {
                 It looks like you haven't configured your API key yet. Visit the <a href="https://codegpt.carlrobert.ee/account">CodeGPT settings</a> to do so.
               </p>
               <p style="margin-top: 4px; margin-bottom: 4px;">
-                Don't have an account? <a href="https://codegpt.carlrobert.ee/signin">Sign up</a> now for free access to all open-source models.
+                Don't have an account? <a href="https://codegpt.carlrobert.ee/signin">Sign up</a> for free access to all open-source models.
               </p>
               </html>""", false, UIUtil::handleHyperlinkClicked));
       panel.setBorder(JBUI.Borders.customLine(JBColor.border(), 1, 0, 0, 0));

@@ -65,17 +65,23 @@ public class ModelComboBoxAction extends ComboBoxAction {
     return button;
   }
 
+  private AnAction[] getCodeGPTModelActions(Presentation presentation) {
+    var apiKey = CredentialsStore.getCredential(CredentialKey.CODEGPT_API_KEY);
+    return AVAILABLE_CHAT_MODELS.stream()
+        .map(model -> {
+          var enabled = "codellama/CodeLlama-13b-Instruct-hf".equals(model.getCode())
+              || (apiKey != null && !apiKey.isEmpty());
+          return createCodeGPTModelAction(model, enabled, presentation);
+        })
+        .toArray(AnAction[]::new);
+  }
+
   @Override
   protected @NotNull DefaultActionGroup createPopupActionGroup(JComponent button) {
     var presentation = ((ComboBoxButton) button).getPresentation();
     var actionGroup = new DefaultActionGroup();
-    var apiKey = CredentialsStore.INSTANCE.getCredential(CredentialKey.CODEGPT_API_KEY);
     actionGroup.addSeparator("CodeGPT");
-    AVAILABLE_CHAT_MODELS.forEach(model -> {
-      var enabled = "codellama/CodeLlama-13b-Instruct-hf".equals(model.getCode())
-          || (apiKey != null && !apiKey.isEmpty());
-      actionGroup.add(createCodeGPTModelAction(model, enabled, presentation));
-    });
+    actionGroup.addAll(getCodeGPTModelActions(presentation));
     actionGroup.addSeparator("OpenAI");
     List.of(
             OpenAIChatCompletionModel.GPT_4_VISION_PREVIEW,
@@ -160,10 +166,11 @@ public class ModelComboBoxAction extends ComboBoxAction {
   }
 
   private void updateTemplatePresentation(ServiceType selectedService) {
+    var application = ApplicationManager.getApplication();
     var templatePresentation = getTemplatePresentation();
     switch (selectedService) {
       case CODEGPT:
-        var model = ApplicationManager.getApplication().getService(CodeGPTServiceSettings.class)
+        var model = application.getService(CodeGPTServiceSettings.class)
             .getState()
             .getChatCompletionSettings()
             .getModel();
@@ -182,11 +189,10 @@ public class ModelComboBoxAction extends ComboBoxAction {
         break;
       case CUSTOM_OPENAI:
         templatePresentation.setIcon(Icons.OpenAI);
-        templatePresentation.setText(
-            ApplicationManager.getApplication().getService(CustomServiceSettings.class)
-                .getState()
-                .getTemplate()
-                .getProviderName());
+        templatePresentation.setText(application.getService(CustomServiceSettings.class)
+            .getState()
+            .getTemplate()
+            .getProviderName());
         break;
       case ANTHROPIC:
         templatePresentation.setIcon(Icons.Anthropic);
@@ -211,8 +217,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
         break;
       case OLLAMA:
         templatePresentation.setIcon(Icons.Ollama);
-        templatePresentation.setText(ApplicationManager.getApplication()
-            .getService(OllamaSettings.class)
+        templatePresentation.setText(application.getService(OllamaSettings.class)
             .getState()
             .getModel());
         break;

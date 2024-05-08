@@ -86,7 +86,7 @@ public class LlamaServerPreferencesForm {
     baseHostField = new JBTextField(settings.getBaseHost(), 30);
     apiKeyField = new JBPasswordField();
     apiKeyField.setColumns(30);
-    apiKeyField.setText(CredentialsStore.INSTANCE.getCredential(LLAMA_API_KEY));
+    apiKeyField.setText(CredentialsStore.getCredential(LLAMA_API_KEY));
 
     llamaModelPreferencesForm = new LlamaModelPreferencesForm();
     runLocalServerRadioButton = new JBRadioButton("Run local server",
@@ -131,7 +131,7 @@ public class LlamaServerPreferencesForm {
     additionalBuildParametersField.setText(state.getAdditionalBuildParameters());
     remotePromptTemplatePanel.setPromptTemplate(state.getRemoteModelPromptTemplate()); // ?
     infillPromptTemplatePanel.setPromptTemplate(state.getRemoteModelInfillPromptTemplate());
-    apiKeyField.setText(CredentialsStore.INSTANCE.getCredential(LLAMA_API_KEY));
+    apiKeyField.setText(CredentialsStore.getCredential(LLAMA_API_KEY));
   }
 
   public JComponent createUseExistingServerForm() {

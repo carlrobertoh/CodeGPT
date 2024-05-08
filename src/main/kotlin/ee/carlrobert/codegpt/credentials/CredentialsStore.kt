@@ -19,6 +19,7 @@ object CredentialsStore {
         }
     }
 
+    @JvmStatic
     fun getCredential(key: CredentialKey): String? = credentialsMap[key]
 
     fun setCredential(key: CredentialKey, password: String?) {

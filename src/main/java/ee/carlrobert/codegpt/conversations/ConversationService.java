@@ -189,8 +189,9 @@ public final class ConversationService {
   }
 
   private static String getModelForSelectedService(ServiceType serviceType) {
+    var application = ApplicationManager.getApplication();
     return switch (serviceType) {
-      case CODEGPT -> ApplicationManager.getApplication().getService(CodeGPTServiceSettings.class)
+      case CODEGPT -> application.getService(CodeGPTServiceSettings.class)
           .getState()
           .getChatCompletionSettings()
           .getModel();
@@ -205,11 +206,10 @@ public final class ConversationService {
             ? llamaSettings.getCustomLlamaModelPath()
             : llamaSettings.getHuggingFaceModel().getCode();
       }
-      case OLLAMA -> ApplicationManager.getApplication()
-          .getService(OllamaSettings.class)
+      case OLLAMA -> application.getService(OllamaSettings.class)
           .getState()
           .getModel();
-      case GOOGLE -> ApplicationManager.getApplication().getService(GoogleSettings.class)
+      case GOOGLE -> application.getService(GoogleSettings.class)
           .getState()
           .getModel();
     };
