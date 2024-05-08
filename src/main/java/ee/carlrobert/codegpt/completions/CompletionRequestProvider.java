@@ -251,7 +251,7 @@ public class CompletionRequestProvider {
       List<OpenAIChatCompletionMessage> messages,
       boolean streamRequest) {
     return buildCustomOpenAIChatCompletionRequest(settings, messages, streamRequest,
-        CredentialsStore.INSTANCE.getCredential(CUSTOM_SERVICE_API_KEY));
+        CredentialsStore.getCredential(CUSTOM_SERVICE_API_KEY));
   }
 
   private static Request buildCustomOpenAIChatCompletionRequest(

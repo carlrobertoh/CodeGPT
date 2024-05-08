@@ -37,6 +37,6 @@ public class AnthropicSettings implements PersistentStateComponent<AnthropicSett
     return !form.getCurrentState().equals(state)
         || !StringUtils.equals(
         form.getApiKey(),
-        CredentialsStore.INSTANCE.getCredential(CredentialKey.ANTHROPIC_API_KEY));
+        CredentialsStore.getCredential(CredentialKey.ANTHROPIC_API_KEY));
   }
 }

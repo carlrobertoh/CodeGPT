@@ -38,6 +38,6 @@ public class OpenAISettings implements PersistentStateComponent<OpenAISettingsSt
     return !form.getCurrentState().equals(state)
         || !StringUtils.equals(
         form.getApiKey(),
-        CredentialsStore.INSTANCE.getCredential(OPENAI_API_KEY));
+        CredentialsStore.getCredential(OPENAI_API_KEY));
   }
 }

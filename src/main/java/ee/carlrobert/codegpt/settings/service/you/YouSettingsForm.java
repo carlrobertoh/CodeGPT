@@ -53,7 +53,7 @@ public class YouSettingsForm extends JPanel {
     passwordField = new JBPasswordField();
     passwordField.setColumns(25);
     if (!settings.getEmail().isEmpty()) {
-      passwordField.setText(CredentialsStore.INSTANCE.getCredential(YOU_ACCOUNT_PASSWORD));
+      passwordField.setText(CredentialsStore.getCredential(YOU_ACCOUNT_PASSWORD));
     }
     signInButton = new JButton(CodeGPTBundle.get("settingsConfigurable.service.you.signIn.label"));
     signUpTextPane = createSignUpTextPane();

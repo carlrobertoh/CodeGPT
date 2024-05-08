@@ -3,6 +3,7 @@ package ee.carlrobert.codegpt.settings;
 import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.ANTHROPIC_API_KEY;
 import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.AZURE_ACTIVE_DIRECTORY_TOKEN;
 import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.AZURE_OPENAI_API_KEY;
+import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.CODEGPT_API_KEY;
 import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.CUSTOM_SERVICE_API_KEY;
 import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.GOOGLE_API_KEY;
 import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.LLAMA_API_KEY;
@@ -18,6 +19,7 @@ import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettings;
 import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettingsForm;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettingsForm;
+import ee.carlrobert.codegpt.settings.service.codegpt.CodeGPTServiceForm;
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceForm;
 import ee.carlrobert.codegpt.settings.service.google.GoogleSettingsForm;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
@@ -65,6 +67,7 @@ public class GeneralSettingsConfigurable implements Configurable {
 
     return !component.getDisplayName().equals(settings.getDisplayName())
         || component.getSelectedService() != settings.getSelectedService()
+        || component.getCodeGPTSettingsForm().isModified()
         || OpenAISettings.getInstance().isModified(component.getOpenAISettingsForm())
         || component.getCustomConfigurationSettingsForm().isModified()
         || AnthropicSettings.getInstance().isModified(component.getAnthropicSettingsForm())
@@ -81,6 +84,7 @@ public class GeneralSettingsConfigurable implements Configurable {
     settings.setDisplayName(component.getDisplayName());
     settings.setSelectedService(component.getSelectedService());
 
+    applyCodeGPTServiceSettings(component.getCodeGPTSettingsForm());
     var openAISettingsForm = component.getOpenAISettingsForm();
     applyOpenAISettings(openAISettingsForm);
     applyCustomOpenAISettings(component.getCustomConfigurationSettingsForm());
@@ -102,6 +106,11 @@ public class GeneralSettingsConfigurable implements Configurable {
             .send();
       }
     }
+  }
+
+  private void applyCodeGPTServiceSettings(CodeGPTServiceForm form) {
+    CredentialsStore.INSTANCE.setCredential(CODEGPT_API_KEY, form.getApiKey());
+    form.applyChanges();
   }
 
   private void applyOpenAISettings(OpenAISettingsForm form) {

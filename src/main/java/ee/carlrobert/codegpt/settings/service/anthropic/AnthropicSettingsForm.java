@@ -23,7 +23,7 @@ public class AnthropicSettingsForm {
   public AnthropicSettingsForm(AnthropicSettingsState settings) {
     apiKeyField = new JBPasswordField();
     apiKeyField.setColumns(30);
-    apiKeyField.setText(CredentialsStore.INSTANCE.getCredential(ANTHROPIC_API_KEY));
+    apiKeyField.setText(CredentialsStore.getCredential(ANTHROPIC_API_KEY));
     apiVersionField = new JBTextField(settings.getApiVersion(), 35);
     modelField = new JBTextField(settings.getModel(), 35);
   }
@@ -63,7 +63,7 @@ public class AnthropicSettingsForm {
 
   public void resetForm() {
     var state = AnthropicSettings.getCurrentState();
-    apiKeyField.setText(CredentialsStore.INSTANCE.getCredential(ANTHROPIC_API_KEY));
+    apiKeyField.setText(CredentialsStore.getCredential(ANTHROPIC_API_KEY));
     apiVersionField.setText(state.getApiVersion());
     modelField.setText(state.getModel());
   }
