@@ -3,8 +3,6 @@ package ee.carlrobert.codegpt.completions
 import ee.carlrobert.codegpt.completions.CompletionRequestProvider.COMPLETION_SYSTEM_PROMPT
 import ee.carlrobert.codegpt.conversations.ConversationService
 import ee.carlrobert.codegpt.conversations.message.Message
-import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey
-import ee.carlrobert.codegpt.credentials.CredentialsStore.setCredential
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel
 import org.assertj.core.api.Assertions.assertThat
@@ -14,7 +12,7 @@ import testsupport.IntegrationTest
 class CompletionRequestProviderTest : IntegrationTest() {
 
   fun testChatCompletionRequestWithSystemPromptOverride() {
-    setCredential(CredentialKey.OPENAI_API_KEY, "TEST_API_KEY")
+    useOpenAIService()
     ConfigurationSettings.getCurrentState().systemPrompt = "TEST_SYSTEM_PROMPT"
     val conversation = ConversationService.getInstance().startConversation()
     val firstMessage = createDummyMessage(500)
@@ -43,6 +41,7 @@ class CompletionRequestProviderTest : IntegrationTest() {
   }
 
   fun testChatCompletionRequestWithoutSystemPromptOverride() {
+    useOpenAIService()
     ConfigurationSettings.getCurrentState().systemPrompt = COMPLETION_SYSTEM_PROMPT
     val conversation = ConversationService.getInstance().startConversation()
     val firstMessage = createDummyMessage(500)
@@ -71,6 +70,7 @@ class CompletionRequestProviderTest : IntegrationTest() {
   }
 
   fun testChatCompletionRequestRetry() {
+    useOpenAIService()
     ConfigurationSettings.getCurrentState().systemPrompt = "TEST_SYSTEM_PROMPT"
     val conversation = ConversationService.getInstance().startConversation()
     val firstMessage = createDummyMessage("FIRST_TEST_PROMPT", 500)
@@ -97,6 +97,7 @@ class CompletionRequestProviderTest : IntegrationTest() {
   }
 
   fun testReducedChatCompletionRequest() {
+    useOpenAIService()
     ConfigurationSettings.getCurrentState().systemPrompt = COMPLETION_SYSTEM_PROMPT
     val conversation = ConversationService.getInstance().startConversation()
     conversation.addMessage(createDummyMessage(50))
@@ -126,6 +127,7 @@ class CompletionRequestProviderTest : IntegrationTest() {
   }
 
   fun testTotalUsageExceededException() {
+    useOpenAIService()
     val conversation = ConversationService.getInstance().startConversation()
     conversation.addMessage(createDummyMessage(1500))
     conversation.addMessage(createDummyMessage(1500))

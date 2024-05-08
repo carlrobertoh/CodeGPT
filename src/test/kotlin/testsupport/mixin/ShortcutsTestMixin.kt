@@ -7,6 +7,7 @@ import ee.carlrobert.codegpt.credentials.CredentialsStore.setCredential
 import ee.carlrobert.codegpt.settings.GeneralSettings
 import ee.carlrobert.codegpt.settings.service.ServiceType
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettings
+import ee.carlrobert.codegpt.settings.service.codegpt.CodeGPTServiceSettings
 import ee.carlrobert.codegpt.settings.service.google.GoogleSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings
@@ -14,6 +15,12 @@ import ee.carlrobert.llm.client.google.models.GoogleModel
 import java.util.function.BooleanSupplier
 
 interface ShortcutsTestMixin {
+
+  fun useCodeGPTService() {
+    GeneralSettings.getCurrentState().selectedService = ServiceType.CODEGPT
+    setCredential(CODEGPT_API_KEY, "TEST_API_KEY")
+    service<CodeGPTServiceSettings>().state.chatCompletionSettings.model = "TEST_MODEL"
+  }
 
   fun useOpenAIService() {
     useOpenAIService("gpt-4")
@@ -49,7 +56,6 @@ interface ShortcutsTestMixin {
     service<GoogleSettings>().state.model = GoogleModel.GEMINI_PRO.code
   }
 
-
   fun waitExpecting(condition: BooleanSupplier?) {
     PlatformTestUtil.waitWithEventsDispatching(
       "Waiting for message response timed out or did not meet expected conditions",
@@ -57,5 +63,4 @@ interface ShortcutsTestMixin {
       5
     )
   }
-
 }

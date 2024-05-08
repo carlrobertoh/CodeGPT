@@ -10,6 +10,7 @@ import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettings;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
+import ee.carlrobert.codegpt.settings.service.codegpt.CodeGPTServiceSettings;
 import ee.carlrobert.codegpt.settings.service.google.GoogleSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
@@ -78,6 +79,11 @@ public class GeneralSettings implements PersistentStateComponent<GeneralSettings
 
   public String getModel() {
     switch (state.getSelectedService()) {
+      case CODEGPT:
+        return ApplicationManager.getApplication().getService(CodeGPTServiceSettings.class)
+            .getState()
+            .getCodeCompletionSettings()
+            .getModel();
       case OPENAI:
         return OpenAISettings.getCurrentState().getModel();
       case ANTHROPIC:

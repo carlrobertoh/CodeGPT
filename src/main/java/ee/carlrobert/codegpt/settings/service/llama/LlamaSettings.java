@@ -62,6 +62,6 @@ public class LlamaSettings implements PersistentStateComponent<LlamaSettingsStat
     return !form.getCurrentState().equals(state)
         || !StringUtils.equals(
         form.getLlamaServerPreferencesForm().getApiKey(),
-        CredentialsStore.INSTANCE.getCredential(LLAMA_API_KEY));
+        CredentialsStore.getCredential(LLAMA_API_KEY));
   }
 }

@@ -26,7 +26,7 @@ public class OpenAISettingsForm {
   public OpenAISettingsForm(OpenAISettingsState settings) {
     apiKeyField = new JBPasswordField();
     apiKeyField.setColumns(30);
-    apiKeyField.setText(CredentialsStore.INSTANCE.getCredential(OPENAI_API_KEY));
+    apiKeyField.setText(CredentialsStore.getCredential(OPENAI_API_KEY));
     organizationField = new JBTextField(settings.getOrganization(), 30);
     completionModelComboBox = new ComboBox<>(
         new EnumComboBoxModel<>(OpenAIChatCompletionModel.class));
@@ -54,6 +54,8 @@ public class OpenAISettingsForm {
     return FormBuilder.createFormBuilder()
         .addComponent(new TitledSeparator(CodeGPTBundle.get("shared.configuration")))
         .addComponent(withEmptyLeftBorder(configurationGrid))
+        .addComponent(new TitledSeparator(CodeGPTBundle.get("shared.codeCompletions")))
+        .addComponent(withEmptyLeftBorder(codeCompletionConfigurationForm.getForm()))
         .addComponentFillVertically(new JPanel(), 0)
         .getPanel();
   }
@@ -78,7 +80,7 @@ public class OpenAISettingsForm {
 
   public void resetForm() {
     var state = OpenAISettings.getCurrentState();
-    apiKeyField.setText(CredentialsStore.INSTANCE.getCredential(OPENAI_API_KEY));
+    apiKeyField.setText(CredentialsStore.getCredential(OPENAI_API_KEY));
     completionModelComboBox.setSelectedItem(
         OpenAIChatCompletionModel.findByCode(state.getModel()));
     organizationField.setText(state.getOrganization());

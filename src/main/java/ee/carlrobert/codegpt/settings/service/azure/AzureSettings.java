@@ -39,9 +39,9 @@ public class AzureSettings implements PersistentStateComponent<AzureSettingsStat
     return !form.getCurrentState().equals(state)
         || !StringUtils.equals(
         form.getActiveDirectoryToken(),
-        CredentialsStore.INSTANCE.getCredential(AZURE_ACTIVE_DIRECTORY_TOKEN))
+        CredentialsStore.getCredential(AZURE_ACTIVE_DIRECTORY_TOKEN))
         || !StringUtils.equals(
         form.getApiKey(),
-        CredentialsStore.INSTANCE.getCredential(AZURE_OPENAI_API_KEY));
+        CredentialsStore.getCredential(AZURE_OPENAI_API_KEY));
   }
 }
