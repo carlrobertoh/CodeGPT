@@ -74,8 +74,13 @@ public class GeneralSettingsComponent {
     serviceComboBox = new ComboBox<>(serviceComboBoxModel);
     serviceComboBox.setSelectedItem(OPENAI);
     serviceComboBox.setPreferredSize(displayNameField.getPreferredSize());
-    serviceComboBox.addItemListener(e ->
-        cardLayout.show(cards, ((ServiceType) e.getItem()).getCode()));
+    serviceComboBox.addItemListener(e -> {
+      ServiceType selectedService = (ServiceType) e.getItem();
+      cardLayout.show(cards, selectedService.getCode());
+      if (selectedService == OLLAMA) {
+        ollamaSettingsForm.refreshModels();
+      }
+    });
     mainPanel = FormBuilder.createFormBuilder()
         .addLabeledComponent(
             CodeGPTBundle.get("settingsConfigurable.displayName.label"),

@@ -55,7 +55,6 @@ class OllamaSettingsForm {
             }
         }
         refreshModelsButton.addActionListener { refreshModels() }
-        refreshModels()
     }
 
     fun getForm(): JPanel = FormBuilder.createFormBuilder()
@@ -116,16 +115,7 @@ class OllamaSettingsForm {
                 || codeCompletionConfigurationForm.fimTemplate != fimTemplate
     }
 
-    private fun disableModelComboBoxWithPlaceholder(placeholderModel: ComboBoxModel<String>) {
-        invokeLater {
-            modelComboBox.apply {
-                model = placeholderModel
-                isEnabled = false
-            }
-        }
-    }
-
-    private fun refreshModels() {
+    fun refreshModels() {
         disableModelComboBoxWithPlaceholder(DefaultComboBoxModel(arrayOf("Loading")))
         try {
             val models = runBlocking(Dispatchers.IO) {
@@ -158,6 +148,15 @@ class OllamaSettingsForm {
                 OverlayUtil.showNotification(ex.message, NotificationType.ERROR)
             }
             disableModelComboBoxWithPlaceholder(DefaultComboBoxModel(arrayOf("Unable to load models")))
+        }
+    }
+
+    private fun disableModelComboBoxWithPlaceholder(placeholderModel: ComboBoxModel<String>) {
+        invokeLater {
+            modelComboBox.apply {
+                model = placeholderModel
+                isEnabled = false
+            }
         }
     }
 }
