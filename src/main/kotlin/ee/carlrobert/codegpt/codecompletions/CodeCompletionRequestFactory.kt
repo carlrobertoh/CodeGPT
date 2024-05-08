@@ -10,8 +10,11 @@ import ee.carlrobert.codegpt.settings.configuration.Placeholder
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettingsState
+import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest
+import ee.carlrobert.llm.client.ollama.completion.request.OllamaCompletionRequest
+import ee.carlrobert.llm.client.ollama.completion.request.OllamaParameters
 import ee.carlrobert.llm.client.openai.completion.request.OpenAITextCompletionRequest
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
@@ -33,17 +36,36 @@ object CodeCompletionRequestFactory {
     @JvmStatic
     fun buildCustomRequest(details: InfillRequestDetails): Request {
         val settings = service<CustomServiceSettings>().state.codeCompletionSettings
-        val requestBuilder = Request.Builder().url(settings.url!!)
         val credential = getCredential(CredentialKey.CUSTOM_SERVICE_API_KEY)
-        for (entry in settings.headers.entries) {
+        return buildCustomRequest(
+            details,
+            settings.url!!,
+            settings.headers,
+            settings.body,
+            settings.infillTemplate,
+            credential
+        )
+    }
+
+    @JvmStatic
+    fun buildCustomRequest(
+        details: InfillRequestDetails,
+        url: String,
+        headers: Map<String, String>,
+        body: Map<String, Any>,
+        infillTemplate: InfillPromptTemplate,
+        credential: String?
+    ): Request {
+        val requestBuilder = Request.Builder().url(url)
+        for (entry in headers.entries) {
             var value = entry.value
             if (credential != null && value.contains("\$CUSTOM_SERVICE_API_KEY")) {
                 value = value.replace("\$CUSTOM_SERVICE_API_KEY", credential)
             }
             requestBuilder.addHeader(entry.key, value)
         }
-        val transformedBody = settings.body.entries.associate { (key, value) ->
-            key to transformValue(value, settings.infillTemplate, details)
+        val transformedBody = body.entries.associate { (key, value) ->
+            key to transformValue(value, infillTemplate, details)
         }
 
         try {
@@ -68,6 +90,22 @@ object CodeCompletionRequestFactory {
             .setStream(true)
             .setTemperature(0.4)
             .setStop(promptTemplate.stopTokens)
+            .build()
+    }
+
+    fun buildOllamaRequest(details: InfillRequestDetails): OllamaCompletionRequest {
+        val settings = service<OllamaSettings>().state
+        return OllamaCompletionRequest.Builder(
+            settings.model,
+            settings.fimTemplate.buildPrompt(details.prefix, details.suffix)
+        )
+            .setOptions(
+                OllamaParameters.Builder()
+                    .stop(settings.fimTemplate.stopTokens)
+                    .numPredict(settings.codeCompletionMaxTokens)
+                    .build()
+            )
+            .setRaw(true)
             .build()
     }
 

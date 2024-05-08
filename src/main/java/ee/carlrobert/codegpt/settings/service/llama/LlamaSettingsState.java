@@ -16,8 +16,8 @@ public class LlamaSettingsState {
   private HuggingFaceModel huggingFaceModel = HuggingFaceModel.CODE_LLAMA_7B_Q4;
   private PromptTemplate localModelPromptTemplate = PromptTemplate.LLAMA;
   private PromptTemplate remoteModelPromptTemplate = PromptTemplate.LLAMA;
-  private InfillPromptTemplate localModelInfillPromptTemplate = InfillPromptTemplate.LLAMA;
-  private InfillPromptTemplate remoteModelInfillPromptTemplate = InfillPromptTemplate.LLAMA;
+  private InfillPromptTemplate localModelInfillPromptTemplate = InfillPromptTemplate.CODE_LLAMA;
+  private InfillPromptTemplate remoteModelInfillPromptTemplate = InfillPromptTemplate.CODE_LLAMA;
   private String baseHost = "http://localhost:8080";
   private Integer serverPort = getRandomAvailablePortOrDefault();
   private int contextSize = 2048;

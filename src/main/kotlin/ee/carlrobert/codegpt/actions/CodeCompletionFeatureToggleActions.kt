@@ -9,34 +9,44 @@ import ee.carlrobert.codegpt.settings.service.ServiceType
 import ee.carlrobert.codegpt.settings.service.ServiceType.*
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
+import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings
 
 abstract class CodeCompletionFeatureToggleActions(
     private val enableFeatureAction: Boolean
 ) : DumbAwareAction() {
 
-
     override fun actionPerformed(e: AnActionEvent) {
         when (GeneralSettings.getCurrentState().selectedService) {
-            OPENAI -> OpenAISettings.getCurrentState().isCodeCompletionsEnabled = enableFeatureAction
-            LLAMA_CPP -> LlamaSettings.getCurrentState().isCodeCompletionsEnabled = enableFeatureAction
-            CUSTOM_OPENAI -> service<CustomServiceSettings>().state.codeCompletionSettings.codeCompletionsEnabled =
-                enableFeatureAction
+            OPENAI ->
+                OpenAISettings.getCurrentState().isCodeCompletionsEnabled = enableFeatureAction
+
+            LLAMA_CPP ->
+                LlamaSettings.getCurrentState().isCodeCompletionsEnabled = enableFeatureAction
+
+            OLLAMA -> service<OllamaSettings>().state.codeCompletionsEnabled = enableFeatureAction
+            CUSTOM_OPENAI -> service<CustomServiceSettings>().state
+                .codeCompletionSettings
+                .codeCompletionsEnabled = enableFeatureAction
+
             ANTHROPIC,
             AZURE,
             YOU,
-            null -> { /* no-op for these services */ }
+            null -> { /* no-op for these services */
+            }
         }
     }
 
     override fun update(e: AnActionEvent) {
         val selectedService = GeneralSettings.getCurrentState().selectedService
         val codeCompletionEnabled = isCodeCompletionsEnabled(selectedService)
-        e.presentation.isEnabled = codeCompletionEnabled != enableFeatureAction
-        e.presentation.isVisible = when (selectedService) {
+        e.presentation.isVisible = codeCompletionEnabled != enableFeatureAction
+        e.presentation.isEnabled = when (selectedService) {
             OPENAI,
             CUSTOM_OPENAI,
-            LLAMA_CPP -> true
+            LLAMA_CPP,
+            OLLAMA -> true
+
             ANTHROPIC,
             AZURE,
             YOU,
@@ -53,6 +63,7 @@ abstract class CodeCompletionFeatureToggleActions(
             OPENAI -> OpenAISettings.getCurrentState().isCodeCompletionsEnabled
             CUSTOM_OPENAI -> service<CustomServiceSettings>().state.codeCompletionSettings.codeCompletionsEnabled
             LLAMA_CPP -> LlamaSettings.isCodeCompletionsPossible()
+            OLLAMA -> service<OllamaSettings>().state.codeCompletionsEnabled
             ANTHROPIC,
             AZURE,
             YOU -> false

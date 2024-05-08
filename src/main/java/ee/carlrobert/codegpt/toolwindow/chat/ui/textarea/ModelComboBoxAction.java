@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt.toolwindow.chat.ui.textarea;
 
 import static ee.carlrobert.codegpt.settings.service.ServiceType.CUSTOM_OPENAI;
+import static ee.carlrobert.codegpt.settings.service.ServiceType.OLLAMA;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.OPENAI;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.YOU;
 import static java.lang.String.format;
@@ -23,6 +24,8 @@ import ee.carlrobert.codegpt.settings.GeneralSettingsState;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
+import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
+import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettingsState;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettingsState;
 import ee.carlrobert.codegpt.settings.service.you.YouSettings;
@@ -41,12 +44,16 @@ public class ModelComboBoxAction extends ComboBoxAction {
   private final GeneralSettingsState settings;
   private final OpenAISettingsState openAISettings;
   private final YouSettingsState youSettings;
+  private final OllamaSettingsState ollamaSettings;
 
   public ModelComboBoxAction(Runnable onModelChange, ServiceType selectedService) {
     this.onModelChange = onModelChange;
     settings = GeneralSettings.getCurrentState();
     openAISettings = OpenAISettings.getCurrentState();
     youSettings = YouSettings.getCurrentState();
+    ollamaSettings = ApplicationManager.getApplication()
+        .getService(OllamaSettings.class)
+        .getState();
     updateTemplatePresentation(selectedService);
 
     subscribeToYouSignedOutTopic(ApplicationManager.getApplication().getMessageBus().connect());
@@ -103,6 +110,9 @@ public class ModelComboBoxAction extends ComboBoxAction {
         getLlamaCppPresentationText(),
         Icons.Llama,
         presentation));
+    actionGroup.addSeparator("Ollama");
+    ollamaSettings.getAvailableModels().forEach(model ->
+        actionGroup.add(createOllamaModelAction(model, presentation)));
 
     if (YouUserManager.getInstance().isSubscribed()) {
       actionGroup.addSeparator("You.com");
@@ -179,7 +189,12 @@ public class ModelComboBoxAction extends ComboBoxAction {
         templatePresentation.setText(getLlamaCppPresentationText());
         templatePresentation.setIcon(Icons.Llama);
         break;
+      case OLLAMA:
+        templatePresentation.setIcon(Icons.Ollama);
+        templatePresentation.setText(ollamaSettings.getModel());
+        break;
       default:
+        break;
     }
   }
 
@@ -233,6 +248,34 @@ public class ModelComboBoxAction extends ComboBoxAction {
     comboBoxPresentation.setIcon(icon);
     comboBoxPresentation.setText(label);
     onModelChange.run();
+  }
+
+  private AnAction createOllamaModelAction(
+      String model,
+      Presentation comboBoxPresentation
+  ) {
+    return new DumbAwareAction(model, "", Icons.Ollama) {
+      @Override
+      public void update(@NotNull AnActionEvent event) {
+        var presentation = event.getPresentation();
+        presentation.setEnabled(!presentation.getText().equals(comboBoxPresentation.getText()));
+      }
+
+      @Override
+      public void actionPerformed(@NotNull AnActionEvent e) {
+        ollamaSettings.setModel(model);
+        handleModelChange(
+            OLLAMA,
+            model,
+            Icons.Ollama,
+            comboBoxPresentation);
+      }
+
+      @Override
+      public @NotNull ActionUpdateThread getActionUpdateThread() {
+        return ActionUpdateThread.BGT;
+      }
+    };
   }
 
   private AnAction createOpenAIModelAction(

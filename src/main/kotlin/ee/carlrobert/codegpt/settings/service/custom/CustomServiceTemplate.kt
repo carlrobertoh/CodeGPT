@@ -61,6 +61,11 @@ enum class CustomServiceTemplate(
         "LLaMA C/C++",
         "https://github.com/ggerganov/llama.cpp/blob/master/examples/server/README.md",
         CustomServiceChatCompletionTemplate.LLAMA_CPP
+    ),
+    MISTRAL_AI(
+        "Mistral AI",
+        "https://docs.mistral.ai/getting-started/quickstart",
+        CustomServiceChatCompletionTemplate.MISTRAL_AI
     );
 
     override fun toString(): String {

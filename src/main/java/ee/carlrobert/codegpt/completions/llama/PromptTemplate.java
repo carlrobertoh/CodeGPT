@@ -144,7 +144,7 @@ public enum PromptTemplate {
           .toString();
     }
   },
-  CODE_GEMMA("CodeGemma 7b Instruct") {
+  CODE_GEMMA("CodeGemma Instruct") {
     @Override
     public String buildPrompt(String systemPrompt, String userPrompt, List<Message> history) {
       StringBuilder prompt = new StringBuilder();
