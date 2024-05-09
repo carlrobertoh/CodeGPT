@@ -112,13 +112,19 @@ public class CompletionRequestProvider {
   }
 
   public static OpenAIChatCompletionRequest buildOpenAILookupCompletionRequest(String context) {
+    return buildOpenAILookupCompletionRequest(context, OpenAISettings.getCurrentState().getModel());
+  }
+
+  public static OpenAIChatCompletionRequest buildOpenAILookupCompletionRequest(
+      String context,
+      String model) {
     return new OpenAIChatCompletionRequest.Builder(
         List.of(
             new OpenAIChatCompletionStandardMessage(
                 "system",
                 getResourceContent("/prompts/method-name-generator.txt")),
             new OpenAIChatCompletionStandardMessage("user", context)))
-        .setModel(OpenAISettings.getCurrentState().getModel())
+        .setModel(model)
         .setStream(false)
         .build();
   }
