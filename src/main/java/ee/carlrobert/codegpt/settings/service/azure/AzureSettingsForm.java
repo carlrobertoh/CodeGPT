@@ -2,6 +2,7 @@ package ee.carlrobert.codegpt.settings.service.azure;
 
 import static ee.carlrobert.codegpt.ui.UIUtil.withEmptyLeftBorder;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.ui.TitledSeparator;
 import com.intellij.ui.components.JBPasswordField;
 import com.intellij.ui.components.JBRadioButton;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import javax.swing.ButtonGroup;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import org.jetbrains.annotations.Nullable;
 
 public class AzureSettingsForm {
@@ -38,15 +40,20 @@ public class AzureSettingsForm {
         settings.isUseAzureActiveDirectoryAuthentication());
     azureApiKeyField = new JBPasswordField();
     azureApiKeyField.setColumns(30);
-    azureApiKeyField.setText(CredentialsStore.getCredential(CredentialKey.AZURE_OPENAI_API_KEY));
+    ApplicationManager.getApplication().executeOnPooledThread(() -> {
+      var apiKey = CredentialsStore.getCredential(CredentialKey.AZURE_OPENAI_API_KEY);
+      SwingUtilities.invokeLater(() -> azureApiKeyField.setText(apiKey));
+    });
     azureApiKeyFieldPanel = UI.PanelFactory.panel(azureApiKeyField)
         .withLabel(CodeGPTBundle.get("settingsConfigurable.shared.apiKey.label"))
         .resizeX(false)
         .createPanel();
     azureActiveDirectoryTokenField = new JBPasswordField();
     azureActiveDirectoryTokenField.setColumns(30);
-    azureActiveDirectoryTokenField.setText(
-        CredentialsStore.getCredential(CredentialKey.AZURE_ACTIVE_DIRECTORY_TOKEN));
+    ApplicationManager.getApplication().executeOnPooledThread(() -> {
+      var apiKey = CredentialsStore.getCredential(CredentialKey.AZURE_ACTIVE_DIRECTORY_TOKEN);
+      SwingUtilities.invokeLater(() -> azureActiveDirectoryTokenField.setText(apiKey));
+    });
     azureActiveDirectoryTokenFieldPanel = UI.PanelFactory.panel(azureActiveDirectoryTokenField)
         .withLabel(CodeGPTBundle.get("settingsConfigurable.service.azure.bearerToken.label"))
         .resizeX(false)

@@ -16,6 +16,8 @@ import ee.carlrobert.codegpt.settings.service.custom.CustomServiceCodeCompletion
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings
 import ee.carlrobert.codegpt.settings.service.custom.template.CustomServiceTemplate
 import ee.carlrobert.codegpt.ui.UIUtil
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import java.awt.FlowLayout
 import java.net.MalformedURLException
 import java.net.URL
@@ -27,7 +29,6 @@ class CustomServiceForm {
 
     private val apiKeyField = JBPasswordField().apply {
         columns = 30
-        text = getCredential(CredentialKey.CUSTOM_SERVICE_API_KEY)
     }
     private val templateHelpText = JBLabel(General.ContextHelp)
     private val templateComboBox = ComboBox(EnumComboBoxModel(CustomServiceTemplate::class.java))
@@ -37,6 +38,9 @@ class CustomServiceForm {
 
     init {
         val state = service<CustomServiceSettings>().state
+        apiKeyField.text = runBlocking(Dispatchers.IO) {
+            getCredential(CredentialKey.CUSTOM_SERVICE_API_KEY)
+        }
         chatCompletionsForm =
             CustomServiceChatCompletionForm(state.chatCompletionSettings, this::getApiKey)
         codeCompletionsForm =

@@ -9,7 +9,6 @@ import com.intellij.ui.components.JBPasswordField
 import com.intellij.ui.components.fields.IntegerField
 import com.intellij.util.ui.FormBuilder
 import ee.carlrobert.codegpt.CodeGPTBundle
-import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey
 import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.CODEGPT_API_KEY
 import ee.carlrobert.codegpt.credentials.CredentialsStore.getCredential
 import ee.carlrobert.codegpt.credentials.CredentialsStore.setCredential
@@ -18,6 +17,8 @@ import ee.carlrobert.llm.client.codegpt.CodeGPTAvailableModels
 import ee.carlrobert.llm.client.codegpt.CodeGPTAvailableModels.AVAILABLE_CHAT_MODELS
 import ee.carlrobert.llm.client.codegpt.CodeGPTAvailableModels.AVAILABLE_CODE_MODELS
 import ee.carlrobert.llm.client.codegpt.CodeGPTModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import org.jdesktop.swingx.combobox.ListComboBoxModel
 import java.awt.Component
 import javax.swing.DefaultListCellRenderer
@@ -28,7 +29,6 @@ class CodeGPTServiceForm {
 
     private val apiKeyField = JBPasswordField().apply {
         columns = 30
-        text = getCredential(CredentialKey.CUSTOM_SERVICE_API_KEY)
     }
 
     private val chatCompletionModelComboBox =
@@ -55,6 +55,12 @@ class CodeGPTServiceForm {
             columns = 12
             value = service<CodeGPTServiceSettings>().state.codeCompletionSettings.maxTokens
         }
+
+    init {
+        apiKeyField.text = runBlocking(Dispatchers.IO) {
+            getCredential(CODEGPT_API_KEY)
+        }
+    }
 
     fun getForm(): JPanel = FormBuilder.createFormBuilder()
         .addComponent(TitledSeparator(CodeGPTBundle.get("shared.configuration")))

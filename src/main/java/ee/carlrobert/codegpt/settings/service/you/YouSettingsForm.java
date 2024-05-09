@@ -1,9 +1,9 @@
 package ee.carlrobert.codegpt.settings.service.you;
 
-import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.YOU_ACCOUNT_PASSWORD;
 import static ee.carlrobert.codegpt.ui.UIUtil.withEmptyLeftBorder;
 
 import com.intellij.openapi.Disposable;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.ui.ComponentValidator;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.util.text.StringUtil;
@@ -53,7 +53,10 @@ public class YouSettingsForm extends JPanel {
     passwordField = new JBPasswordField();
     passwordField.setColumns(25);
     if (!settings.getEmail().isEmpty()) {
-      passwordField.setText(CredentialsStore.getCredential(YOU_ACCOUNT_PASSWORD));
+      ApplicationManager.getApplication().executeOnPooledThread(() -> {
+        var apiKey = CredentialsStore.getCredential(CredentialKey.YOU_ACCOUNT_PASSWORD);
+        SwingUtilities.invokeLater(() -> passwordField.setText(apiKey));
+      });
     }
     signInButton = new JButton(CodeGPTBundle.get("settingsConfigurable.service.you.signIn.label"));
     signUpTextPane = createSignUpTextPane();

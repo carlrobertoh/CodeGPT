@@ -3,16 +3,18 @@ package ee.carlrobert.codegpt.credentials
 import com.intellij.credentialStore.CredentialAttributes
 import com.intellij.credentialStore.generateServiceName
 import com.intellij.ide.passwordSafe.PasswordSafe
+import com.intellij.util.concurrency.annotations.RequiresBackgroundThread
 
 object CredentialsStore {
 
     private val credentialsMap = mutableMapOf<CredentialKey, String?>()
 
     @JvmStatic
+    @RequiresBackgroundThread
     fun getCredential(key: CredentialKey): String? = credentialsMap.getOrPut(key) {
         PasswordSafe.instance.getPassword(
             CredentialAttributes(generateServiceName("CodeGPT", key.name))
-        )
+        ) ?: ""
     }
 
     fun setCredential(key: CredentialKey, password: String?) {
