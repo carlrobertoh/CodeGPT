@@ -122,7 +122,7 @@ public enum LlamaModel {
       PromptTemplate.CODE_GEMMA,
       InfillPromptTemplate.CODE_GEMMA,
       List.of(
-          HuggingFaceModel.CODE_GEMMA_7B_Q3_K_M,
+          HuggingFaceModel.CODE_GEMMA_7B_Q3_K_L,
           HuggingFaceModel.CODE_GEMMA_7B_Q4_K_M,
           HuggingFaceModel.CODE_GEMMA_7B_Q5_K_M,
           HuggingFaceModel.CODE_GEMMA_7B_Q6_K,
