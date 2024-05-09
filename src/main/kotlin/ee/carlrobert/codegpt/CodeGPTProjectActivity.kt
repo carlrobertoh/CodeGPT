@@ -29,7 +29,6 @@ class CodeGPTProjectActivity : ProjectActivity {
 
     override suspend fun execute(project: Project) {
         EditorActionsUtil.refreshActions()
-        CredentialsStore.loadAll()
 
         if (YouUserManager.getInstance().authenticationResponse == null) {
             handleYouServiceAuthenticationAsync()

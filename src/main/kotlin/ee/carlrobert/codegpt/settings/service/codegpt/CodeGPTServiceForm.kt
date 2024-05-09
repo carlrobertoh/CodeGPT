@@ -86,6 +86,7 @@ class CodeGPTServiceForm {
                 )
                 .panel
         )
+        .addComponentFillVertically(JPanel(), 0)
         .panel
 
     fun getApiKey() = String(apiKeyField.password).ifEmpty { null }

@@ -19,6 +19,26 @@
         <postStartupActivity implementation="ee.carlrobert.codegpt.CodeGPTUpdateActivity"/>
         <applicationConfigurable id="settings.codegpt" parentId="tools" displayName="CodeGPT"
             instance="ee.carlrobert.codegpt.settings.GeneralSettingsConfigurable"/>
+        <applicationConfigurable id="settings.codegpt.services" parentId="settings.codegpt" displayName="Providers"
+          instance="ee.carlrobert.codegpt.settings.service.ServiceConfigurable"/>
+        <applicationConfigurable id="settings.codegpt.services.codegpt" parentId="settings.codegpt.services" displayName="CodeGPT"
+          instance="ee.carlrobert.codegpt.settings.service.codegpt.CodeGPTServiceConfigurable"/>
+        <applicationConfigurable id="settings.codegpt.services.openai" parentId="settings.codegpt.services" displayName="OpenAI"
+          instance="ee.carlrobert.codegpt.settings.service.OpenAIServiceConfigurable"/>
+        <applicationConfigurable id="settings.codegpt.services.custom" parentId="settings.codegpt.services" displayName="Custom OpenAI"
+          instance="ee.carlrobert.codegpt.settings.service.custom.CustomServiceConfigurable"/>
+        <applicationConfigurable id="settings.codegpt.services.azure" parentId="settings.codegpt.services" displayName="Azure"
+          instance="ee.carlrobert.codegpt.settings.service.AzureServiceConfigurable"/>
+        <applicationConfigurable id="settings.codegpt.services.anthropic" parentId="settings.codegpt.services" displayName="Anthropic"
+          instance="ee.carlrobert.codegpt.settings.service.AnthropicServiceConfigurable"/>
+        <applicationConfigurable id="settings.codegpt.services.google" parentId="settings.codegpt.services" displayName="Google"
+          instance="ee.carlrobert.codegpt.settings.service.google.GoogleSettingsConfigurable"/>
+        <applicationConfigurable id="settings.codegpt.services.you" parentId="settings.codegpt.services" displayName="You.com"
+          instance="ee.carlrobert.codegpt.settings.service.YouServiceConfigurable"/>
+        <applicationConfigurable id="settings.codegpt.services.llama_cpp" parentId="settings.codegpt.services" displayName="LLaMA C/C++ (Local)"
+          instance="ee.carlrobert.codegpt.settings.service.LlamaServiceConfigurable"/>
+        <applicationConfigurable id="settings.codegpt.services.ollama" parentId="settings.codegpt.services" displayName="Ollama (Local)"
+          instance="ee.carlrobert.codegpt.settings.service.ollama.OllamaSettingsConfigurable"/>
         <applicationConfigurable id="settings.codegpt.configuration" parentId="settings.codegpt" displayName="Configuration"
             instance="ee.carlrobert.codegpt.settings.configuration.ConfigurationConfigurable"/>
         <applicationConfigurable id="settings.codegpt.advanced" parentId="settings.codegpt" displayName="Advanced Settings"
@@ -37,7 +57,6 @@
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.service.you.YouSettings"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.service.llama.LlamaSettings"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings"/>
-        <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.service.google.GoogleSettings"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.IncludedFilesSettings"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.advanced.AdvancedSettings"/>
