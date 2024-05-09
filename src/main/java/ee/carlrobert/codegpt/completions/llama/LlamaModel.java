@@ -17,7 +17,7 @@ public enum LlamaModel {
           + "support for large input contexts, and zero-shot instruction following ability for "
           + "programming tasks.",
       PromptTemplate.LLAMA,
-      InfillPromptTemplate.LLAMA,
+      InfillPromptTemplate.CODE_LLAMA,
       List.of(
           HuggingFaceModel.CODE_LLAMA_7B_Q3,
           HuggingFaceModel.CODE_LLAMA_7B_Q4,
@@ -99,7 +99,52 @@ public enum LlamaModel {
           HuggingFaceModel.LLAMA_3_8B_Q8_0,
           HuggingFaceModel.LLAMA_3_70B_IQ1,
           HuggingFaceModel.LLAMA_3_70B_IQ2_XS,
-          HuggingFaceModel.LLAMA_3_70B_Q4_K_M));
+          HuggingFaceModel.LLAMA_3_70B_Q4_K_M)),
+  PHI_3(
+      "Phi-3 Mini",
+      "Phi-3 Mini is a 3.8B parameters, lightweight, state-of-the-art open model. "
+          + "When assessed against benchmarks testing common sense, language understanding, math, "
+          + "code, long context and logical reasoning, Phi-3 Mini-4K-Instruct showcased a robust "
+          + "and state-of-the-art performance among models with less than 13 billion parameters.",
+      PromptTemplate.PHI_3,
+      List.of(
+          HuggingFaceModel.PHI_3_3_8B_4K_IQ4_NL,
+          HuggingFaceModel.PHI_3_3_8B_4K_Q5_K_M,
+          HuggingFaceModel.PHI_3_3_8B_4K_Q6_K,
+          HuggingFaceModel.PHI_3_3_8B_4K_Q8_0,
+          HuggingFaceModel.PHI_3_3_8B_4K_FP16)),
+  CODE_GEMMA(
+      "CodeGemma Instruct",
+      "CodeGemma Instruct is the first in a series of coding models released by Google. "
+          + "As an instruct model, it specializes in being asked coding related questions, but can "
+          + "also function as an autocomplete/fill-in-middle model for tools like co-pilot.\n"
+          + "This model is perfect for general coding questions or code generation.",
+      PromptTemplate.CODE_GEMMA,
+      InfillPromptTemplate.CODE_GEMMA,
+      List.of(
+          HuggingFaceModel.CODE_GEMMA_7B_Q3_K_L,
+          HuggingFaceModel.CODE_GEMMA_7B_Q4_K_M,
+          HuggingFaceModel.CODE_GEMMA_7B_Q5_K_M,
+          HuggingFaceModel.CODE_GEMMA_7B_Q6_K,
+          HuggingFaceModel.CODE_GEMMA_7B_Q8_0)),
+  CODE_QWEN(
+      "CodeQwen1.5", """
+          A specialized codeLLM built upon the Qwen1.5 language model. \
+          CodeQwen1.5-7B has been pretrained with around 3 trillion tokens of code-related data. \
+          It supports an extensive repertoire of 92 programming languages, and it exhibits \
+          exceptional capacity in long-context understanding and generation with the ability to \
+          process information of 64K tokens. In terms of performance, CodeQwen1.5 demonstrates \
+          impressive capabilities in basic code generation, long-context modelling, code editing \
+          and SQL. We believe this model can significantly enhance developer productivity and \
+          streamline software development workflows within diverse technological environments.""",
+      PromptTemplate.CODE_QWEN,
+      InfillPromptTemplate.CODE_QWEN,
+      List.of(
+          HuggingFaceModel.CODE_QWEN_1_5_7B_Q3_K_M,
+          HuggingFaceModel.CODE_QWEN_1_5_7B_Q4_K_M,
+          HuggingFaceModel.CODE_QWEN_1_5_7B_Q5_K_M,
+          HuggingFaceModel.CODE_QWEN_1_5_7B_Q6_K)),
+  ;
 
   private final String label;
   private final String description;

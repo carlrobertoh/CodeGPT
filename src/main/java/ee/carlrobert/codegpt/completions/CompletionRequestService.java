@@ -1,7 +1,5 @@
 package ee.carlrobert.codegpt.completions;
 
-import static ee.carlrobert.codegpt.settings.service.ServiceType.ANTHROPIC;
-import static ee.carlrobert.codegpt.settings.service.ServiceType.AZURE;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.CUSTOM_OPENAI;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.LLAMA_CPP;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.OPENAI;
@@ -10,8 +8,6 @@ import static ee.carlrobert.codegpt.settings.service.ServiceType.YOU;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.diagnostic.Logger;
-import ee.carlrobert.codegpt.codecompletions.CodeCompletionRequestFactory;
-import ee.carlrobert.codegpt.codecompletions.InfillRequestDetails;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
 import ee.carlrobert.codegpt.credentials.CredentialsStore;
@@ -21,16 +17,25 @@ import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettings;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
+import ee.carlrobert.codegpt.settings.service.codegpt.CodeGPTServiceSettings;
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings;
+import ee.carlrobert.codegpt.settings.service.google.GoogleSettings;
+import ee.carlrobert.codegpt.settings.service.google.GoogleSettingsState;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
+import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.llm.client.DeserializationUtil;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionRequest;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionStandardMessage;
+import ee.carlrobert.llm.client.google.completion.GoogleCompletionContent;
+import ee.carlrobert.llm.client.google.completion.GoogleCompletionRequest;
+import ee.carlrobert.llm.client.google.completion.GoogleGenerationConfig;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
+import ee.carlrobert.llm.client.ollama.completion.request.OllamaChatCompletionMessage;
+import ee.carlrobert.llm.client.ollama.completion.request.OllamaChatCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionEventSourceListener;
 import ee.carlrobert.llm.client.openai.completion.OpenAITextCompletionEventSourceListener;
-import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
+import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest.Builder;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionStandardMessage;
 import ee.carlrobert.llm.client.openai.completion.response.OpenAIChatCompletionResponse;
 import ee.carlrobert.llm.client.openai.completion.response.OpenAIChatCompletionResponseChoice;
@@ -77,8 +82,18 @@ public final class CompletionRequestService {
   public EventSource getChatCompletionAsync(
       CallParameters callParameters,
       CompletionEventListener<String> eventListener) {
+    var application = ApplicationManager.getApplication();
     var requestProvider = new CompletionRequestProvider(callParameters.getConversation());
     return switch (GeneralSettings.getCurrentState().getSelectedService()) {
+      case CODEGPT -> CompletionClientProvider.getCodeGPTClient().getChatCompletionAsync(
+          requestProvider.buildOpenAIChatCompletionRequest(
+              application.getService(CodeGPTServiceSettings.class)
+                  .getState()
+                  .getChatCompletionSettings()
+                  .getModel(),
+              callParameters),
+          eventListener
+      );
       case OPENAI -> CompletionClientProvider.getOpenAIClient().getChatCompletionAsync(
           requestProvider.buildOpenAIChatCompletionRequest(
               OpenAISettings.getCurrentState().getModel(),
@@ -86,8 +101,7 @@ public final class CompletionRequestService {
           eventListener);
       case CUSTOM_OPENAI -> getCustomOpenAIChatCompletionAsync(
           requestProvider.buildCustomOpenAIChatCompletionRequest(
-              ApplicationManager.getApplication()
-                  .getService(CustomServiceSettings.class)
+              application.getService(CustomServiceSettings.class)
                   .getState()
                   .getChatCompletionSettings(),
               callParameters),
@@ -106,27 +120,18 @@ public final class CompletionRequestService {
               callParameters.getMessage(),
               callParameters.getConversationType()),
           eventListener);
-    };
-  }
-
-  public EventSource getCodeCompletionAsync(
-      InfillRequestDetails requestDetails,
-      CompletionEventListener<String> eventListener) {
-    var httpClient = CompletionClientProvider.getDefaultClientBuilder().build();
-    return switch (GeneralSettings.getCurrentState().getSelectedService()) {
-      case OPENAI -> CompletionClientProvider.getOpenAIClient()
-          .getCompletionAsync(
-              CodeCompletionRequestFactory.buildOpenAIRequest(requestDetails),
-              eventListener);
-      case CUSTOM_OPENAI -> EventSources.createFactory(httpClient).newEventSource(
-          CodeCompletionRequestFactory.buildCustomRequest(requestDetails),
-          new OpenAITextCompletionEventSourceListener(eventListener));
-      case LLAMA_CPP -> CompletionClientProvider.getLlamaClient()
-          .getChatCompletionAsync(
-              CodeCompletionRequestFactory.buildLlamaRequest(requestDetails),
-              eventListener);
-      default ->
-          throw new IllegalArgumentException("Code completion not supported for selected service");
+      case OLLAMA -> CompletionClientProvider.getOllamaClient().getChatCompletionAsync(
+          requestProvider.buildOllamaChatCompletionRequest(callParameters),
+          eventListener);
+      case GOOGLE -> {
+        var settings = application.getService(GoogleSettings.class).getState();
+        yield CompletionClientProvider.getGoogleClient().getChatCompletionAsync(
+            requestProvider.buildGoogleChatCompletionRequest(
+                settings.getModel(),
+                callParameters),
+            settings.getModel(),
+            eventListener);
+      }
     };
   }
 
@@ -135,13 +140,17 @@ public final class CompletionRequestService {
       String gitDiff,
       CompletionEventListener<String> eventListener) {
     var configuration = ConfigurationSettings.getCurrentState();
-    var openaiRequest = new OpenAIChatCompletionRequest.Builder(List.of(
+    var openaiRequest = new Builder(List.of(
         new OpenAIChatCompletionStandardMessage("system", systemPrompt),
         new OpenAIChatCompletionStandardMessage("user", gitDiff)))
         .setModel(OpenAISettings.getCurrentState().getModel())
         .build();
     var selectedService = GeneralSettings.getCurrentState().getSelectedService();
     switch (selectedService) {
+      case CODEGPT:
+        CompletionClientProvider.getCodeGPTClient()
+            .getChatCompletionAsync(openaiRequest, eventListener);
+        break;
       case OPENAI:
         CompletionClientProvider.getOpenAIClient()
             .getChatCompletionAsync(openaiRequest, eventListener);
@@ -191,6 +200,35 @@ public final class CompletionRequestService {
                 .setRepeat_penalty(settings.getRepeatPenalty())
                 .build(), eventListener);
         break;
+      case OLLAMA:
+        var model = ApplicationManager.getApplication()
+            .getService(OllamaSettings.class)
+            .getState()
+            .getModel();
+        var request = new OllamaChatCompletionRequest.Builder(
+            model,
+            List.of(
+                new OllamaChatCompletionMessage("system", systemPrompt, null),
+                new OllamaChatCompletionMessage("user", gitDiff, null)
+            )
+        ).build();
+        CompletionClientProvider.getOllamaClient().getChatCompletionAsync(request, eventListener);
+        break;
+      case GOOGLE:
+        GoogleSettingsState state = ApplicationManager.getApplication()
+            .getService(GoogleSettings.class).getState();
+        CompletionClientProvider.getGoogleClient()
+            .getChatCompletionAsync(new GoogleCompletionRequest.Builder(
+                List.of(
+                    new GoogleCompletionContent("user", List.of(systemPrompt)),
+                    new GoogleCompletionContent("model", List.of("Understood.")),
+                    new GoogleCompletionContent("user", List.of(gitDiff))
+                ))
+                .generationConfig(new GoogleGenerationConfig.Builder()
+                    .maxOutputTokens(configuration.getMaxTokens())
+                    .temperature(configuration.getTemperature()).build())
+                .build(), state.getModel(), eventListener);
+        break;
       default:
         LOG.debug("Unknown service: {}", selectedService);
         break;
@@ -226,19 +264,16 @@ public final class CompletionRequestService {
   }
 
   public static boolean isRequestAllowed(ServiceType serviceType) {
-    if (serviceType == OPENAI
-        && CredentialsStore.INSTANCE.isCredentialSet(CredentialKey.OPENAI_API_KEY)) {
-      return true;
-    }
-
-    var azureCredentialKey = AzureSettings.getCurrentState().isUseAzureApiKeyAuthentication()
-        ? CredentialKey.AZURE_OPENAI_API_KEY
-        : CredentialKey.AZURE_ACTIVE_DIRECTORY_TOKEN;
-    if (serviceType == AZURE && CredentialsStore.INSTANCE.isCredentialSet(azureCredentialKey)) {
-      return true;
-    }
-
-    return List.of(LLAMA_CPP, ANTHROPIC, CUSTOM_OPENAI).contains(serviceType);
+    return switch (serviceType) {
+      case OPENAI -> CredentialsStore.INSTANCE.isCredentialSet(CredentialKey.OPENAI_API_KEY);
+      case AZURE -> CredentialsStore.INSTANCE.isCredentialSet(
+          AzureSettings.getCurrentState().isUseAzureApiKeyAuthentication()
+              ? CredentialKey.AZURE_OPENAI_API_KEY
+              : CredentialKey.AZURE_ACTIVE_DIRECTORY_TOKEN);
+      case CODEGPT, CUSTOM_OPENAI, ANTHROPIC, LLAMA_CPP, OLLAMA -> true;
+      case YOU -> false;
+      case GOOGLE -> CredentialsStore.INSTANCE.isCredentialSet(CredentialKey.GOOGLE_API_KEY);
+    };
   }
 
   /**

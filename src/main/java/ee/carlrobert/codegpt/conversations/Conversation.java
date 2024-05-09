@@ -29,7 +29,7 @@ public class Conversation {
   }
 
   public void setMessages(List<Message> messages) {
-    this.messages = messages;
+    this.messages = new ArrayList<>(messages);
   }
 
   public String getClientCode() {
@@ -77,7 +77,7 @@ public class Conversation {
   }
 
   public void removeMessage(UUID messageId) {
-    setMessages(messages.stream()
+    messages = new ArrayList<>(messages.stream()
         .filter(message -> !message.getId().equals(messageId))
         .toList());
   }

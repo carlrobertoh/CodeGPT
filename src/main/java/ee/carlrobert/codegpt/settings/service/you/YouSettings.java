@@ -29,8 +29,4 @@ public class YouSettings implements PersistentStateComponent<YouSettingsState> {
   public static YouSettings getInstance() {
     return ApplicationManager.getApplication().getService(YouSettings.class);
   }
-
-  public boolean isModified(YouSettingsForm form) {
-    return !form.getCurrentState().equals(state);
-  }
 }

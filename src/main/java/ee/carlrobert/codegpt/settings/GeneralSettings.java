@@ -10,7 +10,10 @@ import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettings;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
+import ee.carlrobert.codegpt.settings.service.codegpt.CodeGPTServiceSettings;
+import ee.carlrobert.codegpt.settings.service.google.GoogleSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
+import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import org.jetbrains.annotations.NotNull;
 
@@ -69,10 +72,18 @@ public class GeneralSettings implements PersistentStateComponent<GeneralSettings
     if ("you.chat.completion".equals(clientCode)) {
       state.setSelectedService(ServiceType.YOU);
     }
+    if ("ollama.chat.completion".equals(clientCode)) {
+      state.setSelectedService(ServiceType.OLLAMA);
+    }
   }
 
   public String getModel() {
     switch (state.getSelectedService()) {
+      case CODEGPT:
+        return ApplicationManager.getApplication().getService(CodeGPTServiceSettings.class)
+            .getState()
+            .getCodeCompletionSettings()
+            .getModel();
       case OPENAI:
         return OpenAISettings.getCurrentState().getModel();
       case ANTHROPIC:
@@ -98,6 +109,16 @@ public class GeneralSettings implements PersistentStateComponent<GeneralSettings
             llamaModel.getLabel(),
             huggingFaceModel.getParameterSize(),
             huggingFaceModel.getQuantization());
+      case OLLAMA:
+        return ApplicationManager.getApplication()
+            .getService(OllamaSettings.class)
+            .getState()
+            .getModel();
+      case GOOGLE:
+        return ApplicationManager.getApplication()
+            .getService(GoogleSettings.class)
+            .getState()
+            .getModel();
       default:
         return "Unknown";
     }

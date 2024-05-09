@@ -1,9 +1,8 @@
 package ee.carlrobert.codegpt.settings.service.anthropic;
 
 import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.ANTHROPIC_API_KEY;
-import static ee.carlrobert.codegpt.ui.UIUtil.withEmptyLeftBorder;
 
-import com.intellij.ui.TitledSeparator;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.ui.components.JBPasswordField;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
@@ -12,6 +11,7 @@ import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.credentials.CredentialsStore;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import org.jetbrains.annotations.Nullable;
 
 public class AnthropicSettingsForm {
@@ -23,15 +23,17 @@ public class AnthropicSettingsForm {
   public AnthropicSettingsForm(AnthropicSettingsState settings) {
     apiKeyField = new JBPasswordField();
     apiKeyField.setColumns(30);
-    apiKeyField.setText(CredentialsStore.INSTANCE.getCredential(ANTHROPIC_API_KEY));
+    ApplicationManager.getApplication().executeOnPooledThread(() -> {
+      var apiKey = CredentialsStore.getCredential(ANTHROPIC_API_KEY);
+      SwingUtilities.invokeLater(() -> apiKeyField.setText(apiKey));
+    });
     apiVersionField = new JBTextField(settings.getApiVersion(), 35);
     modelField = new JBTextField(settings.getModel(), 35);
   }
 
   public JPanel getForm() {
     return FormBuilder.createFormBuilder()
-        .addComponent(new TitledSeparator(CodeGPTBundle.get("shared.configuration")))
-        .addComponent(withEmptyLeftBorder(UI.PanelFactory.grid()
+        .addComponent(UI.PanelFactory.grid()
             .add(UI.PanelFactory.panel(apiKeyField)
                 .withLabel(CodeGPTBundle.get("settingsConfigurable.shared.apiKey.label"))
                 .resizeX(false)
@@ -49,7 +51,7 @@ public class AnthropicSettingsForm {
                 .withComment(CodeGPTBundle.get(
                     "settingsConfigurable.service.anthropic.model.comment"))
                 .resizeX(false))
-            .createPanel()))
+            .createPanel())
         .addComponentFillVertically(new JPanel(), 0)
         .getPanel();
   }
@@ -63,7 +65,7 @@ public class AnthropicSettingsForm {
 
   public void resetForm() {
     var state = AnthropicSettings.getCurrentState();
-    apiKeyField.setText(CredentialsStore.INSTANCE.getCredential(ANTHROPIC_API_KEY));
+    apiKeyField.setText(CredentialsStore.getCredential(ANTHROPIC_API_KEY));
     apiVersionField.setText(state.getApiVersion());
     modelField.setText(state.getModel());
   }

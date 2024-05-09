@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.settings.service.custom
+package ee.carlrobert.codegpt.settings.service.custom.form
 
 import com.intellij.icons.AllIcons.General
 import com.intellij.ide.HelpTooltip
@@ -16,6 +16,8 @@ import ee.carlrobert.codegpt.codecompletions.InfillPromptTemplate
 import ee.carlrobert.codegpt.codecompletions.InfillRequestDetails
 import ee.carlrobert.codegpt.completions.CompletionRequestService
 import ee.carlrobert.codegpt.settings.configuration.Placeholder
+import ee.carlrobert.codegpt.settings.service.custom.CustomServiceCodeCompletionSettingsState
+import ee.carlrobert.codegpt.settings.service.custom.CustomServiceFormTabbedPane
 import ee.carlrobert.codegpt.ui.OverlayUtil
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails
 import ee.carlrobert.llm.completion.CompletionEventListener
@@ -28,7 +30,10 @@ import javax.swing.JButton
 import javax.swing.JPanel
 import javax.swing.SwingUtilities
 
-class CustomServiceCodeCompletionForm(state: CustomServiceCodeCompletionSettingsState) {
+class CustomServiceCodeCompletionForm(
+    state: CustomServiceCodeCompletionSettingsState,
+    val getApiKey: () -> String?
+) {
 
     private val featureEnabledCheckBox = JBCheckBox(
         CodeGPTBundle.get("codeCompletionsForm.enableFeatureText"),
@@ -37,7 +42,7 @@ class CustomServiceCodeCompletionForm(state: CustomServiceCodeCompletionSettings
     private val promptTemplateComboBox =
         ComboBox(EnumComboBoxModel(InfillPromptTemplate::class.java)).apply {
             selectedItem = state.infillTemplate
-            setSelectedItem(InfillPromptTemplate.LLAMA)
+            setSelectedItem(InfillPromptTemplate.CODE_LLAMA)
             addItemListener {
                 updatePromptTemplateHelpTooltip(it.item as InfillPromptTemplate)
             }
@@ -138,7 +143,14 @@ class CustomServiceCodeCompletionForm(state: CustomServiceCodeCompletionSettings
 
     private fun testConnection() {
         CompletionRequestService.getInstance().getCustomOpenAICompletionAsync(
-            CodeCompletionRequestFactory.buildCustomRequest(InfillRequestDetails("Hello", "!")),
+            CodeCompletionRequestFactory.buildCustomRequest(
+                InfillRequestDetails("Hello", "!"),
+                urlField.text,
+                tabbedPane.headers,
+                tabbedPane.body,
+                promptTemplateComboBox.selectedItem as InfillPromptTemplate,
+                getApiKey.invoke()
+            ),
             TestConnectionEventListener()
         )
     }

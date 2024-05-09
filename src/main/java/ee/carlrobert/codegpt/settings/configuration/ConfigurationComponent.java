@@ -190,7 +190,12 @@ public class ConfigurationComponent {
   private JPanel createTablePanel() {
     return ToolbarDecorator.createDecorator(table)
         .setPreferredSize(new Dimension(table.getPreferredSize().width, 140))
-        .setAddAction(anActionButton -> getModel().addRow(new Object[]{"", ""}))
+        .setAddAction(anActionButton -> {
+          getModel().addRow(new Object[]{"", ""});
+          int lastRowIndex = getModel().getRowCount() - 1;
+          table.changeSelection(lastRowIndex, 0, false, false);
+          table.editCellAt(lastRowIndex, 0);
+        })
         .setRemoveAction(anActionButton -> getModel().removeRow(table.getSelectedRow()))
         .disableUpAction()
         .disableDownAction()

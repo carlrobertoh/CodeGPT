@@ -16,11 +16,12 @@ import com.intellij.openapi.application.EDT
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
 import ee.carlrobert.codegpt.CodeGPTKeys
-import ee.carlrobert.codegpt.completions.CompletionRequestService
 import ee.carlrobert.codegpt.settings.GeneralSettings
 import ee.carlrobert.codegpt.settings.service.ServiceType
+import ee.carlrobert.codegpt.settings.service.codegpt.CodeGPTServiceSettings
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
+import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings
 import ee.carlrobert.codegpt.ui.OverlayUtil.showNotification
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails
@@ -48,7 +49,8 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
         get() = CodeCompletionSuggestionUpdateAdapter()
 
     override suspend fun getSuggestion(request: InlineCompletionRequest): InlineCompletionSingleSuggestion {
-        if (request.editor.project == null) {
+        val project = request.editor.project
+        if (project == null) {
             logger.error("Could not find project")
             return InlineCompletionSingleSuggestion.build(elements = emptyFlow())
         }
@@ -58,7 +60,7 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
                 InfillRequestDetails.fromInlineCompletionRequest(request)
             }
             currentCall.set(
-                CompletionRequestService.getInstance().getCodeCompletionAsync(
+                project.service<CodeCompletionService>().getCodeCompletionAsync(
                     infillRequest,
                     CodeCompletionEventListener {
                         val inlineText = it.takeWhile { message -> message != '\n' }.toString()
@@ -80,10 +82,16 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
     override fun isEnabled(event: InlineCompletionEvent): Boolean {
         val selectedService = GeneralSettings.getCurrentState().selectedService
         val codeCompletionsEnabled = when (selectedService) {
+            ServiceType.CODEGPT -> service<CodeGPTServiceSettings>().state.codeCompletionSettings.codeCompletionsEnabled
             ServiceType.OPENAI -> OpenAISettings.getCurrentState().isCodeCompletionsEnabled
             ServiceType.CUSTOM_OPENAI -> service<CustomServiceSettings>().state.codeCompletionSettings.codeCompletionsEnabled
             ServiceType.LLAMA_CPP -> LlamaSettings.getCurrentState().isCodeCompletionsEnabled
-            else -> false
+            ServiceType.OLLAMA -> service<OllamaSettings>().state.codeCompletionsEnabled
+            ServiceType.ANTHROPIC,
+            ServiceType.AZURE,
+            ServiceType.YOU,
+            ServiceType.GOOGLE,
+            null -> false
         }
         return event is InlineCompletionEvent.DocumentChange && codeCompletionsEnabled
     }

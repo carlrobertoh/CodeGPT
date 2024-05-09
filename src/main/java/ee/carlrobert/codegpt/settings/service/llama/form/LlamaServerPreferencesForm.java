@@ -28,6 +28,7 @@ import ee.carlrobert.codegpt.completions.llama.LlamaServerAgent;
 import ee.carlrobert.codegpt.completions.llama.LlamaServerStartupParams;
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
 import ee.carlrobert.codegpt.credentials.CredentialsStore;
+import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettingsState;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.codegpt.ui.UIUtil;
@@ -40,6 +41,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import org.jetbrains.annotations.Nullable;
 
 public class LlamaServerPreferencesForm {
@@ -86,7 +88,10 @@ public class LlamaServerPreferencesForm {
     baseHostField = new JBTextField(settings.getBaseHost(), 30);
     apiKeyField = new JBPasswordField();
     apiKeyField.setColumns(30);
-    apiKeyField.setText(CredentialsStore.INSTANCE.getCredential(LLAMA_API_KEY));
+    ApplicationManager.getApplication().executeOnPooledThread(() -> {
+      var apiKey = CredentialsStore.getCredential(CredentialKey.LLAMA_API_KEY);
+      SwingUtilities.invokeLater(() -> apiKeyField.setText(apiKey));
+    });
 
     llamaModelPreferencesForm = new LlamaModelPreferencesForm();
     runLocalServerRadioButton = new JBRadioButton("Run local server",
@@ -131,7 +136,7 @@ public class LlamaServerPreferencesForm {
     additionalBuildParametersField.setText(state.getAdditionalBuildParameters());
     remotePromptTemplatePanel.setPromptTemplate(state.getRemoteModelPromptTemplate()); // ?
     infillPromptTemplatePanel.setPromptTemplate(state.getRemoteModelInfillPromptTemplate());
-    apiKeyField.setText(CredentialsStore.INSTANCE.getCredential(LLAMA_API_KEY));
+    apiKeyField.setText(CredentialsStore.getCredential(LLAMA_API_KEY));
   }
 
   public JComponent createUseExistingServerForm() {
@@ -189,17 +194,17 @@ public class LlamaServerPreferencesForm {
                 createComment("settingsConfigurable.service.llama.threads.comment"))
             .addLabeledComponent(
                 CodeGPTBundle.get("settingsConfigurable.service.llama.additionalParameters.label"),
-                    additionalParametersField)
-                .addComponentToRightColumn(
-                        createComment(
-                            "settingsConfigurable.service.llama.additionalParameters.comment"))
-                .addLabeledComponent(
-                    CodeGPTBundle.get(
-                        "settingsConfigurable.service.llama.additionalBuildParameters.label"),
-                    additionalBuildParametersField)
-                .addComponentToRightColumn(
-                    createComment(
-                        "settingsConfigurable.service.llama.additionalBuildParameters.comment"))
+                additionalParametersField)
+            .addComponentToRightColumn(
+                createComment(
+                    "settingsConfigurable.service.llama.additionalParameters.comment"))
+            .addLabeledComponent(
+                CodeGPTBundle.get(
+                    "settingsConfigurable.service.llama.additionalBuildParameters.label"),
+                additionalBuildParametersField)
+            .addComponentToRightColumn(
+                createComment(
+                    "settingsConfigurable.service.llama.additionalBuildParameters.comment"))
             .addVerticalGap(4)
             .addComponentFillVertically(new JPanel(), 0)
             .getPanel()))
@@ -354,9 +359,9 @@ public class LlamaServerPreferencesForm {
 
   public List<String> getListOfAdditionalParameters() {
     return Arrays.stream(additionalParametersField.getText().split(","))
-            .map(String::trim)
-            .filter(s -> !s.isBlank())
-            .toList();
+        .map(String::trim)
+        .filter(s -> !s.isBlank())
+        .toList();
   }
 
   public String getAdditionalBuildParameters() {
@@ -365,9 +370,9 @@ public class LlamaServerPreferencesForm {
 
   public List<String> getListOfAdditionalBuildParameters() {
     return Arrays.stream(additionalBuildParametersField.getText().split(","))
-            .map(String::trim)
-            .filter(s -> !s.isBlank())
-            .toList();
+        .map(String::trim)
+        .filter(s -> !s.isBlank())
+        .toList();
   }
 
   public PromptTemplate getPromptTemplate() {

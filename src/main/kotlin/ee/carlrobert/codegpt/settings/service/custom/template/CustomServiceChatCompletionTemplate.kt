@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.settings.service.custom
+package ee.carlrobert.codegpt.settings.service.custom.template
 
 enum class CustomServiceChatCompletionTemplate(
     val url: String,
@@ -89,6 +89,16 @@ enum class CustomServiceChatCompletionTemplate(
         "http://localhost:8080/v1/chat/completions",
         getDefaultHeaders(),
         getDefaultBodyParams(emptyMap())
+    ),
+    MISTRAL_AI(
+        "https://api.mistral.ai/v1/chat/completions",
+        getDefaultHeaders("Authorization", "Bearer \$CUSTOM_SERVICE_API_KEY"),
+        getDefaultBodyParams(
+            mapOf(
+                "model" to "open-mistral-7b",
+                "max_tokens" to 1024
+            )
+        )
     );
 }
 

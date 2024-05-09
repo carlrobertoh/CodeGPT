@@ -5,7 +5,7 @@ import ee.carlrobert.codegpt.settings.service.ServiceType;
 public class GeneralSettingsState {
 
   private String displayName = "";
-  private ServiceType selectedService = ServiceType.OPENAI;
+  private ServiceType selectedService = ServiceType.CODEGPT;
 
   public String getDisplayName() {
     if (displayName == null || displayName.isEmpty()) {

@@ -3,6 +3,7 @@ package ee.carlrobert.codegpt.settings.service.openai;
 import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.OPENAI_API_KEY;
 import static ee.carlrobert.codegpt.ui.UIUtil.withEmptyLeftBorder;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.EnumComboBoxModel;
 import com.intellij.ui.TitledSeparator;
@@ -12,10 +13,12 @@ import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.credentials.CredentialsStore;
+import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey;
 import ee.carlrobert.codegpt.settings.service.CodeCompletionConfigurationForm;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import org.jetbrains.annotations.Nullable;
 
 public class OpenAISettingsForm {
@@ -28,7 +31,10 @@ public class OpenAISettingsForm {
   public OpenAISettingsForm(OpenAISettingsState settings) {
     apiKeyField = new JBPasswordField();
     apiKeyField.setColumns(30);
-    apiKeyField.setText(CredentialsStore.INSTANCE.getCredential(OPENAI_API_KEY));
+    ApplicationManager.getApplication().executeOnPooledThread(() -> {
+      var apiKey = CredentialsStore.getCredential(CredentialKey.OPENAI_API_KEY);
+      SwingUtilities.invokeLater(() -> apiKeyField.setText(apiKey));
+    });
     organizationField = new JBTextField(settings.getOrganization(), 30);
     completionModelComboBox = new ComboBox<>(
         new EnumComboBoxModel<>(OpenAIChatCompletionModel.class));
@@ -36,7 +42,8 @@ public class OpenAISettingsForm {
         OpenAIChatCompletionModel.findByCode(settings.getModel()));
     codeCompletionConfigurationForm = new CodeCompletionConfigurationForm(
         settings.isCodeCompletionsEnabled(),
-        settings.getCodeCompletionMaxTokens());
+        settings.getCodeCompletionMaxTokens(),
+        null);
   }
 
   public JPanel getForm() {
@@ -57,10 +64,10 @@ public class OpenAISettingsForm {
         .createPanel();
 
     return FormBuilder.createFormBuilder()
-        .addComponent(new TitledSeparator(CodeGPTBundle.get("shared.codeCompletions")))
-        .addComponent(withEmptyLeftBorder(codeCompletionConfigurationForm.getForm()))
         .addComponent(new TitledSeparator(CodeGPTBundle.get("shared.configuration")))
         .addComponent(withEmptyLeftBorder(configurationGrid))
+        .addComponent(new TitledSeparator(CodeGPTBundle.get("shared.codeCompletions")))
+        .addComponent(withEmptyLeftBorder(codeCompletionConfigurationForm.getForm()))
         .addComponentFillVertically(new JPanel(), 0)
         .getPanel();
   }
@@ -87,7 +94,7 @@ public class OpenAISettingsForm {
 
   public void resetForm() {
     var state = OpenAISettings.getCurrentState();
-    apiKeyField.setText(CredentialsStore.INSTANCE.getCredential(OPENAI_API_KEY));
+    apiKeyField.setText(CredentialsStore.getCredential(OPENAI_API_KEY));
     completionModelComboBox.setSelectedItem(
         OpenAIChatCompletionModel.findByCode(state.getModel()));
     organizationField.setText(state.getOrganization());

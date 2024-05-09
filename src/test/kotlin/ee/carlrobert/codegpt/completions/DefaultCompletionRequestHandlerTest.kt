@@ -7,10 +7,7 @@ import ee.carlrobert.codegpt.conversations.message.Message
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
 import ee.carlrobert.llm.client.http.RequestEntity
 import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange
-import ee.carlrobert.llm.client.util.JSONUtil.e
-import ee.carlrobert.llm.client.util.JSONUtil.jsonArray
-import ee.carlrobert.llm.client.util.JSONUtil.jsonMap
-import ee.carlrobert.llm.client.util.JSONUtil.jsonMapResponse
+import ee.carlrobert.llm.client.util.JSONUtil.*
 import org.apache.http.HttpHeaders
 import org.assertj.core.api.Assertions.assertThat
 import testsupport.IntegrationTest
@@ -164,6 +161,74 @@ class DefaultCompletionRequestHandlerTest : IntegrationTest() {
         jsonMapResponse(
           e("content", ""),
           e("stop", true)))
+    })
+
+    requestHandler.call(CallParameters(conversation, ConversationType.DEFAULT, message, false))
+
+    waitExpecting { "Hello!" == message.response }
+  }
+
+
+  fun testGoogleChatCompletionCall() {
+    useGoogleService()
+    ConfigurationSettings.getCurrentState().systemPrompt = "TEST_SYSTEM_PROMPT"
+    val message = Message("TEST_PROMPT")
+    val conversation = ConversationService.getInstance().startConversation()
+    val requestHandler = CompletionRequestHandler(getRequestEventListener(message))
+    expectGoogle(StreamHttpExchange { request: RequestEntity ->
+      assertThat(request.uri.path).isEqualTo("/v1/models/gemini-pro:streamGenerateContent")
+      assertThat(request.method).isEqualTo("POST")
+      assertThat(request.uri.query).isEqualTo("key=TEST_API_KEY&alt=sse")
+      assertThat(request.body)
+        .extracting("contents")
+        .isEqualTo(
+          listOf(
+          mapOf("parts" to listOf(mapOf("text" to "TEST_SYSTEM_PROMPT")), "role" to "user"),
+          mapOf("parts" to listOf(mapOf("text" to "Understood.")), "role" to "model"),
+          mapOf("parts" to listOf(mapOf("text" to "TEST_PROMPT")), "role" to "user"),
+          )
+        )
+      listOf(
+        jsonMapResponse(
+          "candidates",
+          jsonArray(jsonMap("content", jsonMap("parts", jsonArray(jsonMap("text", "Hello")))))
+        ),
+        jsonMapResponse(
+          "candidates",
+          jsonArray(jsonMap("content", jsonMap("parts", jsonArray(jsonMap("text", "!")))))
+        )
+      )
+    })
+
+    requestHandler.call(CallParameters(conversation, ConversationType.DEFAULT, message, false))
+
+    waitExpecting { "Hello!" == message.response }
+  }
+
+  fun testCodeGPTServiceChatCompletionCall() {
+    useCodeGPTService()
+    ConfigurationSettings.getCurrentState().systemPrompt = "TEST_SYSTEM_PROMPT"
+    val message = Message("TEST_PROMPT")
+    val conversation = ConversationService.getInstance().startConversation()
+    val requestHandler = CompletionRequestHandler(getRequestEventListener(message))
+    expectCodeGPT(StreamHttpExchange { request: RequestEntity ->
+      assertThat(request.uri.path).isEqualTo("/v1/chat/completions")
+      assertThat(request.method).isEqualTo("POST")
+      assertThat(request.headers[HttpHeaders.AUTHORIZATION]!![0]).isEqualTo("Bearer TEST_API_KEY")
+      assertThat(request.body)
+        .extracting(
+          "model",
+          "messages")
+        .containsExactly(
+          "TEST_MODEL",
+          listOf(
+            mapOf("role" to "system", "content" to "TEST_SYSTEM_PROMPT"),
+            mapOf("role" to "user", "content" to "TEST_PROMPT")))
+      listOf(
+        jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("role", "assistant")))),
+        jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "Hel")))),
+        jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "lo")))),
+        jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "!")))))
     })
 
     requestHandler.call(CallParameters(conversation, ConversationType.DEFAULT, message, false))
