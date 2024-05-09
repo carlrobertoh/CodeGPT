@@ -28,6 +28,7 @@ import ee.carlrobert.codegpt.completions.llama.LlamaServerAgent;
 import ee.carlrobert.codegpt.completions.llama.LlamaServerStartupParams;
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
 import ee.carlrobert.codegpt.credentials.CredentialsStore;
+import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettingsState;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.codegpt.ui.UIUtil;
@@ -40,6 +41,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import org.jetbrains.annotations.Nullable;
 
 public class LlamaServerPreferencesForm {
@@ -86,7 +88,10 @@ public class LlamaServerPreferencesForm {
     baseHostField = new JBTextField(settings.getBaseHost(), 30);
     apiKeyField = new JBPasswordField();
     apiKeyField.setColumns(30);
-    apiKeyField.setText(CredentialsStore.getCredential(LLAMA_API_KEY));
+    ApplicationManager.getApplication().executeOnPooledThread(() -> {
+      var apiKey = CredentialsStore.getCredential(CredentialKey.LLAMA_API_KEY);
+      SwingUtilities.invokeLater(() -> apiKeyField.setText(apiKey));
+    });
 
     llamaModelPreferencesForm = new LlamaModelPreferencesForm();
     runLocalServerRadioButton = new JBRadioButton("Run local server",

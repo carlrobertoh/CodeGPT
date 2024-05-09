@@ -2,6 +2,7 @@ package ee.carlrobert.codegpt.settings.service.anthropic;
 
 import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.ANTHROPIC_API_KEY;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.ui.components.JBPasswordField;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
@@ -10,6 +11,7 @@ import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.credentials.CredentialsStore;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import org.jetbrains.annotations.Nullable;
 
 public class AnthropicSettingsForm {
@@ -21,7 +23,10 @@ public class AnthropicSettingsForm {
   public AnthropicSettingsForm(AnthropicSettingsState settings) {
     apiKeyField = new JBPasswordField();
     apiKeyField.setColumns(30);
-    apiKeyField.setText(CredentialsStore.getCredential(ANTHROPIC_API_KEY));
+    ApplicationManager.getApplication().executeOnPooledThread(() -> {
+      var apiKey = CredentialsStore.getCredential(ANTHROPIC_API_KEY);
+      SwingUtilities.invokeLater(() -> apiKeyField.setText(apiKey));
+    });
     apiVersionField = new JBTextField(settings.getApiVersion(), 35);
     modelField = new JBTextField(settings.getModel(), 35);
   }
