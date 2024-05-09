@@ -1,10 +1,5 @@
 package ee.carlrobert.codegpt.completions;
 
-import static ee.carlrobert.codegpt.settings.service.ServiceType.CUSTOM_OPENAI;
-import static ee.carlrobert.codegpt.settings.service.ServiceType.LLAMA_CPP;
-import static ee.carlrobert.codegpt.settings.service.ServiceType.OPENAI;
-import static ee.carlrobert.codegpt.settings.service.ServiceType.YOU;
-
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.diagnostic.Logger;
@@ -42,9 +37,11 @@ import ee.carlrobert.llm.client.openai.completion.response.OpenAIChatCompletionR
 import ee.carlrobert.llm.client.openai.completion.response.OpenAIChatCompletionResponseChoiceDelta;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 import okhttp3.Request;
 import okhttp3.sse.EventSource;
 import okhttp3.sse.EventSources;
@@ -140,20 +137,29 @@ public final class CompletionRequestService {
       String gitDiff,
       CompletionEventListener<String> eventListener) {
     var configuration = ConfigurationSettings.getCurrentState();
-    var openaiRequest = new Builder(List.of(
+    var openaiRequestBuilder = new Builder(List.of(
         new OpenAIChatCompletionStandardMessage("system", systemPrompt),
         new OpenAIChatCompletionStandardMessage("user", gitDiff)))
-        .setModel(OpenAISettings.getCurrentState().getModel())
-        .build();
+        .setModel(OpenAISettings.getCurrentState().getModel());
     var selectedService = GeneralSettings.getCurrentState().getSelectedService();
     switch (selectedService) {
       case CODEGPT:
-        CompletionClientProvider.getCodeGPTClient()
-            .getChatCompletionAsync(openaiRequest, eventListener);
+        CompletionClientProvider.getCodeGPTClient().getChatCompletionAsync(
+            openaiRequestBuilder
+                .setModel(
+                    ApplicationManager.getApplication().getService(CodeGPTServiceSettings.class)
+                        .getState()
+                        .getChatCompletionSettings()
+                        .getModel())
+                .build(),
+            eventListener);
         break;
       case OPENAI:
-        CompletionClientProvider.getOpenAIClient()
-            .getChatCompletionAsync(openaiRequest, eventListener);
+        CompletionClientProvider.getOpenAIClient().getChatCompletionAsync(
+            openaiRequestBuilder
+                .setModel(OpenAISettings.getCurrentState().getModel())
+                .build(),
+            eventListener);
         break;
       case CUSTOM_OPENAI:
         var httpClient = CompletionClientProvider.getDefaultClientBuilder().build();
@@ -176,7 +182,7 @@ public final class CompletionRequestService {
         break;
       case AZURE:
         CompletionClientProvider.getAzureClient()
-            .getChatCompletionAsync(openaiRequest, eventListener);
+            .getChatCompletionAsync(openaiRequestBuilder.build(), eventListener);
         break;
       case LLAMA_CPP:
         var settings = LlamaSettings.getCurrentState();
@@ -236,27 +242,35 @@ public final class CompletionRequestService {
   }
 
   public Optional<String> getLookupCompletion(String prompt) {
+    var openaiRequest = CompletionRequestProvider.buildOpenAILookupCompletionRequest(prompt);
     var selectedService = GeneralSettings.getCurrentState().getSelectedService();
-    if (selectedService == YOU || selectedService == LLAMA_CPP) {
-      return Optional.empty();
-    }
-
-    if (selectedService == CUSTOM_OPENAI) {
-      var request = CompletionRequestProvider.buildCustomOpenAILookupCompletionRequest(prompt);
-      var httpClient = CompletionClientProvider.getDefaultClientBuilder().build();
-      try (var response = httpClient.newCall(request).execute()) {
+    switch (selectedService) {
+      case CODEGPT:
+        var model = ApplicationManager.getApplication().getService(CodeGPTServiceSettings.class)
+            .getState()
+            .getChatCompletionSettings()
+            .getModel();
         return tryExtractContent(
-            DeserializationUtil.mapResponse(response, OpenAIChatCompletionResponse.class));
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
+            CompletionClientProvider.getCodeGPTClient().getChatCompletion(
+                CompletionRequestProvider.buildOpenAILookupCompletionRequest(prompt, model)));
+      case OPENAI:
+        return tryExtractContent(
+            CompletionClientProvider.getOpenAIClient().getChatCompletion(openaiRequest));
+      case AZURE:
+        return tryExtractContent(
+            CompletionClientProvider.getAzureClient().getChatCompletion(openaiRequest));
+      case CUSTOM_OPENAI:
+        var request = CompletionRequestProvider.buildCustomOpenAILookupCompletionRequest(prompt);
+        var httpClient = CompletionClientProvider.getDefaultClientBuilder().build();
+        try (var response = httpClient.newCall(request).execute()) {
+          return tryExtractContent(
+              DeserializationUtil.mapResponse(response, OpenAIChatCompletionResponse.class));
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+      default:
+        return Optional.empty();
     }
-
-    var request = CompletionRequestProvider.buildOpenAILookupCompletionRequest(prompt);
-    var response = selectedService == OPENAI
-        ? CompletionClientProvider.getOpenAIClient().getChatCompletion(request)
-        : CompletionClientProvider.getAzureClient().getChatCompletion(request);
-    return tryExtractContent(response);
   }
 
   public boolean isRequestAllowed() {
@@ -287,9 +301,8 @@ public final class CompletionRequestService {
    * @return First non-blank content or {@code Optional.empty()}
    */
   private Optional<String> tryExtractContent(OpenAIChatCompletionResponse response) {
-    return response
-        .getChoices()
-        .stream()
+    return Stream.ofNullable(response.getChoices())
+        .flatMap(Collection::stream)
         .filter(Objects::nonNull)
         .map(OpenAIChatCompletionResponseChoice::getMessage)
         .filter(Objects::nonNull)
