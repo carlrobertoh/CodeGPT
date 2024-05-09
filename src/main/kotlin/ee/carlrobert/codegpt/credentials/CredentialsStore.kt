@@ -11,11 +11,14 @@ object CredentialsStore {
 
     @JvmStatic
     @RequiresBackgroundThread
-    fun getCredential(key: CredentialKey): String? = credentialsMap.getOrPut(key) {
-        PasswordSafe.instance.getPassword(
-            CredentialAttributes(generateServiceName("CodeGPT", key.name))
-        ) ?: ""
-    }
+    fun getCredential(key: CredentialKey): String? =
+        credentialsMap.getOrPut(key) {
+            PasswordSafe.instance.getPassword(
+                CredentialAttributes(
+                    generateServiceName("CodeGPT", key.name)
+                )
+            ) ?: ""
+        }.takeIf { !it.isNullOrEmpty() }
 
     fun setCredential(key: CredentialKey, password: String?) {
         val prevPassword = credentialsMap[key]
