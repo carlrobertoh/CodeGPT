@@ -13,12 +13,12 @@ import java.util.Map.Entry;
 import javax.swing.JPanel;
 import javax.swing.table.DefaultTableModel;
 
-class CustomServiceFormTabbedPane extends JBTabbedPane {
+public class CustomServiceFormTabbedPane extends JBTabbedPane {
 
   private final JBTable headersTable;
   private final JBTable bodyTable;
 
-  CustomServiceFormTabbedPane(Map<String, String> headers, Map<String, ?> body) {
+  public CustomServiceFormTabbedPane(Map<String, String> headers, Map<String, ?> body) {
     headersTable = new JBTable(
         new DefaultTableModel(toArray(headers),
             new Object[]{"Key", "Value"}));

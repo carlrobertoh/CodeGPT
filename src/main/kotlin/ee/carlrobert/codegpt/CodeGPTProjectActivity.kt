@@ -29,7 +29,6 @@ class CodeGPTProjectActivity : StartupActivity.Background {
 
     override fun runActivity(project: Project) {
         EditorActionsUtil.refreshActions()
-        CredentialsStore.loadAll()
 
         if (YouUserManager.getInstance().authenticationResponse == null) {
             handleYouServiceAuthenticationAsync()

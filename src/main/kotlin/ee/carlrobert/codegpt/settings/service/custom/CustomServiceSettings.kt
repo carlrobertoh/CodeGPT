@@ -3,6 +3,9 @@ package ee.carlrobert.codegpt.settings.service.custom
 import com.intellij.openapi.components.*
 import com.intellij.util.xmlb.annotations.OptionTag
 import ee.carlrobert.codegpt.codecompletions.InfillPromptTemplate
+import ee.carlrobert.codegpt.settings.service.custom.template.CustomServiceChatCompletionTemplate
+import ee.carlrobert.codegpt.settings.service.custom.template.CustomServiceCodeCompletionTemplate
+import ee.carlrobert.codegpt.settings.service.custom.template.CustomServiceTemplate
 import ee.carlrobert.codegpt.util.MapConverter
 
 @Service

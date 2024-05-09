@@ -77,6 +77,7 @@ class OllamaSettingsForm {
         )
         .addComponent(TitledSeparator(CodeGPTBundle.get("shared.codeCompletions")))
         .addComponent(UIUtil.withEmptyLeftBorder(codeCompletionConfigurationForm.getForm()))
+        .addComponentFillVertically(JPanel(), 0)
         .panel
 
     fun getModel(): String {

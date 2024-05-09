@@ -16,6 +16,7 @@ import javax.swing.JPanel
 import javax.swing.event.HyperlinkEvent
 
 class GoogleSettingsForm {
+
     private val apiKeyField = JBPasswordField()
     private val completionModelComboBox: ComboBox<GoogleModel>
 
@@ -67,8 +68,8 @@ class GoogleSettingsForm {
     fun getApiKey(): String? = String(apiKeyField.password).ifEmpty { null }
 
     fun getModel(): String = (completionModelComboBox.model
-            .selectedItem as GoogleModel)
-            .code
+        .selectedItem as GoogleModel)
+        .code
 
     fun getCurrentState() = GoogleSettingsState().apply { model = getModel() }
 
