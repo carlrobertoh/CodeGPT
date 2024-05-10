@@ -88,7 +88,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
             OpenAIChatCompletionModel.GPT_4_0125_128k,
             OpenAIChatCompletionModel.GPT_3_5_0125_16k)
         .forEach(model -> actionGroup.add(createOpenAIModelAction(model, presentation)));
-    actionGroup.addSeparator("Custom OpenAI Service");
+    actionGroup.addSeparator("Custom OpenAI");
     actionGroup.add(createModelAction(
         CUSTOM_OPENAI,
         ApplicationManager.getApplication().getService(CustomServiceSettings.class)
