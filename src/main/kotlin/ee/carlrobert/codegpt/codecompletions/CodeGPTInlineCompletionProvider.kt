@@ -72,7 +72,7 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
             ServiceType.CODEGPT -> service<CodeGPTServiceSettings>().state.codeCompletionSettings.codeCompletionsEnabled
             ServiceType.OPENAI -> OpenAISettings.getCurrentState().isCodeCompletionsEnabled
             ServiceType.CUSTOM_OPENAI -> service<CustomServiceSettings>().state.codeCompletionSettings.codeCompletionsEnabled
-            ServiceType.LLAMA_CPP -> LlamaSettings.getCurrentState().isCodeCompletionsEnabled
+            ServiceType.LLAMA_CPP -> LlamaSettings.isCodeCompletionsPossible()
             ServiceType.OLLAMA -> service<OllamaSettings>().state.codeCompletionsEnabled
             ServiceType.ANTHROPIC,
             ServiceType.AZURE,
