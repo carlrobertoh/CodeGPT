@@ -109,11 +109,7 @@ public class LlamaModelPreferencesForm {
             huggingFaceComboBoxModel),
         BorderLayout.WEST);
     modelDetailsLabel = new JBLabel();
-    huggingFaceModelComboBox = createModelQuantizationComboBox(
-        huggingFaceComboBoxModel,
-        modelExistsIcon,
-        modelDetailsLabel,
-        downloadModelActionLinkWrapper);
+    huggingFaceModelComboBox = createModelQuantizationComboBox(huggingFaceComboBoxModel);
     var llamaServerAgent = ApplicationManager.getApplication().getService(LlamaServerAgent.class);
     huggingFaceModelComboBox.setEnabled(!llamaServerAgent.isServerRunning());
     var modelSizeComboBoxModel = new DefaultComboBoxModel<ModelSize>();
@@ -369,32 +365,27 @@ public class LlamaModelPreferencesForm {
   }
 
   private ComboBox<HuggingFaceModel> createModelQuantizationComboBox(
-      DefaultComboBoxModel<HuggingFaceModel> huggingFaceComboBoxModel,
-      JBLabel modelExistsIcon,
-      JBLabel modelDetailsLabel,
-      JPanel downloadModelActionLinkWrapper) {
+      DefaultComboBoxModel<HuggingFaceModel> huggingFaceComboBoxModel) {
     var comboBox = new ComboBox<>(huggingFaceComboBoxModel);
-    comboBox.addItemListener(e -> {
-      var selectedModel = (HuggingFaceModel) e.getItem();
-      var modelExists = isModelExists(selectedModel);
-
-      updateModelHelpTooltip(selectedModel);
-      modelDetailsLabel.setText(getHuggingFaceModelDetailsHtml(selectedModel));
-      modelExistsIcon.setVisible(modelExists);
-      downloadModelActionLinkWrapper.setVisible(!modelExists);
-    });
+    updateFromModelState(comboBox.getItem());
+    comboBox.addItemListener(e -> updateFromModelState((HuggingFaceModel) e.getItem()));
     comboBox.setRenderer(new DefaultListCellRenderer() {
       @Override
       public Component getListCellRendererComponent(JList list, Object value, int index,
           boolean isSelected, boolean cellHasFocus) {
-        Object item = value;
-        if (item instanceof HuggingFaceModel) {
-          item = ((HuggingFaceModel) item).getQuantizationLabel();
-        }
+        var item = value instanceof HuggingFaceModel hfm ? hfm.getQuantizationLabel() : value;
         return super.getListCellRendererComponent(list, item, index, isSelected, cellHasFocus);
       }
     });
     return comboBox;
+  }
+
+  private void updateFromModelState(HuggingFaceModel selectedModel) {
+    var modelExists = isModelExists(selectedModel);
+    updateModelHelpTooltip(selectedModel);
+    modelDetailsLabel.setText(getHuggingFaceModelDetailsHtml(selectedModel));
+    modelExistsIcon.setVisible(modelExists);
+    downloadModelActionLinkWrapper.setVisible(!modelExists);
   }
 
   private TextFieldWithBrowseButton createBrowsableCustomModelTextField(boolean enabled) {
