@@ -12,7 +12,6 @@ import ee.carlrobert.codegpt.completions.you.auth.AuthenticationHandler
 import ee.carlrobert.codegpt.completions.you.auth.YouAuthenticationError
 import ee.carlrobert.codegpt.completions.you.auth.YouAuthenticationService
 import ee.carlrobert.codegpt.completions.you.auth.response.YouAuthenticationResponse
-import ee.carlrobert.codegpt.credentials.CredentialsStore
 import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey
 import ee.carlrobert.codegpt.credentials.CredentialsStore.getCredential
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
@@ -25,7 +24,7 @@ import kotlin.io.path.absolutePathString
 
 class CodeGPTProjectActivity : ProjectActivity {
 
-    private val watchExtensions = listOf("jpg", "jpeg", "png")
+    private val watchExtensions = setOf("jpg", "jpeg", "png")
 
     override suspend fun execute(project: Project) {
         EditorActionsUtil.refreshActions()
@@ -38,12 +37,11 @@ class CodeGPTProjectActivity : ProjectActivity {
             && ConfigurationSettings.getCurrentState().isCheckForNewScreenshots
         ) {
             val desktopPath = Paths.get(System.getProperty("user.home"), "Desktop")
-            project.service<FileWatcher>()
-                .watch(desktopPath) {
-                    if (watchExtensions.contains(it.extension.lowercase())) {
-                        showImageAttachmentNotification(project, desktopPath.resolve(it).absolutePathString())
-                    }
+            project.service<FileWatcher>().watch(desktopPath) {
+                if (watchExtensions.contains(it.extension.lowercase())) {
+                    showImageAttachmentNotification(project, desktopPath.resolve(it).absolutePathString())
                 }
+            }
         }
     }
 
