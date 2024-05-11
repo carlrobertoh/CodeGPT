@@ -37,7 +37,7 @@ class CodeCompletionService {
         requestDetails: InfillRequestDetails,
         eventListener: CompletionEventListener<String>
     ): EventSource =
-        when (val selectedService = GeneralSettings.getCurrentState().selectedService) {
+        when (val selectedService = GeneralSettings.getSelectedService()) {
             CODEGPT -> CompletionClientProvider.getCodeGPTClient()
                 .getCompletionAsync(buildCodeGPTRequest(requestDetails), eventListener)
 

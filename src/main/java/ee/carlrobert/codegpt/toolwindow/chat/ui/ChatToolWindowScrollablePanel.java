@@ -28,7 +28,7 @@ public class ChatToolWindowScrollablePanel extends ScrollablePanel {
   public void displayLandingView(JComponent landingView) {
     clearAll();
     add(landingView);
-    if (GeneralSettings.getCurrentState().getSelectedService() == ServiceType.CODEGPT
+    if (GeneralSettings.isSelected(ServiceType.CODEGPT)
         && !CredentialsStore.INSTANCE.isCredentialSet(CredentialKey.CODEGPT_API_KEY)) {
 
       var panel = new ResponsePanel()

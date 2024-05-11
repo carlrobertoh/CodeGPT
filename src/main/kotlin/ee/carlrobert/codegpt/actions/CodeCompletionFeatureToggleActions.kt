@@ -17,7 +17,7 @@ abstract class CodeCompletionFeatureToggleActions(
     private val enableFeatureAction: Boolean
 ) : DumbAwareAction() {
 
-    override fun actionPerformed(e: AnActionEvent) = when (GeneralSettings.getCurrentState().selectedService) {
+    override fun actionPerformed(e: AnActionEvent) = when (GeneralSettings.getSelectedService()) {
         CODEGPT -> service<CodeGPTServiceSettings>().state.codeCompletionSettings::codeCompletionsEnabled::set
 
         OPENAI -> OpenAISettings.getCurrentState()::setCodeCompletionsEnabled
@@ -36,7 +36,7 @@ abstract class CodeCompletionFeatureToggleActions(
     }(enableFeatureAction)
 
     override fun update(e: AnActionEvent) {
-        val selectedService = GeneralSettings.getCurrentState().selectedService
+        val selectedService = GeneralSettings.getSelectedService()
         val codeCompletionEnabled =
             e.project?.service<CodeCompletionService>()?.isCodeCompletionsEnabled(selectedService) ?: false
         e.presentation.isVisible = codeCompletionEnabled != enableFeatureAction

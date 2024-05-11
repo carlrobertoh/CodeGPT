@@ -163,7 +163,7 @@ public class TotalTokensPanel extends JPanel {
   }
 
   private String getIconToolTipText(String html) {
-    if (GeneralSettings.getCurrentState().getSelectedService() != ServiceType.OPENAI) {
+    if (!GeneralSettings.isSelected(ServiceType.OPENAI)) {
       return """
           <html
           <p style="margin: 4px 0;">
