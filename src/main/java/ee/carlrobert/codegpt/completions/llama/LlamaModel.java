@@ -5,8 +5,15 @@ import static java.util.stream.Collectors.toSet;
 
 import ee.carlrobert.codegpt.codecompletions.InfillPromptTemplate;
 import ee.carlrobert.codegpt.completions.HuggingFaceModel;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.function.BiConsumer;
 import org.jetbrains.annotations.NotNull;
 
 public enum LlamaModel {
@@ -174,18 +181,37 @@ public enum LlamaModel {
   }
 
   public static @NotNull LlamaModel findByHuggingFaceModel(HuggingFaceModel huggingFaceModel) {
-    for (var llamaModel : LlamaModel.values()) {
-      if (llamaModel.getHuggingFaceModels().contains(huggingFaceModel)) {
-        return llamaModel;
-      }
-    }
+    return Arrays.stream(LlamaModel.values())
+            .filter(model -> model.getHuggingFaceModels().contains(huggingFaceModel))
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("Unable to find correct LLM"));
+  }
 
-    throw new RuntimeException("Unable to find correct LLM");
+  public @NotNull List<HuggingFaceModel> filterSelectedModelsBySize(ModelSize selectedModelSize) {
+    return selectedModelSize != null ? getHuggingFaceModels().stream()
+            .filter(model -> selectedModelSize.size() == model.getParameterSize())
+            .toList() : List.of();
+  }
+
+  public boolean anyDownloaded() {
+    return huggingFaceModels.stream().anyMatch(HuggingFaceModel::isDownloaded);
+  }
+
+  public String getDownloadedMarker() {
+    return getDownloadedMarker(anyDownloaded());
+  }
+
+  public static String getDownloadedMarker(boolean downloaded) {
+    return downloaded ? "✓" : "\u2001";
+  }
+
+  public static @NotNull Path getLlamaModelsPath() {
+    return Paths.get(System.getProperty("user.home"), ".codegpt/models/gguf");
   }
 
   @Override
   public String toString() {
-    return String.join(" ", label, getFormattedModelSizeRange());
+    return String.join(" ", getDownloadedMarker(), label, getFormattedModelSizeRange());
   }
 
   public String getLabel() {
@@ -218,12 +244,37 @@ public enum LlamaModel {
     return format("(%dB - %dB)", Collections.min(parameters), Collections.max(parameters));
   }
 
-  public List<Integer> getSortedUniqueModelSizes() {
+  public List<ModelSize> getSortedUniqueModelSizes() {
     return huggingFaceModels.stream()
-        .map(HuggingFaceModel::getParameterSize)
-        .collect(toSet())
-        .stream()
-        .sorted()
-        .toList();
+            .map(hfm -> new ModelSize(hfm.getParameterSize(), hfm.isDownloaded()))
+            .sorted()
+            .collect(LinkedHashSet::new, ModelSize.skipSameSize(), Set::addAll)
+            .stream().toList();
+  }
+
+  public record ModelSize(int size, boolean downloaded) implements Comparable<ModelSize> {
+    // Sort by size, but downloaded comes first: [  7B, ✓ 13B,   13B,   34B]
+    private static final Comparator<ModelSize> sizeDownloadedFirst = Comparator
+            .comparing(ModelSize::size)
+            .thenComparing(Comparator.comparing(ModelSize::downloaded).reversed());
+
+    @Override
+    public int compareTo(@NotNull ModelSize other) {
+      return sizeDownloadedFirst.compare(this, other);
+    }
+
+    private static @NotNull BiConsumer<Set<ModelSize>, ModelSize> skipSameSize() {
+      return (s, e) -> {
+        if (s.stream().noneMatch(v -> v.size == e.size)) {
+          s.add(e);
+        }
+      };
+    }
+
+    @Override
+    public String toString() {
+      return "%s %dB".formatted(getDownloadedMarker(downloaded), size);
+    }
+
   }
 }

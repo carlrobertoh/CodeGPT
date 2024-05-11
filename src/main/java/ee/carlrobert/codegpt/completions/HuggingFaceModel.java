@@ -1,9 +1,12 @@
 package ee.carlrobert.codegpt.completions;
 
+import static ee.carlrobert.codegpt.completions.llama.LlamaModel.getDownloadedMarker;
+import static ee.carlrobert.codegpt.completions.llama.LlamaModel.getLlamaModelsPath;
 import static java.lang.String.format;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import org.jetbrains.annotations.NotNull;
 
 public enum HuggingFaceModel {
 
@@ -179,6 +182,14 @@ public enum HuggingFaceModel {
   }
 
   public String getQuantizationLabel() {
-    return format("%d-bit precision", quantization);
+    return format("%s %d-bit precision", downloaded(), quantization);
+  }
+
+  public boolean isDownloaded() {
+    return getLlamaModelsPath().resolve(fileName).toFile().exists();
+  }
+
+  private @NotNull String downloaded() {
+    return getDownloadedMarker(isDownloaded());
   }
 }

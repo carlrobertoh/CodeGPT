@@ -27,6 +27,7 @@ import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.codecompletions.InfillPromptTemplate;
 import ee.carlrobert.codegpt.completions.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
+import ee.carlrobert.codegpt.completions.llama.LlamaModel.ModelSize;
 import ee.carlrobert.codegpt.completions.llama.LlamaServerAgent;
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
@@ -113,9 +114,7 @@ public class LlamaModelPreferencesForm {
     var llamaServerAgent = ApplicationManager.getApplication().getService(LlamaServerAgent.class);
     huggingFaceModelComboBox.setEnabled(!llamaServerAgent.isServerRunning());
     var modelSizeComboBoxModel = new DefaultComboBoxModel<ModelSize>();
-    var initialModelSizes = llamaModel.getSortedUniqueModelSizes().stream()
-        .map(ModelSize::new)
-        .toList();
+    var initialModelSizes = llamaModel.getSortedUniqueModelSizes();
     modelSizeComboBoxModel.addAll(initialModelSizes);
     modelSizeComboBoxModel.setSelectedItem(initialModelSizes.get(0));
     var modelComboBoxModel = new EnumComboBoxModel<>(LlamaModel.class);
@@ -315,22 +314,15 @@ public class LlamaModelPreferencesForm {
     comboBox.setSelectedItem(llamaModel);
     comboBox.addItemListener(e -> {
       var selectedModel = (LlamaModel) e.getItem();
-      var modelSizes = selectedModel.getSortedUniqueModelSizes().stream()
-          .map(ModelSize::new)
-          .toList();
+      var modelSizes = selectedModel.getSortedUniqueModelSizes();
 
       modelSizeComboBoxModel.removeAllElements();
       modelSizeComboBoxModel.addAll(modelSizes);
       modelSizeComboBoxModel.setSelectedItem(modelSizes.get(0));
       modelSizeComboBox.setEnabled(modelSizes.size() > 1);
 
-      var huggingFaceModels = selectedModel.getHuggingFaceModels().stream()
-          .filter(model -> {
-            var selectedModelSize = (ModelSize) modelSizeComboBoxModel.getSelectedItem();
-            return selectedModelSize != null
-                    && selectedModelSize.size() == model.getParameterSize();
-          })
-          .toList();
+      var huggingFaceModels = selectedModel.filterSelectedModelsBySize(
+              (ModelSize) modelSizeComboBoxModel.getSelectedItem());
 
       huggingFaceComboBoxModel.removeAllElements();
       huggingFaceComboBoxModel.addAll(huggingFaceModels);
@@ -348,13 +340,8 @@ public class LlamaModelPreferencesForm {
     comboBox.setSelectedItem(modelSizeComboBoxModel.getSelectedItem());
     comboBox.addItemListener(e -> {
       var selectedModel = llamaModelComboBoxModel.getSelectedItem();
-      var models = selectedModel.getHuggingFaceModels().stream()
-          .filter(model -> {
-            var selectedModelSize = (ModelSize) modelSizeComboBoxModel.getSelectedItem();
-            return selectedModelSize != null
-                && selectedModelSize.size() == model.getParameterSize();
-          })
-          .toList();
+      var models = selectedModel.filterSelectedModelsBySize(
+              (ModelSize) modelSizeComboBoxModel.getSelectedItem());
       if (!models.isEmpty()) {
         huggingFaceComboBoxModel.removeAllElements();
         huggingFaceComboBoxModel.addAll(models);
@@ -493,12 +480,5 @@ public class LlamaModelPreferencesForm {
   }
 
   private record ModelDetails(double fileSize, double maxRAMRequired) {
-  }
-
-  private record ModelSize(int size) {
-    @Override
-    public String toString() {
-      return size + "B";
-    }
   }
 }

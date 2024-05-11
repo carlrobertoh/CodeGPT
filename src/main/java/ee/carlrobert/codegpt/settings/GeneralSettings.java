@@ -105,7 +105,8 @@ public class GeneralSettings implements PersistentStateComponent<GeneralSettings
         var huggingFaceModel = llamaSettings.getHuggingFaceModel();
         var llamaModel = LlamaModel.findByHuggingFaceModel(huggingFaceModel);
         return String.format(
-            "%s %dB (Q%d)",
+            "%s %s %dB (Q%d)",
+            llamaModel.getDownloadedMarker(),
             llamaModel.getLabel(),
             huggingFaceModel.getParameterSize(),
             huggingFaceModel.getQuantization());
