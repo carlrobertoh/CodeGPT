@@ -1,5 +1,7 @@
 package ee.carlrobert.codegpt.settings.service.llama.form;
 
+import static ee.carlrobert.codegpt.settings.service.llama.LlamaSettings.getLlamaModelsPath;
+import static ee.carlrobert.codegpt.settings.service.llama.LlamaSettings.isModelExists;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 
@@ -15,7 +17,6 @@ import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.TextBrowseFolderListener;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.ui.panel.ComponentPanelBuilder;
-import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.ui.EnumComboBoxModel;
 import com.intellij.ui.components.AnActionLink;
 import com.intellij.ui.components.JBLabel;
@@ -23,7 +24,6 @@ import com.intellij.ui.components.JBRadioButton;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
-import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.codecompletions.InfillPromptTemplate;
 import ee.carlrobert.codegpt.completions.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
@@ -37,7 +37,6 @@ import java.awt.CardLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.io.File;
 import java.util.Map;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -100,7 +99,7 @@ public class LlamaModelPreferencesForm {
         .filter(model -> model.getParameterSize() == llm.getParameterSize())
         .toList();
     huggingFaceComboBoxModel.addAll(selectableModels);
-    huggingFaceComboBoxModel.setSelectedItem(selectableModels.get(0));
+    huggingFaceComboBoxModel.setSelectedItem(llm);
     downloadModelActionLinkWrapper = new JPanel(new BorderLayout());
     downloadModelActionLinkWrapper.setBorder(JBUI.Borders.emptyLeft(2));
     downloadModelActionLinkWrapper.add(
@@ -116,7 +115,10 @@ public class LlamaModelPreferencesForm {
     var modelSizeComboBoxModel = new DefaultComboBoxModel<ModelSize>();
     var initialModelSizes = llamaModel.getSortedUniqueModelSizes();
     modelSizeComboBoxModel.addAll(initialModelSizes);
-    modelSizeComboBoxModel.setSelectedItem(initialModelSizes.get(0));
+    var selectedModelSize = initialModelSizes.stream()
+            .filter(ms -> ms.size() == llm.getParameterSize())
+            .findFirst().orElse(initialModelSizes.get(0));
+    modelSizeComboBoxModel.setSelectedItem(selectedModelSize);
     var modelComboBoxModel = new EnumComboBoxModel<>(LlamaModel.class);
     modelComboBox = createModelComboBox(modelComboBoxModel, llamaModel, modelSizeComboBoxModel);
     modelComboBox.setEnabled(!llamaServerAgent.isServerRunning());
@@ -194,7 +196,7 @@ public class LlamaModelPreferencesForm {
   public String getActualModelPath() {
     return isUseCustomLlamaModel()
         ? getCustomLlamaModelPath()
-        : CodeGPTPlugin.getLlamaModelsPath() + File.separator + getSelectedModel().getFileName();
+        : getLlamaModelsPath().resolve(getSelectedModel().getFileName()).toString();
   }
 
   private JPanel createFormPanelCards() {
@@ -384,11 +386,6 @@ public class LlamaModelPreferencesForm {
     fileChooserDescriptor.setHideIgnored(false);
     browseButton.addBrowseFolderListener(new TextBrowseFolderListener(fileChooserDescriptor));
     return browseButton;
-  }
-
-  private boolean isModelExists(HuggingFaceModel model) {
-    return FileUtil.exists(
-        CodeGPTPlugin.getLlamaModelsPath() + File.separator + model.getFileName());
   }
 
   private AnActionLink createCancelDownloadLink(
