@@ -42,7 +42,7 @@ public final class LlamaServerAgent implements Disposable {
       LlamaServerStartupParams params,
       ServerProgressPanel serverProgressPanel,
       Runnable onSuccess,
-      Consumer<ServerProgressPanel> onServerTerminated) {
+      Consumer<ServerProgressPanel> onServerStopped) {
     this.activeServerProgressPanel = serverProgressPanel;
     ApplicationManager.getApplication().invokeLater(() -> {
       try {
@@ -52,10 +52,10 @@ public final class LlamaServerAgent implements Disposable {
         makeProcessHandler = new OSProcessHandler(
             getMakeCommandLine(params.additionalBuildParameters()));
         makeProcessHandler.addProcessListener(
-            getMakeProcessListener(params, onSuccess, onServerTerminated));
+            getMakeProcessListener(params, onSuccess, onServerStopped));
         makeProcessHandler.startNotify();
       } catch (ExecutionException e) {
-        showServerError(e.getMessage(), onServerTerminated);
+        showServerError(e.getMessage(), onServerStopped);
       }
     });
   }
@@ -82,7 +82,7 @@ public final class LlamaServerAgent implements Disposable {
   private ProcessListener getMakeProcessListener(
       LlamaServerStartupParams params,
       Runnable onSuccess,
-      Consumer<ServerProgressPanel> onServerTerminated) {
+      Consumer<ServerProgressPanel> onServerStopped) {
     LOG.info("Building llama project");
 
     return new ProcessAdapter() {
@@ -103,11 +103,11 @@ public final class LlamaServerAgent implements Disposable {
         int exitCode = event.getExitCode();
         LOG.info(format("Server build exited with code %d", exitCode));
         if (stoppedByUser) {
-          onServerTerminated.accept(activeServerProgressPanel);
+          onServerStopped.accept(activeServerProgressPanel);
           return;
         }
         if (exitCode != 0) {
-          showServerError(String.join(",", errorLines), onServerTerminated);
+          showServerError(String.join(",", errorLines), onServerStopped);
           return;
         }
 
@@ -118,11 +118,10 @@ public final class LlamaServerAgent implements Disposable {
               CodeGPTBundle.get("llamaServerAgent.serverBootup.description"));
           startServerProcessHandler = new OSProcessHandler.Silent(getServerCommandLine(params));
           startServerProcessHandler.addProcessListener(
-              getProcessListener(params.port(), onSuccess,
-                  onServerTerminated));
+              getProcessListener(params.port(), onSuccess, onServerStopped));
           startServerProcessHandler.startNotify();
         } catch (ExecutionException ex) {
-          showServerError(ex.getMessage(), onServerTerminated);
+          showServerError(ex.getMessage(), onServerStopped);
         }
       }
     };
@@ -131,18 +130,18 @@ public final class LlamaServerAgent implements Disposable {
   private ProcessListener getProcessListener(
       int port,
       Runnable onSuccess,
-      Consumer<ServerProgressPanel> onServerTerminated) {
+      Consumer<ServerProgressPanel> onServerStopped) {
     return new ProcessAdapter() {
       private final ObjectMapper objectMapper = new ObjectMapper();
       private final List<String> errorLines = new CopyOnWriteArrayList<>();
 
       @Override
       public void processTerminated(@NotNull ProcessEvent event) {
-        LOG.info(format("Server terminated with code %d", event.getExitCode()));
+        LOG.info(format("Server stopped with code %d", event.getExitCode()));
         if (stoppedByUser) {
-          onServerTerminated.accept(activeServerProgressPanel);
+          onServerStopped.accept(activeServerProgressPanel);
         } else {
-          showServerError(String.join(",", errorLines), onServerTerminated);
+          showServerError(String.join(",", errorLines), onServerStopped);
         }
       }
 
@@ -172,8 +171,8 @@ public final class LlamaServerAgent implements Disposable {
     };
   }
 
-  private void showServerError(String errorText, Consumer<ServerProgressPanel> onServerTerminated) {
-    onServerTerminated.accept(activeServerProgressPanel);
+  private void showServerError(String errorText, Consumer<ServerProgressPanel> onServerStopped) {
+    onServerStopped.accept(activeServerProgressPanel);
     LOG.info("Unable to start llama server:\n" + errorText);
     OverlayUtil.showClosableBalloon(errorText, MessageType.ERROR, activeServerProgressPanel);
   }

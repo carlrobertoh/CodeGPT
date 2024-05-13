@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt.settings.service.llama.form;
 
 import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.LLAMA_API_KEY;
+import static ee.carlrobert.codegpt.settings.service.llama.LlamaSettings.isModelExists;
 import static ee.carlrobert.codegpt.ui.UIUtil.createComment;
 import static ee.carlrobert.codegpt.ui.UIUtil.createForm;
 import static ee.carlrobert.codegpt.ui.UIUtil.withEmptyLeftBorder;
@@ -9,7 +10,6 @@ import com.intellij.icons.AllIcons.Actions;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.ui.MessageType;
 import com.intellij.openapi.util.SystemInfoRt;
-import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.ui.PortField;
 import com.intellij.ui.TitledSeparator;
 import com.intellij.ui.components.JBLabel;
@@ -21,20 +21,17 @@ import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
-import ee.carlrobert.codegpt.CodeGPTPlugin;
 import ee.carlrobert.codegpt.codecompletions.InfillPromptTemplate;
-import ee.carlrobert.codegpt.completions.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaServerAgent;
 import ee.carlrobert.codegpt.completions.llama.LlamaServerStartupParams;
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
 import ee.carlrobert.codegpt.credentials.CredentialsStore;
 import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey;
+import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettingsState;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import ee.carlrobert.codegpt.ui.UIUtil.RadioButtonWithLayout;
-import java.io.File;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import javax.swing.JButton;
@@ -254,7 +251,7 @@ public class LlamaServerPreferencesForm {
                   CodeGPTBundle.get("settingsConfigurable.service.llama.startServer.label"));
               serverButton.setIcon(Actions.Execute);
               activeServerProgressPanel.displayComponent(new JBLabel(
-                  CodeGPTBundle.get("settingsConfigurable.service.llama.progress.serverTerminated"),
+                  CodeGPTBundle.get("settingsConfigurable.service.llama.progress.serverStopped"),
                   Actions.Cancel,
                   SwingConstants.LEADING));
             });
@@ -291,11 +288,6 @@ public class LlamaServerPreferencesForm {
       return false;
     }
     return true;
-  }
-
-  private boolean isModelExists(HuggingFaceModel model) {
-    return FileUtil.exists(
-        CodeGPTPlugin.getLlamaModelsPath() + File.separator + model.getFileName());
   }
 
   private void enableForm(JButton serverButton, ServerProgressPanel progressPanel) {
@@ -358,10 +350,7 @@ public class LlamaServerPreferencesForm {
   }
 
   public List<String> getListOfAdditionalParameters() {
-    return Arrays.stream(additionalParametersField.getText().split(","))
-        .map(String::trim)
-        .filter(s -> !s.isBlank())
-        .toList();
+    return LlamaSettings.getAdditionalParametersList(additionalParametersField.getText());
   }
 
   public String getAdditionalBuildParameters() {
@@ -369,10 +358,7 @@ public class LlamaServerPreferencesForm {
   }
 
   public List<String> getListOfAdditionalBuildParameters() {
-    return Arrays.stream(additionalBuildParametersField.getText().split(","))
-        .map(String::trim)
-        .filter(s -> !s.isBlank())
-        .toList();
+    return LlamaSettings.getAdditionalParametersList(additionalBuildParametersField.getText());
   }
 
   public PromptTemplate getPromptTemplate() {

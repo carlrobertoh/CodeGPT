@@ -31,15 +31,38 @@ import org.jetbrains.annotations.NotNull;
 
 public class OverlayUtil {
 
+  public static final String NOTIFICATION_GROUP_ID = "CodeGPT Notification Group";
+  public static final String NOTIFICATION_GROUP_STICKY_ID = "CodeGPT Notification Group Sticky";
+
   private OverlayUtil() {
   }
 
   public static Notification getDefaultNotification(String content, NotificationType type) {
-    return new Notification("CodeGPT Notification Group", "CodeGPT", content, type);
+    return new Notification(NOTIFICATION_GROUP_ID, "CodeGPT", content, type);
   }
 
-  public static void showNotification(String content, NotificationType type) {
-    Notifications.Bus.notify(getDefaultNotification(content, type));
+  public static Notification getStickyNotification(String content, NotificationType type) {
+    return new Notification(NOTIFICATION_GROUP_STICKY_ID, "CodeGPT", content, type);
+  }
+
+  public static Notification showNotification(String content) {
+    return showNotification(content, NotificationType.INFORMATION);
+  }
+
+  public static Notification showNotification(String content, NotificationType type) {
+    var notification = getDefaultNotification(content, type);
+    Notifications.Bus.notify(notification);
+    return notification;
+  }
+
+  public static Notification stickyNotification(String content) {
+    return stickyNotification(content, NotificationType.INFORMATION);
+  }
+
+  public static Notification stickyNotification(String content, NotificationType type) {
+    var notification = getStickyNotification(content, type);
+    Notifications.Bus.notify(notification);
+    return notification;
   }
 
   public static int showDeleteConversationDialog() {

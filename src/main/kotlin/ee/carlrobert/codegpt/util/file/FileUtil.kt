@@ -7,8 +7,9 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.progress.ProgressIndicator
+import com.intellij.openapi.util.io.FileUtil.createDirectory
 import com.intellij.openapi.vfs.VirtualFile
-import ee.carlrobert.codegpt.CodeGPTPlugin
+import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings.getLlamaModelsPath
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -30,11 +31,19 @@ object FileUtil {
   private val LOG = Logger.getInstance(FileUtil::class.java)
 
   @JvmStatic
-  fun createFile(directoryPath: String, fileName: String?, fileContent: String?): File {
+  fun createFile(directoryPath: Any, fileName: String?, fileContent: String?): File {
+    requireNotNull(fileContent) { "fileContent null" }
+    require(!fileName.isNullOrBlank()) { "fileName null or blank" }
+    val path = when (directoryPath) {
+      is Path -> directoryPath
+      is File -> directoryPath.toPath()
+      is String -> Path.of(directoryPath)
+      else -> throw IllegalArgumentException("directoryPath must be Path, File or String: $directoryPath")
+    }
     try {
-      tryCreateDirectory(directoryPath)
+      tryCreateDirectory(path)
       return Files.writeString(
-        Path.of(directoryPath, fileName),
+        path.resolve(fileName),
         fileContent,
         StandardOpenOption.CREATE
       ).toFile()
@@ -52,12 +61,10 @@ object FileUtil {
     fileSize: Long,
     indicator: ProgressIndicator
   ) {
-    tryCreateDirectory(CodeGPTPlugin.getLlamaModelsPath())
+    tryCreateDirectory(getLlamaModelsPath())
 
     Channels.newChannel(url.openStream()).use { readableByteChannel ->
-      FileOutputStream(
-        CodeGPTPlugin.getLlamaModelsPath() + File.separator + fileName
-      ).use { fileOutputStream ->
+      FileOutputStream(getLlamaModelsPath().resolve(fileName).toFile()).use { fileOutputStream ->
         val buffer = ByteBuffer.allocateDirect(1024 * 10)
         while (readableByteChannel.read(buffer) != -1) {
           if (indicator.isCanceled) {
@@ -78,21 +85,14 @@ object FileUtil {
     return FileDocumentManager.getInstance().getFile(editor.document)
   }
 
-  private fun tryCreateDirectory(directoryPath: String) {
+  private fun tryCreateDirectory(directoryPath: Path) {
+    Files.exists(directoryPath).takeUnless { it } ?: return
     try {
-      if (!com.intellij.openapi.util.io.FileUtil.exists(directoryPath)) {
-        if (!com.intellij.openapi.util.io.FileUtil.createDirectory(
-            Path.of(directoryPath).toFile()
-          )
-        ) {
-          throw IOException("Failed to create directory: $directoryPath")
-        }
-      }
+      createDirectory(directoryPath.toFile())
     } catch (e: IOException) {
       throw RuntimeException("Failed to create directory", e)
-    }
+    }.takeIf { it } ?: throw RuntimeException("Failed to create directory: $directoryPath")
   }
-
 
   @JvmStatic
   fun getFileExtension(filename: String?): String {
