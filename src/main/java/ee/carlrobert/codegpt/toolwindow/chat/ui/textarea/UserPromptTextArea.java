@@ -3,6 +3,7 @@ package ee.carlrobert.codegpt.toolwindow.chat.ui.textarea;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.ANTHROPIC;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.OLLAMA;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.OPENAI;
+import static ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel.GPT_4_O;
 import static ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel.GPT_4_VISION_PREVIEW;
 
 import com.intellij.icons.AllIcons;
@@ -191,15 +192,22 @@ public class UserPromptTextArea extends JPanel {
             handleSubmit();
           }
         }));
-    var selectedService = GeneralSettings.getSelectedService();
-    if (selectedService == ANTHROPIC
-        || selectedService == OLLAMA
-        || (selectedService == OPENAI
-        && GPT_4_VISION_PREVIEW.getCode().equals(OpenAISettings.getCurrentState().getModel()))) {
+    if (isImageActionSupported()) {
       iconsPanel.add(new IconActionButton(new AttachImageAction()));
     }
     iconsPanel.add(stopButton);
     add(iconsPanel, BorderLayout.EAST);
+  }
+
+  private boolean isImageActionSupported() {
+    var selectedService = GeneralSettings.getSelectedService();
+    if (selectedService == ANTHROPIC || selectedService == OLLAMA) {
+      return true;
+    }
+
+    var model = OpenAISettings.getCurrentState().getModel();
+    return selectedService == OPENAI && (
+        GPT_4_VISION_PREVIEW.getCode().equals(model) || GPT_4_O.getCode().equals(model));
   }
 
   private void updateFont() {
