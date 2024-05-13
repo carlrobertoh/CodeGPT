@@ -6,6 +6,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Three new providers - **Ollama**, **Google** and **CodeGPT** 🚀🚀🚀
+- New provider configuration user interface (#538)
+- Support Phi-3 Mini, CodeGemma and CodeQwen1.5 models (#516, #524, #525, #527)
+- Llama 3 download sizes (#498)
+- Mistral AI service template (#532)
+
+### Fixed
+
+- Commit message generation for Custom OpenAI services (#496)
+- NPE when using unsupported model for code completions (#499)
+- Editor Actions configuration UI issues (#518)
+- IDE error caused by Git4Idea dependency (#526)
+- Custom Service test connection (#531)
+- UI issues around llama.cpp provider configuration (#543, #529)
+
+### Removed
+
+- `max_tokens` configuration for code completions (will be handled internally)
+
 ## [2.6.3-233] - 2024-04-22
 
 ### Added
