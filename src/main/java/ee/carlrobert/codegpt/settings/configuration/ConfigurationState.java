@@ -20,6 +20,7 @@ public class ConfigurationState {
   private boolean methodNameGenerationEnabled = true;
   private boolean captureCompileErrors = true;
   private boolean autoFormattingEnabled = true;
+  private boolean autocompletionPostProcessingEnabled = true;
   private Map<String, String> tableData = EditorActionsUtil.DEFAULT_ACTIONS;
 
   public String getSystemPrompt() {
@@ -118,6 +119,14 @@ public class ConfigurationState {
     this.autoFormattingEnabled = autoFormattingEnabled;
   }
 
+  public boolean isAutocompletionPostProcessingEnabled() {
+    return autocompletionPostProcessingEnabled;
+  }
+
+  public void setAutocompletionPostProcessingEnabled(boolean autocompletionPostProcessingEnabled) {
+    this.autocompletionPostProcessingEnabled = autocompletionPostProcessingEnabled;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -135,6 +144,7 @@ public class ConfigurationState {
         && methodNameGenerationEnabled == that.methodNameGenerationEnabled
         && captureCompileErrors == that.captureCompileErrors
         && autoFormattingEnabled == that.autoFormattingEnabled
+        && autocompletionPostProcessingEnabled == that.autocompletionPostProcessingEnabled
         && Objects.equals(systemPrompt, that.systemPrompt)
         && Objects.equals(commitMessagePrompt, that.commitMessagePrompt)
         && Objects.equals(tableData, that.tableData);
@@ -145,6 +155,6 @@ public class ConfigurationState {
     return Objects.hash(systemPrompt, commitMessagePrompt, maxTokens, temperature,
         checkForPluginUpdates, checkForNewScreenshots, createNewChatOnEachAction,
         ignoreGitCommitTokenLimit, methodNameGenerationEnabled, captureCompileErrors,
-        autoFormattingEnabled, tableData);
+        autoFormattingEnabled, autocompletionPostProcessingEnabled, tableData);
   }
 }

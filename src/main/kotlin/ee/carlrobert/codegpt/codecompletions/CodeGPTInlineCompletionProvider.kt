@@ -6,14 +6,17 @@ import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.EDT
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
+import com.intellij.openapi.util.TextRange
 import ee.carlrobert.codegpt.CodeGPTKeys
 import ee.carlrobert.codegpt.settings.GeneralSettings
+import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
 import ee.carlrobert.codegpt.settings.service.ServiceType
 import ee.carlrobert.codegpt.settings.service.codegpt.CodeGPTServiceSettings
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
 import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings
+import ee.carlrobert.codegpt.treesitter.CodeCompletionParserFactory
 import ee.carlrobert.codegpt.ui.OverlayUtil.showNotification
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails
 import ee.carlrobert.llm.completion.CompletionEventListener
@@ -46,18 +49,48 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
             val infillRequest = withContext(Dispatchers.EDT) {
                 InfillRequestDetails.fromInlineCompletionRequest(request)
             }
+            val (prefix, suffix) = withContext(Dispatchers.EDT) {
+                val caretOffset = request.editor.caretModel.offset
+                val prefix =
+                    request.document.getText(TextRange(0, caretOffset))
+                val suffix =
+                    request.document.getText(
+                        TextRange(
+                            caretOffset,
+                            request.document.textLength
+                        )
+                    )
+                Pair(prefix, suffix)
+            }
+
             currentCall.set(
                 project.service<CodeCompletionService>().getCodeCompletionAsync(
                     infillRequest,
                     CodeCompletionEventListener {
-                        val inlineText = it.takeWhile { message -> message != '\n' }.toString()
-                        request.editor.putUserData(CodeGPTKeys.PREVIOUS_INLAY_TEXT, inlineText)
-                        launch {
-                            try {
-                                trySend(InlineCompletionGrayTextElement(inlineText))
-                            } catch (e: Exception) {
-                                logger.error("Failed to send inline completion suggestion", e)
+                        val settings = service<ConfigurationSettings>().state
+                        try {
+                            var inlineText = it.toString()
+                            if (settings.isAutocompletionPostProcessingEnabled) {
+                                inlineText = CodeCompletionParserFactory
+                                    .getParserForFileExtension(request.file.virtualFile.extension)
+                                    .parse(
+                                        prefix,
+                                        suffix,
+                                        inlineText
+                                    )
                             }
+
+                            request.editor.putUserData(CodeGPTKeys.PREVIOUS_INLAY_TEXT, inlineText)
+                            launch {
+                                try {
+                                    trySend(InlineCompletionGrayTextElement(inlineText))
+                                } catch (e: Exception) {
+                                    logger.error("Failed to send inline completion suggestion", e)
+                                }
+                            }
+                        } catch (t: Throwable) {
+                            logger.error(t)
+                            settings.isAutocompletionPostProcessingEnabled = false
                         }
                     }
                 )
@@ -90,12 +123,6 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
     class CodeCompletionEventListener(
         private val completed: (StringBuilder) -> Unit
     ) : CompletionEventListener<String> {
-
-        override fun onMessage(message: String?, eventSource: EventSource?) {
-            if (message != null && message.contains('\n')) {
-                eventSource?.cancel()
-            }
-        }
 
         override fun onComplete(messageBuilder: StringBuilder) {
             completed(messageBuilder)

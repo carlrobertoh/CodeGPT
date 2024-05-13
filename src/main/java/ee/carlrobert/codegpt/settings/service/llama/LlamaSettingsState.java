@@ -29,7 +29,6 @@ public class LlamaSettingsState {
   private double minP = 0.05;
   private double repeatPenalty = 1.1;
   private boolean codeCompletionsEnabled = true;
-  private int codeCompletionMaxTokens = 128;
 
   public boolean isUseCustomModel() {
     return useCustomModel;
@@ -187,14 +186,6 @@ public class LlamaSettingsState {
     this.codeCompletionsEnabled = codeCompletionsEnabled;
   }
 
-  public int getCodeCompletionMaxTokens() {
-    return codeCompletionMaxTokens;
-  }
-
-  public void setCodeCompletionMaxTokens(int codeCompletionMaxTokens) {
-    this.codeCompletionMaxTokens = codeCompletionMaxTokens;
-  }
-
   private static Integer getRandomAvailablePortOrDefault() {
     try (ServerSocket socket = new ServerSocket(0)) {
       return socket.getLocalPort();
@@ -230,8 +221,7 @@ public class LlamaSettingsState {
         && Objects.equals(serverPort, that.serverPort)
         && Objects.equals(additionalParameters, that.additionalParameters)
         && Objects.equals(additionalBuildParameters, that.additionalBuildParameters)
-        && codeCompletionsEnabled == that.codeCompletionsEnabled
-        && codeCompletionMaxTokens == that.codeCompletionMaxTokens;
+        && codeCompletionsEnabled == that.codeCompletionsEnabled;
   }
 
   @Override
@@ -240,6 +230,6 @@ public class LlamaSettingsState {
         localModelPromptTemplate, remoteModelPromptTemplate, localModelInfillPromptTemplate,
         remoteModelInfillPromptTemplate, baseHost, serverPort, contextSize, threads,
         additionalParameters, additionalBuildParameters, topK, topP, minP, repeatPenalty,
-        codeCompletionsEnabled, codeCompletionMaxTokens);
+        codeCompletionsEnabled);
   }
 }

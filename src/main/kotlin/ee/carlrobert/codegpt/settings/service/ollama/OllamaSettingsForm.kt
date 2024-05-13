@@ -39,7 +39,6 @@ class OllamaSettingsForm {
         val settings = service<OllamaSettings>().state
         codeCompletionConfigurationForm = CodeCompletionConfigurationForm(
             settings.codeCompletionsEnabled,
-            settings.codeCompletionMaxTokens,
             settings.fimTemplate
         )
         val emptyModelsComboBoxModel =
@@ -93,7 +92,6 @@ class OllamaSettingsForm {
             hostField.text = host
             modelComboBox.item = model
             codeCompletionConfigurationForm.isCodeCompletionsEnabled = codeCompletionsEnabled
-            codeCompletionConfigurationForm.maxTokens = codeCompletionMaxTokens
             codeCompletionConfigurationForm.fimTemplate = fimTemplate
         }
     }
@@ -103,7 +101,6 @@ class OllamaSettingsForm {
             host = hostField.text
             model = modelComboBox.item
             codeCompletionsEnabled = codeCompletionConfigurationForm.isCodeCompletionsEnabled
-            codeCompletionMaxTokens = codeCompletionConfigurationForm.maxTokens
             fimTemplate = codeCompletionConfigurationForm.fimTemplate!!
         }
     }
@@ -112,11 +109,10 @@ class OllamaSettingsForm {
         hostField.text != host
                 || modelComboBox.item != model
                 || codeCompletionConfigurationForm.isCodeCompletionsEnabled != codeCompletionsEnabled
-                || codeCompletionConfigurationForm.maxTokens != codeCompletionMaxTokens
                 || codeCompletionConfigurationForm.fimTemplate != fimTemplate
     }
 
-    fun refreshModels() {
+    private fun refreshModels() {
         disableModelComboBoxWithPlaceholder(DefaultComboBoxModel(arrayOf("Loading")))
         try {
             val models = runBlocking(Dispatchers.IO) {

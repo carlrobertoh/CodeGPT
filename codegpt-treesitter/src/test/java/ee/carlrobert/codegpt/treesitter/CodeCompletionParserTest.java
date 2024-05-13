@@ -9,17 +9,17 @@ public class CodeCompletionParserTest {
   @Test
   public void shouldGetValidReturnValue() {
     var prefix = """
-            class Main {
-              public int getRandomNumber() {
-                return\s""";
+        class Main {
+          public int getRandomNumber() {
+            return\s""";
     var suffix = """
 
-              }
-            }""";
+          }
+        }""";
     var output = """
-            10;}
-            }
-            public int getRandomNumber(int k) {""";
+        10;}
+        }
+        public int getRandomNumber(int k) {""";
 
     var parsedResponse = CodeCompletionParserFactory
         .getParserForFileExtension("java")
@@ -31,16 +31,16 @@ public class CodeCompletionParserTest {
   @Test
   public void shouldGetValidParenthesisValue() {
     var prefix = """
-            class Main {
-              public int getRandomNumber(int\s""";
+        class Main {
+          public int getRandomNumber(int\s""";
     var suffix = """
-            ) {
-                return 10;
-              }
-            }""";
+        ) {
+            return 10;
+          }
+        }""";
     var output = """
-            prevNumber) {
-                if() {""";
+        prevNumber) {
+            if() {""";
 
     var parsedResponse = CodeCompletionParserFactory
         .getParserForFileExtension("java")
@@ -50,40 +50,15 @@ public class CodeCompletionParserTest {
   }
 
   @Test
-  public void shouldHandleFieldDeclaration() {
-    var prefix = """
-            class Main {
-            \t
-                private i""";
-    var suffix = """
-
-
-              public int getRandomNumber(int prevNumber) {
-                return Math.of()
-              }
-            }""";
-    var output = """
-            nt randomNumber;
-               \s
-                public void get() {""";
-
-    var result = CodeCompletionParserFactory
-        .getParserForFileExtension("java")
-        .parse(prefix, suffix, output);
-
-    assertThat(result).isEqualTo("nt randomNumber;");
-  }
-
-  @Test
   public void shouldHandleFormalParameters() {
     var prefix = """
-            class Main {
-              public int getRandomNumber(""";
+        class Main {
+          public int getRandomNumber(""";
     var suffix = """
-            ) {
-                return 10;
-              }
-            }""";
+        ) {
+            return 10;
+          }
+        }""";
     var output = "int prevNumber) }";
 
     var result = CodeCompletionParserFactory

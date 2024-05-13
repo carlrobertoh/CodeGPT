@@ -20,7 +20,8 @@ abstract class CodeCompletionFeatureToggleActions(
     override fun actionPerformed(e: AnActionEvent) {
         when (GeneralSettings.getCurrentState().selectedService) {
             CODEGPT ->
-                service<CodeGPTServiceSettings>().state.codeCompletionSettings.codeCompletionsEnabled
+                service<CodeGPTServiceSettings>().state.codeCompletionSettings.codeCompletionsEnabled =
+                    enableFeatureAction
 
             OPENAI ->
                 OpenAISettings.getCurrentState().isCodeCompletionsEnabled = enableFeatureAction

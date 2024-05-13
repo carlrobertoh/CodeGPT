@@ -22,7 +22,6 @@ public class LlamaSettingsForm extends JPanel {
     llamaRequestPreferencesForm = new LlamaRequestPreferencesForm(settings);
     codeCompletionConfigurationForm = new CodeCompletionConfigurationForm(
         settings.isCodeCompletionsEnabled(),
-        settings.getCodeCompletionMaxTokens(),
         null);
     init();
   }
@@ -50,9 +49,7 @@ public class LlamaSettingsForm extends JPanel {
     state.setUseCustomModel(modelPreferencesForm.isUseCustomLlamaModel());
     state.setLocalModelPromptTemplate(modelPreferencesForm.getPromptTemplate());
     state.setLocalModelInfillPromptTemplate(modelPreferencesForm.getInfillPromptTemplate());
-
     state.setCodeCompletionsEnabled(codeCompletionConfigurationForm.isCodeCompletionsEnabled());
-    state.setCodeCompletionMaxTokens(codeCompletionConfigurationForm.getMaxTokens());
     return state;
   }
 
@@ -61,7 +58,6 @@ public class LlamaSettingsForm extends JPanel {
     llamaServerPreferencesForm.resetForm(state);
     llamaRequestPreferencesForm.resetForm(state);
     codeCompletionConfigurationForm.setCodeCompletionsEnabled(state.isCodeCompletionsEnabled());
-    codeCompletionConfigurationForm.setMaxTokens(state.getCodeCompletionMaxTokens());
   }
 
   public LlamaServerPreferencesForm getLlamaServerPreferencesForm() {
