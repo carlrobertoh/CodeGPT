@@ -43,7 +43,7 @@ class ServiceConfigurableComponent {
         .addComponent(JBLabel("All available providers that can be used with CodeGPT:"))
         .addVerticalGap(8)
         .addComponent(FormBuilder.createFormBuilder()
-            .setFormLeftIndent(16).apply {
+            .setFormLeftIndent(20).apply {
                 addLinks(this)
             }
             .panel)

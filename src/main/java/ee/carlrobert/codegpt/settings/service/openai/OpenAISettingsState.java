@@ -8,7 +8,6 @@ public class OpenAISettingsState {
   private String organization = "";
   private String model = OpenAIChatCompletionModel.GPT_3_5_0125_16k.getCode();
   private boolean codeCompletionsEnabled = true;
-  private int codeCompletionMaxTokens = 128;
 
   public String getOrganization() {
     return organization;
@@ -34,14 +33,6 @@ public class OpenAISettingsState {
     this.codeCompletionsEnabled = codeCompletionsEnabled;
   }
 
-  public int getCodeCompletionMaxTokens() {
-    return codeCompletionMaxTokens;
-  }
-
-  public void setCodeCompletionMaxTokens(int codeCompletionMaxTokens) {
-    this.codeCompletionMaxTokens = codeCompletionMaxTokens;
-  }
-
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -53,12 +44,11 @@ public class OpenAISettingsState {
     OpenAISettingsState that = (OpenAISettingsState) o;
     return Objects.equals(organization, that.organization)
         && Objects.equals(model, that.model)
-        && codeCompletionsEnabled == that.codeCompletionsEnabled
-        && codeCompletionMaxTokens == that.codeCompletionMaxTokens;
+        && codeCompletionsEnabled == that.codeCompletionsEnabled;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(organization, model, codeCompletionsEnabled, codeCompletionMaxTokens);
+    return Objects.hash(organization, model, codeCompletionsEnabled);
   }
 }

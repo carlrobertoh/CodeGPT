@@ -1,16 +1,14 @@
 package ee.carlrobert.codegpt.settings.service.openai;
 
 import static ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.OPENAI_API_KEY;
-import static ee.carlrobert.codegpt.ui.UIUtil.withEmptyLeftBorder;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.EnumComboBoxModel;
-import com.intellij.ui.TitledSeparator;
+import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBPasswordField;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
-import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.credentials.CredentialsStore;
 import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey;
@@ -25,6 +23,7 @@ public class OpenAISettingsForm {
   private final JBPasswordField apiKeyField;
   private final JBTextField organizationField;
   private final ComboBox<OpenAIChatCompletionModel> completionModelComboBox;
+  private final JBCheckBox codeCompletionsEnabledCheckBox;
 
   public OpenAISettingsForm(OpenAISettingsState settings) {
     apiKeyField = new JBPasswordField();
@@ -38,30 +37,28 @@ public class OpenAISettingsForm {
         new EnumComboBoxModel<>(OpenAIChatCompletionModel.class));
     completionModelComboBox.setSelectedItem(
         OpenAIChatCompletionModel.findByCode(settings.getModel()));
+    codeCompletionsEnabledCheckBox = new JBCheckBox(
+        CodeGPTBundle.get("codeCompletionsForm.enableFeatureText"),
+        settings.isCodeCompletionsEnabled());
   }
 
   public JPanel getForm() {
-    var configurationGrid = UI.PanelFactory.grid()
-        .add(UI.PanelFactory.panel(apiKeyField)
-            .withLabel(CodeGPTBundle.get("settingsConfigurable.shared.apiKey.label"))
-            .resizeX(false)
-            .withComment(CodeGPTBundle.get("settingsConfigurable.service.openai.apiKey.comment"))
-            .withCommentHyperlinkListener(UIUtil::handleHyperlinkClicked))
-        .add(UI.PanelFactory.panel(organizationField)
-            .withLabel(CodeGPTBundle.get("settingsConfigurable.service.openai.organization.label"))
-            .resizeX(false)
-            .withComment(CodeGPTBundle.get(
-                "settingsConfigurable.section.openai.organization.comment")))
-        .add(UI.PanelFactory.panel(completionModelComboBox)
-            .withLabel(CodeGPTBundle.get("settingsConfigurable.shared.model.label"))
-            .resizeX(false))
-        .createPanel();
-
     return FormBuilder.createFormBuilder()
-        .addComponent(new TitledSeparator(CodeGPTBundle.get("shared.configuration")))
-        .addComponent(withEmptyLeftBorder(configurationGrid))
-        .addComponent(new TitledSeparator(CodeGPTBundle.get("shared.codeCompletions")))
-        .addComponent(withEmptyLeftBorder(codeCompletionConfigurationForm.getForm()))
+        .addLabeledComponent(
+            CodeGPTBundle.get("settingsConfigurable.shared.apiKey.label"), apiKeyField)
+        .addComponentToRightColumn(
+            UIUtil.createComment("settingsConfigurable.service.openai.apiKey.comment")
+        )
+        .addLabeledComponent(
+            CodeGPTBundle.get("settingsConfigurable.service.openai.organization.label"),
+            organizationField)
+        .addComponentToRightColumn(
+            UIUtil.createComment("settingsConfigurable.section.openai.organization.comment")
+        )
+        .addLabeledComponent(
+            CodeGPTBundle.get("settingsConfigurable.shared.model.label"), completionModelComboBox)
+        .addVerticalGap(4)
+        .addComponent(codeCompletionsEnabledCheckBox)
         .addComponentFillVertically(new JPanel(), 0)
         .getPanel();
   }
@@ -81,6 +78,7 @@ public class OpenAISettingsForm {
     var state = new OpenAISettingsState();
     state.setModel(getModel());
     state.setOrganization(organizationField.getText());
+    state.setCodeCompletionsEnabled(codeCompletionsEnabledCheckBox.isSelected());
     return state;
   }
 
@@ -90,5 +88,6 @@ public class OpenAISettingsForm {
     completionModelComboBox.setSelectedItem(
         OpenAIChatCompletionModel.findByCode(state.getModel()));
     organizationField.setText(state.getOrganization());
+    codeCompletionsEnabledCheckBox.setSelected(state.isCodeCompletionsEnabled());
   }
 }

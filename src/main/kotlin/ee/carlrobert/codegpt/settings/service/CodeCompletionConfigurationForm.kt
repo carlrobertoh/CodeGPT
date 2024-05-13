@@ -3,11 +3,9 @@ package ee.carlrobert.codegpt.settings.service
 import com.intellij.icons.AllIcons.General
 import com.intellij.ide.HelpTooltip
 import com.intellij.openapi.ui.ComboBox
-import com.intellij.openapi.ui.panel.ComponentPanelBuilder
 import com.intellij.ui.EnumComboBoxModel
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBLabel
-import com.intellij.ui.components.fields.IntegerField
 import com.intellij.util.ui.FormBuilder
 import ee.carlrobert.codegpt.CodeGPTBundle
 import ee.carlrobert.codegpt.codecompletions.InfillPromptTemplate
@@ -18,7 +16,6 @@ import javax.swing.JPanel
 
 class CodeCompletionConfigurationForm(
     codeCompletionsEnabled: Boolean,
-    maxTokens: Int,
     fimTemplate: InfillPromptTemplate?
 ) {
 
@@ -26,11 +23,6 @@ class CodeCompletionConfigurationForm(
         CodeGPTBundle.get("codeCompletionsForm.enableFeatureText"),
         codeCompletionsEnabled
     )
-    private val codeCompletionMaxTokensField =
-        IntegerField("completion_max_tokens", 8, 4096).apply {
-            columns = 12
-            value = maxTokens
-        }
     private val promptTemplateComboBox =
         ComboBox(EnumComboBoxModel(InfillPromptTemplate::class.java)).apply {
             item = fimTemplate
@@ -43,7 +35,6 @@ class CodeCompletionConfigurationForm(
     fun getForm(): JPanel {
         val formBuilder = FormBuilder.createFormBuilder()
             .addComponent(codeCompletionsEnabledCheckBox)
-            .addVerticalGap(4);
         if (fimTemplate != null) {
             formBuilder.addVerticalGap(4)
                 .addLabeledComponent(
@@ -54,28 +45,13 @@ class CodeCompletionConfigurationForm(
                         add(promptTemplateHelpText)
                     })
         }
-        return formBuilder.addLabeledComponent(
-            CodeGPTBundle.get("codeCompletionsForm.maxTokensLabel"),
-            codeCompletionMaxTokensField
-        )
-            .addComponentToRightColumn(
-                ComponentPanelBuilder.createCommentComponent(
-                    CodeGPTBundle.get("codeCompletionsForm.maxTokensComment"), true, 48, true
-                )
-            )
-            .panel
+        return formBuilder.panel
     }
 
     var isCodeCompletionsEnabled: Boolean
         get() = codeCompletionsEnabledCheckBox.isSelected
         set(enabled) {
             codeCompletionsEnabledCheckBox.isSelected = enabled
-        }
-
-    var maxTokens: Int
-        get() = codeCompletionMaxTokensField.value
-        set(maxTokens) {
-            codeCompletionMaxTokensField.value = maxTokens
         }
 
     var fimTemplate: InfillPromptTemplate?

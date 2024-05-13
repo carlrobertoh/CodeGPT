@@ -3,10 +3,8 @@ package ee.carlrobert.codegpt.settings.service.google
 import com.intellij.openapi.components.service
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.EnumComboBoxModel
-import com.intellij.ui.TitledSeparator
 import com.intellij.ui.components.JBPasswordField
 import com.intellij.util.ui.FormBuilder
-import com.intellij.util.ui.UI
 import ee.carlrobert.codegpt.CodeGPTBundle
 import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.GOOGLE_API_KEY
 import ee.carlrobert.codegpt.credentials.CredentialsStore.getCredential
@@ -15,7 +13,6 @@ import ee.carlrobert.llm.client.google.models.GoogleModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import javax.swing.JPanel
-import javax.swing.event.HyperlinkEvent
 
 class GoogleSettingsForm {
 
@@ -34,39 +31,24 @@ class GoogleSettingsForm {
         completionModelComboBox.selectedItem = GoogleModel.findByCode(state.model)
     }
 
-    fun getForm(): JPanel = FormBuilder.createFormBuilder()
-        .addComponent(TitledSeparator(CodeGPTBundle.get("shared.configuration")))
-        .addComponent(
-            UIUtil.withEmptyLeftBorder(
-                UI.PanelFactory.grid()
-                    .add(
-                        UI.PanelFactory.panel(apiKeyField)
-                            .withLabel(CodeGPTBundle.get("settingsConfigurable.shared.apiKey.label"))
-                            .resizeX(false)
-                            .withComment(CodeGPTBundle.get("settingsConfigurable.service.google.apiKey.comment"))
-                            .withCommentHyperlinkListener { event: HyperlinkEvent? ->
-                                UIUtil.handleHyperlinkClicked(
-                                    event
-                                )
-                            })
 
-                    .add(
-                        UI.PanelFactory.panel(completionModelComboBox)
-                            .withLabel(CodeGPTBundle.get("settingsConfigurable.shared.model.label"))
-                            .resizeX(false)
-                            .withComment(CodeGPTBundle.get("settingsConfigurable.service.google.model.comment"))
-                            .withCommentHyperlinkListener { event: HyperlinkEvent? ->
-                                UIUtil.handleHyperlinkClicked(
-                                    event
-                                )
-                            }
-                    )
-                    .createPanel()
-            )
+    fun getForm(): JPanel = FormBuilder.createFormBuilder()
+        .addLabeledComponent(
+            CodeGPTBundle.get("settingsConfigurable.shared.apiKey.label"),
+            apiKeyField
+        )
+        .addComponentToRightColumn(
+            UIUtil.createComment("settingsConfigurable.service.google.apiKey.comment")
+        )
+        .addLabeledComponent(
+            CodeGPTBundle.get("settingsConfigurable.shared.model.label"),
+            completionModelComboBox
+        )
+        .addComponentToRightColumn(
+            UIUtil.createComment("settingsConfigurable.service.google.model.comment")
         )
         .addComponentFillVertically(JPanel(), 0)
         .panel
-
 
     fun getApiKey(): String? = String(apiKeyField.password).ifEmpty { null }
 

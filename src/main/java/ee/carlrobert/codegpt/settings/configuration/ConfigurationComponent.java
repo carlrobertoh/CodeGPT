@@ -47,6 +47,7 @@ public class ConfigurationComponent {
   private final JBCheckBox openNewTabCheckBox;
   private final JBCheckBox methodNameGenerationCheckBox;
   private final JBCheckBox autoFormattingCheckBox;
+  private final JBCheckBox autocompletionPostProcessingCheckBox;
   private final JTextArea systemPromptTextArea;
   private final JTextArea commitMessagePromptTextArea;
   private final IntegerField maxTokensField;
@@ -123,6 +124,10 @@ public class ConfigurationComponent {
     autoFormattingCheckBox = new JBCheckBox(
         CodeGPTBundle.get("configurationConfigurable.autoFormatting.label"),
         configuration.isAutoFormattingEnabled());
+    autocompletionPostProcessingCheckBox = new JBCheckBox(
+        CodeGPTBundle.get("configurationConfigurable.autocompletionPostProcessing.label"),
+        configuration.isAutocompletionPostProcessingEnabled()
+    );
 
     mainPanel = FormBuilder.createFormBuilder()
         .addComponent(tablePanel)
@@ -132,6 +137,7 @@ public class ConfigurationComponent {
         .addComponent(openNewTabCheckBox)
         .addComponent(methodNameGenerationCheckBox)
         .addComponent(autoFormattingCheckBox)
+        .addComponent(autocompletionPostProcessingCheckBox)
         .addVerticalGap(4)
         .addComponent(new TitledSeparator(
             CodeGPTBundle.get("configurationConfigurable.section.assistant.title")))
@@ -161,6 +167,7 @@ public class ConfigurationComponent {
     state.setAutoFormattingEnabled(autoFormattingCheckBox.isSelected());
     state.setCodeCompletionsEnabled(
         ConfigurationSettings.getCurrentState().isCodeCompletionsEnabled());
+    state.setAutocompletionPostProcessingEnabled(autocompletionPostProcessingCheckBox.isSelected());
     return state;
   }
 
@@ -176,6 +183,8 @@ public class ConfigurationComponent {
     openNewTabCheckBox.setSelected(configuration.isCreateNewChatOnEachAction());
     methodNameGenerationCheckBox.setSelected(configuration.isMethodNameGenerationEnabled());
     autoFormattingCheckBox.setSelected(configuration.isAutoFormattingEnabled());
+    autocompletionPostProcessingCheckBox.setSelected(
+        configuration.isAutocompletionPostProcessingEnabled());
   }
 
   private Map<String, String> getTableData() {

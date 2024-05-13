@@ -2,21 +2,15 @@ package ee.carlrobert.codegpt.settings.service.codegpt
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.ui.ComboBox
-import com.intellij.openapi.ui.panel.ComponentPanelBuilder
-import com.intellij.ui.TitledSeparator
+import com.intellij.ui.DocumentAdapter
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBPasswordField
-import com.intellij.ui.components.fields.IntegerField
 import com.intellij.util.ui.FormBuilder
 import ee.carlrobert.codegpt.CodeGPTBundle
 import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.CODEGPT_API_KEY
 import ee.carlrobert.codegpt.credentials.CredentialsStore.getCredential
 import ee.carlrobert.codegpt.credentials.CredentialsStore.setCredential
 import ee.carlrobert.codegpt.ui.UIUtil
-import ee.carlrobert.llm.client.codegpt.CodeGPTAvailableModels
-import ee.carlrobert.llm.client.codegpt.CodeGPTAvailableModels.AVAILABLE_CHAT_MODELS
-import ee.carlrobert.llm.client.codegpt.CodeGPTAvailableModels.AVAILABLE_CODE_MODELS
-import ee.carlrobert.llm.client.codegpt.CodeGPTModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import org.jdesktop.swingx.combobox.ListComboBoxModel
@@ -24,6 +18,7 @@ import java.awt.Component
 import javax.swing.DefaultListCellRenderer
 import javax.swing.JList
 import javax.swing.JPanel
+import javax.swing.event.DocumentEvent
 
 class CodeGPTServiceForm {
 
@@ -32,7 +27,7 @@ class CodeGPTServiceForm {
     }
 
     private val chatCompletionModelComboBox =
-        ComboBox(ListComboBoxModel(AVAILABLE_CHAT_MODELS)).apply {
+        ComboBox(ListComboBoxModel(CodeGPTAvailableModels.CHAT_MODELS)).apply {
             selectedItem =
                 CodeGPTAvailableModels.findByCode(service<CodeGPTServiceSettings>().state.chatCompletionSettings.model)
             renderer = CustomComboBoxRenderer()
@@ -44,54 +39,47 @@ class CodeGPTServiceForm {
     )
 
     private val codeCompletionModelComboBox =
-        ComboBox(ListComboBoxModel(AVAILABLE_CODE_MODELS)).apply {
+        ComboBox(ListComboBoxModel(CodeGPTAvailableModels.CODE_MODELS)).apply {
             selectedItem =
                 CodeGPTAvailableModels.findByCode(service<CodeGPTServiceSettings>().state.codeCompletionSettings.model)
             renderer = CustomComboBoxRenderer()
         }
 
-    private val codeCompletionMaxTokensField =
-        IntegerField("completion_max_tokens", 8, 4096).apply {
-            columns = 12
-            value = service<CodeGPTServiceSettings>().state.codeCompletionSettings.maxTokens
-        }
+    private fun updateCodeCompletionForm(enabled: Boolean) {
+        codeCompletionModelComboBox.isEnabled = enabled
+        codeCompletionsEnabledCheckBox.isEnabled = enabled
+    }
 
     init {
         apiKeyField.text = runBlocking(Dispatchers.IO) {
             getCredential(CODEGPT_API_KEY)
         }
+        updateCodeCompletionForm(apiKeyField.password.isNotEmpty())
+        apiKeyField.document.addDocumentListener(object : DocumentAdapter() {
+            override fun textChanged(e: DocumentEvent) {
+                updateCodeCompletionForm(apiKeyField.password.isNotEmpty())
+            }
+        })
     }
 
     fun getForm(): JPanel = FormBuilder.createFormBuilder()
-        .addComponent(TitledSeparator(CodeGPTBundle.get("shared.configuration")))
-        .addComponent(
-            FormBuilder.createFormBuilder()
-                .setFormLeftIndent(16)
-                .addLabeledComponent(
-                    CodeGPTBundle.get("settingsConfigurable.shared.apiKey.label"),
-                    apiKeyField
-                )
-                .addComponentToRightColumn(
-                    UIUtil.createComment("settingsConfigurable.service.codegpt.apiKey.comment")
-                )
-                .addLabeledComponent("Model:", chatCompletionModelComboBox)
-                .addVerticalGap(4)
-                .panel
+        .addLabeledComponent(
+            CodeGPTBundle.get("settingsConfigurable.shared.apiKey.label"),
+            apiKeyField
         )
-        .addComponent(TitledSeparator("Code Completions"))
-        .addComponent(
-            FormBuilder.createFormBuilder()
-                .setFormLeftIndent(16)
-                .addComponent(codeCompletionsEnabledCheckBox)
-                .addLabeledComponent("Model:", codeCompletionModelComboBox)
-                .addLabeledComponent("Max tokens:", codeCompletionMaxTokensField)
-                .addComponentToRightColumn(
-                    ComponentPanelBuilder.createCommentComponent(
-                        CodeGPTBundle.get("codeCompletionsForm.maxTokensComment"), true, 48, true
-                    )
-                )
-                .panel
+        .addComponentToRightColumn(
+            UIUtil.createComment("settingsConfigurable.service.codegpt.apiKey.comment")
         )
+        .addLabeledComponent("Chat model:", chatCompletionModelComboBox)
+        .addComponentToRightColumn(
+            UIUtil.createComment("settingsConfigurable.service.codegpt.chatCompletionModel.comment")
+        )
+        .addLabeledComponent("Code model:", codeCompletionModelComboBox)
+        .addComponentToRightColumn(
+            UIUtil.createComment("settingsConfigurable.service.codegpt.codeCompletionModel.comment")
+        )
+        .addVerticalGap(4)
+        .addComponent(codeCompletionsEnabledCheckBox)
         .addComponentFillVertically(JPanel(), 0)
         .panel
 
@@ -100,7 +88,6 @@ class CodeGPTServiceForm {
     fun isModified() = service<CodeGPTServiceSettings>().state.run {
         (chatCompletionModelComboBox.selectedItem as CodeGPTModel).code != chatCompletionSettings.model
                 || (codeCompletionModelComboBox.selectedItem as CodeGPTModel).code != codeCompletionSettings.model
-                || codeCompletionMaxTokensField.value != codeCompletionSettings.maxTokens
                 || codeCompletionsEnabledCheckBox.isSelected != codeCompletionSettings.codeCompletionsEnabled
                 || getApiKey() != getCredential(CODEGPT_API_KEY)
     }
@@ -111,7 +98,6 @@ class CodeGPTServiceForm {
                 (chatCompletionModelComboBox.selectedItem as CodeGPTModel).code
             codeCompletionSettings.codeCompletionsEnabled =
                 codeCompletionsEnabledCheckBox.isSelected
-            codeCompletionSettings.maxTokens = codeCompletionMaxTokensField.value
             codeCompletionSettings.model =
                 (codeCompletionModelComboBox.selectedItem as CodeGPTModel).code
         }
@@ -122,7 +108,6 @@ class CodeGPTServiceForm {
         service<CodeGPTServiceSettings>().state.run {
             chatCompletionModelComboBox.selectedItem = chatCompletionSettings.model
             codeCompletionModelComboBox.selectedItem = codeCompletionSettings.model
-            codeCompletionMaxTokensField.value = codeCompletionSettings.maxTokens
             codeCompletionsEnabledCheckBox.isSelected =
                 codeCompletionSettings.codeCompletionsEnabled
         }

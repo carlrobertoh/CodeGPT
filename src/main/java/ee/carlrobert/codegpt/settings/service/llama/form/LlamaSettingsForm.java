@@ -5,6 +5,7 @@ import static ee.carlrobert.codegpt.ui.UIUtil.withEmptyLeftBorder;
 import com.intellij.ui.TitledSeparator;
 import com.intellij.util.ui.FormBuilder;
 import ee.carlrobert.codegpt.CodeGPTBundle;
+import ee.carlrobert.codegpt.settings.service.CodeCompletionConfigurationForm;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettingsState;
 import java.awt.BorderLayout;
@@ -14,10 +15,14 @@ public class LlamaSettingsForm extends JPanel {
 
   private final LlamaServerPreferencesForm llamaServerPreferencesForm;
   private final LlamaRequestPreferencesForm llamaRequestPreferencesForm;
+  private final CodeCompletionConfigurationForm codeCompletionConfigurationForm;
 
   public LlamaSettingsForm(LlamaSettingsState settings) {
     llamaServerPreferencesForm = new LlamaServerPreferencesForm(settings);
     llamaRequestPreferencesForm = new LlamaRequestPreferencesForm(settings);
+    codeCompletionConfigurationForm = new CodeCompletionConfigurationForm(
+        settings.isCodeCompletionsEnabled(),
+        null);
     init();
   }
 
@@ -44,7 +49,7 @@ public class LlamaSettingsForm extends JPanel {
     state.setUseCustomModel(modelPreferencesForm.isUseCustomLlamaModel());
     state.setLocalModelPromptTemplate(modelPreferencesForm.getPromptTemplate());
     state.setLocalModelInfillPromptTemplate(modelPreferencesForm.getInfillPromptTemplate());
-
+    state.setCodeCompletionsEnabled(codeCompletionConfigurationForm.isCodeCompletionsEnabled());
     return state;
   }
 
@@ -52,6 +57,7 @@ public class LlamaSettingsForm extends JPanel {
     var state = LlamaSettings.getCurrentState();
     llamaServerPreferencesForm.resetForm(state);
     llamaRequestPreferencesForm.resetForm(state);
+    codeCompletionConfigurationForm.setCodeCompletionsEnabled(state.isCodeCompletionsEnabled());
   }
 
   public LlamaServerPreferencesForm getLlamaServerPreferencesForm() {
