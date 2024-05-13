@@ -5,7 +5,6 @@ import static ee.carlrobert.codegpt.settings.service.ServiceType.CUSTOM_OPENAI;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.OLLAMA;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.OPENAI;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.YOU;
-import static ee.carlrobert.llm.client.codegpt.CodeGPTAvailableModels.AVAILABLE_CHAT_MODELS;
 import static java.lang.String.format;
 
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
@@ -25,13 +24,14 @@ import ee.carlrobert.codegpt.credentials.CredentialsStore;
 import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
+import ee.carlrobert.codegpt.settings.service.codegpt.CodeGPTAvailableModels;
+import ee.carlrobert.codegpt.settings.service.codegpt.CodeGPTModel;
 import ee.carlrobert.codegpt.settings.service.codegpt.CodeGPTServiceSettings;
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.codegpt.settings.service.you.YouSettings;
-import ee.carlrobert.llm.client.codegpt.CodeGPTModel;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import ee.carlrobert.llm.client.you.completion.YouCompletionCustomModel;
 import ee.carlrobert.llm.client.you.completion.YouCompletionMode;
@@ -67,9 +67,9 @@ public class ModelComboBoxAction extends ComboBoxAction {
 
   private AnAction[] getCodeGPTModelActions(Presentation presentation) {
     var apiKey = CredentialsStore.getCredential(CredentialKey.CODEGPT_API_KEY);
-    return AVAILABLE_CHAT_MODELS.stream()
+    return CodeGPTAvailableModels.getCHAT_MODELS().stream()
         .map(model -> {
-          var enabled = "codellama/CodeLlama-13b-Instruct-hf".equals(model.getCode())
+          var enabled = "meta-llama/Llama-3-8b-chat-hf".equals(model.getCode())
               || (apiKey != null && !apiKey.isEmpty());
           return createCodeGPTModelAction(model, enabled, presentation);
         })
@@ -88,7 +88,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
             OpenAIChatCompletionModel.GPT_4_0125_128k,
             OpenAIChatCompletionModel.GPT_3_5_0125_16k)
         .forEach(model -> actionGroup.add(createOpenAIModelAction(model, presentation)));
-    actionGroup.addSeparator("Custom OpenAI Service");
+    actionGroup.addSeparator("Custom OpenAI");
     actionGroup.add(createModelAction(
         CUSTOM_OPENAI,
         ApplicationManager.getApplication().getService(CustomServiceSettings.class)
@@ -159,7 +159,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
           if (!YouUserManager.getInstance().isSubscribed()
               && youSettings.getChatMode() != YouCompletionMode.DEFAULT) {
             youSettings.setChatMode(YouCompletionMode.DEFAULT);
-            updateTemplatePresentation(GeneralSettings.getCurrentState().getSelectedService());
+            updateTemplatePresentation(GeneralSettings.getSelectedService());
           }
         }
     );
@@ -174,7 +174,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
             .getState()
             .getChatCompletionSettings()
             .getModel();
-        var modelName = AVAILABLE_CHAT_MODELS.stream()
+        var modelName = CodeGPTAvailableModels.getCHAT_MODELS().stream()
             .filter(it -> it.getCode().equals(model))
             .map(CodeGPTModel::getName)
             .findFirst().orElse("Unknown");
@@ -240,9 +240,11 @@ public class ModelComboBoxAction extends ComboBoxAction {
 
   private String getSelectedHuggingFace() {
     var huggingFaceModel = LlamaSettings.getCurrentState().getHuggingFaceModel();
+    var llamaModel = LlamaModel.findByHuggingFaceModel(huggingFaceModel);
     return format(
-        "%s %dB (Q%d)",
-        LlamaModel.findByHuggingFaceModel(huggingFaceModel).getLabel(),
+        "%s %s %dB (Q%d)",
+        llamaModel.getDownloadedMarker(),
+        llamaModel.getLabel(),
         huggingFaceModel.getParameterSize(),
         huggingFaceModel.getQuantization());
   }

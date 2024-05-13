@@ -5,6 +5,7 @@ import com.intellij.openapi.components.service
 import ee.carlrobert.codegpt.codecompletions.CodeCompletionRequestFactory.buildCodeGPTRequest
 import ee.carlrobert.codegpt.codecompletions.CodeCompletionRequestFactory.buildCustomRequest
 import ee.carlrobert.codegpt.codecompletions.CodeCompletionRequestFactory.buildLlamaRequest
+import ee.carlrobert.codegpt.codecompletions.CodeCompletionRequestFactory.buildOllamaRequest
 import ee.carlrobert.codegpt.codecompletions.CodeCompletionRequestFactory.buildOpenAIRequest
 import ee.carlrobert.codegpt.completions.CompletionClientProvider
 import ee.carlrobert.codegpt.settings.GeneralSettings
@@ -37,7 +38,7 @@ class CodeCompletionService {
         requestDetails: InfillRequestDetails,
         eventListener: CompletionEventListener<String>
     ): EventSource =
-        when (val selectedService = GeneralSettings.getCurrentState().selectedService) {
+        when (val selectedService = GeneralSettings.getSelectedService()) {
             CODEGPT -> CompletionClientProvider.getCodeGPTClient()
                 .getCompletionAsync(buildCodeGPTRequest(requestDetails), eventListener)
 
@@ -50,6 +51,9 @@ class CodeCompletionService {
                 buildCustomRequest(requestDetails),
                 OpenAITextCompletionEventSourceListener(eventListener)
             )
+
+            OLLAMA -> CompletionClientProvider.getOllamaClient()
+                .getCompletionAsync(buildOllamaRequest(requestDetails), eventListener)
 
             LLAMA_CPP -> CompletionClientProvider.getLlamaClient()
                 .getChatCompletionAsync(buildLlamaRequest(requestDetails), eventListener)

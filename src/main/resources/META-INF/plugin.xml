@@ -94,6 +94,11 @@
             <add-to-group group-id="EditorPopupMenu1" anchor="first"/>
             <separator/>
         </group>
+        <action id="CodeGPT.TriggerEditorPopup"
+          class="ee.carlrobert.codegpt.actions.editor.ShowEditorActionGroupAction"
+          text="Show CodeGPT Actions">
+            <keyboard-shortcut first-keystroke="ctrl shift alt m" keymap="$default"/>
+        </action>
         <group id="CodeGPT.ProjectViewPopupMenuRootGroup">
             <group id="CodeGPT.ProjectViewPopupMenuGroup"
               text="CodeGPT"

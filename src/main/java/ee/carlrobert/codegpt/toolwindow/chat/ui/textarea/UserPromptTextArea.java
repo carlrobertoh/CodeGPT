@@ -191,7 +191,7 @@ public class UserPromptTextArea extends JPanel {
             handleSubmit();
           }
         }));
-    var selectedService = GeneralSettings.getCurrentState().getSelectedService();
+    var selectedService = GeneralSettings.getSelectedService();
     if (selectedService == ANTHROPIC
         || selectedService == OLLAMA
         || (selectedService == OPENAI

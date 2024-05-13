@@ -31,7 +31,7 @@ object CodeCompletionRequestFactory {
             .setSuffix(details.suffix)
             .setStream(true)
             .setModel(settings.model)
-            .setMaxTokens(settings.maxTokens)
+            .setMaxTokens(getMaxTokens(details.prefix, details.suffix))
             .setTemperature(0.4)
             .build()
     }
@@ -41,7 +41,7 @@ object CodeCompletionRequestFactory {
         return OpenAITextCompletionRequest.Builder(details.prefix)
             .setSuffix(details.suffix)
             .setStream(true)
-            .setMaxTokens(OpenAISettings.getCurrentState().codeCompletionMaxTokens)
+            .setMaxTokens(getMaxTokens(details.prefix, details.suffix))
             .setTemperature(0.4)
             .build()
     }
@@ -99,7 +99,7 @@ object CodeCompletionRequestFactory {
         val promptTemplate = getLlamaInfillPromptTemplate(settings)
         val prompt = promptTemplate.buildPrompt(details.prefix, details.suffix)
         return LlamaCompletionRequest.Builder(prompt)
-            .setN_predict(settings.codeCompletionMaxTokens)
+            .setN_predict(getMaxTokens(details.prefix, details.suffix))
             .setStream(true)
             .setTemperature(0.4)
             .setStop(promptTemplate.stopTokens)
@@ -115,7 +115,7 @@ object CodeCompletionRequestFactory {
             .setOptions(
                 OllamaParameters.Builder()
                     .stop(settings.fimTemplate.stopTokens)
-                    .numPredict(settings.codeCompletionMaxTokens)
+                    .numPredict(getMaxTokens(details.prefix, details.suffix))
                     .build()
             )
             .setRaw(true)
@@ -145,4 +145,13 @@ object CodeCompletionRequestFactory {
             else -> value
         }
     }
+
+    private fun getMaxTokens(prefix: String, suffix: String): Int {
+        if (isBoundaryCharacter(prefix[prefix.length - 1]) || isBoundaryCharacter(suffix[0])) {
+            return 16
+        }
+        return 36
+    }
+
+    private fun isBoundaryCharacter(c: Char): Boolean = c in "()[]{}<>~!@#$%^&*-+=|\\;:'\",./?"
 }

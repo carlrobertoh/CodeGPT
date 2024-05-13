@@ -22,5 +22,4 @@ class CodeGPTServiceChatCompletionSettingsState : BaseState() {
 class CodeGPTServiceCodeCompletionSettingsState : BaseState() {
     var codeCompletionsEnabled by property(true)
     var model by string("codellama/CodeLlama-70b-hf")
-    var maxTokens by property(128)
 }
