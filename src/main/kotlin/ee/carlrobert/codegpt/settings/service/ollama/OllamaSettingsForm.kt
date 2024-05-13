@@ -142,7 +142,7 @@ class OllamaSettingsForm {
                     NotificationType.ERROR
                 )
             } else {
-                OverlayUtil.showNotification(ex.message, NotificationType.ERROR)
+                OverlayUtil.showNotification(ex.message ?: "Error", NotificationType.ERROR)
             }
             disableModelComboBoxWithPlaceholder(DefaultComboBoxModel(arrayOf("Unable to load models")))
         }
