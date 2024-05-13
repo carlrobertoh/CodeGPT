@@ -242,8 +242,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
     var huggingFaceModel = LlamaSettings.getCurrentState().getHuggingFaceModel();
     var llamaModel = LlamaModel.findByHuggingFaceModel(huggingFaceModel);
     return format(
-        "%s %s %dB (Q%d)",
-        llamaModel.getDownloadedMarker(),
+        "%s %dB (Q%d)",
         llamaModel.getLabel(),
         huggingFaceModel.getParameterSize(),
         huggingFaceModel.getQuantization());
