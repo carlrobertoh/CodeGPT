@@ -7,6 +7,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.DumbAwareAction
 import ee.carlrobert.codegpt.CodeGPTBundle
+import ee.carlrobert.codegpt.completions.llama.LlamaModel.findByHuggingFaceModel
 import ee.carlrobert.codegpt.completions.llama.LlamaServerAgent
 import ee.carlrobert.codegpt.completions.llama.LlamaServerStartupParams
 import ee.carlrobert.codegpt.settings.GeneralSettings
@@ -43,8 +44,9 @@ abstract class LlamaServerToggleActions(
         notification?.expire()
         expireOtherNotification(startServer)
         val llamaServerAgent = service<LlamaServerAgent>()
+        val serverName = LlamaSettings.getInstance().state.huggingFaceModel.let { findByHuggingFaceModel(it).toString(it) }
         if (startServer) {
-            notification = stickyNotification(CodeGPTBundle.get("settingsConfigurable.service.llama.progress.startingServer"))
+            notification = stickyNotification(formatMsg("settingsConfigurable.service.llama.progress.startingServer", serverName))
             val serverProgressPanel = ServerProgressPanel()
             llamaServerAgent.setActiveServerProgressPanel(serverProgressPanel)
             val settings = LlamaSettings.getInstance().state
@@ -60,20 +62,28 @@ abstract class LlamaServerToggleActions(
                 serverProgressPanel,
                 {
                     notification?.expire()
-                    notification = showNotification(CodeGPTBundle.get("settingsConfigurable.service.llama.progress.serverRunning"))
+                    notification = showNotification(formatMsg("settingsConfigurable.service.llama.progress.serverRunning", serverName))
                 },
                 {
                     Consumer<ServerProgressPanel> { _: ServerProgressPanel ->
                         notification?.expire()
-                        notification = showNotification(CodeGPTBundle.get("settingsConfigurable.service.llama.progress.serverStopped"))
+                        notification = showNotification(formatMsg("settingsConfigurable.service.llama.progress.serverStopped", serverName))
                     }
                 })
         } else {
-            notification = showNotification(CodeGPTBundle.get("settingsConfigurable.service.llama.progress.stoppingServer"))
+            notification = showNotification(formatMsg("settingsConfigurable.service.llama.progress.stoppingServer", serverName))
             llamaServerAgent.stopAgent()
             notification?.expire()
-            notification = showNotification(CodeGPTBundle.get("settingsConfigurable.service.llama.progress.serverStopped"))
+            notification = showNotification(formatMsg("settingsConfigurable.service.llama.progress.serverStopped", serverName))
         }
+    }
+
+    // "Starting server..." -> "Starting server: CodeLlama 7B 4-bit ..."
+    // "Stopped server"     -> "Stopped server: CodeLlama 7B 4-bit"
+    private fun formatMsg(id: String, serverName: String): String {
+        val msg = CodeGPTBundle.get(id)
+        val points = msg.endsWith("...")
+        return msg.let { if (points) it.substringBeforeLast("...") else it } + ": " + serverName + (if (points) " ..." else "")
     }
 
     override fun update(e: AnActionEvent) {
