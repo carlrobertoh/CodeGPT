@@ -159,7 +159,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
           if (!YouUserManager.getInstance().isSubscribed()
               && youSettings.getChatMode() != YouCompletionMode.DEFAULT) {
             youSettings.setChatMode(YouCompletionMode.DEFAULT);
-            updateTemplatePresentation(GeneralSettings.getCurrentState().getSelectedService());
+            updateTemplatePresentation(GeneralSettings.getSelectedService());
           }
         }
     );
@@ -240,9 +240,11 @@ public class ModelComboBoxAction extends ComboBoxAction {
 
   private String getSelectedHuggingFace() {
     var huggingFaceModel = LlamaSettings.getCurrentState().getHuggingFaceModel();
+    var llamaModel = LlamaModel.findByHuggingFaceModel(huggingFaceModel);
     return format(
-        "%s %dB (Q%d)",
-        LlamaModel.findByHuggingFaceModel(huggingFaceModel).getLabel(),
+        "%s %s %dB (Q%d)",
+        llamaModel.getDownloadedMarker(),
+        llamaModel.getLabel(),
         huggingFaceModel.getParameterSize(),
         huggingFaceModel.getQuantization());
   }

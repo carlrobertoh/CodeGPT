@@ -84,7 +84,7 @@ public final class CompletionRequestService {
       CompletionEventListener<String> eventListener) {
     var application = ApplicationManager.getApplication();
     var requestProvider = new CompletionRequestProvider(callParameters.getConversation());
-    return switch (GeneralSettings.getCurrentState().getSelectedService()) {
+    return switch (GeneralSettings.getSelectedService()) {
       case CODEGPT -> CompletionClientProvider.getCodeGPTClient().getChatCompletionAsync(
           requestProvider.buildOpenAIChatCompletionRequest(
               application.getService(CodeGPTServiceSettings.class)
@@ -165,7 +165,7 @@ public final class CompletionRequestService {
         new OpenAIChatCompletionStandardMessage("system", systemPrompt),
         new OpenAIChatCompletionStandardMessage("user", gitDiff)))
         .setModel(OpenAISettings.getCurrentState().getModel());
-    var selectedService = GeneralSettings.getCurrentState().getSelectedService();
+    var selectedService = GeneralSettings.getSelectedService();
     switch (selectedService) {
       case CODEGPT:
         CompletionClientProvider.getCodeGPTClient().getChatCompletionAsync(
@@ -267,7 +267,7 @@ public final class CompletionRequestService {
 
   public Optional<String> getLookupCompletion(String prompt) {
     var openaiRequest = CompletionRequestProvider.buildOpenAILookupCompletionRequest(prompt);
-    var selectedService = GeneralSettings.getCurrentState().getSelectedService();
+    var selectedService = GeneralSettings.getSelectedService();
     switch (selectedService) {
       case CODEGPT:
         var model = ApplicationManager.getApplication().getService(CodeGPTServiceSettings.class)
@@ -297,8 +297,12 @@ public final class CompletionRequestService {
     }
   }
 
-  public boolean isRequestAllowed() {
-    return isRequestAllowed(GeneralSettings.getCurrentState().getSelectedService());
+  public boolean isAllowed() {
+    return isRequestAllowed();
+  }
+
+  public static boolean isRequestAllowed() {
+    return isRequestAllowed(GeneralSettings.getSelectedService());
   }
 
   public static boolean isRequestAllowed(ServiceType serviceType) {

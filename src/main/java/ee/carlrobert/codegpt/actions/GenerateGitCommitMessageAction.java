@@ -62,8 +62,8 @@ public class GenerateGitCommitMessageAction extends AnAction {
 
   @Override
   public void update(@NotNull AnActionEvent event) {
-    var selectedService = GeneralSettings.getCurrentState().getSelectedService();
-    if (selectedService == YOU) {
+    var commitWorkflowUi = event.getData(VcsDataKeys.COMMIT_WORKFLOW_UI);
+    if (GeneralSettings.isSelected(YOU) || commitWorkflowUi == null) {
       event.getPresentation().setVisible(false);
       return;
     }
@@ -72,8 +72,7 @@ public class GenerateGitCommitMessageAction extends AnAction {
     var includedUnversionedChangesFilePaths = getIncludedUnversionedFilePaths(event);
     var filesSelected =
         !includedChangesFilePaths.isEmpty() || !includedUnversionedChangesFilePaths.isEmpty();
-    var callAllowed = CompletionRequestService.isRequestAllowed(
-        GeneralSettings.getCurrentState().getSelectedService());
+    var callAllowed = CompletionRequestService.isRequestAllowed();
     event.getPresentation().setEnabled(callAllowed && filesSelected);
     event.getPresentation().setText(CodeGPTBundle.get(callAllowed
         ? "action.generateCommitMessage.title"
