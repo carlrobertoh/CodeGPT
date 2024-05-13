@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support Phi-3 Mini, CodeGemma and CodeQwen1.5 models (#516, #524, #525, #527)
 - Llama 3 download sizes (#498)
 - Mistral AI service template (#532)
+- Support for starting/stopping llama.cpp server from statusbar (#544)
 
 ### Fixed
 
