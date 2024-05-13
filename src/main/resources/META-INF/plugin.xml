@@ -67,6 +67,7 @@
         <typedHandler order="first, before completionAutoPopup"
           implementation="ee.carlrobert.codegpt.codecompletions.TypeOverHandler"/>
         <notificationGroup id="CodeGPT Notification Group" displayType="BALLOON" key="notification.group.name"/>
+        <notificationGroup id="CodeGPT Notification Group Sticky" displayType="STICKY_BALLOON" key="notification.group.sticky.name"/>
         <statusBarWidgetFactory order="first" id="ee.carlrobert.codegpt.statusbar.widget"
           implementation="ee.carlrobert.codegpt.statusbar.CodeGPTStatusBarWidgetFactory"/>
     </extensions>
@@ -114,29 +115,45 @@
             <override-text place="popup" use-text-of-place="MainMenu"/>
         </action>
         <action
-          id="codegpt.enableCompletions"
-          text="Enable Completions"
+          id="statusbar.enableCompletions"
           class="ee.carlrobert.codegpt.actions.EnableCompletionsAction">
             <keyboard-shortcut first-keystroke="ctrl shift alt c" keymap="$default"/>
 
-            <override-text place="MainMenu" text="Enable Completions"/>
+            <override-text place="MainMenu"/>
             <override-text place="popup" use-text-of-place="MainMenu"/>
         </action>
         <action
-          id="codegpt.disableCompletions"
-          text="Disable Completions"
+          id="statusbar.disableCompletions"
           class="ee.carlrobert.codegpt.actions.DisableCompletionsAction">
             <keyboard-shortcut first-keystroke="ctrl shift alt c" keymap="$default"/>
 
-            <override-text place="MainMenu" text="Disable Completions"/>
+            <override-text place="MainMenu"/>
+            <override-text place="popup" use-text-of-place="MainMenu"/>
+        </action>
+        <action
+          id="statusbar.startServer"
+          class="ee.carlrobert.codegpt.actions.StartServerAction">
+            <keyboard-shortcut first-keystroke="ctrl shift alt s" keymap="$default"/>
+
+            <override-text place="MainMenu"/>
+            <override-text place="popup" use-text-of-place="MainMenu"/>
+        </action>
+        <action
+          id="statusbar.stopServer"
+          class="ee.carlrobert.codegpt.actions.StopServerAction">
+            <keyboard-shortcut first-keystroke="ctrl shift alt s" keymap="$default"/>
+
+            <override-text place="MainMenu"/>
             <override-text place="popup" use-text-of-place="MainMenu"/>
         </action>
 
         <group id="codegpt.statusBarPopup">
             <reference id="codegpt.openSettings" />
             <separator/>
-            <reference id="codegpt.disableCompletions" />
-            <reference id="codegpt.enableCompletions" />
+            <reference id="statusbar.stopServer" />
+            <reference id="statusbar.startServer" />
+            <reference id="statusbar.disableCompletions" />
+            <reference id="statusbar.enableCompletions" />
         </group>
 
         <group id="CodeGPT.GenerateGitCommitMessageGroup">
