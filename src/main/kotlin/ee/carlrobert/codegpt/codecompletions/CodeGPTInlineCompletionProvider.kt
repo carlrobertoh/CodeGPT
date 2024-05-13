@@ -67,7 +67,7 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
     }
 
     override fun isEnabled(event: InlineCompletionEvent): Boolean {
-        val selectedService = GeneralSettings.getCurrentState().selectedService
+        val selectedService = GeneralSettings.getSelectedService()
         val codeCompletionsEnabled = when (selectedService) {
             ServiceType.CODEGPT -> service<CodeGPTServiceSettings>().state.codeCompletionSettings.codeCompletionsEnabled
             ServiceType.OPENAI -> OpenAISettings.getCurrentState().isCodeCompletionsEnabled

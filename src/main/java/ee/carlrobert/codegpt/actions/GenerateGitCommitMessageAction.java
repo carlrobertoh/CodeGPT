@@ -62,14 +62,12 @@ public class GenerateGitCommitMessageAction extends AnAction {
   @Override
   public void update(@NotNull AnActionEvent event) {
     var commitWorkflowUi = event.getData(VcsDataKeys.COMMIT_WORKFLOW_UI);
-    var selectedService = GeneralSettings.getCurrentState().getSelectedService();
-    if (selectedService == YOU || commitWorkflowUi == null) {
+    if (GeneralSettings.isSelected(YOU) || commitWorkflowUi == null) {
       event.getPresentation().setVisible(false);
       return;
     }
 
-    var callAllowed = CompletionRequestService.isRequestAllowed(
-        GeneralSettings.getCurrentState().getSelectedService());
+    var callAllowed = CompletionRequestService.isRequestAllowed();
     event.getPresentation().setEnabled(callAllowed
         && new CommitWorkflowChanges(commitWorkflowUi).isFilesSelected());
     event.getPresentation().setText(CodeGPTBundle.get(callAllowed

@@ -229,7 +229,7 @@ public class ChatToolWindowTabPanel implements Disposable {
   private void call(CallParameters callParameters, ResponsePanel responsePanel) {
     var responseContainer = (ChatMessageResponseBody) responsePanel.getContent();
 
-    if (!CompletionRequestService.getInstance().isRequestAllowed()) {
+    if (!CompletionRequestService.getInstance().isAllowed()) {
       responseContainer.displayMissingCredential();
       return;
     }
@@ -359,7 +359,7 @@ public class ChatToolWindowTabPanel implements Disposable {
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.gridy = 1;
     rootPanel.add(
-        createUserPromptPanel(GeneralSettings.getCurrentState().getSelectedService()), gbc);
+        createUserPromptPanel(GeneralSettings.getSelectedService()), gbc);
     return rootPanel;
   }
 }

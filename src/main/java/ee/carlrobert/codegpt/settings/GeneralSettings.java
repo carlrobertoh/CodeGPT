@@ -41,6 +41,14 @@ public class GeneralSettings implements PersistentStateComponent<GeneralSettings
     return ApplicationManager.getApplication().getService(GeneralSettings.class);
   }
 
+  public static ServiceType getSelectedService() {
+    return getCurrentState().getSelectedService();
+  }
+
+  public static boolean isSelected(ServiceType serviceType) {
+    return getSelectedService() == serviceType;
+  }
+
   public void sync(Conversation conversation) {
     var clientCode = conversation.getClientCode();
     if ("chat.completion".equals(clientCode)) {
@@ -105,7 +113,8 @@ public class GeneralSettings implements PersistentStateComponent<GeneralSettings
         var huggingFaceModel = llamaSettings.getHuggingFaceModel();
         var llamaModel = LlamaModel.findByHuggingFaceModel(huggingFaceModel);
         return String.format(
-            "%s %dB (Q%d)",
+            "%s %s %dB (Q%d)",
+            llamaModel.getDownloadedMarker(),
             llamaModel.getLabel(),
             huggingFaceModel.getParameterSize(),
             huggingFaceModel.getQuantization());

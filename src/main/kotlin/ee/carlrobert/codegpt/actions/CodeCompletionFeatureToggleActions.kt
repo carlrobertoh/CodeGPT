@@ -17,35 +17,28 @@ abstract class CodeCompletionFeatureToggleActions(
     private val enableFeatureAction: Boolean
 ) : DumbAwareAction() {
 
-    override fun actionPerformed(e: AnActionEvent) {
-        when (GeneralSettings.getCurrentState().selectedService) {
-            CODEGPT ->
-                service<CodeGPTServiceSettings>().state.codeCompletionSettings.codeCompletionsEnabled
+    override fun actionPerformed(e: AnActionEvent) = when (GeneralSettings.getSelectedService()) {
+        CODEGPT -> service<CodeGPTServiceSettings>().state.codeCompletionSettings::codeCompletionsEnabled::set
 
-            OPENAI ->
-                OpenAISettings.getCurrentState().isCodeCompletionsEnabled = enableFeatureAction
+        OPENAI -> OpenAISettings.getCurrentState()::setCodeCompletionsEnabled
 
-            LLAMA_CPP ->
-                LlamaSettings.getCurrentState().isCodeCompletionsEnabled = enableFeatureAction
+        LLAMA_CPP -> LlamaSettings.getCurrentState()::setCodeCompletionsEnabled
 
-            OLLAMA -> service<OllamaSettings>().state.codeCompletionsEnabled = enableFeatureAction
-            CUSTOM_OPENAI -> service<CustomServiceSettings>().state
-                .codeCompletionSettings
-                .codeCompletionsEnabled = enableFeatureAction
+        OLLAMA -> service<OllamaSettings>().state::codeCompletionsEnabled::set
 
-            ANTHROPIC,
-            AZURE,
-            YOU,
-            GOOGLE,
-            null -> { /* no-op for these services */
-            }
-        }
-    }
+        CUSTOM_OPENAI -> service<CustomServiceSettings>().state.codeCompletionSettings::codeCompletionsEnabled::set
+
+        ANTHROPIC,
+        AZURE,
+        YOU,
+        GOOGLE,
+        null -> { _: Boolean -> Unit } // no-op for these services
+    }(enableFeatureAction)
 
     override fun update(e: AnActionEvent) {
-        val selectedService = GeneralSettings.getCurrentState().selectedService
+        val selectedService = GeneralSettings.getSelectedService()
         val codeCompletionEnabled =
-            service<CodeCompletionService>().isCodeCompletionsEnabled(selectedService)
+            e.project?.service<CodeCompletionService>()?.isCodeCompletionsEnabled(selectedService) ?: false
         e.presentation.isVisible = codeCompletionEnabled != enableFeatureAction
         e.presentation.isEnabled = when (selectedService) {
             CODEGPT,
