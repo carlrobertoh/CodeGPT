@@ -449,8 +449,7 @@ public class CompletionRequestProvider {
       CallParameters callParameters) {
     var messages = buildOpenAIMessages(callParameters);
 
-    if (model == null
-        || GeneralSettings.getCurrentState().getSelectedService() == ServiceType.YOU) {
+    if (model == null || GeneralSettings.isSelected(ServiceType.YOU)) {
       return messages;
     }
 
