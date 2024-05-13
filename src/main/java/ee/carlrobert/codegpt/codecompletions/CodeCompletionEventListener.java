@@ -66,7 +66,7 @@ class CodeCompletionEventListener implements CompletionEventListener<String> {
     CodeGPTEditorManager.getInstance().disposeEditorInlays(editor);
     SwingUtilities.invokeLater(() -> {
       if (editor.getCaretModel().getOffset() == caretOffset && !processedOutput.isEmpty()) {
-        CodeCompletionService
+        CodeCompletionServiceOld
             .getInstance(requireNonNull(editor.getProject()))
             .addInlays(editor, caretOffset, processedOutput);
       }

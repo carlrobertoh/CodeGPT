@@ -13,7 +13,7 @@ import com.intellij.openapi.editor.event.DocumentEvent;
 import com.intellij.openapi.editor.event.SelectionEvent;
 import com.intellij.openapi.editor.event.SelectionListener;
 import ee.carlrobert.codegpt.actions.CodeCompletionEnabledListener;
-import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
+import ee.carlrobert.codegpt.settings.GeneralSettings;
 import java.util.List;
 import java.util.regex.PatternSyntaxException;
 import javax.swing.SwingUtilities;
@@ -31,7 +31,11 @@ public class CodeCompletionListenerBinder implements Disposable {
   public CodeCompletionListenerBinder(Editor editor) {
     this.editor = editor;
 
-    if (ConfigurationSettings.getCurrentState().isCodeCompletionsEnabled()) {
+    var project = editor.getProject();
+    if (project != null && project
+        .getService(CodeCompletionService.class)
+        .isCodeCompletionsEnabled(GeneralSettings.getSelectedService())) {
+
       addListeners();
     }
 
@@ -99,7 +103,7 @@ public class CodeCompletionListenerBinder implements Disposable {
       if (!"Typing".equals(CommandProcessor.getInstance().getCurrentCommandName())) {
         CodeGPTEditorManager.getInstance().disposeEditorInlays(editor);
         if (editor.getProject() != null) {
-          CodeCompletionService.getInstance(editor.getProject()).cancelPreviousCall();
+          CodeCompletionServiceOld.getInstance(editor.getProject()).cancelPreviousCall();
         }
       }
     }
@@ -120,7 +124,7 @@ public class CodeCompletionListenerBinder implements Disposable {
 
         var project = editor.getProject();
         if (project != null) {
-          var codeCompletionService = CodeCompletionService.getInstance(project);
+          var codeCompletionService = CodeCompletionServiceOld.getInstance(project);
           SwingUtilities.invokeLater(() -> {
             var caretOffset = editor.getCaretModel().getOffset();
             var charTyped = event.getNewFragment().toString().trim();

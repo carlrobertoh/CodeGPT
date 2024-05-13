@@ -5,6 +5,7 @@ import com.intellij.openapi.util.TextRange
 import com.intellij.testFramework.PlatformTestUtil
 import ee.carlrobert.codegpt.CodeGPTKeys
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
+import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
 import ee.carlrobert.codegpt.util.file.FileUtil.getResourceContent
 import ee.carlrobert.llm.client.http.RequestEntity
 import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange
@@ -18,7 +19,7 @@ class CodeCompletionServiceTest : IntegrationTest() {
 
     fun testFetchCodeCompletionLlama() {
         useLlamaService()
-        ConfigurationSettings.getCurrentState().isCodeCompletionsEnabled = true
+        LlamaSettings.getCurrentState().isCodeCompletionsEnabled = true
         myFixture.configureByText(
             "CompletionTest.java",
             getResourceContent("/codecompletions/code-completion-file.txt")
@@ -88,10 +89,10 @@ class CodeCompletionServiceTest : IntegrationTest() {
              $expectedMultiLineInlay
              """.trimIndent()
         val cursorOffsetBeforeApply = editor.caretModel.offset
-        CodeCompletionService.getInstance(project)
+        CodeCompletionServiceOld.getInstance(project)
             .addInlays(editor, cursorOffsetBeforeApply, expectedInlay)
 
-        myFixture.performEditorAction(CodeCompletionService.APPLY_INLAY_ACTION_ID)
+        myFixture.performEditorAction(CodeCompletionServiceOld.APPLY_INLAY_ACTION_ID)
 
         val newTextRange = TextRange(cursorOffsetBeforeApply, editor.caretModel.offset)
         val appliedInlay = editor.document.getText(newTextRange)

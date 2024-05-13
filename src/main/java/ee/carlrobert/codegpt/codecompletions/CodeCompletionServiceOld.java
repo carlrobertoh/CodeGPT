@@ -46,7 +46,7 @@ import javax.swing.KeyStroke;
 import org.jetbrains.annotations.NotNull;
 
 @Service(PROJECT)
-public final class CodeCompletionService implements Disposable {
+public final class CodeCompletionServiceOld implements Disposable {
 
   public static final String APPLY_INLAY_ACTION_ID = "ApplyInlayAction";
 
@@ -55,15 +55,15 @@ public final class CodeCompletionService implements Disposable {
   private final Project project;
   private final CallDebouncer callDebouncer;
 
-  private CodeCompletionService(Project project) {
+  private CodeCompletionServiceOld(Project project) {
     this.project = project;
     this.callDebouncer = new CallDebouncer(project);
 
     subscribeToFeatureToggleEvents();
   }
 
-  public static CodeCompletionService getInstance(Project project) {
-    return project.getService(CodeCompletionService.class);
+  public static CodeCompletionServiceOld getInstance(Project project) {
+    return project.getService(CodeCompletionServiceOld.class);
   }
 
   public void cancelPreviousCall() {
@@ -75,7 +75,6 @@ public final class CodeCompletionService implements Disposable {
 
     if (project.isDisposed()
         || TypeOverHandler.getPendingTypeOverAndReset(editor)
-        || !ConfigurationSettings.getCurrentState().isCodeCompletionsEnabled()
         || !EditorUtil.isSelectedEditor(editor)
         || LookupManager.getActiveLookup(editor) != null
         || editor.isViewer()

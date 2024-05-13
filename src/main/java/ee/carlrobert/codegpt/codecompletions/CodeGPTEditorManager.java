@@ -36,7 +36,7 @@ public final class CodeGPTEditorManager {
   }
 
   public void disposeEditorInlays(Editor editor) {
-    ActionManager.getInstance().unregisterAction(CodeCompletionService.APPLY_INLAY_ACTION_ID);
+    ActionManager.getInstance().unregisterAction(CodeCompletionServiceOld.APPLY_INLAY_ACTION_ID);
     disposeInlay(editor, SINGLE_LINE_INLAY);
     disposeInlay(editor, MULTI_LINE_INLAY);
   }

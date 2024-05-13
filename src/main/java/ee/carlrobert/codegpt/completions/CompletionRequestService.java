@@ -141,6 +141,10 @@ public final class CompletionRequestService {
     var httpClient = CompletionClientProvider.getDefaultClientBuilder().build();
     var requestProvider = new CodeCompletionRequestProvider(requestDetails);
     return switch (GeneralSettings.getCurrentState().getSelectedService()) {
+      case CODEGPT -> CompletionClientProvider.getCodeGPTClient()
+          .getCompletionAsync(
+              CodeCompletionRequestFactory.buildCodeGPTRequest(requestDetails),
+              eventListener);
       case OPENAI -> CompletionClientProvider.getOpenAIClient()
           .getCompletionAsync(requestProvider.buildOpenAIRequest(), eventListener);
       case CUSTOM_OPENAI -> EventSources.createFactory(httpClient).newEventSource(

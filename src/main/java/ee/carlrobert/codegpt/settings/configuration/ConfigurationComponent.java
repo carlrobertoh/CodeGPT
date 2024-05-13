@@ -165,8 +165,6 @@ public class ConfigurationComponent {
     state.setCreateNewChatOnEachAction(openNewTabCheckBox.isSelected());
     state.setMethodNameGenerationEnabled(methodNameGenerationCheckBox.isSelected());
     state.setAutoFormattingEnabled(autoFormattingCheckBox.isSelected());
-    state.setCodeCompletionsEnabled(
-        ConfigurationSettings.getCurrentState().isCodeCompletionsEnabled());
     state.setAutocompletionPostProcessingEnabled(autocompletionPostProcessingCheckBox.isSelected());
     return state;
   }
