@@ -14,8 +14,6 @@ Receive single-line or whole-function autocomplete suggestions as you type.
 
 ![Code Completions](https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/new/inline-completion.png?raw=true)
 
-> Completions are currently supported only for OpenAI GPT-3.5 and locally hosted models.
-
 ### Chat (with Vision)
 
 Get instant coding advice through a ChatGPT-like interface. Ask questions, seek explanations, or get guidance on your projects without leaving your IDE.
