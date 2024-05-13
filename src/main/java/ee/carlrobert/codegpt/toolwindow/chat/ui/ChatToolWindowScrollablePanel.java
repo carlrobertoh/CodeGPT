@@ -1,5 +1,8 @@
 package ee.carlrobert.codegpt.toolwindow.chat.ui;
 
+import static javax.swing.event.HyperlinkEvent.EventType.ACTIVATED;
+
+import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
 import com.intellij.openapi.roots.ui.componentsList.layout.VerticalStackLayout;
 import com.intellij.ui.JBColor;
@@ -8,7 +11,9 @@ import ee.carlrobert.codegpt.credentials.CredentialsStore;
 import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
+import ee.carlrobert.codegpt.settings.service.codegpt.CodeGPTServiceConfigurable;
 import ee.carlrobert.codegpt.ui.UIUtil;
+import ee.carlrobert.codegpt.util.ApplicationUtil;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,14 +38,25 @@ public class ChatToolWindowScrollablePanel extends ScrollablePanel {
 
       var panel = new ResponsePanel()
           .addContent(UIUtil.createTextPane("""
-              <html>
-              <p style="margin-top: 4px; margin-bottom: 4px;">
-                It looks like you haven't configured your API key yet. Visit the <a href="https://codegpt.carlrobert.ee/account">CodeGPT settings</a> to do so.
-              </p>
-              <p style="margin-top: 4px; margin-bottom: 4px;">
-                Don't have an account? <a href="https://codegpt.carlrobert.ee/signin">Sign up</a> for free access to all open-source models.
-              </p>
-              </html>""", false, UIUtil::handleHyperlinkClicked));
+                  <html>
+                  <p style="margin-top: 4px; margin-bottom: 4px;">
+                    It looks like you haven't configured your API key yet. Visit the <a href="#OPEN_SETTINGS">CodeGPT settings</a> to do so.
+                  </p>
+                  <p style="margin-top: 4px; margin-bottom: 4px;">
+                    Don't have an account? <a href="https://codegpt.carlrobert.ee/signin">Sign up</a> for free access to all open-source models.
+                  </p>
+                  </html>""",
+              false,
+              event -> {
+                if (ACTIVATED.equals(event.getEventType())
+                    && "#OPEN_SETTINGS".equals(event.getDescription())) {
+                  ShowSettingsUtil.getInstance().showSettingsDialog(
+                      ApplicationUtil.findCurrentProject(),
+                      CodeGPTServiceConfigurable.class);
+                } else {
+                  UIUtil.handleHyperlinkClicked(event);
+                }
+              }));
       panel.setBorder(JBUI.Borders.customLine(JBColor.border(), 1, 0, 0, 0));
       add(panel);
     }
