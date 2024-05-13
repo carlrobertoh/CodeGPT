@@ -62,8 +62,8 @@ public class GenerateGitCommitMessageAction extends AnAction {
 
   @Override
   public void update(@NotNull AnActionEvent event) {
-    var commitWorkflowUi = event.getData(VcsDataKeys.COMMIT_WORKFLOW_UI);
-    if (GeneralSettings.isSelected(YOU) || commitWorkflowUi == null) {
+    var selectedService = GeneralSettings.getCurrentState().getSelectedService();
+    if (selectedService == YOU) {
       event.getPresentation().setVisible(false);
       return;
     }
