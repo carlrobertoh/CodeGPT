@@ -27,10 +27,10 @@ class ServiceConfigurableComponent {
         }
 
     fun getSelectedService(): ServiceType {
-        return serviceComboBox.item
+        return serviceComboBox.selectedItem as ServiceType
     }
 
-    fun setSelectedService(serviceType: ServiceType?) {
+    fun setSelectedService(serviceType: ServiceType) {
         serviceComboBox.selectedItem = serviceType
     }
 
