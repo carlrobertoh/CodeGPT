@@ -241,6 +241,16 @@ public enum LlamaModel {
     return huggingFaceModels;
   }
 
+  /**
+   * Downloaded model with the biggest parameter size, otherwise first.
+   */
+  public HuggingFaceModel getLastExistingModelOrFirst() {
+    return huggingFaceModels.stream()
+            .filter(HuggingFaceModel::isDownloaded)
+            .max(Comparator.comparing(HuggingFaceModel::getParameterSize))
+            .orElse(huggingFaceModels.get(0));
+  }
+
   public String getFormattedModelSizeRange() {
     var parameters = huggingFaceModels.stream()
         .map(HuggingFaceModel::getParameterSize)
