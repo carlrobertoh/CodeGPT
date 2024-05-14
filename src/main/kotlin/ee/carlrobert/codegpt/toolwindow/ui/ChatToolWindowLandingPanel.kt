@@ -32,9 +32,9 @@ class ChatToolWindowLandingPanel(onAction: (LandingPanelAction, Point) -> Unit) 
         listPanel.layout = BoxLayout(listPanel, BoxLayout.PAGE_AXIS)
         listPanel.border = JBUI.Borders.emptyLeft(4)
         listPanel.add(Box.createVerticalStrut(4))
-        listPanel.add(createEditorActionLink(LandingPanelAction.WRITE_TESTS, onAction))
-        listPanel.add(Box.createVerticalStrut(4))
         listPanel.add(createEditorActionLink(LandingPanelAction.EXPLAIN, onAction))
+        listPanel.add(Box.createVerticalStrut(4))
+        listPanel.add(createEditorActionLink(LandingPanelAction.WRITE_TESTS, onAction))
         listPanel.add(Box.createVerticalStrut(4))
         listPanel.add(createEditorActionLink(LandingPanelAction.FIND_BUGS, onAction))
         listPanel.add(Box.createVerticalStrut(4))
@@ -56,10 +56,7 @@ class ChatToolWindowLandingPanel(onAction: (LandingPanelAction, Point) -> Unit) 
         return """
             <html>
             <p style="margin-top: 4px; margin-bottom: 4px;">
-            Welcome <strong>${GeneralSettings.getCurrentState().displayName}</strong>, I'm your intelligent code companion, here to be your partner-in-crime for getting things done in a flash.
-            </p>
-            <p style="margin-top: 4px; margin-bottom: 4px;">
-            Feel free to ask me anything you'd like, but my true superpower lies in assisting you with your code! Here are a few examples of how I can assist you:
+            Hi <strong>${GeneralSettings.getCurrentState().displayName}</strong>, I'm CodeGPT! You can ask me anything, but most people request help with their code. Here are a few examples of what you can ask me:
             </p>
             </html>
         """.trimIndent()
@@ -69,7 +66,7 @@ class ChatToolWindowLandingPanel(onAction: (LandingPanelAction, Point) -> Unit) 
         return """
             <html>
             <p style="margin-top: 4px; margin-bottom: 4px;">
-            Being an AI-powered assistant, I may occasionally have surprises or make mistakes. Therefore, it's wise to double-check any code or suggestions I provide.
+            I can sometimes make mistakes, so please double-check anything critical.
             </p>
             </html>
         """.trimIndent()
@@ -83,12 +80,12 @@ enum class LandingPanelAction(
 ) {
     FIND_BUGS(
         "Find Bugs",
-        "Find bugs in the selected code",
+        "Find bugs in this code",
         "Find bugs and output code with bugs fixed in the selected code: {{selectedCode}}"
     ),
     WRITE_TESTS(
         "Write Tests",
-        "Write unit tests for the selected code",
+        "Write unit tests for this code",
         "Write unit tests for the selected code: {{selectedCode}}"
     ),
     EXPLAIN(
