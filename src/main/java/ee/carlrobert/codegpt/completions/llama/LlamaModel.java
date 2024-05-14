@@ -214,6 +214,13 @@ public enum LlamaModel {
     return String.join(" ", getDownloadedMarker(), label, getFormattedModelSizeRange());
   }
 
+  /**
+   * Server started: {@code CodeLlama 7B 4-bit}.
+   */
+  public @NotNull String toString(@NotNull HuggingFaceModel hfm) {
+    return "%s %dB %d-bit".formatted(label, hfm.getParameterSize(), hfm.getQuantization());
+  }
+
   public String getLabel() {
     return label;
   }
@@ -232,6 +239,16 @@ public enum LlamaModel {
 
   public List<HuggingFaceModel> getHuggingFaceModels() {
     return huggingFaceModels;
+  }
+
+  /**
+   * Downloaded model with the biggest parameter size, otherwise first.
+   */
+  public HuggingFaceModel getLastExistingModelOrFirst() {
+    return huggingFaceModels.stream()
+            .filter(HuggingFaceModel::isDownloaded)
+            .max(Comparator.comparing(HuggingFaceModel::getParameterSize))
+            .orElse(huggingFaceModels.get(0));
   }
 
   public String getFormattedModelSizeRange() {
