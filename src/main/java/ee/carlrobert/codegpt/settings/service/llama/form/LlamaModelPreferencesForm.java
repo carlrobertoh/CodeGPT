@@ -113,21 +113,15 @@ public class LlamaModelPreferencesForm {
     var llamaServerAgent = ApplicationManager.getApplication().getService(LlamaServerAgent.class);
     huggingFaceModelComboBox.setEnabled(!llamaServerAgent.isServerRunning());
     var modelSizeComboBoxModel = new DefaultComboBoxModel<ModelSize>();
-    var initialModelSizes = llamaModel.getSortedUniqueModelSizes();
-    modelSizeComboBoxModel.addAll(initialModelSizes);
-    var selectedModelSize = initialModelSizes.stream()
-            .filter(ms -> ms.size() == llm.getParameterSize())
-            .findFirst().orElse(initialModelSizes.get(0));
-    modelSizeComboBoxModel.setSelectedItem(selectedModelSize);
     var modelComboBoxModel = new EnumComboBoxModel<>(LlamaModel.class);
-    modelComboBox = createModelComboBox(modelComboBoxModel, llamaModel, modelSizeComboBoxModel);
+    modelComboBox = createModelComboBox(
+        modelComboBoxModel, llamaModel, llm, llamaServerAgent, modelSizeComboBoxModel);
     modelComboBox.setEnabled(!llamaServerAgent.isServerRunning());
     modelSizeComboBox = createModelSizeComboBox(
         modelComboBoxModel,
         modelSizeComboBoxModel,
+        llamaServerAgent,
         huggingFaceComboBoxModel);
-    modelSizeComboBox.setEnabled(
-        initialModelSizes.size() > 1 && !llamaServerAgent.isServerRunning());
     browsableCustomModelTextField = createBrowsableCustomModelTextField(
         !llamaServerAgent.isServerRunning());
     browsableCustomModelTextField.setText(llamaSettings.getCustomLlamaModelPath());
@@ -310,40 +304,57 @@ public class LlamaModelPreferencesForm {
   private ComboBox<LlamaModel> createModelComboBox(
       EnumComboBoxModel<LlamaModel> llamaModelEnumComboBoxModel,
       LlamaModel llamaModel,
+      HuggingFaceModel llm,
+      LlamaServerAgent llamaServerAgent,
       DefaultComboBoxModel<ModelSize> modelSizeComboBoxModel) {
     var comboBox = new ComboBox<>(llamaModelEnumComboBoxModel);
     comboBox.setPreferredSize(new Dimension(280, comboBox.getPreferredSize().height));
     comboBox.setSelectedItem(llamaModel);
+    initializeModelSizes(llamaModel, llm, modelSizeComboBoxModel);
     comboBox.addItemListener(e -> {
       var selectedModel = (LlamaModel) e.getItem();
-      var modelSizes = selectedModel.getSortedUniqueModelSizes();
-
-      modelSizeComboBoxModel.removeAllElements();
-      modelSizeComboBoxModel.addAll(modelSizes);
-      modelSizeComboBoxModel.setSelectedItem(modelSizes.get(0));
-      modelSizeComboBox.setEnabled(modelSizes.size() > 1);
-
-      var huggingFaceModels = selectedModel.filterSelectedModelsBySize(
-              (ModelSize) modelSizeComboBoxModel.getSelectedItem());
-
+      var hfm = selectedModel.getLastExistingModelOrFirst();
+      var modelSize = initializeModelSizes(selectedModel, hfm, modelSizeComboBoxModel);
+      var huggingFaceModels = selectedModel.filterSelectedModelsBySize(modelSize);
       huggingFaceComboBoxModel.removeAllElements();
       huggingFaceComboBoxModel.addAll(huggingFaceModels);
-      huggingFaceComboBoxModel.setSelectedItem(huggingFaceModels.get(0));
+      huggingFaceComboBoxModel.setSelectedItem(hfm);
+      modelSizeComboBox.setEnabled(
+          modelSizeComboBox.getModel().getSize() > 1 && !llamaServerAgent.isServerRunning());
     });
     return comboBox;
+  }
+
+  private static ModelSize initializeModelSizes(
+      LlamaModel llamaModel,
+      HuggingFaceModel hfm,
+      DefaultComboBoxModel<ModelSize> modelSizeComboBoxModel) {
+    var modelSizes = llamaModel.getSortedUniqueModelSizes();
+    modelSizeComboBoxModel.removeAllElements();
+    modelSizeComboBoxModel.addAll(modelSizes);
+    var selectedModelSize = modelSizes.stream()
+        .filter(ms -> ms.size() == hfm.getParameterSize())
+        .findFirst().orElse(modelSizes.get(0));
+    modelSizeComboBoxModel.setSelectedItem(selectedModelSize);
+    return selectedModelSize;
   }
 
   private ComboBox<ModelSize> createModelSizeComboBox(
       EnumComboBoxModel<LlamaModel> llamaModelComboBoxModel,
       DefaultComboBoxModel<ModelSize> modelSizeComboBoxModel,
+      LlamaServerAgent llamaServerAgent,
       DefaultComboBoxModel<HuggingFaceModel> huggingFaceComboBoxModel) {
     var comboBox = new ComboBox<>(modelSizeComboBoxModel);
     comboBox.setPreferredSize(modelComboBox.getPreferredSize());
     comboBox.setSelectedItem(modelSizeComboBoxModel.getSelectedItem());
+    comboBox.setEnabled(
+        modelSizeComboBoxModel.getSize() > 1 && !llamaServerAgent.isServerRunning());
     comboBox.addItemListener(e -> {
       var selectedModel = llamaModelComboBoxModel.getSelectedItem();
       var models = selectedModel.filterSelectedModelsBySize(
               (ModelSize) modelSizeComboBoxModel.getSelectedItem());
+      comboBox.setEnabled(
+          modelSizeComboBoxModel.getSize() > 1 && !llamaServerAgent.isServerRunning());
       if (!models.isEmpty()) {
         huggingFaceComboBoxModel.removeAllElements();
         huggingFaceComboBoxModel.addAll(models);
