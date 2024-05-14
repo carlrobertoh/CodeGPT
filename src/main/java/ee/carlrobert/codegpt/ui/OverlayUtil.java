@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.ui;
 
+import static com.intellij.notification.NotificationType.INFORMATION;
 import static com.intellij.openapi.ui.Messages.CANCEL;
 import static com.intellij.openapi.ui.Messages.OK;
 import static ee.carlrobert.codegpt.Icons.Default;
@@ -10,6 +11,7 @@ import com.intellij.execution.ExecutionBundle;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
+import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DoNotAskOption;
@@ -26,6 +28,7 @@ import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import ee.carlrobert.codegpt.util.EditorUtil;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
+import java.util.Arrays;
 import javax.swing.JComponent;
 import org.jetbrains.annotations.NotNull;
 
@@ -37,30 +40,53 @@ public class OverlayUtil {
   private OverlayUtil() {
   }
 
-  public static Notification getDefaultNotification(String content, NotificationType type) {
-    return new Notification(NOTIFICATION_GROUP_ID, "CodeGPT", content, type);
+  public static Notification getDefaultNotification(
+      @NotNull String content, @NotNull AnAction... actions) {
+    return getDefaultNotification(content, INFORMATION, actions);
   }
 
-  public static Notification getStickyNotification(String content, NotificationType type) {
-    return new Notification(NOTIFICATION_GROUP_STICKY_ID, "CodeGPT", content, type);
-  }
-
-  public static Notification showNotification(String content) {
-    return showNotification(content, NotificationType.INFORMATION);
-  }
-
-  public static Notification showNotification(String content, NotificationType type) {
-    var notification = getDefaultNotification(content, type);
-    Notifications.Bus.notify(notification);
+  public static Notification getDefaultNotification(
+      @NotNull String content, @NotNull NotificationType type, @NotNull AnAction... actions) {
+    var notification = new Notification(NOTIFICATION_GROUP_ID, "CodeGPT", content, type);
+    Arrays.asList(actions).forEach(notification::addAction);
     return notification;
   }
 
-  public static Notification stickyNotification(String content) {
-    return stickyNotification(content, NotificationType.INFORMATION);
+  public static Notification getStickyNotification(
+      @NotNull String content, @NotNull AnAction... actions) {
+    return getStickyNotification(content, INFORMATION, actions);
   }
 
-  public static Notification stickyNotification(String content, NotificationType type) {
-    var notification = getStickyNotification(content, type);
+  public static Notification getStickyNotification(
+      @NotNull String content, @NotNull NotificationType type, @NotNull AnAction... actions) {
+    var notification = new Notification(NOTIFICATION_GROUP_STICKY_ID, "CodeGPT", content, type);
+    Arrays.asList(actions).forEach(notification::addAction);
+    return notification;
+  }
+
+  public static Notification showNotification(
+      @NotNull String content, @NotNull AnAction... actions) {
+    return showNotification(content, INFORMATION, actions);
+  }
+
+  public static Notification showNotification(
+      @NotNull String content, @NotNull NotificationType type, @NotNull AnAction... actions) {
+    return notify(getDefaultNotification(content, type, actions));
+  }
+
+  public static Notification stickyNotification(
+      @NotNull String content, @NotNull AnAction... actions) {
+    return stickyNotification(content, INFORMATION, actions);
+  }
+
+  public static Notification stickyNotification(
+      @NotNull String content, @NotNull NotificationType type, @NotNull AnAction... actions) {
+    return notify(getStickyNotification(content, type, actions));
+  }
+
+  public static @NotNull Notification notify(
+      @NotNull Notification notification, @NotNull AnAction... actions) {
+    Arrays.asList(actions).forEach(notification::addAction);
     Notifications.Bus.notify(notification);
     return notification;
   }
