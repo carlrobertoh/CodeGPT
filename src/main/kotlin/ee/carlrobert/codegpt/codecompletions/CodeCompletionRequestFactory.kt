@@ -97,7 +97,9 @@ object CodeCompletionRequestFactory {
     fun buildLlamaRequest(details: InfillRequestDetails): LlamaCompletionRequest {
         val settings = LlamaSettings.getCurrentState()
         val promptTemplate = getLlamaInfillPromptTemplate(settings)
-        val prompt = promptTemplate.buildPrompt(details.prefix, details.suffix)
+        val prompt = promptTemplate.buildPrompt(details)
+        println("PROMPT: ")
+        println(prompt)
         return LlamaCompletionRequest.Builder(prompt)
             .setN_predict(getMaxTokens(details.prefix, details.suffix))
             .setStream(true)
@@ -110,7 +112,7 @@ object CodeCompletionRequestFactory {
         val settings = service<OllamaSettings>().state
         return OllamaCompletionRequest.Builder(
             settings.model,
-            settings.fimTemplate.buildPrompt(details.prefix, details.suffix)
+            settings.fimTemplate.buildPrompt(details)
         )
             .setOptions(
                 OllamaParameters.Builder()
@@ -140,7 +142,7 @@ object CodeCompletionRequestFactory {
     ): Any {
         if (value !is String) return value
         return when (value) {
-            "$" + Placeholder.FIM_PROMPT -> template.buildPrompt(details.prefix, details.suffix)
+            "$" + Placeholder.FIM_PROMPT -> template.buildPrompt(details)
             "$" + Placeholder.PREFIX -> details.prefix
             "$" + Placeholder.SUFFIX -> details.suffix
             else -> value

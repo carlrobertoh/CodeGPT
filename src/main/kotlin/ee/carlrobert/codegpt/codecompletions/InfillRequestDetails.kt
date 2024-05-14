@@ -1,13 +1,20 @@
 package ee.carlrobert.codegpt.codecompletions
 
 import com.intellij.codeInsight.inline.completion.InlineCompletionRequest
+import com.intellij.codeInsight.navigation.ImplementationSearcher
+import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Document
+import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.util.TextRange
+import com.intellij.openapi.vfs.VirtualFile
 import ee.carlrobert.codegpt.EncodingManager
+import ee.carlrobert.codegpt.codecompletions.psi.PsiParserService
 import kotlin.math.max
 import kotlin.math.min
 
-class InfillRequestDetails(val prefix: String, val suffix: String) {
+
+class InfillRequestDetails(val prefix: String, val suffix: String, val context: InfillContext?) :
+    ImplementationSearcher() {
     companion object {
         private const val MAX_OFFSET = 10_000
         private const val MAX_PROMPT_TOKENS = 128
@@ -16,16 +23,18 @@ class InfillRequestDetails(val prefix: String, val suffix: String) {
             return fromDocumentWithMaxOffset(
                 request.editor.document,
                 request.editor.caretModel.offset,
+                request.editor
             )
         }
 
         private fun fromDocumentWithMaxOffset(
             document: Document,
             caretOffset: Int,
+            editor: Editor,
         ): InfillRequestDetails {
             val start = max(0, (caretOffset - MAX_OFFSET))
             val end = min(document.textLength, (caretOffset + MAX_OFFSET))
-            return fromDocumentWithCustomRange(document, caretOffset, start, end)
+            return fromDocumentWithCustomRange(document, caretOffset, start, end, editor)
         }
 
         private fun fromDocumentWithCustomRange(
@@ -33,10 +42,12 @@ class InfillRequestDetails(val prefix: String, val suffix: String) {
             caretOffset: Int,
             start: Int,
             end: Int,
+            editor: Editor,
         ): InfillRequestDetails {
             val prefix: String = truncateText(document, start, caretOffset, false)
             val suffix: String = truncateText(document, caretOffset, end, true)
-            return InfillRequestDetails(prefix, suffix)
+            val contextFiles = service<PsiParserService>().findContextFiles(editor, caretOffset)
+            return InfillRequestDetails(prefix, suffix, InfillContext(editor.project!!.name, editor.virtualFile, contextFiles))
         }
 
         private fun truncateText(
@@ -53,3 +64,9 @@ class InfillRequestDetails(val prefix: String, val suffix: String) {
         }
     }
 }
+
+class InfillContext(
+    val repoName: String,
+    val file: VirtualFile,
+    val contextFiles: Set<VirtualFile>?
+)

@@ -5,6 +5,13 @@
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.lang</depends>
     <depends optional="true" config-file="plugin-java.xml">com.intellij.modules.java</depends>
+    <depends optional="true" config-file="plugin-python.xml">com.intellij.modules.python</depends>
+<!--    TODO-->
+<!--    <depends optional="true" config-file="plugin-js.xml">JavaScript</depends>-->
+<!--    <depends optional="true" config-file="plugin-go.xml">org.jetbrains.plugins.go</depends>-->
+<!--    <depends optional="true" config-file="plugin-ruby.xml">com.intellij.modules.ruby</depends>-->
+<!--    <depends optional="true" config-file="plugin-php.xml">com.jetbrains.php</depends>-->
+<!--    <depends optional="true" config-file="plugin-swift.xml">com.intellij.swift</depends>-->
     <depends optional="true">Git4Idea</depends>
 
     <projectListeners>
@@ -59,6 +66,7 @@
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.advanced.AdvancedSettings"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.conversations.ConversationsState"/>
+        <applicationService serviceImplementation="ee.carlrobert.codegpt.codecompletions.psi.PsiParserService"/>
         <inline.completion.provider
           id="CodeGPTInlineCompletionProvider"
           implementation="ee.carlrobert.codegpt.codecompletions.CodeGPTInlineCompletionProvider"/>
