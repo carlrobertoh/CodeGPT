@@ -17,7 +17,7 @@ import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import org.jetbrains.annotations.NotNull;
 
-@State(name = "CodeGPT_GeneralSettings_210", storages = @Storage("CodeGPT_GeneralSettings_210.xml"))
+@State(name = "CodeGPT_GeneralSettings_270", storages = @Storage("CodeGPT_GeneralSettings_270.xml"))
 public class GeneralSettings implements PersistentStateComponent<GeneralSettingsState> {
 
   private GeneralSettingsState state = new GeneralSettingsState();
