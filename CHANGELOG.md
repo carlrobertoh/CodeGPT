@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.7.1-241] - 2024-05-15
+
+### Fixed
+
+- Backward compatibility issues on plugin updates (#551)
+
+### Added
+
+- Display a model name when starting the llama.cpp server (#546)
+
 ## [2.7.0-241] - 2024-05-14
 
 ### Added
@@ -472,7 +482,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `OPENAI_API_KEY` persistence, key is saved in the OS password safe from now on
 
-[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.7.0-241...HEAD
+[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.7.1-241...HEAD
+[2.7.1-241]: https://github.com/carlrobertoh/CodeGPT/compare/v2.7.0-241...v2.7.1-241
 [2.7.0-241]: https://github.com/carlrobertoh/CodeGPT/compare/v2.6.3-241...v2.7.0-241
 [2.6.3-241]: https://github.com/carlrobertoh/CodeGPT/compare/v2.6.2-241...v2.6.3-241
 [2.6.2-241]: https://github.com/carlrobertoh/CodeGPT/compare/v2.6.1-241...v2.6.2-241
