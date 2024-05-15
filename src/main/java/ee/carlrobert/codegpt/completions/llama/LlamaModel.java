@@ -287,6 +287,10 @@ public enum LlamaModel {
             .stream().toList();
   }
 
+  public static List<LlamaModel> getSorted() {
+    return Arrays.stream(values()).sorted(Comparator.comparing(Enum::name)).toList();
+  }
+
   public record ModelSize(int size, boolean downloaded) implements Comparable<ModelSize> {
     // Sort by size, but downloaded comes first: [  7B, ✓ 13B,   13B,   34B]
     private static final Comparator<ModelSize> sizeDownloadedFirst = Comparator
