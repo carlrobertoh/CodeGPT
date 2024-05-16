@@ -11,11 +11,13 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.ex.util.EditorUtil;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.registry.Registry;
 import com.intellij.ui.DocumentAdapter;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBTextArea;
 import com.intellij.util.ui.JBUI;
+import com.intellij.util.ui.JBUI.CurrentTheme.DragAndDrop;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.actions.AttachImageAction;
@@ -31,9 +33,20 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.RenderingHints;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetDragEvent;
+import java.awt.dnd.DropTargetDropEvent;
+import java.awt.dnd.DropTargetEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import javax.swing.AbstractAction;
@@ -41,6 +54,7 @@ import javax.swing.JPanel;
 import javax.swing.UIManager;
 import javax.swing.event.DocumentEvent;
 import javax.swing.text.BadLocationException;
+import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.NotNull;
 
 public class UserPromptTextArea extends JPanel {
@@ -54,12 +68,16 @@ public class UserPromptTextArea extends JPanel {
       new AtomicReference<>();
   private final JBTextArea textArea;
   private final int textAreaRadius = 16;
+  private final Project project;
   private final Consumer<String> onSubmit;
   private IconActionButton stopButton;
   private boolean submitEnabled = true;
+  private boolean isDragActive = false;
 
-  public UserPromptTextArea(Consumer<String> onSubmit, TotalTokensPanel totalTokensPanel) {
+  public UserPromptTextArea(Project project, Consumer<String> onSubmit,
+      TotalTokensPanel totalTokensPanel) {
     super(new BorderLayout());
+    this.project = project;
     this.onSubmit = onSubmit;
 
     textArea = new JBTextArea();
@@ -68,7 +86,7 @@ public class UserPromptTextArea extends JPanel {
     textArea.setBackground(BACKGROUND_COLOR);
     textArea.setLineWrap(true);
     textArea.setWrapStyleWord(true);
-    textArea.getEmptyText().setText(CodeGPTBundle.get("toolwindow.chat.textArea.emptyText"));
+    resetEmptyText();
     textArea.setBorder(JBUI.Borders.empty(8, 4));
     UIUtil.addShiftEnterInputMap(textArea, new AbstractAction() {
       @Override
@@ -136,9 +154,15 @@ public class UserPromptTextArea extends JPanel {
   protected void paintBorder(Graphics g) {
     Graphics2D g2 = (Graphics2D) g.create();
     g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-    g2.setColor(JBUI.CurrentTheme.ActionButton.focusedBorder());
-    if (textArea.isFocusOwner()) {
-      g2.setStroke(new BasicStroke(1.5F));
+    if (isDragActive) {
+      g2.setColor(DragAndDrop.BORDER_COLOR);
+      g2.setStroke(new BasicStroke(3, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
+          0, new float[]{9}, 0));
+    } else {
+      g2.setColor(JBUI.CurrentTheme.ActionButton.focusedBorder());
+      if (textArea.isFocusOwner()) {
+        g2.setStroke(new BasicStroke(1.5F));
+      }
     }
     g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, textAreaRadius, textAreaRadius);
   }
@@ -194,9 +218,66 @@ public class UserPromptTextArea extends JPanel {
         }));
     if (isImageActionSupported()) {
       iconsPanel.add(new IconActionButton(new AttachImageAction()));
+      setDropTarget(new DropTarget() {
+        @Override
+        public synchronized void dragEnter(DropTargetDragEvent evt) {
+          isDragActive = true;
+          var t = evt.getTransferable();
+          var isSupportedFile = false;
+          try {
+            List<File> files = (List<File>) t.getTransferData(
+                DataFlavor.javaFileListFlavor);
+            isSupportedFile = files.size() == 1
+                && AttachImageAction.SUPPORTED_EXTENSIONS.contains(
+                FilenameUtils.getExtension(files.get(0).getName().toLowerCase()));
+          } catch (UnsupportedFlavorException | IOException | ClassCastException ex) {
+            LOG.debug("Unable to get image file list:", ex);
+          }
+          if (isSupportedFile) {
+            textArea.getEmptyText()
+                .setText(CodeGPTBundle.get("toolwindow.chat.textArea.drag.allowed"));
+            evt.acceptDrag(DnDConstants.ACTION_COPY);
+          } else {
+            textArea.getEmptyText()
+                .setText(CodeGPTBundle.get("toolwindow.chat.textArea.drag.notAllowed"));
+            evt.rejectDrag();
+          }
+          repaint();
+        }
+
+        @Override
+        public synchronized void dragExit(DropTargetEvent dte) {
+          isDragActive = false;
+          resetEmptyText();
+          repaint();
+        }
+
+        @Override
+        public synchronized void drop(DropTargetDropEvent evt) {
+          isDragActive = false;
+          resetEmptyText();
+          try {
+            evt.acceptDrop(DnDConstants.ACTION_COPY);
+            Transferable transferable = evt.getTransferable();
+            List<File> files = (List<File>) transferable.getTransferData(
+                DataFlavor.javaFileListFlavor);
+            if (files.size() != 1) {
+              return;
+            }
+            AttachImageAction.addImageAttachment(project, files.get(0).getAbsolutePath());
+          } catch (UnsupportedFlavorException | IOException | ClassCastException ex) {
+            LOG.error("Unable to drop image file:", ex);
+          }
+        }
+      });
+      textArea.getDropTarget().setActive(false);
     }
     iconsPanel.add(stopButton);
     add(iconsPanel, BorderLayout.EAST);
+  }
+
+  private void resetEmptyText() {
+    textArea.getEmptyText().setText(CodeGPTBundle.get("toolwindow.chat.textArea.emptyText"));
   }
 
   private boolean isImageActionSupported() {
