@@ -169,6 +169,19 @@ public enum LlamaModel {
           HuggingFaceModel.STABLE_CODE_3B_Q5_K_M,
           HuggingFaceModel.STABLE_CODE_3B_Q6_K,
           HuggingFaceModel.STABLE_CODE_3B_Q8_0)),
+  FALCON2(
+      "Falcon2", """
+      Falcon2-11B is an 11B parameters causal decoder-only model built by TII and trained on over \
+      5,000B tokens of RefinedWeb enhanced with curated corpora. The model is made available under \
+      the TII Falcon License 2.0, the permissive Apache 2.0-based software license which includes \
+      an acceptable use policy that promotes the responsible use of AI.""",
+      PromptTemplate.FALCON2,
+      List.of(
+          HuggingFaceModel.FALCON2_Q3_K_M,
+          HuggingFaceModel.FALCON2_Q4_K_M,
+          HuggingFaceModel.FALCON2_Q5_K_M,
+          HuggingFaceModel.FALCON2_Q6_K,
+          HuggingFaceModel.FALCON2_Q8_0)),
   ;
 
   private final String label;

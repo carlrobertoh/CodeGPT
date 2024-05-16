@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.completions;
 
+import static ee.carlrobert.codegpt.completions.HuggingFaceModel.Model.F11;
 import static ee.carlrobert.codegpt.completions.HuggingFaceModel.Model.SC3;
 import static ee.carlrobert.codegpt.completions.llama.LlamaModel.getDownloadedMarker;
 import static ee.carlrobert.codegpt.completions.llama.LlamaModel.getLlamaModelsPath;
@@ -123,10 +124,18 @@ public enum HuggingFaceModel {
   STABLE_CODE_3B_Q5_K_M(SC3, 5, "stable-code-instruct-3b-Q5_K_M.gguf", 1.99),
   STABLE_CODE_3B_Q6_K(SC3, 6, "stable-code-instruct-3b-Q6_K.gguf", 2.3),
   STABLE_CODE_3B_Q8_0(SC3, 8, "stable-code-instruct-3b-Q8_0.gguf", 2.97),
+
+  FALCON2_Q3_K_M(F11, 3, "falcon-11B-Q3_K_M.gguf", 5.44),
+  FALCON2_Q4_K_M(F11, 4, "falcon-11B-Q4_K_M.gguf", 6.85),
+  FALCON2_Q5_K_M(F11, 5, "falcon-11B-Q5_K_M.gguf", 8.2),
+  FALCON2_Q6_K(F11, 6, "falcon-11B-Q6_K.gguf", 9.18),
+  FALCON2_Q8_0(F11, 8, "falcon-11B-Q8_0.gguf", 11.8),
   ;
 
   enum Model {
-    SC3("bartowski", 3, "stable-code-instruct-3b-GGUF");
+    SC3("bartowski", 3, "stable-code-instruct-3b-GGUF"),
+    F11("bartowski", 11, "falcon-11B-GGUF")
+    ;
 
     private final String user;
     private final int parameterSize;

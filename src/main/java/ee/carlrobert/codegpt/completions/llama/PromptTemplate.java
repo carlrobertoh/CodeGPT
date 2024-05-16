@@ -210,6 +210,31 @@ public enum PromptTemplate {
               .toString();
     }
   },
+  FALCON2("Falcon2", List.of("<|endoftext|>")) {
+    @Override
+    public String buildPrompt(String systemPrompt, String userPrompt, List<Message> history) {
+      StringBuilder prompt = new StringBuilder();
+
+      if (systemPrompt != null && !systemPrompt.isBlank()) {
+        prompt.append("\nSystem:\n")
+                .append(systemPrompt)
+                .append("\n");
+      }
+
+      for (Message message : history) {
+        prompt.append("\n\nUser:\n")
+            .append(message.getPrompt())
+            .append("\n\nFalcon:\n")
+            .append(message.getResponse())
+            .append("\n");
+      }
+
+      return prompt.append("\nUser:\n")
+              .append(userPrompt)
+              .append("\n\nFalcon:\n")
+              .toString();
+    }
+  },
   ALPACA("Alpaca/Vicuna") {
     @Override
     public String buildPrompt(String systemPrompt, String userPrompt, List<Message> history) {
