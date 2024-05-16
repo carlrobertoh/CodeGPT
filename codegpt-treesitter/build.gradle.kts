@@ -5,7 +5,7 @@ plugins {
 dependencies {
     implementation(libs.tree.sitter)
     implementation("io.github.bonede:tree-sitter-erlang:0.1.0")
-    implementation("io.github.bonede:tree-sitter-elixir:0.1.1")
+    implementation("io.github.bonede:tree-sitter-elixir:0.2.0")
     implementation("io.github.bonede:tree-sitter-dockerfile:0.1.2")
     implementation("io.github.bonede:tree-sitter-dart:master")
     implementation("io.github.bonede:tree-sitter-css:0.20.0")
