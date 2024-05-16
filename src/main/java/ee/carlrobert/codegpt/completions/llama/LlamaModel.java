@@ -151,6 +151,24 @@ public enum LlamaModel {
           HuggingFaceModel.CODE_QWEN_1_5_7B_Q4_K_M,
           HuggingFaceModel.CODE_QWEN_1_5_7B_Q5_K_M,
           HuggingFaceModel.CODE_QWEN_1_5_7B_Q6_K)),
+  STABLE_CODE(
+      "Stable Code Instruct", """
+      stable-code-instruct-3b is a 2.7B billion parameter decoder-only language model tuned from \
+      stable-code-3b. This model was trained on a mix of publicly available datasets, synthetic \
+      datasets using Direct Preference Optimization (DPO).
+      This instruct tune demonstrates state-of-the-art performance (compared to models of similar \
+      size) on the MultiPL-E metrics across multiple programming languages tested using BigCode's \
+      Evaluation Harness, and on the code portions of MT Bench. The model is fine tuned to make it \
+      usable in tasks like general purpose Code/Software Engineering like conversations and \
+      SQL related generation and conversation.""",
+      PromptTemplate.STABLE_CODE,
+      InfillPromptTemplate.CODE_QWEN,
+      List.of(
+          HuggingFaceModel.STABLE_CODE_3B_Q3_K_M,
+          HuggingFaceModel.STABLE_CODE_3B_Q4_K_M,
+          HuggingFaceModel.STABLE_CODE_3B_Q5_K_M,
+          HuggingFaceModel.STABLE_CODE_3B_Q6_K,
+          HuggingFaceModel.STABLE_CODE_3B_Q8_0)),
   ;
 
   private final String label;
@@ -267,6 +285,10 @@ public enum LlamaModel {
             .sorted()
             .collect(LinkedHashSet::new, ModelSize.skipSameSize(), Set::addAll)
             .stream().toList();
+  }
+
+  public static List<LlamaModel> getSorted() {
+    return Arrays.stream(values()).sorted(Comparator.comparing(Enum::name)).toList();
   }
 
   public record ModelSize(int size, boolean downloaded) implements Comparable<ModelSize> {

@@ -7,6 +7,7 @@ import ee.carlrobert.codegpt.completions.llama.PromptTemplate.CODE_QWEN
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate.LLAMA
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate.LLAMA_3
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate.PHI_3
+import ee.carlrobert.codegpt.completions.llama.PromptTemplate.STABLE_CODE
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate.TORA
 import ee.carlrobert.codegpt.conversations.message.Message
 import org.assertj.core.api.Assertions.assertThat
@@ -292,6 +293,78 @@ class PromptTemplateTest {
   @ValueSource(strings = [" ", "\t", "\n"])
   fun shouldBuildCodeQwenPromptWithHistorySkippingBlankSystemPrompt(systemPrompt: String?) {
     val prompt = CODE_QWEN.buildPrompt(systemPrompt, USER_PROMPT, HISTORY)
+
+    assertThat(prompt).isEqualTo("""
+      <|im_start|>user
+      TEST_PREV_PROMPT_1<|im_end|>
+      <|im_start|>assistant
+      TEST_PREV_RESPONSE_1<|im_end|>
+      <|im_start|>user
+      TEST_PREV_PROMPT_2<|im_end|>
+      <|im_start|>assistant
+      TEST_PREV_RESPONSE_2<|im_end|>
+      <|im_start|>user
+      TEST_USER_PROMPT<|im_end|>
+      <|im_start|>assistant
+
+      """.trimIndent())
+  }
+
+  @Test
+  fun shouldBuildStableCodePromptWithoutHistory() {
+    val prompt = STABLE_CODE.buildPrompt(SYSTEM_PROMPT, USER_PROMPT, listOf())
+
+    assertThat(prompt).isEqualTo("""
+      <|im_start|>system
+      TEST_SYSTEM_PROMPT<|im_end|>
+      <|im_start|>user
+      TEST_USER_PROMPT<|im_end|>
+      <|im_start|>assistant
+
+      """.trimIndent())
+  }
+
+  @ParameterizedTest
+  @NullAndEmptySource
+  @ValueSource(strings = [" ", "\t", "\n"])
+  fun shouldBuildStableCodePromptWithoutHistorySkippingBlankSystemPrompt(systemPrompt: String?) {
+    val prompt = STABLE_CODE.buildPrompt(systemPrompt, USER_PROMPT, listOf())
+
+    assertThat(prompt).isEqualTo("""
+      <|im_start|>user
+      TEST_USER_PROMPT<|im_end|>
+      <|im_start|>assistant
+
+      """.trimIndent())
+  }
+
+  @Test
+  fun shouldBuildStableCodePromptWithHistory() {
+    val prompt = STABLE_CODE.buildPrompt(SYSTEM_PROMPT, USER_PROMPT, HISTORY)
+
+    assertThat(prompt).isEqualTo("""
+      <|im_start|>system
+      TEST_SYSTEM_PROMPT<|im_end|>
+      <|im_start|>user
+      TEST_PREV_PROMPT_1<|im_end|>
+      <|im_start|>assistant
+      TEST_PREV_RESPONSE_1<|im_end|>
+      <|im_start|>user
+      TEST_PREV_PROMPT_2<|im_end|>
+      <|im_start|>assistant
+      TEST_PREV_RESPONSE_2<|im_end|>
+      <|im_start|>user
+      TEST_USER_PROMPT<|im_end|>
+      <|im_start|>assistant
+
+      """.trimIndent())
+  }
+
+  @ParameterizedTest
+  @NullAndEmptySource
+  @ValueSource(strings = [" ", "\t", "\n"])
+  fun shouldBuildStableCodePromptWithHistorySkippingBlankSystemPrompt(systemPrompt: String?) {
+    val prompt = STABLE_CODE.buildPrompt(systemPrompt, USER_PROMPT, HISTORY)
 
     assertThat(prompt).isEqualTo("""
       <|im_start|>user
