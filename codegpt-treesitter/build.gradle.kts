@@ -35,6 +35,6 @@ dependencies {
     implementation("io.github.bonede:tree-sitter-java:0.21.0")
     implementation("io.github.bonede:tree-sitter-python:0.21.0")
     implementation("io.github.bonede:tree-sitter-php:0.22.2")
-    implementation("io.github.bonede:tree-sitter-typescript:0.20.6")
+    implementation("io.github.bonede:tree-sitter-typescript:0.21.1")
     implementation("io.github.bonede:tree-sitter-query:0.1.0")
 }
