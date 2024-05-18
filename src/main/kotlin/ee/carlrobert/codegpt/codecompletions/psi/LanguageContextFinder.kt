@@ -4,7 +4,7 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiElement
 
-interface LanguagePsiParser {
+interface LanguageContextFinder {
     /**
      * Determines [PsiElement]s relevant to the context of [psiElement] and returns their source code files.
      */

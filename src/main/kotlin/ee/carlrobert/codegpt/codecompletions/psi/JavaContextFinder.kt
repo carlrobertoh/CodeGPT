@@ -10,7 +10,7 @@ import com.intellij.psi.impl.source.PsiClassReferenceType
 import com.intellij.psi.util.PsiTypesUtil
 import com.intellij.psi.util.findParentOfType
 
-class JavaPsiParser : LanguagePsiParser {
+class JavaContextFinder : LanguageContextFinder {
 
     /**
      * Finds enclosing [PsiMethod] or [PsiClass] of [psiElement] and

@@ -7,30 +7,33 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiManager
 
 @Service(Service.Level.PROJECT)
-class PsiParserService {
+class CompletionContextService {
 
     companion object {
-        private val PARSERS = mapOf(
-            "java" to JavaPsiParser::class.java,
-            "py" to PythonPsiParser::class.java
+        private val CONTEXT_FINDERS = mapOf(
+            "JAVA" to JavaContextFinder::class.java,
+            "Python" to PythonContextFinder::class.java
         )
     }
 
     /**
      * Determines the [com.intellij.psi.PsiElement] at the given offset,
-     * determines relevant context with the help of [LanguagePsiParser]s
+     * determines relevant context with the help of [LanguageContextFinder]s
      * and returns the context as a set of source code [VirtualFile]s.
      */
     fun findContextFiles(editor: Editor, offset: Int): Set<VirtualFile> {
         val psiFile = PsiManager.getInstance(editor.project!!).findFile(editor.virtualFile!!)!!
         val psiElement = psiFile.findElementAt(offset)
-        val psiParserClass = PARSERS[psiFile.fileType.defaultExtension]
-            ?: // No parser for the language implemented yet
+        if (psiElement == null) {
+            return setOf();
+        }
+        val psiParserClass = CONTEXT_FINDERS[psiElement.language.id]
+            ?: // No context finder for the language implemented yet
             return setOf()
         val psiParser = ApplicationManager.getApplication().getService(psiParserClass)
-            ?: // A parser for the language exists but not available in the used IDE
+            ?: // A context finder for the language exists but not available in the used IDE
             return setOf()
-        return psiParser.findContextSourceFiles(psiElement!!, editor)
+        return psiParser.findContextSourceFiles(psiElement, editor).minus(editor.virtualFile)
 
     }
 }

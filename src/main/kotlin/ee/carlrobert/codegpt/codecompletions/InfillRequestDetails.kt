@@ -8,7 +8,7 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.util.TextRange
 import com.intellij.openapi.vfs.VirtualFile
 import ee.carlrobert.codegpt.EncodingManager
-import ee.carlrobert.codegpt.codecompletions.psi.PsiParserService
+import ee.carlrobert.codegpt.codecompletions.psi.CompletionContextService
 import kotlin.math.max
 import kotlin.math.min
 
@@ -46,7 +46,7 @@ class InfillRequestDetails(val prefix: String, val suffix: String, val context: 
         ): InfillRequestDetails {
             val prefix: String = truncateText(document, start, caretOffset, false)
             val suffix: String = truncateText(document, caretOffset, end, true)
-            val contextFiles = service<PsiParserService>().findContextFiles(editor, caretOffset)
+            val contextFiles = service<CompletionContextService>().findContextFiles(editor, caretOffset)
             return InfillRequestDetails(prefix, suffix, InfillContext(editor.project!!.name, editor.virtualFile, contextFiles))
         }
 

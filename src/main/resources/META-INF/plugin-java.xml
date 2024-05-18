@@ -6,6 +6,6 @@
 
   <extensions defaultExtensionNs="com.intellij">
     <applicationService
-      serviceImplementation="ee.carlrobert.codegpt.codecompletions.psi.JavaPsiParser"/>
+      serviceImplementation="ee.carlrobert.codegpt.codecompletions.psi.JavaContextFinder"/>
   </extensions>
 </idea-plugin>
