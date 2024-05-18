@@ -9,6 +9,7 @@ import static ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionMod
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.ex.util.EditorUtil;
 import com.intellij.openapi.project.Project;
@@ -218,59 +219,61 @@ public class UserPromptTextArea extends JPanel {
         }));
     if (isImageActionSupported()) {
       iconsPanel.add(new IconActionButton(new AttachImageAction()));
-      setDropTarget(new DropTarget() {
-        @Override
-        public synchronized void dragEnter(DropTargetDragEvent evt) {
-          isDragActive = true;
-          var t = evt.getTransferable();
-          var isSupportedFile = false;
-          try {
-            List<File> files = (List<File>) t.getTransferData(
-                DataFlavor.javaFileListFlavor);
-            isSupportedFile = files.size() == 1
-                && AttachImageAction.SUPPORTED_EXTENSIONS.contains(
-                FilenameUtils.getExtension(files.get(0).getName().toLowerCase()));
-          } catch (UnsupportedFlavorException | IOException | ClassCastException ex) {
-            LOG.debug("Unable to get image file list:", ex);
-          }
-          if (isSupportedFile) {
-            textArea.getEmptyText()
-                .setText(CodeGPTBundle.get("toolwindow.chat.textArea.drag.allowed"));
-            evt.acceptDrag(DnDConstants.ACTION_COPY);
-          } else {
-            textArea.getEmptyText()
-                .setText(CodeGPTBundle.get("toolwindow.chat.textArea.drag.notAllowed"));
-            evt.rejectDrag();
-          }
-          repaint();
-        }
-
-        @Override
-        public synchronized void dragExit(DropTargetEvent dte) {
-          isDragActive = false;
-          resetEmptyText();
-          repaint();
-        }
-
-        @Override
-        public synchronized void drop(DropTargetDropEvent evt) {
-          isDragActive = false;
-          resetEmptyText();
-          try {
-            evt.acceptDrop(DnDConstants.ACTION_COPY);
-            Transferable transferable = evt.getTransferable();
-            List<File> files = (List<File>) transferable.getTransferData(
-                DataFlavor.javaFileListFlavor);
-            if (files.size() != 1) {
-              return;
+      if (!ApplicationManager.getApplication().isUnitTestMode()) {
+        setDropTarget(new DropTarget() {
+          @Override
+          public synchronized void dragEnter(DropTargetDragEvent evt) {
+            isDragActive = true;
+            var t = evt.getTransferable();
+            var isSupportedFile = false;
+            try {
+              List<File> files = (List<File>) t.getTransferData(
+                  DataFlavor.javaFileListFlavor);
+              isSupportedFile = files.size() == 1
+                  && AttachImageAction.SUPPORTED_EXTENSIONS.contains(
+                  FilenameUtils.getExtension(files.get(0).getName().toLowerCase()));
+            } catch (UnsupportedFlavorException | IOException | ClassCastException ex) {
+              LOG.debug("Unable to get image file list:", ex);
             }
-            AttachImageAction.addImageAttachment(project, files.get(0).getAbsolutePath());
-          } catch (UnsupportedFlavorException | IOException | ClassCastException ex) {
-            LOG.error("Unable to drop image file:", ex);
+            if (isSupportedFile) {
+              textArea.getEmptyText()
+                  .setText(CodeGPTBundle.get("toolwindow.chat.textArea.drag.allowed"));
+              evt.acceptDrag(DnDConstants.ACTION_COPY);
+            } else {
+              textArea.getEmptyText()
+                  .setText(CodeGPTBundle.get("toolwindow.chat.textArea.drag.notAllowed"));
+              evt.rejectDrag();
+            }
+            repaint();
           }
-        }
-      });
-      textArea.getDropTarget().setActive(false);
+
+          @Override
+          public synchronized void dragExit(DropTargetEvent dte) {
+            isDragActive = false;
+            resetEmptyText();
+            repaint();
+          }
+
+          @Override
+          public synchronized void drop(DropTargetDropEvent evt) {
+            isDragActive = false;
+            resetEmptyText();
+            try {
+              evt.acceptDrop(DnDConstants.ACTION_COPY);
+              Transferable transferable = evt.getTransferable();
+              List<File> files = (List<File>) transferable.getTransferData(
+                  DataFlavor.javaFileListFlavor);
+              if (files.size() != 1) {
+                return;
+              }
+              AttachImageAction.addImageAttachment(project, files.get(0).getAbsolutePath());
+            } catch (UnsupportedFlavorException | IOException | ClassCastException ex) {
+              LOG.error("Unable to drop image file:", ex);
+            }
+          }
+        });
+        textArea.getDropTarget().setActive(false);
+      }
     }
     iconsPanel.add(stopButton);
     add(iconsPanel, BorderLayout.EAST);
