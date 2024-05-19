@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt.codecompletions.psi
 
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
@@ -20,8 +21,27 @@ class PythonContextFinder : LanguageContextFinder {
      */
     override fun findContextSourceFiles(psiElement: PsiElement, editor: Editor): Set<VirtualFile> {
         val enclosingElement = findEnclosingElement(psiElement)
-        val referenceExpressions = findReferenceExpressions(enclosingElement, enclosingElement)
-        return referenceExpressions.mapNotNull { findSourceFile(it, editor) }.toSet()
+        val referenceExpressions = findRelevantElements(enclosingElement, enclosingElement)
+        val declarations =
+            referenceExpressions.map { findDeclarations(it, editor.project!!) }.flatten().distinct()
+        return declarations.mapNotNull { findSourceFile(it) }.toSet()
+    }
+
+    private fun findDeclarations(
+        pyReference: PyReferenceExpression,
+        project: Project
+    ): Set<PsiElement> {
+        // TODO: slow operations on EDT
+        val declaration = PyResolveUtil.resolveDeclaration(
+            pyReference.reference,
+            PyResolveContext.defaultContext(
+                TypeEvalContext.codeAnalysis(
+                    project,
+                    pyReference.containingFile
+                )
+            )
+        )
+        return if (declaration != null) setOf(declaration) else emptySet()
     }
 
     private fun findSignificantElement(psiElement: PsiElement): PsiElement? {
@@ -41,12 +61,12 @@ class PythonContextFinder : LanguageContextFinder {
             ?: significantElement.findParentOfType<PyClass>(false) ?: psiElement
     }
 
-    private fun findReferenceExpressions(
+    private fun findRelevantElements(
         psiElement: Array<PsiElement>,
         originalElement: PsiElement
     ): Set<PyReferenceExpression> {
         return psiElement.map {
-            findReferenceExpressions(it, originalElement)
+            findRelevantElements(it, originalElement)
         }.flatten().distinctBy { it.name }.toSet()
     }
 
@@ -54,7 +74,7 @@ class PythonContextFinder : LanguageContextFinder {
      * Finds [PyReferenceExpression]s inside of [psiElement].
      * If [psiElement] is a [PyFunction] it also adds all [PyReferenceExpression] of any class/instance fields.
      */
-    fun findReferenceExpressions(
+    fun findRelevantElements(
         psiElement: PsiElement,
         enclosingElement: PsiElement
     ): Set<PyReferenceExpression> {
@@ -69,6 +89,7 @@ class PythonContextFinder : LanguageContextFinder {
 
         if (psiElement is PyFunction) {
             val enclosingClass = psiElement.findParentOfType<PyClass>()
+            // add class and instance fields of enclosing class
             if (enclosingClass != null) {
                 significationElements = significationElements
                     .plus(enclosingClass.classAttributes.mapNotNull {
@@ -79,35 +100,23 @@ class PythonContextFinder : LanguageContextFinder {
                     })
             }
         }
-        return findReferenceExpressions(significationElements, enclosingElement).toSet()
+        return findRelevantElements(significationElements, enclosingElement).toSet()
     }
 
     private fun findTargetExpressionAssignment(targetExpression: PyTargetExpression): PyExpression? {
         return targetExpression.findParentOfType<PyAssignmentStatement>()?.assignedValue
     }
 
-    private fun findSourceFile(psiReference: PyReferenceExpression, editor: Editor): VirtualFile? {
+    private fun findSourceFile(psiElement: PsiElement): VirtualFile? {
         // see https://github.com/JetBrains/intellij-community/blob/ae5290861a1f41b93c48c475239a52faa94b97b0/python/python-psi-impl/src/com/jetbrains/python/codeInsight/PyTargetElementEvaluator.java#L51-L54
         // TODO: Slow operations are prohibited on EDT
-        val declaration = PyResolveUtil.resolveDeclaration(
-            psiReference.reference,
-            PyResolveContext.defaultContext(
-                TypeEvalContext.codeAnalysis(
-                    editor.project!!,
-                    psiReference.containingFile
-                )
-            )
-        )
-        if (declaration != null) {
-            val file = declaration.navigationElement.containingFile.virtualFile
-            if (file.isInLocalFileSystem) {
-                return file
-            } else {
-                // TODO: what to do with library files?
-                return null
-            }
+        val file = psiElement.navigationElement.containingFile.virtualFile
+        return if (file.isInLocalFileSystem) {
+            file
+        } else {
+            // TODO: what to do with library files?
+            null
         }
-        return null
 
     }
 }
