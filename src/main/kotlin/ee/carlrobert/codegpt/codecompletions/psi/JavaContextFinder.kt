@@ -17,25 +17,26 @@ class JavaContextFinder : LanguageContextFinder {
      * determines source code files of all used [PsiTypeElement]s for the context.
      */
     override fun findContextSourceFiles(psiElement: PsiElement, editor: Editor): Set<VirtualFile> {
-        val parent = psiElement.findParentOfType<PsiMethod>()
-            ?: psiElement.findParentOfType<PsiClass>() ?: psiElement
-        val findPsiTypes = findPsyTypes(parent)
-        return findPsiTypes.mapNotNull {
-            findSourceFile(it, editor)
-        }.toSet()
+        val enclosingElement = findEnclosingElement(psiElement)
+        val typeElements = findTypeElements(enclosingElement)
+        return typeElements.mapNotNull { findSourceFile(it, editor) }.toSet()
     }
 
-    private fun findPsyTypes(psiElement: Array<PsiElement>): Set<PsiTypeElement> {
-        return psiElement.map {
-            findPsyTypes(it)
-        }.flatten().distinctBy { it.type }.toSet()
+
+    private fun findEnclosingElement(psiElement: PsiElement): PsiElement {
+        return psiElement.findParentOfType<PsiMethod>(false)
+            ?: psiElement.findParentOfType<PsiClass>(false) ?: psiElement
+    }
+
+    private fun findTypeElements(psiElement: Array<PsiElement>): Set<PsiTypeElement> {
+        return psiElement.map { findTypeElements(it) }.flatten().distinctBy { it.type }.toSet()
     }
 
     /**
      * Finds [PsiTypeElement]s inside of [psiElement].
      * If [psiElement] is a [PsiMethod] it also adds all [PsiTypeElement] of any class fields.
      */
-    private fun findPsyTypes(psiElement: PsiElement): Set<PsiTypeElement> {
+    private fun findTypeElements(psiElement: PsiElement): Set<PsiTypeElement> {
         if (psiElement is PsiTypeElement
             // For wrapper classes with generics like List<T> only the generic type classes are returned
             && (psiElement.type !is PsiClassReferenceType || (psiElement.type as PsiClassReferenceType).parameters.isEmpty())
@@ -45,9 +46,9 @@ class JavaContextFinder : LanguageContextFinder {
 
         var childElements = psiElement.children
         if (psiElement is PsiMethod && psiElement.parent is PsiClass) {
-            childElements += (psiElement.parent as PsiClass).allFields
+            childElements = childElements.plus((psiElement.parent as PsiClass).allFields)
         }
-        return findPsyTypes(childElements).toSet()
+        return findTypeElements(childElements).toSet()
     }
 
     /**
