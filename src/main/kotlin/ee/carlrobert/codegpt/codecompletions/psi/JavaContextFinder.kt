@@ -2,10 +2,7 @@ package ee.carlrobert.codegpt.codecompletions.psi
 
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.psi.PsiClass
-import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiMethod
-import com.intellij.psi.PsiTypeElement
+import com.intellij.psi.*
 import com.intellij.psi.impl.source.PsiClassReferenceType
 import com.intellij.psi.util.PsiTypesUtil
 import com.intellij.psi.util.findParentOfType
@@ -23,25 +20,39 @@ class JavaContextFinder : LanguageContextFinder {
     }
 
 
-    private fun findEnclosingElement(psiElement: PsiElement): PsiElement {
+    fun findEnclosingElement(psiElement: PsiElement): PsiElement {
         return psiElement.findParentOfType<PsiMethod>(false)
             ?: psiElement.findParentOfType<PsiClass>(false) ?: psiElement
     }
 
-    private fun findTypeElements(psiElement: Array<PsiElement>): Set<PsiTypeElement> {
-        return psiElement.map { findTypeElements(it) }.flatten().distinctBy { it.type }.toSet()
+    private fun findTypeElements(psiElement: Array<PsiElement>): Set<PsiTarget> {
+        return psiElement.map { findTypeElements(it) }.flatten().distinct().toSet()
     }
 
     /**
-     * Finds [PsiTypeElement]s inside of [psiElement].
-     * If [psiElement] is a [PsiMethod] it also adds all [PsiTypeElement] of any class fields.
+     * Finds [PsiTarget]s to references used inside of [psiElement].
+     * If [psiElement] is a [PsiMethod] it also adds all [PsiTarget] of any class fields.
      */
-    private fun findTypeElements(psiElement: PsiElement): Set<PsiTypeElement> {
+    fun findTypeElements(psiElement: PsiElement): Set<PsiTarget> {
         if (psiElement is PsiTypeElement
             // For wrapper classes with generics like List<T> only the generic type classes are returned
             && (psiElement.type !is PsiClassReferenceType || (psiElement.type as PsiClassReferenceType).parameters.isEmpty())
         ) {
-            return setOf(psiElement);
+            val clazz = PsiTypesUtil.getPsiClass(psiElement.type);
+            return if (clazz != null) {
+                setOf(clazz)
+            } else {
+                return setOf()
+            }
+        }
+        if (psiElement is PsiMethodCallExpression) {
+            val method = psiElement.resolveMethod()
+            // TODO: could also look at methodcall argument types
+            return if (method != null) {
+                setOf(method)
+            } else {
+                return setOf()
+            }
         }
 
         var childElements = psiElement.children
@@ -52,13 +63,13 @@ class JavaContextFinder : LanguageContextFinder {
     }
 
     /**
-     * If [psiTypeElement] is a Java class defined in the user's project the corresponding source code
+     * If [psiTarget] is a Java class defined in the user's project the corresponding source code
      * [VirtualFile] is returned, otherwise `null` is returned.
      */
-    private fun findSourceFile(psiTypeElement: PsiTypeElement, editor: Editor): VirtualFile? {
-        val psiClass = PsiTypesUtil.getPsiClass(psiTypeElement.type)
-        if (psiClass != null) {
-            val file = psiClass.navigationElement.containingFile.virtualFile
+    private fun findSourceFile(psiTarget: PsiTarget, editor: Editor): VirtualFile? {
+        // TODO: If e.g. only a single method is targeted we could also just use the method's source code
+        //  not its entire class source code
+        val file = psiTarget.navigationElement.containingFile.virtualFile
             if (file.isInLocalFileSystem) {
                 return file
             } else {
@@ -78,7 +89,5 @@ class JavaContextFinder : LanguageContextFinder {
 //                println()
                 return null
             }
-        }
-        return null
     }
 }

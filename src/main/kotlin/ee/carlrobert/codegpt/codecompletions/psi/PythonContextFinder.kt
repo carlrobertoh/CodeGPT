@@ -35,7 +35,7 @@ class PythonContextFinder : LanguageContextFinder {
         return element
     }
 
-    private fun findEnclosingElement(psiElement: PsiElement): PsiElement {
+    fun findEnclosingElement(psiElement: PsiElement): PsiElement {
         val significantElement = findSignificantElement(psiElement) ?: psiElement
         return significantElement.findParentOfType<PyFunction>(false)
             ?: significantElement.findParentOfType<PyClass>(false) ?: psiElement
@@ -54,7 +54,7 @@ class PythonContextFinder : LanguageContextFinder {
      * Finds [PyReferenceExpression]s inside of [psiElement].
      * If [psiElement] is a [PyFunction] it also adds all [PyReferenceExpression] of any class/instance fields.
      */
-    private fun findReferenceExpressions(
+    fun findReferenceExpressions(
         psiElement: PsiElement,
         enclosingElement: PsiElement
     ): Set<PyReferenceExpression> {
