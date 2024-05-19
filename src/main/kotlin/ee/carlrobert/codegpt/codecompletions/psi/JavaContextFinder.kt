@@ -11,12 +11,13 @@ class JavaContextFinder : LanguageContextFinder {
 
     /**
      * Finds enclosing [PsiMethod] or [PsiClass] of [psiElement] and
-     * determines source code files of all used [PsiTypeElement]s for the context.
+     * determines source code files of all referenced classes or methods.
      */
     override fun findContextSourceFiles(psiElement: PsiElement, editor: Editor): Set<VirtualFile> {
         val enclosingElement = findEnclosingElement(psiElement)
-        val typeElements = findTypeElements(enclosingElement)
-        return typeElements.mapNotNull { findSourceFile(it, editor) }.toSet()
+        val relevantElements = findRelevantElements(enclosingElement)
+        val psiTargets = relevantElements.map { findPsiTarget(it) }.flatten().distinct()
+        return psiTargets.mapNotNull { findSourceFile(it, editor) }.toSet()
     }
 
 
@@ -25,41 +26,53 @@ class JavaContextFinder : LanguageContextFinder {
             ?: psiElement.findParentOfType<PsiClass>(false) ?: psiElement
     }
 
-    private fun findTypeElements(psiElement: Array<PsiElement>): Set<PsiTarget> {
-        return psiElement.map { findTypeElements(it) }.flatten().distinct().toSet()
+    private fun findRelevantElements(psiElement: Array<PsiElement>): Set<PsiElement> {
+        return psiElement.map { findRelevantElements(it) }.flatten().distinctBy { it.text }.toSet()
     }
 
     /**
-     * Finds [PsiTarget]s to references used inside of [psiElement].
-     * If [psiElement] is a [PsiMethod] it also adds all [PsiTarget] of any class fields.
+     * Finds relevant [PsiTypeElement]s and [PsiMethodCallExpression]s that are used inside of [psiElement].
+     * If [psiElement] is a [PsiMethod] it also adds all class and instance fields.
      */
-    fun findTypeElements(psiElement: PsiElement): Set<PsiTarget> {
-        if (psiElement is PsiTypeElement
-            // For wrapper classes with generics like List<T> only the generic type classes are returned
-            && (psiElement.type !is PsiClassReferenceType || (psiElement.type as PsiClassReferenceType).parameters.isEmpty())
-        ) {
-            val clazz = PsiTypesUtil.getPsiClass(psiElement.type);
-            return if (clazz != null) {
-                setOf(clazz)
-            } else {
-                return setOf()
-            }
+    fun findRelevantElements(psiElement: PsiElement): Set<PsiElement> {
+        if (psiElement is PsiTypeElement || psiElement is PsiMethodCallExpression) {
+            return setOf(psiElement)
         }
-        if (psiElement is PsiMethodCallExpression) {
-            val method = psiElement.resolveMethod()
-            // TODO: could also look at methodcall argument types
-            return if (method != null) {
-                setOf(method)
-            } else {
-                return setOf()
-            }
-        }
-
         var childElements = psiElement.children
         if (psiElement is PsiMethod && psiElement.parent is PsiClass) {
             childElements = childElements.plus((psiElement.parent as PsiClass).allFields)
         }
-        return findTypeElements(childElements).toSet()
+        return findRelevantElements(childElements).toSet()
+    }
+
+    /**
+     * Finds [PsiTarget]s to references used inside of [psiElement].
+     */
+    private fun findPsiTarget(psiElement: PsiElement): Set<PsiTarget> {
+        if (psiElement is PsiTypeElement) {
+            val type = psiElement.type
+            val clazz = PsiTypesUtil.getPsiClass(type) ?: return emptySet()
+            // Include generic types, e.g. String for List<String>
+            if (type is PsiClassReferenceType && type.parameters.isNotEmpty()) {
+                return setOf(clazz).plus(
+                    type.parameters
+                        .filterIsInstance<PsiClassReferenceType>()
+                        .mapNotNull { it.resolve() }
+                )
+            }
+            return setOf(clazz)
+        }
+        if (psiElement is PsiMethodCallExpression) {
+            val method = psiElement.resolveMethod()
+            // TODO: could also look at methodcall argument types
+            return if (method != null) setOf(method) else emptySet()
+        }
+
+        if (psiElement is PsiReferenceExpression) {
+            val resolvedTarget = psiElement.resolve()
+            return if (resolvedTarget is PsiTarget) setOf(resolvedTarget) else emptySet()
+        }
+        return emptySet()
     }
 
     /**
