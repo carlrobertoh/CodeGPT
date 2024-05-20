@@ -39,18 +39,16 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
         get() = InlineCompletionProviderID("CodeGPTInlineCompletionProvider")
 
     override suspend fun getSuggestion(request: InlineCompletionRequest): InlineCompletionSuggestion {
-        val project = request.editor.project
+        val editor = request.editor
+        val project = editor.project
         if (project == null) {
             logger.error("Could not find project")
             return InlineCompletionSuggestion.empty()
         }
 
         return InlineCompletionSuggestion.Default(channelFlow {
-            val infillRequest = withContext(Dispatchers.EDT) {
-                InfillRequestDetails.fromInlineCompletionRequest(request)
-            }
-            val (prefix, suffix) = withContext(Dispatchers.EDT) {
-                val caretOffset = request.editor.caretModel.offset
+            val (caretOffset, prefix, suffix) = withContext(Dispatchers.EDT) {
+                val caretOffset = editor.caretModel.offset
                 val prefix =
                     request.document.getText(TextRange(0, caretOffset))
                 val suffix =
@@ -60,9 +58,14 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
                             request.document.textLength
                         )
                     )
-                Pair(prefix, suffix)
+                Triple(caretOffset, prefix, suffix)
             }
-
+            val infillRequest = InfillRequestDetails.fromInlineRequestDetails(
+                editor,
+                caretOffset,
+                prefix,
+                suffix
+            )
             currentCall.set(
                 project.service<CodeCompletionService>().getCodeCompletionAsync(
                     infillRequest,
@@ -80,7 +83,7 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
                                     )
                             }
 
-                            request.editor.putUserData(CodeGPTKeys.PREVIOUS_INLAY_TEXT, inlineText)
+                            editor.putUserData(CodeGPTKeys.PREVIOUS_INLAY_TEXT, inlineText)
                             launch {
                                 try {
                                     trySend(InlineCompletionGrayTextElement(inlineText))

@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt.codecompletions.psi
 
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.vfs.VirtualFile
@@ -22,18 +23,18 @@ class CompletionContextService {
      * and returns the context as a set of source code [VirtualFile]s.
      */
     fun findContextFiles(editor: Editor, offset: Int): Set<VirtualFile> {
-        val psiFile = PsiManager.getInstance(editor.project!!).findFile(editor.virtualFile!!)!!
-        val psiElement = psiFile.findElementAt(offset)
-        if (psiElement == null) {
-            return setOf();
+        return ReadAction.compute<Set<VirtualFile>, Throwable> {
+            val psiFile = PsiManager.getInstance(editor.project!!).findFile(editor.virtualFile!!)!!
+            val psiElement = psiFile.findElementAt(offset) ?: return@compute setOf()
+            val contextFinderClass = CONTEXT_FINDERS[psiElement.language.id]
+                ?: // No context finder for the language implemented yet
+                return@compute setOf()
+            val contextFinder = ApplicationManager.getApplication().getService(contextFinderClass)
+                ?: // A context finder for the language exists but not available in the used IDE
+                return@compute setOf()
+            return@compute contextFinder.findContextSourceFiles(psiElement)
+                .minus(editor.virtualFile)
         }
-        val psiParserClass = CONTEXT_FINDERS[psiElement.language.id]
-            ?: // No context finder for the language implemented yet
-            return setOf()
-        val psiParser = ApplicationManager.getApplication().getService(psiParserClass)
-            ?: // A context finder for the language exists but not available in the used IDE
-            return setOf()
-        return psiParser.findContextSourceFiles(psiElement, editor).minus(editor.virtualFile)
 
     }
 }

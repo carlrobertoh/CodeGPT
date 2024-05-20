@@ -8,5 +8,5 @@ interface LanguageContextFinder {
     /**
      * Determines [PsiElement]s relevant to the context of [psiElement] and returns their source code files.
      */
-    fun findContextSourceFiles(psiElement: PsiElement, editor: Editor): Set<VirtualFile>
+    fun findContextSourceFiles(psiElement: PsiElement): Set<VirtualFile>
 }

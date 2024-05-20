@@ -1,6 +1,5 @@
 package ee.carlrobert.codegpt.codecompletions.psi
 
-import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.*
 import com.intellij.psi.impl.source.PsiClassReferenceType
@@ -13,11 +12,11 @@ class JavaContextFinder : LanguageContextFinder {
      * Finds enclosing [PsiMethod] or [PsiClass] of [psiElement] and
      * determines source code files of all referenced classes or methods.
      */
-    override fun findContextSourceFiles(psiElement: PsiElement, editor: Editor): Set<VirtualFile> {
+    override fun findContextSourceFiles(psiElement: PsiElement): Set<VirtualFile> {
         val enclosingElement = findEnclosingElement(psiElement)
         val relevantElements = findRelevantElements(enclosingElement)
         val psiTargets = relevantElements.map { findPsiTarget(it) }.flatten().distinct()
-        return psiTargets.mapNotNull { findSourceFile(it, editor) }.toSet()
+        return psiTargets.mapNotNull { findSourceFile(it) }.toSet()
     }
 
 
@@ -79,7 +78,7 @@ class JavaContextFinder : LanguageContextFinder {
      * If [psiTarget] is a Java class defined in the user's project the corresponding source code
      * [VirtualFile] is returned, otherwise `null` is returned.
      */
-    private fun findSourceFile(psiTarget: PsiTarget, editor: Editor): VirtualFile? {
+    private fun findSourceFile(psiTarget: PsiTarget): VirtualFile? {
         // TODO: If e.g. only a single method is targeted we could also just use the method's source code
         //  not its entire class source code
         val file = psiTarget.navigationElement.containingFile.virtualFile

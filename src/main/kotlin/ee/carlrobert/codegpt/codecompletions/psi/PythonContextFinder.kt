@@ -19,11 +19,11 @@ class PythonContextFinder : LanguageContextFinder {
      * Finds enclosing [PyFunction] or [PyClass] of [psiElement] and
      * determines source code files of all used [PyReferenceExpression]s for the context.
      */
-    override fun findContextSourceFiles(psiElement: PsiElement, editor: Editor): Set<VirtualFile> {
+    override fun findContextSourceFiles(psiElement: PsiElement): Set<VirtualFile> {
         val enclosingElement = findEnclosingElement(psiElement)
         val referenceExpressions = findRelevantElements(enclosingElement, enclosingElement)
         val declarations =
-            referenceExpressions.map { findDeclarations(it, editor.project!!) }.flatten().distinct()
+            referenceExpressions.map { findDeclarations(it, psiElement.containingFile.project) }.flatten().distinct()
         return declarations.mapNotNull { findSourceFile(it) }.toSet()
     }
 
@@ -31,7 +31,7 @@ class PythonContextFinder : LanguageContextFinder {
         pyReference: PyReferenceExpression,
         project: Project
     ): Set<PsiElement> {
-        // TODO: slow operations on EDT
+        // see https://github.com/JetBrains/intellij-community/blob/ae5290861a1f41b93c48c475239a52faa94b97b0/python/python-psi-impl/src/com/jetbrains/python/codeInsight/PyTargetElementEvaluator.java#L51-L54
         val declaration = PyResolveUtil.resolveDeclaration(
             pyReference.reference,
             PyResolveContext.defaultContext(
@@ -108,8 +108,6 @@ class PythonContextFinder : LanguageContextFinder {
     }
 
     private fun findSourceFile(psiElement: PsiElement): VirtualFile? {
-        // see https://github.com/JetBrains/intellij-community/blob/ae5290861a1f41b93c48c475239a52faa94b97b0/python/python-psi-impl/src/com/jetbrains/python/codeInsight/PyTargetElementEvaluator.java#L51-L54
-        // TODO: Slow operations are prohibited on EDT
         val file = psiElement.navigationElement.containingFile.virtualFile
         return if (file.isInLocalFileSystem) {
             file
