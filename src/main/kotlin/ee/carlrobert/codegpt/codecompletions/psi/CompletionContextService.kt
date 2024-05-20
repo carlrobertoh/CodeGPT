@@ -25,13 +25,13 @@ class CompletionContextService {
     fun findContextFiles(editor: Editor, offset: Int): Set<VirtualFile> {
         return ReadAction.compute<Set<VirtualFile>, Throwable> {
             val psiFile = PsiManager.getInstance(editor.project!!).findFile(editor.virtualFile!!)!!
-            val psiElement = psiFile.findElementAt(offset) ?: return@compute setOf()
+            val psiElement = psiFile.findElementAt(offset) ?: return@compute emptySet()
             val contextFinderClass = CONTEXT_FINDERS[psiElement.language.id]
                 ?: // No context finder for the language implemented yet
-                return@compute setOf()
+                return@compute emptySet()
             val contextFinder = ApplicationManager.getApplication().getService(contextFinderClass)
                 ?: // A context finder for the language exists but not available in the used IDE
-                return@compute setOf()
+                return@compute emptySet()
             return@compute contextFinder.findContextSourceFiles(psiElement)
                 .minus(editor.virtualFile)
         }

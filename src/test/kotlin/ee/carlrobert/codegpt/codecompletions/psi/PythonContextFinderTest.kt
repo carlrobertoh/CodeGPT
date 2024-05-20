@@ -54,13 +54,13 @@ class PythonContextFinderTest : BasePlatformTestCase() {
             .hasSize(7)
             .extracting("name")
             .containsExactly(
+                "test",
                 "int",
                 "List",
                 "str",
                 "randint",
                 "range",
                 "n",
-                "test",
             )
     }
 

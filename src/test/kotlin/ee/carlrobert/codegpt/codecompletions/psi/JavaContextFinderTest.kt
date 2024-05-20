@@ -12,21 +12,21 @@ class JavaContextFinderTest : BasePlatformTestCase() {
 
     private val contextFinder = JavaContextFinder()
 
-    fun testFindEnclosingElementMethod() {
+    fun testFindEnclosingContextMethod() {
         val file = myFixture.configureByText(
             "Util.java",
             getResourceContent("/codecompletions/psi/java.txt")
         )
         val psiElement =
             file.findElementAt(myFixture.editor.visualPositionToOffset(VisualPosition(15, 4)))
-        val enclosingElement = contextFinder.findEnclosingElement(psiElement!!)
+        val enclosingElement = contextFinder.findEnclosingContext(psiElement!!)
         assertThat(enclosingElement)
             .isInstanceOf(PsiMethod::class.java)
             .extracting("name")
             .isEqualTo("randomStrings")
     }
 
-    fun testFindEnclosingElementClass() {
+    fun testFindEnclosingContextClass() {
         val file = myFixture.configureByText(
             "Util.java",
             getResourceContent("/codecompletions/psi/java.txt")
@@ -34,7 +34,7 @@ class JavaContextFinderTest : BasePlatformTestCase() {
         val psiElement =
             file.findElementAt(myFixture.editor.visualPositionToOffset(VisualPosition(13, 2)))
         val contextFinder = contextFinder
-        val enclosingElement = contextFinder.findEnclosingElement(psiElement!!)
+        val enclosingElement = contextFinder.findEnclosingContext(psiElement!!)
         assertThat(enclosingElement)
             .isInstanceOf(PsiClass::class.java)
             .extracting("name")
@@ -48,15 +48,15 @@ class JavaContextFinderTest : BasePlatformTestCase() {
         )
         val psiMethod =
             (file as PsiJavaFile).classes[0].findMethodsByName("randomStrings", false)[0]
-        val relevantElements = contextFinder.findRelevantElements(psiMethod)
+        val relevantElements = contextFinder.findRelevantElements(psiMethod, psiMethod)
         assertThat(relevantElements)
             .hasSize(4)
             .extracting("text")
             .containsExactly(
+                "String",
                 "List<String>",
                 "int",
-                "IntStream.range(0, number).mapToObj(i -> Math.floor(100 * Math.random()) + \"\").toList()",
-                "String"
+                "IntStream.range(0, number).mapToObj(i -> Math.floor(100 * Math.random()) + \"\").toList()"
             )
     }
 

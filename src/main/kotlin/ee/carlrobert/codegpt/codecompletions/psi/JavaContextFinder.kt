@@ -3,8 +3,10 @@ package ee.carlrobert.codegpt.codecompletions.psi
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.*
 import com.intellij.psi.impl.source.PsiClassReferenceType
+import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.PsiTypesUtil
-import com.intellij.psi.util.findParentOfType
+import kotlinx.collections.immutable.toImmutableSet
+
 
 class JavaContextFinder : LanguageContextFinder {
 
@@ -14,64 +16,89 @@ class JavaContextFinder : LanguageContextFinder {
      */
     override fun findContextSourceFiles(psiElement: PsiElement): Set<VirtualFile> {
         val enclosingElement = findEnclosingElement(psiElement)
-        val relevantElements = findRelevantElements(enclosingElement)
+        val relevantElements = findRelevantElements(enclosingElement, enclosingElement)
         val psiTargets = relevantElements.map { findPsiTarget(it) }.flatten().distinct()
         return psiTargets.mapNotNull { findSourceFile(it) }.toSet()
     }
 
+    private fun findEnclosingElement(psiElement: PsiElement): PsiElement =
+        findEnclosingContext(psiElement)
+            ?: PsiTreeUtil.prevCodeLeaf(psiElement)?.let { findEnclosingContext(it) } ?: psiElement
 
-    fun findEnclosingElement(psiElement: PsiElement): PsiElement {
-        return psiElement.findParentOfType<PsiMethod>(false)
-            ?: psiElement.findParentOfType<PsiClass>(false) ?: psiElement
-    }
+    fun findEnclosingContext(psiElement: PsiElement) =
+        PsiTreeUtil.findFirstContext(psiElement, true) { it is PsiMethod || it is PsiClass }
 
-    private fun findRelevantElements(psiElement: Array<PsiElement>): Set<PsiElement> {
-        return psiElement.map { findRelevantElements(it) }.flatten().distinctBy { it.text }.toSet()
-    }
+
+    private fun findRelevantElements(
+        psiElement: Collection<PsiElement>,
+        rootElement: PsiElement
+    ): Set<PsiElement> = psiElement.map { findRelevantElements(it, rootElement) }.flatten()
+        .distinctBy { it.text }.toSet()
 
     /**
      * Finds relevant [PsiTypeElement]s and [PsiMethodCallExpression]s that are used inside of [psiElement].
-     * If [psiElement] is a [PsiMethod] it also adds all class and instance fields.
+     * If [psiElement] is a [PsiMethod] inside of a [PsiClass] it also adds all class and instance fields.
      */
-    fun findRelevantElements(psiElement: PsiElement): Set<PsiElement> {
-        if (psiElement is PsiTypeElement || psiElement is PsiMethodCallExpression) {
-            return setOf(psiElement)
-        }
-        var childElements = psiElement.children
-        if (psiElement is PsiMethod && psiElement.parent is PsiClass) {
-            childElements = childElements.plus((psiElement.parent as PsiClass).allFields)
-        }
-        return findRelevantElements(childElements).toSet()
+    fun findRelevantElements(psiElement: PsiElement, rootElement: PsiElement): Set<PsiElement> {
+        val resultSet = mutableSetOf<PsiElement>()
+        psiElement.accept(object : PsiRecursiveElementWalkingVisitor() {
+            override fun visitElement(element: PsiElement) {
+                when (element) {
+                    is PsiTypeElement, is PsiMethodCallExpression -> resultSet.add(element)
+                    is PsiMethod -> {
+                        if (rootElement is PsiClass) {
+                            // If the cursor was not inside a PsiMethod but inside a PsiClass, do not look into the method
+                            return
+                        }
+                        val enclosingContext = findEnclosingContext(element)
+                        if (enclosingContext is PsiClass) {
+                            // add class and instance fields of enclosing class
+                            resultSet.addAll(
+                                findRelevantElements(
+                                    (element.parent as PsiClass).allFields.toSet(),
+                                    rootElement
+                                )
+                            )
+                        }
+                        super.visitElement(element)
+                    }
+
+                    else -> super.visitElement(element)
+                }
+            }
+        })
+        return resultSet.distinctBy { it.text }.toImmutableSet()
     }
 
     /**
      * Finds [PsiTarget]s to references used inside of [psiElement].
      */
     private fun findPsiTarget(psiElement: PsiElement): Set<PsiTarget> {
-        if (psiElement is PsiTypeElement) {
-            val type = psiElement.type
-            val clazz = PsiTypesUtil.getPsiClass(type) ?: return emptySet()
-            // Include generic types, e.g. String for List<String>
-            if (type is PsiClassReferenceType && type.parameters.isNotEmpty()) {
-                return setOf(clazz).plus(
-                    type.parameters
-                        .filterIsInstance<PsiClassReferenceType>()
-                        .mapNotNull { it.resolve() }
-                )
+        return when (psiElement) {
+            is PsiTypeElement -> {
+                val type = psiElement.type
+                val clazz = PsiTypesUtil.getPsiClass(type) ?: return emptySet()
+                // Include generic types, e.g. String for List<String>
+                if (type is PsiClassReferenceType && type.parameters.isNotEmpty()) {
+                    return setOf(clazz).plus(
+                        type.parameters
+                            .filterIsInstance<PsiClassReferenceType>()
+                            .mapNotNull { it.resolve() }
+                    )
+                }
+                setOf(clazz)
             }
-            return setOf(clazz)
-        }
-        if (psiElement is PsiMethodCallExpression) {
-            val method = psiElement.resolveMethod()
-            // TODO: could also look at methodcall argument types
-            return if (method != null) setOf(method) else emptySet()
-        }
 
-        if (psiElement is PsiReferenceExpression) {
-            val resolvedTarget = psiElement.resolve()
-            return if (resolvedTarget is PsiTarget) setOf(resolvedTarget) else emptySet()
+            is PsiMethodCallExpression -> psiElement.resolveMethod()?.let { setOf(it) }
+                ?: emptySet()
+
+            is PsiReferenceExpression -> {
+                val resolvedTarget = psiElement.resolve()
+                if (resolvedTarget is PsiTarget) setOf(resolvedTarget) else emptySet()
+            }
+
+            else -> emptySet()
         }
-        return emptySet()
     }
 
     /**
