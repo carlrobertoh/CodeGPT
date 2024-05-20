@@ -28,7 +28,7 @@ enum class InfillPromptTemplate(val label: String, val stopTokens: List<String>?
                 infillDetails.context.contextFiles.map {
                     "<|file_separator|>${it.path} \n" +
                             it.readText()
-                }.joinToString { it + "\n" } +
+                }.joinToString("") { it + "\n" } +
                         "<|file_separator|>${infillDetails.context.file.path} \n" +
                         infillPrompt
             }
@@ -46,7 +46,7 @@ enum class InfillPromptTemplate(val label: String, val stopTokens: List<String>?
                         infillDetails.context.contextFiles.map {
                             "<file_sep>${it.path} \n" +
                                     it.readText()
-                        }.joinToString { it + "\n" } +
+                        }.joinToString("") { it + "\n" } +
                         "<file_sep>${infillDetails.context.file.path} \n" +
                         infillPrompt
             }
@@ -66,7 +66,7 @@ enum class InfillPromptTemplate(val label: String, val stopTokens: List<String>?
                 infillPrompt
             } else {
                 infillDetails.context.contextFiles.map { "#${it.path}\n" + it.readText() }
-                    .joinToString { it + "\n" } +
+                    .joinToString("") { it + "\n" } +
                         "#${infillDetails.context.file.path}\n" +
                         infillPrompt
             }
@@ -84,7 +84,7 @@ enum class InfillPromptTemplate(val label: String, val stopTokens: List<String>?
                         infillDetails.context.contextFiles.map {
                             "<filename>${it.path}\n" +
                                     it.readText() + "<|endoftext|>"
-                        }.joinToString { it + "\n" } +
+                        }.joinToString("") { it + "\n" } +
                         "<filename>${infillDetails.context.file.path} \n" +
                         infillPrompt
             }
