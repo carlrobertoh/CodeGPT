@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.completions;
 
+import static ee.carlrobert.codegpt.completions.HuggingFaceModel.Model.P3M;
 import static ee.carlrobert.codegpt.completions.HuggingFaceModel.Model.SC3;
 import static ee.carlrobert.codegpt.completions.llama.LlamaModel.getDownloadedMarker;
 import static ee.carlrobert.codegpt.completions.llama.LlamaModel.getLlamaModelsPath;
@@ -123,10 +124,20 @@ public enum HuggingFaceModel {
   STABLE_CODE_3B_Q5_K_M(SC3, 5, "stable-code-instruct-3b-Q5_K_M.gguf", 1.99),
   STABLE_CODE_3B_Q6_K(SC3, 6, "stable-code-instruct-3b-Q6_K.gguf", 2.3),
   STABLE_CODE_3B_Q8_0(SC3, 8, "stable-code-instruct-3b-Q8_0.gguf", 2.97),
+
+  PHI_3_14B_128K_IQ3_M(P3M, 3, "Phi-3-medium-128k-instruct-IQ3_M.gguf", 6.47),
+  PHI_3_14B_128K_Q3_K_M(P3M, 3, "Phi-3-medium-128k-instruct-Q3_K_M.gguf", 6.92),
+  PHI_3_14B_128K_IQ4_NL(P3M, 4, "Phi-3-medium-128k-instruct-IQ4_NL.gguf", 7.9),
+  PHI_3_14B_128K_Q4_K_M(P3M, 4, "Phi-3-medium-128k-instruct-Q4_K_M.gguf", 8.57),
+  PHI_3_14B_128K_Q5_K_M(P3M, 5, "Phi-3-medium-128k-instruct-Q5_K_M.gguf", 10.1),
+  PHI_3_14B_128K_Q6_K(P3M, 6, "Phi-3-medium-128k-instruct-Q6_K.gguf", 11.5),
+  PHI_3_14B_128K_Q8_0(P3M, 8, "Phi-3-medium-128k-instruct-Q8_0.gguf", 14.8),
   ;
 
   enum Model {
-    SC3("bartowski", 3, "stable-code-instruct-3b-GGUF");
+    SC3("bartowski", 3, "stable-code-instruct-3b-GGUF"),
+    P3M("bartowski", 14, "Phi-3-medium-128k-instruct-GGUF")
+    ;
 
     private final String user;
     private final int parameterSize;
