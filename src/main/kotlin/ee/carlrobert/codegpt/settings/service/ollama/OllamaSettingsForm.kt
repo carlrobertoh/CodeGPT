@@ -13,6 +13,7 @@ import ee.carlrobert.codegpt.CodeGPTBundle
 import ee.carlrobert.codegpt.settings.service.CodeCompletionConfigurationForm
 import ee.carlrobert.codegpt.ui.OverlayUtil
 import ee.carlrobert.codegpt.ui.UIUtil
+import ee.carlrobert.codegpt.ui.URLTextField
 import ee.carlrobert.llm.client.ollama.OllamaClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -46,7 +47,7 @@ class OllamaSettingsForm {
         modelComboBox = ComboBox(emptyModelsComboBoxModel).apply {
             isEnabled = false
         }
-        hostField = JBTextField().apply {
+        hostField = URLTextField().apply {
             text = settings.host
             whenTextChangedFromUi {
                 modelComboBox.model = emptyModelsComboBoxModel
