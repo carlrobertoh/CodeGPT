@@ -186,6 +186,30 @@ public enum PromptTemplate {
               .toString();
     }
   },
+  STABLE_CODE("Stable Code Instruct", List.of("<|endoftext|>", "<|im_end|>")) {
+    @Override
+    public String buildPrompt(String systemPrompt, String userPrompt, List<Message> history) {
+      StringBuilder prompt = new StringBuilder();
+
+      if (systemPrompt != null && !systemPrompt.isBlank()) {
+        prompt.append("<|im_start|>system\n")
+                .append(systemPrompt)
+                .append("<|im_end|>\n");
+      }
+
+      for (Message message : history) {
+        prompt.append("<|im_start|>user\n")
+                .append(message.getPrompt())
+                .append("<|im_end|>\n<|im_start|>assistant\n")
+                .append(message.getResponse()).append("<|im_end|>\n");
+      }
+
+      return prompt.append("<|im_start|>user\n")
+              .append(userPrompt)
+              .append("<|im_end|>\n<|im_start|>assistant\n")
+              .toString();
+    }
+  },
   ALPACA("Alpaca/Vicuna") {
     @Override
     public String buildPrompt(String systemPrompt, String userPrompt, List<Message> history) {

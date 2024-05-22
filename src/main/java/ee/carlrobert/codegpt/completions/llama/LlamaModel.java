@@ -120,6 +120,25 @@ public enum LlamaModel {
           HuggingFaceModel.PHI_3_3_8B_4K_Q6_K,
           HuggingFaceModel.PHI_3_3_8B_4K_Q8_0,
           HuggingFaceModel.PHI_3_3_8B_4K_FP16)),
+  PHI_3_MEDIUM(
+      "Phi-3 Medium 128K", """
+      The Phi-3-Medium-128K-Instruct is a 14B parameters, lightweight, state-of-the-art open model \
+      trained with the Phi-3 datasets that includes both synthetic data and the filtered publicly \
+      available websites data with a focus on high-quality and reasoning dense properties. \
+      The model has underwent a post-training process that incorporates both supervised fine-tuning\
+       and direct preference optimization for the instruction following and safety measures. \
+      When assessed against benchmarks testing common sense, language understanding, math, code, \
+      long context and logical reasoning, Phi-3-Medium-128K-Instruct showcased a robust and \
+      state-of-the-art performance among models of the same-size and next-size-up.""",
+      PromptTemplate.PHI_3,
+      List.of(
+          HuggingFaceModel.PHI_3_14B_128K_IQ3_M,
+          HuggingFaceModel.PHI_3_14B_128K_Q3_K_M,
+          HuggingFaceModel.PHI_3_14B_128K_IQ4_NL,
+          HuggingFaceModel.PHI_3_14B_128K_Q4_K_M,
+          HuggingFaceModel.PHI_3_14B_128K_Q5_K_M,
+          HuggingFaceModel.PHI_3_14B_128K_Q6_K,
+          HuggingFaceModel.PHI_3_14B_128K_Q8_0)),
   CODE_GEMMA(
       "CodeGemma Instruct",
       "CodeGemma Instruct is the first in a series of coding models released by Google. "
@@ -151,6 +170,24 @@ public enum LlamaModel {
           HuggingFaceModel.CODE_QWEN_1_5_7B_Q4_K_M,
           HuggingFaceModel.CODE_QWEN_1_5_7B_Q5_K_M,
           HuggingFaceModel.CODE_QWEN_1_5_7B_Q6_K)),
+  STABLE_CODE(
+      "Stable Code Instruct", """
+      stable-code-instruct-3b is a 2.7B billion parameter decoder-only language model tuned from \
+      stable-code-3b. This model was trained on a mix of publicly available datasets, synthetic \
+      datasets using Direct Preference Optimization (DPO).
+      This instruct tune demonstrates state-of-the-art performance (compared to models of similar \
+      size) on the MultiPL-E metrics across multiple programming languages tested using BigCode's \
+      Evaluation Harness, and on the code portions of MT Bench. The model is fine tuned to make it \
+      usable in tasks like general purpose Code/Software Engineering like conversations and \
+      SQL related generation and conversation.""",
+      PromptTemplate.STABLE_CODE,
+      InfillPromptTemplate.CODE_QWEN,
+      List.of(
+          HuggingFaceModel.STABLE_CODE_3B_Q3_K_M,
+          HuggingFaceModel.STABLE_CODE_3B_Q4_K_M,
+          HuggingFaceModel.STABLE_CODE_3B_Q5_K_M,
+          HuggingFaceModel.STABLE_CODE_3B_Q6_K,
+          HuggingFaceModel.STABLE_CODE_3B_Q8_0)),
   ;
 
   private final String label;
@@ -267,6 +304,10 @@ public enum LlamaModel {
             .sorted()
             .collect(LinkedHashSet::new, ModelSize.skipSameSize(), Set::addAll)
             .stream().toList();
+  }
+
+  public static List<LlamaModel> getSorted() {
+    return Arrays.stream(values()).sorted(Comparator.comparing(Enum::name)).toList();
   }
 
   public record ModelSize(int size, boolean downloaded) implements Comparable<ModelSize> {

@@ -32,6 +32,7 @@ import ee.carlrobert.codegpt.settings.service.llama.LlamaSettingsState;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import ee.carlrobert.codegpt.ui.UIUtil.RadioButtonWithLayout;
+import ee.carlrobert.codegpt.ui.URLTextField;
 import java.util.List;
 import java.util.Map;
 import javax.swing.JButton;
@@ -87,7 +88,7 @@ public class LlamaServerPreferencesForm {
         settings.getAdditionalEnvironmentVariables(), 30);
     additionalEnvironmentVariablesField.setEnabled(!serverRunning);
 
-    baseHostField = new JBTextField(settings.getBaseHost(), 30);
+    baseHostField = new URLTextField(settings.getBaseHost(), 30);
     apiKeyField = new JBPasswordField();
     apiKeyField.setColumns(30);
     ApplicationManager.getApplication().executeOnPooledThread(() -> {
