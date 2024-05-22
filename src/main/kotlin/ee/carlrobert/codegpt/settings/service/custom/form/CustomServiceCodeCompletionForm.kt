@@ -8,7 +8,6 @@ import com.intellij.openapi.ui.panel.ComponentPanelBuilder
 import com.intellij.ui.EnumComboBoxModel
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBLabel
-import com.intellij.ui.components.JBTextField
 import com.intellij.util.ui.FormBuilder
 import ee.carlrobert.codegpt.CodeGPTBundle
 import ee.carlrobert.codegpt.codecompletions.CodeCompletionRequestFactory
@@ -19,6 +18,7 @@ import ee.carlrobert.codegpt.settings.configuration.Placeholder
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceCodeCompletionSettingsState
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceFormTabbedPane
 import ee.carlrobert.codegpt.ui.OverlayUtil
+import ee.carlrobert.codegpt.ui.URLTextField
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails
 import ee.carlrobert.llm.completion.CompletionEventListener
 import okhttp3.sse.EventSource
@@ -48,7 +48,7 @@ class CustomServiceCodeCompletionForm(
             }
         }
     private val promptTemplateHelpText = JBLabel(General.ContextHelp)
-    private val urlField = JBTextField(state.url, 30)
+    private val urlField = URLTextField(state.url, 30)
     private val tabbedPane = CustomServiceFormTabbedPane(state.headers, state.body)
     private val testConnectionButton = JButton(
         CodeGPTBundle.get("settingsConfigurable.service.custom.openai.testConnection.label")
