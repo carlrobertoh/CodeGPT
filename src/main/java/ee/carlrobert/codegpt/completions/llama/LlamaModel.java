@@ -120,6 +120,25 @@ public enum LlamaModel {
           HuggingFaceModel.PHI_3_3_8B_4K_Q6_K,
           HuggingFaceModel.PHI_3_3_8B_4K_Q8_0,
           HuggingFaceModel.PHI_3_3_8B_4K_FP16)),
+  PHI_3_MEDIUM(
+      "Phi-3 Medium 128K", """
+      The Phi-3-Medium-128K-Instruct is a 14B parameters, lightweight, state-of-the-art open model \
+      trained with the Phi-3 datasets that includes both synthetic data and the filtered publicly \
+      available websites data with a focus on high-quality and reasoning dense properties. \
+      The model has underwent a post-training process that incorporates both supervised fine-tuning\
+       and direct preference optimization for the instruction following and safety measures. \
+      When assessed against benchmarks testing common sense, language understanding, math, code, \
+      long context and logical reasoning, Phi-3-Medium-128K-Instruct showcased a robust and \
+      state-of-the-art performance among models of the same-size and next-size-up.""",
+      PromptTemplate.PHI_3,
+      List.of(
+          HuggingFaceModel.PHI_3_14B_128K_IQ3_M,
+          HuggingFaceModel.PHI_3_14B_128K_Q3_K_M,
+          HuggingFaceModel.PHI_3_14B_128K_IQ4_NL,
+          HuggingFaceModel.PHI_3_14B_128K_Q4_K_M,
+          HuggingFaceModel.PHI_3_14B_128K_Q5_K_M,
+          HuggingFaceModel.PHI_3_14B_128K_Q6_K,
+          HuggingFaceModel.PHI_3_14B_128K_Q8_0)),
   CODE_GEMMA(
       "CodeGemma Instruct",
       "CodeGemma Instruct is the first in a series of coding models released by Google. "
