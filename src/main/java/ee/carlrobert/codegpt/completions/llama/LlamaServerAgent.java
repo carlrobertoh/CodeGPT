@@ -50,7 +50,7 @@ public final class LlamaServerAgent implements Disposable {
         serverProgressPanel.displayText(
             CodeGPTBundle.get("llamaServerAgent.buildingProject.description"));
         makeProcessHandler = new OSProcessHandler(
-            getMakeCommandLine(params.additionalBuildParameters()));
+            getMakeCommandLine(params));
         makeProcessHandler.addProcessListener(
             getMakeProcessListener(params, onSuccess, onServerStopped));
         makeProcessHandler.startNotify();
@@ -177,12 +177,13 @@ public final class LlamaServerAgent implements Disposable {
     OverlayUtil.showClosableBalloon(errorText, MessageType.ERROR, activeServerProgressPanel);
   }
 
-  private static GeneralCommandLine getMakeCommandLine(List<String> additionalCompileParameters) {
+  private static GeneralCommandLine getMakeCommandLine(LlamaServerStartupParams params) {
     GeneralCommandLine commandLine = new GeneralCommandLine().withCharset(StandardCharsets.UTF_8);
     commandLine.setExePath("make");
     commandLine.withWorkDirectory(CodeGPTPlugin.getLlamaSourcePath());
     commandLine.addParameters("-j");
-    commandLine.addParameters(additionalCompileParameters);
+    commandLine.addParameters(params.additionalBuildParameters());
+    commandLine.withEnvironment(params.additionalEnvironmentVariables());
     commandLine.setRedirectErrorStream(false);
     return commandLine;
   }
@@ -197,6 +198,7 @@ public final class LlamaServerAgent implements Disposable {
         "--port", String.valueOf(params.port()),
         "-t", String.valueOf(params.threads()));
     commandLine.addParameters(params.additionalRunParameters());
+    commandLine.withEnvironment(params.additionalEnvironmentVariables());
     commandLine.setRedirectErrorStream(false);
     return commandLine;
   }
