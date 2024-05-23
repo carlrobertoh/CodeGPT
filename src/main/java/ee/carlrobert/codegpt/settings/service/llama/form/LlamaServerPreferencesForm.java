@@ -58,6 +58,7 @@ public class LlamaServerPreferencesForm {
   private final IntegerField threadsField;
   private final JBTextField additionalParametersField;
   private final JBTextField additionalBuildParametersField;
+  private final JBTextField additionalEnvironmentVariablesField;
   private final ChatPromptTemplatePanel remotePromptTemplatePanel;
   private final InfillPromptTemplatePanel infillPromptTemplatePanel;
 
@@ -82,6 +83,10 @@ public class LlamaServerPreferencesForm {
 
     additionalBuildParametersField = new JBTextField(settings.getAdditionalBuildParameters(), 30);
     additionalBuildParametersField.setEnabled(!serverRunning);
+
+    additionalEnvironmentVariablesField = new JBTextField(
+        settings.getAdditionalEnvironmentVariables(), 30);
+    additionalEnvironmentVariablesField.setEnabled(!serverRunning);
 
     baseHostField = new URLTextField(settings.getBaseHost(), 30);
     apiKeyField = new JBPasswordField();
@@ -132,6 +137,7 @@ public class LlamaServerPreferencesForm {
     threadsField.setValue(state.getThreads());
     additionalParametersField.setText(state.getAdditionalParameters());
     additionalBuildParametersField.setText(state.getAdditionalBuildParameters());
+    additionalEnvironmentVariablesField.setText(state.getAdditionalEnvironmentVariables());
     remotePromptTemplatePanel.setPromptTemplate(state.getRemoteModelPromptTemplate()); // ?
     infillPromptTemplatePanel.setPromptTemplate(state.getRemoteModelInfillPromptTemplate());
     apiKeyField.setText(CredentialsStore.getCredential(LLAMA_API_KEY));
@@ -204,6 +210,14 @@ public class LlamaServerPreferencesForm {
                 createComment(
                     "settingsConfigurable.service.llama.additionalBuildParameters.comment"))
             .addVerticalGap(4)
+            .addLabeledComponent(
+                CodeGPTBundle.get(
+                    "settingsConfigurable.service.llama.additionalEnvironmentVariables.label"),
+                additionalEnvironmentVariablesField)
+            .addComponentToRightColumn(
+                createComment(
+                    "settingsConfigurable.service.llama.additionalEnvironmentVariables.comment"))
+            .addVerticalGap(4)
             .addComponentFillVertically(new JPanel(), 0)
             .getPanel()))
         .getPanel());
@@ -236,7 +250,8 @@ public class LlamaServerPreferencesForm {
                 getThreads(),
                 getServerPort(),
                 getListOfAdditionalParameters(),
-                getListOfAdditionalBuildParameters()
+                getListOfAdditionalBuildParameters(),
+                getMapOfAdditionalEnvironmentVariables()
             ),
             serverProgressPanel,
             () -> {
@@ -316,6 +331,7 @@ public class LlamaServerPreferencesForm {
     threadsField.setEnabled(enabled);
     additionalParametersField.setEnabled(enabled);
     additionalBuildParametersField.setEnabled(enabled);
+    additionalEnvironmentVariablesField.setEnabled(enabled);
   }
 
   public boolean isRunLocalServer() {
@@ -360,6 +376,15 @@ public class LlamaServerPreferencesForm {
 
   public List<String> getListOfAdditionalBuildParameters() {
     return LlamaSettings.getAdditionalParametersList(additionalBuildParametersField.getText());
+  }
+
+  public String getAdditionalEnvironmentVariables() {
+    return additionalEnvironmentVariablesField.getText();
+  }
+
+  public Map<String, String> getMapOfAdditionalEnvironmentVariables() {
+    return LlamaSettings.getAdditionalEnvironmentVariablesMap(
+        additionalEnvironmentVariablesField.getText());
   }
 
   public PromptTemplate getPromptTemplate() {
