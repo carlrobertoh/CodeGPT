@@ -116,6 +116,7 @@ object CodeCompletionRequestFactory {
                 OllamaParameters.Builder()
                     .stop(settings.fimTemplate.stopTokens)
                     .numPredict(getMaxTokens(details.prefix, details.suffix))
+                    .temperature(0.4)
                     .build()
             )
             .setRaw(true)
