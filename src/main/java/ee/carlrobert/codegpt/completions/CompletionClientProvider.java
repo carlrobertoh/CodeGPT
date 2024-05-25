@@ -104,9 +104,14 @@ public class CompletionClientProvider {
         .getService(OllamaSettings.class)
         .getState()
         .getHost();
-    return new OllamaClient.Builder()
-        .setHost(host)
-        .build(getDefaultClientBuilder());
+    var builder = new OllamaClient.Builder()
+        .setHost(host);
+
+    String apiKey = getCredential(CredentialKey.OLLAMA_API_KEY);
+    if (apiKey != null && !apiKey.isBlank()) {
+      builder.setApiKey(apiKey);
+    }
+    return builder.build(getDefaultClientBuilder());
   }
 
 

@@ -7,9 +7,13 @@ import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.observable.util.whenTextChangedFromUi
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.TitledSeparator
+import com.intellij.ui.components.JBPasswordField
 import com.intellij.ui.components.JBTextField
 import com.intellij.util.ui.FormBuilder
 import ee.carlrobert.codegpt.CodeGPTBundle
+import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.OLLAMA_API_KEY
+import ee.carlrobert.codegpt.credentials.CredentialsStore.getCredential
+import ee.carlrobert.codegpt.credentials.CredentialsStore.setCredential
 import ee.carlrobert.codegpt.settings.service.CodeCompletionConfigurationForm
 import ee.carlrobert.codegpt.ui.OverlayUtil
 import ee.carlrobert.codegpt.ui.UIUtil
@@ -31,6 +35,7 @@ class OllamaSettingsForm {
     private val hostField: JBTextField
     private val modelComboBox: ComboBox<String>
     private val codeCompletionConfigurationForm: CodeCompletionConfigurationForm
+    private val apiKeyField: JBPasswordField
 
     companion object {
         private val logger = thisLogger()
@@ -55,6 +60,12 @@ class OllamaSettingsForm {
             }
         }
         refreshModelsButton.addActionListener { refreshModels() }
+        apiKeyField = JBPasswordField().apply {
+            columns = 30
+            text = runBlocking(Dispatchers.IO) {
+                getCredential(OLLAMA_API_KEY)
+            }
+        }
     }
 
     fun getForm(): JPanel = FormBuilder.createFormBuilder()
@@ -73,6 +84,13 @@ class OllamaSettingsForm {
                         add(refreshModelsButton, BorderLayout.EAST)
                     }
                 )
+                .addComponent(TitledSeparator(CodeGPTBundle.get("settingsConfigurable.shared.authentication.title")))
+                .setFormLeftIndent(32)
+                .addLabeledComponent(
+                    CodeGPTBundle.get("settingsConfigurable.shared.apiKey.label"),
+                    apiKeyField
+                )
+                .addComponentToRightColumn(UIUtil.createComment("settingsConfigurable.shared.apiKey.comment"))
                 .panel
         )
         .addComponent(TitledSeparator(CodeGPTBundle.get("shared.codeCompletions")))
@@ -88,6 +106,8 @@ class OllamaSettingsForm {
         }
     }
 
+    fun getApiKey(): String? = String(apiKeyField.password).ifEmpty { null }
+
     fun resetForm() {
         service<OllamaSettings>().state.run {
             hostField.text = host
@@ -95,6 +115,7 @@ class OllamaSettingsForm {
             codeCompletionConfigurationForm.isCodeCompletionsEnabled = codeCompletionsEnabled
             codeCompletionConfigurationForm.fimTemplate = fimTemplate
         }
+        apiKeyField.text = getCredential(OLLAMA_API_KEY)
     }
 
     fun applyChanges() {
@@ -104,6 +125,7 @@ class OllamaSettingsForm {
             codeCompletionsEnabled = codeCompletionConfigurationForm.isCodeCompletionsEnabled
             fimTemplate = codeCompletionConfigurationForm.fimTemplate!!
         }
+        setCredential(OLLAMA_API_KEY, getApiKey())
     }
 
     fun isModified() = service<OllamaSettings>().state.run {
@@ -111,6 +133,7 @@ class OllamaSettingsForm {
                 || modelComboBox.item != model
                 || codeCompletionConfigurationForm.isCodeCompletionsEnabled != codeCompletionsEnabled
                 || codeCompletionConfigurationForm.fimTemplate != fimTemplate
+                || getApiKey() != getCredential(OLLAMA_API_KEY)
     }
 
     private fun refreshModels() {
@@ -119,6 +142,7 @@ class OllamaSettingsForm {
             val models = runBlocking(Dispatchers.IO) {
                 OllamaClient.Builder()
                     .setHost(hostField.text)
+                    .setApiKey(getApiKey())
                     .build()
                     .modelTags
                     .models
