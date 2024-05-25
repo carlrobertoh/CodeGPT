@@ -148,7 +148,7 @@ public class LlamaServerPreferencesForm {
         .withLabel(CodeGPTBundle.get("settingsConfigurable.shared.apiKey.label"))
         .resizeX(false)
         .withComment(
-            CodeGPTBundle.get("settingsConfigurable.service.llama.apiKey.comment"))
+            CodeGPTBundle.get("settingsConfigurable.shared.apiKey.comment"))
         .withCommentHyperlinkListener(UIUtil::handleHyperlinkClicked)
         .createPanel();
     return withEmptyLeftBorder(FormBuilder.createFormBuilder()
