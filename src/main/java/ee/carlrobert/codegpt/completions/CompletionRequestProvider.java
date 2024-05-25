@@ -49,6 +49,7 @@ import ee.carlrobert.llm.client.google.models.GoogleModel;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
 import ee.carlrobert.llm.client.ollama.completion.request.OllamaChatCompletionMessage;
 import ee.carlrobert.llm.client.ollama.completion.request.OllamaChatCompletionRequest;
+import ee.carlrobert.llm.client.ollama.completion.request.OllamaParameters;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionDetailedMessage;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
@@ -336,9 +337,15 @@ public class CompletionRequestProvider {
   public OllamaChatCompletionRequest buildOllamaChatCompletionRequest(
       CallParameters callParameters
   ) {
+    var configuration = ConfigurationSettings.getCurrentState();
     var settings = ApplicationManager.getApplication().getService(OllamaSettings.class).getState();
     return new OllamaChatCompletionRequest
         .Builder(settings.getModel(), buildOllamaMessages(callParameters))
+        .setStream(true)
+        .setOptions(new OllamaParameters.Builder()
+            .numPredict(configuration.getMaxTokens())
+            .temperature(configuration.getTemperature())
+            .build())
         .build();
   }
 

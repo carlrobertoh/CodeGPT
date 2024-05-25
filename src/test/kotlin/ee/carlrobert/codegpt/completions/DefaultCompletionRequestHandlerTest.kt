@@ -6,8 +6,14 @@ import ee.carlrobert.codegpt.conversations.ConversationService
 import ee.carlrobert.codegpt.conversations.message.Message
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
 import ee.carlrobert.llm.client.http.RequestEntity
+import ee.carlrobert.llm.client.http.exchange.NdJsonStreamHttpExchange
 import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange
+import ee.carlrobert.llm.client.ollama.OllamaClient
+import ee.carlrobert.llm.client.ollama.completion.request.OllamaCompletionRequest
+import ee.carlrobert.llm.client.ollama.completion.request.OllamaParameters
 import ee.carlrobert.llm.client.util.JSONUtil.*
+import ee.carlrobert.llm.completion.CompletionEventListener
+import okhttp3.sse.EventSource
 import org.apache.http.HttpHeaders
 import org.assertj.core.api.Assertions.assertThat
 import testsupport.IntegrationTest
@@ -168,6 +174,42 @@ class DefaultCompletionRequestHandlerTest : IntegrationTest() {
     waitExpecting { "Hello!" == message.response }
   }
 
+  fun testOllamaChatCompletionCall() {
+    useOllamaService()
+    ConfigurationSettings.getCurrentState().maxTokens = 99
+    ConfigurationSettings.getCurrentState().systemPrompt = "TEST_SYSTEM_PROMPT"
+    val message = Message("TEST_PROMPT")
+    val conversation = ConversationService.getInstance().startConversation()
+    val requestHandler = CompletionRequestHandler(getRequestEventListener(message))
+    expectOllama(NdJsonStreamHttpExchange { request: RequestEntity ->
+      assertThat(request.uri.path).isEqualTo("/api/chat")
+      assertThat(request.headers[HttpHeaders.AUTHORIZATION]!![0]).isEqualTo("Bearer TEST_API_KEY")
+      assertThat(request.body)
+        .extracting(
+          "model",
+          "messages",
+          "options.num_predict",
+          "stream"
+        )
+        .containsExactly(
+          HuggingFaceModel.LLAMA_3_8B_Q6_K.code,
+          listOf(
+            mapOf("role" to "system", "content" to "TEST_SYSTEM_PROMPT"),
+            mapOf("role" to "user", "content" to "TEST_PROMPT")
+          ),
+          99,
+          true
+        )
+      listOf(
+        jsonMapResponse("message", jsonMap(e("content", "Hel"), e("role", "assistant"))),
+        jsonMapResponse("message", jsonMap(e("content", "lo"), e("role", "assistant"))),
+        jsonMapResponse("message", jsonMap(e("content", "!"), e("role", "assistant")))
+      )
+    })
+
+    requestHandler.call(CallParameters(conversation, ConversationType.DEFAULT, message, false))
+    waitExpecting { "Hello!" == message.response }
+  }
 
   fun testGoogleChatCompletionCall() {
     useGoogleService()
