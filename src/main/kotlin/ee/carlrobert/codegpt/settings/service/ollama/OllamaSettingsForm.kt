@@ -6,6 +6,7 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.observable.util.whenTextChangedFromUi
 import com.intellij.openapi.ui.ComboBox
+import com.intellij.openapi.ui.MessageType
 import com.intellij.ui.TitledSeparator
 import com.intellij.ui.components.JBPasswordField
 import com.intellij.ui.components.JBTextField
@@ -22,6 +23,7 @@ import ee.carlrobert.llm.client.ollama.OllamaClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import java.awt.BorderLayout
+import java.lang.String.format
 import java.net.ConnectException
 import javax.swing.ComboBoxModel
 import javax.swing.DefaultComboBoxModel
@@ -59,13 +61,14 @@ class OllamaSettingsForm {
                 modelComboBox.isEnabled = false
             }
         }
-        refreshModelsButton.addActionListener { refreshModels() }
+        refreshModelsButton.addActionListener { refreshModels(getModel() ?: settings.model) }
         apiKeyField = JBPasswordField().apply {
             columns = 30
             text = runBlocking(Dispatchers.IO) {
                 getCredential(OLLAMA_API_KEY)
             }
         }
+        refreshModels(settings.model)
     }
 
     fun getForm(): JPanel = FormBuilder.createFormBuilder()
@@ -98,11 +101,11 @@ class OllamaSettingsForm {
         .addComponentFillVertically(JPanel(), 0)
         .panel
 
-    fun getModel(): String {
+    fun getModel(): String? {
         return if (modelComboBox.isEnabled) {
             modelComboBox.item
         } else {
-            ""
+            null
         }
     }
 
@@ -111,7 +114,7 @@ class OllamaSettingsForm {
     fun resetForm() {
         service<OllamaSettings>().state.run {
             hostField.text = host
-            modelComboBox.item = model
+            modelComboBox.item = model ?: ""
             codeCompletionConfigurationForm.isCodeCompletionsEnabled = codeCompletionsEnabled
             codeCompletionConfigurationForm.fimTemplate = fimTemplate
         }
@@ -130,13 +133,13 @@ class OllamaSettingsForm {
 
     fun isModified() = service<OllamaSettings>().state.run {
         hostField.text != host
-                || modelComboBox.item != model
+                || (modelComboBox.item != model && modelComboBox.isEnabled)
                 || codeCompletionConfigurationForm.isCodeCompletionsEnabled != codeCompletionsEnabled
                 || codeCompletionConfigurationForm.fimTemplate != fimTemplate
                 || getApiKey() != getCredential(OLLAMA_API_KEY)
     }
 
-    private fun refreshModels() {
+    fun refreshModels(currentModel: String?) {
         disableModelComboBoxWithPlaceholder(DefaultComboBoxModel(arrayOf("Loading")))
         try {
             val models = runBlocking(Dispatchers.IO) {
@@ -153,6 +156,20 @@ class OllamaSettingsForm {
                 modelComboBox.apply {
                     if (models.isNotEmpty()) {
                         model = DefaultComboBoxModel(models.toTypedArray())
+                        currentModel?.let {
+                            if (models.contains(currentModel)) {
+                                selectedItem = currentModel
+                            } else {
+                                OverlayUtil.showBalloon(
+                                    format(
+                                        CodeGPTBundle.get("validation.error.model.notExists"),
+                                        currentModel
+                                    ),
+                                    MessageType.ERROR,
+                                    modelComboBox
+                                )
+                            }
+                        }
                         isEnabled = true
                     } else {
                         model = DefaultComboBoxModel(arrayOf("No models"))
