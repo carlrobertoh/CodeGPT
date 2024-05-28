@@ -7,12 +7,15 @@ enum class InfillPromptTemplate(val label: String, val stopTokens: List<String>?
 
     OPENAI("OpenAI", null) {
         override fun buildPrompt(infillDetails: InfillRequestDetails): String {
-            return "<|fim_prefix|> ${infillDetails.prefix} <|fim_suffix|>${infillDetails.suffix} <|fim_middle|>"
+            val infillPrompt =
+                "<|fim_prefix|> ${infillDetails.prefix} <|fim_suffix|>${infillDetails.suffix} <|fim_middle|>"
+            return createDefaultMultiFilePrompt(infillDetails, infillPrompt)
         }
     },
     CODE_LLAMA("Code Llama", listOf("<EOT>")) {
         override fun buildPrompt(infillDetails: InfillRequestDetails): String {
-            return "<PRE> ${infillDetails.prefix} <SUF>${infillDetails.suffix} <MID>"
+            val infillPrompt = "<PRE> ${infillDetails.prefix} <SUF>${infillDetails.suffix} <MID>"
+            return createDefaultMultiFilePrompt(infillDetails, infillPrompt)
         }
     },
     CODE_GEMMA(
@@ -55,7 +58,9 @@ enum class InfillPromptTemplate(val label: String, val stopTokens: List<String>?
     },
     STABILITY("Stability AI", listOf("<|endoftext|>")) {
         override fun buildPrompt(infillDetails: InfillRequestDetails): String {
-            return "<fim_prefix>${infillDetails.prefix}<fim_suffix>${infillDetails.suffix}<fim_middle>"
+            val infillPrompt =
+                "<fim_prefix>${infillDetails.prefix}<fim_suffix>${infillDetails.suffix}<fim_middle>"
+            return createDefaultMultiFilePrompt(infillDetails, infillPrompt)
         }
     },
     DEEPSEEK_CODER("DeepSeek Coder", listOf("<|EOT|>")) {
@@ -102,5 +107,24 @@ enum class InfillPromptTemplate(val label: String, val stopTokens: List<String>?
 
     override fun toString(): String {
         return label
+    }
+
+    companion object {
+        private fun createDefaultMultiFilePrompt(
+            infillDetails: InfillRequestDetails,
+            infillPrompt: String
+        ): String {
+            val context = infillDetails.context
+            return if (context == null || context.contextElements.isEmpty()) {
+                infillPrompt
+            } else {
+                context.contextElements.map {
+                    "# ${it.filePath()} \n" +
+                            it.readText()
+                }.joinToString("") { it + "\n" } +
+                        "# ${context.enclosingElement.filePath()} \n" +
+                        infillPrompt
+            }
+        }
     }
 }
