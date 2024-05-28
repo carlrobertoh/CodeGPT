@@ -66,6 +66,11 @@ enum class CustomServiceTemplate(
         "Mistral AI",
         "https://docs.mistral.ai/getting-started/quickstart",
         CustomServiceChatCompletionTemplate.MISTRAL_AI
+    ),
+    OPEN_ROUTER(
+        "OpenRouter",
+        "https://openrouter.ai/docs#quick-start",
+        CustomServiceChatCompletionTemplate.OPEN_ROUTER
     );
 
     override fun toString(): String {
