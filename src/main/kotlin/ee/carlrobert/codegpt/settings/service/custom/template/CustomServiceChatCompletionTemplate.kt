@@ -99,6 +99,22 @@ enum class CustomServiceChatCompletionTemplate(
                 "max_tokens" to 1024
             )
         )
+    ),
+    OPEN_ROUTER(
+        "https://openrouter.ai/api/v1/chat/completions",
+        getDefaultHeaders(
+            mapOf(
+                "Authorization" to "Bearer \$CUSTOM_SERVICE_API_KEY",
+                "HTTP-Referer" to "https://plugins.jetbrains.com/plugin/21056-codegpt",
+                "X-Title" to "CodeGPT"
+            )
+        ),
+        getDefaultBodyParams(
+            mapOf(
+                "model" to "meta-llama/llama-3-8b-instruct:free",
+                "max_tokens" to 1024
+            )
+        )
     );
 }
 
