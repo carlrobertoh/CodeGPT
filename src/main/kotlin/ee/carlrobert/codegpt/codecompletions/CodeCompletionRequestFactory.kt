@@ -12,7 +12,6 @@ import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettingsState
 import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings
-import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest
 import ee.carlrobert.llm.client.ollama.completion.request.OllamaCompletionRequest
 import ee.carlrobert.llm.client.ollama.completion.request.OllamaParameters
@@ -150,7 +149,9 @@ object CodeCompletionRequestFactory {
     }
 
     private fun getMaxTokens(prefix: String, suffix: String): Int {
-        if (isBoundaryCharacter(prefix[prefix.length - 1]) || isBoundaryCharacter(suffix[0])) {
+        if ((prefix.isNotEmpty() && isBoundaryCharacter(prefix[prefix.length - 1]))
+            || (suffix.isNotEmpty() && isBoundaryCharacter(suffix[0]))
+        ) {
             return 16
         }
         return 36

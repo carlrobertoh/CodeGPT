@@ -1,28 +1,39 @@
 package ee.carlrobert.codegpt.codecompletions.psi
 
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiRecursiveElementWalkingVisitor
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.findParentOfType
 import com.jetbrains.python.psi.*
+import com.jetbrains.python.psi.impl.PyBuiltinCache
 import com.jetbrains.python.psi.resolve.PyResolveContext
 import com.jetbrains.python.psi.resolve.PyResolveUtil
 import com.jetbrains.python.psi.types.TypeEvalContext
+import ee.carlrobert.codegpt.codecompletions.InfillContext
 
 class PythonContextFinder : LanguageContextFinder {
 
     /**
      * Finds enclosing [PyFunction] or [PyClass] of [psiElement] and
-     * determines source code files of all used [PyReferenceExpression]s for the context.
+     * determines source code elements of all used [PyReferenceExpression]s for the context.
      */
-    override fun findContextSourceFiles(psiElement: PsiElement): Set<VirtualFile> {
+    override fun findContext(psiElement: PsiElement): InfillContext {
         val enclosingElement = findEnclosingElement(psiElement)
         val referenceExpressions = findRelevantElements(enclosingElement, enclosingElement)
         val declarations =
             referenceExpressions.map { findDeclarations(it, psiElement.containingFile.project) }.flatten().distinct()
-        return declarations.mapNotNull { findSourceFile(it) }.toSet()
+                .filter {
+                    // Filter out elements whose source code is inside the enclosingElement
+                    // e.g. for something like this: [i for i in range(10)]  findRelevantElements()
+                    // would return a "PyReferenceExpression: i" which is irrelevant
+                    !it.containingFile.equals(enclosingElement.containingFile) || !enclosingElement.textRange.contains(it.textRange)
+                }
+        val sourceElement = declarations.mapNotNull { findSourceElement(it) }
+        return InfillContext(
+            enclosingElement,
+            sourceElement.toSet()
+        )
     }
 
     fun findEnclosingElement(psiElement: PsiElement): PsiElement = findEnclosingContext(psiElement)
@@ -59,6 +70,8 @@ class PythonContextFinder : LanguageContextFinder {
                         val enclosingContext = findEnclosingContext(element)
                         if (enclosingContext is PyClass) {
                             // add class and instance fields of enclosing class
+                            // TODO: class fields declarations have to be present in the infillPrompt
+                            //  (same file as enclosingElement) as well
                             resultSet.addAll(
                                 findRelevantElements(enclosingContext.classAttributes.mapNotNull {
                                     findTargetExpressionAssignment(
@@ -102,15 +115,21 @@ class PythonContextFinder : LanguageContextFinder {
                     pyReference.containingFile
                 )
             )
-        )?.let { setOf(it) } ?: emptySet()
+        )?.let {
+            if (PyBuiltinCache.getInstance(pyReference).isBuiltin(it) || it.filePath().contains("/stdlib/")) {
+                null
+            } else {
+                setOf(it)
+            }
+        } ?: emptySet()
     }
 
-    private fun findSourceFile(psiElement: PsiElement): VirtualFile? {
-        val file = psiElement.navigationElement.containingFile.virtualFile
+    private fun findSourceElement(psiElement: PsiElement): PsiElement? {
+        val navigationElement = psiElement.navigationElement
+        val file = navigationElement.containingFile.virtualFile
         return if (file.isInLocalFileSystem) {
-            file
+            navigationElement
         } else {
-            // TODO: what to do with library files?
             null
         }
 

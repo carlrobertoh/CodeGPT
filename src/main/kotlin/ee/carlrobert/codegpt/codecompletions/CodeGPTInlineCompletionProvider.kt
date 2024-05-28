@@ -8,6 +8,7 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.util.TextRange
 import ee.carlrobert.codegpt.CodeGPTKeys
+import ee.carlrobert.codegpt.codecompletions.psi.CompletionContextService
 import ee.carlrobert.codegpt.settings.GeneralSettings
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
 import ee.carlrobert.codegpt.settings.service.ServiceType
@@ -47,25 +48,30 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
         }
 
         return InlineCompletionSuggestion.Default(channelFlow {
-            val (caretOffset, prefix, suffix) = withContext(Dispatchers.EDT) {
-                val caretOffset = editor.caretModel.offset
-                val prefix =
-                    request.document.getText(TextRange(0, caretOffset))
-                val suffix =
-                    request.document.getText(
-                        TextRange(
-                            caretOffset,
-                            request.document.textLength
+            val caretOffset = withContext(Dispatchers.EDT) { editor.caretModel.offset }
+            val infillContext = service<CompletionContextService>().findContext(editor, caretOffset)
+            val infillRequest = if (infillContext == null) {
+                val (prefix, suffix) = withContext(Dispatchers.EDT) {
+                    val prefix =
+                        request.document.getText(TextRange(0, caretOffset))
+                    val suffix =
+                        request.document.getText(
+                            TextRange(
+                                caretOffset,
+                                request.document.textLength
+                            )
                         )
-                    )
-                Triple(caretOffset, prefix, suffix)
+                    Pair(prefix, suffix)
+                }
+                InfillRequestDetails.withoutContext(prefix, suffix)
+            } else {
+                // TODO: truncate contextElements if too long?
+                InfillRequestDetails.withContext(
+                    infillContext,
+                    caretOffset
+                )
             }
-            val infillRequest = InfillRequestDetails.fromInlineRequestDetails(
-                editor,
-                caretOffset,
-                prefix,
-                suffix
-            )
+
             currentCall.set(
                 project.service<CodeCompletionService>().getCodeCompletionAsync(
                     infillRequest,
@@ -77,8 +83,9 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
                                 inlineText = CodeCompletionParserFactory
                                     .getParserForFileExtension(request.file.virtualFile.extension)
                                     .parse(
-                                        prefix,
-                                        suffix,
+                                        // TODO: ?
+                                        infillRequest.prefix,
+                                        infillRequest.suffix,
                                         inlineText
                                     )
                             }

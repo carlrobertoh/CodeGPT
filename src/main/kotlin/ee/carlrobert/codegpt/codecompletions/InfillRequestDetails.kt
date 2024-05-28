@@ -1,13 +1,10 @@
 package ee.carlrobert.codegpt.codecompletions
 
 import com.intellij.codeInsight.navigation.ImplementationSearcher
-import com.intellij.openapi.components.service
-import com.intellij.openapi.editor.Document
-import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.util.TextRange
-import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.psi.PsiElement
+import com.intellij.refactoring.suggested.startOffset
 import ee.carlrobert.codegpt.EncodingManager
-import ee.carlrobert.codegpt.codecompletions.psi.CompletionContextService
+import ee.carlrobert.codegpt.codecompletions.psi.readText
 
 
 class InfillRequestDetails(val prefix: String, val suffix: String, val context: InfillContext?) :
@@ -16,20 +13,36 @@ class InfillRequestDetails(val prefix: String, val suffix: String, val context: 
         private const val MAX_OFFSET = 10_000
         private const val MAX_PROMPT_TOKENS = 128
 
-        fun fromInlineRequestDetails(
-            editor: Editor,
-            caretOffset: Int,
+        fun withoutContext(
             prefix: String,
             suffix: String
         ): InfillRequestDetails {
             val truncatedPrefix = prefix.takeLast(MAX_OFFSET)
             val truncatedSuffix = suffix.take(MAX_OFFSET)
-            val contextFiles =
-                service<CompletionContextService>().findContextFiles(editor, caretOffset)
             return InfillRequestDetails(
                 truncateText(truncatedPrefix, false),
                 truncateText(truncatedSuffix, true),
-                InfillContext(editor.project!!.name, editor.virtualFile, contextFiles)
+                null
+            )
+        }
+
+        fun withContext(
+            infillContext: InfillContext,
+            caretOffsetInFile: Int,
+        ): InfillRequestDetails {
+            val caretInEnclosingElement =
+                caretOffsetInFile - infillContext.enclosingElement.startOffset
+            val entireText = infillContext.enclosingElement.readText()
+            val prefix = entireText.take(caretInEnclosingElement)
+            val suffix =
+                if (entireText.length < caretInEnclosingElement) "" else entireText.takeLast(
+                    entireText.length - caretInEnclosingElement
+                )
+            // TODO: truncate if too long
+            return InfillRequestDetails(
+                truncateText(prefix, false),
+                truncateText(suffix, true),
+                infillContext
             )
         }
 
@@ -47,7 +60,9 @@ class InfillRequestDetails(val prefix: String, val suffix: String, val context: 
 }
 
 class InfillContext(
-    val repoName: String,
-    val file: VirtualFile,
-    val contextFiles: Set<VirtualFile>?
-)
+    val enclosingElement: PsiElement,
+    val contextElements: Set<PsiElement>
+) {
+
+    fun getRepoName(): String = enclosingElement.project.name
+}

@@ -4,8 +4,9 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiManager
+import ee.carlrobert.codegpt.codecompletions.InfillContext
 
 @Service(Service.Level.PROJECT)
 class CompletionContextService {
@@ -18,22 +19,21 @@ class CompletionContextService {
     }
 
     /**
-     * Determines the [com.intellij.psi.PsiElement] at the given offset,
+     * Determines the [PsiElement] at the given offset,
      * determines relevant context with the help of [LanguageContextFinder]s
-     * and returns the context as a set of source code [VirtualFile]s.
+     * and returns the context with the relevant enclosing [PsiElement] and a set of source code [PsiElement]s.
      */
-    fun findContextFiles(editor: Editor, offset: Int): Set<VirtualFile> {
-        return ReadAction.compute<Set<VirtualFile>, Throwable> {
+    fun findContext(editor: Editor, offset: Int): InfillContext? {
+        return ReadAction.compute<InfillContext, Throwable> {
             val psiFile = PsiManager.getInstance(editor.project!!).findFile(editor.virtualFile!!)!!
-            val psiElement = psiFile.findElementAt(offset) ?: return@compute emptySet()
+            val psiElement = psiFile.findElementAt(offset) ?: return@compute null
             val contextFinderClass = CONTEXT_FINDERS[psiElement.language.id]
                 ?: // No context finder for the language implemented yet
-                return@compute emptySet()
+                return@compute null
             val contextFinder = ApplicationManager.getApplication().getService(contextFinderClass)
                 ?: // A context finder for the language exists but not available in the used IDE
-                return@compute emptySet()
-            return@compute contextFinder.findContextSourceFiles(psiElement)
-                .minus(editor.virtualFile)
+                return@compute null
+            return@compute contextFinder.findContext(psiElement)
         }
 
     }

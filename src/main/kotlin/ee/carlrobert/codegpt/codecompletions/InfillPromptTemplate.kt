@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt.codecompletions
 
-import com.intellij.openapi.vfs.readText
+import ee.carlrobert.codegpt.codecompletions.psi.filePath
+import ee.carlrobert.codegpt.codecompletions.psi.readText
 
 enum class InfillPromptTemplate(val label: String, val stopTokens: List<String>?) {
 
@@ -22,14 +23,14 @@ enum class InfillPromptTemplate(val label: String, val stopTokens: List<String>?
             // see https://huggingface.co/google/codegemma-7b#for-code-completion
             val infillPrompt =
                 "<|fim_prefix|>${infillDetails.prefix}<|fim_suffix|>${infillDetails.suffix}<|fim_middle|>"
-            return if (infillDetails.context == null || infillDetails.context.contextFiles.isNullOrEmpty()) {
+            return if (infillDetails.context == null || infillDetails.context.contextElements.isEmpty()) {
                 infillPrompt
             } else {
-                infillDetails.context.contextFiles.map {
-                    "<|file_separator|>${it.path} \n" +
-                            it.readText()
+                infillDetails.context.contextElements.map {
+                    "<|file_separator|>${it.filePath()} \n" +
+                            it.text
                 }.joinToString("") { it + "\n" } +
-                        "<|file_separator|>${infillDetails.context.file.path} \n" +
+                        "<|file_separator|>${infillDetails.context.enclosingElement.filePath()} \n" +
                         infillPrompt
             }
         }
@@ -39,15 +40,15 @@ enum class InfillPromptTemplate(val label: String, val stopTokens: List<String>?
             // see https://github.com/QwenLM/CodeQwen1.5?tab=readme-ov-file#2-file-level-code-completion-fill-in-the-middle
             val infillPrompt =
                 "<fim_prefix>${infillDetails.prefix}<fim_suffix>${infillDetails.suffix}<fim_middle>"
-            return if (infillDetails.context == null || infillDetails.context.contextFiles.isNullOrEmpty()) {
+            return if (infillDetails.context == null || infillDetails.context.contextElements.isEmpty()) {
                 infillPrompt
             } else {
-                "<reponame>${infillDetails.context.repoName}\n" +
-                        infillDetails.context.contextFiles.map {
-                            "<file_sep>${it.path} \n" +
+                "<reponame>${infillDetails.context.getRepoName()}\n" +
+                        infillDetails.context.contextElements.map {
+                            "<file_sep>${it.filePath()} \n" +
                                     it.readText()
                         }.joinToString("") { it + "\n" } +
-                        "<file_sep>${infillDetails.context.file.path} \n" +
+                        "<file_sep>${infillDetails.context.enclosingElement.filePath()} \n" +
                         infillPrompt
             }
         }
@@ -62,12 +63,12 @@ enum class InfillPromptTemplate(val label: String, val stopTokens: List<String>?
             // see https://github.com/deepseek-ai/DeepSeek-Coder?tab=readme-ov-file#2-code-insertion
             val infillPrompt =
                 "<｜fim▁begin｜>${infillDetails.prefix}<｜fim▁hole｜>${infillDetails.suffix}<｜fim▁end｜>"
-            return if (infillDetails.context == null || infillDetails.context.contextFiles.isNullOrEmpty()) {
+            return if (infillDetails.context == null || infillDetails.context.contextElements.isEmpty()) {
                 infillPrompt
             } else {
-                infillDetails.context.contextFiles.map { "#${it.path}\n" + it.readText() }
+                infillDetails.context.contextElements.map { "#${it.filePath()}\n" + it.readText() }
                     .joinToString("") { it + "\n" } +
-                        "#${infillDetails.context.file.path}\n" +
+                        "#${infillDetails.context.enclosingElement.filePath()}\n" +
                         infillPrompt
             }
         }
@@ -77,15 +78,15 @@ enum class InfillPromptTemplate(val label: String, val stopTokens: List<String>?
             // see https://huggingface.co/spaces/bigcode/bigcode-playground/blob/main/app.py
             val infillPrompt =
                 "<fim_prefix>${infillDetails.prefix} <fim_suffix> ${infillDetails.suffix}<fim_middle>"
-            return if (infillDetails.context == null || infillDetails.context.contextFiles.isNullOrEmpty()) {
+            return if (infillDetails.context == null || infillDetails.context.contextElements.isEmpty()) {
                 infillPrompt
             } else {
-                "<reponame>${infillDetails.context.repoName}" +
-                        infillDetails.context.contextFiles.map {
-                            "<filename>${it.path}\n" +
+                "<reponame>${infillDetails.context.getRepoName()}" +
+                        infillDetails.context.contextElements.map {
+                            "<filename>${it.filePath()}\n" +
                                     it.readText() + "<|endoftext|>"
                         }.joinToString("") { it + "\n" } +
-                        "<filename>${infillDetails.context.file.path} \n" +
+                        "<filename>${infillDetails.context.enclosingElement.filePath()} \n" +
                         infillPrompt
             }
         }

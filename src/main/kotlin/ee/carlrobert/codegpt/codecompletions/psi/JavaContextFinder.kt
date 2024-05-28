@@ -1,10 +1,11 @@
 package ee.carlrobert.codegpt.codecompletions.psi
 
-import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.openapi.roots.JdkUtils
 import com.intellij.psi.*
 import com.intellij.psi.impl.source.PsiClassReferenceType
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.PsiTypesUtil
+import ee.carlrobert.codegpt.codecompletions.InfillContext
 import kotlinx.collections.immutable.toImmutableSet
 
 
@@ -14,11 +15,15 @@ class JavaContextFinder : LanguageContextFinder {
      * Finds enclosing [PsiMethod] or [PsiClass] of [psiElement] and
      * determines source code files of all referenced classes or methods.
      */
-    override fun findContextSourceFiles(psiElement: PsiElement): Set<VirtualFile> {
+    override fun findContext(psiElement: PsiElement): InfillContext {
         val enclosingElement = findEnclosingElement(psiElement)
         val relevantElements = findRelevantElements(enclosingElement, enclosingElement)
         val psiTargets = relevantElements.map { findPsiTarget(it) }.flatten().distinct()
-        return psiTargets.mapNotNull { findSourceFile(it) }.toSet()
+        val sourceElements = psiTargets.mapNotNull { findSourceElement(it) }
+        return InfillContext(
+            enclosingElement,
+            sourceElements.toSet()
+        )
     }
 
     private fun findEnclosingElement(psiElement: PsiElement): PsiElement =
@@ -53,6 +58,8 @@ class JavaContextFinder : LanguageContextFinder {
                         val enclosingContext = findEnclosingContext(element)
                         if (enclosingContext is PsiClass) {
                             // add class and instance fields of enclosing class
+                            // TODO: class fields declarations have to be present in the infillPrompt
+                            //  (same file as enclosingElement) as well
                             resultSet.addAll(
                                 findRelevantElements(
                                     (element.parent as PsiClass).allFields.toSet(),
@@ -101,32 +108,13 @@ class JavaContextFinder : LanguageContextFinder {
         }
     }
 
-    /**
-     * If [psiTarget] is a Java class defined in the user's project the corresponding source code
-     * [VirtualFile] is returned, otherwise `null` is returned.
-     */
-    private fun findSourceFile(psiTarget: PsiTarget): VirtualFile? {
-        // TODO: If e.g. only a single method is targeted we could also just use the method's source code
-        //  not its entire class source code
-        val file = psiTarget.navigationElement.containingFile.virtualFile
-            if (file.isInLocalFileSystem) {
-                return file
-            } else {
-                // TODO: ignore library classes? -> if not, might have to download sources.jar to get source code
-//                val module = ModuleUtilCore.findModuleForPsiElement(psiTypeElement)
-//                val moduleRootManager = ModuleRootManager.getInstance(
-//                    module!!
-//                )
-//                var orderEntries =
-//                    ProjectFileIndex.getInstance(editor.project!!).getOrderEntriesForFile(file)
-//                if (orderEntries.isNotEmpty()) {
-//                    val orderEntry = orderEntries[0]
-//                }
-//                val url: URL =
-//                    URL("jar:file:/home/user/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.14.1/jackson-databind-2.14.1.jar!/")
-//                val jarConnection: JarURLConnection = url.openConnection() as JarURLConnection
-//                println()
-                return null
-            }
+    private fun findSourceElement(psiTarget: PsiTarget): PsiElement? {
+        return if (psiTarget.canNavigateToSource()
+            && JdkUtils.getJdkForElement(psiTarget.navigationElement) == null
+        ) {
+            psiTarget.navigationElement
+        } else {
+            null
+        }
     }
 }

@@ -1,12 +1,11 @@
 package ee.carlrobert.codegpt.codecompletions.psi
 
-import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiElement
+import ee.carlrobert.codegpt.codecompletions.InfillContext
 
 interface LanguageContextFinder {
     /**
-     * Determines [PsiElement]s relevant to the context of [psiElement] and returns their source code files.
+     * Determines relevant enclosing [PsiElement] and [PsiElement]s relevant to the context and returns their source code [PsiElement].
      */
-    fun findContextSourceFiles(psiElement: PsiElement): Set<VirtualFile>
+    fun findContext(psiElement: PsiElement): InfillContext
 }
