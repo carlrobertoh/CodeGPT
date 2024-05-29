@@ -29,7 +29,7 @@ public class LlamaSettingsState {
   private double topP = 0.9;
   private double minP = 0.05;
   private double repeatPenalty = 1.1;
-  private boolean codeCompletionsEnabled = true;
+  private boolean codeCompletionsEnabled = false;
 
   public boolean isUseCustomModel() {
     return useCustomModel;

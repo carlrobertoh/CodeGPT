@@ -20,6 +20,6 @@ class CodeGPTServiceChatCompletionSettingsState : BaseState() {
 }
 
 class CodeGPTServiceCodeCompletionSettingsState : BaseState() {
-    var codeCompletionsEnabled by property(true)
+    var codeCompletionsEnabled by property(false)
     var model by string("codellama/CodeLlama-70b-hf")
 }

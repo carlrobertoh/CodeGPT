@@ -13,7 +13,7 @@ class OllamaSettings :
 class OllamaSettingsState : BaseState() {
     var host by string("http://localhost:11434")
     var model by string()
-    var codeCompletionsEnabled by property(true)
+    var codeCompletionsEnabled by property(false)
     var fimTemplate by enum<InfillPromptTemplate>(InfillPromptTemplate.CODE_LLAMA)
     var availableModels by list<String>()
 }
