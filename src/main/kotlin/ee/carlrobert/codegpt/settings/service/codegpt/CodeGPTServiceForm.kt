@@ -45,19 +45,15 @@ class CodeGPTServiceForm {
             renderer = CustomComboBoxRenderer()
         }
 
-    private fun updateCodeCompletionForm(enabled: Boolean) {
-        codeCompletionModelComboBox.isEnabled = enabled
-        codeCompletionsEnabledCheckBox.isEnabled = enabled
-    }
-
     init {
         apiKeyField.text = runBlocking(Dispatchers.IO) {
             getCredential(CODEGPT_API_KEY)
         }
-        updateCodeCompletionForm(apiKeyField.password.isNotEmpty())
+        val apiKeyDefined = apiKeyField.password.isNotEmpty()
+        codeCompletionModelComboBox.isEnabled = apiKeyDefined
         apiKeyField.document.addDocumentListener(object : DocumentAdapter() {
             override fun textChanged(e: DocumentEvent) {
-                updateCodeCompletionForm(apiKeyField.password.isNotEmpty())
+                codeCompletionModelComboBox.isEnabled = apiKeyDefined
             }
         })
     }

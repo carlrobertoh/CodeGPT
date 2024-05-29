@@ -20,7 +20,7 @@ public class ConfigurationState {
   private boolean methodNameGenerationEnabled = true;
   private boolean captureCompileErrors = true;
   private boolean autoFormattingEnabled = true;
-  private boolean autocompletionPostProcessingEnabled = true;
+  private boolean autocompletionPostProcessingEnabled = false;
   private Map<String, String> tableData = EditorActionsUtil.DEFAULT_ACTIONS;
 
   public String getSystemPrompt() {
