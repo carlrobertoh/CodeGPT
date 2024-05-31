@@ -6,6 +6,7 @@ import ee.carlrobert.codegpt.completions.llama.PromptTemplate.CODE_GEMMA
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate.CODE_QWEN
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate.LLAMA
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate.LLAMA_3
+import ee.carlrobert.codegpt.completions.llama.PromptTemplate.MIXTRAL_INSTRUCT
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate.PHI_3
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate.STABLE_CODE
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate.TORA
@@ -380,6 +381,49 @@ class PromptTemplateTest {
       <|im_start|>assistant
 
       """.trimIndent())
+  }
+
+  @Test
+  fun shouldBuildCodestralPromptWithoutHistory() {
+    val prompt = MIXTRAL_INSTRUCT.buildPrompt(SYSTEM_PROMPT, USER_PROMPT, listOf())
+
+    assertThat(prompt).isEqualTo("""
+      TEST_SYSTEM_PROMPT
+      [INST] TEST_USER_PROMPT [/INST]""".trimIndent()
+    )
+  }
+
+  @ParameterizedTest
+  @NullAndEmptySource
+  @ValueSource(strings = [" ", "\t", "\n"])
+  fun shouldBuildCodestralPromptWithoutHistorySkippingBlankSystemPrompt(systemPrompt: String?) {
+    val prompt = MIXTRAL_INSTRUCT.buildPrompt(systemPrompt, USER_PROMPT, listOf())
+
+    val sysPrompt = if (systemPrompt.isNullOrEmpty()) "" else "$systemPrompt\n"
+    assertThat(prompt).isEqualTo(
+      """$sysPrompt[INST] TEST_USER_PROMPT [/INST]"""
+    )
+  }
+
+  @Test
+  fun shouldBuildCodestral3PromptWithHistory() {
+    val prompt = MIXTRAL_INSTRUCT.buildPrompt(SYSTEM_PROMPT, USER_PROMPT, HISTORY)
+
+    assertThat(prompt).isEqualTo("""
+      TEST_SYSTEM_PROMPT
+      <s> [INST] TEST_PREV_PROMPT_1 [/INST] TEST_PREV_RESPONSE_1</s> <s> [INST] TEST_PREV_PROMPT_2 [/INST] TEST_PREV_RESPONSE_2</s> [INST] TEST_USER_PROMPT [/INST]""".trimIndent())
+  }
+
+  @ParameterizedTest
+  @NullAndEmptySource
+  @ValueSource(strings = [" ", "\t", "\n"])
+  fun shouldBuildCodestralPromptWithHistorySkippingBlankSystemPrompt(systemPrompt: String?) {
+    val prompt = MIXTRAL_INSTRUCT.buildPrompt(systemPrompt, USER_PROMPT, HISTORY)
+
+    val sysPrompt = if (systemPrompt.isNullOrEmpty()) "" else "$systemPrompt\n"
+    assertThat(prompt).isEqualTo(
+      """$sysPrompt<s> [INST] TEST_PREV_PROMPT_1 [/INST] TEST_PREV_RESPONSE_1</s> <s> [INST] TEST_PREV_PROMPT_2 [/INST] TEST_PREV_RESPONSE_2</s> [INST] TEST_USER_PROMPT [/INST]"""
+    )
   }
 
   @Test
