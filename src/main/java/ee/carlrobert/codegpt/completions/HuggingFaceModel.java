@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.completions;
 
+import static ee.carlrobert.codegpt.completions.HuggingFaceModel.Model.CST;
 import static ee.carlrobert.codegpt.completions.HuggingFaceModel.Model.P3M;
 import static ee.carlrobert.codegpt.completions.HuggingFaceModel.Model.SC3;
 import static ee.carlrobert.codegpt.completions.llama.LlamaModel.getDownloadedMarker;
@@ -132,11 +133,18 @@ public enum HuggingFaceModel {
   PHI_3_14B_128K_Q5_K_M(P3M, 5, "Phi-3-medium-128k-instruct-Q5_K_M.gguf", 10.1),
   PHI_3_14B_128K_Q6_K(P3M, 6, "Phi-3-medium-128k-instruct-Q6_K.gguf", 11.5),
   PHI_3_14B_128K_Q8_0(P3M, 8, "Phi-3-medium-128k-instruct-Q8_0.gguf", 14.8),
+
+  CODESTRAL_22B_32K_Q3_K_M(CST, 3, "Codestral-22B-v0.1-Q3_K_M.gguf", 10.8),
+  CODESTRAL_22B_32K_Q4_K_M(CST, 4, "Codestral-22B-v0.1-Q4_K_M.gguf", 13.3),
+  CODESTRAL_22B_32K_Q5_K_M(CST, 5, "Codestral-22B-v0.1-Q5_K_M.gguf", 15.7),
+  CODESTRAL_22B_32K_Q6_K(CST, 6, "Codestral-22B-v0.1-Q6_K.gguf", 18.3),
+  CODESTRAL_22B_32K_Q8_0(CST, 8, "Codestral-22B-v0.1-Q8_0.gguf", 23.6),
   ;
 
   enum Model {
     SC3("bartowski", 3, "stable-code-instruct-3b-GGUF"),
-    P3M("bartowski", 14, "Phi-3-medium-128k-instruct-GGUF")
+    P3M("bartowski", 14, "Phi-3-medium-128k-instruct-GGUF"),
+    CST("bartowski", 22, "Codestral-22B-v0.1-GGUF"),
     ;
 
     private final String user;

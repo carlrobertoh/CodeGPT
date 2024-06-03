@@ -34,7 +34,13 @@ enum class InfillPromptTemplate(val label: String, val stopTokens: List<String>?
         override fun buildPrompt(prefix: String, suffix: String): String {
             return "<｜fim▁begin｜>$prefix<｜fim▁hole｜>$suffix<｜fim▁end｜>"
         }
-    };
+    },
+    CODESTRAL("Codestral", listOf("</s>")) {
+        override fun buildPrompt(prefix: String, suffix: String): String {
+            return "[SUFFIX]$suffix[PREFIX] $prefix"
+        }
+    },
+    ;
 
     abstract fun buildPrompt(prefix: String, suffix: String): String
 
