@@ -15,13 +15,13 @@ import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.actionSystem.ex.ComboBoxAction;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.DumbAwareAction;
+import com.intellij.openapi.project.Project;
 import com.intellij.util.messages.MessageBusConnection;
+import ee.carlrobert.codegpt.CodeGPTKeys;
 import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.completions.you.YouUserManager;
 import ee.carlrobert.codegpt.completions.you.auth.SignedOutNotifier;
-import ee.carlrobert.codegpt.credentials.CredentialsStore;
-import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.service.codegpt.CodeGPTAvailableModels;
@@ -43,8 +43,10 @@ import org.jetbrains.annotations.NotNull;
 public class ModelComboBoxAction extends ComboBoxAction {
 
   private final Runnable onModelChange;
+  private final Project project;
 
-  public ModelComboBoxAction(Runnable onModelChange, ServiceType selectedService) {
+  public ModelComboBoxAction(Project project, Runnable onModelChange, ServiceType selectedService) {
+    this.project = project;
     this.onModelChange = onModelChange;
     updateTemplatePresentation(selectedService);
 
@@ -65,14 +67,11 @@ public class ModelComboBoxAction extends ComboBoxAction {
     return button;
   }
 
-  private AnAction[] getCodeGPTModelActions(Presentation presentation) {
-    var apiKey = CredentialsStore.getCredential(CredentialKey.CODEGPT_API_KEY);
-    return CodeGPTAvailableModels.getCHAT_MODELS().stream()
-        .map(model -> {
-          var enabled = "meta-llama/Llama-3-8b-chat-hf".equals(model.getCode())
-              || (apiKey != null && !apiKey.isEmpty());
-          return createCodeGPTModelAction(model, enabled, presentation);
-        })
+  private AnAction[] getCodeGPTModelActions(Project project, Presentation presentation) {
+    var userDetails = CodeGPTKeys.CODEGPT_USER_DETAILS.get(project);
+    return CodeGPTAvailableModels.getToolWindowModels(
+            userDetails == null ? null : userDetails.getPricingPlan()).stream()
+        .map(model -> createCodeGPTModelAction(model, presentation))
         .toArray(AnAction[]::new);
   }
 
@@ -81,7 +80,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
     var presentation = ((ComboBoxButton) button).getPresentation();
     var actionGroup = new DefaultActionGroup();
     actionGroup.addSeparator("CodeGPT");
-    actionGroup.addAll(getCodeGPTModelActions(presentation));
+    actionGroup.addAll(getCodeGPTModelActions(project, presentation));
     actionGroup.addSeparator("OpenAI");
     List.of(
             OpenAIChatCompletionModel.GPT_4_O,
@@ -171,16 +170,15 @@ public class ModelComboBoxAction extends ComboBoxAction {
     var templatePresentation = getTemplatePresentation();
     switch (selectedService) {
       case CODEGPT:
-        var model = application.getService(CodeGPTServiceSettings.class)
+        var modelCode = application.getService(CodeGPTServiceSettings.class)
             .getState()
             .getChatCompletionSettings()
             .getModel();
-        var modelName = CodeGPTAvailableModels.getCHAT_MODELS().stream()
-            .filter(it -> it.getCode().equals(model))
-            .map(CodeGPTModel::getName)
-            .findFirst().orElse("Unknown");
-        templatePresentation.setIcon(Icons.CodeGPTModel);
-        templatePresentation.setText(modelName);
+        var model = CodeGPTAvailableModels.getALL_CHAT_MODELS().stream()
+            .filter(it -> it.getCode().equals(modelCode))
+            .findFirst();
+        templatePresentation.setIcon(model.map(CodeGPTModel::getIcon).orElse(Icons.CodeGPTModel));
+        templatePresentation.setText(model.map(CodeGPTModel::getName).orElse("Unknown"));
         break;
       case OPENAI:
         templatePresentation.setIcon(Icons.OpenAI);
@@ -284,14 +282,12 @@ public class ModelComboBoxAction extends ComboBoxAction {
     onModelChange.run();
   }
 
-  private AnAction createCodeGPTModelAction(CodeGPTModel model, boolean enabled,
-      Presentation comboBoxPresentation) {
-    return new DumbAwareAction(model.getName(), "", Icons.CodeGPTModel) {
+  private AnAction createCodeGPTModelAction(CodeGPTModel model, Presentation comboBoxPresentation) {
+    return new DumbAwareAction(model.getName(), "", model.getIcon()) {
       @Override
       public void update(@NotNull AnActionEvent event) {
         var presentation = event.getPresentation();
-        presentation.setEnabled(
-            enabled && !presentation.getText().equals(comboBoxPresentation.getText()));
+        presentation.setEnabled(!presentation.getText().equals(comboBoxPresentation.getText()));
       }
 
       @Override
@@ -303,7 +299,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
         handleModelChange(
             CODEGPT,
             model.getName(),
-            Icons.OpenAI,
+            model.getIcon(),
             comboBoxPresentation);
       }
 

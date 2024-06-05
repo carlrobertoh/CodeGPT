@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt.toolwindow.chat.ui.textarea;
 
 import static ee.carlrobert.codegpt.settings.service.ServiceType.ANTHROPIC;
+import static ee.carlrobert.codegpt.settings.service.ServiceType.CODEGPT;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.OLLAMA;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.OPENAI;
 import static ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel.GPT_4_O;
@@ -9,6 +10,7 @@ import static ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionMod
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.ex.util.EditorUtil;
 import com.intellij.openapi.util.registry.Registry;
@@ -21,6 +23,7 @@ import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.actions.AttachImageAction;
 import ee.carlrobert.codegpt.completions.CompletionRequestHandler;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
+import ee.carlrobert.codegpt.settings.service.codegpt.CodeGPTServiceSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.codegpt.ui.IconActionButton;
 import ee.carlrobert.codegpt.ui.UIUtil;
@@ -34,6 +37,7 @@ import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import javax.swing.AbstractAction;
@@ -203,6 +207,13 @@ public class UserPromptTextArea extends JPanel {
     var selectedService = GeneralSettings.getSelectedService();
     if (selectedService == ANTHROPIC || selectedService == OLLAMA) {
       return true;
+    }
+    if (selectedService == CODEGPT) {
+      var model = ApplicationManager.getApplication().getService(CodeGPTServiceSettings.class)
+          .getState()
+          .getChatCompletionSettings()
+          .getModel();
+      return List.of("gpt-4o", "claude-3-opus").contains(model);
     }
 
     var model = OpenAISettings.getCurrentState().getModel();

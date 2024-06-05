@@ -6,7 +6,9 @@ import ee.carlrobert.codegpt.completions.llama.PromptTemplate.CODE_GEMMA
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate.CODE_QWEN
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate.LLAMA
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate.LLAMA_3
+import ee.carlrobert.codegpt.completions.llama.PromptTemplate.MIXTRAL_INSTRUCT
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate.PHI_3
+import ee.carlrobert.codegpt.completions.llama.PromptTemplate.STABLE_CODE
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate.TORA
 import ee.carlrobert.codegpt.conversations.message.Message
 import org.assertj.core.api.Assertions.assertThat
@@ -307,6 +309,121 @@ class PromptTemplateTest {
       <|im_start|>assistant
 
       """.trimIndent())
+  }
+
+  @Test
+  fun shouldBuildStableCodePromptWithoutHistory() {
+    val prompt = STABLE_CODE.buildPrompt(SYSTEM_PROMPT, USER_PROMPT, listOf())
+
+    assertThat(prompt).isEqualTo("""
+      <|im_start|>system
+      TEST_SYSTEM_PROMPT<|im_end|>
+      <|im_start|>user
+      TEST_USER_PROMPT<|im_end|>
+      <|im_start|>assistant
+
+      """.trimIndent())
+  }
+
+  @ParameterizedTest
+  @NullAndEmptySource
+  @ValueSource(strings = [" ", "\t", "\n"])
+  fun shouldBuildStableCodePromptWithoutHistorySkippingBlankSystemPrompt(systemPrompt: String?) {
+    val prompt = STABLE_CODE.buildPrompt(systemPrompt, USER_PROMPT, listOf())
+
+    assertThat(prompt).isEqualTo("""
+      <|im_start|>user
+      TEST_USER_PROMPT<|im_end|>
+      <|im_start|>assistant
+
+      """.trimIndent())
+  }
+
+  @Test
+  fun shouldBuildStableCodePromptWithHistory() {
+    val prompt = STABLE_CODE.buildPrompt(SYSTEM_PROMPT, USER_PROMPT, HISTORY)
+
+    assertThat(prompt).isEqualTo("""
+      <|im_start|>system
+      TEST_SYSTEM_PROMPT<|im_end|>
+      <|im_start|>user
+      TEST_PREV_PROMPT_1<|im_end|>
+      <|im_start|>assistant
+      TEST_PREV_RESPONSE_1<|im_end|>
+      <|im_start|>user
+      TEST_PREV_PROMPT_2<|im_end|>
+      <|im_start|>assistant
+      TEST_PREV_RESPONSE_2<|im_end|>
+      <|im_start|>user
+      TEST_USER_PROMPT<|im_end|>
+      <|im_start|>assistant
+
+      """.trimIndent())
+  }
+
+  @ParameterizedTest
+  @NullAndEmptySource
+  @ValueSource(strings = [" ", "\t", "\n"])
+  fun shouldBuildStableCodePromptWithHistorySkippingBlankSystemPrompt(systemPrompt: String?) {
+    val prompt = STABLE_CODE.buildPrompt(systemPrompt, USER_PROMPT, HISTORY)
+
+    assertThat(prompt).isEqualTo("""
+      <|im_start|>user
+      TEST_PREV_PROMPT_1<|im_end|>
+      <|im_start|>assistant
+      TEST_PREV_RESPONSE_1<|im_end|>
+      <|im_start|>user
+      TEST_PREV_PROMPT_2<|im_end|>
+      <|im_start|>assistant
+      TEST_PREV_RESPONSE_2<|im_end|>
+      <|im_start|>user
+      TEST_USER_PROMPT<|im_end|>
+      <|im_start|>assistant
+
+      """.trimIndent())
+  }
+
+  @Test
+  fun shouldBuildCodestralPromptWithoutHistory() {
+    val prompt = MIXTRAL_INSTRUCT.buildPrompt(SYSTEM_PROMPT, USER_PROMPT, listOf())
+
+    assertThat(prompt).isEqualTo("""
+      TEST_SYSTEM_PROMPT
+      [INST] TEST_USER_PROMPT [/INST]""".trimIndent()
+    )
+  }
+
+  @ParameterizedTest
+  @NullAndEmptySource
+  @ValueSource(strings = [" ", "\t", "\n"])
+  fun shouldBuildCodestralPromptWithoutHistorySkippingBlankSystemPrompt(systemPrompt: String?) {
+    val prompt = MIXTRAL_INSTRUCT.buildPrompt(systemPrompt, USER_PROMPT, listOf())
+
+    val sysPrompt = if (systemPrompt.isNullOrEmpty()) "" else "$systemPrompt\n"
+    assertThat(prompt).isEqualTo(
+      """$sysPrompt[INST] TEST_USER_PROMPT [/INST]"""
+    )
+  }
+
+  @Test
+  fun shouldBuildCodestral3PromptWithHistory() {
+    val prompt = MIXTRAL_INSTRUCT.buildPrompt(SYSTEM_PROMPT, USER_PROMPT, HISTORY)
+
+    assertThat(prompt).isEqualTo("""
+      TEST_SYSTEM_PROMPT
+      <s> [INST] TEST_PREV_PROMPT_1 [/INST] TEST_PREV_RESPONSE_1</s> <s> [INST] TEST_PREV_PROMPT_2 [/INST] TEST_PREV_RESPONSE_2</s> [INST] TEST_USER_PROMPT [/INST]""".trimIndent())
+  }
+
+  @ParameterizedTest
+  @NullAndEmptySource
+  @ValueSource(strings = [" ", "\t", "\n"])
+  fun shouldBuildCodestralPromptWithHistorySkippingBlankSystemPrompt(systemPrompt: String?) {
+    val prompt = MIXTRAL_INSTRUCT.buildPrompt(systemPrompt, USER_PROMPT, HISTORY)
+
+    val sysPrompt = if (systemPrompt.isNullOrEmpty()) "" else "$systemPrompt\n"
+    assertThat(prompt).isEqualTo(
+      """$sysPrompt<s> [INST] TEST_PREV_PROMPT_1 [/INST] TEST_PREV_RESPONSE_1</s> <s> [INST] TEST_PREV_PROMPT_2 [/INST] TEST_PREV_RESPONSE_2</s> [INST] TEST_USER_PROMPT [/INST]"""
+    )
   }
 
   @Test

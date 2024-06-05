@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val libs = versionCatalogs.named("libs")
@@ -50,7 +51,7 @@ tasks {
       targetCompatibility = it
     }
     withType<KotlinCompile> {
-      kotlinOptions.jvmTarget = it
+      compilerOptions.jvmTarget.set(JvmTarget.fromTarget(it))
     }
   }
 

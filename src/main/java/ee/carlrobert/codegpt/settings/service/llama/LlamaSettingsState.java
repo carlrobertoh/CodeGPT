@@ -24,11 +24,12 @@ public class LlamaSettingsState {
   private int threads = 8;
   private String additionalParameters = "";
   private String additionalBuildParameters = "";
+  private String additionalEnvironmentVariables = "";
   private int topK = 40;
   private double topP = 0.9;
   private double minP = 0.05;
   private double repeatPenalty = 1.1;
-  private boolean codeCompletionsEnabled = true;
+  private boolean codeCompletionsEnabled = false;
 
   public boolean isUseCustomModel() {
     return useCustomModel;
@@ -146,6 +147,14 @@ public class LlamaSettingsState {
     this.additionalBuildParameters = additionalBuildParameters;
   }
 
+  public String getAdditionalEnvironmentVariables() {
+    return additionalEnvironmentVariables;
+  }
+
+  public void setAdditionalEnvironmentVariables(String additionalEnvironmentVariables) {
+    this.additionalEnvironmentVariables = additionalEnvironmentVariables;
+  }
+
   public int getTopK() {
     return topK;
   }
@@ -221,6 +230,7 @@ public class LlamaSettingsState {
         && Objects.equals(serverPort, that.serverPort)
         && Objects.equals(additionalParameters, that.additionalParameters)
         && Objects.equals(additionalBuildParameters, that.additionalBuildParameters)
+        && Objects.equals(additionalEnvironmentVariables, that.additionalEnvironmentVariables)
         && codeCompletionsEnabled == that.codeCompletionsEnabled;
   }
 
@@ -229,7 +239,8 @@ public class LlamaSettingsState {
     return Objects.hash(runLocalServer, useCustomModel, customLlamaModelPath, huggingFaceModel,
         localModelPromptTemplate, remoteModelPromptTemplate, localModelInfillPromptTemplate,
         remoteModelInfillPromptTemplate, baseHost, serverPort, contextSize, threads,
-        additionalParameters, additionalBuildParameters, topK, topP, minP, repeatPenalty,
+        additionalParameters, additionalBuildParameters, additionalEnvironmentVariables, topK, topP,
+        minP, repeatPenalty,
         codeCompletionsEnabled);
   }
 }

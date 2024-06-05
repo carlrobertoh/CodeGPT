@@ -274,6 +274,7 @@ public class ChatToolWindowTabPanel implements Disposable {
         JBUI.Borders.empty(8)));
     var contentManager = project.getService(ChatToolWindowContentManager.class);
     panel.add(JBUI.Panels.simplePanel(createUserPromptTextAreaHeader(
+        project,
         selectedService,
         () -> {
           ConversationService.getInstance().startConversation();
@@ -284,13 +285,14 @@ public class ChatToolWindowTabPanel implements Disposable {
   }
 
   private JPanel createUserPromptTextAreaHeader(
+      Project project,
       ServiceType selectedService,
       Runnable onModelChange) {
     return JBUI.Panels.simplePanel()
         .withBorder(Borders.emptyBottom(8))
         .andTransparent()
         .addToLeft(totalTokensPanel)
-        .addToRight(new ModelComboBoxAction(onModelChange, selectedService)
+        .addToRight(new ModelComboBoxAction(project, onModelChange, selectedService)
             .createCustomComponent(ActionPlaces.UNKNOWN));
   }
 

@@ -14,8 +14,7 @@ import ee.carlrobert.codegpt.completions.llama.LlamaServerStartupParams
 import ee.carlrobert.codegpt.settings.GeneralSettings
 import ee.carlrobert.codegpt.settings.service.ServiceType.LLAMA_CPP
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
-import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings.getAdditionalParametersList
-import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings.isRunnable
+import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings.*
 import ee.carlrobert.codegpt.settings.service.llama.form.ServerProgressPanel
 import ee.carlrobert.codegpt.ui.OverlayUtil.showNotification
 import ee.carlrobert.codegpt.ui.OverlayUtil.stickyNotification
@@ -42,9 +41,11 @@ abstract class LlamaServerToggleActions(
             }
         }
 
-        private fun getAction(start: Boolean) = ActionManager.getInstance().getAction(getId(start)) as LlamaServerToggleActions
+        private fun getAction(start: Boolean) =
+            ActionManager.getInstance().getAction(getId(start)) as LlamaServerToggleActions
 
-        private fun getId(start: Boolean) = if (start) "statusbar.stopServer" else "statusbar.startServer"
+        private fun getId(start: Boolean) =
+            if (start) "statusbar.stopServer" else "statusbar.startServer"
     }
 
     var notification: Notification? = null
@@ -54,7 +55,9 @@ abstract class LlamaServerToggleActions(
         notification?.expire()
         expireOtherNotification(startServer)
         val llamaServerAgent = service<LlamaServerAgent>()
-        val serverName = LlamaSettings.getInstance().state.huggingFaceModel.let { findByHuggingFaceModel(it).toString(it) }
+        val serverName = LlamaSettings.getInstance().state.huggingFaceModel.let {
+            findByHuggingFaceModel(it).toString(it)
+        }
         if (startServer) {
             start(serverName, llamaServerAgent)
         } else {
@@ -75,7 +78,8 @@ abstract class LlamaServerToggleActions(
                 settings.threads,
                 settings.serverPort,
                 getAdditionalParametersList(settings.additionalParameters),
-                getAdditionalParametersList(settings.additionalBuildParameters)
+                getAdditionalParametersList(settings.additionalBuildParameters),
+                getAdditionalEnvironmentVariablesMap(settings.additionalEnvironmentVariables)
             ),
             serverProgressPanel,
             {
@@ -97,10 +101,18 @@ abstract class LlamaServerToggleActions(
         notification = notification(STOPPED, true, serverName, llamaServerAgent)
     }
 
-    private fun notification(id: String, nextStart: Boolean, serverName: String, llamaServerAgent: LlamaServerAgent) =
+    private fun notification(
+        id: String,
+        nextStart: Boolean,
+        serverName: String,
+        llamaServerAgent: LlamaServerAgent
+    ) =
         showNotification(formatMsg(id, serverName),
             createSimpleExpiring(CodeGPTBundle.get(if (nextStart) START else STOP)) {
-                if (nextStart) start(serverName, llamaServerAgent) else stop(serverName, llamaServerAgent)
+                if (nextStart) start(serverName, llamaServerAgent) else stop(
+                    serverName,
+                    llamaServerAgent
+                )
             })
 
     // "Starting server..." -> "Starting server: CodeLlama 7B 4-bit ..."

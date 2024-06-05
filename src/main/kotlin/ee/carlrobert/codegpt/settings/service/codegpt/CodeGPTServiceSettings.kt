@@ -4,8 +4,8 @@ import com.intellij.openapi.components.*
 
 @Service
 @State(
-    name = "CodeGPT_CodeGPTServiceSettings",
-    storages = [Storage("CodeGPT_CodeGPTServiceSettings.xml")]
+    name = "CodeGPT_CodeGPTServiceSettings_280",
+    storages = [Storage("CodeGPT_CodeGPTServiceSettings_280.xml")]
 )
 class CodeGPTServiceSettings :
     SimplePersistentStateComponent<CodeGPTServiceSettingsState>(CodeGPTServiceSettingsState())
@@ -16,10 +16,10 @@ class CodeGPTServiceSettingsState : BaseState() {
 }
 
 class CodeGPTServiceChatCompletionSettingsState : BaseState() {
-    var model by string("meta-llama/Llama-3-70b-chat-hf")
+    var model by string("llama-3-8b")
 }
 
 class CodeGPTServiceCodeCompletionSettingsState : BaseState() {
-    var codeCompletionsEnabled by property(true)
-    var model by string("codellama/CodeLlama-70b-hf")
+    var codeCompletionsEnabled by property(false)
+    var model by string("starcoder-7b")
 }

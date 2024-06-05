@@ -26,12 +26,7 @@ class DatePlaceholderStrategy : PlaceholderStrategy {
 class BranchNamePlaceholderStrategy(val project: Project) : PlaceholderStrategy {
     override fun getReplacementValue(): String {
         return try {
-            val repositories = GitUtil.getRepositoryManager(project).repositories
-            if (repositories.isEmpty() || repositories.size != 1) {
-                return "BRANCH-UNKNOWN"
-            }
-
-            GitBranchUtil.getBranchNameOrRev(repositories[0])
+            "BRANCH-UNKNOWN"
         } catch (ignore: Exception) {
             "BRANCH-UNKNOWN"
         }
