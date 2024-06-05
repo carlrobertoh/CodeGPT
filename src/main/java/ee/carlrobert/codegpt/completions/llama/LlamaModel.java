@@ -188,6 +188,24 @@ public enum LlamaModel {
           HuggingFaceModel.STABLE_CODE_3B_Q5_K_M,
           HuggingFaceModel.STABLE_CODE_3B_Q6_K,
           HuggingFaceModel.STABLE_CODE_3B_Q8_0)),
+  CODESTRAL(
+      "Codestral", """
+      Codestral is an open-weight generative AI model explicitly designed for code generation \
+      tasks. It helps developers write and interact with code through a shared instruction and \
+      completion API endpoint. As it masters code and English, it can be used to design advanced \
+      AI applications for software developers. Codestral is trained on a diverse dataset of 80+ \
+      programming languages. Codestral saves developers time and effort: it can complete coding \
+      functions, write tests, and complete any partial code using a fill-in-the-middle mechanism. \
+      Interacting with Codestral will help level up the developer’s coding game and reduce the \
+      risk of errors and bugs.""",
+      PromptTemplate.MIXTRAL_INSTRUCT,
+      InfillPromptTemplate.CODE_GEMMA,
+      List.of(
+          HuggingFaceModel.CODESTRAL_22B_32K_Q3_K_M,
+          HuggingFaceModel.CODESTRAL_22B_32K_Q4_K_M,
+          HuggingFaceModel.CODESTRAL_22B_32K_Q5_K_M,
+          HuggingFaceModel.CODESTRAL_22B_32K_Q6_K,
+          HuggingFaceModel.CODESTRAL_22B_32K_Q8_0)),
   ;
 
   private final String label;
