@@ -3,13 +3,16 @@ package ee.carlrobert.codegpt.toolwindow.chat;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 
+import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.actionSystem.DefaultCompactActionGroup;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.util.Disposer;
+import com.intellij.ui.components.ActionLink;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.CodeGPTKeys;
 import ee.carlrobert.codegpt.ReferencedFile;
@@ -19,8 +22,13 @@ import ee.carlrobert.codegpt.actions.toolwindow.CreateNewConversationAction;
 import ee.carlrobert.codegpt.actions.toolwindow.OpenInEditorAction;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
+import ee.carlrobert.codegpt.settings.GeneralSettings;
+import ee.carlrobert.codegpt.settings.service.ProviderChangeNotifier;
+import ee.carlrobert.codegpt.settings.service.ServiceType;
+import ee.carlrobert.codegpt.settings.service.codegpt.CodeGPTUserDetailsNotifier;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ToolWindowFooterNotification;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.AttachImageNotifier;
+import ee.carlrobert.llm.client.codegpt.PricingPlan;
 import java.awt.BorderLayout;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -34,6 +42,7 @@ public class ChatToolWindowPanel extends SimpleToolWindowPanel {
 
   private final ToolWindowFooterNotification selectedFilesNotification;
   private final ToolWindowFooterNotification imageFileAttachmentNotification;
+  private final ActionLink upgradePlanLink;
   private ChatToolWindowTabbedPane tabbedPane;
 
   public ChatToolWindowPanel(
@@ -44,18 +53,42 @@ public class ChatToolWindowPanel extends SimpleToolWindowPanel {
         () -> clearSelectedFilesNotification(project));
     imageFileAttachmentNotification = new ToolWindowFooterNotification(() ->
         project.putUserData(CodeGPTKeys.IMAGE_ATTACHMENT_FILE_PATH, ""));
+    upgradePlanLink = new ActionLink("Upgrade your plan", event -> {
+      BrowserUtil.browse("https://codegpt.carlrobert.ee/#pricing");
+    });
+    upgradePlanLink.setFont(JBUI.Fonts.smallFont());
+    upgradePlanLink.setExternalLinkIcon();
+    upgradePlanLink.setVisible(false);
+
     init(project, parentDisposable);
 
-    project.getMessageBus()
-        .connect()
-        .subscribe(IncludeFilesInContextNotifier.FILES_INCLUDED_IN_CONTEXT_TOPIC,
-            (IncludeFilesInContextNotifier) this::displaySelectedFilesNotification);
-    project.getMessageBus()
-        .connect()
-        .subscribe(AttachImageNotifier.IMAGE_ATTACHMENT_FILE_PATH_TOPIC,
-            (AttachImageNotifier) filePath -> imageFileAttachmentNotification.show(
-                Path.of(filePath).getFileName().toString(),
-                "File path: " + filePath));
+    var messageBusConnection = project.getMessageBus().connect();
+    messageBusConnection.subscribe(IncludeFilesInContextNotifier.FILES_INCLUDED_IN_CONTEXT_TOPIC,
+        (IncludeFilesInContextNotifier) this::displaySelectedFilesNotification);
+    messageBusConnection.subscribe(AttachImageNotifier.IMAGE_ATTACHMENT_FILE_PATH_TOPIC,
+        (AttachImageNotifier) filePath -> imageFileAttachmentNotification.show(
+            Path.of(filePath).getFileName().toString(),
+            "File path: " + filePath));
+    messageBusConnection.subscribe(ProviderChangeNotifier.getPROVIDER_CHANGE_TOPIC(),
+        (ProviderChangeNotifier) provider -> {
+          if (provider == ServiceType.CODEGPT) {
+            var userDetails = CodeGPTKeys.CODEGPT_USER_DETAILS.get(project);
+            upgradePlanLink.setVisible(
+                userDetails != null && userDetails.getPricingPlan() != PricingPlan.INDIVIDUAL);
+          } else {
+            upgradePlanLink.setVisible(false);
+          }
+        });
+    messageBusConnection.subscribe(CodeGPTUserDetailsNotifier.getCODEGPT_USER_DETAILS_TOPIC(),
+        (CodeGPTUserDetailsNotifier) userDetails -> {
+          if (userDetails != null) {
+            var provider = ApplicationManager.getApplication().getService(GeneralSettings.class)
+                .getState()
+                .getSelectedService();
+            upgradePlanLink.setVisible(provider == ServiceType.CODEGPT
+                && userDetails.getPricingPlan() != PricingPlan.INDIVIDUAL);
+          }
+        });
   }
 
   public ChatToolWindowTabbedPane getChatTabbedPane() {
@@ -109,6 +142,7 @@ public class ChatToolWindowPanel extends SimpleToolWindowPanel {
     actionToolbarPanel.add(
         createActionToolbar(project, tabbedPane, onAddNewTab).getComponent(),
         BorderLayout.LINE_START);
+    actionToolbarPanel.add(upgradePlanLink, BorderLayout.LINE_END);
 
     setToolbar(actionToolbarPanel);
     var notificationContainer = new JPanel(new BorderLayout());
