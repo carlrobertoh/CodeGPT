@@ -40,7 +40,7 @@ public class ChatToolWindowScrollablePanel extends ScrollablePanel {
           .addContent(UIUtil.createTextPane("""
                   <html>
                   <p style="margin-top: 4px; margin-bottom: 4px;">
-                    It looks like you haven't configured your API key yet. Visit the <a href="#OPEN_SETTINGS">CodeGPT settings</a> to do so.
+                    It looks like you haven't configured your API key yet. Visit <a href="#OPEN_SETTINGS">CodeGPT settings</a> to do so.
                   </p>
                   <p style="margin-top: 4px; margin-bottom: 4px;">
                     Don't have an account? <a href="https://codegpt.carlrobert.ee/signin">Sign up</a> for free access to all open-source models.

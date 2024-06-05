@@ -2,7 +2,6 @@ package ee.carlrobert.codegpt.settings.service.codegpt
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.ui.ComboBox
-import com.intellij.ui.DocumentAdapter
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBPasswordField
 import com.intellij.util.ui.FormBuilder
@@ -18,7 +17,6 @@ import java.awt.Component
 import javax.swing.DefaultListCellRenderer
 import javax.swing.JList
 import javax.swing.JPanel
-import javax.swing.event.DocumentEvent
 
 class CodeGPTServiceForm {
 
@@ -27,7 +25,7 @@ class CodeGPTServiceForm {
     }
 
     private val chatCompletionModelComboBox =
-        ComboBox(ListComboBoxModel(CodeGPTAvailableModels.CHAT_MODELS)).apply {
+        ComboBox(ListComboBoxModel(CodeGPTAvailableModels.ALL_CHAT_MODELS)).apply {
             selectedItem =
                 CodeGPTAvailableModels.findByCode(service<CodeGPTServiceSettings>().state.chatCompletionSettings.model)
             renderer = CustomComboBoxRenderer()
@@ -49,13 +47,6 @@ class CodeGPTServiceForm {
         apiKeyField.text = runBlocking(Dispatchers.IO) {
             getCredential(CODEGPT_API_KEY)
         }
-        val apiKeyDefined = apiKeyField.password.isNotEmpty()
-        codeCompletionModelComboBox.isEnabled = apiKeyDefined
-        apiKeyField.document.addDocumentListener(object : DocumentAdapter() {
-            override fun textChanged(e: DocumentEvent) {
-                codeCompletionModelComboBox.isEnabled = apiKeyDefined
-            }
-        })
     }
 
     fun getForm(): JPanel = FormBuilder.createFormBuilder()

@@ -14,7 +14,10 @@ import ee.carlrobert.codegpt.completions.you.auth.YouAuthenticationService
 import ee.carlrobert.codegpt.completions.you.auth.response.YouAuthenticationResponse
 import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey
 import ee.carlrobert.codegpt.credentials.CredentialsStore.getCredential
+import ee.carlrobert.codegpt.settings.GeneralSettings
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
+import ee.carlrobert.codegpt.settings.service.ServiceType
+import ee.carlrobert.codegpt.settings.service.codegpt.CodeGPTService
 import ee.carlrobert.codegpt.settings.service.you.YouSettings
 import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.AttachImageNotifier
 import ee.carlrobert.codegpt.ui.OverlayUtil
@@ -29,6 +32,11 @@ class CodeGPTProjectActivity : StartupActivity.Background {
     override fun runActivity(project: Project) {
         EditorActionsUtil.refreshActions()
 
+        val settings = service<GeneralSettings>().state
+        if (settings.selectedService == ServiceType.CODEGPT) {
+            project.service<CodeGPTService>().syncUserDetailsAsync()
+        }
+
         if (YouUserManager.getInstance().authenticationResponse == null) {
             handleYouServiceAuthenticationAsync()
         }
@@ -39,7 +47,10 @@ class CodeGPTProjectActivity : StartupActivity.Background {
             val desktopPath = Paths.get(System.getProperty("user.home"), "Desktop")
             project.service<FileWatcher>().watch(desktopPath) {
                 if (watchExtensions.contains(it.extension.lowercase())) {
-                    showImageAttachmentNotification(project, desktopPath.resolve(it).absolutePathString())
+                    showImageAttachmentNotification(
+                        project,
+                        desktopPath.resolve(it).absolutePathString()
+                    )
                 }
             }
         }
