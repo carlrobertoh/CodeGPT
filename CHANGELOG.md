@@ -6,6 +6,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.8.0-241.1] - 2024-06-06
+
+### Added
+
+- OpenAI and Anthropic models for CodeGPT subscribed users
+- Support Stable Code Instruct 3B (#552)
+- Support Phi-3 Medium 128K (#577)
+- Support Codestral 22B 32K (#587)
+- Add field for environment variables for Llama server (#550)
+- Add OpenRouter service template (#581)
+
+### Fixed
+
+- Remove trailing slashes from URL text fields (#579)
+- Disable code completions by default
+
 ## [2.7.1-241] - 2024-05-15
 
 ### Fixed
@@ -482,7 +498,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `OPENAI_API_KEY` persistence, key is saved in the OS password safe from now on
 
-[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.7.1-241...HEAD
+[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.8.0-241.1...HEAD
+[2.8.0-241.1]: https://github.com/carlrobertoh/CodeGPT/compare/v2.7.1-241...v2.8.0-241.1
 [2.7.1-241]: https://github.com/carlrobertoh/CodeGPT/compare/v2.7.0-241...v2.7.1-241
 [2.7.0-241]: https://github.com/carlrobertoh/CodeGPT/compare/v2.6.3-241...v2.7.0-241
 [2.6.3-241]: https://github.com/carlrobertoh/CodeGPT/compare/v2.6.2-241...v2.6.3-241
