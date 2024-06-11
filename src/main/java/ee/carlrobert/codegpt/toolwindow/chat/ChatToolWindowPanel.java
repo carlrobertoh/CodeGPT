@@ -95,7 +95,7 @@ public class ChatToolWindowPanel extends SimpleToolWindowPanel {
     return tabbedPane;
   }
 
-  public void displaySelectedFilesNotification(List<ReferencedFile> referencedFiles) {
+  public void displaySelectedFilesNotification(List<? extends ReferencedFile> referencedFiles) {
     if (referencedFiles.isEmpty()) {
       return;
     }

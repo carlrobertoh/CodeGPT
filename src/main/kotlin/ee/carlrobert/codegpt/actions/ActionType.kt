@@ -1,7 +1,6 @@
-package ee.carlrobert.codegpt.actions;
+package ee.carlrobert.codegpt.actions
 
-public enum ActionType {
-
+enum class ActionType {
   CLEAR_CHAT_WINDOW,
   CREATE_NEW_CHAT,
   DELETE_ALL_CONVERSATIONS,
