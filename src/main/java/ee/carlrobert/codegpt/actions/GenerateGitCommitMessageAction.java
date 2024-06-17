@@ -1,7 +1,6 @@
 package ee.carlrobert.codegpt.actions;
 
 import static com.intellij.openapi.ui.Messages.OK;
-import static com.intellij.util.ObjectUtils.tryCast;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.YOU;
 import static java.util.stream.Collectors.joining;
 
@@ -13,14 +12,10 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.WriteCommandAction;
-import com.intellij.openapi.editor.Document;
-import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vcs.FilePath;
 import com.intellij.openapi.vcs.VcsDataKeys;
 import com.intellij.openapi.vcs.changes.Change;
-import com.intellij.openapi.vcs.ui.CommitMessage;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.vcs.commit.CommitWorkflowUi;
 import ee.carlrobert.codegpt.CodeGPTBundle;
@@ -89,14 +84,13 @@ public class GenerateGitCommitMessageAction extends AnAction {
       return;
     }
 
-    var editor = getCommitMessageEditor(event);
-    if (editor != null) {
-      ((EditorEx) editor).setCaretVisible(false);
+    var commitWorkflowUi = event.getData(VcsDataKeys.COMMIT_WORKFLOW_UI);
+    if (commitWorkflowUi != null) {
       CompletionRequestService.getInstance()
           .generateCommitMessageAsync(
               project.getService(CommitMessageTemplate.class).getSystemPrompt(),
               gitDiff,
-              getEventListener(project, editor.getDocument()));
+              getEventListener(project, commitWorkflowUi));
     }
   }
 
@@ -105,7 +99,9 @@ public class GenerateGitCommitMessageAction extends AnAction {
     return ActionUpdateThread.EDT;
   }
 
-  private CompletionEventListener<String> getEventListener(Project project, Document document) {
+  private CompletionEventListener<String> getEventListener(
+      Project project,
+      CommitWorkflowUi commitWorkflowUi) {
     return new CompletionEventListener<>() {
       private final StringBuilder messageBuilder = new StringBuilder();
 
@@ -116,7 +112,7 @@ public class GenerateGitCommitMessageAction extends AnAction {
         application.invokeLater(() ->
             application.runWriteAction(() ->
                 WriteCommandAction.runWriteCommandAction(project, () ->
-                    document.setText(messageBuilder))));
+                    commitWorkflowUi.getCommitMessageUi().setText(messageBuilder.toString()))));
       }
 
       @Override
@@ -128,13 +124,6 @@ public class GenerateGitCommitMessageAction extends AnAction {
             NotificationType.ERROR));
       }
     };
-  }
-
-  private Editor getCommitMessageEditor(AnActionEvent event) {
-    var commitMessage = tryCast(
-        event.getData(VcsDataKeys.COMMIT_MESSAGE_CONTROL),
-        CommitMessage.class);
-    return commitMessage != null ? commitMessage.getEditorField().getEditor() : null;
   }
 
   private String getGitDiff(AnActionEvent event, Project project) {
