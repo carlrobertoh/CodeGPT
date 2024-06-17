@@ -45,9 +45,10 @@ interface ShortcutsTestMixin {
     GeneralSettings.getCurrentState().selectedService = ServiceType.YOU
   }
 
-  fun useLlamaService() {
+  fun useLlamaService(codeCompletionsEnabled: Boolean = false) {
     GeneralSettings.getCurrentState().selectedService = ServiceType.LLAMA_CPP
     LlamaSettings.getCurrentState().serverPort = null
+    LlamaSettings.getCurrentState().isCodeCompletionsEnabled = codeCompletionsEnabled
   }
 
   fun useGoogleService() {
