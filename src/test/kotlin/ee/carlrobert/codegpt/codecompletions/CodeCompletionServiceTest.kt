@@ -4,6 +4,7 @@ import com.intellij.codeInsight.inline.completion.session.InlineCompletionSessio
 import com.intellij.openapi.editor.VisualPosition
 import com.intellij.openapi.util.TextRange
 import com.intellij.testFramework.PlatformTestUtil
+import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings
 import ee.carlrobert.codegpt.util.file.FileUtil
 import ee.carlrobert.llm.client.http.RequestEntity
@@ -16,8 +17,7 @@ import testsupport.IntegrationTest
 class CodeCompletionServiceTest : IntegrationTest() {
 
     fun testApplyCompletionNextWordInlay() {
-        useLlamaService()
-        OpenAISettings.getCurrentState().isCodeCompletionsEnabled = true
+        useLlamaService(true)
         myFixture.configureByText(
             "CompletionTest.java",
             FileUtil.getResourceContent("/codecompletions/code-completion-file.txt")

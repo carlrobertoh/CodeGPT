@@ -101,7 +101,9 @@ public class GenerateGitCommitMessageAction extends AnAction {
     return ActionUpdateThread.EDT;
   }
 
-  private CompletionEventListener<String> getEventListener(Project project, CommitWorkflowUi commitWorkflowUi) {
+  private CompletionEventListener<String> getEventListener(
+      Project project,
+      CommitWorkflowUi commitWorkflowUi) {
     return new CompletionEventListener<>() {
       private final StringBuilder messageBuilder = new StringBuilder();
 
