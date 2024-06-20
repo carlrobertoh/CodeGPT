@@ -42,6 +42,7 @@ object CodeGPTAvailableModels {
         CodeGPTModel("GPT-4o", "gpt-4o", Icons.OpenAI, INDIVIDUAL),
         CodeGPTModel("GPT-3.5 Turbo", "gpt-3.5-turbo", Icons.OpenAI, INDIVIDUAL),
         CodeGPTModel("Claude 3 Opus", "claude-3-opus", Icons.Anthropic, INDIVIDUAL),
+        CodeGPTModel("Claude 3.5 Sonnet", "claude-3.5-sonnet", Icons.Anthropic, INDIVIDUAL),
         CodeGPTModel("Claude 3 Sonnet", "claude-3-sonnet", Icons.Anthropic, INDIVIDUAL),
         CodeGPTModel("DBRX", "dbrx", Icons.Databricks, INDIVIDUAL),
         CodeGPTModel("Llama 3 (70B)", "llama-3-70b", Icons.Meta, FREE),
