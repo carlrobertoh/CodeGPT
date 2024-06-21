@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Claude 3.5 Sonnet model (CodeGPT)
+- Additional `maxTokens`, `temperature` and `apiKey` fields (Ollama)
+
+### Fixed
+
+- Model re-selection after refresh (Ollama)
+- Commit message placeholders
+
 ## [2.8.0-223] - 2024-06-06
 
 ### Added
