@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.8.1-233] - 2024-06-21
+
 ### Added
 
 - Claude 3.5 Sonnet model (CodeGPT)
@@ -507,7 +509,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `OPENAI_API_KEY` persistence, key is saved in the OS password safe from now on
 
-[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.8.0-233...HEAD
+[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.8.1-233...HEAD
+[2.8.1-233]: https://github.com/carlrobertoh/CodeGPT/compare/v2.8.0-233...v2.8.1-233
 [2.8.0-233]: https://github.com/carlrobertoh/CodeGPT/compare/v2.7.1-233...v2.8.0-233
 [2.7.1-233]: https://github.com/carlrobertoh/CodeGPT/compare/v2.7.0-233...v2.7.1-233
 [2.7.0-233]: https://github.com/carlrobertoh/CodeGPT/compare/v2.6.3-233...v2.7.0-233
