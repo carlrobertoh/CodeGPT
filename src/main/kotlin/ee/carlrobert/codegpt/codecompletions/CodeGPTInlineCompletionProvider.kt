@@ -122,7 +122,6 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
             ServiceType.OLLAMA -> service<OllamaSettings>().state.codeCompletionsEnabled
             ServiceType.ANTHROPIC,
             ServiceType.AZURE,
-            ServiceType.YOU,
             ServiceType.GOOGLE,
             null -> false
         }

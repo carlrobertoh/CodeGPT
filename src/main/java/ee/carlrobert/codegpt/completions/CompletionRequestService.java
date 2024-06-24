@@ -109,9 +109,6 @@ public final class CompletionRequestService {
       case AZURE -> CompletionClientProvider.getAzureClient().getChatCompletionAsync(
           requestProvider.buildOpenAIChatCompletionRequest(null, callParameters),
           eventListener);
-      case YOU -> CompletionClientProvider.getYouClient().getChatCompletionAsync(
-          requestProvider.buildYouCompletionRequest(callParameters.getMessage()),
-          eventListener);
       case LLAMA_CPP -> CompletionClientProvider.getLlamaClient().getChatCompletionAsync(
           requestProvider.buildLlamaCompletionRequest(
               callParameters.getMessage(),
@@ -289,7 +286,6 @@ public final class CompletionRequestService {
               ? CredentialKey.AZURE_OPENAI_API_KEY
               : CredentialKey.AZURE_ACTIVE_DIRECTORY_TOKEN);
       case CODEGPT, CUSTOM_OPENAI, ANTHROPIC, LLAMA_CPP, OLLAMA -> true;
-      case YOU -> false;
       case GOOGLE -> CredentialsStore.INSTANCE.isCredentialSet(CredentialKey.GOOGLE_API_KEY);
     };
   }

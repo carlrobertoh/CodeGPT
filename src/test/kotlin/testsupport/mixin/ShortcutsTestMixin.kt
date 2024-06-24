@@ -43,10 +43,6 @@ interface ShortcutsTestMixin {
     azureSettings.deploymentId = "TEST_DEPLOYMENT_ID"
   }
 
-  fun useYouService() {
-    GeneralSettings.getCurrentState().selectedService = ServiceType.YOU
-  }
-
   fun useLlamaService(codeCompletionsEnabled: Boolean = false) {
     GeneralSettings.getCurrentState().selectedService = ServiceType.LLAMA_CPP
     LlamaSettings.getCurrentState().serverPort = null

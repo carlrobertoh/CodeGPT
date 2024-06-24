@@ -10,7 +10,6 @@ import ee.carlrobert.codegpt.completions.CompletionResponseEventListener;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
-import ee.carlrobert.codegpt.settings.service.you.YouSettings;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ChatMessageResponseBody;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ResponsePanel;
@@ -122,12 +121,10 @@ abstract class ToolWindowCompletionResponseEventListener implements
     if (containsResults) {
       message.setSerpResults(serpResults);
     }
-    var displayResults = YouSettings.getCurrentState().isDisplayWebSearchResults();
-
     SwingUtilities.invokeLater(() -> {
       try {
         responsePanel.enableActions();
-        if (displayResults && containsResults) {
+        if (containsResults) {
           responseContainer.displaySerpResults(serpResults);
         }
         totalTokensPanel.updateUserPromptTokens(userPromptTextArea.getText());
