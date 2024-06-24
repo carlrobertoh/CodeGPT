@@ -14,7 +14,7 @@ public class ConfigurationState {
   private int maxTokens = 1000;
   private double temperature = 0.1;
   private boolean checkForPluginUpdates = true;
-  private boolean checkForNewScreenshots = true;
+  private boolean checkForNewScreenshots = false;
   private boolean createNewChatOnEachAction;
   private boolean ignoreGitCommitTokenLimit;
   private boolean methodNameGenerationEnabled = true;
