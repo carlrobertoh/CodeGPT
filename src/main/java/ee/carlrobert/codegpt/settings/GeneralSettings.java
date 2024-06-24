@@ -116,8 +116,6 @@ public class GeneralSettings implements PersistentStateComponent<GeneralSettings
         return AnthropicSettings.getCurrentState().getModel();
       case AZURE:
         return AzureSettings.getCurrentState().getDeploymentId();
-      case YOU:
-        return "YouCode";
       case LLAMA_CPP:
         var llamaSettings = LlamaSettings.getCurrentState();
         if (llamaSettings.isUseCustomModel()) {

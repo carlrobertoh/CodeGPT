@@ -19,19 +19,14 @@ import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.credentials.CredentialsStore;
-import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.IncludedFilesSettings;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
-import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettings;
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceChatCompletionSettingsState;
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
-import ee.carlrobert.codegpt.settings.service.you.YouSettings;
-import ee.carlrobert.codegpt.telemetry.core.configuration.TelemetryConfiguration;
-import ee.carlrobert.codegpt.telemetry.core.service.UserId;
 import ee.carlrobert.codegpt.util.file.FileUtil;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeBase64Source;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionDetailedMessage;
@@ -58,8 +53,6 @@ import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionSt
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIImageUrl;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIMessageImageURLContent;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIMessageTextContent;
-import ee.carlrobert.llm.client.you.completion.YouCompletionRequest;
-import ee.carlrobert.llm.client.you.completion.YouCompletionRequestMessage;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -70,7 +63,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import okhttp3.Request;
@@ -204,23 +196,6 @@ public class CompletionRequestProvider {
         .setRepeat_penalty(settings.getRepeatPenalty())
         .setStop(promptTemplate.getStopTokens())
         .build();
-  }
-
-  public YouCompletionRequest buildYouCompletionRequest(Message message) {
-    var requestBuilder = new YouCompletionRequest.Builder(message.getPrompt())
-        .setUseGPT4Model(YouSettings.getCurrentState().isUseGPT4Model())
-        .setChatMode(YouSettings.getCurrentState().getChatMode())
-        .setCustomModel(YouSettings.getCurrentState().getCustomModel())
-        .setChatHistory(conversation.getMessages().stream()
-            .map(prevMessage -> new YouCompletionRequestMessage(
-                prevMessage.getPrompt(),
-                prevMessage.getResponse()))
-            .toList());
-    if (TelemetryConfiguration.getInstance().isEnabled()
-        && !ApplicationManager.getApplication().isUnitTestMode()) {
-      requestBuilder.setUserId(UUID.fromString(UserId.INSTANCE.get()));
-    }
-    return requestBuilder.build();
   }
 
   public OpenAIChatCompletionRequest buildOpenAIChatCompletionRequest(
@@ -456,7 +431,7 @@ public class CompletionRequestProvider {
       CallParameters callParameters) {
     var messages = buildOpenAIMessages(callParameters);
 
-    if (model == null || GeneralSettings.isSelected(ServiceType.YOU)) {
+    if (model == null) {
       return messages;
     }
 

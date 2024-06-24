@@ -198,7 +198,6 @@ public final class ConversationService {
       case CUSTOM_OPENAI -> "CustomService";
       case ANTHROPIC -> AnthropicSettings.getCurrentState().getModel();
       case AZURE -> AzureSettings.getCurrentState().getDeploymentId();
-      case YOU -> "YouCode";
       case LLAMA_CPP -> {
         var llamaSettings = LlamaSettings.getCurrentState();
         yield llamaSettings.isUseCustomModel()

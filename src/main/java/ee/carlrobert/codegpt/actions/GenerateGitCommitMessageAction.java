@@ -2,7 +2,6 @@ package ee.carlrobert.codegpt.actions;
 
 import static com.intellij.openapi.ui.Messages.OK;
 import static com.intellij.util.ObjectUtils.tryCast;
-import static ee.carlrobert.codegpt.settings.service.ServiceType.YOU;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
@@ -29,7 +28,6 @@ import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.completions.CompletionRequestService;
-import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.configuration.CommitMessageTemplate;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
@@ -62,12 +60,6 @@ public class GenerateGitCommitMessageAction extends AnAction {
 
   @Override
   public void update(@NotNull AnActionEvent event) {
-    var selectedService = GeneralSettings.getCurrentState().getSelectedService();
-    if (selectedService == YOU) {
-      event.getPresentation().setVisible(false);
-      return;
-    }
-
     var includedChangesFilePaths = getIncludedChangesFilePaths(event);
     var includedUnversionedChangesFilePaths = getIncludedUnversionedFilePaths(event);
     var filesSelected =
