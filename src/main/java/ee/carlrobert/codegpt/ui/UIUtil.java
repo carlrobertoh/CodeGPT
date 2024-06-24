@@ -37,9 +37,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
-import javax.swing.ScrollPaneConstants;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
+import javax.swing.text.DefaultCaret;
 
 public class UIUtil {
 
@@ -59,6 +59,7 @@ public class UIUtil {
     textPane.setEditable(false);
     textPane.setText(text);
     textPane.setOpaque(opaque);
+    ((DefaultCaret) textPane.getCaret()).setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
     return textPane;
   }
 
@@ -82,7 +83,6 @@ public class UIUtil {
 
   public static JScrollPane createScrollPaneWithSmartScroller(ScrollablePanel scrollablePanel) {
     var scrollPane = ScrollPaneFactory.createScrollPane(scrollablePanel, true);
-    scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
     new SmartScroller(scrollPane);
     return scrollPane;
   }
