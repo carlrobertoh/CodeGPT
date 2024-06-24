@@ -1,29 +1,53 @@
 package ee.carlrobert.codegpt.toolwindow.chat.ui;
 
-import java.awt.event.AdjustmentEvent;
-import java.awt.event.AdjustmentListener;
-import javax.swing.BoundedRangeModel;
-import javax.swing.JScrollBar;
-import javax.swing.JScrollPane;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.text.DefaultCaret;
 import javax.swing.text.JTextComponent;
+import java.awt.*;
+import java.awt.event.AdjustmentEvent;
+import java.awt.event.AdjustmentListener;
 
+/**
+ *  SmartScroller taken from http://tips4java.wordpress.com/2013/03/03/smart-scrolling/
+ *
+ *  The SmartScroller will attempt to keep the viewport positioned based on
+ *  the users interaction with the scrollbar. The normal behaviour is to keep
+ *  the viewport positioned to see new data as it is dynamically added.
+ *
+ *  Assuming vertical scrolling and data is added to the bottom:
+ *
+ *  - when the viewport is at the bottom and new data is added,
+ *    then automatically scroll the viewport to the bottom
+ *  - when the viewport is not at the bottom and new data is added,
+ *    then do nothing with the viewport
+ *
+ *  Assuming vertical scrolling and data is added to the top:
+ *
+ *  - when the viewport is at the top and new data is added,
+ *    then do nothing with the viewport
+ *  - when the viewport is not at the top and new data is added, then adjust
+ *    the viewport to the relative position it was at before the data was added
+ *
+ *  Similiar logic would apply for horizontal scrolling.
+ */
 public class SmartScroller implements AdjustmentListener {
+  public final static int HORIZONTAL = 0;
+  public final static int VERTICAL = 1;
 
-  private static final int HORIZONTAL = 0;
-  private static final int VERTICAL = 1;
-  private static final int START = 0;
-  private static final int END = 1;
+  public final static int START = 0;
+  public final static int END = 1;
 
-  private final int viewportPosition;
+  private int viewportPosition;
 
+  private JScrollBar scrollBar;
   private boolean adjustScrollBar = true;
+
   private int previousValue = -1;
   private int previousMaximum = -1;
 
   /**
-   * Convenience constructor. Scroll direction is VERTICAL and viewport position is at the END.
+   * Convenience constructor.
+   * Scroll direction is VERTICAL and viewport position is at the END.
    *
    * @param scrollPane the scroll pane to monitor
    */
@@ -31,40 +55,51 @@ public class SmartScroller implements AdjustmentListener {
     this(scrollPane, VERTICAL, END);
   }
 
+  /**
+   * Convenience constructor.
+   * Scroll direction is VERTICAL.
+   *
+   * @param scrollPane       the scroll pane to monitor
+   * @param viewportPosition valid values are START and END
+   */
+  public SmartScroller(JScrollPane scrollPane, int viewportPosition) {
+    this(scrollPane, VERTICAL, viewportPosition);
+  }
 
   /**
    * Specify how the SmartScroller will function.
    *
    * @param scrollPane       the scroll pane to monitor
-   * @param scrollDirection  indicates which JScrollBar to monitor. Valid values are HORIZONTAL and
-   *                         VERTICAL.
-   * @param viewportPosition indicates where the viewport will normally be positioned as data is
-   *                         added. Valid values are START and END
+   * @param scrollDirection  indicates which JScrollBar to monitor.
+   *                         Valid values are HORIZONTAL and VERTICAL.
+   * @param viewportPosition indicates where the viewport will normally be
+   *                         positioned as data is added.
+   *                         Valid values are START and END
    */
   public SmartScroller(JScrollPane scrollPane, int scrollDirection, int viewportPosition) {
     if (scrollDirection != HORIZONTAL
-        && scrollDirection != VERTICAL) {
+        && scrollDirection != VERTICAL)
       throw new IllegalArgumentException("invalid scroll direction specified");
-    }
 
     if (viewportPosition != START
-        && viewportPosition != END) {
+        && viewportPosition != END)
       throw new IllegalArgumentException("invalid viewport position specified");
-    }
 
     this.viewportPosition = viewportPosition;
 
-    JScrollBar scrollBar;
-    if (scrollDirection == HORIZONTAL) {
+    if (scrollDirection == HORIZONTAL)
       scrollBar = scrollPane.getHorizontalScrollBar();
-    } else {
+    else
       scrollBar = scrollPane.getVerticalScrollBar();
-    }
 
     scrollBar.addAdjustmentListener(this);
 
     //  Turn off automatic scrolling for text components
-    if (scrollPane.getViewport().getView() instanceof JTextComponent textComponent) {
+
+    Component view = scrollPane.getViewport().getView();
+
+    if (view instanceof JTextComponent) {
+      JTextComponent textComponent = (JTextComponent) view;
       DefaultCaret caret = (DefaultCaret) textComponent.getCaret();
       caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
     }
@@ -72,7 +107,11 @@ public class SmartScroller implements AdjustmentListener {
 
   @Override
   public void adjustmentValueChanged(final AdjustmentEvent e) {
-    SwingUtilities.invokeLater(() -> checkScrollBar(e));
+    SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
+        checkScrollBar(e);
+      }
+    });
   }
 
   /*
@@ -95,11 +134,10 @@ public class SmartScroller implements AdjustmentListener {
     //  Check if the user has manually repositioned the scrollbar
 
     if (valueChanged && !maximumChanged) {
-      if (viewportPosition == START) {
+      if (viewportPosition == START)
         adjustScrollBar = value != 0;
-      } else {
+      else
         adjustScrollBar = value + extent >= maximum;
-      }
     }
 
     //  Reset the "value" so we can reposition the viewport and
