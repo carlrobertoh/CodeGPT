@@ -33,8 +33,6 @@
           instance="ee.carlrobert.codegpt.settings.service.AnthropicServiceConfigurable"/>
         <applicationConfigurable id="settings.codegpt.services.google" parentId="settings.codegpt.services" displayName="Google"
           instance="ee.carlrobert.codegpt.settings.service.google.GoogleSettingsConfigurable"/>
-        <applicationConfigurable id="settings.codegpt.services.you" parentId="settings.codegpt.services" displayName="You.com"
-          instance="ee.carlrobert.codegpt.settings.service.YouServiceConfigurable"/>
         <applicationConfigurable id="settings.codegpt.services.llama_cpp" parentId="settings.codegpt.services" displayName="LLaMA C/C++ (Local)"
           instance="ee.carlrobert.codegpt.settings.service.LlamaServiceConfigurable"/>
         <applicationConfigurable id="settings.codegpt.services.ollama" parentId="settings.codegpt.services" displayName="Ollama (Local)"

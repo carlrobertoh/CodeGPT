@@ -58,7 +58,6 @@ class ServiceConfigurableComponent {
             "Azure" to AzureServiceConfigurable::class.java,
             "Anthropic" to AnthropicServiceConfigurable::class.java,
             "Google" to GoogleSettingsConfigurable::class.java,
-            "You.com" to YouServiceConfigurable::class.java,
             "LLaMA C/C++ (Local)" to LlamaServiceConfigurable::class.java,
             "Ollama (Local)" to OllamaSettingsConfigurable::class.java,
         ).entries.forEach { (name, configurableClass) ->

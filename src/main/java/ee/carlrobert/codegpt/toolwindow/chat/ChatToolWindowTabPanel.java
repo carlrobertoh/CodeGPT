@@ -7,7 +7,6 @@ import static java.lang.String.format;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.ActionPlaces;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
 import com.intellij.util.ui.JBUI;
@@ -25,7 +24,6 @@ import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
-import ee.carlrobert.codegpt.settings.service.you.YouSettings;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ChatMessageResponseBody;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ChatToolWindowScrollablePanel;
@@ -324,11 +322,6 @@ public class ChatToolWindowTabPanel implements Disposable {
       var messageResponseBody =
           new ChatMessageResponseBody(project, this).withResponse(message.getResponse());
 
-      var serpResults = message.getSerpResults();
-      if (YouSettings.getCurrentState().isDisplayWebSearchResults()
-          && serpResults != null && !serpResults.isEmpty()) {
-        messageResponseBody.displaySerpResults(serpResults);
-      }
       messageResponseBody.hideCaret();
 
       var userMessagePanel = new UserMessagePanel(project, message, this);
