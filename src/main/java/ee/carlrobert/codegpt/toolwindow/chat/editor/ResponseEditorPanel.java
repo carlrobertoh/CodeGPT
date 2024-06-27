@@ -21,6 +21,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.JBMenuItem;
 import com.intellij.openapi.ui.JBPopupMenu;
 import com.intellij.openapi.util.Disposer;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.ui.ColorUtil;
 import com.intellij.ui.IdeBorderFactory;
 import com.intellij.ui.components.ActionLink;
@@ -57,7 +58,7 @@ public class ResponseEditorPanel extends JPanel implements Disposable {
     editor = EditorUtil.createEditor(
         project,
         findLanguageExtensionMapping(markdownLanguage).getValue(),
-        code);
+        StringUtil.convertLineSeparators(code));
 
     var group = new DefaultActionGroup();
     group.add(new ReplaceCodeInMainEditorAction());
