@@ -3,8 +3,8 @@ package ee.carlrobert.codegpt.actions.editor;
 import static java.lang.String.format;
 
 import com.intellij.icons.AllIcons;
+import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.util.ui.FormBuilder;
@@ -44,6 +44,11 @@ public class CustomPromptAction extends BaseEditorAction {
             project.getService(ChatToolWindowContentManager.class).sendMessage(message));
       }
     }
+  }
+
+  @Override
+  public void update(AnActionEvent event) {
+    event.getPresentation().setEnabled(true);
   }
 
   public static class CustomPromptDialog extends DialogWrapper {

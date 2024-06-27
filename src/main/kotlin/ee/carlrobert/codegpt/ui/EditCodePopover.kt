@@ -8,26 +8,29 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.event.SelectionEvent
 import com.intellij.openapi.editor.event.SelectionListener
 import com.intellij.openapi.observable.properties.AtomicBooleanProperty
+import com.intellij.openapi.observable.properties.ObservableProperty
 import com.intellij.openapi.observable.util.not
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.ui.popup.util.MinimizeButton
 import com.intellij.ui.DocumentAdapter
 import com.intellij.ui.components.JBTextField
 import com.intellij.ui.dsl.builder.AlignX
+import com.intellij.ui.dsl.builder.Cell
+import com.intellij.ui.dsl.builder.Row
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.ui.layout.ComponentPredicate
 import com.intellij.util.ui.AsyncProcessIcon
 import com.intellij.util.ui.JBUI
 import ee.carlrobert.codegpt.CodeGPTBundle
 import ee.carlrobert.codegpt.settings.GeneralSettings
-import ee.carlrobert.codegpt.settings.service.ServiceType
+import ee.carlrobert.codegpt.settings.service.ServiceType.CODEGPT
 import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.ModelComboBoxAction
 import ee.carlrobert.codegpt.util.ApplicationUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import java.util.concurrent.atomic.AtomicReference
+import javax.swing.JButton
 import javax.swing.JPanel
 import javax.swing.event.DocumentEvent
 
@@ -35,7 +38,6 @@ data class ObservableProperties(
     val submitted: AtomicBooleanProperty = AtomicBooleanProperty(false),
     val accepted: AtomicBooleanProperty = AtomicBooleanProperty(false),
     val loading: AtomicBooleanProperty = AtomicBooleanProperty(false),
-    val selectedProvider: AtomicReference<ServiceType> = AtomicReference<ServiceType>(ServiceType.CODEGPT)
 )
 
 class EditCodePopover(private val editor: Editor) {
@@ -83,41 +85,14 @@ class EditCodePopover(private val editor: Editor) {
                 comment(CodeGPTBundle.get("editCodePopover.textField.comment"))
             }
             row {
-                button(CodeGPTBundle.get("editCodePopover.submitButton.title")) {
-                    serviceScope.launch {
-                        submissionHandler.handleSubmit(promptTextField.text)
-                        promptTextField.text = ""
-                        promptTextField.emptyText.text =
-                            CodeGPTBundle.get("editCodePopover.textField.followUp.emptyText")
-                    }
-                }
-                    .applyToComponent {
-                        putClientProperty(DarculaButtonUI.DEFAULT_STYLE_KEY, true)
-                    }
-                    .visibleIf(observableProperties.submitted.not())
-                    .enabledIf(
-                        EnabledButtonComponentPredicate(
-                            editor,
-                            promptTextField,
-                            observableProperties
-                        )
-                    )
-                button(CodeGPTBundle.get("editCodePopover.followUpButton.title")) {
-                    serviceScope.launch {
-                        submissionHandler.handleSubmit(promptTextField.text)
-                    }
-                }
-                    .applyToComponent {
-                        putClientProperty(DarculaButtonUI.DEFAULT_STYLE_KEY, true)
-                    }
-                    .visibleIf(observableProperties.submitted)
-                    .enabledIf(
-                        EnabledButtonComponentPredicate(
-                            editor,
-                            promptTextField,
-                            observableProperties
-                        )
-                    )
+                button(
+                    CodeGPTBundle.get("editCodePopover.submitButton.title"),
+                    observableProperties.submitted.not(),
+                )
+                button(
+                    CodeGPTBundle.get("editCodePopover.followUpButton.title"),
+                    observableProperties.submitted,
+                )
                 button(CodeGPTBundle.get("editCodePopover.acceptButton.title")) {
                     submissionHandler.handleAccept()
                     popup.cancel()
@@ -137,14 +112,12 @@ class EditCodePopover(private val editor: Editor) {
                     .applyToComponent {
                         font = JBUI.Fonts.smallFont()
                     }
-                    .align(AlignX.LEFT)
                 cell(
                     ModelComboBoxAction(
                         ApplicationUtil.findCurrentProject(),
-                        { /*provider ->
-                            observableProperties.selectedProvider.getAndSet(provider);*/
-                        },
-                        GeneralSettings.getSelectedService()
+                        {},
+                        GeneralSettings.getSelectedService(),
+                        listOf(CODEGPT)
                     )
                         .createCustomComponent(ActionPlaces.UNKNOWN)
                 ).align(AlignX.RIGHT)
@@ -154,14 +127,48 @@ class EditCodePopover(private val editor: Editor) {
         }
     }
 
+    private fun Row.button(title: String, visibleIf: ObservableProperty<Boolean>): Cell<JButton> {
+        val button = JButton(title).apply {
+            putClientProperty(DarculaButtonUI.DEFAULT_STYLE_KEY, true)
+            addActionListener {
+                serviceScope.launch {
+                    submissionHandler.handleSubmit(promptTextField.text)
+                    promptTextField.text = ""
+                    promptTextField.emptyText.text =
+                        CodeGPTBundle.get("editCodePopover.textField.followUp.emptyText")
+                }
+            }
+        }
+        return cell(button)
+            .visibleIf(visibleIf)
+            .enabledIf(
+                EnabledButtonComponentPredicate(
+                    button,
+                    editor,
+                    promptTextField,
+                    observableProperties
+                )
+            )
+    }
+
     private class EnabledButtonComponentPredicate(
+        private val button: JButton,
         private val editor: Editor,
         private val promptTextField: JBTextField,
         private val observableProperties: ObservableProperties
     ) : ComponentPredicate() {
-        override fun invoke(): Boolean =
-            editor.selectionModel.hasSelection() && promptTextField.text.isNotEmpty() && observableProperties.loading.get()
-                .not()
+        override fun invoke(): Boolean {
+            if (!editor.selectionModel.hasSelection()) {
+                button.toolTipText = "Please select code to continue"
+            }
+            if (promptTextField.text.isEmpty()) {
+                button.toolTipText = "Please enter a prompt to continue"
+            }
+
+            return editor.selectionModel.hasSelection()
+                    && promptTextField.text.isNotEmpty()
+                    && observableProperties.loading.get().not()
+        }
 
         override fun addListener(listener: (Boolean) -> Unit) {
             promptTextField.document.addDocumentListener(object : DocumentAdapter() {

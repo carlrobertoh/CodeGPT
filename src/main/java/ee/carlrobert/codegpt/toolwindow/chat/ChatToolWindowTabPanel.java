@@ -275,7 +275,7 @@ public class ChatToolWindowTabPanel implements Disposable {
     panel.add(JBUI.Panels.simplePanel(createUserPromptTextAreaHeader(
         project,
         selectedService,
-        () -> {
+        (provider) -> {
           ConversationService.getInstance().startConversation();
           contentManager.createNewTabPanel();
         })), BorderLayout.NORTH);
@@ -286,7 +286,7 @@ public class ChatToolWindowTabPanel implements Disposable {
   private JPanel createUserPromptTextAreaHeader(
       Project project,
       ServiceType selectedService,
-      Runnable onModelChange) {
+      Consumer<ServiceType> onModelChange) {
     return JBUI.Panels.simplePanel()
         .withBorder(Borders.emptyBottom(8))
         .andTransparent()

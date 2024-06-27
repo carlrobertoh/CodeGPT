@@ -157,7 +157,7 @@ object EditorUtil {
         psiDocumentManager.commitDocument(document)
         val psiFile = psiDocumentManager.getPsiFile(document)
         return psiFile?.let { file ->
-            CodeStyleManager.getInstance(project).reformatText(file, startOffset, endOffset)
+            CodeStyleManager.getInstance(project).adjustLineIndent(file, TextRange(startOffset, endOffset))
 
             val documentText = document.text
             val newEndOffset = (startOffset until documentText.length)

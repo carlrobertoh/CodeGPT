@@ -5,12 +5,14 @@ import com.intellij.openapi.application.readAction
 import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.application.runWriteAction
 import com.intellij.openapi.command.WriteCommandAction.runWriteCommandAction
+import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.markup.RangeHighlighter
 import com.intellij.openapi.ui.Messages
 import com.jetbrains.rd.util.AtomicReference
 import ee.carlrobert.codegpt.completions.CompletionClientProvider
 import ee.carlrobert.codegpt.completions.CompletionRequestProvider
+import ee.carlrobert.codegpt.settings.service.codegpt.CodeGPTServiceSettings
 import ee.carlrobert.codegpt.util.EditorUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -65,8 +67,9 @@ class EditCodeSubmissionHandler(
     }
 
     private fun getModifiedContent(prompt: String): String {
+        val model = service<CodeGPTServiceSettings>().state.chatCompletionSettings.model
         val response = CompletionClientProvider.getCodeGPTClient().getChatCompletion(
-            CompletionRequestProvider.buildModifySelectionRequest(prompt, "claude-3.5-sonnet")
+            CompletionRequestProvider.buildModifySelectionRequest(prompt, model)
         )
         if (response == null || response.choices == null || response.choices.isEmpty()) {
             runInEdt {
