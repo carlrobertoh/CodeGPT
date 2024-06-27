@@ -2,11 +2,11 @@ package ee.carlrobert.codegpt.actions.editor;
 
 import static java.lang.String.format;
 
+import com.intellij.icons.AllIcons.Actions;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.project.Project;
 import ee.carlrobert.codegpt.CodeGPTKeys;
@@ -47,6 +47,7 @@ public class EditorActionsUtil {
     if (actionGroup instanceof DefaultActionGroup group) {
       group.removeAll();
       group.add(new AskAction());
+      group.add(new ModifySelectionAction(Actions.EditSource));
       group.add(new CustomPromptAction());
       group.addSeparator();
 
