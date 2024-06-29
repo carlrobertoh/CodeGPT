@@ -6,6 +6,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Fast Code Edits [#601](https://github.com/carlrobertoh/CodeGPT/pull/601)
+
+### Fixed
+
+- Chat toolwindow autoscroller issues
+- Wrong line separators on Windows machine 
+
+### Removed
+
+- You.com provider support
+
 ## [2.8.1-233] - 2024-06-21
 
 ### Added
