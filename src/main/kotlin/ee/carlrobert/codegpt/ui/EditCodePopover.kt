@@ -22,6 +22,7 @@ import com.intellij.ui.layout.ComponentPredicate
 import com.intellij.util.ui.AsyncProcessIcon
 import com.intellij.util.ui.JBUI
 import ee.carlrobert.codegpt.CodeGPTBundle
+import ee.carlrobert.codegpt.actions.editor.EditCodeSubmissionHandler
 import ee.carlrobert.codegpt.settings.GeneralSettings
 import ee.carlrobert.codegpt.settings.service.ServiceType.CODEGPT
 import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.ModelComboBoxAction
@@ -41,12 +42,6 @@ data class ObservableProperties(
 )
 
 class EditCodePopover(private val editor: Editor) {
-
-    companion object {
-        fun show(editor: Editor) {
-            EditCodePopover(editor).show()
-        }
-    }
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val observableProperties = ObservableProperties()

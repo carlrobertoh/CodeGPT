@@ -47,7 +47,7 @@ public class EditorActionsUtil {
     if (actionGroup instanceof DefaultActionGroup group) {
       group.removeAll();
       group.add(new AskAction());
-      group.add(new ModifySelectionAction(Actions.EditSource));
+      group.add(new EditCodeAction(Actions.EditSource));
       group.add(new CustomPromptAction());
       group.addSeparator();
 

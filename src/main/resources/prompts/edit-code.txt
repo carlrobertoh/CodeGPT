@@ -4,8 +4,7 @@ Rules:
 1. Return ONLY the modified code.
 2. Do not include any explanations, comments, or additional text.
 3. If the request cannot be translated into code changes, return NULL.
-4. Use appropriate syntax highlighting for the programming language.
-5. Do not wrap the entire response in triple backticks.
+3. Do not wrap the entire response in triple backticks.
 
 Example:
 

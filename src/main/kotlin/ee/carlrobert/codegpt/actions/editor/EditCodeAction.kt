@@ -1,6 +1,5 @@
 package ee.carlrobert.codegpt.actions.editor
 
-import com.intellij.openapi.application.invokeLater
 import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
@@ -8,7 +7,7 @@ import ee.carlrobert.codegpt.Icons
 import ee.carlrobert.codegpt.ui.EditCodePopover
 import javax.swing.Icon
 
-class ModifySelectionAction : BaseEditorAction {
+class EditCodeAction : BaseEditorAction {
 
     constructor() : this(Icons.Sparkle)
 
@@ -22,7 +21,7 @@ class ModifySelectionAction : BaseEditorAction {
 
     override fun actionPerformed(project: Project, editor: Editor, selectedText: String) {
         runInEdt {
-            EditCodePopover.show(editor)
+            EditCodePopover(editor).show()
         }
     }
 }

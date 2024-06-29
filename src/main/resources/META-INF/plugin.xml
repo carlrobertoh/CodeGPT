@@ -108,7 +108,7 @@
         <group id="CodeGPT.FloatingCodeToolbarMenuRootGroup">
             <action
               id="CodeGPT.ModifySelectionAction"
-              class="ee.carlrobert.codegpt.actions.editor.ModifySelectionAction" />
+              class="ee.carlrobert.codegpt.actions.editor.EditCodeAction" />
             <add-to-group
               group-id="Floating.CodeToolbar"
               relative-to-action="ProjectViewPopupMenuRefactoringGroup"

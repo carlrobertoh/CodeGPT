@@ -122,17 +122,17 @@ public class CompletionRequestProvider {
         .build();
   }
 
-  public static OpenAIChatCompletionRequest buildModifySelectionRequest(
+  public static OpenAIChatCompletionRequest buildEditCodeRequest(
       String context,
       String model) {
     return new OpenAIChatCompletionRequest.Builder(
         List.of(
             new OpenAIChatCompletionStandardMessage(
                 "system",
-                getResourceContent("/prompts/modify-selection.txt")),
+                getResourceContent("/prompts/edit-code.txt")),
             new OpenAIChatCompletionStandardMessage("user", context)))
         .setModel(model)
-        .setStream(false)
+        .setStream(true)
         .build();
   }
 

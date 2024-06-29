@@ -1,8 +1,6 @@
 package ee.carlrobert.codegpt.util
 
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer
-import com.intellij.diff.tools.fragmented.UnifiedDiffChange
-import com.intellij.diff.util.DiffDrawUtil
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.PathManager
 import com.intellij.openapi.application.runUndoTransparentWriteAction
@@ -11,7 +9,6 @@ import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.editor.EditorKind
-import com.intellij.openapi.editor.markup.RangeHighlighter
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.TextEditor
@@ -137,31 +134,6 @@ object EditorUtil {
             DaemonCodeAnalyzer.getInstance(project).setHighlightingEnabled(psiFile, false)
         }
     }
-
-    fun highlightDifferences(
-        editor: Editor,
-        selectedText: String,
-        modifiedContent: String
-    ): List<RangeHighlighter> =
-        DiffUtil.calculateDifferences(editor, selectedText, modifiedContent)
-            .map {
-                val blockStart = it.startLine1
-                val insertedStart = it.startLine2
-                val insertedEnd = it.endLine2
-
-                UnifiedDiffChange(blockStart, insertedStart, insertedEnd, it)
-                    .run {
-                        DiffDrawUtil.createUnifiedChunkHighlighters(
-                            editor,
-                            deletedRange,
-                            insertedRange,
-                            isExcluded,
-                            isSkipped,
-                            lineFragment.innerFragments
-                        )
-                    }
-            }
-            .flatten()
 
     private fun replaceTextAndReformat(
         editor: Editor,
