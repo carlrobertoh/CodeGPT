@@ -17,7 +17,6 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.codeStyle.CodeStyleManager
 import com.intellij.testFramework.LightVirtualFile
@@ -106,10 +105,6 @@ object EditorUtil {
     }
 
     @JvmStatic
-    fun replaceMainEditorSelection(project: Project, text: String) {
-        replaceEditorSelection(getSelectedEditor(project)!!, text)
-    }
-
     fun replaceEditorSelection(editor: Editor, text: String) {
         val selectionModel = editor.selectionModel
         val startOffset = selectionModel.selectionStart
@@ -121,53 +116,17 @@ object EditorUtil {
         }
     }
 
-    private fun replaceTextAndReformat(
-        editor: Editor,
-        startOffset: Int,
-        endOffset: Int,
-        newText: String
-    ) {
-        return runUndoTransparentWriteAction {
-            val document = editor.document
-            val originalText = document.getText(TextRange(startOffset, endOffset))
-
-            document.replaceString(startOffset, endOffset, newText)
-
-            if (ConfigurationSettings.getCurrentState().isAutoFormattingEnabled) {
-                reformatDocument(
-                    editor.project!!,
-                    document,
-                    originalText,
-                    startOffset,
-                    endOffset
-                )
-            }
-        }
-    }
-
     @JvmStatic
     fun reformatDocument(
         project: Project,
         document: Document,
-        originalText: String,
         startOffset: Int,
         endOffset: Int
-    ): TextRange? {
+    ) {
         val psiDocumentManager = PsiDocumentManager.getInstance(project)
         psiDocumentManager.commitDocument(document)
-        val psiFile = psiDocumentManager.getPsiFile(document)
-        return psiFile?.let { file ->
-            CodeStyleManager.getInstance(project).adjustLineIndent(file, TextRange(startOffset, endOffset))
-
-            val documentText = document.text
-            val newEndOffset = (startOffset until documentText.length)
-                .asSequence()
-                .filter { !documentText[it].isWhitespace() }
-                .take(originalText.count { !it.isWhitespace() })
-                .lastOrNull()
-                ?.plus(1)
-                ?: startOffset
-            return TextRange(startOffset, newEndOffset)
+        psiDocumentManager.getPsiFile(document)?.let { file ->
+            CodeStyleManager.getInstance(project).reformatText(file, startOffset, endOffset)
         }
     }
 
@@ -203,4 +162,27 @@ object EditorUtil {
                     }
             }
             .flatten()
+
+    private fun replaceTextAndReformat(
+        editor: Editor,
+        startOffset: Int,
+        endOffset: Int,
+        newText: String
+    ) {
+        editor.project?.let { project ->
+            runUndoTransparentWriteAction {
+                val document = editor.document
+                document.replaceString(startOffset, endOffset, newText)
+
+                if (ConfigurationSettings.getCurrentState().isAutoFormattingEnabled) {
+                    reformatDocument(
+                        project,
+                        document,
+                        startOffset,
+                        endOffset
+                    )
+                }
+            }
+        }
+    }
 }
