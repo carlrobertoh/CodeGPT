@@ -2,6 +2,7 @@ package ee.carlrobert.codegpt.settings.service.ollama
 
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.invokeLater
+import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.observable.util.whenTextChangedFromUi
@@ -152,7 +153,7 @@ class OllamaSettingsForm {
                     .map { it.name }
             }
             service<OllamaSettings>().state.availableModels = models.toMutableList()
-            invokeLater {
+            runInEdt {
                 modelComboBox.apply {
                     if (models.isNotEmpty()) {
                         model = DefaultComboBoxModel(models.toTypedArray())

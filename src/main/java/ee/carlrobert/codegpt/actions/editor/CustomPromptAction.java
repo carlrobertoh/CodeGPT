@@ -4,7 +4,6 @@ import static java.lang.String.format;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.util.ui.FormBuilder;

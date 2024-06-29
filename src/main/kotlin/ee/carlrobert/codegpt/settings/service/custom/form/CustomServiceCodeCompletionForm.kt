@@ -2,6 +2,7 @@ package ee.carlrobert.codegpt.settings.service.custom.form
 
 import com.intellij.icons.AllIcons.General
 import com.intellij.ide.HelpTooltip
+import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.ui.MessageType
 import com.intellij.openapi.ui.panel.ComponentPanelBuilder
@@ -158,7 +159,7 @@ class CustomServiceCodeCompletionForm(
     internal inner class TestConnectionEventListener : CompletionEventListener<String?> {
         override fun onMessage(value: String?, eventSource: EventSource) {
             if (!value.isNullOrEmpty()) {
-                SwingUtilities.invokeLater {
+                runInEdt {
                     OverlayUtil.showBalloon(
                         CodeGPTBundle.get("settingsConfigurable.service.custom.openai.connectionSuccess"),
                         MessageType.INFO,
@@ -170,7 +171,7 @@ class CustomServiceCodeCompletionForm(
         }
 
         override fun onError(error: ErrorDetails, ex: Throwable) {
-            SwingUtilities.invokeLater {
+            runInEdt {
                 OverlayUtil.showBalloon(
                     CodeGPTBundle.get("settingsConfigurable.service.custom.openai.connectionFailed")
                             + "\n\n"
