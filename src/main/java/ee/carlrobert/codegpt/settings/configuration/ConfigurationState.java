@@ -11,7 +11,7 @@ public class ConfigurationState {
 
   private String systemPrompt = COMPLETION_SYSTEM_PROMPT;
   private String commitMessagePrompt = GENERATE_COMMIT_MESSAGE_SYSTEM_PROMPT;
-  private int maxTokens = 1000;
+  private int maxTokens = 2048;
   private double temperature = 0.1;
   private boolean checkForPluginUpdates = true;
   private boolean checkForNewScreenshots = false;

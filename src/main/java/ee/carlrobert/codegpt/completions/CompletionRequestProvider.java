@@ -122,6 +122,20 @@ public class CompletionRequestProvider {
         .build();
   }
 
+  public static OpenAIChatCompletionRequest buildEditCodeRequest(
+      String context,
+      String model) {
+    return new OpenAIChatCompletionRequest.Builder(
+        List.of(
+            new OpenAIChatCompletionStandardMessage(
+                "system",
+                getResourceContent("/prompts/edit-code.txt")),
+            new OpenAIChatCompletionStandardMessage("user", context)))
+        .setModel(model)
+        .setStream(true)
+        .build();
+  }
+
   public static Request buildCustomOpenAICompletionRequest(String system, String context) {
     return buildCustomOpenAIChatCompletionRequest(
         ApplicationManager.getApplication().getService(CustomServiceSettings.class)

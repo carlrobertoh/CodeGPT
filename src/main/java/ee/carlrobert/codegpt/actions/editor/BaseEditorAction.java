@@ -11,7 +11,7 @@ import javax.swing.Icon;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-abstract class BaseEditorAction extends AnAction {
+public abstract class BaseEditorAction extends AnAction {
 
   BaseEditorAction(
       @Nullable @NlsActions.ActionText String text,

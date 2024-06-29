@@ -27,7 +27,7 @@ public class ReplaceSelectionAction extends TrackableAction {
   public void handleAction(@NotNull AnActionEvent event) {
     var project = requireNonNull(event.getProject());
     if (EditorUtil.isMainEditorTextSelected(project)) {
-      EditorUtil.replaceMainEditorSelection(project, editor.getDocument().getText());
+      EditorUtil.replaceEditorSelection(editor, editor.getDocument().getText());
     } else {
       OverlayUtil.showSelectedEditorSelectionWarning(event);
     }
