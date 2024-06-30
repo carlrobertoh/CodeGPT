@@ -1,6 +1,8 @@
 package ee.carlrobert.codegpt.actions.editor
 
 import com.intellij.notification.NotificationType
+import com.intellij.openapi.application.runInEdt
+import com.intellij.openapi.application.runUndoTransparentWriteAction
 import com.intellij.openapi.command.WriteCommandAction.runWriteCommandAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
@@ -15,7 +17,7 @@ import ee.carlrobert.llm.client.openai.completion.ErrorDetails
 import ee.carlrobert.llm.completion.CompletionEventListener
 import okhttp3.sse.EventSource
 
-class EditCodeCompletionHandler(
+class EditCodeCompletionListener(
     private val editor: Editor,
     private val observableProperties: ObservableProperties,
     private val selectionTextRange: TextRange
@@ -25,11 +27,11 @@ class EditCodeCompletionHandler(
     private var currentHighlighter: RangeHighlighter? = null
 
     override fun onMessage(message: String, eventSource: EventSource) {
-        handleDiff(message)
+        runInEdt { handleDiff(message) }
     }
 
     override fun onComplete(messageBuilder: StringBuilder) {
-        cleanupAndFormat()
+        runInEdt { cleanupAndFormat() }
         observableProperties.loading.set(false)
     }
 
@@ -40,8 +42,8 @@ class EditCodeCompletionHandler(
         )
     }
 
-    private fun highlightCurrentRow(editor: Editor) {
-        currentHighlighter?.let { editor.markupModel.removeHighlighter(it) }
+    private fun updateHighlighter(editor: Editor) {
+        cleanupHighlighter()
 
         val document = editor.document
         val lineNumber = document.getLineNumber(editor.caretModel.offset)
@@ -59,13 +61,12 @@ class EditCodeCompletionHandler(
         )
     }
 
-
     private fun handleDiff(message: String) {
-        runWriteCommandAction(editor.project) {
-            val document = editor.document
-            val startOffset = selectionTextRange.startOffset
-            val endOffset = selectionTextRange.endOffset
+        val document = editor.document
+        val startOffset = selectionTextRange.startOffset
+        val endOffset = selectionTextRange.endOffset
 
+        runUndoTransparentWriteAction {
             val remainingOriginalLength = endOffset - (startOffset + replacedLength)
             if (remainingOriginalLength > 0) {
                 document.replaceString(
@@ -79,41 +80,40 @@ class EditCodeCompletionHandler(
             } else {
                 document.insertString(startOffset + replacedLength, message)
             }
-
-            replacedLength += message.length
-            editor.caretModel.moveToOffset(startOffset + replacedLength)
-            highlightCurrentRow(editor)
         }
-    }
 
-    private fun cleanupHighlighter() {
-        currentHighlighter?.let { editor.markupModel.removeHighlighter(it) }
-        currentHighlighter = null
+        replacedLength += message.length
+        editor.caretModel.moveToOffset(startOffset + replacedLength)
+        updateHighlighter(editor)
     }
 
     private fun cleanupAndFormat() {
         val project = editor.project ?: return
-        runWriteCommandAction(project) {
-            val document = editor.document
-            val psiDocumentManager = project.service<PsiDocumentManager>()
-            val psiFile = psiDocumentManager.getPsiFile(document)
-                ?: return@runWriteCommandAction
-            val startOffset = selectionTextRange.startOffset
-            val endOffset = selectionTextRange.endOffset
-            val newEndOffset = startOffset + replacedLength
+        val document = editor.document
+        val psiDocumentManager = project.service<PsiDocumentManager>()
+        val psiFile = psiDocumentManager.getPsiFile(document) ?: return
+        val startOffset = selectionTextRange.startOffset
+        val endOffset = selectionTextRange.endOffset
+        val newEndOffset = startOffset + replacedLength
 
+        runWriteCommandAction(project) {
             if (newEndOffset < endOffset) {
                 document.deleteString(newEndOffset, endOffset)
             }
-
             psiDocumentManager.commitDocument(document)
             project.service<CodeStyleManager>().reformatText(
                 psiFile,
                 listOf(TextRange(startOffset, newEndOffset))
             )
-            editor.caretModel.moveToOffset(newEndOffset)
-            psiDocumentManager.doPostponedOperationsAndUnblockDocument(document)
-            cleanupHighlighter()
         }
+
+        editor.caretModel.moveToOffset(newEndOffset)
+        psiDocumentManager.doPostponedOperationsAndUnblockDocument(document)
+        cleanupHighlighter()
+    }
+
+    private fun cleanupHighlighter() {
+        currentHighlighter?.let { editor.markupModel.removeHighlighter(it) }
+        currentHighlighter = null
     }
 }
