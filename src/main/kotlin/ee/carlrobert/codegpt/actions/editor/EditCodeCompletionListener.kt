@@ -1,5 +1,7 @@
 package ee.carlrobert.codegpt.actions.editor
 
+import com.intellij.ide.BrowserUtil
+import com.intellij.notification.NotificationAction
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.application.runUndoTransparentWriteAction
@@ -37,9 +39,13 @@ class EditCodeCompletionListener(
 
     override fun onError(error: ErrorDetails, ex: Throwable) {
         observableProperties.loading.set(false)
+
         OverlayUtil.showNotification(
-            "Something went wrong while requesting completion. Please try again.",
-            NotificationType.ERROR
+            error.message,
+            NotificationType.ERROR,
+            NotificationAction.createSimpleExpiring("Upgrade plan") {
+                BrowserUtil.open("https://codegpt.ee/#pricing")
+            },
         )
     }
 
