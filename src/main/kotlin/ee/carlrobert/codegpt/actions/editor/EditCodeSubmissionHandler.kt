@@ -20,32 +20,28 @@ class EditCodeSubmissionHandler(
     private val previousSourceRef = AtomicReference<String?>(null)
 
     suspend fun handleSubmit(userPrompt: String) {
-        try {
-            observableProperties.loading.set(true)
-            observableProperties.submitted.set(true)
+        observableProperties.loading.set(true)
+        observableProperties.submitted.set(true)
 
-            previousSourceRef.getAndSet(editor.document.text)
-            val (selectionTextRange, selectedText) = readAction {
-                editor.selectionModel.run {
-                    Pair(
-                        TextRange(selectionStart, selectionEnd),
-                        editor.selectionModel.selectedText ?: ""
-                    )
-                }
+        previousSourceRef.getAndSet(editor.document.text)
+        val (selectionTextRange, selectedText) = readAction {
+            editor.selectionModel.run {
+                Pair(
+                    TextRange(selectionStart, selectionEnd),
+                    editor.selectionModel.selectedText ?: ""
+                )
             }
-            runInEdt { editor.selectionModel.removeSelection() }
-
-            // TODO: Support other providers
-            CompletionClientProvider.getCodeGPTClient().getChatCompletionAsync(
-                CompletionRequestProvider.buildEditCodeRequest(
-                    "$userPrompt\n\n$selectedText",
-                    service<CodeGPTServiceSettings>().state.chatCompletionSettings.model
-                ),
-                EditCodeCompletionListener(editor, observableProperties, selectionTextRange)
-            )
-        } finally {
-            observableProperties.loading.set(false)
         }
+        runInEdt { editor.selectionModel.removeSelection() }
+
+        // TODO: Support other providers
+        CompletionClientProvider.getCodeGPTClient().getChatCompletionAsync(
+            CompletionRequestProvider.buildEditCodeRequest(
+                "$userPrompt\n\n$selectedText",
+                service<CodeGPTServiceSettings>().state.chatCompletionSettings.model
+            ),
+            EditCodeCompletionListener(editor, observableProperties, selectionTextRange)
+        )
     }
 
     fun handleAccept() {

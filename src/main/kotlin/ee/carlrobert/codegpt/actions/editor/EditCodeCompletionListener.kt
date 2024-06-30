@@ -36,6 +36,7 @@ class EditCodeCompletionListener(
     }
 
     override fun onError(error: ErrorDetails, ex: Throwable) {
+        observableProperties.loading.set(false)
         OverlayUtil.showNotification(
             "Something went wrong while requesting completion. Please try again.",
             NotificationType.ERROR
