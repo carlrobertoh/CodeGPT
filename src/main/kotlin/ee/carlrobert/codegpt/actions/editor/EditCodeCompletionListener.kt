@@ -13,16 +13,20 @@ import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.codeStyle.CodeStyleManager
 import com.intellij.ui.JBColor
+import com.intellij.util.ui.AsyncProcessIcon
 import ee.carlrobert.codegpt.ui.ObservableProperties
 import ee.carlrobert.codegpt.ui.OverlayUtil
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails
 import ee.carlrobert.llm.completion.CompletionEventListener
 import okhttp3.sse.EventSource
+import javax.swing.JButton
 
 class EditCodeCompletionListener(
     private val editor: Editor,
-    private val observableProperties: ObservableProperties,
-    private val selectionTextRange: TextRange
+    private val selectionTextRange: TextRange,
+    private val followUpButton: JButton,
+    private val acceptButton: JButton,
+    private val spinner: AsyncProcessIcon
 ) : CompletionEventListener<String> {
 
     private var replacedLength = 0
@@ -33,12 +37,16 @@ class EditCodeCompletionListener(
     }
 
     override fun onComplete(messageBuilder: StringBuilder) {
+        followUpButton.isEnabled = true
+        acceptButton.isEnabled = true
+        spinner.isVisible = false
         runInEdt { cleanupAndFormat() }
-        observableProperties.loading.set(false)
     }
 
     override fun onError(error: ErrorDetails, ex: Throwable) {
-        observableProperties.loading.set(false)
+        followUpButton.isEnabled = true
+        acceptButton.isEnabled = true
+        spinner.isVisible = false
 
         OverlayUtil.showNotification(
             error.message,

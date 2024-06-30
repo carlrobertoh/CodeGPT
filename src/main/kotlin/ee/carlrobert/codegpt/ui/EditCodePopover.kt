@@ -8,15 +8,12 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.event.SelectionEvent
 import com.intellij.openapi.editor.event.SelectionListener
 import com.intellij.openapi.observable.properties.AtomicBooleanProperty
-import com.intellij.openapi.observable.properties.ObservableProperty
-import com.intellij.openapi.observable.util.not
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.ui.popup.util.MinimizeButton
 import com.intellij.ui.DocumentAdapter
+import com.intellij.ui.components.ActionLink
 import com.intellij.ui.components.JBTextField
 import com.intellij.ui.dsl.builder.AlignX
-import com.intellij.ui.dsl.builder.Cell
-import com.intellij.ui.dsl.builder.Row
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.ui.layout.ComponentPredicate
 import com.intellij.util.ui.AsyncProcessIcon
@@ -36,7 +33,6 @@ import javax.swing.JPanel
 import javax.swing.event.DocumentEvent
 
 data class ObservableProperties(
-    val submitted: AtomicBooleanProperty = AtomicBooleanProperty(false),
     val accepted: AtomicBooleanProperty = AtomicBooleanProperty(false),
     val loading: AtomicBooleanProperty = AtomicBooleanProperty(false),
 )
@@ -72,6 +68,84 @@ class EditCodePopover(private val editor: Editor) {
     }
 
     private fun createPopupPanel(): JPanel {
+        val followUpButton =
+            JButton(CodeGPTBundle.get("editCodePopover.followUpButton.title")).apply {
+                isVisible = false
+                isEnabled = false
+                putClientProperty(DarculaButtonUI.DEFAULT_STYLE_KEY, true)
+            }
+        val acceptButton = JButton(CodeGPTBundle.get("editCodePopover.acceptButton.title")).apply {
+            isVisible = false
+            isEnabled = false
+            addActionListener {
+                submissionHandler.handleAccept()
+                popup.cancel()
+            }
+        }
+        val discardLink = ActionLink(CodeGPTBundle.get("shared.discard")) {
+            submissionHandler.handleReject()
+            popup.cancel()
+        }.apply {
+            isVisible = false
+        }
+        val spinner = AsyncProcessIcon("edit_code_spinner").apply {
+            isVisible = observableProperties.loading.get()
+        }
+        val submitButton = JButton(CodeGPTBundle.get("editCodePopover.submitButton.title")).apply {
+            isEnabled = promptTextField.text.isNotEmpty() && editor.selectionModel.hasSelection()
+            putClientProperty(DarculaButtonUI.DEFAULT_STYLE_KEY, true)
+        }
+        submitButton.addActionListener {
+            submitButton.isVisible = false
+            followUpButton.isVisible = true
+            acceptButton.isVisible = true
+            discardLink.isVisible = true
+
+            serviceScope.launch {
+                submissionHandler.handleSubmit(
+                    promptTextField.text,
+                    followUpButton,
+                    acceptButton,
+                    spinner
+                )
+                promptTextField.text = ""
+                promptTextField.emptyText.text =
+                    CodeGPTBundle.get("editCodePopover.textField.followUp.emptyText")
+            }
+        }
+        followUpButton.addActionListener {
+            serviceScope.launch {
+                submissionHandler.handleSubmit(
+                    promptTextField.text,
+                    followUpButton,
+                    acceptButton,
+                    spinner
+                )
+            }
+        }
+        promptTextField.document.addDocumentListener(object : DocumentAdapter() {
+            override fun textChanged(e: DocumentEvent) {
+                val textNotEmpty = e.document.getText(
+                    e.document.startPosition.offset,
+                    e.document.endPosition.offset
+                ).isNotEmpty()
+                runInEdt {
+                    submitButton.isEnabled = textNotEmpty && editor.selectionModel.hasSelection()
+                    followUpButton.isEnabled = textNotEmpty && editor.selectionModel.hasSelection()
+                }
+            }
+        })
+        editor.selectionModel.addSelectionListener(object : SelectionListener {
+            override fun selectionChanged(e: SelectionEvent) {
+                runInEdt {
+                    submitButton.isEnabled =
+                        e.editor.selectionModel.hasSelection() && promptTextField.text.isNotEmpty()
+                    followUpButton.isEnabled =
+                        e.editor.selectionModel.hasSelection() && promptTextField.text.isNotEmpty()
+                }
+            }
+        })
+
         return panel {
             row {
                 cell(promptTextField)
@@ -80,27 +154,11 @@ class EditCodePopover(private val editor: Editor) {
                 comment(CodeGPTBundle.get("editCodePopover.textField.comment"))
             }
             row {
-                button(
-                    CodeGPTBundle.get("editCodePopover.submitButton.title"),
-                    observableProperties.submitted.not(),
-                )
-                button(
-                    CodeGPTBundle.get("editCodePopover.followUpButton.title"),
-                    observableProperties.submitted,
-                )
-                button(CodeGPTBundle.get("editCodePopover.acceptButton.title")) {
-                    submissionHandler.handleAccept()
-                    popup.cancel()
-                }
-                    .visibleIf(observableProperties.submitted)
-                    .enabledIf(observableProperties.loading.not())
-                cell(AsyncProcessIcon("edit_code_spinner")).visibleIf(observableProperties.loading)
-                link(CodeGPTBundle.get("shared.discard")) {
-                    submissionHandler.handleReject()
-                    popup.cancel()
-                }
-                    .align(AlignX.RIGHT)
-                    .visibleIf(observableProperties.submitted)
+                cell(submitButton)
+                cell(followUpButton)
+                cell(acceptButton)
+                cell(spinner)
+                cell(discardLink).align(AlignX.RIGHT)
             }
             separator()
             row {
@@ -121,30 +179,6 @@ class EditCodePopover(private val editor: Editor) {
         }.apply {
             border = JBUI.Borders.empty(8, 8, 2, 8)
         }
-    }
-
-    private fun Row.button(title: String, visibleIf: ObservableProperty<Boolean>): Cell<JButton> {
-        val button = JButton(title).apply {
-            putClientProperty(DarculaButtonUI.DEFAULT_STYLE_KEY, true)
-            addActionListener {
-                serviceScope.launch {
-                    submissionHandler.handleSubmit(promptTextField.text)
-                    promptTextField.text = ""
-                    promptTextField.emptyText.text =
-                        CodeGPTBundle.get("editCodePopover.textField.followUp.emptyText")
-                }
-            }
-        }
-        return cell(button)
-            .visibleIf(visibleIf)
-            .enabledIf(
-                EnabledButtonComponentPredicate(
-                    button,
-                    editor,
-                    promptTextField,
-                    observableProperties
-                )
-            )
     }
 
     private class EnabledButtonComponentPredicate(
