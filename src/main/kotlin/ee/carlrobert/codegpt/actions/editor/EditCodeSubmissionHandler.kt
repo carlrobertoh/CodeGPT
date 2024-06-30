@@ -41,7 +41,7 @@ class EditCodeSubmissionHandler(
                     "$userPrompt\n\n$selectedText",
                     service<CodeGPTServiceSettings>().state.chatCompletionSettings.model
                 ),
-                EditCodeCompletionHandler(editor, observableProperties, selectionTextRange)
+                EditCodeCompletionListener(editor, observableProperties, selectionTextRange)
             )
         } finally {
             observableProperties.loading.set(false)

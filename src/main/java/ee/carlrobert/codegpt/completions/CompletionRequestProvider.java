@@ -71,14 +71,20 @@ import org.jetbrains.annotations.Nullable;
 
 public class CompletionRequestProvider {
 
-  public static final String COMPLETION_SYSTEM_PROMPT = getResourceContent(
-      "/prompts/default-completion-system-prompt.txt");
+  public static final String COMPLETION_SYSTEM_PROMPT =
+      getResourceContent("/prompts/default-completion.txt");
 
-  public static final String GENERATE_COMMIT_MESSAGE_SYSTEM_PROMPT = getResourceContent(
-      "/prompts/generate-commit-message-system-prompt.txt");
+  public static final String GENERATE_COMMIT_MESSAGE_SYSTEM_PROMPT =
+      getResourceContent("/prompts/generate-commit-message.txt");
 
-  public static final String FIX_COMPILE_ERRORS_SYSTEM_PROMPT = getResourceContent(
-      "/prompts/fix-compile-errors.txt");
+  public static final String FIX_COMPILE_ERRORS_SYSTEM_PROMPT =
+      getResourceContent("/prompts/fix-compile-errors.txt");
+
+  public static final String GENERATE_METHOD_NAMES_SYSTEM_PROMPT =
+      getResourceContent("/prompts/method-name-generator.txt");
+
+  public static final String EDIT_CODE_SYSTEM_PROMPT =
+      getResourceContent("/prompts/edit-code.txt");
 
   private final EncodingManager encodingManager = EncodingManager.getInstance();
   private final Conversation conversation;
@@ -113,9 +119,7 @@ public class CompletionRequestProvider {
       String model) {
     return new OpenAIChatCompletionRequest.Builder(
         List.of(
-            new OpenAIChatCompletionStandardMessage(
-                "system",
-                getResourceContent("/prompts/method-name-generator.txt")),
+            new OpenAIChatCompletionStandardMessage("system", GENERATE_METHOD_NAMES_SYSTEM_PROMPT),
             new OpenAIChatCompletionStandardMessage("user", context)))
         .setModel(model)
         .setStream(false)
@@ -127,9 +131,7 @@ public class CompletionRequestProvider {
       String model) {
     return new OpenAIChatCompletionRequest.Builder(
         List.of(
-            new OpenAIChatCompletionStandardMessage(
-                "system",
-                getResourceContent("/prompts/edit-code.txt")),
+            new OpenAIChatCompletionStandardMessage("system", EDIT_CODE_SYSTEM_PROMPT),
             new OpenAIChatCompletionStandardMessage("user", context)))
         .setModel(model)
         .setStream(true)
@@ -169,14 +171,14 @@ public class CompletionRequestProvider {
         List.of(
             new OpenAIChatCompletionStandardMessage(
                 "system",
-                getResourceContent("/prompts/method-name-generator.txt")),
+                GENERATE_COMMIT_MESSAGE_SYSTEM_PROMPT),
             new OpenAIChatCompletionStandardMessage("user", context)),
         false);
   }
 
   public static LlamaCompletionRequest buildLlamaLookupCompletionRequest(String context) {
-    return new LlamaCompletionRequest.Builder(PromptTemplate.LLAMA
-        .buildPrompt(getResourceContent("/prompts/method-name-generator.txt"), context, List.of()))
+    return new LlamaCompletionRequest.Builder(
+        PromptTemplate.LLAMA.buildPrompt(GENERATE_COMMIT_MESSAGE_SYSTEM_PROMPT, context, List.of()))
         .setStream(false)
         .build();
   }
