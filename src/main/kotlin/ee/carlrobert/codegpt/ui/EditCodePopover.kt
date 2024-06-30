@@ -93,6 +93,7 @@ class EditCodePopover(private val editor: Editor) {
                     popup.cancel()
                 }
                     .visibleIf(observableProperties.submitted)
+                    .enabledIf(observableProperties.loading.not())
                 cell(AsyncProcessIcon("edit_code_spinner")).visibleIf(observableProperties.loading)
                 link(CodeGPTBundle.get("shared.discard")) {
                     submissionHandler.handleReject()
