@@ -97,6 +97,7 @@ class CompletionRequestProviderTest : IntegrationTest() {
   }
 
   fun testReducedChatCompletionRequest() {
+    useOpenAIService()
     ConfigurationSettings.getCurrentState().systemPrompt = COMPLETION_SYSTEM_PROMPT
     val conversation = ConversationService.getInstance().startConversation()
     conversation.addMessage(createDummyMessage(50))
