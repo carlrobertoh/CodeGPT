@@ -97,11 +97,12 @@ enum class InfillPromptTemplate(val label: String, val stopTokens: List<String>?
         }
     },
     CODESTRAL("Codestral", listOf("</s>")) {
-        override fun buildPrompt(prefix: String, suffix: String): String {
-            return "[SUFFIX]$suffix[PREFIX] $prefix"
+        override fun buildPrompt(infillDetails: InfillRequestDetails): String {
+            // see https://github.com/mistralai/mistral-common/blob/master/src/mistral_common/tokens/tokenizers/base.py
+            val infillPrompt = "[SUFFIX]$infillDetails.suffix[PREFIX] $infillDetails.prefix"
+            return createDefaultMultiFilePrompt(infillDetails, infillPrompt)
         }
-    },
-    ;
+    };
 
     abstract fun buildPrompt(infillDetails: InfillRequestDetails): String
 
