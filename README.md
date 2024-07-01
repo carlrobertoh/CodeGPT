@@ -58,6 +58,12 @@ CodeGPT also supports vision models and image understanding, allowing you to att
 
 ![Chat with Vision](https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/new/chat-interface.png?raw=true)
 
+### Fast Edit
+
+Transform your code effortlessly using natural language instructions. Highlight the code you want to modify, describe the desired changes, and let CodeGPT implement them automatically.
+
+![Fast Edits](https://www.codegpt.ee/fast-code-edits-cover.png)
+
 ### Commit Message Generation
 
 CodeGPT can generate meaningful commit messages based on the changes made in your codebase. It analyzes the diff of your staged changes and suggests concise and descriptive commit messages, saving you time and effort.

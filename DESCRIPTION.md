@@ -22,7 +22,7 @@ CodeGPT also supports vision models and image understanding, allowing you to att
 
 ![Chat with Vision](https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/new/chat-interface.png?raw=true)
 
-### Fast Edits
+### Fast Edit
 
 Transform your code effortlessly using natural language instructions. Highlight the code you want to modify, describe the desired changes, and let CodeGPT implement them automatically.
 
