@@ -49,7 +49,10 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
 
         return InlineCompletionSuggestion.Default(channelFlow {
             val caretOffset = withContext(Dispatchers.EDT) { editor.caretModel.offset }
-            val infillContext = service<CompletionContextService>().findContext(editor, caretOffset)
+            val infillContext =
+                if (service<ConfigurationSettings>().state.isAutocompletionContextAwareEnabled)
+                    service<CompletionContextService>().findContext(editor, caretOffset)
+                else null
             val infillRequest = if (infillContext == null) {
                 val (prefix, suffix) = withContext(Dispatchers.EDT) {
                     val prefix =
