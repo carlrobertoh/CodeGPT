@@ -1,0 +1,19 @@
+package ee.carlrobert.codegpt.actions;
+
+import java.util.List;
+import java.util.stream.IntStream;
+
+public class Util {
+
+  private final String test;
+
+
+  public Util(String test) {
+    this.test = test;
+  }
+
+  public List<String> randomStrings(int number) {
+
+    return IntStream.range(0, number).mapToObj(i -> Math.floor(100 * Math.random()) + "").toList();
+  }
+}

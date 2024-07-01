@@ -3,4 +3,9 @@
     <listener topic="com.intellij.openapi.compiler.CompilationStatusListener"
       class="ee.carlrobert.codegpt.ProjectCompilationStatusListener" />
   </projectListeners>
+
+  <extensions defaultExtensionNs="com.intellij">
+    <applicationService
+      serviceImplementation="ee.carlrobert.codegpt.codecompletions.psi.JavaContextFinder"/>
+  </extensions>
 </idea-plugin>

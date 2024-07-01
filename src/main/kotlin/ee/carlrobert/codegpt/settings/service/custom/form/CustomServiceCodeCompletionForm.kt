@@ -145,7 +145,7 @@ class CustomServiceCodeCompletionForm(
     private fun testConnection() {
         CompletionRequestService.getInstance().getCustomOpenAICompletionAsync(
             CodeCompletionRequestFactory.buildCustomRequest(
-                InfillRequestDetails("Hello", "!"),
+                InfillRequestDetails("Hello", "!", null),
                 urlField.text,
                 tabbedPane.headers,
                 tabbedPane.body,
@@ -186,7 +186,15 @@ class CustomServiceCodeCompletionForm(
     private fun updatePromptTemplateHelpTooltip(template: InfillPromptTemplate) {
         promptTemplateHelpText.setToolTipText(null)
 
-        val description = StringEscapeUtils.escapeHtml4(template.buildPrompt("PREFIX", "SUFFIX"))
+        val description = StringEscapeUtils.escapeHtml4(
+            template.buildPrompt(
+                InfillRequestDetails(
+                    "PREFIX",
+                    "SUFFIX",
+                    null
+                )
+            )
+        )
         HelpTooltip()
             .setTitle(template.toString())
             .setDescription("<html><p>$description</p></html>")
