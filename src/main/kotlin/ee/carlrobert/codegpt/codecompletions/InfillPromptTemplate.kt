@@ -1,8 +1,5 @@
 package ee.carlrobert.codegpt.codecompletions
 
-import ee.carlrobert.codegpt.codecompletions.psi.filePath
-import ee.carlrobert.codegpt.codecompletions.psi.readText
-
 enum class InfillPromptTemplate(val label: String, val stopTokens: List<String>?) {
 
     OPENAI("OpenAI", null) {
@@ -31,7 +28,7 @@ enum class InfillPromptTemplate(val label: String, val stopTokens: List<String>?
             } else {
                 infillDetails.context.contextElements.map {
                     "<|file_separator|>${it.filePath()} \n" +
-                            it.text
+                            it.text()
                 }.joinToString("") { it + "\n" } +
                         "<|file_separator|>${infillDetails.context.enclosingElement.filePath()} \n" +
                         infillPrompt
@@ -49,7 +46,7 @@ enum class InfillPromptTemplate(val label: String, val stopTokens: List<String>?
                 "<reponame>${infillDetails.context.getRepoName()}\n" +
                         infillDetails.context.contextElements.map {
                             "<file_sep>${it.filePath()} \n" +
-                                    it.readText()
+                                    it.text()
                         }.joinToString("") { it + "\n" } +
                         "<file_sep>${infillDetails.context.enclosingElement.filePath()} \n" +
                         infillPrompt
@@ -71,7 +68,7 @@ enum class InfillPromptTemplate(val label: String, val stopTokens: List<String>?
             return if (infillDetails.context == null || infillDetails.context.contextElements.isEmpty()) {
                 infillPrompt
             } else {
-                infillDetails.context.contextElements.map { "#${it.filePath()}\n" + it.readText() }
+                infillDetails.context.contextElements.map { "#${it.filePath()}\n" + it.text() }
                     .joinToString("") { it + "\n" } +
                         "#${infillDetails.context.enclosingElement.filePath()}\n" +
                         infillPrompt
@@ -89,7 +86,7 @@ enum class InfillPromptTemplate(val label: String, val stopTokens: List<String>?
                 "<reponame>${infillDetails.context.getRepoName()}" +
                         infillDetails.context.contextElements.map {
                             "<filename>${it.filePath()}\n" +
-                                    it.readText() + "<|endoftext|>"
+                                    it.text() + "<|endoftext|>"
                         }.joinToString("") { it + "\n" } +
                         "<filename>${infillDetails.context.enclosingElement.filePath()} \n" +
                         infillPrompt
@@ -121,7 +118,7 @@ enum class InfillPromptTemplate(val label: String, val stopTokens: List<String>?
             } else {
                 context.contextElements.map {
                     "# ${it.filePath()} \n" +
-                            it.readText()
+                            it.text()
                 }.joinToString("") { it + "\n" } +
                         "# ${context.enclosingElement.filePath()} \n" +
                         infillPrompt

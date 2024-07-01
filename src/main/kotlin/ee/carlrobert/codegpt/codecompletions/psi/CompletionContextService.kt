@@ -6,6 +6,7 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.editor.Editor
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiManager
+import ee.carlrobert.codegpt.EncodingManager
 import ee.carlrobert.codegpt.codecompletions.InfillContext
 
 @Service(Service.Level.PROJECT)
@@ -33,7 +34,14 @@ class CompletionContextService {
             val contextFinder = ApplicationManager.getApplication().getService(contextFinderClass)
                 ?: // A context finder for the language exists but not available in the used IDE
                 return@compute null
-            return@compute contextFinder.findContext(psiElement)
+            val context = contextFinder.findContext(psiElement)
+            val encodingManager = EncodingManager.getInstance()
+            context.enclosingElement.tokens =
+                encodingManager.countTokens(context.enclosingElement.psiElement.text)
+            context.contextElements.forEach {
+                it.tokens = encodingManager.countTokens(it.psiElement.text)
+            }
+            return@compute context
         }
 
     }

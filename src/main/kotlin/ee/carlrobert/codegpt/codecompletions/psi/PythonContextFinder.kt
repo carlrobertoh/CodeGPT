@@ -10,6 +10,7 @@ import com.jetbrains.python.psi.impl.PyBuiltinCache
 import com.jetbrains.python.psi.resolve.PyResolveContext
 import com.jetbrains.python.psi.resolve.PyResolveUtil
 import com.jetbrains.python.psi.types.TypeEvalContext
+import ee.carlrobert.codegpt.codecompletions.ContextElement
 import ee.carlrobert.codegpt.codecompletions.InfillContext
 
 class PythonContextFinder : LanguageContextFinder {
@@ -29,10 +30,10 @@ class PythonContextFinder : LanguageContextFinder {
                     // would return a "PyReferenceExpression: i" which is irrelevant
                     !it.containingFile.equals(enclosingElement.containingFile) || !enclosingElement.textRange.contains(it.textRange)
                 }
-        val sourceElement = declarations.mapNotNull { findSourceElement(it) }
+        val sourceElements = declarations.mapNotNull { findSourceElement(it) }
         return InfillContext(
-            enclosingElement,
-            sourceElement.toSet()
+            ContextElement(enclosingElement),
+            sourceElements.map { ContextElement(it) }.toSet()
         )
     }
 

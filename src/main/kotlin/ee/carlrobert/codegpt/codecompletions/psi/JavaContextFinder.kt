@@ -5,6 +5,7 @@ import com.intellij.psi.*
 import com.intellij.psi.impl.source.PsiClassReferenceType
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.PsiTypesUtil
+import ee.carlrobert.codegpt.codecompletions.ContextElement
 import ee.carlrobert.codegpt.codecompletions.InfillContext
 import kotlinx.collections.immutable.toImmutableSet
 
@@ -21,8 +22,8 @@ class JavaContextFinder : LanguageContextFinder {
         val psiTargets = relevantElements.map { findPsiTarget(it) }.flatten().distinct()
         val sourceElements = psiTargets.mapNotNull { findSourceElement(it) }
         return InfillContext(
-            enclosingElement,
-            sourceElements.toSet()
+            ContextElement(enclosingElement),
+            sourceElements.map { ContextElement(it) }.toSet()
         )
     }
 
