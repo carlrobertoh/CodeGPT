@@ -20,6 +20,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -104,6 +106,15 @@ public class LlamaSettings implements PersistentStateComponent<LlamaSettingsStat
             .map(String::trim)
             .filter(s -> !s.isBlank())
             .toList();
+  }
+
+  public static Map<String, String> getAdditionalEnvironmentVariablesMap(
+      String additionalEnvironmentVariables) {
+    return Arrays.stream(additionalEnvironmentVariables.split(" "))
+        .map(String::trim)
+        .filter(s -> !s.isBlank() && s.contains("="))
+        .collect(Collectors.toMap(item -> item.split("=")[0].trim(),
+            item -> item.split("=")[1].trim()));
   }
 
 }

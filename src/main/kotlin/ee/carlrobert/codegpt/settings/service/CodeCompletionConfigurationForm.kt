@@ -9,6 +9,7 @@ import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.FormBuilder
 import ee.carlrobert.codegpt.CodeGPTBundle
 import ee.carlrobert.codegpt.codecompletions.InfillPromptTemplate
+import ee.carlrobert.codegpt.codecompletions.InfillRequestDetails
 import org.apache.commons.text.StringEscapeUtils
 import java.awt.FlowLayout
 import javax.swing.Box
@@ -63,7 +64,8 @@ class CodeCompletionConfigurationForm(
     private fun updatePromptTemplateHelpTooltip(template: InfillPromptTemplate) {
         promptTemplateHelpText.setToolTipText(null)
 
-        val description = StringEscapeUtils.escapeHtml4(template.buildPrompt("PREFIX", "SUFFIX"))
+        val description = StringEscapeUtils.escapeHtml4(template.buildPrompt(
+            InfillRequestDetails("PREFIX", "SUFFIX", null)))
         HelpTooltip()
             .setTitle(template.toString())
             .setDescription("<html><p>$description</p></html>")

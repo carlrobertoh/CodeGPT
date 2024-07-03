@@ -1,6 +1,8 @@
 package ee.carlrobert.codegpt.settings.service;
 
 import ee.carlrobert.codegpt.CodeGPTBundle;
+import java.util.HashMap;
+import java.util.Map;
 
 public enum ServiceType {
   CODEGPT("CODEGPT", "service.codegpt.title", "codegpt.chat.completion"),
@@ -9,13 +11,20 @@ public enum ServiceType {
   ANTHROPIC("ANTHROPIC", "service.anthropic.title", "anthropic.chat.completion"),
   AZURE("AZURE", "service.azure.title", "azure.chat.completion"),
   GOOGLE("GOOGLE", "service.google.title", "google.chat.completion"),
-  YOU("YOU", "service.you.title", "you.chat.completion"),
   LLAMA_CPP("LLAMA_CPP", "service.llama.title", "llama.chat.completion"),
   OLLAMA("OLLAMA", "service.ollama.title", "ollama.chat.completion");
 
   private final String code;
   private final String label;
   private final String completionCode;
+
+  private static final Map<String, ServiceType> CLIENT_CODE_MAP = new HashMap<>();
+
+  static {
+    for (ServiceType type : values()) {
+      CLIENT_CODE_MAP.put(type.getCompletionCode(), type);
+    }
+  }
 
   ServiceType(String code, String messageKey, String completionCode) {
     this.code = code;
@@ -38,5 +47,13 @@ public enum ServiceType {
   @Override
   public String toString() {
     return label;
+  }
+
+  public static ServiceType fromClientCode(String clientCode) {
+    ServiceType serviceType = CLIENT_CODE_MAP.get(clientCode);
+    if (serviceType == null) {
+      throw new RuntimeException("Provided client code '" + clientCode + "' is not supported");
+    }
+    return serviceType;
   }
 }

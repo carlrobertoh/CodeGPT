@@ -40,8 +40,8 @@ object CredentialsStore {
         ANTHROPIC_API_KEY,
         AZURE_OPENAI_API_KEY,
         AZURE_ACTIVE_DIRECTORY_TOKEN,
-        YOU_ACCOUNT_PASSWORD,
         LLAMA_API_KEY,
-        GOOGLE_API_KEY
+        GOOGLE_API_KEY,
+        OLLAMA_API_KEY,
     }
 }

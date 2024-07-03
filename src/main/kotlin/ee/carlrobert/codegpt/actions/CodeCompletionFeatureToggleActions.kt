@@ -30,7 +30,6 @@ abstract class CodeCompletionFeatureToggleActions(
 
         ANTHROPIC,
         AZURE,
-        YOU,
         GOOGLE,
         null -> { _: Boolean -> Unit } // no-op for these services
     }(enableFeatureAction)
@@ -49,7 +48,6 @@ abstract class CodeCompletionFeatureToggleActions(
 
             ANTHROPIC,
             AZURE,
-            YOU,
             GOOGLE,
             null -> false
         }

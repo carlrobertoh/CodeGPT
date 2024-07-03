@@ -14,8 +14,7 @@ import ee.carlrobert.codegpt.completions.llama.LlamaServerStartupParams
 import ee.carlrobert.codegpt.settings.GeneralSettings
 import ee.carlrobert.codegpt.settings.service.ServiceType.LLAMA_CPP
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
-import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings.getAdditionalParametersList
-import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings.isRunnable
+import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings.*
 import ee.carlrobert.codegpt.settings.service.llama.form.ServerProgressPanel
 import ee.carlrobert.codegpt.ui.OverlayUtil.showNotification
 import ee.carlrobert.codegpt.ui.OverlayUtil.stickyNotification
@@ -75,7 +74,8 @@ abstract class LlamaServerToggleActions(
                 settings.threads,
                 settings.serverPort,
                 getAdditionalParametersList(settings.additionalParameters),
-                getAdditionalParametersList(settings.additionalBuildParameters)
+                getAdditionalParametersList(settings.additionalBuildParameters),
+                getAdditionalEnvironmentVariablesMap(settings.additionalEnvironmentVariables)
             ),
             serverProgressPanel,
             {

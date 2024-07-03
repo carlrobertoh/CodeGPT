@@ -19,19 +19,14 @@ import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.credentials.CredentialsStore;
-import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.IncludedFilesSettings;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
-import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettings;
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceChatCompletionSettingsState;
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
-import ee.carlrobert.codegpt.settings.service.you.YouSettings;
-import ee.carlrobert.codegpt.telemetry.core.configuration.TelemetryConfiguration;
-import ee.carlrobert.codegpt.telemetry.core.service.UserId;
 import ee.carlrobert.codegpt.util.file.FileUtil;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeBase64Source;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionDetailedMessage;
@@ -49,6 +44,7 @@ import ee.carlrobert.llm.client.google.models.GoogleModel;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
 import ee.carlrobert.llm.client.ollama.completion.request.OllamaChatCompletionMessage;
 import ee.carlrobert.llm.client.ollama.completion.request.OllamaChatCompletionRequest;
+import ee.carlrobert.llm.client.ollama.completion.request.OllamaParameters;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionDetailedMessage;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
@@ -57,8 +53,6 @@ import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionSt
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIImageUrl;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIMessageImageURLContent;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIMessageTextContent;
-import ee.carlrobert.llm.client.you.completion.YouCompletionRequest;
-import ee.carlrobert.llm.client.you.completion.YouCompletionRequestMessage;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -69,7 +63,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import okhttp3.Request;
@@ -78,14 +71,20 @@ import org.jetbrains.annotations.Nullable;
 
 public class CompletionRequestProvider {
 
-  public static final String COMPLETION_SYSTEM_PROMPT = getResourceContent(
-      "/prompts/default-completion-system-prompt.txt");
+  public static final String COMPLETION_SYSTEM_PROMPT =
+      getResourceContent("/prompts/default-completion.txt");
 
-  public static final String GENERATE_COMMIT_MESSAGE_SYSTEM_PROMPT = getResourceContent(
-      "/prompts/generate-commit-message-system-prompt.txt");
+  public static final String GENERATE_COMMIT_MESSAGE_SYSTEM_PROMPT =
+      getResourceContent("/prompts/generate-commit-message.txt");
 
-  public static final String FIX_COMPILE_ERRORS_SYSTEM_PROMPT = getResourceContent(
-      "/prompts/fix-compile-errors.txt");
+  public static final String FIX_COMPILE_ERRORS_SYSTEM_PROMPT =
+      getResourceContent("/prompts/fix-compile-errors.txt");
+
+  public static final String GENERATE_METHOD_NAMES_SYSTEM_PROMPT =
+      getResourceContent("/prompts/method-name-generator.txt");
+
+  public static final String EDIT_CODE_SYSTEM_PROMPT =
+      getResourceContent("/prompts/edit-code.txt");
 
   private final EncodingManager encodingManager = EncodingManager.getInstance();
   private final Conversation conversation;
@@ -120,12 +119,23 @@ public class CompletionRequestProvider {
       String model) {
     return new OpenAIChatCompletionRequest.Builder(
         List.of(
-            new OpenAIChatCompletionStandardMessage(
-                "system",
-                getResourceContent("/prompts/method-name-generator.txt")),
+            new OpenAIChatCompletionStandardMessage("system", GENERATE_METHOD_NAMES_SYSTEM_PROMPT),
             new OpenAIChatCompletionStandardMessage("user", context)))
         .setModel(model)
         .setStream(false)
+        .build();
+  }
+
+  public static OpenAIChatCompletionRequest buildEditCodeRequest(
+      String context,
+      String model) {
+    return new OpenAIChatCompletionRequest.Builder(
+        List.of(
+            new OpenAIChatCompletionStandardMessage("system", EDIT_CODE_SYSTEM_PROMPT),
+            new OpenAIChatCompletionStandardMessage("user", context)))
+        .setModel(model)
+        .setStream(true)
+        .setMaxTokens(2048)
         .build();
   }
 
@@ -161,14 +171,14 @@ public class CompletionRequestProvider {
         List.of(
             new OpenAIChatCompletionStandardMessage(
                 "system",
-                getResourceContent("/prompts/method-name-generator.txt")),
+                GENERATE_COMMIT_MESSAGE_SYSTEM_PROMPT),
             new OpenAIChatCompletionStandardMessage("user", context)),
         false);
   }
 
   public static LlamaCompletionRequest buildLlamaLookupCompletionRequest(String context) {
-    return new LlamaCompletionRequest.Builder(PromptTemplate.LLAMA
-        .buildPrompt(getResourceContent("/prompts/method-name-generator.txt"), context, List.of()))
+    return new LlamaCompletionRequest.Builder(
+        PromptTemplate.LLAMA.buildPrompt(GENERATE_COMMIT_MESSAGE_SYSTEM_PROMPT, context, List.of()))
         .setStream(false)
         .build();
   }
@@ -203,23 +213,6 @@ public class CompletionRequestProvider {
         .setRepeat_penalty(settings.getRepeatPenalty())
         .setStop(promptTemplate.getStopTokens())
         .build();
-  }
-
-  public YouCompletionRequest buildYouCompletionRequest(Message message) {
-    var requestBuilder = new YouCompletionRequest.Builder(message.getPrompt())
-        .setUseGPT4Model(YouSettings.getCurrentState().isUseGPT4Model())
-        .setChatMode(YouSettings.getCurrentState().getChatMode())
-        .setCustomModel(YouSettings.getCurrentState().getCustomModel())
-        .setChatHistory(conversation.getMessages().stream()
-            .map(prevMessage -> new YouCompletionRequestMessage(
-                prevMessage.getPrompt(),
-                prevMessage.getResponse()))
-            .toList());
-    if (TelemetryConfiguration.getInstance().isEnabled()
-        && !ApplicationManager.getApplication().isUnitTestMode()) {
-      requestBuilder.setUserId(UUID.fromString(UserId.INSTANCE.get()));
-    }
-    return requestBuilder.build();
   }
 
   public OpenAIChatCompletionRequest buildOpenAIChatCompletionRequest(
@@ -336,9 +329,15 @@ public class CompletionRequestProvider {
   public OllamaChatCompletionRequest buildOllamaChatCompletionRequest(
       CallParameters callParameters
   ) {
+    var configuration = ConfigurationSettings.getCurrentState();
     var settings = ApplicationManager.getApplication().getService(OllamaSettings.class).getState();
     return new OllamaChatCompletionRequest
         .Builder(settings.getModel(), buildOllamaMessages(callParameters))
+        .setStream(true)
+        .setOptions(new OllamaParameters.Builder()
+            .numPredict(configuration.getMaxTokens())
+            .temperature(configuration.getTemperature())
+            .build())
         .build();
   }
 
@@ -449,7 +448,7 @@ public class CompletionRequestProvider {
       CallParameters callParameters) {
     var messages = buildOpenAIMessages(callParameters);
 
-    if (model == null || GeneralSettings.isSelected(ServiceType.YOU)) {
+    if (model == null) {
       return messages;
     }
 

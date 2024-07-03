@@ -48,6 +48,7 @@ public class ConfigurationComponent {
   private final JBCheckBox methodNameGenerationCheckBox;
   private final JBCheckBox autoFormattingCheckBox;
   private final JBCheckBox autocompletionPostProcessingCheckBox;
+  private final JBCheckBox autocompletionContextAwareCheckBox;
   private final JTextArea systemPromptTextArea;
   private final JTextArea commitMessagePromptTextArea;
   private final IntegerField maxTokensField;
@@ -128,6 +129,10 @@ public class ConfigurationComponent {
         CodeGPTBundle.get("configurationConfigurable.autocompletionPostProcessing.label"),
         configuration.isAutocompletionPostProcessingEnabled()
     );
+    autocompletionContextAwareCheckBox = new JBCheckBox(
+        CodeGPTBundle.get("configurationConfigurable.autocompletionContextAwareCheckBox.label"),
+        configuration.isAutocompletionPostProcessingEnabled()
+    );
 
     mainPanel = FormBuilder.createFormBuilder()
         .addComponent(tablePanel)
@@ -138,6 +143,7 @@ public class ConfigurationComponent {
         .addComponent(methodNameGenerationCheckBox)
         .addComponent(autoFormattingCheckBox)
         .addComponent(autocompletionPostProcessingCheckBox)
+        .addComponent(autocompletionContextAwareCheckBox)
         .addVerticalGap(4)
         .addComponent(new TitledSeparator(
             CodeGPTBundle.get("configurationConfigurable.section.assistant.title")))
@@ -166,6 +172,7 @@ public class ConfigurationComponent {
     state.setMethodNameGenerationEnabled(methodNameGenerationCheckBox.isSelected());
     state.setAutoFormattingEnabled(autoFormattingCheckBox.isSelected());
     state.setAutocompletionPostProcessingEnabled(autocompletionPostProcessingCheckBox.isSelected());
+    state.setAutocompletionContextAwareEnabled(autocompletionContextAwareCheckBox.isSelected());
     return state;
   }
 
@@ -183,6 +190,8 @@ public class ConfigurationComponent {
     autoFormattingCheckBox.setSelected(configuration.isAutoFormattingEnabled());
     autocompletionPostProcessingCheckBox.setSelected(
         configuration.isAutocompletionPostProcessingEnabled());
+    autocompletionContextAwareCheckBox.setSelected(
+        configuration.isAutocompletionContextAwareEnabled());
   }
 
   private Map<String, String> getTableData() {

@@ -17,7 +17,6 @@ import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.TextBrowseFolderListener;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.ui.panel.ComponentPanelBuilder;
-import com.intellij.ui.EnumComboBoxModel;
 import com.intellij.ui.components.AnActionLink;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBRadioButton;
@@ -41,6 +40,7 @@ import java.util.Map;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
+import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
@@ -113,7 +113,8 @@ public class LlamaModelPreferencesForm {
     var llamaServerAgent = ApplicationManager.getApplication().getService(LlamaServerAgent.class);
     huggingFaceModelComboBox.setEnabled(!llamaServerAgent.isServerRunning());
     var modelSizeComboBoxModel = new DefaultComboBoxModel<ModelSize>();
-    var modelComboBoxModel = new EnumComboBoxModel<>(LlamaModel.class);
+    var modelComboBoxModel = new DefaultComboBoxModel<LlamaModel>();
+    modelComboBoxModel.addAll(LlamaModel.getSorted());
     modelComboBox = createModelComboBox(
         modelComboBoxModel, llamaModel, llm, llamaServerAgent, modelSizeComboBoxModel);
     modelComboBox.setEnabled(!llamaServerAgent.isServerRunning());
@@ -302,7 +303,7 @@ public class LlamaModelPreferencesForm {
   }
 
   private ComboBox<LlamaModel> createModelComboBox(
-      EnumComboBoxModel<LlamaModel> llamaModelEnumComboBoxModel,
+      ComboBoxModel<LlamaModel> llamaModelEnumComboBoxModel,
       LlamaModel llamaModel,
       HuggingFaceModel llm,
       LlamaServerAgent llamaServerAgent,
@@ -340,7 +341,7 @@ public class LlamaModelPreferencesForm {
   }
 
   private ComboBox<ModelSize> createModelSizeComboBox(
-      EnumComboBoxModel<LlamaModel> llamaModelComboBoxModel,
+      ComboBoxModel<LlamaModel> llamaModelComboBoxModel,
       DefaultComboBoxModel<ModelSize> modelSizeComboBoxModel,
       LlamaServerAgent llamaServerAgent,
       DefaultComboBoxModel<HuggingFaceModel> huggingFaceComboBoxModel) {
@@ -350,7 +351,7 @@ public class LlamaModelPreferencesForm {
     comboBox.setEnabled(
         modelSizeComboBoxModel.getSize() > 1 && !llamaServerAgent.isServerRunning());
     comboBox.addItemListener(e -> {
-      var selectedModel = llamaModelComboBoxModel.getSelectedItem();
+      var selectedModel = (LlamaModel) llamaModelComboBoxModel.getSelectedItem();
       var models = selectedModel.filterSelectedModelsBySize(
               (ModelSize) modelSizeComboBoxModel.getSelectedItem());
       comboBox.setEnabled(

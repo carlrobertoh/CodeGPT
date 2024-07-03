@@ -2,13 +2,13 @@ package ee.carlrobert.codegpt.settings.service.custom.form
 
 import com.intellij.icons.AllIcons.General
 import com.intellij.ide.HelpTooltip
+import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.ui.MessageType
 import com.intellij.openapi.ui.panel.ComponentPanelBuilder
 import com.intellij.ui.EnumComboBoxModel
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBLabel
-import com.intellij.ui.components.JBTextField
 import com.intellij.util.ui.FormBuilder
 import ee.carlrobert.codegpt.CodeGPTBundle
 import ee.carlrobert.codegpt.codecompletions.CodeCompletionRequestFactory
@@ -19,6 +19,7 @@ import ee.carlrobert.codegpt.settings.configuration.Placeholder
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceCodeCompletionSettingsState
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceFormTabbedPane
 import ee.carlrobert.codegpt.ui.OverlayUtil
+import ee.carlrobert.codegpt.ui.URLTextField
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails
 import ee.carlrobert.llm.completion.CompletionEventListener
 import okhttp3.sse.EventSource
@@ -48,7 +49,7 @@ class CustomServiceCodeCompletionForm(
             }
         }
     private val promptTemplateHelpText = JBLabel(General.ContextHelp)
-    private val urlField = JBTextField(state.url, 30)
+    private val urlField = URLTextField(state.url, 30)
     private val tabbedPane = CustomServiceFormTabbedPane(state.headers, state.body)
     private val testConnectionButton = JButton(
         CodeGPTBundle.get("settingsConfigurable.service.custom.openai.testConnection.label")
@@ -144,7 +145,7 @@ class CustomServiceCodeCompletionForm(
     private fun testConnection() {
         CompletionRequestService.getInstance().getCustomOpenAICompletionAsync(
             CodeCompletionRequestFactory.buildCustomRequest(
-                InfillRequestDetails("Hello", "!"),
+                InfillRequestDetails("Hello", "!", null),
                 urlField.text,
                 tabbedPane.headers,
                 tabbedPane.body,
@@ -158,7 +159,7 @@ class CustomServiceCodeCompletionForm(
     internal inner class TestConnectionEventListener : CompletionEventListener<String?> {
         override fun onMessage(value: String?, eventSource: EventSource) {
             if (!value.isNullOrEmpty()) {
-                SwingUtilities.invokeLater {
+                runInEdt {
                     OverlayUtil.showBalloon(
                         CodeGPTBundle.get("settingsConfigurable.service.custom.openai.connectionSuccess"),
                         MessageType.INFO,
@@ -170,7 +171,7 @@ class CustomServiceCodeCompletionForm(
         }
 
         override fun onError(error: ErrorDetails, ex: Throwable) {
-            SwingUtilities.invokeLater {
+            runInEdt {
                 OverlayUtil.showBalloon(
                     CodeGPTBundle.get("settingsConfigurable.service.custom.openai.connectionFailed")
                             + "\n\n"
@@ -185,7 +186,15 @@ class CustomServiceCodeCompletionForm(
     private fun updatePromptTemplateHelpTooltip(template: InfillPromptTemplate) {
         promptTemplateHelpText.setToolTipText(null)
 
-        val description = StringEscapeUtils.escapeHtml4(template.buildPrompt("PREFIX", "SUFFIX"))
+        val description = StringEscapeUtils.escapeHtml4(
+            template.buildPrompt(
+                InfillRequestDetails(
+                    "PREFIX",
+                    "SUFFIX",
+                    null
+                )
+            )
+        )
         HelpTooltip()
             .setTitle(template.toString())
             .setDescription("<html><p>$description</p></html>")

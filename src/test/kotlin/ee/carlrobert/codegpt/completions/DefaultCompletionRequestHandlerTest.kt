@@ -1,11 +1,11 @@
 package ee.carlrobert.codegpt.completions
 
-import ee.carlrobert.codegpt.CodeGPTPlugin
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate.LLAMA
 import ee.carlrobert.codegpt.conversations.ConversationService
 import ee.carlrobert.codegpt.conversations.message.Message
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
 import ee.carlrobert.llm.client.http.RequestEntity
+import ee.carlrobert.llm.client.http.exchange.NdJsonStreamHttpExchange
 import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange
 import ee.carlrobert.llm.client.util.JSONUtil.*
 import org.apache.http.HttpHeaders
@@ -82,57 +82,6 @@ class DefaultCompletionRequestHandlerTest : IntegrationTest() {
     waitExpecting { "Hello!" == message.response }
   }
 
-  fun testYouChatCompletionCall() {
-    useYouService()
-    val message = Message("TEST_PROMPT")
-    val conversation = ConversationService.getInstance().startConversation()
-    conversation.addMessage(Message("Ping", "Pong"))
-    val requestHandler = CompletionRequestHandler(getRequestEventListener(message))
-    expectYou(StreamHttpExchange { request: RequestEntity ->
-      assertThat(request.uri.path).isEqualTo("/api/streamingSearch")
-      assertThat(request.method).isEqualTo("GET")
-      assertThat(request.uri.path).isEqualTo("/api/streamingSearch")
-      assertThat(request.uri.query).isEqualTo(
-        "q=TEST_PROMPT&"
-                + "page=1&"
-                + "cfr=CodeGPT&"
-                + "count=10&"
-                + "safeSearch=WebPages,Translations,TimeZone,Computation,RelatedSearches&"
-                + "domain=youchat&"
-                + "selectedChatMode=default&"
-                + "chat=[{\"question\":\"Ping\",\"answer\":\"Pong\"}]&"
-                + "utm_source=ide&"
-                + "utm_medium=jetbrains&"
-                + "utm_campaign=" + CodeGPTPlugin.getVersion() + "&"
-                + "utm_content=CodeGPT")
-      assertThat(request.headers)
-        .flatExtracting("Accept", "Connection", "User-agent", "Cookie")
-        .containsExactly(
-          "text/event-stream",
-          "Keep-Alive",
-          "youide CodeGPT",
-          "safesearch_guest=Moderate; "
-                  + "youpro_subscription=true; "
-                  + "you_subscription=free; "
-                  + "stytch_session=; "
-                  + "ydc_stytch_session=; "
-                  + "stytch_session_jwt=; "
-                  + "ydc_stytch_session_jwt=; "
-                  + "eg4=false; "
-                  + "__cf_bm=aN2b3pQMH8XADeMB7bg9s1bJ_bfXBcCHophfOGRg6g0-1693601599-0-"
-                  + "AWIt5Mr4Y3xQI4mIJ1lSf4+vijWKDobrty8OopDeBxY+NABe0MRFidF3dCUoWjRt8"
-                  + "SVMvBZPI3zkOgcRs7Mz3yazd7f7c58HwW5Xg9jdBjNg;")
-      listOf(
-        jsonMapResponse("youChatToken", "Hel"),
-        jsonMapResponse("youChatToken", "lo"),
-        jsonMapResponse("youChatToken", "!"))
-    })
-
-    requestHandler.call(CallParameters(conversation, ConversationType.DEFAULT, message, false))
-
-    waitExpecting { "Hello!" == message.response }
-  }
-
   fun testLlamaChatCompletionCall() {
     useLlamaService()
     ConfigurationSettings.getCurrentState().maxTokens = 99
@@ -168,6 +117,42 @@ class DefaultCompletionRequestHandlerTest : IntegrationTest() {
     waitExpecting { "Hello!" == message.response }
   }
 
+  fun testOllamaChatCompletionCall() {
+    useOllamaService()
+    ConfigurationSettings.getCurrentState().maxTokens = 99
+    ConfigurationSettings.getCurrentState().systemPrompt = "TEST_SYSTEM_PROMPT"
+    val message = Message("TEST_PROMPT")
+    val conversation = ConversationService.getInstance().startConversation()
+    val requestHandler = CompletionRequestHandler(getRequestEventListener(message))
+    expectOllama(NdJsonStreamHttpExchange { request: RequestEntity ->
+      assertThat(request.uri.path).isEqualTo("/api/chat")
+      assertThat(request.headers[HttpHeaders.AUTHORIZATION]!![0]).isEqualTo("Bearer TEST_API_KEY")
+      assertThat(request.body)
+        .extracting(
+          "model",
+          "messages",
+          "options.num_predict",
+          "stream"
+        )
+        .containsExactly(
+          HuggingFaceModel.LLAMA_3_8B_Q6_K.code,
+          listOf(
+            mapOf("role" to "system", "content" to "TEST_SYSTEM_PROMPT"),
+            mapOf("role" to "user", "content" to "TEST_PROMPT")
+          ),
+          99,
+          true
+        )
+      listOf(
+        jsonMapResponse("message", jsonMap(e("content", "Hel"), e("role", "assistant"))),
+        jsonMapResponse("message", jsonMap(e("content", "lo"), e("role", "assistant"))),
+        jsonMapResponse("message", jsonMap(e("content", "!"), e("role", "assistant")))
+      )
+    })
+
+    requestHandler.call(CallParameters(conversation, ConversationType.DEFAULT, message, false))
+    waitExpecting { "Hello!" == message.response }
+  }
 
   fun testGoogleChatCompletionCall() {
     useGoogleService()

@@ -12,9 +12,11 @@ public final class Icons {
       IconLoader.getIcon("/icons/codegpt-model.svg", Icons.class);
   public static final Icon Anthropic = IconLoader.getIcon("/icons/anthropic.svg", Icons.class);
   public static final Icon Azure = IconLoader.getIcon("/icons/azure.svg", Icons.class);
+  public static final Icon Databricks = IconLoader.getIcon("/icons/dbrx.svg", Icons.class);
   public static final Icon Google = IconLoader.getIcon("/icons/google.svg", Icons.class);
   public static final Icon Llama = IconLoader.getIcon("/icons/llama.svg", Icons.class);
   public static final Icon OpenAI = IconLoader.getIcon("/icons/openai.svg", Icons.class);
+  public static final Icon Meta = IconLoader.getIcon("/icons/meta.svg", Icons.class);
   public static final Icon Send = IconLoader.getIcon("/icons/send.svg", Icons.class);
   public static final Icon Sparkle = IconLoader.getIcon("/icons/sparkle.svg", Icons.class);
   public static final Icon You = IconLoader.getIcon("/icons/you.svg", Icons.class);

@@ -3,8 +3,6 @@ package ee.carlrobert.codegpt.completions;
 import static ee.carlrobert.codegpt.credentials.CredentialsStore.getCredential;
 
 import com.intellij.openapi.application.ApplicationManager;
-import ee.carlrobert.codegpt.CodeGPTPlugin;
-import ee.carlrobert.codegpt.completions.you.YouUserManager;
 import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey;
 import ee.carlrobert.codegpt.settings.advanced.AdvancedSettings;
 import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettings;
@@ -20,8 +18,6 @@ import ee.carlrobert.llm.client.google.GoogleClient;
 import ee.carlrobert.llm.client.llama.LlamaClient;
 import ee.carlrobert.llm.client.ollama.OllamaClient;
 import ee.carlrobert.llm.client.openai.OpenAIClient;
-import ee.carlrobert.llm.client.you.UTMParameters;
-import ee.carlrobert.llm.client.you.YouClient;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.concurrent.TimeUnit;
@@ -64,27 +60,6 @@ public class CompletionClientProvider {
         .build(getDefaultClientBuilder());
   }
 
-  public static YouClient getYouClient() {
-    var utmParameters = new UTMParameters();
-    utmParameters.setSource("ide");
-    utmParameters.setMedium("jetbrains");
-    utmParameters.setCampaign(CodeGPTPlugin.getVersion());
-    utmParameters.setContent("CodeGPT");
-
-    var sessionId = "";
-    var accessToken = "";
-    var youUserManager = YouUserManager.getInstance();
-    if (youUserManager.isAuthenticated()) {
-      var authenticationResponse = youUserManager.getAuthenticationResponse().data();
-      sessionId = authenticationResponse.session().sessionId();
-      accessToken = authenticationResponse.sessionJwt();
-    }
-
-    return new YouClient.Builder(sessionId, accessToken)
-        .setUTMParameters(utmParameters)
-        .build();
-  }
-
   public static LlamaClient getLlamaClient() {
     var llamaSettings = LlamaSettings.getCurrentState();
     var builder = new LlamaClient.Builder()
@@ -104,9 +79,14 @@ public class CompletionClientProvider {
         .getService(OllamaSettings.class)
         .getState()
         .getHost();
-    return new OllamaClient.Builder()
-        .setHost(host)
-        .build(getDefaultClientBuilder());
+    var builder = new OllamaClient.Builder()
+        .setHost(host);
+
+    String apiKey = getCredential(CredentialKey.OLLAMA_API_KEY);
+    if (apiKey != null && !apiKey.isBlank()) {
+      builder.setApiKey(apiKey);
+    }
+    return builder.build(getDefaultClientBuilder());
   }
 
 

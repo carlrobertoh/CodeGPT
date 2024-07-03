@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt.toolwindow.chat.ui.textarea;
 
 import static ee.carlrobert.codegpt.settings.service.ServiceType.ANTHROPIC;
+import static ee.carlrobert.codegpt.settings.service.ServiceType.CODEGPT;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.OLLAMA;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.OPENAI;
 import static ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel.GPT_4_O;
@@ -24,6 +25,7 @@ import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.actions.AttachImageAction;
 import ee.carlrobert.codegpt.completions.CompletionRequestHandler;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
+import ee.carlrobert.codegpt.settings.service.codegpt.CodeGPTServiceSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.codegpt.ui.IconActionButton;
 import ee.carlrobert.codegpt.ui.UIUtil;
@@ -287,6 +289,13 @@ public class UserPromptTextArea extends JPanel {
     var selectedService = GeneralSettings.getSelectedService();
     if (selectedService == ANTHROPIC || selectedService == OLLAMA) {
       return true;
+    }
+    if (selectedService == CODEGPT) {
+      var model = ApplicationManager.getApplication().getService(CodeGPTServiceSettings.class)
+          .getState()
+          .getChatCompletionSettings()
+          .getModel();
+      return List.of("gpt-4o", "claude-3-opus").contains(model);
     }
 
     var model = OpenAISettings.getCurrentState().getModel();

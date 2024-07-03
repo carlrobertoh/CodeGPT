@@ -13,38 +13,44 @@ import testsupport.IntegrationTest
 
 class CodeCompletionServiceTest : IntegrationTest() {
 
-  private val cursorPosition = VisualPosition(3, 0)
+    private val cursorPosition = VisualPosition(3, 0)
 
-  fun testFetchCodeCompletionLlama() {
-    useLlamaService()
-    LlamaSettings.getCurrentState().isCodeCompletionsEnabled = true
-    myFixture.configureByText(
-      "CompletionTest.java",
-      getResourceContent("/codecompletions/code-completion-file.txt")
-    )
-    myFixture.editor.caretModel.moveToVisualPosition(cursorPosition)
-    val expectedCompletion = "TEST_OUTPUT"
-    val prefix = """
+    fun testFetchCodeCompletionLlama() {
+        useLlamaService()
+        LlamaSettings.getCurrentState().isCodeCompletionsEnabled = true
+        myFixture.configureByText(
+            "CompletionTest.java",
+            getResourceContent("/codecompletions/code-completion-file.txt")
+        )
+        myFixture.editor.caretModel.moveToVisualPosition(cursorPosition)
+        val expectedCompletion = "TEST_OUTPUT"
+        val prefix = """
          ${"z".repeat(245)}
          [INPUT]
          c
          """.trimIndent() // 128 tokens
-    val suffix = """
+        val suffix = """
          
          [\INPUT]
          ${"z".repeat(247)}
          """.trimIndent() // 128 tokens
-    expectLlama(StreamHttpExchange { request: RequestEntity ->
-      assertThat(request.uri.path).isEqualTo("/completion")
-      assertThat(request.method).isEqualTo("POST")
-      assertThat(request.body)
-        .extracting("prompt")
-        .isEqualTo(InfillPromptTemplate.CODE_LLAMA.buildPrompt(prefix, suffix))
-      listOf(jsonMapResponse(e("content", expectedCompletion), e("stop", true)))
-    })
+        expectLlama(StreamHttpExchange { request: RequestEntity ->
+            assertThat(request.uri.path).isEqualTo("/completion")
+            assertThat(request.method).isEqualTo("POST")
+            assertThat(request.body)
+                .extracting("prompt")
+                .isEqualTo(InfillPromptTemplate.CODE_LLAMA.buildPrompt(
+                    InfillRequestDetails(
+                        prefix,
+                        suffix,
+                        null
+                    )
+                ))
+            listOf(jsonMapResponse(e("content", expectedCompletion), e("stop", true)))
+        })
 
-    myFixture.type('c')
+        myFixture.type('c')
 
-    waitExpecting { "TEST_OUTPUT" == PREVIOUS_INLAY_TEXT[myFixture.editor] }
-  }
+        waitExpecting { "TEST_OUTPUT" == PREVIOUS_INLAY_TEXT[myFixture.editor] }
+    }
 }

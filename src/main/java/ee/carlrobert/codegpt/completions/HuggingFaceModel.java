@@ -1,5 +1,8 @@
 package ee.carlrobert.codegpt.completions;
 
+import static ee.carlrobert.codegpt.completions.HuggingFaceModel.Model.CST;
+import static ee.carlrobert.codegpt.completions.HuggingFaceModel.Model.P3M;
+import static ee.carlrobert.codegpt.completions.HuggingFaceModel.Model.SC3;
 import static ee.carlrobert.codegpt.completions.llama.LlamaModel.getDownloadedMarker;
 import static ee.carlrobert.codegpt.completions.llama.LlamaModel.getLlamaModelsPath;
 import static java.lang.String.format;
@@ -116,7 +119,50 @@ public enum HuggingFaceModel {
           "CodeQwen1.5-7B-Chat.Q5_K_M.gguf", "RichardErkhov", 5.43),
   CODE_QWEN_1_5_7B_Q6_K(7, 6, "Qwen_-_CodeQwen1.5-7B-Chat-gguf",
           "CodeQwen1.5-7B-Chat.Q6_K.gguf", "RichardErkhov", 6.38),
+
+  STABLE_CODE_3B_Q3_K_M(SC3, 3, "stable-code-instruct-3b-Q3_K_M.gguf", 1.39),
+  STABLE_CODE_3B_Q4_K_M(SC3, 4, "stable-code-instruct-3b-Q4_K_M.gguf", 1.71),
+  STABLE_CODE_3B_Q5_K_M(SC3, 5, "stable-code-instruct-3b-Q5_K_M.gguf", 1.99),
+  STABLE_CODE_3B_Q6_K(SC3, 6, "stable-code-instruct-3b-Q6_K.gguf", 2.3),
+  STABLE_CODE_3B_Q8_0(SC3, 8, "stable-code-instruct-3b-Q8_0.gguf", 2.97),
+
+  PHI_3_14B_128K_IQ3_M(P3M, 3, "Phi-3-medium-128k-instruct-IQ3_M.gguf", 6.47),
+  PHI_3_14B_128K_Q3_K_M(P3M, 3, "Phi-3-medium-128k-instruct-Q3_K_M.gguf", 6.92),
+  PHI_3_14B_128K_IQ4_NL(P3M, 4, "Phi-3-medium-128k-instruct-IQ4_NL.gguf", 7.9),
+  PHI_3_14B_128K_Q4_K_M(P3M, 4, "Phi-3-medium-128k-instruct-Q4_K_M.gguf", 8.57),
+  PHI_3_14B_128K_Q5_K_M(P3M, 5, "Phi-3-medium-128k-instruct-Q5_K_M.gguf", 10.1),
+  PHI_3_14B_128K_Q6_K(P3M, 6, "Phi-3-medium-128k-instruct-Q6_K.gguf", 11.5),
+  PHI_3_14B_128K_Q8_0(P3M, 8, "Phi-3-medium-128k-instruct-Q8_0.gguf", 14.8),
+
+  CODESTRAL_22B_32K_Q3_K_M(CST, 3, "Codestral-22B-v0.1-Q3_K_M.gguf", 10.8),
+  CODESTRAL_22B_32K_Q4_K_M(CST, 4, "Codestral-22B-v0.1-Q4_K_M.gguf", 13.3),
+  CODESTRAL_22B_32K_Q5_K_M(CST, 5, "Codestral-22B-v0.1-Q5_K_M.gguf", 15.7),
+  CODESTRAL_22B_32K_Q6_K(CST, 6, "Codestral-22B-v0.1-Q6_K.gguf", 18.3),
+  CODESTRAL_22B_32K_Q8_0(CST, 8, "Codestral-22B-v0.1-Q8_0.gguf", 23.6),
   ;
+
+  enum Model {
+    SC3("bartowski", 3, "stable-code-instruct-3b-GGUF"),
+    P3M("bartowski", 14, "Phi-3-medium-128k-instruct-GGUF"),
+    CST("bartowski", 22, "Codestral-22B-v0.1-GGUF"),
+    ;
+
+    private final String user;
+    private final int parameterSize;
+    private final String directory;
+    private final String prefix;
+
+    Model(String user, int parameterSize, String directory) {
+      this(user, parameterSize, directory, null);
+    }
+
+    Model(String user, int parameterSize, String directory, String prefix) {
+      this.user = user;
+      this.parameterSize = parameterSize;
+      this.directory = directory;
+      this.prefix = prefix;
+    }
+  }
 
   private final int parameterSize;
   private final int quantization;
@@ -132,6 +178,10 @@ public enum HuggingFaceModel {
   HuggingFaceModel(int parameterSize, int quantization, String directory, String fileName,
                    Double downloadSize) {
     this(parameterSize, quantization, directory, fileName, "TheBloke", downloadSize);
+  }
+
+  HuggingFaceModel(Model m, int quantization, String fileName, Double downloadSize) {
+    this(m.parameterSize, quantization, m.directory, fileName, m.user, downloadSize);
   }
 
   HuggingFaceModel(int parameterSize, int quantization, String directory, String fileName,

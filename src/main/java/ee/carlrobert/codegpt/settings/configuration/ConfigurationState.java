@@ -11,16 +11,17 @@ public class ConfigurationState {
 
   private String systemPrompt = COMPLETION_SYSTEM_PROMPT;
   private String commitMessagePrompt = GENERATE_COMMIT_MESSAGE_SYSTEM_PROMPT;
-  private int maxTokens = 1000;
+  private int maxTokens = 2048;
   private double temperature = 0.1;
   private boolean checkForPluginUpdates = true;
-  private boolean checkForNewScreenshots = true;
+  private boolean checkForNewScreenshots = false;
   private boolean createNewChatOnEachAction;
   private boolean ignoreGitCommitTokenLimit;
   private boolean methodNameGenerationEnabled = true;
   private boolean captureCompileErrors = true;
   private boolean autoFormattingEnabled = true;
-  private boolean autocompletionPostProcessingEnabled = true;
+  private boolean autocompletionPostProcessingEnabled = false;
+  private boolean autocompletionContextAwareEnabled = false;
   private Map<String, String> tableData = EditorActionsUtil.DEFAULT_ACTIONS;
 
   public String getSystemPrompt() {
@@ -127,6 +128,14 @@ public class ConfigurationState {
     this.autocompletionPostProcessingEnabled = autocompletionPostProcessingEnabled;
   }
 
+  public boolean isAutocompletionContextAwareEnabled() {
+    return autocompletionContextAwareEnabled;
+  }
+
+  public void setAutocompletionContextAwareEnabled(boolean autocompletionContextAwareEnabled) {
+    this.autocompletionContextAwareEnabled = autocompletionContextAwareEnabled;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -145,6 +154,7 @@ public class ConfigurationState {
         && captureCompileErrors == that.captureCompileErrors
         && autoFormattingEnabled == that.autoFormattingEnabled
         && autocompletionPostProcessingEnabled == that.autocompletionPostProcessingEnabled
+        && autocompletionContextAwareEnabled == that.autocompletionContextAwareEnabled
         && Objects.equals(systemPrompt, that.systemPrompt)
         && Objects.equals(commitMessagePrompt, that.commitMessagePrompt)
         && Objects.equals(tableData, that.tableData);
@@ -155,6 +165,7 @@ public class ConfigurationState {
     return Objects.hash(systemPrompt, commitMessagePrompt, maxTokens, temperature,
         checkForPluginUpdates, checkForNewScreenshots, createNewChatOnEachAction,
         ignoreGitCommitTokenLimit, methodNameGenerationEnabled, captureCompileErrors,
-        autoFormattingEnabled, autocompletionPostProcessingEnabled, tableData);
+        autoFormattingEnabled, autocompletionPostProcessingEnabled,
+        autocompletionContextAwareEnabled, tableData);
   }
 }

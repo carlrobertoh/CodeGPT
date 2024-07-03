@@ -5,6 +5,13 @@
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.lang</depends>
     <depends optional="true" config-file="plugin-java.xml">com.intellij.modules.java</depends>
+    <depends optional="true" config-file="plugin-python.xml">com.intellij.modules.python</depends>
+<!--    TODO-->
+<!--    <depends optional="true" config-file="plugin-js.xml">JavaScript</depends>-->
+<!--    <depends optional="true" config-file="plugin-go.xml">org.jetbrains.plugins.go</depends>-->
+<!--    <depends optional="true" config-file="plugin-ruby.xml">com.intellij.modules.ruby</depends>-->
+<!--    <depends optional="true" config-file="plugin-php.xml">com.jetbrains.php</depends>-->
+<!--    <depends optional="true" config-file="plugin-swift.xml">com.intellij.swift</depends>-->
     <depends optional="true">Git4Idea</depends>
 
     <projectListeners>
@@ -33,8 +40,6 @@
           instance="ee.carlrobert.codegpt.settings.service.AnthropicServiceConfigurable"/>
         <applicationConfigurable id="settings.codegpt.services.google" parentId="settings.codegpt.services" displayName="Google"
           instance="ee.carlrobert.codegpt.settings.service.google.GoogleSettingsConfigurable"/>
-        <applicationConfigurable id="settings.codegpt.services.you" parentId="settings.codegpt.services" displayName="You.com"
-          instance="ee.carlrobert.codegpt.settings.service.YouServiceConfigurable"/>
         <applicationConfigurable id="settings.codegpt.services.llama_cpp" parentId="settings.codegpt.services" displayName="LLaMA C/C++ (Local)"
           instance="ee.carlrobert.codegpt.settings.service.LlamaServiceConfigurable"/>
         <applicationConfigurable id="settings.codegpt.services.ollama" parentId="settings.codegpt.services" displayName="Ollama (Local)"
@@ -61,6 +66,7 @@
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.advanced.AdvancedSettings"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.conversations.ConversationsState"/>
+        <applicationService serviceImplementation="ee.carlrobert.codegpt.codecompletions.psi.CompletionContextService"/>
         <inline.completion.provider
           id="CodeGPTInlineCompletionProvider"
           implementation="ee.carlrobert.codegpt.codecompletions.CodeGPTInlineCompletionProvider"/>
@@ -102,6 +108,17 @@
             </group>
             <add-to-group
               group-id="ProjectViewPopupMenu"
+              relative-to-action="ProjectViewPopupMenuRefactoringGroup"
+              anchor="before"/>
+            <separator/>
+        </group>
+
+        <group id="CodeGPT.FloatingCodeToolbarMenuRootGroup">
+            <action
+              id="CodeGPT.ModifySelectionAction"
+              class="ee.carlrobert.codegpt.actions.editor.EditCodeAction" />
+            <add-to-group
+              group-id="Floating.CodeToolbar"
               relative-to-action="ProjectViewPopupMenuRefactoringGroup"
               anchor="before"/>
             <separator/>

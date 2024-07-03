@@ -7,7 +7,7 @@ public class OpenAISettingsState {
 
   private String organization = "";
   private String model = OpenAIChatCompletionModel.GPT_3_5_0125_16k.getCode();
-  private boolean codeCompletionsEnabled = true;
+  private boolean codeCompletionsEnabled = false;
 
   public String getOrganization() {
     return organization;

@@ -1,7 +1,7 @@
 package ee.carlrobert.codegpt.settings.service.custom.form
 
+import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.ui.MessageType
-import com.intellij.ui.components.JBTextField
 import com.intellij.util.ui.FormBuilder
 import ee.carlrobert.codegpt.CodeGPTBundle
 import ee.carlrobert.codegpt.completions.CompletionRequestProvider
@@ -9,6 +9,7 @@ import ee.carlrobert.codegpt.completions.CompletionRequestService
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceChatCompletionSettingsState
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceFormTabbedPane
 import ee.carlrobert.codegpt.ui.OverlayUtil
+import ee.carlrobert.codegpt.ui.URLTextField
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails
 import ee.carlrobert.llm.completion.CompletionEventListener
 import okhttp3.sse.EventSource
@@ -22,7 +23,7 @@ class CustomServiceChatCompletionForm(
     val getApiKey: () -> String?
 ) {
 
-    private val urlField = JBTextField(state.url, 30)
+    private val urlField = URLTextField(state.url, 30)
     private val tabbedPane = CustomServiceFormTabbedPane(state.headers, state.body)
     private val testConnectionButton = JButton(
         CodeGPTBundle.get("settingsConfigurable.service.custom.openai.testConnection.label")
@@ -86,7 +87,7 @@ class CustomServiceChatCompletionForm(
     internal inner class TestConnectionEventListener : CompletionEventListener<String?> {
         override fun onMessage(value: String?, eventSource: EventSource) {
             if (!value.isNullOrEmpty()) {
-                SwingUtilities.invokeLater {
+                runInEdt {
                     OverlayUtil.showBalloon(
                         CodeGPTBundle.get("settingsConfigurable.service.custom.openai.connectionSuccess"),
                         MessageType.INFO,
@@ -98,7 +99,7 @@ class CustomServiceChatCompletionForm(
         }
 
         override fun onError(error: ErrorDetails, ex: Throwable) {
-            SwingUtilities.invokeLater {
+            runInEdt {
                 OverlayUtil.showBalloon(
                     CodeGPTBundle.get("settingsConfigurable.service.custom.openai.connectionFailed")
                             + "\n\n"

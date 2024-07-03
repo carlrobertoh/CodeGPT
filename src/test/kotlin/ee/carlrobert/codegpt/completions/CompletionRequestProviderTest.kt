@@ -97,14 +97,13 @@ class CompletionRequestProviderTest : IntegrationTest() {
   }
 
   fun testReducedChatCompletionRequest() {
-    useOpenAIService()
     ConfigurationSettings.getCurrentState().systemPrompt = COMPLETION_SYSTEM_PROMPT
     val conversation = ConversationService.getInstance().startConversation()
     conversation.addMessage(createDummyMessage(50))
     conversation.addMessage(createDummyMessage(100))
     conversation.addMessage(createDummyMessage(150))
     conversation.addMessage(createDummyMessage(1000))
-    val remainingMessage = createDummyMessage(2000)
+    val remainingMessage = createDummyMessage(1000)
     conversation.addMessage(remainingMessage)
     conversation.discardTokenLimits()
 

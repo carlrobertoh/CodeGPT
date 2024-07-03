@@ -7,7 +7,6 @@ import static java.lang.String.format;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.ActionPlaces;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
 import com.intellij.util.ui.JBUI;
@@ -25,7 +24,6 @@ import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
-import ee.carlrobert.codegpt.settings.service.you.YouSettings;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ChatMessageResponseBody;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ChatToolWindowScrollablePanel;
@@ -46,6 +44,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
+import java.util.function.Consumer;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -274,8 +273,9 @@ public class ChatToolWindowTabPanel implements Disposable {
         JBUI.Borders.empty(8)));
     var contentManager = project.getService(ChatToolWindowContentManager.class);
     panel.add(JBUI.Panels.simplePanel(createUserPromptTextAreaHeader(
+        project,
         selectedService,
-        () -> {
+        (provider) -> {
           ConversationService.getInstance().startConversation();
           contentManager.createNewTabPanel();
         })), BorderLayout.NORTH);
@@ -284,13 +284,14 @@ public class ChatToolWindowTabPanel implements Disposable {
   }
 
   private JPanel createUserPromptTextAreaHeader(
+      Project project,
       ServiceType selectedService,
-      Runnable onModelChange) {
+      Consumer<ServiceType> onModelChange) {
     return JBUI.Panels.simplePanel()
         .withBorder(Borders.emptyBottom(8))
         .andTransparent()
         .addToLeft(totalTokensPanel)
-        .addToRight(new ModelComboBoxAction(onModelChange, selectedService)
+        .addToRight(new ModelComboBoxAction(project, onModelChange, selectedService)
             .createCustomComponent(ActionPlaces.UNKNOWN));
   }
 
@@ -322,11 +323,6 @@ public class ChatToolWindowTabPanel implements Disposable {
       var messageResponseBody =
           new ChatMessageResponseBody(project, this).withResponse(message.getResponse());
 
-      var serpResults = message.getSerpResults();
-      if (YouSettings.getCurrentState().isDisplayWebSearchResults()
-          && serpResults != null && !serpResults.isEmpty()) {
-        messageResponseBody.displaySerpResults(serpResults);
-      }
       messageResponseBody.hideCaret();
 
       var userMessagePanel = new UserMessagePanel(project, message, this);

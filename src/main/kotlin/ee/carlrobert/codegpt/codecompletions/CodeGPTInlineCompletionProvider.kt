@@ -8,6 +8,7 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.util.TextRange
 import ee.carlrobert.codegpt.CodeGPTKeys
+import ee.carlrobert.codegpt.codecompletions.psi.CompletionContextService
 import ee.carlrobert.codegpt.settings.GeneralSettings
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
 import ee.carlrobert.codegpt.settings.service.ServiceType
@@ -27,8 +28,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.sse.EventSource
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.time.Duration
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
-class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
+class CodeGPTInlineCompletionProvider : DebouncedInlineCompletionProvider() {
     companion object {
         private val logger = thisLogger()
     }
@@ -38,29 +42,40 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
     override val id: InlineCompletionProviderID
         get() = InlineCompletionProviderID("CodeGPTInlineCompletionProvider")
 
-    override suspend fun getSuggestion(request: InlineCompletionRequest): InlineCompletionSuggestion {
-        val project = request.editor.project
+    override suspend fun getSuggestionDebounced(request: InlineCompletionRequest): InlineCompletionSuggestion {
+        val editor = request.editor
+        val project = editor.project
         if (project == null) {
             logger.error("Could not find project")
             return InlineCompletionSuggestion.empty()
         }
 
         return InlineCompletionSuggestion.Default(channelFlow {
-            val infillRequest = withContext(Dispatchers.EDT) {
-                InfillRequestDetails.fromInlineCompletionRequest(request)
-            }
-            val (prefix, suffix) = withContext(Dispatchers.EDT) {
-                val caretOffset = request.editor.caretModel.offset
-                val prefix =
-                    request.document.getText(TextRange(0, caretOffset))
-                val suffix =
-                    request.document.getText(
-                        TextRange(
-                            caretOffset,
-                            request.document.textLength
+            val caretOffset = withContext(Dispatchers.EDT) { editor.caretModel.offset }
+            val infillContext =
+                if (service<ConfigurationSettings>().state.isAutocompletionContextAwareEnabled)
+                    service<CompletionContextService>().findContext(editor, caretOffset)
+                else null
+            val infillRequest = if (infillContext == null) {
+                val (prefix, suffix) = withContext(Dispatchers.EDT) {
+                    val prefix =
+                        request.document.getText(TextRange(0, caretOffset))
+                    val suffix =
+                        request.document.getText(
+                            TextRange(
+                                caretOffset,
+                                request.document.textLength
+                            )
                         )
-                    )
-                Pair(prefix, suffix)
+                    Pair(prefix, suffix)
+                }
+                InfillRequestDetails.withoutContext(prefix, suffix)
+            } else {
+                // TODO: truncate contextElements if too long?
+                InfillRequestDetails.withContext(
+                    infillContext,
+                    caretOffset
+                )
             }
 
             currentCall.set(
@@ -74,13 +89,14 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
                                 inlineText = CodeCompletionParserFactory
                                     .getParserForFileExtension(request.file.virtualFile.extension)
                                     .parse(
-                                        prefix,
-                                        suffix,
+                                        // TODO: ?
+                                        infillRequest.prefix,
+                                        infillRequest.suffix,
                                         inlineText
                                     )
                             }
 
-                            request.editor.putUserData(CodeGPTKeys.PREVIOUS_INLAY_TEXT, inlineText)
+                            editor.putUserData(CodeGPTKeys.PREVIOUS_INLAY_TEXT, inlineText)
                             launch {
                                 try {
                                     trySend(InlineCompletionGrayTextElement(inlineText))
@@ -99,6 +115,10 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
         })
     }
 
+    override suspend fun getDebounceDelay(request: InlineCompletionRequest): Duration {
+        return 600.toDuration(DurationUnit.MILLISECONDS)
+    }
+
     override fun isEnabled(event: InlineCompletionEvent): Boolean {
         val selectedService = GeneralSettings.getSelectedService()
         val codeCompletionsEnabled = when (selectedService) {
@@ -109,7 +129,6 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
             ServiceType.OLLAMA -> service<OllamaSettings>().state.codeCompletionsEnabled
             ServiceType.ANTHROPIC,
             ServiceType.AZURE,
-            ServiceType.YOU,
             ServiceType.GOOGLE,
             null -> false
         }

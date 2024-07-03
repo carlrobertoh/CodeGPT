@@ -20,7 +20,7 @@ class OpenAIServiceConfigurable : Configurable {
 
     override fun createComponent(): JComponent {
         component = OpenAISettingsForm(service<OpenAISettings>().state)
-        return component.getForm()
+        return component.form
     }
 
     override fun isModified(): Boolean {
