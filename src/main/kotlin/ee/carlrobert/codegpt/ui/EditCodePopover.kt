@@ -34,6 +34,8 @@ import kotlinx.coroutines.launch
 import javax.swing.JButton
 import javax.swing.JPanel
 import javax.swing.event.DocumentEvent
+import java.awt.event.KeyEvent
+import java.awt.event.KeyAdapter
 
 data class ObservableProperties(
     val submitted: AtomicBooleanProperty = AtomicBooleanProperty(false),
@@ -48,6 +50,14 @@ class EditCodePopover(private val editor: Editor) {
     private val submissionHandler = EditCodeSubmissionHandler(editor, observableProperties)
     private val promptTextField = JBTextField("", 40).apply {
         emptyText.appendText(CodeGPTBundle.get("editCodePopover.textField.emptyText"))
+        addKeyListener(object : KeyAdapter() {
+            override fun keyPressed(e: KeyEvent) {
+                if (e.keyCode == KeyEvent.VK_ENTER) {
+                    e.consume()
+                    handleSubmit()
+                }
+            }
+        })
     }
     private val popup = JBPopupFactory.getInstance()
         .createComponentPopupBuilder(
@@ -127,12 +137,7 @@ class EditCodePopover(private val editor: Editor) {
         val button = JButton(title).apply {
             putClientProperty(DarculaButtonUI.DEFAULT_STYLE_KEY, true)
             addActionListener {
-                serviceScope.launch {
-                    submissionHandler.handleSubmit(promptTextField.text)
-                    promptTextField.text = ""
-                    promptTextField.emptyText.text =
-                        CodeGPTBundle.get("editCodePopover.textField.followUp.emptyText")
-                }
+                handleSubmit()
             }
         }
         return cell(button)
@@ -145,6 +150,15 @@ class EditCodePopover(private val editor: Editor) {
                     observableProperties
                 )
             )
+    }
+
+    private fun handleSubmit() {
+        serviceScope.launch {
+            submissionHandler.handleSubmit(promptTextField.text)
+            promptTextField.text = ""
+            promptTextField.emptyText.text =
+                CodeGPTBundle.get("editCodePopover.textField.followUp.emptyText")
+        }
     }
 
     private class EnabledButtonComponentPredicate(
