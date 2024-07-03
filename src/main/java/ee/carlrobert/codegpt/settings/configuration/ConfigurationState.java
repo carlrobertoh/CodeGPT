@@ -21,6 +21,7 @@ public class ConfigurationState {
   private boolean captureCompileErrors = true;
   private boolean autoFormattingEnabled = true;
   private boolean autocompletionPostProcessingEnabled = false;
+  private boolean autocompletionContextAwareEnabled = false;
   private Map<String, String> tableData = EditorActionsUtil.DEFAULT_ACTIONS;
 
   public String getSystemPrompt() {
@@ -127,6 +128,14 @@ public class ConfigurationState {
     this.autocompletionPostProcessingEnabled = autocompletionPostProcessingEnabled;
   }
 
+  public boolean isAutocompletionContextAwareEnabled() {
+    return autocompletionContextAwareEnabled;
+  }
+
+  public void setAutocompletionContextAwareEnabled(boolean autocompletionContextAwareEnabled) {
+    this.autocompletionContextAwareEnabled = autocompletionContextAwareEnabled;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -145,6 +154,7 @@ public class ConfigurationState {
         && captureCompileErrors == that.captureCompileErrors
         && autoFormattingEnabled == that.autoFormattingEnabled
         && autocompletionPostProcessingEnabled == that.autocompletionPostProcessingEnabled
+        && autocompletionContextAwareEnabled == that.autocompletionContextAwareEnabled
         && Objects.equals(systemPrompt, that.systemPrompt)
         && Objects.equals(commitMessagePrompt, that.commitMessagePrompt)
         && Objects.equals(tableData, that.tableData);
@@ -155,6 +165,7 @@ public class ConfigurationState {
     return Objects.hash(systemPrompt, commitMessagePrompt, maxTokens, temperature,
         checkForPluginUpdates, checkForNewScreenshots, createNewChatOnEachAction,
         ignoreGitCommitTokenLimit, methodNameGenerationEnabled, captureCompileErrors,
-        autoFormattingEnabled, autocompletionPostProcessingEnabled, tableData);
+        autoFormattingEnabled, autocompletionPostProcessingEnabled,
+        autocompletionContextAwareEnabled, tableData);
   }
 }

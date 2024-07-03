@@ -4,8 +4,6 @@ import com.intellij.codeInsight.inline.completion.session.InlineCompletionSessio
 import com.intellij.openapi.editor.VisualPosition
 import com.intellij.openapi.util.TextRange
 import com.intellij.testFramework.PlatformTestUtil
-import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
-import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings
 import ee.carlrobert.codegpt.util.file.FileUtil
 import ee.carlrobert.llm.client.http.RequestEntity
 import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange
@@ -39,7 +37,13 @@ class CodeCompletionServiceTest : IntegrationTest() {
             assertThat(request.method).isEqualTo("POST")
             assertThat(request.body)
                 .extracting("prompt")
-                .isEqualTo(InfillPromptTemplate.CODE_LLAMA.buildPrompt(prefix, suffix))
+                .isEqualTo(InfillPromptTemplate.CODE_LLAMA.buildPrompt(
+                    InfillRequestDetails(
+                        prefix,
+                        suffix,
+                        null
+                    )
+                ))
             listOf(
                 jsonMapResponse(
                     e("content", expectedCompletion),
