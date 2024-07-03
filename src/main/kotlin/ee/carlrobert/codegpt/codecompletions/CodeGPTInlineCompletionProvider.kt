@@ -28,8 +28,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.sse.EventSource
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.time.Duration
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
-class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
+class CodeGPTInlineCompletionProvider : DebouncedInlineCompletionProvider() {
     companion object {
         private val logger = thisLogger()
     }
@@ -39,7 +42,7 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
     override val id: InlineCompletionProviderID
         get() = InlineCompletionProviderID("CodeGPTInlineCompletionProvider")
 
-    override suspend fun getSuggestion(request: InlineCompletionRequest): InlineCompletionSuggestion {
+    override suspend fun getSuggestionDebounced(request: InlineCompletionRequest): InlineCompletionSuggestion {
         val editor = request.editor
         val project = editor.project
         if (project == null) {
@@ -110,6 +113,10 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
             )
             awaitClose { cancelCurrentCall() }
         })
+    }
+
+    override suspend fun getDebounceDelay(request: InlineCompletionRequest): Duration {
+        return 600.toDuration(DurationUnit.MILLISECONDS)
     }
 
     override fun isEnabled(event: InlineCompletionEvent): Boolean {
