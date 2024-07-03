@@ -28,6 +28,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import java.awt.event.KeyAdapter
+import java.awt.event.KeyEvent
 import javax.swing.JButton
 import javax.swing.JPanel
 import javax.swing.event.DocumentEvent
@@ -113,6 +115,29 @@ class EditCodePopover(private val editor: Editor) {
                     CodeGPTBundle.get("editCodePopover.textField.followUp.emptyText")
             }
         }
+        promptTextField.addKeyListener(object : KeyAdapter() {
+            override fun keyPressed(e: KeyEvent) {
+                if (e.keyCode == KeyEvent.VK_ENTER) {
+                    e.consume()
+                    submitButton.isVisible = false
+                    followUpButton.isVisible = true
+                    acceptButton.isVisible = true
+                    discardLink.isVisible = true
+
+                    serviceScope.launch {
+                        submissionHandler.handleSubmit(
+                            promptTextField.text,
+                            followUpButton,
+                            acceptButton,
+                            spinner
+                        )
+                        promptTextField.text = ""
+                        promptTextField.emptyText.text =
+                            CodeGPTBundle.get("editCodePopover.textField.followUp.emptyText")
+                    }
+                }
+            }
+        })
         followUpButton.addActionListener {
             serviceScope.launch {
                 submissionHandler.handleSubmit(
