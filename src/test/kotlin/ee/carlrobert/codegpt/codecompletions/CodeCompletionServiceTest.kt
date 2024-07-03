@@ -42,7 +42,15 @@ class CodeCompletionServiceTest : IntegrationTest() {
             assertThat(request.method).isEqualTo("POST")
             assertThat(request.body)
                 .extracting("prompt")
-                .isEqualTo(InfillPromptTemplate.CODE_LLAMA.buildPrompt(prefix, suffix))
+                .isEqualTo(
+                    InfillPromptTemplate.CODE_LLAMA.buildPrompt(
+                        InfillRequestDetails(
+                            prefix,
+                            suffix,
+                            null
+                        )
+                    )
+                )
             listOf(
                 jsonMapResponse(
                     e(

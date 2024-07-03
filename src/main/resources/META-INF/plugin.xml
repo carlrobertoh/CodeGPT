@@ -5,6 +5,7 @@
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.lang</depends>
     <depends optional="true" config-file="plugin-java.xml">com.intellij.modules.java</depends>
+    <depends optional="true" config-file="plugin-python.xml">com.intellij.modules.python</depends>
     <depends optional="true" config-file="git4idea.xml">Git4Idea</depends>
 
     <projectListeners>
@@ -59,6 +60,7 @@
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.advanced.AdvancedSettings"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.conversations.ConversationsState"/>
+        <applicationService serviceImplementation="ee.carlrobert.codegpt.codecompletions.psi.CompletionContextService"/>
         <editorFactoryListener implementation="ee.carlrobert.codegpt.codecompletions.CodeGPTEditorListener"/>
         <toolWindow id="CodeGPT" icon="ee.carlrobert.codegpt.Icons.DefaultSmall" anchor="right"
             factoryClass="ee.carlrobert.codegpt.toolwindow.ProjectToolWindowFactory"/>

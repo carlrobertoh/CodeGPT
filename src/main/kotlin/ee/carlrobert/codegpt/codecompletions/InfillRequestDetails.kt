@@ -1,47 +1,94 @@
 package ee.carlrobert.codegpt.codecompletions
 
-import com.intellij.openapi.editor.Document
-import com.intellij.openapi.util.TextRange
+import com.intellij.codeInsight.navigation.ImplementationSearcher
+import com.intellij.psi.PsiElement
+import com.intellij.refactoring.suggested.startOffset
 import ee.carlrobert.codegpt.EncodingManager
-import kotlin.math.max
-import kotlin.math.min
+import ee.carlrobert.codegpt.codecompletions.psi.filePath
+import ee.carlrobert.codegpt.codecompletions.psi.readText
 
-class InfillRequestDetails(val prefix: String, val suffix: String) {
+
+class InfillRequestDetails(val prefix: String, val suffix: String, val context: InfillContext?) :
+    ImplementationSearcher() {
     companion object {
         private const val MAX_OFFSET = 10_000
         private const val MAX_PROMPT_TOKENS = 128
+        private const val MAX_INFILL_PROMPT_TOKENS = 1_000
 
-        fun fromDocumentWithMaxOffset(
-            document: Document,
-            caretOffset: Int,
+        fun withoutContext(
+            prefix: String,
+            suffix: String
         ): InfillRequestDetails {
-            val start = max(0, (caretOffset - MAX_OFFSET))
-            val end = min(document.textLength, (caretOffset + MAX_OFFSET))
-            return fromDocumentWithCustomRange(document, caretOffset, start, end)
+            val truncatedPrefix = prefix.takeLast(MAX_OFFSET)
+            val truncatedSuffix = suffix.take(MAX_OFFSET)
+            return InfillRequestDetails(
+                truncateText(truncatedPrefix, false),
+                truncateText(truncatedSuffix, true),
+                null
+            )
         }
 
-        private fun fromDocumentWithCustomRange(
-            document: Document,
-            caretOffset: Int,
-            start: Int,
-            end: Int,
+        fun withContext(
+            infillContext: InfillContext,
+            caretOffsetInFile: Int,
         ): InfillRequestDetails {
-            val prefix: String = truncateText(document, start, caretOffset, false)
-            val suffix: String = truncateText(document, caretOffset, end, true)
-            return InfillRequestDetails(prefix, suffix)
+            val caretInEnclosingElement =
+                caretOffsetInFile - infillContext.enclosingElement.psiElement.startOffset
+            val entireText = infillContext.enclosingElement.psiElement.readText()
+            val prefix = truncateText(entireText.take(caretInEnclosingElement), false)
+            val suffix = truncateText(
+                if (entireText.length < caretInEnclosingElement) "" else entireText.takeLast(
+                    entireText.length - caretInEnclosingElement
+                ), true
+            )
+            return InfillRequestDetails(
+                prefix,
+                suffix,
+                truncateContext(prefix + suffix, infillContext)
+            )
+        }
+
+        private fun truncateContext(prompt: String, infillContext: InfillContext): InfillContext {
+            var promptTokens = EncodingManager.getInstance().countTokens(prompt)
+            val truncatedContextElements = infillContext.contextElements.takeWhile {
+                promptTokens += it.tokens
+                promptTokens <= MAX_INFILL_PROMPT_TOKENS
+            }.toSet()
+            return InfillContext(infillContext.enclosingElement, truncatedContextElements)
         }
 
         private fun truncateText(
-            document: Document,
-            start: Int,
-            end: Int,
+            text: String,
             fromStart: Boolean
         ): String {
             return EncodingManager.getInstance().truncateText(
-                document.getText(TextRange(start, end)),
+                text,
                 MAX_PROMPT_TOKENS,
                 fromStart
             )
         }
     }
+}
+
+class InfillContext(
+    val enclosingElement: ContextElement,
+    // TODO: Add some kind of ranking, which contextElements are more important than others
+    val contextElements: Set<ContextElement>
+) {
+
+    fun getRepoName(): String = enclosingElement.psiElement.project.name
+}
+
+
+class ContextElement {
+    val psiElement: PsiElement
+    var tokens: Int
+
+    constructor(psiElement: PsiElement) {
+        this.psiElement = psiElement
+        this.tokens = -1
+    }
+
+    fun filePath() = this.psiElement.filePath()
+    fun text() = this.psiElement.readText()
 }
