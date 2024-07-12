@@ -3,7 +3,9 @@ package ee.carlrobert.codegpt.codecompletions.psi
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.components.Service
+import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiManager
 import ee.carlrobert.codegpt.EncodingManager
@@ -26,7 +28,8 @@ class CompletionContextService {
      */
     fun findContext(editor: Editor, offset: Int): InfillContext? {
         return ReadAction.compute<InfillContext, Throwable> {
-            val psiFile = PsiManager.getInstance(editor.project!!).findFile(editor.virtualFile!!)!!
+            val virtualFile = editor.project?.service<FileEditorManager>()?.selectedEditor?.file
+            val psiFile = PsiManager.getInstance(editor.project!!).findFile(virtualFile!!)!!
             val psiElement = psiFile.findElementAt(offset) ?: return@compute null
             val contextFinderClass = CONTEXT_FINDERS[psiElement.language.id]
                 ?: // No context finder for the language implemented yet
