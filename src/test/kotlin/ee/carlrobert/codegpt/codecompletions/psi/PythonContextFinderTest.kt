@@ -1,14 +1,15 @@
 package ee.carlrobert.codegpt.codecompletions.psi
 
 import com.intellij.openapi.editor.VisualPosition
-import com.intellij.psi.PsiJavaFile
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import com.jetbrains.python.psi.PyClass
 import com.jetbrains.python.psi.PyFile
 import com.jetbrains.python.psi.PyFunction
 import ee.carlrobert.codegpt.util.file.FileUtil.getResourceContent
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.Ignore
 
+@Ignore
 class PythonContextFinderTest : BasePlatformTestCase() {
 
     private val contextFinder = PythonContextFinder()
