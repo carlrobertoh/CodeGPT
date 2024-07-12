@@ -26,7 +26,8 @@ public class CodeCompletionRequestProvider {
 
   public LlamaCompletionRequest buildLlamaRequest() {
     InfillPromptTemplate promptTemplate = getLlamaInfillPromptTemplate();
-    String prompt = promptTemplate.buildPrompt(details.getPrefix(), details.getSuffix());
+    String prompt = promptTemplate.buildPrompt(
+        new InfillRequestDetails(details.getPrefix(), details.getSuffix(), null));
     return new LlamaCompletionRequest.Builder(prompt)
         .setN_predict(MAX_TOKENS)
         .setStream(true)

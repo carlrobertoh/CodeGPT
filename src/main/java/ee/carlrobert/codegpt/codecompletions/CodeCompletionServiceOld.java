@@ -88,7 +88,10 @@ public final class CodeCompletionServiceOld implements Disposable {
       return;
     }
 
-    var request = InfillRequestDetails.Companion.fromDocumentWithMaxOffset(document, offset);
+    var prefix = document.getText(new TextRange(0, offset));
+    var suffix = document.getText(new TextRange(offset, document.getTextLength()));
+
+    var request = InfillRequestDetails.Companion.withoutContext(prefix, suffix);
     if (Stream.of(request.getSuffix(), request.getPrefix()).anyMatch(String::isEmpty)) {
       return;
     }
