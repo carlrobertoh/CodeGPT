@@ -1,17 +1,17 @@
 package ee.carlrobert.codegpt.codecompletions
 
+import com.intellij.codeInsight.inline.completion.DebouncedInlineCompletionProvider
 import com.intellij.codeInsight.inline.completion.InlineCompletionEvent
-import com.intellij.codeInsight.inline.completion.InlineCompletionProvider
 import com.intellij.codeInsight.inline.completion.InlineCompletionProviderID
 import com.intellij.codeInsight.inline.completion.InlineCompletionRequest
 import com.intellij.codeInsight.inline.completion.elements.InlineCompletionGrayTextElement
-import com.intellij.notification.NotificationType
 import com.intellij.codeInsight.inline.completion.suggestion.InlineCompletionSingleSuggestion
 import com.intellij.codeInsight.inline.completion.suggestion.InlineCompletionSuggestionUpdateManager
 import com.intellij.codeInsight.inline.completion.suggestion.InlineCompletionSuggestionUpdateManager.UpdateResult
 import com.intellij.codeInsight.inline.completion.suggestion.InlineCompletionSuggestionUpdateManager.UpdateResult.Changed
 import com.intellij.codeInsight.inline.completion.suggestion.InlineCompletionSuggestionUpdateManager.UpdateResult.Invalidated
 import com.intellij.codeInsight.inline.completion.suggestion.InlineCompletionVariant
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.EDT
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
@@ -38,8 +38,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.sse.EventSource
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.time.Duration
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
-class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
+class CodeGPTInlineCompletionProvider : DebouncedInlineCompletionProvider() {
     companion object {
         private val logger = thisLogger()
     }
@@ -52,7 +55,7 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
     override val suggestionUpdateManager: CodeCompletionSuggestionUpdateAdapter
         get() = CodeCompletionSuggestionUpdateAdapter()
 
-    override suspend fun getSuggestion(request: InlineCompletionRequest): InlineCompletionSingleSuggestion {
+    override suspend fun getSuggestionDebounced(request: InlineCompletionRequest): InlineCompletionSingleSuggestion {
         val editor = request.editor
         val project = editor.project
         if (project == null) {
@@ -106,7 +109,7 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
                                     )
                             }
 
-                            editor.putUserData(CodeGPTKeys.PREVIOUS_INLAY_TEXT, inlineText)
+                            request.editor.putUserData(CodeGPTKeys.PREVIOUS_INLAY_TEXT, inlineText)
                             launch {
                                 try {
                                     trySend(InlineCompletionGrayTextElement(inlineText))
@@ -123,6 +126,10 @@ class CodeGPTInlineCompletionProvider : InlineCompletionProvider {
             )
             awaitClose { cancelCurrentCall() }
         })
+    }
+
+    override suspend fun getDebounceDelay(request: InlineCompletionRequest): Duration {
+        return 600.toDuration(DurationUnit.MILLISECONDS)
     }
 
     override fun isEnabled(event: InlineCompletionEvent): Boolean {
