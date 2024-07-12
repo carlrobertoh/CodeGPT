@@ -30,9 +30,12 @@ public class ReplaceCodeInMainEditorAction extends AnAction {
     var project = event.getProject();
     var toolWindowEditor = event.getData(PlatformDataKeys.EDITOR);
     if (project != null && toolWindowEditor != null) {
-      EditorUtil.replaceEditorSelection(
-          toolWindowEditor,
-          requireNonNull(toolWindowEditor.getSelectionModel().getSelectedText()));
+      var mainEditor = EditorUtil.getSelectedEditor(project);
+      if (mainEditor != null) {
+        EditorUtil.replaceEditorSelection(
+            mainEditor,
+            requireNonNull(toolWindowEditor.getSelectionModel().getSelectedText()));
+      }
     }
   }
 
