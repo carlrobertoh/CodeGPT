@@ -14,6 +14,7 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.text.StringUtil
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.codeStyle.CodeStyleManager
 import com.intellij.testFramework.LightVirtualFile
@@ -144,7 +145,11 @@ object EditorUtil {
         editor.project?.let { project ->
             runUndoTransparentWriteAction {
                 val document = editor.document
-                document.replaceString(startOffset, endOffset, newText)
+                document.replaceString(
+                    startOffset,
+                    endOffset,
+                    StringUtil.convertLineSeparators(newText)
+                )
 
                 if (ConfigurationSettings.getCurrentState().isAutoFormattingEnabled) {
                     reformatDocument(
