@@ -6,6 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Debouncer for code completions
+- Enter key shortcut for Fast Edit submission (#602)
+
+### Fixed
+
+- Ollama form combobox state (#606)
+- Replace code behaviour (#614)
+- Wrong line separators on Windows (#605)
+
 ## [2.8.2-241.1] - 2024-07-01
 
 ### Added
