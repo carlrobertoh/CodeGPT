@@ -1,8 +1,8 @@
 <!-- Plugin description -->
 
-## Introducing CodeGPT: Your Free, Open-Source AI Copilot for Coding
+## CodeGPT: Your Free, Open-Source AI Copilot for Coding
 
-CodeGPT is your go-to AI coding assistant, offering assistance throughout your entire software development journey while keeping privacy in mind. Access state-of-the-art large language models from leading providers such as OpenAI, Anthropic, Azure, Mistral, and others, or connect to a locally hosted model for a completely offline and transparent development experience.
+CodeGPT is your go-to AI assistant, ready to support you through every step of your software development journey with a strong focus on privacy. Access state-of-the-art large language models from leading providers such as OpenAI, Anthropic, Azure, Mistral, and others, or opt for a locally hosted model for a fully offline and transparent development experience. CodeGPT leverages technologies like **Ollama** and **llama.cpp**, keeping you productive even when you're off the grid.
 
 ## Core Features
 
@@ -72,6 +72,7 @@ CodeGPT's code is open source under the Apache License 2.0.
 
 Your input helps us grow. Reach out through:
 
+- [Homepage](https://codegpt.ee)
 - [Issue Tracker](https://github.com/carlrobertoh/CodeGPT/issues)
 - [Discord](https://discord.gg/8dTGGrwcnR)
 - [Email](mailto:carlrobertoh@gmail.com)
