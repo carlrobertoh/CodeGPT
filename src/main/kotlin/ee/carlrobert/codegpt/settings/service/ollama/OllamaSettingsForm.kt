@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt.settings.service.ollama
 
 import com.intellij.notification.NotificationType
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.components.service
@@ -155,6 +156,11 @@ class OllamaSettingsForm {
                     .modelTags
                     .models
                     .map { it.name }
+                    // ollama return the models not sorted, so we sort them here to make it easier to find the model:version
+                    .sortedWith(compareBy({ it.split(":").first() }, {
+                        //if model version is `latest`, put it last
+                        if (it.contains("latest")) 1 else 0
+                    }))
             } catch (t: Throwable) {
                 handleModelLoadingError(t)
                 throw t
@@ -187,6 +193,24 @@ class OllamaSettingsForm {
         } else {
             modelComboBox.model = DefaultComboBoxModel(arrayOf("No models"))
         }
+        val availableModels = ApplicationManager.getApplication()
+            .getService(OllamaSettings::class.java)
+            .state.availableModels
+        // remove models that are not available anymore
+        availableModels.removeAll { !models.contains(it) }
+        // add new models
+        models.forEach { model ->
+            if (!availableModels.contains(model)) {
+                availableModels.add(model)
+            }
+        }
+        // sort models so that models are clearly listed, we can find the model:version easily
+        availableModels.sortWith(
+            compareBy({ it.split(":").first() }, {
+                //if is `latest` model, put it last
+                if (it.contains("latest")) 1 else 0
+            })
+        )
     }
 
     private fun handleModelLoadingError(ex: Throwable) {
