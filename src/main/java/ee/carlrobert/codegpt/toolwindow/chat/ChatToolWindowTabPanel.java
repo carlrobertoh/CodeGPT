@@ -74,7 +74,7 @@ public class ChatToolWindowTabPanel implements Disposable {
         conversation,
         EditorUtil.getSelectedEditorSelectedText(project),
         this);
-    userPromptTextArea = new UserPromptTextArea(this::handleSubmit, totalTokensPanel);
+    userPromptTextArea = new UserPromptTextArea(project, this::handleSubmit, totalTokensPanel);
     rootPanel = createRootPanel();
     userPromptTextArea.requestFocusInWindow();
     userPromptTextArea.requestFocus();
