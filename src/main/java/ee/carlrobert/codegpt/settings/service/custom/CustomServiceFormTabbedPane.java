@@ -44,7 +44,7 @@ public class CustomServiceFormTabbedPane extends JBTabbedPane {
   public Map<String, String> getHeaders() {
     return getTableData(headersTable).entrySet().stream()
         .filter(entry -> entry.getKey() != null && entry.getValue() != null)
-        .collect(toMap(Entry::getKey, entry -> (String) entry.getValue()));
+        .collect(toMap(Entry::getKey, entry -> String.valueOf(entry.getValue())));
   }
 
   public void setBody(Map<String, Object> body) {
