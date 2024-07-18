@@ -1,18 +1,18 @@
 package ee.carlrobert.codegpt.actions
 
+import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.fileChooser.FileChooser
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import ee.carlrobert.codegpt.CodeGPTBundle
 import ee.carlrobert.codegpt.CodeGPTKeys
-import ee.carlrobert.codegpt.Icons
 import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.AttachImageNotifier
 
 class AttachImageAction : AnAction(
     CodeGPTBundle.get("action.attachImage"),
     CodeGPTBundle.get("action.attachImageDescription"),
-    Icons.Upload
+    AllIcons.FileTypes.Image
 ) {
 
     override fun actionPerformed(e: AnActionEvent) {

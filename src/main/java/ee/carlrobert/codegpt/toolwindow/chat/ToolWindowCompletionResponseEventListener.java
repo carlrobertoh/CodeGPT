@@ -14,8 +14,8 @@ import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ChatMessageResponseBody;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ResponsePanel;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.TotalTokensPanel;
-import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.UserPromptTextArea;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
+import ee.carlrobert.codegpt.ui.textarea.UserInputPanel;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.client.you.completion.YouSerpResult;
 import java.util.HashMap;
@@ -37,7 +37,7 @@ abstract class ToolWindowCompletionResponseEventListener implements
   private final ResponsePanel responsePanel;
   private final ChatMessageResponseBody responseContainer;
   private final TotalTokensPanel totalTokensPanel;
-  private final UserPromptTextArea userPromptTextArea;
+  private final UserInputPanel textArea;
 
   private volatile boolean completed;
 
@@ -45,13 +45,13 @@ abstract class ToolWindowCompletionResponseEventListener implements
       ConversationService conversationService,
       ResponsePanel responsePanel,
       TotalTokensPanel totalTokensPanel,
-      UserPromptTextArea userPromptTextArea) {
+      UserInputPanel textArea) {
     this.encodingManager = EncodingManager.getInstance();
     this.conversationService = conversationService;
     this.responsePanel = responsePanel;
     this.responseContainer = (ChatMessageResponseBody) responsePanel.getContent();
     this.totalTokensPanel = totalTokensPanel;
-    this.userPromptTextArea = userPromptTextArea;
+    this.textArea = textArea;
   }
 
   public abstract void handleTokensExceededPolicyAccepted();
@@ -127,7 +127,7 @@ abstract class ToolWindowCompletionResponseEventListener implements
         if (containsResults) {
           responseContainer.displaySerpResults(serpResults);
         }
-        totalTokensPanel.updateUserPromptTokens(userPromptTextArea.getText());
+        totalTokensPanel.updateUserPromptTokens(textArea.getText());
         totalTokensPanel.updateConversationTokens(callParameters.getConversation());
       } finally {
         stopStreaming(responseContainer);
@@ -142,7 +142,7 @@ abstract class ToolWindowCompletionResponseEventListener implements
 
   private void stopStreaming(ChatMessageResponseBody responseContainer) {
     completed = true;
-    userPromptTextArea.setSubmitEnabled(true);
+    textArea.setSubmitEnabled(true);
     responseContainer.hideCaret();
   }
 }
