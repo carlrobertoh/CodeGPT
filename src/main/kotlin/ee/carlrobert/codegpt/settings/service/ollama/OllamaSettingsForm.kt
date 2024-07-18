@@ -202,7 +202,6 @@ class OllamaSettingsForm {
         }
         availableModels.sortWith(
             compareBy({ it.split(":").first() }, {
-                //if is `latest` model, put it last
                 if (it.contains("latest")) 1 else 0
             })
         )
