@@ -9,7 +9,7 @@ import ee.carlrobert.codegpt.CodeGPTBundle
 import ee.carlrobert.codegpt.CodeGPTKeys
 import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.AttachImageNotifier
 
-open class AttachImageAction : AnAction(
+class AttachImageAction : AnAction(
     CodeGPTBundle.get("action.attachImage"),
     CodeGPTBundle.get("action.attachImageDescription"),
     AllIcons.FileTypes.Image

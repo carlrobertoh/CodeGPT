@@ -78,14 +78,8 @@ class UserInputPanel(
         add(getFooter(), BorderLayout.SOUTH)
     }
 
-    inner class CustomImageAction : AttachImageAction() {
-        override fun update(e: AnActionEvent) {
-            e.presentation.isEnabled = isImageActionSupported()
-        }
-    }
-
     private fun getFooter(): JPanel {
-        val attachImageLink = AnActionLink(CodeGPTBundle.get("shared.image"), CustomImageAction())
+        val attachImageLink = AnActionLink(CodeGPTBundle.get("shared.image"), AttachImageAction())
             .apply {
                 icon = AllIcons.FileTypes.Image
                 font = JBUI.Fonts.smallFont()
