@@ -98,9 +98,9 @@ public class ModelComboBoxAction extends ComboBoxAction {
       actionGroup.addSeparator("OpenAI");
       List.of(
               OpenAIChatCompletionModel.GPT_4_O,
+              OpenAIChatCompletionModel.GPT_4_O_MINI,
               OpenAIChatCompletionModel.GPT_4_VISION_PREVIEW,
-              OpenAIChatCompletionModel.GPT_4_0125_128k,
-              OpenAIChatCompletionModel.GPT_3_5_0125_16k)
+              OpenAIChatCompletionModel.GPT_4_0125_128k)
           .forEach(model -> actionGroup.add(createOpenAIModelAction(model, presentation)));
     }
     if (availableProviders.contains(CUSTOM_OPENAI)) {
