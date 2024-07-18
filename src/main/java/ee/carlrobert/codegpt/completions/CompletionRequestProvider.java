@@ -135,7 +135,7 @@ public class CompletionRequestProvider {
             new OpenAIChatCompletionStandardMessage("user", context)))
         .setModel(model)
         .setStream(true)
-        .setMaxTokens(2048)
+        .setMaxTokens(ConfigurationSettings.getCurrentState().getMaxTokens())
         .build();
   }
 
