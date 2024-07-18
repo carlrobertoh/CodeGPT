@@ -5,13 +5,11 @@ import static ee.carlrobert.codegpt.ui.UIUtil.createScrollPaneWithSmartScroller;
 import static java.lang.String.format;
 
 import com.intellij.openapi.Disposable;
-import com.intellij.openapi.actionSystem.ActionPlaces;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
 import com.intellij.util.ui.JBUI;
-import com.intellij.util.ui.JBUI.Borders;
 import ee.carlrobert.codegpt.CodeGPTKeys;
 import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.ReferencedFile;
@@ -23,19 +21,16 @@ import ee.carlrobert.codegpt.completions.ConversationType;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
-import ee.carlrobert.codegpt.settings.GeneralSettings;
-import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ChatMessageResponseBody;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ChatToolWindowScrollablePanel;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ResponsePanel;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.UserMessagePanel;
-import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.ModelComboBoxAction;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.TotalTokensDetails;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.TotalTokensPanel;
-import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.UserPromptTextArea;
 import ee.carlrobert.codegpt.toolwindow.ui.ChatToolWindowLandingPanel;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
+import ee.carlrobert.codegpt.ui.textarea.UserInputPanel;
 import ee.carlrobert.codegpt.util.EditorUtil;
 import ee.carlrobert.codegpt.util.file.FileUtil;
 import java.awt.BorderLayout;
@@ -45,7 +40,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
-import java.util.function.Consumer;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -60,10 +54,12 @@ public class ChatToolWindowTabPanel implements Disposable {
   private final Project project;
   private final JPanel rootPanel;
   private final Conversation conversation;
-  private final UserPromptTextArea userPromptTextArea;
+  private final UserInputPanel textArea;
   private final ConversationService conversationService;
   private final TotalTokensPanel totalTokensPanel;
   private final ChatToolWindowScrollablePanel toolWindowScrollablePanel;
+
+  private @Nullable CompletionRequestHandler requestHandler;
 
   public ChatToolWindowTabPanel(@NotNull Project project, @NotNull Conversation conversation) {
     this.project = project;
@@ -75,10 +71,9 @@ public class ChatToolWindowTabPanel implements Disposable {
         conversation,
         EditorUtil.getSelectedEditorSelectedText(project),
         this);
-    userPromptTextArea = new UserPromptTextArea(this::handleSubmit, totalTokensPanel);
+    textArea = new UserInputPanel(project, this::handleSubmit, this::handleCancel);
+    textArea.requestFocus();
     rootPanel = createRootPanel();
-    userPromptTextArea.requestFocusInWindow();
-    userPromptTextArea.requestFocus();
 
     if (conversation.getMessages().isEmpty()) {
       displayLandingView();
@@ -104,7 +99,7 @@ public class ChatToolWindowTabPanel implements Disposable {
   }
 
   public void requestFocusForTextArea() {
-    userPromptTextArea.focus();
+    textArea.requestFocus();
   }
 
   public void displayLandingView() {
@@ -234,24 +229,23 @@ public class ChatToolWindowTabPanel implements Disposable {
       return;
     }
 
-    var requestHandler = new CompletionRequestHandler(
+    requestHandler = new CompletionRequestHandler(
         new ToolWindowCompletionResponseEventListener(
             conversationService,
             responsePanel,
             totalTokensPanel,
-            userPromptTextArea) {
+            textArea) {
           @Override
           public void handleTokensExceededPolicyAccepted() {
             call(callParameters, responsePanel);
           }
         });
-    userPromptTextArea.setRequestHandler(requestHandler);
-    userPromptTextArea.setSubmitEnabled(false);
+    textArea.setSubmitEnabled(false);
 
     requestHandler.call(callParameters);
   }
 
-  private void handleSubmit(String text) {
+  private Unit handleSubmit(String text) {
     var message = new Message(text);
     var editor = EditorUtil.getSelectedEditor(project);
     if (editor != null) {
@@ -266,35 +260,25 @@ public class ChatToolWindowTabPanel implements Disposable {
     }
     message.setUserMessage(text);
     sendMessage(message, ConversationType.DEFAULT);
+    return Unit.INSTANCE;
   }
 
-  private JPanel createUserPromptPanel(ServiceType selectedService) {
+  private Unit handleCancel() {
+    if (requestHandler != null) {
+      requestHandler.cancel();
+    }
+    return Unit.INSTANCE;
+  }
+
+  private JPanel createUserPromptPanel() {
     var panel = new JPanel(new BorderLayout());
     panel.setBorder(JBUI.Borders.compound(
         JBUI.Borders.customLine(JBColor.border(), 1, 0, 0, 0),
         JBUI.Borders.empty(8)));
-    var contentManager = project.getService(ChatToolWindowContentManager.class);
-    panel.add(JBUI.Panels.simplePanel(createUserPromptTextAreaHeader(
-        project,
-        selectedService,
-        (provider) -> {
-          ConversationService.getInstance().startConversation();
-          contentManager.createNewTabPanel();
-        })), BorderLayout.NORTH);
-    panel.add(JBUI.Panels.simplePanel(userPromptTextArea), BorderLayout.CENTER);
+    panel.add(JBUI.Panels.simplePanel(totalTokensPanel)
+        .withBorder(JBUI.Borders.emptyBottom(8)), BorderLayout.NORTH);
+    panel.add(JBUI.Panels.simplePanel(textArea), BorderLayout.CENTER);
     return panel;
-  }
-
-  private JPanel createUserPromptTextAreaHeader(
-      Project project,
-      ServiceType selectedService,
-      Consumer<ServiceType> onModelChange) {
-    return JBUI.Panels.simplePanel()
-        .withBorder(Borders.emptyBottom(8))
-        .andTransparent()
-        .addToLeft(totalTokensPanel)
-        .addToRight(new ModelComboBoxAction(project, onModelChange, selectedService)
-            .createCustomComponent(ActionPlaces.UNKNOWN));
   }
 
   private JComponent getLandingView() {
@@ -357,8 +341,7 @@ public class ChatToolWindowTabPanel implements Disposable {
     gbc.weighty = 0;
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.gridy = 1;
-    rootPanel.add(
-        createUserPromptPanel(GeneralSettings.getSelectedService()), gbc);
+    rootPanel.add(createUserPromptPanel(), gbc);
     return rootPanel;
   }
 }

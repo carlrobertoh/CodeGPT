@@ -37,7 +37,7 @@ public class SelectedFilesAccordion extends JPanel {
   private JPanel createContentPanel(Project project, List<String> referencedFilePaths) {
     var panel = new JPanel();
     panel.setOpaque(false);
-    panel.setVisible(false);
+    panel.setVisible(true);
     panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
     panel.setBorder(JBUI.Borders.empty(4, 0));
     referencedFilePaths.stream()
