@@ -31,9 +31,10 @@ object MarkdownUtil {
   }
 
   @JvmStatic
-  fun convertMdToHtml(message: String?): String {
+  fun convertMdToHtml(message: String): String {
     val options = MutableDataSet()
-    val document = Parser.builder(options).build().parse(message!!)
+    options.set(HtmlRenderer.SOFT_BREAK, "<br/>")
+    val document = Parser.builder(options).build().parse(message)
     return HtmlRenderer.builder(options)
       .nodeRendererFactory(ResponseNodeRenderer.Factory())
       .build()

@@ -64,7 +64,7 @@ public class ChatToolWindowPanel extends SimpleToolWindowPanel {
 
     var messageBusConnection = project.getMessageBus().connect();
     messageBusConnection.subscribe(IncludeFilesInContextNotifier.FILES_INCLUDED_IN_CONTEXT_TOPIC,
-        (IncludeFilesInContextNotifier) this::displaySelectedFilesNotification);
+        (IncludeFilesInContextNotifier) this::updateSelectedFilesNotification);
     messageBusConnection.subscribe(AttachImageNotifier.IMAGE_ATTACHMENT_FILE_PATH_TOPIC,
         (AttachImageNotifier) filePath -> imageFileAttachmentNotification.show(
             Path.of(filePath).getFileName().toString(),
@@ -95,8 +95,9 @@ public class ChatToolWindowPanel extends SimpleToolWindowPanel {
     return tabbedPane;
   }
 
-  public void displaySelectedFilesNotification(List<ReferencedFile> referencedFiles) {
+  public void updateSelectedFilesNotification(List<ReferencedFile> referencedFiles) {
     if (referencedFiles.isEmpty()) {
+      selectedFilesNotification.hideNotification();
       return;
     }
 
