@@ -75,7 +75,7 @@ public enum ServiceType {
             .getState()
             .getChatCompletionSettings()
             .getModel();
-        yield List.of("gpt-4o", "claude-3-opus").contains(codegptModel);
+        yield List.of("gpt-4o", "gpt-4o-mini", "claude-3-opus").contains(codegptModel);
       case OPENAI:
         var openaiModel = ApplicationManager.getApplication().getService(OpenAISettings.class)
             .getState()
