@@ -14,7 +14,7 @@ junit = "5.10.2"
 kotlin = "2.0.0"
 llm-client = "0.8.8"
 okio = "3.9.0"
-tree-sitter = "0.22.5"
+tree-sitter = "0.22.6a"
 
 [libraries]
 analytics = { module = "com.rudderstack.sdk.java.analytics:analytics", version.ref = "analytics" }
