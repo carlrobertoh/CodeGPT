@@ -156,9 +156,7 @@ class OllamaSettingsForm {
                     .modelTags
                     .models
                     .map { it.name }
-                    // ollama return the models not sorted, so we sort them here to make it easier to find the model:version
                     .sortedWith(compareBy({ it.split(":").first() }, {
-                        //if model version is `latest`, put it last
                         if (it.contains("latest")) 1 else 0
                     }))
             } catch (t: Throwable) {
@@ -196,15 +194,12 @@ class OllamaSettingsForm {
         val availableModels = ApplicationManager.getApplication()
             .getService(OllamaSettings::class.java)
             .state.availableModels
-        // remove models that are not available anymore
         availableModels.removeAll { !models.contains(it) }
-        // add new models
         models.forEach { model ->
             if (!availableModels.contains(model)) {
                 availableModels.add(model)
             }
         }
-        // sort models so that models are clearly listed, we can find the model:version easily
         availableModels.sortWith(
             compareBy({ it.split(":").first() }, {
                 //if is `latest` model, put it last
