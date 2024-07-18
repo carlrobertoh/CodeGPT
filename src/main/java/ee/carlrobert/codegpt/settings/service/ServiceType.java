@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt.settings.service;
 
 import static ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel.GPT_4_O;
+import static ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel.GPT_4_O_MINI;
 import static ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel.GPT_4_VISION_PREVIEW;
 
 import com.intellij.openapi.application.ApplicationManager;
@@ -80,7 +81,10 @@ public enum ServiceType {
         var openaiModel = ApplicationManager.getApplication().getService(OpenAISettings.class)
             .getState()
             .getModel();
-        yield List.of(GPT_4_VISION_PREVIEW.getCode(), GPT_4_O.getCode()).contains(openaiModel);
+        yield List.of(
+            GPT_4_VISION_PREVIEW.getCode(),
+            GPT_4_O.getCode(),
+            GPT_4_O_MINI.getCode()).contains(openaiModel);
       default:
         yield false;
     };
