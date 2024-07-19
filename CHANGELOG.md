@@ -6,6 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- GPT-4o mini model (**free** with [our hosted service](https://www.codegpt.ee/#pricing))
+- New UI/UX design for the toolwindow's user input component
+- Support for searching for and attaching files in the textarea popover when the '@' key is used
+
+### Fixed
+
+- Numeric values in Custom providers' headers section ([#619](https://github.com/carlrobertoh/CodeGPT/issues/619))
+- Ollama settings sync ([#616](https://github.com/carlrobertoh/CodeGPT/issues/616))
+
 ## [2.8.3-233] - 2024-07-15
 
 ### Added
