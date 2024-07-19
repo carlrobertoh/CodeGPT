@@ -16,7 +16,7 @@ class CodeGPTServiceSettingsState : BaseState() {
 }
 
 class CodeGPTServiceChatCompletionSettingsState : BaseState() {
-    var model by string("llama-3-8b")
+    var model by string("gpt-4o-mini")
 }
 
 class CodeGPTServiceCodeCompletionSettingsState : BaseState() {
