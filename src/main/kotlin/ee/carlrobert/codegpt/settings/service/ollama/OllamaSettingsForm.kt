@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt.settings.service.ollama
 
 import com.intellij.notification.NotificationType
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.components.service
@@ -155,6 +156,9 @@ class OllamaSettingsForm {
                     .modelTags
                     .models
                     .map { it.name }
+                    .sortedWith(compareBy({ it.split(":").first() }, {
+                        if (it.contains("latest")) 1 else 0
+                    }))
             } catch (t: Throwable) {
                 handleModelLoadingError(t)
                 throw t
@@ -187,6 +191,20 @@ class OllamaSettingsForm {
         } else {
             modelComboBox.model = DefaultComboBoxModel(arrayOf("No models"))
         }
+        val availableModels = ApplicationManager.getApplication()
+            .getService(OllamaSettings::class.java)
+            .state.availableModels
+        availableModels.removeAll { !models.contains(it) }
+        models.forEach { model ->
+            if (!availableModels.contains(model)) {
+                availableModels.add(model)
+            }
+        }
+        availableModels.sortWith(
+            compareBy({ it.split(":").first() }, {
+                if (it.contains("latest")) 1 else 0
+            })
+        )
     }
 
     private fun handleModelLoadingError(ex: Throwable) {
