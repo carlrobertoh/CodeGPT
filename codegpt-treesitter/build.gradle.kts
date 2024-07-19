@@ -7,7 +7,7 @@ dependencies {
     implementation("io.github.bonede:tree-sitter-erlang:0.1.0a")
     implementation("io.github.bonede:tree-sitter-elixir:0.2.0")
     implementation("io.github.bonede:tree-sitter-dockerfile:0.2.0")
-    implementation("io.github.bonede:tree-sitter-dart:master-a")
+    implementation("io.github.bonede:tree-sitter-dart:master")
     implementation("io.github.bonede:tree-sitter-css:0.21.0")
     implementation("io.github.bonede:tree-sitter-cpp:0.22.0a")
     implementation("io.github.bonede:tree-sitter-c-sharp:0.20.0a")
