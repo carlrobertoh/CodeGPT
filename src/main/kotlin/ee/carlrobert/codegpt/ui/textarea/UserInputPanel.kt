@@ -67,7 +67,11 @@ class UserInputPanel(
             }
         }
     ).apply { isEnabled = false }
-    private val imageActionSupported = AtomicBooleanProperty(isImageActionSupported())
+    private val attachImageLink = AnActionLink(CodeGPTBundle.get("shared.image"), AttachImageAction())
+        .apply {
+            icon = AllIcons.General.Add
+            font = JBUI.Fonts.smallFont()
+        }
 
     val text: String
         get() = textPane.text
@@ -79,15 +83,10 @@ class UserInputPanel(
     }
 
     private fun getFooter(): JPanel {
-        val attachImageLink = AnActionLink(CodeGPTBundle.get("shared.image"), AttachImageAction())
-            .apply {
-                icon = AllIcons.FileTypes.Image
-                font = JBUI.Fonts.smallFont()
-            }
         val modelComboBox = ModelComboBoxAction(
             project,
             {
-                imageActionSupported.set(isImageActionSupported())
+                attachImageLink.isEnabled = isImageActionSupported()
                 // TODO: Implement a proper session management
                 if (service<ConversationsState>().state?.currentConversation?.messages?.isNotEmpty() == true) {
                     service<ConversationService>().startConversation()
@@ -100,7 +99,7 @@ class UserInputPanel(
         return panel {
             twoColumnsRow({
                 cell(modelComboBox).gap(RightGap.SMALL)
-                cell(attachImageLink).visibleIf(imageActionSupported)
+                cell(attachImageLink)
             }, {
                 panel {
                     row {

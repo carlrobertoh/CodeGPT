@@ -12,7 +12,7 @@ import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.AttachImageNotifier
 class AttachImageAction : AnAction(
     CodeGPTBundle.get("action.attachImage"),
     CodeGPTBundle.get("action.attachImageDescription"),
-    AllIcons.FileTypes.Image
+    AllIcons.General.Add
 ) {
 
     override fun actionPerformed(e: AnActionEvent) {

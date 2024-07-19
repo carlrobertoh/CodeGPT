@@ -8,7 +8,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupFactory
-import com.intellij.vcsUtil.showAbove
+import ee.carlrobert.codegpt.util.showAbove
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -18,7 +18,7 @@ import javax.swing.Icon
 import javax.swing.JComponent
 
 enum class DefaultAction(val displayName: String, val icon: Icon) {
-    ATTACH_IMAGE("Attach image", AllIcons.FileTypes.Image),
+    ATTACH_IMAGE("Attach image", AllIcons.General.Add),
     SEARCH_WEB("Search web", AllIcons.General.Web),
 }
 

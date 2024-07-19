@@ -56,11 +56,11 @@ class CustomTextPane(private val onSubmit: (String) -> Unit) : JTextPane() {
             StyleConstants.setFontFamily(fileNameStyle, fontFamily)
             StyleConstants.setForeground(
                 fileNameStyle,
-                JBUI.CurrentTheme.GotItTooltip.codeForeground(true)
+                JBColor.foreground()
             )
             StyleConstants.setBackground(
                 fileNameStyle,
-                JBUI.CurrentTheme.GotItTooltip.codeBackground(true)
+                JBColor.background()
             )
 
             document.remove(lastIndex + 1, document.length - (lastIndex + 1))
