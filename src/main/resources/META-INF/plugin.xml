@@ -48,6 +48,8 @@
             instance="ee.carlrobert.codegpt.settings.configuration.ConfigurationConfigurable"/>
         <applicationConfigurable id="settings.codegpt.advanced" parentId="settings.codegpt" displayName="Advanced Settings"
             instance="ee.carlrobert.codegpt.settings.advanced.AdvancedSettingsConfigurable"/>
+        <applicationConfigurable id="settings.codegpt.personas" parentId="settings.codegpt" displayName="Personas"
+          instance="ee.carlrobert.codegpt.settings.persona.PersonasConfigurable"/>
         <applicationConfigurable
           parentId="settings.codegpt"
           instance="ee.carlrobert.codegpt.telemetry.ui.preferences.TelemetryConfigurable"
