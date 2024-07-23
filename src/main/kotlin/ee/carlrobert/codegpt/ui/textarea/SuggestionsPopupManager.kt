@@ -69,7 +69,7 @@ class SuggestionsPopupManager(
             override fun contentsChanged(e: ListDataEvent) {}
         })
     }
-    private val list = SuggestionList(listModel) {
+    private val list = SuggestionList(listModel, textPane) {
         handleSelection(it)
     }
     private val scrollPane: JBScrollPane = JBScrollPane(list).apply {
@@ -149,9 +149,7 @@ class SuggestionsPopupManager(
                     }
                 }
                 currentActionStrategy.populateSuggestions(project, listModel)
-                val reservedTextRange =
-                    textPane.appendHighlightedText(item.action.code, withSpace = false)
-                println(reservedTextRange)
+                textPane.appendHighlightedText(item.action.code, withWhitespace = false)
                 textPane.requestFocus()
             }
 
@@ -164,8 +162,7 @@ class SuggestionsPopupManager(
     private fun handleFileSelection(filePath: String) {
         val selectedFile = service<VirtualFileManager>().findFileByNioPath(Paths.get(filePath))
         selectedFile?.let { file ->
-            val reservedTextRange = textPane.appendHighlightedText(file.name, ':')
-            println(reservedTextRange)
+            textPane.appendHighlightedText(file.name, ':')
             project.service<FileSearchService>().addFileToSession(file)
         }
         hidePopup()

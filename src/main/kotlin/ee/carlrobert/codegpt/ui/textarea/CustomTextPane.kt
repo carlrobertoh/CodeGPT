@@ -47,7 +47,7 @@ class CustomTextPane(private val onSubmit: (String) -> Unit) : JTextPane() {
     fun appendHighlightedText(
         text: String,
         searchChar: Char = '@',
-        withSpace: Boolean = true
+        withWhitespace: Boolean = true
     ): TextRange? {
         val lastIndex = this.text.lastIndexOf(searchChar)
         if (lastIndex != -1) {
@@ -76,7 +76,7 @@ class CustomTextPane(private val onSubmit: (String) -> Unit) : JTextPane() {
                 fileNameStyle,
                 true
             )
-            if (withSpace) {
+            if (withWhitespace) {
                 document.insertString(
                     document.length,
                     " ",

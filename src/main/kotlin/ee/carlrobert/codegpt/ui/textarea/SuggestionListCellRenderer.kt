@@ -3,6 +3,7 @@ package ee.carlrobert.codegpt.ui.textarea
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.components.service
 import com.intellij.openapi.fileTypes.FileTypeManager
+import com.intellij.ui.ColorUtil
 import com.intellij.ui.JBColor
 import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.panel
@@ -13,7 +14,9 @@ import java.awt.Component
 import java.awt.Dimension
 import javax.swing.*
 
-class SuggestionListCellRenderer : DefaultListCellRenderer() {
+class SuggestionListCellRenderer(
+    private val textPane: CustomTextPane
+) : DefaultListCellRenderer() {
 
     override fun getListCellRendererComponent(
         list: JList<*>?,
@@ -88,16 +91,48 @@ class SuggestionListCellRenderer : DefaultListCellRenderer() {
         )
     }
 
+    private fun getSearchText(text: String): String? {
+        val lastAtIndex = text.lastIndexOf('@')
+        if (lastAtIndex == -1) return null
+
+        val lastColonIndex = text.lastIndexOf(':')
+        if (lastColonIndex == -1) return null
+
+        return text.substring(lastColonIndex + 1).takeIf { it.isNotEmpty() }
+    }
+
+    private fun generateHighlightedHtml(title: String, searchText: String): String {
+        val searchIndex = title.indexOf(searchText, ignoreCase = true)
+        if (searchIndex == -1) return title
+
+        val prefix = title.substring(0, searchIndex)
+        val highlight = title.substring(
+            searchIndex,
+            (searchIndex + searchText.length).coerceAtMost(title.length)
+        )
+        val suffix = title.substring((searchIndex + searchText.length).coerceAtMost(title.length))
+
+        val foregroundHex = ColorUtil.toHex(JBUI.CurrentTheme.GotItTooltip.codeForeground(true))
+        val backgroundHex = ColorUtil.toHex(JBUI.CurrentTheme.GotItTooltip.codeBackground(true))
+
+        return "<html>$prefix<span style=\"color: $foregroundHex;background-color: $backgroundHex;\">$highlight</span>$suffix</html>"
+    }
+
     private fun createDefaultPanel(
         label: JLabel,
         labelIcon: Icon,
         title: String,
         description: String? = null
     ): JPanel {
+        val searchText = getSearchText(textPane.text)
         label.apply {
-            text = title
             icon = labelIcon
             iconTextGap = 4
+            text = if (searchText != null) {
+                generateHighlightedHtml(title, searchText)
+            } else {
+                title
+            }
         }
 
         if (description != null) {

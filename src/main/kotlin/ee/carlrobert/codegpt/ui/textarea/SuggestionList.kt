@@ -12,6 +12,7 @@ import javax.swing.ListSelectionModel
 
 class SuggestionList(
     listModel: DefaultListModel<SuggestionItem>,
+    private val textPane: CustomTextPane,
     private val onSelected: (SuggestionItem) -> Unit
 ) : JBList<SuggestionItem>(listModel) {
 
@@ -26,7 +27,7 @@ class SuggestionList(
     private fun setupUI() {
         border = JBUI.Borders.empty()
         selectionMode = ListSelectionModel.SINGLE_SELECTION
-        cellRenderer = SuggestionListCellRenderer()
+        cellRenderer = SuggestionListCellRenderer(textPane)
     }
 
     private fun setupKeyboardFocusManager() {
