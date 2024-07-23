@@ -56,22 +56,6 @@ class PersonasSettingsForm {
         setupForm()
     }
 
-    private fun setupForm() {
-        service<PersonaSettings>().state.let {
-            val userPersonas = it.userCreatedPersonas.map { persona ->
-                PersonaDetails(persona.id, persona.name!!, persona.description!!)
-            }
-
-            initialItems = (ResourceUtil.getPrompts() + userPersonas).toMutableList()
-            initialItems.forEachIndexed { index, (id, act, prompt) ->
-                tableModel.addRow(arrayOf(id, act, prompt, true))
-                if (it.selectedPersona.id == id) {
-                    table.setRowSelectionInterval(index, index)
-                }
-            }
-        }
-    }
-
     fun createPanel(): DialogPanel {
         return panel {
             row {
@@ -111,6 +95,52 @@ class PersonasSettingsForm {
                     .resizableColumn()
             }
         }
+    }
+
+    fun isModified(): Boolean {
+        if (table.selectedRow == -1) {
+            return false
+        }
+
+        return service<PersonaSettings>().state.selectedPersona.let {
+            it.id != tableModel.getValueAt(table.selectedRow, 0)
+                    || it.name != nameField.text
+                    || it.description != instructionsTextArea.text
+        }
+    }
+
+    fun applyChanges() {
+        if (table.selectedRow == -1) {
+            return
+        }
+
+        val personaDetails = PersonaDetailsState().apply {
+            id = tableModel.getValueAt(table.selectedRow, 0) as Long
+            name = nameField.text
+            description = instructionsTextArea.text
+        }
+
+        service<PersonaSettings>().state.apply {
+            selectedPersona
+            selectedPersona.apply {
+                id = personaDetails.id
+                name = personaDetails.name
+                description = personaDetails.description
+            }
+            userCreatedPersonas.add(personaDetails)
+            val userPersonas = service<PersonaSettings>().state.userCreatedPersonas.map {
+                PersonaDetails(it.id, it.name!!, it.description!!)
+            }
+
+            initialItems = (ResourceUtil.getPrompts() + userPersonas).toMutableList()
+            addedItems.clear()
+        }
+    }
+
+    fun resetChanges() {
+        addedItems.clear()
+        tableModel.rowCount = 0
+        setupForm()
     }
 
     private fun populateEditArea() {
@@ -177,68 +207,20 @@ class PersonasSettingsForm {
         }
     }
 
-    fun isModified(): Boolean {
-        if (table.selectedRow == -1) {
-            return false
-        }
-
-        return service<PersonaSettings>().state.selectedPersona.let {
-            it.id != tableModel.getValueAt(table.selectedRow, 0)
-                    || it.name != nameField.text
-                    || it.description != instructionsTextArea.text
-        }
-    }
-
-    fun applyChanges() {
-        if (table.selectedRow == -1) {
-            return
-        }
-
-        val personaDetails = PersonaDetailsState().apply {
-            id = tableModel.getValueAt(table.selectedRow, 0) as Long
-            name = nameField.text
-            description = instructionsTextArea.text
-        }
-
-        service<PersonaSettings>().state.apply {
-            selectedPersona
-            selectedPersona.apply {
-                id = personaDetails.id
-                name = personaDetails.name
-                description = personaDetails.description
-            }
-            userCreatedPersonas.add(personaDetails)
-            val userPersonas = service<PersonaSettings>().state.userCreatedPersonas.map {
-                PersonaDetails(it.id, it.name!!, it.description!!)
+    private fun setupForm() {
+        service<PersonaSettings>().state.let {
+            val userPersonas = it.userCreatedPersonas.map { persona ->
+                PersonaDetails(persona.id, persona.name!!, persona.description!!)
             }
 
             initialItems = (ResourceUtil.getPrompts() + userPersonas).toMutableList()
-            addedItems.clear()
-        }
-    }
-
-    fun resetChanges() {
-        addedItems.clear()
-        tableModel.rowCount = 0
-        setupForm()
-    }
-
-    private fun compareWithInitialState(): Boolean {
-        if (tableModel.rowCount != initialItems.size) return true
-
-        for (i in 0 until tableModel.rowCount) {
-            val currentId = tableModel.getValueAt(i, 0) as Long
-            val currentName = tableModel.getValueAt(i, 1) as String
-            val currentInstructions = tableModel.getValueAt(i, 2) as String
-            val currentFromResource = tableModel.getValueAt(i, 3) as Boolean
-
-            val initialItem = initialItems.find { it.id == currentId } ?: return true
-            if (initialItem.name != currentName || initialItem.description != currentInstructions || currentFromResource != true) {
-                return true
+            initialItems.forEachIndexed { index, (id, act, prompt) ->
+                tableModel.addRow(arrayOf(id, act, prompt, true))
+                if (it.selectedPersona.id == id) {
+                    table.setRowSelectionInterval(index, index)
+                }
             }
         }
-
-        return false
     }
 
     private fun scrollToLastRow() {
