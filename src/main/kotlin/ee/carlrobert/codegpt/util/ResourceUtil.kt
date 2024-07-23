@@ -15,7 +15,7 @@ object ResourceUtil {
             prompts = prompts.filter(filterPredicate)
         }
         return prompts
-            .map { SuggestionItem.PersonaItem(Pair(it.persona, it.prompt)) }
+            .map { SuggestionItem.PersonaItem(it) }
             .take(10) + listOf(SuggestionItem.ActionItem(DefaultAction.CREATE_NEW_PERSONA))
     }
 

@@ -21,6 +21,8 @@ import com.intellij.util.ui.JBUI
 import com.intellij.vcsUtil.showAbove
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
 import ee.carlrobert.codegpt.settings.persona.PersonaDetails
+import ee.carlrobert.codegpt.settings.persona.PersonaDetailsState
+import ee.carlrobert.codegpt.settings.persona.PersonaSettings
 import ee.carlrobert.codegpt.settings.persona.PersonasConfigurable
 import java.awt.Dimension
 import java.awt.Point
@@ -52,7 +54,7 @@ sealed class SuggestionItem {
     data class FileItem(val file: File) : SuggestionItem()
     data class FolderItem(val folder: File) : SuggestionItem()
     data class ActionItem(val action: DefaultAction) : SuggestionItem()
-    data class PersonaItem(val personaDetails: Pair<String, String>) : SuggestionItem()
+    data class PersonaItem(val personaDetails: PersonaDetails) : SuggestionItem()
 }
 
 val DEFAULT_ACTIONS = mutableListOf(
@@ -187,9 +189,13 @@ class SuggestionsPopupManager(
         hidePopup()
     }
 
-    private fun handlePersonaSelection(personaDetails: Pair<String, String>) {
-        service<ConfigurationSettings>().state.systemPrompt = personaDetails.second
-        val reservedTextRange = textPane.appendHighlightedText(personaDetails.first, ':')
+    private fun handlePersonaSelection(personaDetails: PersonaDetails) {
+        service<PersonaSettings>().state.selectedPersona.apply {
+            id = personaDetails.id
+            persona = personaDetails.persona
+            prompt = personaDetails.prompt
+        }
+        val reservedTextRange = textPane.appendHighlightedText(personaDetails.persona, ':')
         println(reservedTextRange)
         hidePopup()
     }

@@ -8,6 +8,7 @@ import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.ui.dsl.gridLayout.UnscaledGaps
 import com.intellij.util.ui.JBUI
+import ee.carlrobert.codegpt.settings.persona.PersonaSettings
 import java.awt.Component
 import java.awt.Dimension
 import javax.swing.*
@@ -72,7 +73,9 @@ class SuggestionListCellRenderer : DefaultListCellRenderer() {
             },
             item.action.icon,
             item.action.displayName,
-            if (item.action == DefaultAction.PERSONAS) "CodeGPT default" else null
+            if (item.action == DefaultAction.PERSONAS)
+                service<PersonaSettings>().state.selectedPersona.persona
+            else null
         )
     }
 
@@ -80,8 +83,8 @@ class SuggestionListCellRenderer : DefaultListCellRenderer() {
         return createDefaultPanel(
             component,
             AllIcons.General.User,
-            item.personaDetails.first,
-            item.personaDetails.second,
+            item.personaDetails.persona,
+            item.personaDetails.prompt,
         )
     }
 

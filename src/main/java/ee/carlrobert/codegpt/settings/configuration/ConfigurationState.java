@@ -1,6 +1,5 @@
 package ee.carlrobert.codegpt.settings.configuration;
 
-import static ee.carlrobert.codegpt.completions.CompletionRequestProvider.COMPLETION_SYSTEM_PROMPT;
 import static ee.carlrobert.codegpt.completions.CompletionRequestProvider.GENERATE_COMMIT_MESSAGE_SYSTEM_PROMPT;
 
 import ee.carlrobert.codegpt.actions.editor.EditorActionsUtil;
@@ -9,7 +8,6 @@ import java.util.Objects;
 
 public class ConfigurationState {
 
-  private String systemPrompt = COMPLETION_SYSTEM_PROMPT;
   private String commitMessagePrompt = GENERATE_COMMIT_MESSAGE_SYSTEM_PROMPT;
   private int maxTokens = 2048;
   private double temperature = 0.1;
@@ -24,16 +22,8 @@ public class ConfigurationState {
   private boolean autocompletionContextAwareEnabled = false;
   private Map<String, String> tableData = EditorActionsUtil.DEFAULT_ACTIONS;
 
-  public String getSystemPrompt() {
-    return systemPrompt;
-  }
-
   public String getCommitMessagePrompt() {
     return commitMessagePrompt;
-  }
-
-  public void setSystemPrompt(String systemPrompt) {
-    this.systemPrompt = systemPrompt;
   }
 
   public void setCommitMessagePrompt(String commitMessagePrompt) {
@@ -155,14 +145,13 @@ public class ConfigurationState {
         && autoFormattingEnabled == that.autoFormattingEnabled
         && autocompletionPostProcessingEnabled == that.autocompletionPostProcessingEnabled
         && autocompletionContextAwareEnabled == that.autocompletionContextAwareEnabled
-        && Objects.equals(systemPrompt, that.systemPrompt)
         && Objects.equals(commitMessagePrompt, that.commitMessagePrompt)
         && Objects.equals(tableData, that.tableData);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(systemPrompt, commitMessagePrompt, maxTokens, temperature,
+    return Objects.hash(commitMessagePrompt, maxTokens, temperature,
         checkForPluginUpdates, checkForNewScreenshots, createNewChatOnEachAction,
         ignoreGitCommitTokenLimit, methodNameGenerationEnabled, captureCompileErrors,
         autoFormattingEnabled, autocompletionPostProcessingEnabled,
