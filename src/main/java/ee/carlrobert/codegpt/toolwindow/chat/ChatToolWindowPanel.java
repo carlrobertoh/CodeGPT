@@ -7,7 +7,10 @@ import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionToolbar;
+import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DefaultCompactActionGroup;
+import com.intellij.openapi.actionSystem.Presentation;
+import com.intellij.openapi.actionSystem.ex.ToolbarLabelAction;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
@@ -23,6 +26,7 @@ import ee.carlrobert.codegpt.actions.toolwindow.OpenInEditorAction;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
+import ee.carlrobert.codegpt.settings.persona.PersonaSettings;
 import ee.carlrobert.codegpt.settings.service.ProviderChangeNotifier;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.service.codegpt.CodeGPTUserDetailsNotifier;
@@ -35,6 +39,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.swing.BoxLayout;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import org.jetbrains.annotations.NotNull;
 
@@ -165,6 +170,8 @@ public class ChatToolWindowPanel extends SimpleToolWindowPanel {
         new ClearChatWindowAction(() -> tabbedPane.resetCurrentlyActiveTabPanel(project)));
     actionGroup.addSeparator();
     actionGroup.add(new OpenInEditorAction());
+    actionGroup.addSeparator();
+    actionGroup.add(new PersonaToolbarLabel());
 
     var toolbar = ActionManager.getInstance()
         .createActionToolbar("NAVIGATION_BAR_TOOLBAR", actionGroup, true);
@@ -185,5 +192,29 @@ public class ChatToolWindowPanel extends SimpleToolWindowPanel {
     project.getMessageBus()
         .syncPublisher(IncludeFilesInContextNotifier.FILES_INCLUDED_IN_CONTEXT_TOPIC)
         .filesIncluded(emptyList());
+  }
+}
+
+class PersonaToolbarLabel extends ToolbarLabelAction {
+
+  @Override
+  public @NotNull JComponent createCustomComponent(
+      @NotNull Presentation presentation,
+      @NotNull String place) {
+    var component = super.createCustomComponent(presentation, place);
+    component.setBorder(JBUI.Borders.empty(0, 2));
+    component.setEnabled(true);
+    return component;
+  }
+
+  @Override
+  public void update(@NotNull AnActionEvent e) {
+    super.update(e);
+
+    var presentation = e.getPresentation();
+    presentation.setText("Persona: " + ApplicationManager.getApplication().getService(
+        PersonaSettings.class).getState().getSelectedPersona().getPersona());
+    presentation.setVisible(true);
+    presentation.setEnabled(true);
   }
 }
