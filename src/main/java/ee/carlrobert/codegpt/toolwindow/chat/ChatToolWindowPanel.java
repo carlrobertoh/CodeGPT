@@ -193,28 +193,28 @@ public class ChatToolWindowPanel extends SimpleToolWindowPanel {
         .syncPublisher(IncludeFilesInContextNotifier.FILES_INCLUDED_IN_CONTEXT_TOPIC)
         .filesIncluded(emptyList());
   }
-}
 
-class PersonaToolbarLabel extends ToolbarLabelAction {
+  static class PersonaToolbarLabel extends ToolbarLabelAction {
 
-  @Override
-  public @NotNull JComponent createCustomComponent(
-      @NotNull Presentation presentation,
-      @NotNull String place) {
-    var component = super.createCustomComponent(presentation, place);
-    component.setBorder(JBUI.Borders.empty(0, 2));
-    component.setEnabled(true);
-    return component;
-  }
+    @Override
+    public @NotNull JComponent createCustomComponent(
+        @NotNull Presentation presentation,
+        @NotNull String place) {
+      var component = super.createCustomComponent(presentation, place);
+      component.setBorder(JBUI.Borders.empty(0, 2));
+      component.setEnabled(true);
+      return component;
+    }
 
-  @Override
-  public void update(@NotNull AnActionEvent e) {
-    super.update(e);
+    @Override
+    public void update(@NotNull AnActionEvent e) {
+      super.update(e);
 
-    var presentation = e.getPresentation();
-    presentation.setText("Persona: " + ApplicationManager.getApplication().getService(
-        PersonaSettings.class).getState().getSelectedPersona().getName());
-    presentation.setVisible(true);
-    presentation.setEnabled(true);
+      var presentation = e.getPresentation();
+      presentation.setText("Persona: " + ApplicationManager.getApplication().getService(
+          PersonaSettings.class).getState().getSelectedPersona().getName());
+      presentation.setVisible(true);
+      presentation.setEnabled(true);
+    }
   }
 }

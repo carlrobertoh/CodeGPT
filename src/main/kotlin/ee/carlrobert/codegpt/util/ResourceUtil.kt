@@ -12,16 +12,16 @@ object ResourceUtil {
     fun getPrompts(filterPredicate: ((PersonaDetails) -> Boolean)? = null): List<SuggestionItem> {
         var prompts = getPrompts()
         if (filterPredicate != null) {
-            prompts = prompts.filter(filterPredicate)
+            prompts = prompts.filter(filterPredicate).toMutableList()
         }
         return prompts
             .map { SuggestionItem.PersonaItem(it) }
             .take(10) + listOf(SuggestionItem.ActionItem(DefaultAction.CREATE_NEW_PERSONA))
     }
 
-    fun getPrompts(): List<PersonaDetails> {
+    fun getPrompts(): MutableList<PersonaDetails> {
         return ObjectMapper().readValue(
             getResourceContent("/prompts.json"),
-            object : TypeReference<List<PersonaDetails>>() {})
+            object : TypeReference<MutableList<PersonaDetails>>() {})
     }
 }
