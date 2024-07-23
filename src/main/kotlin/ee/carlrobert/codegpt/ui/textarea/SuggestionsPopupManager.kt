@@ -4,19 +4,10 @@ import com.intellij.icons.AllIcons
 import com.intellij.openapi.components.service
 import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.ui.DialogPanel
 import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.vfs.VirtualFileManager
-import com.intellij.ui.ToolbarDecorator
 import com.intellij.ui.components.JBScrollPane
-import com.intellij.ui.components.JBTextArea
-import com.intellij.ui.components.JBTextField
-import com.intellij.ui.dsl.builder.Align
-import com.intellij.ui.dsl.builder.Cell
-import com.intellij.ui.dsl.builder.LabelPosition
-import com.intellij.ui.dsl.builder.panel
-import com.intellij.ui.table.JBTable
 import com.intellij.util.ui.JBUI
 import com.intellij.vcsUtil.showAbove
 import ee.carlrobert.codegpt.settings.persona.PersonaDetails
@@ -32,7 +23,6 @@ import javax.swing.JComponent
 import javax.swing.ScrollPaneConstants
 import javax.swing.event.ListDataEvent
 import javax.swing.event.ListDataListener
-import javax.swing.table.DefaultTableModel
 
 enum class DefaultAction(
     val displayName: String,
@@ -132,6 +122,7 @@ class SuggestionsPopupManager(
         when (item) {
             is SuggestionItem.ActionItem -> {
                 if (item.action == DefaultAction.CREATE_NEW_PERSONA) {
+                    hidePopup()
                     service<ShowSettingsUtil>().showSettingsDialog(
                         project,
                         PersonasConfigurable::class.java
@@ -231,117 +222,4 @@ class SuggestionsPopupManager(
             }
             .setResizable(true)
             .createPopup()
-}
-
-class CreatePersonaPopup(private val existingPrompts: List<PersonaDetails>) {
-
-    private val tableModel = object : DefaultTableModel(arrayOf("Persona", "Instructions"), 0) {
-        override fun isCellEditable(row: Int, column: Int): Boolean = true
-    }.apply {
-        existingPrompts.forEach { addRow(arrayOf(it.name, it.description)) }
-    }
-
-    private lateinit var table: JBTable
-    private lateinit var editActField: Cell<JBTextField>
-    private lateinit var editPromptArea: Cell<JBScrollPane>
-
-    fun createPanel(): DialogPanel {
-        return panel {
-            row {
-                table = JBTable(tableModel).apply {
-                    setShowGrid(true)
-                    columnModel.getColumn(0).preferredWidth = 100
-                    columnModel.getColumn(1).preferredWidth = 400
-                    selectionModel.addListSelectionListener { updateEditArea() }
-                }
-
-                val toolbarDecorator = ToolbarDecorator.createDecorator(table)
-                    .setAddAction { addNewPrompt() }
-                    .setRemoveAction { removeSelectedPrompt() }
-                    .disableUpDownActions()
-
-                cell(toolbarDecorator.createPanel())
-                    .align(Align.FILL)
-                    .resizableColumn()
-                    .applyToComponent {
-                        preferredSize = Dimension(650, 300)
-                    }
-            }
-
-            row {
-                editActField = cell(JBTextField())
-                    .label("Persona:", LabelPosition.TOP)
-                    .align(Align.FILL)
-                    .resizableColumn()
-            }
-
-            row {
-                val promptTextArea = JBTextArea().apply {
-                    lineWrap = true
-                    wrapStyleWord = true
-                }
-                val promptScrollPane = JBScrollPane(promptTextArea).apply {
-                    preferredSize = Dimension(650, 300)
-                }
-
-                editPromptArea = cell(promptScrollPane)
-                    .label("Instructions:", LabelPosition.TOP)
-                    .align(Align.FILL)
-                    .resizableColumn()
-            }
-
-            row {
-                button("Save Changes") { saveChanges() }
-                button("Cancel") { cancel() }
-            }
-        }
-    }
-
-    private fun updateEditArea() {
-        val selectedRow = table.selectedRow
-        if (selectedRow != -1) {
-            val act = tableModel.getValueAt(selectedRow, 0) as String
-            val prompt = tableModel.getValueAt(selectedRow, 1) as String
-            editActField.component.text = act
-            (editPromptArea.component.viewport.view as JBTextArea).text = prompt
-        } else {
-            editActField.component.text = ""
-            (editPromptArea.component.viewport.view as JBTextArea).text = ""
-        }
-    }
-
-    private fun addNewPrompt() {
-        tableModel.addRow(arrayOf("New Act", "New Prompt"))
-        table.selectLastRow()
-        updateEditArea()
-    }
-
-    private fun removeSelectedPrompt() {
-        val selectedRow = table.selectedRow
-        if (selectedRow != -1) {
-            tableModel.removeRow(selectedRow)
-            updateEditArea()
-        }
-    }
-
-    private fun saveChanges() {
-        val selectedRow = table.selectedRow
-        if (selectedRow != -1) {
-            val editedAct = editActField.component.text
-            val editedPrompt = (editPromptArea.component.viewport.view as JBTextArea).text
-            tableModel.setValueAt(editedAct, selectedRow, 0)
-            tableModel.setValueAt(editedPrompt, selectedRow, 1)
-        }
-        // Implement additional save logic here
-    }
-
-    private fun cancel() {
-        // Implement cancel logic here
-    }
-}
-
-// Extension function to select the last row of a JBTable
-fun JBTable.selectLastRow() {
-    val lastRow = rowCount - 1
-    setRowSelectionInterval(lastRow, lastRow)
 }
