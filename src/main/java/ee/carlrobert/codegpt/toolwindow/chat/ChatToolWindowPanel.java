@@ -213,7 +213,7 @@ class PersonaToolbarLabel extends ToolbarLabelAction {
 
     var presentation = e.getPresentation();
     presentation.setText("Persona: " + ApplicationManager.getApplication().getService(
-        PersonaSettings.class).getState().getSelectedPersona().getPersona());
+        PersonaSettings.class).getState().getSelectedPersona().getName());
     presentation.setVisible(true);
     presentation.setEnabled(true);
   }

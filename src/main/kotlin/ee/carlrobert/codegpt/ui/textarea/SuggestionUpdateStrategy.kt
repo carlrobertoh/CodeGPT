@@ -129,7 +129,7 @@ class PersonaSuggestionActionStrategy : SuggestionUpdateStrategy {
         searchText: String,
     ) {
         listModel.clear()
-        listModel.addAll(ResourceUtil.getPrompts { it.persona.contains(searchText, true) })
+        listModel.addAll(ResourceUtil.getPrompts { it.name.contains(searchText, true) })
     }
 }
 

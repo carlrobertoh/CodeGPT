@@ -19,9 +19,7 @@ import com.intellij.ui.dsl.builder.panel
 import com.intellij.ui.table.JBTable
 import com.intellij.util.ui.JBUI
 import com.intellij.vcsUtil.showAbove
-import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
 import ee.carlrobert.codegpt.settings.persona.PersonaDetails
-import ee.carlrobert.codegpt.settings.persona.PersonaDetailsState
 import ee.carlrobert.codegpt.settings.persona.PersonaSettings
 import ee.carlrobert.codegpt.settings.persona.PersonasConfigurable
 import java.awt.Dimension
@@ -192,10 +190,10 @@ class SuggestionsPopupManager(
     private fun handlePersonaSelection(personaDetails: PersonaDetails) {
         service<PersonaSettings>().state.selectedPersona.apply {
             id = personaDetails.id
-            persona = personaDetails.persona
-            prompt = personaDetails.prompt
+            name = personaDetails.name
+            description = personaDetails.description
         }
-        val reservedTextRange = textPane.appendHighlightedText(personaDetails.persona, ':')
+        val reservedTextRange = textPane.appendHighlightedText(personaDetails.name, ':')
         println(reservedTextRange)
         hidePopup()
     }
@@ -240,7 +238,7 @@ class CreatePersonaPopup(private val existingPrompts: List<PersonaDetails>) {
     private val tableModel = object : DefaultTableModel(arrayOf("Persona", "Instructions"), 0) {
         override fun isCellEditable(row: Int, column: Int): Boolean = true
     }.apply {
-        existingPrompts.forEach { addRow(arrayOf(it.persona, it.prompt)) }
+        existingPrompts.forEach { addRow(arrayOf(it.name, it.description)) }
     }
 
     private lateinit var table: JBTable

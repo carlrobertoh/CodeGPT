@@ -74,7 +74,7 @@ class SuggestionListCellRenderer : DefaultListCellRenderer() {
             item.action.icon,
             item.action.displayName,
             if (item.action == DefaultAction.PERSONAS)
-                service<PersonaSettings>().state.selectedPersona.persona
+                service<PersonaSettings>().state.selectedPersona.name
             else null
         )
     }
@@ -83,8 +83,8 @@ class SuggestionListCellRenderer : DefaultListCellRenderer() {
         return createDefaultPanel(
             component,
             AllIcons.General.User,
-            item.personaDetails.persona,
-            item.personaDetails.prompt,
+            item.personaDetails.name,
+            item.personaDetails.description,
         )
     }
 

@@ -1,13 +1,10 @@
 package ee.carlrobert.codegpt.completions
 
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import ee.carlrobert.codegpt.conversations.ConversationService
 import ee.carlrobert.codegpt.conversations.message.Message
-import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
 import ee.carlrobert.codegpt.settings.persona.DEFAULT_PROMPT
 import ee.carlrobert.codegpt.settings.persona.PersonaSettings
-import ee.carlrobert.codegpt.telemetry.core.service.Application
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.groups.Tuple
@@ -17,7 +14,7 @@ class CompletionRequestProviderTest : IntegrationTest() {
 
   fun testChatCompletionRequestWithSystemPromptOverride() {
     useOpenAIService()
-    service<PersonaSettings>().state.selectedPersona.prompt = "TEST_SYSTEM_PROMPT"
+    service<PersonaSettings>().state.selectedPersona.description = "TEST_SYSTEM_PROMPT"
     val conversation = ConversationService.getInstance().startConversation()
     val firstMessage = createDummyMessage(500)
     val secondMessage = createDummyMessage(250)
@@ -46,7 +43,7 @@ class CompletionRequestProviderTest : IntegrationTest() {
 
   fun testChatCompletionRequestWithoutSystemPromptOverride() {
     useOpenAIService()
-    service<PersonaSettings>().state.selectedPersona.prompt = DEFAULT_PROMPT
+    service<PersonaSettings>().state.selectedPersona.description = DEFAULT_PROMPT
     val conversation = ConversationService.getInstance().startConversation()
     val firstMessage = createDummyMessage(500)
     val secondMessage = createDummyMessage(250)
@@ -75,7 +72,7 @@ class CompletionRequestProviderTest : IntegrationTest() {
 
   fun testChatCompletionRequestRetry() {
     useOpenAIService()
-    service<PersonaSettings>().state.selectedPersona.prompt = "TEST_SYSTEM_PROMPT"
+    service<PersonaSettings>().state.selectedPersona.description = "TEST_SYSTEM_PROMPT"
     val conversation = ConversationService.getInstance().startConversation()
     val firstMessage = createDummyMessage("FIRST_TEST_PROMPT", 500)
     val secondMessage = createDummyMessage("SECOND_TEST_PROMPT", 250)
@@ -101,7 +98,7 @@ class CompletionRequestProviderTest : IntegrationTest() {
   }
 
   fun testReducedChatCompletionRequest() {
-    service<PersonaSettings>().state.selectedPersona.prompt = DEFAULT_PROMPT
+    service<PersonaSettings>().state.selectedPersona.description = DEFAULT_PROMPT
     val conversation = ConversationService.getInstance().startConversation()
     conversation.addMessage(createDummyMessage(50))
     conversation.addMessage(createDummyMessage(100))

@@ -18,7 +18,7 @@ class DefaultCompletionRequestHandlerTest : IntegrationTest() {
 
   fun testOpenAIChatCompletionCall() {
     useOpenAIService()
-    service<PersonaSettings>().state.selectedPersona.prompt = "TEST_SYSTEM_PROMPT"
+    service<PersonaSettings>().state.selectedPersona.description = "TEST_SYSTEM_PROMPT"
     val message = Message("TEST_PROMPT")
     val conversation = ConversationService.getInstance().startConversation()
     val requestHandler = CompletionRequestHandler(getRequestEventListener(message))
@@ -49,7 +49,7 @@ class DefaultCompletionRequestHandlerTest : IntegrationTest() {
 
   fun testAzureChatCompletionCall() {
     useAzureService()
-    service<PersonaSettings>().state.selectedPersona.prompt = "TEST_SYSTEM_PROMPT"
+    service<PersonaSettings>().state.selectedPersona.description = "TEST_SYSTEM_PROMPT"
     val conversationService = ConversationService.getInstance()
     val prevMessage = Message("TEST_PREV_PROMPT")
     prevMessage.response = "TEST_PREV_RESPONSE"
@@ -87,7 +87,7 @@ class DefaultCompletionRequestHandlerTest : IntegrationTest() {
   fun testLlamaChatCompletionCall() {
     useLlamaService()
     ConfigurationSettings.getCurrentState().maxTokens = 99
-    service<PersonaSettings>().state.selectedPersona.prompt = "TEST_SYSTEM_PROMPT"
+    service<PersonaSettings>().state.selectedPersona.description = "TEST_SYSTEM_PROMPT"
     val message = Message("TEST_PROMPT")
     val conversation = ConversationService.getInstance().startConversation()
     conversation.addMessage(Message("Ping", "Pong"))
@@ -122,7 +122,7 @@ class DefaultCompletionRequestHandlerTest : IntegrationTest() {
   fun testOllamaChatCompletionCall() {
     useOllamaService()
     ConfigurationSettings.getCurrentState().maxTokens = 99
-    service<PersonaSettings>().state.selectedPersona.prompt = "TEST_SYSTEM_PROMPT"
+    service<PersonaSettings>().state.selectedPersona.description = "TEST_SYSTEM_PROMPT"
     val message = Message("TEST_PROMPT")
     val conversation = ConversationService.getInstance().startConversation()
     val requestHandler = CompletionRequestHandler(getRequestEventListener(message))
@@ -158,7 +158,7 @@ class DefaultCompletionRequestHandlerTest : IntegrationTest() {
 
   fun testGoogleChatCompletionCall() {
     useGoogleService()
-    service<PersonaSettings>().state.selectedPersona.prompt = "TEST_SYSTEM_PROMPT"
+    service<PersonaSettings>().state.selectedPersona.description = "TEST_SYSTEM_PROMPT"
     val message = Message("TEST_PROMPT")
     val conversation = ConversationService.getInstance().startConversation()
     val requestHandler = CompletionRequestHandler(getRequestEventListener(message))
@@ -194,7 +194,7 @@ class DefaultCompletionRequestHandlerTest : IntegrationTest() {
 
   fun testCodeGPTServiceChatCompletionCall() {
     useCodeGPTService()
-    service<PersonaSettings>().state.selectedPersona.prompt = "TEST_SYSTEM_PROMPT"
+    service<PersonaSettings>().state.selectedPersona.description = "TEST_SYSTEM_PROMPT"
     val message = Message("TEST_PROMPT")
     val conversation = ConversationService.getInstance().startConversation()
     val requestHandler = CompletionRequestHandler(getRequestEventListener(message))

@@ -61,7 +61,7 @@ class PersonasSettingsForm {
 
         val userPersonas: List<PersonaDetails> =
             service<PersonaSettings>().state.userCreatedPersonas.map {
-                PersonaDetails(it.id, it.persona!!, it.prompt!!)
+                PersonaDetails(it.id, it.name!!, it.description!!)
             }
 
         (ResourceUtil.getPrompts() + userPersonas).forEachIndexed { index, (id, act, prompt) ->
@@ -137,8 +137,8 @@ class PersonasSettingsForm {
         tableModel.addRow(
             arrayOf(
                 personaDetails.id,
-                personaDetails.persona,
-                personaDetails.prompt,
+                personaDetails.name,
+                personaDetails.description,
                 false
             )
         )
@@ -160,8 +160,8 @@ class PersonasSettingsForm {
         tableModel.addRow(
             arrayOf(
                 personaDetails.id,
-                personaDetails.persona,
-                personaDetails.prompt,
+                personaDetails.name,
+                personaDetails.description,
                 false
             )
         )
@@ -198,8 +198,8 @@ class PersonasSettingsForm {
 
         return service<PersonaSettings>().state.selectedPersona.let {
             it.id != tableModel.getValueAt(table.selectedRow, 0)
-                    || it.persona != personaField.text
-                    || it.prompt != promptTextArea.text
+                    || it.name != personaField.text
+                    || it.description != promptTextArea.text
         }
     }
 
@@ -210,16 +210,16 @@ class PersonasSettingsForm {
 
         val personaDetails = PersonaDetailsState().apply {
             id = tableModel.getValueAt(table.selectedRow, 0) as Long
-            persona = personaField.text
-            prompt = promptTextArea.text
+            name = personaField.text
+            description = promptTextArea.text
         }
 
         service<PersonaSettings>().state.apply {
             selectedPersona
             selectedPersona.apply {
                 id = personaDetails.id
-                persona = personaDetails.persona
-                prompt = personaDetails.prompt
+                name = personaDetails.name
+                description = personaDetails.description
             }
             userCreatedPersonas.add(personaDetails)
         }

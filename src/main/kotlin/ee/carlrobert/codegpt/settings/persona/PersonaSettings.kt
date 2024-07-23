@@ -15,7 +15,7 @@ class PersonaSettings :
     companion object {
         @JvmStatic
         fun getSystemPrompt(): String {
-            return service<PersonaSettings>().state.selectedPersona.prompt ?: ""
+            return service<PersonaSettings>().state.selectedPersona.description ?: ""
         }
     }
 }
@@ -27,9 +27,9 @@ class PersonaSettingsState : BaseState() {
 
 class PersonaDetailsState : BaseState() {
     var id by property(1L)
-    var persona by string("CodeGPT Default")
-    var prompt by string(DEFAULT_PROMPT)
+    var name by string("CodeGPT Default")
+    var description by string(DEFAULT_PROMPT)
 }
 
 @JvmRecord
-data class PersonaDetails(val id: Long, val persona: String, val prompt: String)
+data class PersonaDetails(val id: Long, val name: String, val description: String)
