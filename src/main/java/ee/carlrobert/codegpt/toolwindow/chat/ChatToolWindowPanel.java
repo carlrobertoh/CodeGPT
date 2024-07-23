@@ -10,8 +10,10 @@ import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DefaultCompactActionGroup;
 import com.intellij.openapi.actionSystem.Presentation;
-import com.intellij.openapi.actionSystem.ex.ToolbarLabelAction;
+import com.intellij.openapi.actionSystem.ex.CustomComponentAction;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.options.ShowSettingsUtil;
+import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.util.Disposer;
@@ -27,6 +29,7 @@ import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.persona.PersonaSettings;
+import ee.carlrobert.codegpt.settings.persona.PersonasConfigurable;
 import ee.carlrobert.codegpt.settings.service.ProviderChangeNotifier;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.service.codegpt.CodeGPTUserDetailsNotifier;
@@ -171,7 +174,7 @@ public class ChatToolWindowPanel extends SimpleToolWindowPanel {
     actionGroup.addSeparator();
     actionGroup.add(new OpenInEditorAction());
     actionGroup.addSeparator();
-    actionGroup.add(new PersonaToolbarLabel());
+    actionGroup.add(new SelectedPersonaActionLink(project));
 
     var toolbar = ActionManager.getInstance()
         .createActionToolbar("NAVIGATION_BAR_TOOLBAR", actionGroup, true);
@@ -194,27 +197,46 @@ public class ChatToolWindowPanel extends SimpleToolWindowPanel {
         .filesIncluded(emptyList());
   }
 
-  static class PersonaToolbarLabel extends ToolbarLabelAction {
+  private static class SelectedPersonaActionLink extends DumbAwareAction implements
+      CustomComponentAction {
 
-    @Override
-    public @NotNull JComponent createCustomComponent(
-        @NotNull Presentation presentation,
-        @NotNull String place) {
-      var component = super.createCustomComponent(presentation, place);
-      component.setBorder(JBUI.Borders.empty(0, 2));
-      component.setEnabled(true);
-      return component;
+    private final Project project;
+
+    SelectedPersonaActionLink(Project project) {
+      this.project = project;
     }
 
     @Override
-    public void update(@NotNull AnActionEvent e) {
-      super.update(e);
+    @NotNull
+    public JComponent createCustomComponent(
+        @NotNull Presentation presentation,
+        @NotNull String place) {
+      var link = new ActionLink(getSelectedPersonaName(), (e) -> {
+        ShowSettingsUtil.getInstance()
+            .showSettingsDialog(project, PersonasConfigurable.class);
+      });
+      link.setExternalLinkIcon();
+      link.setFont(JBUI.Fonts.smallFont());
+      link.setBorder(JBUI.Borders.empty(0, 4));
+      return link;
+    }
 
-      var presentation = e.getPresentation();
-      presentation.setText("Persona: " + ApplicationManager.getApplication().getService(
-          PersonaSettings.class).getState().getSelectedPersona().getName());
-      presentation.setVisible(true);
-      presentation.setEnabled(true);
+    @Override
+    public void updateCustomComponent(
+        @NotNull JComponent component,
+        @NotNull Presentation presentation) {
+      ((ActionLink) component).setText(getSelectedPersonaName());
+    }
+
+    @Override
+    public void actionPerformed(@NotNull AnActionEvent e) {
+    }
+
+    private String getSelectedPersonaName() {
+      return ApplicationManager.getApplication().getService(PersonaSettings.class)
+          .getState()
+          .getSelectedPersona()
+          .getName();
     }
   }
 }
