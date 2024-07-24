@@ -12,7 +12,7 @@ object CodeGPTAvailableModels {
         val anonymousModels = listOf(
             CodeGPTModel("GPT-4o", "gpt-4o", Icons.OpenAI, INDIVIDUAL),
             CodeGPTModel("Claude 3.5 Sonnet", "claude-3.5-sonnet", Icons.Anthropic, INDIVIDUAL),
-            CodeGPTModel("Code Llama (70B)", "codellama:chat", Icons.Meta, FREE),
+            CodeGPTModel("Llama 3.1 (405B)", "llama-3.1-405b", Icons.Meta, INDIVIDUAL),
             CodeGPTModel("DBRX", "dbrx", Icons.Databricks, INDIVIDUAL),
             CodeGPTModel("GPT-4o mini - FREE", "gpt-4o-mini", Icons.OpenAI, ANONYMOUS),
             CodeGPTModel("Llama 3 (8B) - FREE", "llama-3-8b", Icons.Meta, ANONYMOUS)
@@ -42,8 +42,9 @@ object CodeGPTAvailableModels {
         CodeGPTModel("GPT-4o mini", "gpt-4o-mini", Icons.OpenAI, ANONYMOUS),
         CodeGPTModel("Claude 3 Opus", "claude-3-opus", Icons.Anthropic, INDIVIDUAL),
         CodeGPTModel("Claude 3.5 Sonnet", "claude-3.5-sonnet", Icons.Anthropic, INDIVIDUAL),
-        CodeGPTModel("DBRX", "dbrx", Icons.Databricks, INDIVIDUAL),
+        CodeGPTModel("Llama 3.1 (405B)", "llama-3.1-405b", Icons.Meta, INDIVIDUAL),
         CodeGPTModel("Llama 3 (70B)", "llama-3-70b", Icons.Meta, FREE),
+        CodeGPTModel("DBRX", "dbrx", Icons.Databricks, INDIVIDUAL),
     )
 
     @JvmStatic
