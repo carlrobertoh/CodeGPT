@@ -50,7 +50,18 @@ class PersonasSettingsForm {
         }
     }
     private var initialItems = mutableListOf<PersonaDetails>()
-    private val addedItems = mutableListOf<PersonaDetails>()
+    val addedItems = mutableListOf<PersonaDetails>()
+    val removedItemIds = mutableListOf<Long>()
+    var name: String
+        get() = nameField.text
+        set(value) {
+            nameField.text = value
+        }
+    var instructions: String?
+        get() = instructionsTextArea.text
+        set(value) {
+            instructionsTextArea.text = value
+        }
 
     init {
         setupForm()
@@ -97,48 +108,13 @@ class PersonasSettingsForm {
         }
     }
 
-    fun isModified(): Boolean {
-        if (table.selectedRow == -1) {
-            return false
-        }
-
-        return service<PersonaSettings>().state.selectedPersona.let {
-            it.id != tableModel.getValueAt(table.selectedRow, 0)
-                    || it.name != nameField.text
-                    || it.description != instructionsTextArea.text
-        }
-    }
-
-    fun applyChanges() {
-        if (table.selectedRow == -1) {
-            return
-        }
-
-        val personaDetails = PersonaDetailsState().apply {
-            id = tableModel.getValueAt(table.selectedRow, 0) as Long
-            name = nameField.text
-            description = instructionsTextArea.text
-        }
-
-        service<PersonaSettings>().state.apply {
-            selectedPersona
-            selectedPersona.apply {
-                id = personaDetails.id
-                name = personaDetails.name
-                description = personaDetails.description
-            }
-            userCreatedPersonas.add(personaDetails)
-            val userPersonas = service<PersonaSettings>().state.userCreatedPersonas.map {
-                PersonaDetails(it.id, it.name!!, it.description!!)
-            }
-
-            initialItems = (ResourceUtil.getPrompts() + userPersonas).toMutableList()
-            addedItems.clear()
-        }
+    fun clear() {
+        addedItems.clear()
+        removedItemIds.clear()
     }
 
     fun resetChanges() {
-        addedItems.clear()
+        clear()
         tableModel.rowCount = 0
         setupForm()
     }
@@ -147,6 +123,7 @@ class PersonasSettingsForm {
         val selectedRow = table.selectedRow
         if (selectedRow != -1) {
             val userCreatedResource = !(tableModel.getValueAt(selectedRow, 3) as Boolean)
+
             nameField.text = tableModel.getValueAt(selectedRow, 1) as String
             nameField.isEnabled = userCreatedResource
             instructionsTextArea.text = tableModel.getValueAt(selectedRow, 2) as String
@@ -196,7 +173,11 @@ class PersonasSettingsForm {
     private fun handleRemoveItem() {
         val selectedRow = table.selectedRow
         if (selectedRow != -1 && !(tableModel.getValueAt(selectedRow, 3) as Boolean)) {
-            addedItems.filter { it.id != tableModel.getValueAt(selectedRow, 0) as Long }
+            val id = tableModel.getValueAt(selectedRow, 0) as Long
+            if (addedItems.none { it.id == id }) {
+                removedItemIds.add(id)
+            }
+            addedItems.filter { it.id != id }
             tableModel.removeRow(selectedRow)
             populateEditArea()
 
@@ -208,7 +189,7 @@ class PersonasSettingsForm {
     }
 
     private fun setupForm() {
-        service<PersonaSettings>().state.apply {
+        service<PersonaSettings>().state.run {
             val userPersonas = userCreatedPersonas.mapIndexed { index, persona ->
                 val personaDetails =
                     PersonaDetails(persona.id, persona.name!!, persona.description!!)
@@ -261,6 +242,18 @@ class PersonasSettingsForm {
         }
     }
 
+    private fun JBTable.getSelectedPersona(): PersonaDetails? {
+        if (selectedRow == -1) {
+            return null
+        }
+
+        return PersonaDetails(
+            tableModel.getValueAt(selectedRow, 0) as Long,
+            tableModel.getValueAt(selectedRow, 1) as String,
+            tableModel.getValueAt(selectedRow, 2) as String
+        )
+    }
+
     private fun JTextComponent.addTextChangeListener(listener: (String) -> Unit) {
         document.addDocumentListener(object : DocumentAdapter() {
             override fun textChanged(e: DocumentEvent) {
@@ -273,5 +266,9 @@ class PersonasSettingsForm {
         if (table.selectedRow != -1) {
             tableModel.setValueAt(newValue, table.selectedRow, column)
         }
+    }
+
+    fun getSelectedPersona(): PersonaDetails? {
+        return table.getSelectedPersona()
     }
 }
