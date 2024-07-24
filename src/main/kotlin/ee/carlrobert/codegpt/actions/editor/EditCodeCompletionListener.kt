@@ -10,6 +10,7 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.markup.*
 import com.intellij.openapi.util.TextRange
+import com.intellij.openapi.util.text.StringUtil
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.codeStyle.CodeStyleManager
 import com.intellij.ui.JBColor
@@ -90,7 +91,7 @@ class EditCodeCompletionListener(
                         message.length,
                         remainingOriginalLength
                     ),
-                    message
+                    StringUtil.convertLineSeparators(message)
                 )
             } else {
                 document.insertString(startOffset + replacedLength, message)

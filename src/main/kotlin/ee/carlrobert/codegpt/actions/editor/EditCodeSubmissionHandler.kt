@@ -7,6 +7,7 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.util.TextRange
 import com.intellij.util.ui.AsyncProcessIcon
+import com.intellij.openapi.util.text.StringUtil
 import com.jetbrains.rd.util.AtomicReference
 import ee.carlrobert.codegpt.completions.CompletionClientProvider
 import ee.carlrobert.codegpt.completions.CompletionRequestProvider
@@ -71,7 +72,11 @@ class EditCodeSubmissionHandler(
 
     private fun revertAllChanges(prevSource: String) {
         runWriteCommandAction(editor.project) {
-            editor.document.replaceString(0, editor.document.textLength, prevSource)
+            editor.document.replaceString(
+                0,
+                editor.document.textLength,
+                StringUtil.convertLineSeparators(prevSource)
+            )
         }
     }
 }
