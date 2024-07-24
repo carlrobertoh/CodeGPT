@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Llama 3.1 405B** model for CodeGPT Individual plan users
+
 ## [2.8.4-233] - 2024-07-19
 
 ### Added
