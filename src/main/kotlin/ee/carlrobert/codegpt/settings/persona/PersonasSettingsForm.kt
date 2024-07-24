@@ -208,18 +208,32 @@ class PersonasSettingsForm {
     }
 
     private fun setupForm() {
-        service<PersonaSettings>().state.let {
-            val userPersonas = it.userCreatedPersonas.map { persona ->
-                PersonaDetails(persona.id, persona.name!!, persona.description!!)
+        service<PersonaSettings>().state.apply {
+            val userPersonas = userCreatedPersonas.mapIndexed { index, persona ->
+                val personaDetails =
+                    PersonaDetails(persona.id, persona.name!!, persona.description!!)
+                tableModel.addPersonaRow(personaDetails, selectedPersona.id, index)
+                personaDetails
+            }
+            val defaultPrompts = ResourceUtil.getPrompts().mapIndexed { index, persona ->
+                tableModel.addPersonaRow(persona, selectedPersona.id, index, true)
+                persona
             }
 
-            initialItems = (ResourceUtil.getPrompts() + userPersonas).toMutableList()
-            initialItems.forEachIndexed { index, (id, act, prompt) ->
-                tableModel.addRow(arrayOf(id, act, prompt, true))
-                if (it.selectedPersona.id == id) {
-                    table.setRowSelectionInterval(index, index)
-                }
-            }
+            initialItems = (userPersonas + defaultPrompts).toMutableList()
+        }
+    }
+
+    private fun DefaultTableModel.addPersonaRow(
+        persona: PersonaDetails,
+        selectedPersonaId: Long,
+        rowIndex: Int,
+        fromResource: Boolean = false
+    ) {
+        val (id, name, description) = persona
+        addRow(arrayOf(id, name, description, fromResource))
+        if (selectedPersonaId == id) {
+            table.setRowSelectionInterval(rowIndex, rowIndex)
         }
     }
 
