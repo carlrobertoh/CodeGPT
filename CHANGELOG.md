@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Llama 3.1 405B** model for CodeGPT Individual plan users
+
+### Fixed
+
+- Wrong line separators exception during code completion [(#637)](https://github.com/carlrobertoh/CodeGPT/issues/637)
+
 ## [2.8.4-223] - 2024-07-19
 
 ### Added
