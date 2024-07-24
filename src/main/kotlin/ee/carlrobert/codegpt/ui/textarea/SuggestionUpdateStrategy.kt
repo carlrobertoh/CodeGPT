@@ -66,9 +66,11 @@ class FolderSuggestionActionStrategy : SuggestionUpdateStrategy {
         listModel: DefaultListModel<SuggestionItem>
     ) {
         CoroutineScope(Dispatchers.Default).launch {
-            val folderPaths = getProjectFolders(project).take(10)
+            val folderPaths = getProjectFolders(project)
+                .take(10)
+                .map { SuggestionItem.FolderItem(Path.of(it).toFile()) }
             listModel.clear()
-            listModel.addAll(folderPaths.map { SuggestionItem.FolderItem(Path.of(it).toFile()) })
+            listModel.addAll(folderPaths)
         }
     }
 
@@ -79,11 +81,9 @@ class FolderSuggestionActionStrategy : SuggestionUpdateStrategy {
     ) {
         CoroutineScope(Dispatchers.Default).launch {
             val filteredFolders = getProjectFolders(project)
-                .asSequence()
                 .filter { it.contains(searchText, ignoreCase = true) }
                 .take(10)
                 .map { SuggestionItem.FolderItem(Path.of(it).toFile()) }
-                .toList()
             listModel.clear()
             listModel.addAll(filteredFolders)
         }

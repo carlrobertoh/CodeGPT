@@ -6,7 +6,10 @@ import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupFactory
+import com.intellij.openapi.vfs.VfsUtilCore
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
+import com.intellij.openapi.vfs.VirtualFileVisitor
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.JBUI
 import com.intellij.vcsUtil.showAbove
@@ -70,7 +73,12 @@ class SuggestionsPopupManager(
         })
     }
     private val list = SuggestionList(listModel, textPane) {
-        handleSelection(it)
+        when (it) {
+            is SuggestionItem.ActionItem -> handleActionSelection(it)
+            is SuggestionItem.FileItem -> handleFileSelection(it.file.path)
+            is SuggestionItem.FolderItem -> handleFolderSelection(it.folder.path)
+            is SuggestionItem.PersonaItem -> handlePersonaSelection(it.personaDetails)
+        }
     }
     private val scrollPane: JBScrollPane = JBScrollPane(list).apply {
         border = JBUI.Borders.empty()
@@ -118,45 +126,37 @@ class SuggestionsPopupManager(
         popup?.content?.repaint()
     }
 
-    private fun handleSelection(item: SuggestionItem) {
-        when (item) {
-            is SuggestionItem.ActionItem -> {
-                if (item.action == DefaultAction.CREATE_NEW_PERSONA) {
-                    hidePopup()
-                    service<ShowSettingsUtil>().showSettingsDialog(
-                        project,
-                        PersonasConfigurable::class.java
-                    )
-                    return
-                }
+    private fun handleActionSelection(item: SuggestionItem.ActionItem) {
+        if (item.action == DefaultAction.CREATE_NEW_PERSONA) {
+            hidePopup()
+            service<ShowSettingsUtil>().showSettingsDialog(
+                project,
+                PersonasConfigurable::class.java
+            )
+            return
+        }
 
-                appliedActions.add(item)
-                currentActionStrategy = when (item.action) {
-                    DefaultAction.FILES -> {
-                        FileSuggestionActionStrategy()
-                    }
-
-                    DefaultAction.FOLDERS -> {
-                        FolderSuggestionActionStrategy()
-                    }
-
-                    DefaultAction.PERSONAS -> {
-                        PersonaSuggestionActionStrategy()
-                    }
-
-                    else -> {
-                        DefaultSuggestionActionStrategy()
-                    }
-                }
-                currentActionStrategy.populateSuggestions(project, listModel)
-                textPane.appendHighlightedText(item.action.code, withWhitespace = false)
-                textPane.requestFocus()
+        appliedActions.add(item)
+        currentActionStrategy = when (item.action) {
+            DefaultAction.FILES -> {
+                FileSuggestionActionStrategy()
             }
 
-            is SuggestionItem.FileItem -> handleFileSelection(item.file.path)
-            is SuggestionItem.FolderItem -> handleFolderSelection(item.folder.path)
-            is SuggestionItem.PersonaItem -> handlePersonaSelection(item.personaDetails)
+            DefaultAction.FOLDERS -> {
+                FolderSuggestionActionStrategy()
+            }
+
+            DefaultAction.PERSONAS -> {
+                PersonaSuggestionActionStrategy()
+            }
+
+            else -> {
+                DefaultSuggestionActionStrategy()
+            }
         }
+        currentActionStrategy.populateSuggestions(project, listModel)
+        textPane.appendHighlightedText(item.action.code, withWhitespace = false)
+        textPane.requestFocus()
     }
 
     private fun handleFileSelection(filePath: String) {
@@ -169,9 +169,21 @@ class SuggestionsPopupManager(
     }
 
     private fun handleFolderSelection(folderPath: String) {
-        // TODO
-        val reservedTextRange = textPane.appendHighlightedText(folderPath, ':')
-        println(reservedTextRange)
+        textPane.appendHighlightedText(folderPath, ':')
+
+        val folder = service<VirtualFileManager>().findFileByNioPath(Paths.get(folderPath))
+        if (folder != null) {
+            VfsUtilCore.visitChildrenRecursively(folder, object : VirtualFileVisitor<Any>() {
+                override fun visitFile(file: VirtualFile): Boolean {
+                    if (!file.isDirectory) {
+                        // TODO
+                        println("Found file: ${file.path}")
+                    }
+                    return true
+                }
+            })
+        }
+
         hidePopup()
     }
 
