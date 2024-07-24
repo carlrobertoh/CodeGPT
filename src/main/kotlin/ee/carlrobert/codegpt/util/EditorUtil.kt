@@ -63,7 +63,11 @@ object EditorUtil {
         val updateDocumentRunnable = Runnable {
             application.runWriteAction {
                 WriteCommandAction.runWriteCommandAction(editor.project) {
-                    document.replaceString(0, document.textLength, content)
+                    document.replaceString(
+                        0,
+                        document.textLength,
+                        StringUtil.convertLineSeparators(content)
+                    )
                     editor.component.repaint()
                     editor.component.revalidate()
                 }
