@@ -172,8 +172,7 @@ class SuggestionsPopupManager(
             VfsUtilCore.visitChildrenRecursively(folder, object : VirtualFileVisitor<Any>() {
                 override fun visitFile(file: VirtualFile): Boolean {
                     if (!file.isDirectory) {
-                        // TODO
-                        println("Found file: ${file.path}")
+                        project.service<FileSearchService>().addFileToSession(file)
                     }
                     return true
                 }
@@ -189,8 +188,7 @@ class SuggestionsPopupManager(
             name = personaDetails.name
             instructions = personaDetails.instructions
         }
-        val reservedTextRange = textPane.appendHighlightedText(personaDetails.name, ':')
-        println(reservedTextRange)
+        textPane.appendHighlightedText(personaDetails.name, ':')
         hidePopup()
     }
 
