@@ -1,7 +1,6 @@
 package ee.carlrobert.codegpt.settings.configuration;
 
 import static ee.carlrobert.codegpt.actions.editor.EditorActionsUtil.DEFAULT_ACTIONS_ARRAY;
-import static ee.carlrobert.codegpt.completions.CompletionRequestProvider.COMPLETION_SYSTEM_PROMPT;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.icons.AllIcons.Nodes;
@@ -49,7 +48,6 @@ public class ConfigurationComponent {
   private final JBCheckBox autoFormattingCheckBox;
   private final JBCheckBox autocompletionPostProcessingCheckBox;
   private final JBCheckBox autocompletionContextAwareCheckBox;
-  private final JTextArea systemPromptTextArea;
   private final JTextArea commitMessagePromptTextArea;
   private final IntegerField maxTokensField;
   private final JBTextField temperatureField;
@@ -93,17 +91,6 @@ public class ConfigurationComponent {
     maxTokensField = new IntegerField();
     maxTokensField.setColumns(12);
     maxTokensField.setValue(configuration.getMaxTokens());
-
-    systemPromptTextArea = new JTextArea(3, 60);
-    if (configuration.getSystemPrompt().isBlank()) {
-      // for backward compatibility
-      systemPromptTextArea.setText(COMPLETION_SYSTEM_PROMPT);
-    } else {
-      systemPromptTextArea.setText(configuration.getSystemPrompt());
-    }
-    systemPromptTextArea.setLineWrap(true);
-    systemPromptTextArea.setWrapStyleWord(true);
-    systemPromptTextArea.setBorder(JBUI.Borders.empty(8, 4));
 
     commitMessagePromptTextArea = new JTextArea(configuration.getCommitMessagePrompt(), 3, 60);
     commitMessagePromptTextArea.setLineWrap(true);
@@ -164,7 +151,6 @@ public class ConfigurationComponent {
     state.setTableData(getTableData());
     state.setMaxTokens(maxTokensField.getValue());
     state.setTemperature(Double.parseDouble(temperatureField.getText()));
-    state.setSystemPrompt(systemPromptTextArea.getText());
     state.setCommitMessagePrompt(commitMessagePromptTextArea.getText());
     state.setCheckForPluginUpdates(checkForPluginUpdatesCheckBox.isSelected());
     state.setCheckForNewScreenshots(checkForNewScreenshotsCheckBox.isSelected());
@@ -181,7 +167,6 @@ public class ConfigurationComponent {
     setTableData(configuration.getTableData());
     maxTokensField.setValue(configuration.getMaxTokens());
     temperatureField.setText(String.valueOf(configuration.getTemperature()));
-    systemPromptTextArea.setText(configuration.getSystemPrompt());
     commitMessagePromptTextArea.setText(configuration.getCommitMessagePrompt());
     checkForPluginUpdatesCheckBox.setSelected(configuration.isCheckForPluginUpdates());
     checkForNewScreenshotsCheckBox.setSelected(configuration.isCheckForNewScreenshots());
@@ -242,15 +227,6 @@ public class ConfigurationComponent {
 
   private JPanel createAssistantConfigurationForm() {
     var formBuilder = FormBuilder.createFormBuilder();
-    addAssistantFormLabeledComponent(
-        formBuilder,
-        "configurationConfigurable.section.assistant.systemPromptField.label",
-        "configurationConfigurable.section.assistant.systemPromptField.comment",
-        JBUI.Panels
-            .simplePanel(systemPromptTextArea)
-            .withBorder(JBUI.Borders.customLine(
-                JBUI.CurrentTheme.CustomFrameDecorations.separatorForeground())));
-    formBuilder.addVerticalGap(8);
     addAssistantFormLabeledComponent(
         formBuilder,
         "configurationConfigurable.section.assistant.temperatureField.label",

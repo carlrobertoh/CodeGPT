@@ -7,8 +7,13 @@ import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionToolbar;
+import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DefaultCompactActionGroup;
+import com.intellij.openapi.actionSystem.Presentation;
+import com.intellij.openapi.actionSystem.ex.CustomComponentAction;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.options.ShowSettingsUtil;
+import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.util.Disposer;
@@ -23,6 +28,8 @@ import ee.carlrobert.codegpt.actions.toolwindow.OpenInEditorAction;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
+import ee.carlrobert.codegpt.settings.persona.PersonaSettings;
+import ee.carlrobert.codegpt.settings.persona.PersonasConfigurable;
 import ee.carlrobert.codegpt.settings.service.ProviderChangeNotifier;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.service.codegpt.CodeGPTUserDetailsNotifier;
@@ -35,6 +42,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.swing.BoxLayout;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import org.jetbrains.annotations.NotNull;
 
@@ -165,6 +173,8 @@ public class ChatToolWindowPanel extends SimpleToolWindowPanel {
         new ClearChatWindowAction(() -> tabbedPane.resetCurrentlyActiveTabPanel(project)));
     actionGroup.addSeparator();
     actionGroup.add(new OpenInEditorAction());
+    actionGroup.addSeparator();
+    actionGroup.add(new SelectedPersonaActionLink(project));
 
     var toolbar = ActionManager.getInstance()
         .createActionToolbar("NAVIGATION_BAR_TOOLBAR", actionGroup, true);
@@ -185,5 +195,48 @@ public class ChatToolWindowPanel extends SimpleToolWindowPanel {
     project.getMessageBus()
         .syncPublisher(IncludeFilesInContextNotifier.FILES_INCLUDED_IN_CONTEXT_TOPIC)
         .filesIncluded(emptyList());
+  }
+
+  private static class SelectedPersonaActionLink extends DumbAwareAction implements
+      CustomComponentAction {
+
+    private final Project project;
+
+    SelectedPersonaActionLink(Project project) {
+      this.project = project;
+    }
+
+    @Override
+    @NotNull
+    public JComponent createCustomComponent(
+        @NotNull Presentation presentation,
+        @NotNull String place) {
+      var link = new ActionLink(getSelectedPersonaName(), (e) -> {
+        ShowSettingsUtil.getInstance()
+            .showSettingsDialog(project, PersonasConfigurable.class);
+      });
+      link.setExternalLinkIcon();
+      link.setFont(JBUI.Fonts.smallFont());
+      link.setBorder(JBUI.Borders.empty(0, 4));
+      return link;
+    }
+
+    @Override
+    public void updateCustomComponent(
+        @NotNull JComponent component,
+        @NotNull Presentation presentation) {
+      ((ActionLink) component).setText(getSelectedPersonaName());
+    }
+
+    @Override
+    public void actionPerformed(@NotNull AnActionEvent e) {
+    }
+
+    private String getSelectedPersonaName() {
+      return ApplicationManager.getApplication().getService(PersonaSettings.class)
+          .getState()
+          .getSelectedPersona()
+          .getName();
+    }
   }
 }
