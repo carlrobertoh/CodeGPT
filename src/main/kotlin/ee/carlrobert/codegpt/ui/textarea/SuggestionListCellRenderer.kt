@@ -57,7 +57,7 @@ class SuggestionListCellRenderer(
             item.file.isDirectory -> AllIcons.Nodes.Folder
             else -> service<FileTypeManager>().getFileTypeByFileName(item.file.name).icon
         }
-        return createDefaultPanel(component, icon, item.file.name, item.file.path)
+        return createDefaultPanel(component, icon, item.file.name, item.file.path, true)
     }
 
     private fun renderFolderItem(component: JLabel, item: SuggestionItem.FolderItem): JPanel {
@@ -65,7 +65,8 @@ class SuggestionListCellRenderer(
             component,
             AllIcons.Nodes.Folder,
             item.folder.name,
-            item.folder.path
+            item.folder.path,
+            true
         )
     }
 
@@ -125,7 +126,8 @@ class SuggestionListCellRenderer(
         label: JLabel,
         labelIcon: Icon,
         title: String,
-        description: String? = null
+        description: String? = null,
+        truncateFromStart: Boolean = false
     ): JPanel {
         val searchText = getSearchText(textPane.text)
         label.apply {
@@ -142,7 +144,7 @@ class SuggestionListCellRenderer(
             row {
                 cell(label)
                 if (description != null) {
-                    text(description.truncate(480 - label.width - 28, false))
+                    text(description.truncate(480 - label.width - 32, truncateFromStart))
                         .customize(UnscaledGaps(left = 8))
                         .align(AlignX.RIGHT)
                         .applyToComponent {
@@ -170,19 +172,19 @@ class SuggestionListCellRenderer(
         }
     }
 
-    private fun String.truncate(maxWidth: Int, fromEnd: Boolean = true): String {
+    private fun String.truncate(maxWidth: Int, truncateFromStart: Boolean = false): String {
         val fontMetrics = getFontMetrics(JBUI.Fonts.smallFont())
         if (fontMetrics.stringWidth(this) <= maxWidth) return this
 
         val ellipsis = "..."
         var truncated = this
         while (fontMetrics.stringWidth(ellipsis + truncated) > maxWidth && truncated.isNotEmpty()) {
-            truncated = if (fromEnd) {
+            truncated = if (truncateFromStart) {
                 truncated.drop(1)
             } else {
                 truncated.dropLast(1)
             }
         }
-        return ellipsis + truncated
+        return if (truncateFromStart) ellipsis + truncated else truncated + ellipsis
     }
 }
