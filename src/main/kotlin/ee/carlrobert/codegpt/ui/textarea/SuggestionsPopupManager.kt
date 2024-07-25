@@ -118,10 +118,6 @@ class SuggestionsPopupManager(
             listModel.clear()
         }
         listModel.addAll(DEFAULT_ACTIONS)
-        list.revalidate()
-        list.repaint()
-        scrollPane.revalidate()
-        scrollPane.repaint()
         popup?.content?.revalidate()
         popup?.content?.repaint()
     }
@@ -191,7 +187,7 @@ class SuggestionsPopupManager(
         service<PersonaSettings>().state.selectedPersona.apply {
             id = personaDetails.id
             name = personaDetails.name
-            description = personaDetails.description
+            instructions = personaDetails.instructions
         }
         val reservedTextRange = textPane.appendHighlightedText(personaDetails.name, ':')
         println(reservedTextRange)
@@ -199,7 +195,7 @@ class SuggestionsPopupManager(
     }
 
     private fun adjustPopupSize() {
-        val maxVisibleRows = 15 // or any other number you prefer
+        val maxVisibleRows = 15
         val newRowCount = minOf(listModel.size(), maxVisibleRows)
         list.setVisibleRowCount(newRowCount)
         list.revalidate()
@@ -219,7 +215,6 @@ class SuggestionsPopupManager(
         service<JBPopupFactory>()
             .createComponentPopupBuilder(scrollPane, preferableFocusComponent)
             .setMovable(true)
-            .setShowShadow(true)
             .setCancelOnClickOutside(false)
             .setCancelOnWindowDeactivation(false)
             .setRequestFocus(true)

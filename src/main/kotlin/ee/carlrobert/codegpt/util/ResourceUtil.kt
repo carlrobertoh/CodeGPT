@@ -9,17 +9,19 @@ import ee.carlrobert.codegpt.util.file.FileUtil.getResourceContent
 
 object ResourceUtil {
 
-    fun getPrompts(filterPredicate: ((PersonaDetails) -> Boolean)? = null): List<SuggestionItem> {
-        var prompts = getPrompts()
+    fun getFilteredPersonaSuggestions(
+        filterPredicate: ((PersonaDetails) -> Boolean)? = null
+    ): List<SuggestionItem> {
+        var personaDetails = getFilteredPersonaSuggestions()
         if (filterPredicate != null) {
-            prompts = prompts.filter(filterPredicate).toMutableList()
+            personaDetails = personaDetails.filter(filterPredicate).toMutableList()
         }
-        return prompts
+        return personaDetails
             .map { SuggestionItem.PersonaItem(it) }
             .take(10) + listOf(SuggestionItem.ActionItem(DefaultAction.CREATE_NEW_PERSONA))
     }
 
-    fun getPrompts(): MutableList<PersonaDetails> {
+    fun getFilteredPersonaSuggestions(): MutableList<PersonaDetails> {
         return ObjectMapper().readValue(
             getResourceContent("/prompts.json"),
             object : TypeReference<MutableList<PersonaDetails>>() {})

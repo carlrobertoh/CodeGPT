@@ -9,6 +9,7 @@ import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.ui.dsl.gridLayout.UnscaledGaps
 import com.intellij.util.ui.JBUI
+import com.intellij.util.ui.JBUI.CurrentTheme.GotItTooltip
 import ee.carlrobert.codegpt.settings.persona.PersonaSettings
 import java.awt.Component
 import java.awt.Dimension
@@ -69,6 +70,10 @@ class SuggestionListCellRenderer(
     }
 
     private fun renderActionItem(component: JLabel, item: SuggestionItem.ActionItem): JPanel {
+        val description = if (item.action == DefaultAction.PERSONAS)
+            service<PersonaSettings>().state.selectedPersona.name
+        else null
+
         return createDefaultPanel(
             component.apply {
                 disabledIcon = item.action.icon
@@ -76,9 +81,7 @@ class SuggestionListCellRenderer(
             },
             item.action.icon,
             item.action.displayName,
-            if (item.action == DefaultAction.PERSONAS)
-                service<PersonaSettings>().state.selectedPersona.name
-            else null
+            description
         )
     }
 
@@ -87,7 +90,7 @@ class SuggestionListCellRenderer(
             component,
             AllIcons.General.User,
             item.personaDetails.name,
-            item.personaDetails.description,
+            item.personaDetails.instructions,
         )
     }
 
@@ -112,8 +115,8 @@ class SuggestionListCellRenderer(
         )
         val suffix = title.substring((searchIndex + searchText.length).coerceAtMost(title.length))
 
-        val foregroundHex = ColorUtil.toHex(JBUI.CurrentTheme.GotItTooltip.codeForeground(true))
-        val backgroundHex = ColorUtil.toHex(JBUI.CurrentTheme.GotItTooltip.codeBackground(true))
+        val foregroundHex = ColorUtil.toHex(GotItTooltip.codeForeground(true))
+        val backgroundHex = ColorUtil.toHex(GotItTooltip.codeBackground(true))
 
         return "<html>$prefix<span style=\"color: $foregroundHex;background-color: $backgroundHex;\">$highlight</span>$suffix</html>"
     }
@@ -135,10 +138,10 @@ class SuggestionListCellRenderer(
             }
         }
 
-        if (description != null) {
-            return panel {
-                row {
-                    cell(label)
+        return panel {
+            row {
+                cell(label)
+                if (description != null) {
                     text(description.truncate(480 - label.width - 28, false))
                         .customize(UnscaledGaps(left = 8))
                         .align(AlignX.RIGHT)
@@ -147,12 +150,6 @@ class SuggestionListCellRenderer(
                             foreground = JBColor.gray
                         }
                 }
-            }
-        }
-
-        return panel {
-            row {
-                cell(label)
             }
         }
     }
@@ -178,18 +175,14 @@ class SuggestionListCellRenderer(
         if (fontMetrics.stringWidth(this) <= maxWidth) return this
 
         val ellipsis = "..."
-        return if (fromEnd) {
-            var truncated = this
-            while (fontMetrics.stringWidth(ellipsis + truncated) > maxWidth && truncated.isNotEmpty()) {
-                truncated = truncated.drop(1)
+        var truncated = this
+        while (fontMetrics.stringWidth(ellipsis + truncated) > maxWidth && truncated.isNotEmpty()) {
+            truncated = if (fromEnd) {
+                truncated.drop(1)
+            } else {
+                truncated.dropLast(1)
             }
-            ellipsis + truncated
-        } else {
-            var truncated = this
-            while (fontMetrics.stringWidth(truncated + ellipsis) > maxWidth && truncated.isNotEmpty()) {
-                truncated = truncated.dropLast(1)
-            }
-            truncated + ellipsis
         }
+        return ellipsis + truncated
     }
 }

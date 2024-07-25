@@ -32,7 +32,7 @@ class ChatToolWindowTabPanelTest : IntegrationTest() {
 
   fun testSendingOpenAIMessage() {
     useOpenAIService()
-    service<PersonaSettings>().state.selectedPersona.description = "TEST_SYSTEM_PROMPT"
+    service<PersonaSettings>().state.selectedPersona.instructions = "TEST_SYSTEM_PROMPT"
     val message = Message("Hello!")
     val conversation = ConversationService.getInstance().startConversation()
     val panel = ChatToolWindowTabPanel(project, conversation)
@@ -94,7 +94,7 @@ class ChatToolWindowTabPanelTest : IntegrationTest() {
         ReferencedFile("TEST_FILE_NAME_2", "TEST_FILE_PATH_2", "TEST_FILE_CONTENT_2"),
         ReferencedFile("TEST_FILE_NAME_3", "TEST_FILE_PATH_3", "TEST_FILE_CONTENT_3")))
     useOpenAIService()
-    service<PersonaSettings>().state.selectedPersona.description = "TEST_SYSTEM_PROMPT"
+    service<PersonaSettings>().state.selectedPersona.instructions = "TEST_SYSTEM_PROMPT"
     val message = Message("TEST_MESSAGE")
     message.userMessage = "TEST_MESSAGE"
     message.referencedFilePaths = listOf("TEST_FILE_PATH_1", "TEST_FILE_PATH_2", "TEST_FILE_PATH_3")
@@ -181,7 +181,7 @@ class ChatToolWindowTabPanelTest : IntegrationTest() {
     val testImagePath = Objects.requireNonNull(javaClass.getResource("/images/test-image.png")).path
     project.putUserData(CodeGPTKeys.IMAGE_ATTACHMENT_FILE_PATH, testImagePath)
     useOpenAIService("gpt-4-vision-preview")
-    service<PersonaSettings>().state.selectedPersona.description = "TEST_SYSTEM_PROMPT"
+    service<PersonaSettings>().state.selectedPersona.instructions = "TEST_SYSTEM_PROMPT"
     val message = Message("TEST_MESSAGE")
     val conversation = ConversationService.getInstance().startConversation()
     val panel = ChatToolWindowTabPanel(project, conversation)
@@ -257,7 +257,7 @@ class ChatToolWindowTabPanelTest : IntegrationTest() {
         ReferencedFile("TEST_FILE_NAME_2", "TEST_FILE_PATH_2", "TEST_FILE_CONTENT_2"),
         ReferencedFile("TEST_FILE_NAME_3", "TEST_FILE_PATH_3", "TEST_FILE_CONTENT_3")))
     useOpenAIService()
-    service<PersonaSettings>().state.selectedPersona.description = "TEST_SYSTEM_PROMPT"
+    service<PersonaSettings>().state.selectedPersona.instructions = "TEST_SYSTEM_PROMPT"
     val message = Message("TEST_MESSAGE")
     message.userMessage = "TEST_MESSAGE"
     message.referencedFilePaths = listOf("TEST_FILE_PATH_1", "TEST_FILE_PATH_2", "TEST_FILE_PATH_3")
@@ -343,7 +343,7 @@ class ChatToolWindowTabPanelTest : IntegrationTest() {
   fun testSendingLlamaMessage() {
     useLlamaService()
     val configurationState = ConfigurationSettings.getCurrentState()
-    service<PersonaSettings>().state.selectedPersona.description = "TEST_SYSTEM_PROMPT"
+    service<PersonaSettings>().state.selectedPersona.instructions = "TEST_SYSTEM_PROMPT"
     configurationState.maxTokens = 1000
     configurationState.temperature = 0.1
     val llamaSettings = LlamaSettings.getCurrentState()

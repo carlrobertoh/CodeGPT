@@ -120,7 +120,7 @@ class PersonaSuggestionActionStrategy : SuggestionUpdateStrategy {
         listModel: DefaultListModel<SuggestionItem>,
     ) {
         listModel.clear()
-        listModel.addAll(ResourceUtil.getPrompts(null))
+        listModel.addAll(ResourceUtil.getFilteredPersonaSuggestions(null))
     }
 
     override fun updateSuggestions(
@@ -129,7 +129,7 @@ class PersonaSuggestionActionStrategy : SuggestionUpdateStrategy {
         searchText: String,
     ) {
         listModel.clear()
-        listModel.addAll(ResourceUtil.getPrompts { it.name.contains(searchText, true) })
+        listModel.addAll(ResourceUtil.getFilteredPersonaSuggestions { it.name.contains(searchText, true) })
     }
 }
 

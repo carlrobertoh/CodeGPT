@@ -9,8 +9,6 @@ import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.editor.EditorKind
-import com.intellij.openapi.editor.event.EditorMouseEvent
-import com.intellij.openapi.editor.event.EditorMouseListener
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.TextEditor
@@ -44,16 +42,7 @@ object EditorUtil {
             lightVirtualFile,
             true,
             EditorKind.MAIN_EDITOR
-        ).apply {
-            addEditorMouseListener(object : EditorMouseListener {
-                override fun mouseClicked(event: EditorMouseEvent) {
-                    component.revalidate()
-                    component.repaint()
-                    contentComponent.revalidate()
-                    contentComponent.repaint()
-                }
-            })
-        }
+        )
     }
 
     @JvmStatic

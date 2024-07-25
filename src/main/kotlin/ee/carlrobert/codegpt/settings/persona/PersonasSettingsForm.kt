@@ -49,19 +49,8 @@ class PersonasSettingsForm {
             updateTableModelIfRowSelected(2, newText)
         }
     }
-    private var initialItems = mutableListOf<PersonaDetails>()
-    val addedItems = mutableListOf<PersonaDetails>()
-    val removedItemIds = mutableListOf<Long>()
-    var name: String
-        get() = nameField.text
-        set(value) {
-            nameField.text = value
-        }
-    var instructions: String?
-        get() = instructionsTextArea.text
-        set(value) {
-            instructionsTextArea.text = value
-        }
+    private val addedItems = mutableListOf<PersonaDetails>()
+    private val removedItemIds = mutableListOf<Long>()
 
     init {
         setupForm()
@@ -108,9 +97,28 @@ class PersonasSettingsForm {
         }
     }
 
-    fun clear() {
-        addedItems.clear()
-        removedItemIds.clear()
+    fun applyChanges() {
+        val persona = getSelectedPersona()
+        service<PersonaSettings>().state.run {
+            if (persona != null) {
+                selectedPersona = persona.toPersonaDetailsState()
+            }
+
+            userCreatedPersonas.removeIf { removedItemIds.contains(it.id) }
+            userCreatedPersonas.addAll(addedItems.map { it.toPersonaDetailsState() })
+        }
+        clear()
+    }
+
+    fun isModified(): Boolean {
+        service<PersonaSettings>().state.let {
+            val (id, name, description) = getSelectedPersona() ?: return false
+            return it.selectedPersona.id != id
+                    || it.selectedPersona.name != name
+                    || it.selectedPersona.instructions != description
+                    || removedItemIds.size > 0
+                    || addedItems.size > 0
+        }
     }
 
     fun resetChanges() {
@@ -152,7 +160,7 @@ class PersonasSettingsForm {
 
     private fun addPersonaToTable(persona: PersonaDetails) {
         addedItems.add(persona)
-        tableModel.addRow(arrayOf(persona.id, persona.name, persona.description, false))
+        tableModel.addRow(arrayOf(persona.id, persona.name, persona.instructions, false))
         selectLastRowAndUpdateUI()
     }
 
@@ -190,18 +198,20 @@ class PersonasSettingsForm {
 
     private fun setupForm() {
         service<PersonaSettings>().state.run {
-            val userPersonas = userCreatedPersonas.mapIndexed { index, persona ->
-                val personaDetails =
-                    PersonaDetails(persona.id, persona.name!!, persona.description!!)
-                tableModel.addPersonaRow(personaDetails, selectedPersona.id, index)
-                personaDetails
+            userCreatedPersonas.forEachIndexed { index, persona ->
+                tableModel.addPersonaRow(
+                    PersonaDetails(
+                        persona.id,
+                        persona.name!!,
+                        persona.instructions!!
+                    ),
+                    selectedPersona.id,
+                    index
+                )
             }
-            val defaultPrompts = ResourceUtil.getPrompts().mapIndexed { index, persona ->
+            ResourceUtil.getFilteredPersonaSuggestions().forEachIndexed { index, persona ->
                 tableModel.addPersonaRow(persona, selectedPersona.id, index, true)
-                persona
             }
-
-            initialItems = (userPersonas + defaultPrompts).toMutableList()
         }
     }
 
@@ -211,16 +221,15 @@ class PersonasSettingsForm {
         rowIndex: Int,
         fromResource: Boolean = false
     ) {
-        val (id, name, description) = persona
-        addRow(arrayOf(id, name, description, fromResource))
+        val (id, name, instructions) = persona
+        addRow(arrayOf(id, name, instructions, fromResource))
         if (selectedPersonaId == id) {
             table.setRowSelectionInterval(rowIndex, rowIndex)
         }
     }
 
     private fun scrollToLastRow() {
-        val lastRow = table.rowCount - 1
-        table.scrollRectToVisible(table.getCellRect(lastRow, 0, true))
+        table.scrollRectToVisible(table.getCellRect(table.rowCount - 1, 0, true))
     }
 
     private fun JBTable.setupTableColumns() {
@@ -268,7 +277,12 @@ class PersonasSettingsForm {
         }
     }
 
-    fun getSelectedPersona(): PersonaDetails? {
+    private fun getSelectedPersona(): PersonaDetails? {
         return table.getSelectedPersona()
+    }
+
+    private fun clear() {
+        addedItems.clear()
+        removedItemIds.clear()
     }
 }
