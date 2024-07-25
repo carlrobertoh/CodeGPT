@@ -21,6 +21,7 @@ import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.credentials.CredentialsStore;
 import ee.carlrobert.codegpt.settings.IncludedFilesSettings;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
+import ee.carlrobert.codegpt.settings.persona.PersonaSettings;
 import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettings;
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceChatCompletionSettingsState;
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings;
@@ -70,9 +71,6 @@ import okhttp3.RequestBody;
 import org.jetbrains.annotations.Nullable;
 
 public class CompletionRequestProvider {
-
-  public static final String COMPLETION_SYSTEM_PROMPT =
-      getResourceContent("/prompts/default-completion.txt");
 
   public static final String GENERATE_COMMIT_MESSAGE_SYSTEM_PROMPT =
       getResourceContent("/prompts/generate-commit-message.txt");
@@ -197,7 +195,7 @@ public class CompletionRequestProvider {
     }
 
     var systemPrompt = conversationType == FIX_COMPILE_ERRORS
-        ? FIX_COMPILE_ERRORS_SYSTEM_PROMPT : ConfigurationSettings.getSystemPrompt();
+        ? FIX_COMPILE_ERRORS_SYSTEM_PROMPT : PersonaSettings.getSystemPrompt();
 
     var prompt = promptTemplate.buildPrompt(
         systemPrompt,
@@ -302,7 +300,7 @@ public class CompletionRequestProvider {
     request.setModel(settings.getModel());
     request.setMaxTokens(configuration.getMaxTokens());
     request.setStream(true);
-    request.setSystem(ConfigurationSettings.getSystemPrompt());
+    request.setSystem(PersonaSettings.getSystemPrompt());
     List<ClaudeCompletionMessage> messages = conversation.getMessages().stream()
         .filter(prevMessage -> prevMessage.getResponse() != null
             && !prevMessage.getResponse().isEmpty())
@@ -345,8 +343,8 @@ public class CompletionRequestProvider {
     var message = callParameters.getMessage();
     var messages = new ArrayList<OllamaChatCompletionMessage>();
     if (callParameters.getConversationType() == ConversationType.DEFAULT) {
-      String systemPrompt = ConfigurationSettings.getCurrentState().getSystemPrompt();
-      messages.add(new OllamaChatCompletionMessage("system", systemPrompt, null));
+      messages.add(
+          new OllamaChatCompletionMessage("system", PersonaSettings.getSystemPrompt(), null));
     }
     if (callParameters.getConversationType() == ConversationType.FIX_COMPILE_ERRORS) {
       messages.add(
@@ -397,8 +395,8 @@ public class CompletionRequestProvider {
     var message = callParameters.getMessage();
     var messages = new ArrayList<OpenAIChatCompletionMessage>();
     if (callParameters.getConversationType() == ConversationType.DEFAULT) {
-      String systemPrompt = ConfigurationSettings.getCurrentState().getSystemPrompt();
-      messages.add(new OpenAIChatCompletionStandardMessage("system", systemPrompt));
+      messages.add(
+          new OpenAIChatCompletionStandardMessage("system", PersonaSettings.getSystemPrompt()));
     }
     if (callParameters.getConversationType() == ConversationType.FIX_COMPILE_ERRORS) {
       messages.add(
@@ -474,8 +472,7 @@ public class CompletionRequestProvider {
     // Gemini API does not support direct 'system' prompts:
     // see https://www.reddit.com/r/Bard/comments/1b90i8o/does_gemini_have_a_system_prompt_option_while/
     if (callParameters.getConversationType() == ConversationType.DEFAULT) {
-      String systemPrompt = ConfigurationSettings.getCurrentState().getSystemPrompt();
-      messages.add(new GoogleCompletionContent("user", List.of(systemPrompt)));
+      messages.add(new GoogleCompletionContent("user", List.of(PersonaSettings.getSystemPrompt())));
       messages.add(new GoogleCompletionContent("model", List.of("Understood.")));
     }
     if (callParameters.getConversationType() == ConversationType.FIX_COMPILE_ERRORS) {

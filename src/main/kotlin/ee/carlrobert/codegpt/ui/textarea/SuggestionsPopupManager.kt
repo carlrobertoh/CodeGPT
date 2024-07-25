@@ -1,62 +1,96 @@
 package ee.carlrobert.codegpt.ui.textarea
 
 import com.intellij.icons.AllIcons
-import com.intellij.openapi.application.readAction
 import com.intellij.openapi.components.service
-import com.intellij.openapi.fileEditor.FileEditorManager
+import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupFactory
+import com.intellij.openapi.vfs.VfsUtilCore
+import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.openapi.vfs.VirtualFileManager
+import com.intellij.openapi.vfs.VirtualFileVisitor
+import com.intellij.ui.components.JBScrollPane
+import com.intellij.util.ui.JBUI
 import ee.carlrobert.codegpt.util.showAbove
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import ee.carlrobert.codegpt.settings.persona.PersonaDetails
+import ee.carlrobert.codegpt.settings.persona.PersonaSettings
+import ee.carlrobert.codegpt.settings.persona.PersonasConfigurable
+import java.awt.Dimension
+import java.awt.Point
 import java.io.File
+import java.nio.file.Paths
 import javax.swing.DefaultListModel
 import javax.swing.Icon
 import javax.swing.JComponent
+import javax.swing.ScrollPaneConstants
+import javax.swing.event.ListDataEvent
+import javax.swing.event.ListDataListener
 
-enum class DefaultAction(val displayName: String, val icon: Icon) {
-    ATTACH_IMAGE("Attach image", AllIcons.General.Add),
-    SEARCH_WEB("Search web", AllIcons.General.Web),
+enum class DefaultAction(
+    val displayName: String,
+    val code: String,
+    val icon: Icon,
+    val enabled: Boolean = true
+) {
+    FILES("Files →", "file:", AllIcons.FileTypes.Any_type),
+    FOLDERS("Folders →", "folder:", AllIcons.Nodes.Folder),
+    PERSONAS("Personas →", "persona:", AllIcons.General.User),
+    DOCS("Docs (coming soon) →", "docs:", AllIcons.Toolwindows.Documentation, false),
+    SEARCH_WEB("Web (coming soon)", "", AllIcons.General.Web, false),
+    CREATE_NEW_PERSONA("Create new persona", "", AllIcons.General.Add),
 }
 
 sealed class SuggestionItem {
     data class FileItem(val file: File) : SuggestionItem()
+    data class FolderItem(val folder: File) : SuggestionItem()
     data class ActionItem(val action: DefaultAction) : SuggestionItem()
+    data class PersonaItem(val personaDetails: PersonaDetails) : SuggestionItem()
 }
+
+val DEFAULT_ACTIONS = mutableListOf(
+    SuggestionItem.ActionItem(DefaultAction.FILES),
+    SuggestionItem.ActionItem(DefaultAction.FOLDERS),
+    SuggestionItem.ActionItem(DefaultAction.PERSONAS),
+    SuggestionItem.ActionItem(DefaultAction.DOCS),
+    SuggestionItem.ActionItem(DefaultAction.SEARCH_WEB),
+)
 
 class SuggestionsPopupManager(
     private val project: Project,
-    private val onSelected: (filePath: String) -> Unit
+    private val textPane: CustomTextPane,
 ) {
 
+    private var currentActionStrategy: SuggestionUpdateStrategy = DefaultSuggestionActionStrategy()
+    private val appliedActions: MutableList<SuggestionItem.ActionItem> = mutableListOf()
     private var popup: JBPopup? = null
-    private val listModel = DefaultListModel<SuggestionItem>()
-    private val list = SuggestionList(listModel) {
-        if (it is SuggestionItem.FileItem) {
-            onSelected(it.file.path)
-        } else if (it is SuggestionItem.ActionItem) {
-            when (it.action) {
-                DefaultAction.ATTACH_IMAGE -> {} // todo
-                DefaultAction.SEARCH_WEB -> {} // todo
-            }
+    private var originalLocation: Point? = null
+    private val listModel = DefaultListModel<SuggestionItem>().apply {
+        addListDataListener(object : ListDataListener {
+            override fun intervalAdded(e: ListDataEvent) = adjustPopupSize()
+            override fun intervalRemoved(e: ListDataEvent) {}
+            override fun contentsChanged(e: ListDataEvent) {}
+        })
+    }
+    private val list = SuggestionList(listModel, textPane) {
+        when (it) {
+            is SuggestionItem.ActionItem -> handleActionSelection(it)
+            is SuggestionItem.FileItem -> handleFileSelection(it.file.path)
+            is SuggestionItem.FolderItem -> handleFolderSelection(it.folder.path)
+            is SuggestionItem.PersonaItem -> handlePersonaSelection(it.personaDetails)
         }
+    }
+    private val scrollPane: JBScrollPane = JBScrollPane(list).apply {
+        border = JBUI.Borders.empty()
+        verticalScrollBarPolicy = ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED
+        horizontalScrollBarPolicy = ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER
     }
 
     fun showPopup(component: JComponent) {
         popup = createPopup(component)
         popup?.showAbove(component)
-
-        val projectFileIndex = project.service<ProjectFileIndex>()
-        CoroutineScope(Dispatchers.Default).launch {
-            val openFilePaths = project.service<FileEditorManager>().openFiles
-                .filter { readAction { projectFileIndex.isInContent(it) } }
-                .take(6)
-                .map { it.path }
-            updateSuggestions(openFilePaths)
-        }
+        originalLocation = component.locationOnScreen
+        reset(true)
     }
 
     fun hidePopup() {
@@ -67,11 +101,6 @@ class SuggestionsPopupManager(
         return popup?.isVisible ?: false
     }
 
-    fun updateSuggestions(filePaths: List<String>) {
-        listModel.clear()
-        listModel.addAll(filePaths.map { SuggestionItem.FileItem(File(it)) })
-    }
-
     fun requestFocus() {
         list.requestFocus()
     }
@@ -80,16 +109,119 @@ class SuggestionsPopupManager(
         list.selectNext()
     }
 
-    private fun createPopup(preferableFocusComponent: JComponent? = null): JBPopup =
+    fun updateSuggestions(searchText: String) {
+        currentActionStrategy.updateSuggestions(project, listModel, searchText)
+    }
+
+    fun reset(clearPrevious: Boolean = true) {
+        if (clearPrevious) {
+            listModel.clear()
+        }
+        listModel.addAll(DEFAULT_ACTIONS)
+        popup?.content?.revalidate()
+        popup?.content?.repaint()
+    }
+
+    private fun handleActionSelection(item: SuggestionItem.ActionItem) {
+        if (item.action == DefaultAction.CREATE_NEW_PERSONA) {
+            hidePopup()
+            service<ShowSettingsUtil>().showSettingsDialog(
+                project,
+                PersonasConfigurable::class.java
+            )
+            return
+        }
+
+        appliedActions.add(item)
+        currentActionStrategy = when (item.action) {
+            DefaultAction.FILES -> {
+                FileSuggestionActionStrategy()
+            }
+
+            DefaultAction.FOLDERS -> {
+                FolderSuggestionActionStrategy()
+            }
+
+            DefaultAction.PERSONAS -> {
+                PersonaSuggestionActionStrategy()
+            }
+
+            else -> {
+                DefaultSuggestionActionStrategy()
+            }
+        }
+        currentActionStrategy.populateSuggestions(project, listModel)
+        textPane.appendHighlightedText(item.action.code, withWhitespace = false)
+        textPane.requestFocus()
+    }
+
+    private fun handleFileSelection(filePath: String) {
+        val selectedFile = service<VirtualFileManager>().findFileByNioPath(Paths.get(filePath))
+        selectedFile?.let { file ->
+            textPane.appendHighlightedText(file.name, ':')
+            project.service<FileSearchService>().addFileToSession(file)
+        }
+        hidePopup()
+    }
+
+    private fun handleFolderSelection(folderPath: String) {
+        textPane.appendHighlightedText(folderPath, ':')
+
+        val folder = service<VirtualFileManager>().findFileByNioPath(Paths.get(folderPath))
+        if (folder != null) {
+            VfsUtilCore.visitChildrenRecursively(folder, object : VirtualFileVisitor<Any>() {
+                override fun visitFile(file: VirtualFile): Boolean {
+                    if (!file.isDirectory) {
+                        project.service<FileSearchService>().addFileToSession(file)
+                    }
+                    return true
+                }
+            })
+        }
+
+        hidePopup()
+    }
+
+    private fun handlePersonaSelection(personaDetails: PersonaDetails) {
+        service<PersonaSettings>().state.selectedPersona.apply {
+            id = personaDetails.id
+            name = personaDetails.name
+            instructions = personaDetails.instructions
+        }
+        textPane.appendHighlightedText(personaDetails.name, ':')
+        hidePopup()
+    }
+
+    private fun adjustPopupSize() {
+        val maxVisibleRows = 15
+        val newRowCount = minOf(listModel.size(), maxVisibleRows)
+        list.setVisibleRowCount(newRowCount)
+        list.revalidate()
+        list.repaint()
+
+        popup?.size = list.preferredSize
+
+        originalLocation?.let { original ->
+            val newY = original.y - list.preferredSize.height
+            popup?.setLocation(Point(original.x, maxOf(newY, 0)))
+        }
+    }
+
+    private fun createPopup(
+        preferableFocusComponent: JComponent? = null,
+    ): JBPopup =
         service<JBPopupFactory>()
-            .createComponentPopupBuilder(list, preferableFocusComponent)
+            .createComponentPopupBuilder(scrollPane, preferableFocusComponent)
             .setMovable(true)
-            .setCancelOnClickOutside(true)
+            .setCancelOnClickOutside(false)
             .setCancelOnWindowDeactivation(false)
             .setRequestFocus(true)
+            .setMinSize(Dimension(480, 30))
             .setCancelCallback {
-                listModel.removeAllElements()
+                originalLocation = null
+                currentActionStrategy = DefaultSuggestionActionStrategy()
                 true
             }
+            .setResizable(true)
             .createPopup()
 }

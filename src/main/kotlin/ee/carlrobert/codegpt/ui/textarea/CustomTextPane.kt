@@ -4,6 +4,7 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.colors.EditorFontType
 import com.intellij.openapi.editor.ex.util.EditorUtil
+import com.intellij.openapi.util.TextRange
 import com.intellij.openapi.util.registry.Registry
 import com.intellij.ui.JBColor
 import com.intellij.util.ui.JBFont
@@ -43,8 +44,12 @@ class CustomTextPane(private val onSubmit: (String) -> Unit) : JTextPane() {
         })
     }
 
-    fun highlightText(text: String) {
-        val lastIndex = this.text.lastIndexOf('@')
+    fun appendHighlightedText(
+        text: String,
+        searchChar: Char = '@',
+        withWhitespace: Boolean = true
+    ): TextRange? {
+        val lastIndex = this.text.lastIndexOf(searchChar)
         if (lastIndex != -1) {
             val styleContext = StyleContext.getDefaultStyleContext()
             val fileNameStyle = styleContext.addStyle("smart-highlighter", null)
@@ -71,12 +76,16 @@ class CustomTextPane(private val onSubmit: (String) -> Unit) : JTextPane() {
                 fileNameStyle,
                 true
             )
-            document.insertString(
-                document.length,
-                " ",
-                styleContext.getStyle(StyleContext.DEFAULT_STYLE)
-            )
+            if (withWhitespace) {
+                document.insertString(
+                    document.length,
+                    " ",
+                    styleContext.getStyle(StyleContext.DEFAULT_STYLE)
+                )
+            }
+            return TextRange(lastIndex, lastIndex + text.length)
         }
+        return null
     }
 
     override fun paintComponent(g: Graphics) {
@@ -90,7 +99,6 @@ class CustomTextPane(private val onSubmit: (String) -> Unit) : JTextPane() {
             } else {
                 UIManager.getFont("TextField.font")
             }
-            // Draw placeholder
             g2d.drawString(
                 CodeGPTBundle.get("toolwindow.chat.textArea.emptyText"),
                 insets.left,
