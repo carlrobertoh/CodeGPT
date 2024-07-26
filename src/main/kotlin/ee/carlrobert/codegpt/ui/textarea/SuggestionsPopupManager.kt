@@ -11,8 +11,11 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.vfs.VirtualFileVisitor
 import com.intellij.ui.components.JBScrollPane
+import com.intellij.ui.dsl.builder.panel
+import com.intellij.ui.dsl.gridLayout.UnscaledGaps
 import com.intellij.util.ui.JBUI
 import ee.carlrobert.codegpt.util.showAbove
+import ee.carlrobert.codegpt.CodeGPTBundle
 import ee.carlrobert.codegpt.settings.persona.PersonaDetails
 import ee.carlrobert.codegpt.settings.persona.PersonaSettings
 import ee.carlrobert.codegpt.settings.persona.PersonasConfigurable
@@ -199,19 +202,30 @@ class SuggestionsPopupManager(
         list.revalidate()
         list.repaint()
 
-        popup?.size = list.preferredSize
+        popup?.size = Dimension(list.preferredSize.width, list.preferredSize.height + 32)
 
         originalLocation?.let { original ->
-            val newY = original.y - list.preferredSize.height
+            val newY = original.y - list.preferredSize.height - 32
             popup?.setLocation(Point(original.x, maxOf(newY, 0)))
         }
     }
 
     private fun createPopup(
         preferableFocusComponent: JComponent? = null,
-    ): JBPopup =
-        service<JBPopupFactory>()
-            .createComponentPopupBuilder(scrollPane, preferableFocusComponent)
+    ): JBPopup {
+        val popupPanel = panel {
+            row { cell(scrollPane).customize(UnscaledGaps.EMPTY) }
+            separator()
+            row {
+                text(CodeGPTBundle.get("shared.escToCancel"))
+                    .customize(UnscaledGaps(left = 4))
+                    .applyToComponent {
+                        font = JBUI.Fonts.smallFont()
+                    }
+            }
+        }
+        return service<JBPopupFactory>()
+            .createComponentPopupBuilder(popupPanel, preferableFocusComponent)
             .setMovable(true)
             .setCancelOnClickOutside(false)
             .setCancelOnWindowDeactivation(false)
@@ -224,4 +238,5 @@ class SuggestionsPopupManager(
             }
             .setResizable(true)
             .createPopup()
+    }
 }

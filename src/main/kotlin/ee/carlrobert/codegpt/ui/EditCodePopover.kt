@@ -187,7 +187,7 @@ class EditCodePopover(private val editor: Editor) {
             }
             separator()
             row {
-                text(CodeGPTBundle.get("editCodePopover.cancel.helpText"))
+                text(CodeGPTBundle.get("shared.escToCancel"))
                     .applyToComponent {
                         font = JBUI.Fonts.smallFont()
                     }
