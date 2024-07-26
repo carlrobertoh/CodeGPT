@@ -1,23 +1,20 @@
 package ee.carlrobert.codegpt.ui.textarea
 
 import com.intellij.openapi.application.readAction
-import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.roots.ContentIterator
 import com.intellij.openapi.roots.ProjectFileIndex
-import com.intellij.openapi.vfs.VirtualFileManager
+import com.intellij.openapi.vfs.VirtualFile
 import ee.carlrobert.codegpt.util.ResourceUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.nio.file.Files
 import java.nio.file.Path
 import javax.swing.DefaultListModel
-import kotlin.io.path.absolutePathString
-import kotlin.io.path.isDirectory
 
 interface SuggestionUpdateStrategy {
     fun populateSuggestions(
@@ -96,33 +93,23 @@ class FolderSuggestionActionStrategy : SuggestionUpdateStrategy {
         }
     }
 
-    private suspend fun findProjectFolders(project: Project): List<String> {
-        val projectRoot = project.basePath?.let { Path.of(it) } ?: return emptyList()
-        val projectFileIndex = project.service<ProjectFileIndex>()
-        val virtualFileManager = VirtualFileManager.getInstance()
-
-        return withContext(Dispatchers.IO) {
+    private suspend fun findProjectFolders(project: Project): List<String> =
+        withContext(Dispatchers.IO) {
             val uniqueFolders = mutableSetOf<String>()
-            Files.walk(projectRoot)
-                .filter { path ->
-                    val file = virtualFileManager.findFileByNioPath(path)
-                    val isProjectFile =
-                        file != null && runReadAction {
-                            projectFileIndex.isInSourceContent(file)
-                                    || projectFileIndex.isInTestSourceContent(file)
-                        }
-                    path.isDirectory() && !path.startsWith(".") && isProjectFile
-                }
-                .forEach { folder ->
-                    val folderPath = folder.absolutePathString()
+            val iterator = ContentIterator { file: VirtualFile ->
+                if (file.isDirectory && !file.name.startsWith(".")) {
+                    val folderPath = file.path
                     if (uniqueFolders.none { it.startsWith(folderPath) }) {
                         uniqueFolders.removeAll { it.startsWith(folderPath) }
                         uniqueFolders.add(folderPath)
                     }
                 }
+                true
+            }
+
+            project.service<ProjectFileIndex>().iterateContent(iterator)
             uniqueFolders.toList()
         }
-    }
 }
 
 class PersonaSuggestionActionStrategy : SuggestionUpdateStrategy {
