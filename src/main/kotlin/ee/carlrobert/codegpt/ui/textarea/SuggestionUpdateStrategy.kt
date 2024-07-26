@@ -107,7 +107,10 @@ class FolderSuggestionActionStrategy : SuggestionUpdateStrategy {
                 .filter { path ->
                     val file = virtualFileManager.findFileByNioPath(path)
                     val isProjectFile =
-                        file != null && runReadAction { projectFileIndex.isInContent(file) }
+                        file != null && runReadAction {
+                            projectFileIndex.isInSourceContent(file)
+                                    || projectFileIndex.isInTestSourceContent(file)
+                        }
                     path.isDirectory() && !path.startsWith(".") && isProjectFile
                 }
                 .forEach { folder ->
@@ -144,21 +147,6 @@ class PersonaSuggestionActionStrategy : SuggestionUpdateStrategy {
                 true
             )
         })
-    }
-}
-
-class CreatePersonaActionStrategy : SuggestionUpdateStrategy {
-    override fun populateSuggestions(
-        project: Project,
-        listModel: DefaultListModel<SuggestionItem>,
-    ) {
-    }
-
-    override fun updateSuggestions(
-        project: Project,
-        listModel: DefaultListModel<SuggestionItem>,
-        searchText: String,
-    ) {
     }
 }
 
