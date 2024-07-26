@@ -94,6 +94,9 @@ class SuggestionsPopupManager(
         popup?.showAbove(component)
         originalLocation = component.locationOnScreen
         reset(true)
+        // TODO: Apply initial focus to the popup until a proper search mechanism is in place.
+        requestFocus()
+        selectNext()
     }
 
     fun hidePopup() {
