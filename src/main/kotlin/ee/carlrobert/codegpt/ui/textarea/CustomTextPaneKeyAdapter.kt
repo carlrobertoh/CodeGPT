@@ -69,10 +69,6 @@ class CustomTextPaneKeyAdapter(
                 )
             )
             return
-        } else if (e.keyChar == '\t') {
-            suggestionsPopupManager.requestFocus()
-            suggestionsPopupManager.selectNext()
-            return
         } else if (popupVisible) {
             updateSuggestions()
         }
@@ -85,6 +81,14 @@ class CustomTextPaneKeyAdapter(
                 StyleContext.getDefaultStyleContext().getStyle(StyleContext.DEFAULT_STYLE),
                 true
             )
+        }
+    }
+
+    override fun keyPressed(e: KeyEvent) {
+        if (e.keyChar == '\t') {
+            suggestionsPopupManager.requestFocus()
+            suggestionsPopupManager.selectNext()
+            e.consume()
         }
     }
 
