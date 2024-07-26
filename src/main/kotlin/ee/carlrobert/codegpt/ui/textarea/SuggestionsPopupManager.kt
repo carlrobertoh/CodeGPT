@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt.ui.textarea
 
 import com.intellij.icons.AllIcons
+import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.components.service
 import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
@@ -10,15 +11,15 @@ import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.vfs.VirtualFileVisitor
+import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.dsl.builder.panel
-import com.intellij.ui.dsl.gridLayout.UnscaledGaps
 import com.intellij.util.ui.JBUI
-import ee.carlrobert.codegpt.util.showAbove
 import ee.carlrobert.codegpt.CodeGPTBundle
 import ee.carlrobert.codegpt.settings.persona.PersonaDetails
 import ee.carlrobert.codegpt.settings.persona.PersonaSettings
 import ee.carlrobert.codegpt.settings.persona.PersonasConfigurable
+import ee.carlrobert.codegpt.util.showAbove
 import java.awt.Dimension
 import java.awt.Point
 import java.io.File
@@ -207,10 +208,10 @@ class SuggestionsPopupManager(
         list.revalidate()
         list.repaint()
 
-        popup?.size = Dimension(list.preferredSize.width, list.preferredSize.height + 32)
+        popup?.size = Dimension(list.preferredSize.width, list.preferredSize.height + 40)
 
         originalLocation?.let { original ->
-            val newY = original.y - list.preferredSize.height - 32
+            val newY = original.y - list.preferredSize.height - 40
             popup?.setLocation(Point(original.x, maxOf(newY, 0)))
         }
     }
@@ -219,14 +220,13 @@ class SuggestionsPopupManager(
         preferableFocusComponent: JComponent? = null,
     ): JBPopup {
         val popupPanel = panel {
-            row { cell(scrollPane).customize(UnscaledGaps.EMPTY) }
-            separator()
+            row { cell(scrollPane) }
             row {
-                text(CodeGPTBundle.get("shared.escToCancel"))
-                    .customize(UnscaledGaps(left = 4))
-                    .applyToComponent {
-                        font = JBUI.Fonts.smallFont()
-                    }
+                cell(
+                    JBLabel(CodeGPTBundle.get("shared.escToCancel"))
+                        .withFont(JBUI.Fonts.smallFont())
+                        .withBorder(JBUI.Borders.empty(0, 8))
+                )
             }
         }
         return service<JBPopupFactory>()

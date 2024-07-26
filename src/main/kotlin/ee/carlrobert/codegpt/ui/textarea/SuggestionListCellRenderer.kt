@@ -7,9 +7,7 @@ import com.intellij.ui.ColorUtil
 import com.intellij.ui.JBColor
 import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.panel
-import com.intellij.ui.dsl.gridLayout.UnscaledGaps
 import com.intellij.util.ui.JBUI
-import com.intellij.util.ui.JBUI.CurrentTheme.GotItTooltip
 import ee.carlrobert.codegpt.settings.persona.PersonaSettings
 import java.awt.Component
 import java.awt.Dimension
@@ -116,8 +114,8 @@ class SuggestionListCellRenderer(
         )
         val suffix = title.substring((searchIndex + searchText.length).coerceAtMost(title.length))
 
-        val foregroundHex = ColorUtil.toHex(GotItTooltip.codeForeground(true))
-        val backgroundHex = ColorUtil.toHex(GotItTooltip.codeBackground(true))
+        val foregroundHex = ColorUtil.toHex(JBColor.foreground())
+        val backgroundHex = ColorUtil.toHex(JBColor.background())
 
         return "<html>$prefix<span style=\"color: $foregroundHex;background-color: $backgroundHex;\">$highlight</span>$suffix</html>"
     }
@@ -145,7 +143,6 @@ class SuggestionListCellRenderer(
                 cell(label)
                 if (description != null) {
                     text(description.truncate(480 - label.width - 32, truncateFromStart))
-                        .customize(UnscaledGaps(left = 8))
                         .align(AlignX.RIGHT)
                         .applyToComponent {
                             font = JBUI.Fonts.smallFont()
