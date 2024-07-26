@@ -114,6 +114,8 @@ class SuggestionsPopupManager(
 
     fun updateSuggestions(searchText: String) {
         currentActionStrategy.updateSuggestions(project, listModel, searchText)
+        list.revalidate()
+        list.repaint()
     }
 
     fun reset(clearPrevious: Boolean = true) {
