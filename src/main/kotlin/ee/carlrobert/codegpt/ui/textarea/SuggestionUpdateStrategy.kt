@@ -1,10 +1,12 @@
 package ee.carlrobert.codegpt.ui.textarea
 
 import com.intellij.openapi.application.readAction
+import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectFileIndex
+import com.intellij.openapi.vfs.VirtualFileManager
 import ee.carlrobert.codegpt.util.ResourceUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -16,7 +18,6 @@ import java.nio.file.Path
 import javax.swing.DefaultListModel
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.isDirectory
-import kotlin.io.path.name
 
 interface SuggestionUpdateStrategy {
     fun populateSuggestions(
@@ -97,10 +98,18 @@ class FolderSuggestionActionStrategy : SuggestionUpdateStrategy {
 
     private suspend fun findProjectFolders(project: Project): List<String> {
         val projectRoot = project.basePath?.let { Path.of(it) } ?: return emptyList()
+        val projectFileIndex = project.service<ProjectFileIndex>()
+        val virtualFileManager = VirtualFileManager.getInstance()
+
         return withContext(Dispatchers.IO) {
             val uniqueFolders = mutableSetOf<String>()
             Files.walk(projectRoot)
-                .filter { it.isDirectory() && !it.name.startsWith(".") }
+                .filter { path ->
+                    val file = virtualFileManager.findFileByNioPath(path)
+                    val isProjectFile =
+                        file != null && runReadAction { projectFileIndex.isInContent(file) }
+                    path.isDirectory() && !path.startsWith(".") && isProjectFile
+                }
                 .forEach { folder ->
                     val folderPath = folder.absolutePathString()
                     if (uniqueFolders.none { it.startsWith(folderPath) }) {
@@ -129,7 +138,12 @@ class PersonaSuggestionActionStrategy : SuggestionUpdateStrategy {
         searchText: String,
     ) {
         listModel.clear()
-        listModel.addAll(ResourceUtil.getFilteredPersonaSuggestions { it.name.contains(searchText, true) })
+        listModel.addAll(ResourceUtil.getFilteredPersonaSuggestions {
+            it.name.contains(
+                searchText,
+                true
+            )
+        })
     }
 }
 
