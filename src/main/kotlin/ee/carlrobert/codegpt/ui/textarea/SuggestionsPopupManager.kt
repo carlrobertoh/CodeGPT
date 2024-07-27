@@ -19,6 +19,9 @@ import ee.carlrobert.codegpt.CodeGPTBundle
 import ee.carlrobert.codegpt.settings.persona.PersonaDetails
 import ee.carlrobert.codegpt.settings.persona.PersonaSettings
 import ee.carlrobert.codegpt.settings.persona.PersonasConfigurable
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import ee.carlrobert.codegpt.util.showAbove
 import java.awt.Dimension
 import java.awt.Point
@@ -65,7 +68,7 @@ class SuggestionsPopupManager(
     private val textPane: CustomTextPane,
 ) {
 
-    private var currentActionStrategy: SuggestionUpdateStrategy = DefaultSuggestionActionStrategy()
+    private var currentActionStrategy: SuggestionStrategy = DefaultSuggestionStrategy()
     private val appliedActions: MutableList<SuggestionItem.ActionItem> = mutableListOf()
     private var popup: JBPopup? = null
     private var originalLocation: Point? = null
@@ -116,10 +119,18 @@ class SuggestionsPopupManager(
         list.selectNext()
     }
 
-    fun updateSuggestions(searchText: String) {
-        currentActionStrategy.updateSuggestions(project, listModel, searchText)
-        list.revalidate()
-        list.repaint()
+    fun updateSuggestions(searchText: String? = null) {
+        val suggestions = runBlocking {
+            withContext(Dispatchers.Default) {
+                currentActionStrategy.getSuggestions(project, searchText)
+            }
+        }
+        runInEdt {
+            listModel.clear()
+            listModel.addAll(suggestions)
+            list.revalidate()
+            list.repaint()
+        }
     }
 
     fun reset(clearPrevious: Boolean = true) {
@@ -144,22 +155,22 @@ class SuggestionsPopupManager(
         appliedActions.add(item)
         currentActionStrategy = when (item.action) {
             DefaultAction.FILES -> {
-                FileSuggestionActionStrategy()
+                FileSuggestionStrategy()
             }
 
             DefaultAction.FOLDERS -> {
-                FolderSuggestionActionStrategy()
+                FolderSuggestionStrategy()
             }
 
             DefaultAction.PERSONAS -> {
-                PersonaSuggestionActionStrategy()
+                PersonaSuggestionStrategy()
             }
 
             else -> {
-                DefaultSuggestionActionStrategy()
+                DefaultSuggestionStrategy()
             }
         }
-        currentActionStrategy.populateSuggestions(project, listModel)
+        updateSuggestions()
         textPane.appendHighlightedText(item.action.code, withWhitespace = false)
         textPane.requestFocus()
     }
@@ -238,7 +249,7 @@ class SuggestionsPopupManager(
             .setMinSize(Dimension(480, 30))
             .setCancelCallback {
                 originalLocation = null
-                currentActionStrategy = DefaultSuggestionActionStrategy()
+                currentActionStrategy = DefaultSuggestionStrategy()
                 true
             }
             .setResizable(true)
