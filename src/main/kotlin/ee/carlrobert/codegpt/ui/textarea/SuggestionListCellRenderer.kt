@@ -153,6 +153,8 @@ class SuggestionListCellRenderer(
                         }
                 }
             }
+        }.apply {
+            toolTipText = description
         }
     }
 
