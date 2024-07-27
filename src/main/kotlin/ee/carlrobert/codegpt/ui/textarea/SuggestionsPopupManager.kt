@@ -19,18 +19,14 @@ import ee.carlrobert.codegpt.CodeGPTBundle
 import ee.carlrobert.codegpt.settings.persona.PersonaDetails
 import ee.carlrobert.codegpt.settings.persona.PersonaSettings
 import ee.carlrobert.codegpt.settings.persona.PersonasConfigurable
+import ee.carlrobert.codegpt.util.showAbove
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import ee.carlrobert.codegpt.util.showAbove
-import java.awt.Dimension
-import java.awt.Point
+import java.awt.*
 import java.io.File
 import java.nio.file.Paths
-import javax.swing.DefaultListModel
-import javax.swing.Icon
-import javax.swing.JComponent
-import javax.swing.ScrollPaneConstants
+import javax.swing.*
 import javax.swing.event.ListDataEvent
 import javax.swing.event.ListDataListener
 
@@ -233,11 +229,19 @@ class SuggestionsPopupManager(
         val popupPanel = panel {
             row { cell(scrollPane) }
             row {
-                cell(
-                    JBLabel(CodeGPTBundle.get("shared.escToCancel"))
-                        .withFont(JBUI.Fonts.smallFont())
-                        .withBorder(JBUI.Borders.empty(0, 8))
-                )
+                cell(JPanel(GridBagLayout()).apply {
+                    val gbc = GridBagConstraints()
+                    gbc.anchor = GridBagConstraints.WEST
+                    gbc.insets = Insets(0, 8, 0, 8)
+                    gbc.weightx = 1.0
+                    gbc.fill = GridBagConstraints.HORIZONTAL
+                    add(
+                        JBLabel(CodeGPTBundle.get("shared.escToCancel"))
+                            .withFont(JBUI.Fonts.smallFont())
+                            .withBorder(JBUI.Borders.empty()), gbc
+                    )
+                    preferredSize = Dimension(480, 16)
+                })
             }
         }
         return service<JBPopupFactory>()

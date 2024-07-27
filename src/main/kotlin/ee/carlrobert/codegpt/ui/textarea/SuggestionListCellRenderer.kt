@@ -5,10 +5,12 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.ui.ColorUtil
 import com.intellij.ui.JBColor
+import com.intellij.ui.components.JBLabel
 import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.util.ui.JBUI
 import ee.carlrobert.codegpt.settings.persona.PersonaSettings
+import java.awt.BorderLayout
 import java.awt.Component
 import java.awt.Dimension
 import javax.swing.*
@@ -85,12 +87,29 @@ class SuggestionListCellRenderer(
     }
 
     private fun renderPersonaItem(component: JLabel, item: SuggestionItem.PersonaItem): JPanel {
-        return createDefaultPanel(
-            component,
-            AllIcons.General.User,
-            item.personaDetails.name,
-            item.personaDetails.instructions,
-        )
+        component.apply {
+            icon = AllIcons.General.User
+            iconTextGap = 4
+            val searchText = getSearchText(textPane.text)
+            text = if (searchText != null) {
+                generateHighlightedHtml(item.personaDetails.name, searchText)
+            } else {
+                item.personaDetails.name
+            }
+        }
+
+        return JPanel(BorderLayout()).apply {
+            add(component, BorderLayout.LINE_START)
+            add(
+                JBLabel(item.personaDetails.instructions)
+                    .apply {
+                        font = JBUI.Fonts.smallFont()
+                        foreground = JBColor.gray
+                        border = JBUI.Borders.emptyLeft(22)
+                    },
+                BorderLayout.SOUTH
+            )
+        }
     }
 
     private fun getSearchText(text: String): String? {
