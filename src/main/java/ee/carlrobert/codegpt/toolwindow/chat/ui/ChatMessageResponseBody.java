@@ -12,23 +12,25 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.JBUI;
 import com.vladsch.flexmark.ast.FencedCodeBlock;
 import com.vladsch.flexmark.parser.Parser;
+import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.actions.ActionType;
+import ee.carlrobert.codegpt.events.Details;
 import ee.carlrobert.codegpt.settings.GeneralSettingsConfigurable;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.toolwindow.chat.StreamParser;
 import ee.carlrobert.codegpt.toolwindow.chat.editor.ResponseEditorPanel;
+import ee.carlrobert.codegpt.toolwindow.ui.WebpageList;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import ee.carlrobert.codegpt.util.EditorUtil;
 import ee.carlrobert.codegpt.util.MarkdownUtil;
-import ee.carlrobert.llm.client.you.completion.YouSerpResult;
 import java.awt.BorderLayout;
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import javax.swing.BoxLayout;
+import javax.swing.DefaultListModel;
 import javax.swing.JPanel;
 import javax.swing.JTextPane;
 
@@ -38,6 +40,7 @@ public class ChatMessageResponseBody extends JPanel {
   private final Disposable parentDisposable;
   private final StreamParser streamParser;
   private final boolean readOnly;
+  private final DefaultListModel<Details> webpageListModel = new DefaultListModel<>();
   private ResponseEditorPanel currentlyProcessedEditorPanel;
   private JTextPane currentlyProcessedTextPane;
   private boolean responseReceived;
@@ -50,13 +53,14 @@ public class ChatMessageResponseBody extends JPanel {
       Project project,
       boolean withGhostText,
       Disposable parentDisposable) {
-    this(project, withGhostText, false, parentDisposable);
+    this(project, withGhostText, false, false, parentDisposable);
   }
 
   public ChatMessageResponseBody(
       Project project,
       boolean withGhostText,
       boolean readOnly,
+      boolean webSearchIncluded,
       Disposable parentDisposable) {
     super(new BorderLayout());
     this.project = project;
@@ -66,6 +70,18 @@ public class ChatMessageResponseBody extends JPanel {
     setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
     setOpaque(false);
 
+    if (webSearchIncluded) {
+      var title = new JPanel(new BorderLayout());
+      title.setOpaque(false);
+      title.setBorder(JBUI.Borders.empty(8, 0));
+      title.add(new JBLabel(CodeGPTBundle.get("chatMessageResponseBody.webPagesTitle"))
+          .withFont(JBUI.Fonts.miniFont()), BorderLayout.LINE_START);
+      add(title);
+
+      var listPanel = new JPanel(new BorderLayout());
+      listPanel.add(new WebpageList(webpageListModel), BorderLayout.LINE_START);
+      add(listPanel);
+    }
     if (withGhostText) {
       prepareProcessingText(!readOnly);
       currentlyProcessedTextPane.setText(
@@ -136,18 +152,6 @@ public class ChatMessageResponseBody extends JPanel {
     }
   }
 
-  public void displaySerpResults(List<YouSerpResult> serpResults) {
-    var html = getSearchResultsHtml(serpResults);
-    if (responseReceived) {
-      add(createTextPane(html, false));
-    } else {
-      if (currentlyProcessedTextPane == null) {
-        prepareProcessingText(false);
-      }
-      currentlyProcessedTextPane.setText(html);
-    }
-  }
-
   public void clear() {
     removeAll();
 
@@ -159,21 +163,6 @@ public class ChatMessageResponseBody extends JPanel {
 
     repaint();
     revalidate();
-  }
-
-  private String getSearchResultsHtml(List<YouSerpResult> serpResults) {
-    var titles = serpResults.stream()
-        .map(result -> format(
-            "<li style=\"margin-bottom: 4px;\"><a href=\"%s\">%s</a></li>",
-            result.getUrl(),
-            result.getName()))
-        .collect(Collectors.joining());
-    return format(
-        "<html>"
-            + "<p><strong>Search results:</strong></p>"
-            + "<ol>%s</ol>"
-            + "</html>",
-        titles);
   }
 
   private void processResponse(String markdownInput, boolean codeResponse, boolean caretVisible) {
@@ -238,5 +227,9 @@ public class ChatMessageResponseBody extends JPanel {
     }
     textPane.setBorder(JBUI.Borders.empty());
     return textPane;
+  }
+
+  public void displayWebSearchItem(Details name) {
+    webpageListModel.addElement(name);
   }
 }

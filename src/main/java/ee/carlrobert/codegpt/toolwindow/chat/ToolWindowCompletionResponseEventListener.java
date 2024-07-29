@@ -6,6 +6,7 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.completions.CallParameters;
+import ee.carlrobert.codegpt.events.CodeGPTEvent;
 import ee.carlrobert.codegpt.completions.CompletionResponseEventListener;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationService;
@@ -17,11 +18,6 @@ import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.TotalTokensPanel;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.codegpt.ui.textarea.UserInputPanel;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
-import ee.carlrobert.llm.client.you.completion.YouSerpResult;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 import javax.swing.SwingUtilities;
 
 abstract class ToolWindowCompletionResponseEventListener implements
@@ -31,7 +27,6 @@ abstract class ToolWindowCompletionResponseEventListener implements
       ToolWindowCompletionResponseEventListener.class);
 
   private final StringBuilder messageBuilder = new StringBuilder();
-  private final Map<UUID, List<YouSerpResult>> serpResultsMapping = new HashMap<>();
   private final EncodingManager encodingManager;
   private final ConversationService conversationService;
   private final ResponsePanel responsePanel;
@@ -113,20 +108,11 @@ abstract class ToolWindowCompletionResponseEventListener implements
 
   @Override
   public void handleCompleted(String fullMessage, CallParameters callParameters) {
-    var message = callParameters.getMessage();
     conversationService.saveMessage(fullMessage, callParameters);
 
-    var serpResults = serpResultsMapping.get(message.getId());
-    var containsResults = serpResults != null && !serpResults.isEmpty();
-    if (containsResults) {
-      message.setSerpResults(serpResults);
-    }
     SwingUtilities.invokeLater(() -> {
       try {
         responsePanel.enableActions();
-        if (containsResults) {
-          responseContainer.displaySerpResults(serpResults);
-        }
         totalTokensPanel.updateUserPromptTokens(textArea.getText());
         totalTokensPanel.updateConversationTokens(callParameters.getConversation());
       } finally {
@@ -136,8 +122,8 @@ abstract class ToolWindowCompletionResponseEventListener implements
   }
 
   @Override
-  public void handleSerpResults(List<YouSerpResult> results, Message message) {
-    serpResultsMapping.put(message.getId(), results);
+  public void handleCodeGPTEvent(CodeGPTEvent event) {
+    responseContainer.displayWebSearchItem(event.getEvent().getDetails());
   }
 
   private void stopStreaming(ChatMessageResponseBody responseContainer) {

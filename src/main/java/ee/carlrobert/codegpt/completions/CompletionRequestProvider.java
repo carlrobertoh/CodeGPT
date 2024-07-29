@@ -217,11 +217,17 @@ public class CompletionRequestProvider {
       @Nullable String model,
       CallParameters callParameters) {
     var configuration = ConfigurationSettings.getCurrentState();
-    return new OpenAIChatCompletionRequest.Builder(buildOpenAIMessages(model, callParameters))
+    var requestBuilder = new OpenAIChatCompletionRequest.Builder(
+        buildOpenAIMessages(model, callParameters))
         .setModel(model)
         .setMaxTokens(configuration.getMaxTokens())
         .setStream(true)
-        .setTemperature(configuration.getTemperature()).build();
+        .setTemperature(configuration.getTemperature());
+    if (callParameters.getMessage().isWebSearchIncluded()) {
+      // tri-state boolean
+      requestBuilder.setWebSearchIncluded(true);
+    }
+    return requestBuilder.build();
   }
 
   public GoogleCompletionRequest buildGoogleChatCompletionRequest(
