@@ -8,8 +8,10 @@ import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.ui.popup.util.MinimizeButton
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.ActionLink
+import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBList
 import com.intellij.ui.dsl.builder.AlignX
+import com.intellij.ui.dsl.builder.RightGap
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.ui.jcef.JBCefApp
 import com.intellij.util.ui.JBUI
@@ -78,7 +80,7 @@ class WebpageList(model: DefaultListModel<Details>) : JBList<Details>(model) {
             val details = model.getElementAt(index)
             val browser = JBCefApp.getInstance().createClient()
                 .cefClient
-                .createBrowser(details.url, CefRendering.OFFSCREEN, false, null)
+                .createBrowser(details.url, CefRendering.DEFAULT, false, null)
 
             val popupPanel = JPanel(BorderLayout()).apply {
                 add(browser.uiComponent, BorderLayout.CENTER)
@@ -138,9 +140,17 @@ class WebpageListCellRenderer : DefaultListCellRenderer() {
                     iconTextGap = 4
                     font = JBUI.Fonts.smallFont()
                     text = value.name
-                    foreground = JBColor.gray
                 }
-                component
+                panel {
+                    row {
+                        cell(component).gap(RightGap.SMALL)
+                        cell(JBLabel(value.displayUrl)
+                            .withFont(JBUI.Fonts.miniFont())
+                            .apply { foreground = JBColor.gray })
+                    }
+                }.apply {
+                    isOpaque = false
+                }
             } else {
                 component
             }
