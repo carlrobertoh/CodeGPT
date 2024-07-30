@@ -174,7 +174,8 @@ public class ChatToolWindowTabPanel implements Disposable {
     return new ResponsePanel()
         .withReloadAction(() -> reloadMessage(message, conversation, conversationType))
         .withDeleteAction(() -> removeMessage(message.getId(), conversation))
-        .addContent(new ChatMessageResponseBody(project, true, this));
+        .addContent(
+            new ChatMessageResponseBody(project, true, false, message.isWebSearchIncluded(), this));
   }
 
   private void reloadMessage(
@@ -245,7 +246,7 @@ public class ChatToolWindowTabPanel implements Disposable {
     requestHandler.call(callParameters);
   }
 
-  private Unit handleSubmit(String text) {
+  private Unit handleSubmit(String text, boolean webSearchIncluded) {
     var message = new Message(text);
     var editor = EditorUtil.getSelectedEditor(project);
     if (editor != null) {
@@ -259,6 +260,7 @@ public class ChatToolWindowTabPanel implements Disposable {
       }
     }
     message.setUserMessage(text);
+    message.setWebSearchIncluded(webSearchIncluded);
     sendMessage(message, ConversationType.DEFAULT);
     return Unit.INSTANCE;
   }

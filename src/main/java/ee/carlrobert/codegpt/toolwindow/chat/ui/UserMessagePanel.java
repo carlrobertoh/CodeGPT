@@ -59,7 +59,13 @@ public class UserMessagePanel extends JPanel {
       Project project,
       String prompt,
       Disposable parentDisposable) {
-    return new ChatMessageResponseBody(project, false, true, parentDisposable).withResponse(prompt);
+    return new ChatMessageResponseBody(
+        project,
+        false,
+        true,
+        false,
+        parentDisposable)
+        .withResponse(prompt);
   }
 
   private JBLabel createDisplayNameLabel() {

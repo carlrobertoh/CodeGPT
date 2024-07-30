@@ -9,7 +9,9 @@ import com.intellij.ui.components.JBLabel
 import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.util.ui.JBUI
+import ee.carlrobert.codegpt.settings.GeneralSettings
 import ee.carlrobert.codegpt.settings.persona.PersonaSettings
+import ee.carlrobert.codegpt.settings.service.ServiceType
 import java.awt.BorderLayout
 import java.awt.Component
 import java.awt.Dimension
@@ -78,7 +80,7 @@ class SuggestionListCellRenderer(
         return createDefaultPanel(
             component.apply {
                 disabledIcon = item.action.icon
-                isEnabled = item.action.enabled
+                isEnabled = item.action.enabled()
             },
             item.action.icon,
             item.action.displayName,

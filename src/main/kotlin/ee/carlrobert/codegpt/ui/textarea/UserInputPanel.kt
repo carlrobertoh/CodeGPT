@@ -26,12 +26,16 @@ import javax.swing.JPanel
 
 class UserInputPanel(
     private val project: Project,
-    private val onSubmit: (String) -> Unit,
+    private val onSubmit: (String, Boolean) -> Unit,
     private val onStop: () -> Unit
 ) : JPanel(BorderLayout()) {
 
     private val textPane = CustomTextPane { handleSubmit() }
-        .apply { addKeyListener(CustomTextPaneKeyAdapter(project, this)) }
+        .apply {
+            addKeyListener(CustomTextPaneKeyAdapter(project, this) {
+                webSearchIncluded = true
+            })
+        }
 
     private val submitButton = IconActionButton(
         object : AnAction(
@@ -60,6 +64,7 @@ class UserInputPanel(
             icon = AllIcons.General.Add
             font = JBUI.Fonts.smallFont()
         }
+    private var webSearchIncluded: Boolean = false
 
     val text: String
         get() = textPane.text
@@ -103,9 +108,12 @@ class UserInputPanel(
     override fun getInsets(): Insets = JBUI.insets(4)
 
     private fun handleSubmit() {
-        val text = textPane.text.trim()
+        val text = textPane.text
+            // TODO
+            .replace("@web", "")
+            .trim()
         if (text.isNotEmpty()) {
-            onSubmit(text)
+            onSubmit(text, webSearchIncluded)
             textPane.text = ""
         }
     }

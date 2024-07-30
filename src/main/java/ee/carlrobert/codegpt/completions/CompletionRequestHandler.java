@@ -1,11 +1,12 @@
 package ee.carlrobert.codegpt.completions;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import ee.carlrobert.codegpt.events.CodeGPTEvent;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.GeneralSettingsState;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
-import ee.carlrobert.llm.client.you.completion.YouCompletionEventListener;
-import ee.carlrobert.llm.client.you.completion.YouSerpResult;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.util.List;
 import javax.swing.SwingWorker;
@@ -67,7 +68,7 @@ public class CompletionRequestHandler {
     protected Void doInBackground() {
       var settings = GeneralSettings.getCurrentState();
       try {
-        eventSource = startCall(callParameters, new YouRequestCompletionEventListener());
+        eventSource = startCall(callParameters, new RequestCompletionEventListener());
       } catch (TotalUsageExceededException e) {
         completionResponseEventListener.handleTokensExceeded(
             callParameters.getConversation(),
@@ -86,11 +87,16 @@ public class CompletionRequestHandler {
       }
     }
 
-    class YouRequestCompletionEventListener implements YouCompletionEventListener {
+    class RequestCompletionEventListener implements CompletionEventListener<String> {
 
       @Override
-      public void onSerpResults(List<YouSerpResult> results) {
-        completionResponseEventListener.handleSerpResults(results, callParameters.getMessage());
+      public void onEvent(String data) {
+        try {
+          var event = new ObjectMapper().readValue(data, CodeGPTEvent.class);
+          completionResponseEventListener.handleCodeGPTEvent(event);
+        } catch (JsonProcessingException e) {
+          // ignore
+        }
       }
 
       @Override

@@ -16,6 +16,8 @@ import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.util.ui.JBUI
 import ee.carlrobert.codegpt.CodeGPTBundle
+import ee.carlrobert.codegpt.settings.GeneralSettings
+import ee.carlrobert.codegpt.settings.service.ServiceType
 import ee.carlrobert.codegpt.settings.persona.PersonaDetails
 import ee.carlrobert.codegpt.settings.persona.PersonaSettings
 import ee.carlrobert.codegpt.settings.persona.PersonasConfigurable
@@ -34,13 +36,17 @@ enum class DefaultAction(
     val displayName: String,
     val code: String,
     val icon: Icon,
-    val enabled: Boolean = true
+    val enabled: () -> Boolean = { true }
 ) {
     FILES("Files →", "file:", AllIcons.FileTypes.Any_type),
     FOLDERS("Folders →", "folder:", AllIcons.Nodes.Folder),
     PERSONAS("Personas →", "persona:", AllIcons.General.User),
-    DOCS("Docs (coming soon) →", "docs:", AllIcons.Toolwindows.Documentation, false),
-    SEARCH_WEB("Web (coming soon)", "", AllIcons.General.Web, false),
+    SEARCH_WEB("Web", "web", AllIcons.General.Web, {
+        GeneralSettings.getSelectedService() == ServiceType.CODEGPT
+    }),
+    DOCS("Docs (coming soon) →", "docs:", AllIcons.Toolwindows.Documentation, {
+        false
+    }),
     CREATE_NEW_PERSONA("Create new persona", "", AllIcons.General.Add),
 }
 
@@ -55,13 +61,14 @@ val DEFAULT_ACTIONS = mutableListOf(
     SuggestionItem.ActionItem(DefaultAction.FILES),
     SuggestionItem.ActionItem(DefaultAction.FOLDERS),
     SuggestionItem.ActionItem(DefaultAction.PERSONAS),
-    SuggestionItem.ActionItem(DefaultAction.DOCS),
     SuggestionItem.ActionItem(DefaultAction.SEARCH_WEB),
+    SuggestionItem.ActionItem(DefaultAction.DOCS),
 )
 
 class SuggestionsPopupManager(
     private val project: Project,
     private val textPane: CustomTextPane,
+    private val onWebSearchIncluded: () -> Unit
 ) {
 
     private var currentActionStrategy: SuggestionStrategy = DefaultSuggestionStrategy()
@@ -145,6 +152,12 @@ class SuggestionsPopupManager(
                 project,
                 PersonasConfigurable::class.java
             )
+            return
+        }
+        if (item.action == DefaultAction.SEARCH_WEB) {
+            hidePopup()
+            onWebSearchIncluded()
+            textPane.appendHighlightedText(item.action.code, withWhitespace = true)
             return
         }
 
