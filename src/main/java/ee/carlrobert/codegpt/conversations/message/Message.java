@@ -17,6 +17,7 @@ public class Message {
   private List<YouSerpResult> serpResults;
   private List<String> referencedFilePaths;
   private @Nullable String imageFilePath;
+  private boolean webSearchIncluded;
 
   public Message(String prompt, String response) {
     this(prompt);
@@ -79,6 +80,14 @@ public class Message {
 
   public void setImageFilePath(@Nullable String imageFilePath) {
     this.imageFilePath = imageFilePath;
+  }
+
+  public boolean isWebSearchIncluded() {
+    return webSearchIncluded;
+  }
+
+  public void setWebSearchIncluded(boolean webSearchIncluded) {
+    this.webSearchIncluded = webSearchIncluded;
   }
 
   @Override
