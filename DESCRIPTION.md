@@ -22,6 +22,18 @@ Receive single-line or whole-function autocomplete suggestions as you type.
 
 ![Code Completions](https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/plugin-description/inline-completion-resized.png?raw=true)
 
+### Web Search
+
+Enhance your coding with real-time web search capabilities. Instantly access the latest information and insights directly within your coding environment.
+
+![Web Search](https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/plugin-description/web-search.png?raw=true)
+
+### Customized Personas
+
+Quickly define and switch between various prompts to make the assistant work for you, whether you're learning, writing, or proofreading. 
+
+![Customized Personas](https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/plugin-description/personas.png?raw=true)
+
 ### Fast Edit
 
 Transform your code using natural language instructions. Highlight the code you want to modify, describe the desired changes, and watch CodeGPT work its magic.
