@@ -105,6 +105,7 @@ class UserInputPanel(
 
     private fun handleSubmit() {
         val text = textPane.text
+            // TODO
             .replace("@web", "")
             .trim()
         if (text.isNotEmpty()) {

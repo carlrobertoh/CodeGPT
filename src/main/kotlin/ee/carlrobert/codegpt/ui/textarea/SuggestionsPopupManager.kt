@@ -17,6 +17,8 @@ import com.intellij.ui.dsl.gridLayout.UnscaledGaps
 import com.intellij.util.ui.JBUI
 import com.intellij.vcsUtil.showAbove
 import ee.carlrobert.codegpt.CodeGPTBundle
+import ee.carlrobert.codegpt.settings.GeneralSettings
+import ee.carlrobert.codegpt.settings.service.ServiceType
 import ee.carlrobert.codegpt.settings.persona.PersonaDetails
 import ee.carlrobert.codegpt.settings.persona.PersonaSettings
 import ee.carlrobert.codegpt.settings.persona.PersonasConfigurable
@@ -38,13 +40,17 @@ enum class DefaultAction(
     val displayName: String,
     val code: String,
     val icon: Icon,
-    val enabled: Boolean = true
+    val enabled: () -> Boolean = { true }
 ) {
     FILES("Files →", "file:", AllIcons.FileTypes.Any_type),
     FOLDERS("Folders →", "folder:", AllIcons.Nodes.Folder),
     PERSONAS("Personas →", "persona:", AllIcons.General.User),
-    SEARCH_WEB("Web", "web", AllIcons.General.Web),
-    DOCS("Docs (coming soon) →", "docs:", AllIcons.Toolwindows.Documentation, false),
+    SEARCH_WEB("Web", "web", AllIcons.General.Web, {
+        GeneralSettings.getSelectedService() == ServiceType.CODEGPT
+    }),
+    DOCS("Docs (coming soon) →", "docs:", AllIcons.Toolwindows.Documentation, {
+        false
+    }),
     CREATE_NEW_PERSONA("Create new persona", "", AllIcons.General.Add),
 }
 

@@ -229,7 +229,7 @@ public class ChatMessageResponseBody extends JPanel {
     return textPane;
   }
 
-  public void displayWebSearchItem(Details name) {
-    webpageListModel.addElement(name);
+  public void displayWebSearchItem(Details details) {
+    webpageListModel.addElement(details);
   }
 }
