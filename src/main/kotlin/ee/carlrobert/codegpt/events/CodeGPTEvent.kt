@@ -8,8 +8,8 @@ data class CodeGPTEvent @JsonCreator constructor(
 )
 
 data class Event @JsonCreator constructor(
-    @JsonProperty("type") val type: String,
-    @JsonProperty("details") val details: Details
+    @JsonProperty("details") val details: Details,
+    @JsonProperty("type") val type: String
 )
 
 data class Details @JsonCreator constructor(
