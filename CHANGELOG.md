@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- An additional context popup triggered by '@' keystrokes
+- **Web search support** - available only through the CodeGPT provider [#641](https://github.com/carlrobertoh/CodeGPT/pull/641)
+- **Persona customization** - a quick way to define and switch between different system prompts. Initial release comes with over 600 pre-defined prompts. [#638](https://github.com/carlrobertoh/CodeGPT/pull/638)
+
 ## [2.8.5-233] - 2024-07-24
 
 ### Added
