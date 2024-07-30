@@ -5,6 +5,7 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
 import com.jetbrains.rd.util.AtomicReference
+import ee.carlrobert.codegpt.conversations.Conversation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -15,10 +16,11 @@ import javax.swing.text.StyledDocument
 
 class CustomTextPaneKeyAdapter(
     private val project: Project,
-    private val textPane: CustomTextPane
+    private val textPane: CustomTextPane,
+    onWebSearchIncluded: () -> Unit
 ) : KeyAdapter() {
 
-    private val suggestionsPopupManager = SuggestionsPopupManager(project, textPane)
+    private val suggestionsPopupManager = SuggestionsPopupManager(project, textPane, onWebSearchIncluded)
     private val popupOpenedAtRange: AtomicReference<TextRange?> = AtomicReference(null)
 
     override fun keyReleased(e: KeyEvent) {

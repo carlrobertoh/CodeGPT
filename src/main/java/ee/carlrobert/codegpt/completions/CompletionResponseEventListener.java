@@ -2,9 +2,8 @@ package ee.carlrobert.codegpt.completions;
 
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.message.Message;
+import ee.carlrobert.codegpt.events.CodeGPTEvent;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
-import ee.carlrobert.llm.client.you.completion.YouSerpResult;
-import java.util.List;
 
 public interface CompletionResponseEventListener {
 
@@ -20,6 +19,6 @@ public interface CompletionResponseEventListener {
   default void handleCompleted(String fullMessage, CallParameters callParameters) {
   }
 
-  default void handleSerpResults(List<YouSerpResult> results, Message message) {
+  default void handleCodeGPTEvent(CodeGPTEvent event) {
   }
 }
