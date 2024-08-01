@@ -41,8 +41,10 @@ public class ChatMessageResponseBody extends JPanel {
   private final StreamParser streamParser;
   private final boolean readOnly;
   private final DefaultListModel<Details> webpageListModel = new DefaultListModel<>();
+  private final WebpageList webpageList = new WebpageList(webpageListModel);
   private ResponseEditorPanel currentlyProcessedEditorPanel;
   private JTextPane currentlyProcessedTextPane;
+  private JPanel webpageListPanel;
   private boolean responseReceived;
 
   public ChatMessageResponseBody(Project project, Disposable parentDisposable) {
@@ -71,17 +73,10 @@ public class ChatMessageResponseBody extends JPanel {
     setOpaque(false);
 
     if (webSearchIncluded) {
-      var title = new JPanel(new BorderLayout());
-      title.setOpaque(false);
-      title.setBorder(JBUI.Borders.empty(8, 0));
-      title.add(new JBLabel(CodeGPTBundle.get("chatMessageResponseBody.webPagesTitle"))
-          .withFont(JBUI.Fonts.miniFont()), BorderLayout.LINE_START);
-      add(title);
-
-      var listPanel = new JPanel(new BorderLayout());
-      listPanel.add(new WebpageList(webpageListModel), BorderLayout.LINE_START);
-      add(listPanel);
+      webpageListPanel = createWebpageListPanel(webpageList);
+      add(webpageListPanel);
     }
+
     if (withGhostText) {
       prepareProcessingText(!readOnly);
       currentlyProcessedTextPane.setText(
@@ -113,7 +108,11 @@ public class ChatMessageResponseBody extends JPanel {
             .showSettingsDialog(project, GeneralSettingsConfigurable.class);
       }
     });
-    currentlyProcessedTextPane.getCaret().setVisible(false);
+    hideCaret();
+
+    if (webpageListPanel != null) {
+      webpageListPanel.setVisible(false);
+    }
   }
 
   public void displayQuotaExceeded() {
@@ -133,11 +132,9 @@ public class ChatMessageResponseBody extends JPanel {
       }
     });
     hideCaret();
-  }
 
-  public void hideCaret() {
-    if (currentlyProcessedTextPane != null) {
-      currentlyProcessedTextPane.getCaret().setVisible(false);
+    if (webpageListPanel != null) {
+      webpageListPanel.setVisible(false);
     }
   }
 
@@ -149,6 +146,23 @@ public class ChatMessageResponseBody extends JPanel {
       add(createTextPane(errorText, false));
     } else {
       currentlyProcessedTextPane.setText(errorText);
+    }
+    hideCaret();
+
+    if (webpageListPanel != null) {
+      webpageListPanel.setVisible(false);
+    }
+  }
+
+  public void displayWebSearchItem(Details details) {
+    webpageListModel.addElement(details);
+    webpageList.revalidate();
+    webpageList.repaint();
+  }
+
+  public void hideCaret() {
+    if (currentlyProcessedTextPane != null) {
+      currentlyProcessedTextPane.getCaret().setVisible(false);
     }
   }
 
@@ -229,7 +243,20 @@ public class ChatMessageResponseBody extends JPanel {
     return textPane;
   }
 
-  public void displayWebSearchItem(Details details) {
-    webpageListModel.addElement(details);
+  private static JPanel createWebpageListPanel(WebpageList webpageList) {
+    var panel = new JPanel(new BorderLayout());
+
+    var title = new JPanel(new BorderLayout());
+    title.setOpaque(false);
+    title.setBorder(JBUI.Borders.empty(8, 0));
+    title.add(new JBLabel(CodeGPTBundle.get("chatMessageResponseBody.webPagesTitle"))
+        .withFont(JBUI.Fonts.miniFont()), BorderLayout.LINE_START);
+    panel.add(title);
+
+    var listPanel = new JPanel(new BorderLayout());
+    listPanel.add(webpageList, BorderLayout.LINE_START);
+    panel.add(listPanel);
+
+    return panel;
   }
 }
