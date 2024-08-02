@@ -6,6 +6,7 @@ import static java.lang.String.format;
 import static javax.swing.event.HyperlinkEvent.EventType.ACTIVATED;
 
 import com.intellij.openapi.Disposable;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
@@ -99,59 +100,65 @@ public class ChatMessageResponseBody extends JPanel {
   }
 
   public void displayMissingCredential() {
-    var message = "API key not provided. Open <a href=\"#\">Settings</a> to set one.";
-    currentlyProcessedTextPane.setText(
-        format("<html><p style=\"margin-top: 4px; margin-bottom: 8px;\">%s</p></html>", message));
-    currentlyProcessedTextPane.addHyperlinkListener(e -> {
-      if (e.getEventType() == ACTIVATED) {
-        ShowSettingsUtil.getInstance()
-            .showSettingsDialog(project, GeneralSettingsConfigurable.class);
+    ApplicationManager.getApplication().invokeLater(() -> {
+      var message = "API key not provided. Open <a href=\"#\">Settings</a> to set one.";
+      currentlyProcessedTextPane.setText(
+          format("<html><p style=\"margin-top: 4px; margin-bottom: 8px;\">%s</p></html>", message));
+      currentlyProcessedTextPane.addHyperlinkListener(e -> {
+        if (e.getEventType() == ACTIVATED) {
+          ShowSettingsUtil.getInstance()
+              .showSettingsDialog(project, GeneralSettingsConfigurable.class);
+        }
+      });
+      hideCaret();
+
+      if (webpageListPanel != null) {
+        webpageListPanel.setVisible(false);
       }
     });
-    hideCaret();
-
-    if (webpageListPanel != null) {
-      webpageListPanel.setVisible(false);
-    }
   }
 
   public void displayQuotaExceeded() {
-    currentlyProcessedTextPane.setText("<html>"
-        + "<p style=\"margin-top: 4px; margin-bottom: 8px;\">"
-        + "You exceeded your current quota, please check your plan and billing details, "
-        + "or <a href=\"#CHANGE_PROVIDER\">change</a> to a different LLM provider.</p>"
-        + "</html>");
+    ApplicationManager.getApplication().invokeLater(() -> {
+      currentlyProcessedTextPane.setText("<html>"
+          + "<p style=\"margin-top: 4px; margin-bottom: 8px;\">"
+          + "You exceeded your current quota, please check your plan and billing details, "
+          + "or <a href=\"#CHANGE_PROVIDER\">change</a> to a different LLM provider.</p>"
+          + "</html>");
 
-    currentlyProcessedTextPane.addHyperlinkListener(e -> {
-      if (e.getEventType() == ACTIVATED) {
-        ShowSettingsUtil.getInstance()
-            .showSettingsDialog(project, GeneralSettingsConfigurable.class);
-        TelemetryAction.IDE_ACTION.createActionMessage()
-            .property("action", ActionType.CHANGE_PROVIDER.name())
-            .send();
+      currentlyProcessedTextPane.addHyperlinkListener(e -> {
+        if (e.getEventType() == ACTIVATED) {
+          ShowSettingsUtil.getInstance()
+              .showSettingsDialog(project, GeneralSettingsConfigurable.class);
+          TelemetryAction.IDE_ACTION.createActionMessage()
+              .property("action", ActionType.CHANGE_PROVIDER.name())
+              .send();
+        }
+      });
+      hideCaret();
+
+      if (webpageListPanel != null) {
+        webpageListPanel.setVisible(false);
       }
     });
-    hideCaret();
-
-    if (webpageListPanel != null) {
-      webpageListPanel.setVisible(false);
-    }
   }
 
   public void displayError(String message) {
-    var errorText = format(
-        "<html><p style=\"margin-top: 4px; margin-bottom: 8px;\">%s</p></html>",
-        message);
-    if (responseReceived) {
-      add(createTextPane(errorText, false));
-    } else {
-      currentlyProcessedTextPane.setText(errorText);
-    }
-    hideCaret();
+    ApplicationManager.getApplication().invokeLater(() -> {
+      var errorText = format(
+          "<html><p style=\"margin-top: 4px; margin-bottom: 8px;\">%s</p></html>",
+          message);
+      if (responseReceived) {
+        add(createTextPane(errorText, false));
+      } else {
+        currentlyProcessedTextPane.setText(errorText);
+      }
+      hideCaret();
 
-    if (webpageListPanel != null) {
-      webpageListPanel.setVisible(false);
-    }
+      if (webpageListPanel != null) {
+        webpageListPanel.setVisible(false);
+      }
+    });
   }
 
   public void displayWebSearchItem(Details details) {
@@ -196,19 +203,23 @@ public class ChatMessageResponseBody extends JPanel {
       var codeBlock = ((FencedCodeBlock) child);
       var code = codeBlock.getContentChars().unescape();
       if (!code.isEmpty()) {
-        if (currentlyProcessedEditorPanel == null) {
-          prepareProcessingCode(code, codeBlock.getInfo().unescape());
-        }
-        EditorUtil.updateEditorDocument(currentlyProcessedEditorPanel.getEditor(), code);
+        ApplicationManager.getApplication().invokeLater(() -> {
+          if (currentlyProcessedEditorPanel == null) {
+            prepareProcessingCode(code, codeBlock.getInfo().unescape());
+          }
+          EditorUtil.updateEditorDocument(currentlyProcessedEditorPanel.getEditor(), code);
+        });
       }
     }
   }
 
   private void processText(String markdownText, boolean caretVisible) {
-    if (currentlyProcessedTextPane == null) {
-      prepareProcessingText(caretVisible);
-    }
-    currentlyProcessedTextPane.setText(convertMdToHtml(markdownText));
+    ApplicationManager.getApplication().invokeLater(() -> {
+      if (currentlyProcessedTextPane == null) {
+        prepareProcessingText(caretVisible);
+      }
+      currentlyProcessedTextPane.setText(convertMdToHtml(markdownText));
+    });
   }
 
   private void prepareProcessingText(boolean caretVisible) {
@@ -244,19 +255,17 @@ public class ChatMessageResponseBody extends JPanel {
   }
 
   private static JPanel createWebpageListPanel(WebpageList webpageList) {
-    var panel = new JPanel(new BorderLayout());
-
     var title = new JPanel(new BorderLayout());
     title.setOpaque(false);
     title.setBorder(JBUI.Borders.empty(8, 0));
     title.add(new JBLabel(CodeGPTBundle.get("chatMessageResponseBody.webPagesTitle"))
         .withFont(JBUI.Fonts.miniFont()), BorderLayout.LINE_START);
-    panel.add(title);
-
     var listPanel = new JPanel(new BorderLayout());
     listPanel.add(webpageList, BorderLayout.LINE_START);
-    panel.add(listPanel);
 
+    var panel = new JPanel(new BorderLayout());
+    panel.add(title);
+    panel.add(listPanel);
     return panel;
   }
 }

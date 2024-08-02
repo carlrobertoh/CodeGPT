@@ -5,13 +5,13 @@ import static ee.carlrobert.codegpt.ui.UIUtil.createScrollPaneWithSmartScroller;
 import static java.lang.String.format;
 
 import com.intellij.openapi.Disposable;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.CodeGPTKeys;
-import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.ReferencedFile;
 import ee.carlrobert.codegpt.actions.ActionType;
 import ee.carlrobert.codegpt.completions.CallParameters;
@@ -42,7 +42,6 @@ import java.nio.file.Path;
 import java.util.UUID;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 import kotlin.Unit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -112,7 +111,7 @@ public class ChatToolWindowTabPanel implements Disposable {
   }
 
   public void sendMessage(Message message, ConversationType conversationType) {
-    SwingUtilities.invokeLater(() -> {
+    ApplicationManager.getApplication().invokeLater(() -> {
       var referencedFiles = project.getUserData(CodeGPTKeys.SELECTED_FILES);
       var chatToolWindowPanel = project.getService(ChatToolWindowContentManager.class)
           .tryFindChatToolWindowPanel();
@@ -128,6 +127,7 @@ public class ChatToolWindowTabPanel implements Disposable {
 
         chatToolWindowPanel.ifPresent(panel -> panel.clearNotifications(project));
       }
+      totalTokensPanel.updateConversationTokens(conversation);
 
       var userMessagePanel = new UserMessagePanel(project, message, this);
       var attachedFilePath = CodeGPTKeys.IMAGE_ATTACHMENT_FILE_PATH.get(project);
@@ -143,7 +143,6 @@ public class ChatToolWindowTabPanel implements Disposable {
 
       var responsePanel = createResponsePanel(message, conversationType);
       messagePanel.add(responsePanel);
-      updateTotalTokens(message);
       call(callParameters, responsePanel);
     });
   }
@@ -162,12 +161,6 @@ public class ChatToolWindowTabPanel implements Disposable {
       }
     }
     return callParameters;
-  }
-
-  private void updateTotalTokens(Message message) {
-    int userPromptTokens = EncodingManager.getInstance().countTokens(message.getPrompt());
-    int conversationTokens = EncodingManager.getInstance().countConversationTokens(conversation);
-    totalTokensPanel.updateConversationTokens(conversationTokens + userPromptTokens);
   }
 
   private ResponsePanel createResponsePanel(Message message, ConversationType conversationType) {
