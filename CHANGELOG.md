@@ -8,9 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- An additional context popup triggered by '@' keystrokes
 - **Web search support** - available only through the CodeGPT provider [#641](https://github.com/carlrobertoh/CodeGPT/pull/641)
-- **Persona customization** - a quick way to define and switch between different system prompts. Initial release comes with over 600 pre-defined prompts. [#638](https://github.com/carlrobertoh/CodeGPT/pull/638)
+- **Customizable Personas** - a quick way to define and switch between different system prompts. Initial release comes with over 600 pre-defined prompts. [#638](https://github.com/carlrobertoh/CodeGPT/pull/638)
+
+### Other Improvements
+
+- The textbox suggestions popover now offers better usability, making it easier and quicker to add additional context to your session for more accurate responses.
+- Support for attaching folders, allowing all files within the folder to be added to your current chat session.
+- Optimized the chat user interface for better performance. We noticed that for faster models, the inference speed didn't match what was being rendered on the screen.
 
 ## [2.8.5-223] - 2024-07-24
 
