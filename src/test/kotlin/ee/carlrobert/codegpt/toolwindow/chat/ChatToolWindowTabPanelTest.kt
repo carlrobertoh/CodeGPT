@@ -61,6 +61,7 @@ class ChatToolWindowTabPanelTest : IntegrationTest() {
     waitExpecting {
       val messages = conversation.messages
       messages.isNotEmpty() && "Hello!" == messages[0].response
+              && panel.tokenDetails.conversationTokens > 0
     }
     val encodingManager = EncodingManager.getInstance()
     assertThat(panel.tokenDetails).extracting(
@@ -70,7 +71,7 @@ class ChatToolWindowTabPanelTest : IntegrationTest() {
       "highlightedTokens")
       .containsExactly(
         encodingManager.countTokens("TEST_SYSTEM_PROMPT"),
-        encodingManager.countTokens(message.prompt),
+        encodingManager.countConversationTokens(conversation),
         0,
         0)
     assertThat(panel.conversation)
@@ -146,6 +147,7 @@ class ChatToolWindowTabPanelTest : IntegrationTest() {
     waitExpecting {
       val messages = conversation.messages
       messages.isNotEmpty() && "Hello!" == messages[0].response
+              && panel.tokenDetails.conversationTokens > 0
     }
     val encodingManager = EncodingManager.getInstance()
     assertThat(panel.tokenDetails).extracting(
@@ -155,7 +157,7 @@ class ChatToolWindowTabPanelTest : IntegrationTest() {
       "highlightedTokens")
       .containsExactly(
         encodingManager.countTokens("TEST_SYSTEM_PROMPT"),
-        encodingManager.countTokens(message.prompt),
+        encodingManager.countConversationTokens(conversation),
         0,
         0)
     assertThat(panel.conversation)
@@ -219,6 +221,7 @@ class ChatToolWindowTabPanelTest : IntegrationTest() {
     waitExpecting {
       val messages = conversation.messages
       messages.isNotEmpty() && "Hello!" == messages[0].response
+              && panel.tokenDetails.conversationTokens > 0
     }
     val encodingManager = EncodingManager.getInstance()
     assertThat(panel.tokenDetails).extracting(
@@ -228,7 +231,7 @@ class ChatToolWindowTabPanelTest : IntegrationTest() {
       "highlightedTokens")
       .containsExactly(
         encodingManager.countTokens("TEST_SYSTEM_PROMPT"),
-        encodingManager.countTokens(message.prompt),
+        encodingManager.countConversationTokens(conversation),
         0,
         0)
     assertThat(panel.conversation)
@@ -309,6 +312,7 @@ class ChatToolWindowTabPanelTest : IntegrationTest() {
     waitExpecting {
       val messages = conversation.messages
       messages.isNotEmpty() && "Hello!" == messages[0].response
+              && panel.tokenDetails.conversationTokens > 0
     }
     val encodingManager = EncodingManager.getInstance()
     assertThat(panel.tokenDetails).extracting(
@@ -318,7 +322,7 @@ class ChatToolWindowTabPanelTest : IntegrationTest() {
       "highlightedTokens")
       .containsExactly(
         encodingManager.countTokens("TEST_SYSTEM_PROMPT"),
-        encodingManager.countTokens(message.prompt),
+        encodingManager.countConversationTokens(conversation),
         0,
         0)
     assertThat(panel.conversation)
@@ -393,6 +397,7 @@ class ChatToolWindowTabPanelTest : IntegrationTest() {
     waitExpecting {
       val messages = conversation.messages
       messages.isNotEmpty() && "Hello!" == messages[0].response
+              && panel.tokenDetails.conversationTokens > 0
     }
     assertThat(panel.conversation)
       .isNotNull()

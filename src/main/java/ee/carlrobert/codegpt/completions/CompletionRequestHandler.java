@@ -4,19 +4,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.codegpt.events.CodeGPTEvent;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
-import ee.carlrobert.codegpt.settings.GeneralSettingsState;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.completion.CompletionEventListener;
-import java.util.List;
-import javax.swing.SwingWorker;
 import okhttp3.sse.EventSource;
 
 public class CompletionRequestHandler {
 
   private final StringBuilder messageBuilder = new StringBuilder();
   private final CompletionResponseEventListener completionResponseEventListener;
-  private SwingWorker<Void, String> swingWorker;
   private EventSource eventSource;
 
   public CompletionRequestHandler(CompletionResponseEventListener completionResponseEventListener) {
@@ -24,15 +20,21 @@ public class CompletionRequestHandler {
   }
 
   public void call(CallParameters callParameters) {
-    swingWorker = new CompletionRequestWorker(callParameters);
-    swingWorker.execute();
+    try {
+      eventSource = startCall(callParameters, new RequestCompletionEventListener(callParameters));
+    } catch (TotalUsageExceededException e) {
+      completionResponseEventListener.handleTokensExceeded(
+          callParameters.getConversation(),
+          callParameters.getMessage());
+    } finally {
+      sendInfo(callParameters);
+    }
   }
 
   public void cancel() {
     if (eventSource != null) {
       eventSource.cancel();
     }
-    swingWorker.cancel(true);
   }
 
   private EventSource startCall(
@@ -57,79 +59,48 @@ public class CompletionRequestHandler {
     completionResponseEventListener.handleError(new ErrorDetails(errorMessage), ex);
   }
 
-  private class CompletionRequestWorker extends SwingWorker<Void, String> {
+  class RequestCompletionEventListener implements CompletionEventListener<String> {
 
     private final CallParameters callParameters;
 
-    public CompletionRequestWorker(CallParameters callParameters) {
+    public RequestCompletionEventListener(CallParameters callParameters) {
       this.callParameters = callParameters;
     }
 
-    protected Void doInBackground() {
-      var settings = GeneralSettings.getCurrentState();
+    @Override
+    public void onEvent(String data) {
       try {
-        eventSource = startCall(callParameters, new RequestCompletionEventListener());
-      } catch (TotalUsageExceededException e) {
-        completionResponseEventListener.handleTokensExceeded(
-            callParameters.getConversation(),
-            callParameters.getMessage());
-      } finally {
-        sendInfo(settings);
+        var event = new ObjectMapper().readValue(data, CodeGPTEvent.class);
+        completionResponseEventListener.handleCodeGPTEvent(event);
+      } catch (JsonProcessingException e) {
+        // ignore
       }
-      return null;
     }
 
-    protected void process(List<String> chunks) {
+    @Override
+    public void onMessage(String message, EventSource eventSource) {
+      messageBuilder.append(message);
       callParameters.getMessage().setResponse(messageBuilder.toString());
-      for (String text : chunks) {
-        messageBuilder.append(text);
-        completionResponseEventListener.handleMessage(text);
-      }
+      completionResponseEventListener.handleMessage(message);
     }
 
-    class RequestCompletionEventListener implements CompletionEventListener<String> {
-
-      @Override
-      public void onEvent(String data) {
-        try {
-          var event = new ObjectMapper().readValue(data, CodeGPTEvent.class);
-          completionResponseEventListener.handleCodeGPTEvent(event);
-        } catch (JsonProcessingException e) {
-          // ignore
-        }
-      }
-
-      @Override
-      public void onMessage(String message, EventSource eventSource) {
-        publish(message);
-      }
-
-      @Override
-      public void onComplete(StringBuilder messageBuilder) {
-        completionResponseEventListener.handleCompleted(messageBuilder.toString(), callParameters);
-      }
-
-      @Override
-      public void onCancelled(StringBuilder messageBuilder) {
-        completionResponseEventListener.handleCompleted(messageBuilder.toString(), callParameters);
-      }
-
-      @Override
-      public void onError(ErrorDetails error, Throwable ex) {
-        try {
-          completionResponseEventListener.handleError(error, ex);
-        } finally {
-          sendError(error, ex);
-        }
-      }
+    @Override
+    public void onComplete(StringBuilder messageBuilder) {
+      completionResponseEventListener.handleCompleted(messageBuilder.toString(), callParameters);
     }
 
-    private void sendInfo(GeneralSettingsState settings) {
-      TelemetryAction.COMPLETION.createActionMessage()
-          .property("conversationId", callParameters.getConversation().getId().toString())
-          .property("model", callParameters.getConversation().getModel())
-          .property("service", settings.getSelectedService().getCode().toLowerCase())
-          .send();
+    @Override
+    public void onCancelled(StringBuilder messageBuilder) {
+      completionResponseEventListener.handleCompleted(messageBuilder.toString(), callParameters);
+    }
+
+    @Override
+    public void onError(ErrorDetails error, Throwable ex) {
+      try {
+        completionResponseEventListener.handleError(error, ex);
+      } finally {
+        sendError(error, ex);
+      }
     }
 
     private void sendError(ErrorDetails error, Throwable ex) {
@@ -146,5 +117,13 @@ public class CompletionRequestHandler {
       }
       telemetryMessage.send();
     }
+  }
+
+  private void sendInfo(CallParameters callParameters) {
+    TelemetryAction.COMPLETION.createActionMessage()
+        .property("conversationId", callParameters.getConversation().getId().toString())
+        .property("model", callParameters.getConversation().getModel())
+        .property("service", GeneralSettings.getSelectedService().getCode().toLowerCase())
+        .send();
   }
 }
