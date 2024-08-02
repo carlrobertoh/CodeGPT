@@ -569,7 +569,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [2.8.4-223]: https://github.com/carlrobertoh/CodeGPT/compare/v2.8.3-223...v2.8.4-223
 [2.8.3-223]: https://github.com/carlrobertoh/CodeGPT/compare/v2.8.2-233...v2.8.3-223
 [2.8.2-223]: https://github.com/carlrobertoh/CodeGPT/compare/v2.8.1-223...v2.8.2-223
-[2.8.2-233]: https://github.com/carlrobertoh/CodeGPT/compare/v2.8.1-223...v2.8.2-233
 [2.8.1-223]: https://github.com/carlrobertoh/CodeGPT/compare/v2.8.0-223...v2.8.1-223
 [2.8.0-223]: https://github.com/carlrobertoh/CodeGPT/compare/v2.7.1-223...v2.8.0-223
 [2.7.1-223]: https://github.com/carlrobertoh/CodeGPT/compare/v2.7.0-223...v2.7.1-223

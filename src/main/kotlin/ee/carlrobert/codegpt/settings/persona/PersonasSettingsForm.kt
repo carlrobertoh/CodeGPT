@@ -105,7 +105,13 @@ class PersonasSettingsForm {
             }
 
             userCreatedPersonas.removeIf { removedItemIds.contains(it.id) }
-            userCreatedPersonas.addAll(addedItems.map { it.toPersonaDetailsState() })
+            userCreatedPersonas.forEach {
+                if (it.id == persona?.id) {
+                    it.name = persona.name
+                    it.instructions = persona.instructions
+                }
+            }
+            userCreatedPersonas.addAll(findMatchingRows(addedItems.map { it.id }).map { it.toPersonaDetailsState() })
         }
         clear()
     }
@@ -154,8 +160,7 @@ class PersonasSettingsForm {
     }
 
     private fun createNewPersona(name: String, prompt: String): PersonaDetails {
-        val newId = findMaxId() + 1
-        return PersonaDetails(newId, name, prompt)
+        return PersonaDetails(findMaxId() + 1, name, prompt)
     }
 
     private fun addPersonaToTable(persona: PersonaDetails) {
@@ -209,7 +214,7 @@ class PersonasSettingsForm {
                     index
                 )
             }
-            ResourceUtil.getFilteredPersonaSuggestions().forEachIndexed { index, persona ->
+            ResourceUtil.getDefaultPersonas().forEachIndexed { index, persona ->
                 tableModel.addPersonaRow(persona, selectedPersona.id, index, true)
             }
         }
@@ -284,5 +289,20 @@ class PersonasSettingsForm {
     private fun clear() {
         addedItems.clear()
         removedItemIds.clear()
+    }
+
+    private fun findMatchingRows(ids: List<Long>): List<PersonaDetails> {
+        val matchingRows = mutableListOf<PersonaDetails>()
+
+        for (rowIndex in 0 until tableModel.rowCount) {
+            val personaId = tableModel.getValueAt(rowIndex, 0) as Long
+            if (ids.contains(personaId)) {
+                val name = tableModel.getValueAt(rowIndex, 1) as String
+                val instructions = tableModel.getValueAt(rowIndex, 2) as String
+                matchingRows.add(PersonaDetails(personaId, name, instructions))
+            }
+        }
+
+        return matchingRows
     }
 }
