@@ -18,7 +18,6 @@ import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.TotalTokensPanel;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.codegpt.ui.textarea.UserInputPanel;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
-import javax.swing.SwingUtilities;
 
 abstract class ToolWindowCompletionResponseEventListener implements
     CompletionResponseEventListener {
@@ -54,17 +53,16 @@ abstract class ToolWindowCompletionResponseEventListener implements
   @Override
   public void handleMessage(String partialMessage) {
     try {
-      ApplicationManager.getApplication()
-          .invokeLater(() -> {
-            responseContainer.update(partialMessage);
-            messageBuilder.append(partialMessage);
+      responseContainer.update(partialMessage);
+      messageBuilder.append(partialMessage);
 
-            if (!completed) {
-              var ongoingTokens = encodingManager.countTokens(messageBuilder.toString());
-              totalTokensPanel.update(
-                  totalTokensPanel.getTokenDetails().getTotal() + ongoingTokens);
-            }
-          });
+      if (!completed) {
+        var ongoingTokens = encodingManager.countTokens(messageBuilder.toString());
+        ApplicationManager.getApplication().invokeLater(() -> {
+          totalTokensPanel.update(
+              totalTokensPanel.getTokenDetails().getTotal() + ongoingTokens);
+        });
+      }
     } catch (Exception e) {
       responseContainer.displayError("Something went wrong.");
       throw new RuntimeException("Error while updating the content", e);
@@ -73,7 +71,7 @@ abstract class ToolWindowCompletionResponseEventListener implements
 
   @Override
   public void handleError(ErrorDetails error, Throwable ex) {
-    SwingUtilities.invokeLater(() -> {
+    ApplicationManager.getApplication().invokeLater(() -> {
       try {
         if ("insufficient_quota".equals(error.getCode())) {
           responseContainer.displayQuotaExceeded();
@@ -90,7 +88,7 @@ abstract class ToolWindowCompletionResponseEventListener implements
 
   @Override
   public void handleTokensExceeded(Conversation conversation, Message message) {
-    SwingUtilities.invokeLater(() -> {
+    ApplicationManager.getApplication().invokeLater(() -> {
       var answer = OverlayUtil.showTokenLimitExceededDialog();
       if (answer == OK) {
         TelemetryAction.IDE_ACTION.createActionMessage()
@@ -110,7 +108,7 @@ abstract class ToolWindowCompletionResponseEventListener implements
   public void handleCompleted(String fullMessage, CallParameters callParameters) {
     conversationService.saveMessage(fullMessage, callParameters);
 
-    SwingUtilities.invokeLater(() -> {
+    ApplicationManager.getApplication().invokeLater(() -> {
       try {
         responsePanel.enableActions();
         totalTokensPanel.updateUserPromptTokens(textArea.getText());
@@ -123,7 +121,8 @@ abstract class ToolWindowCompletionResponseEventListener implements
 
   @Override
   public void handleCodeGPTEvent(CodeGPTEvent event) {
-    responseContainer.displayWebSearchItem(event.getEvent().getDetails());
+    ApplicationManager.getApplication().invokeLater(() ->
+        responseContainer.displayWebSearchItem(event.getEvent().getDetails()));
   }
 
   private void stopStreaming(ChatMessageResponseBody responseContainer) {
