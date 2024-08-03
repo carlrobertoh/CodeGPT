@@ -264,8 +264,8 @@ public class ChatMessageResponseBody extends JPanel {
     listPanel.add(webpageList, BorderLayout.LINE_START);
 
     var panel = new JPanel(new BorderLayout());
-    panel.add(title);
-    panel.add(listPanel);
+    panel.add(title, BorderLayout.NORTH);
+    panel.add(listPanel, BorderLayout.CENTER);
     return panel;
   }
 }
