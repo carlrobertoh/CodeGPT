@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.9.0-241.1] - 2024-08-03
+
 ### Added
 
 - **Web search support** - available only through the CodeGPT provider [#641](https://github.com/carlrobertoh/CodeGPT/pull/641)
@@ -572,7 +574,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `OPENAI_API_KEY` persistence, key is saved in the OS password safe from now on
 
-[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.8.5-241.1...HEAD
+[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.9.0-241.1...HEAD
+[2.9.0-241.1]: https://github.com/carlrobertoh/CodeGPT/compare/v2.8.5-241.1...v2.9.0-241.1
 [2.8.5-241.1]: https://github.com/carlrobertoh/CodeGPT/compare/v2.8.4-241.1...v2.8.5-241.1
 [2.8.4-241.1]: https://github.com/carlrobertoh/CodeGPT/compare/v2.8.3-241.1...v2.8.4-241.1
 [2.8.3-241.1]: https://github.com/carlrobertoh/CodeGPT/compare/v2.8.2-241.1...v2.8.3-241.1
