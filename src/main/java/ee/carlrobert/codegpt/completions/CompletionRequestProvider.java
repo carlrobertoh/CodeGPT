@@ -54,6 +54,7 @@ import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionSt
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIImageUrl;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIMessageImageURLContent;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIMessageTextContent;
+import ee.carlrobert.llm.client.openai.completion.request.RequestDocumentationDetails;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -226,6 +227,14 @@ public class CompletionRequestProvider {
     if (callParameters.getMessage().isWebSearchIncluded()) {
       // tri-state boolean
       requestBuilder.setWebSearchIncluded(true);
+    }
+    var documentationDetails =
+        callParameters.getMessage().getDocumentationDetails();
+    if (documentationDetails != null) {
+      var requestDocumentationDetails = new RequestDocumentationDetails();
+      requestDocumentationDetails.setName(documentationDetails.getName());
+      requestDocumentationDetails.setUrl(documentationDetails.getUrl());
+      requestBuilder.setDocumentationDetails(requestDocumentationDetails);
     }
     return requestBuilder.build();
   }

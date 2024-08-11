@@ -103,7 +103,7 @@ public class OverlayUtil {
             CodeGPTBundle.get("dialog.tokenLimitExceeded.title"),
             CodeGPTBundle.get("dialog.tokenLimitExceeded.description"))
         .yesText(CodeGPTBundle.get("dialog.continue"))
-        .noText(CodeGPTBundle.get("dialog.cancel"))
+        .noText(CodeGPTBundle.get("shared.cancel"))
         .icon(Default)
         .doNotAsk(new DoNotAskOption.Adapter() {
           @Override
@@ -132,7 +132,7 @@ public class OverlayUtil {
             CodeGPTBundle.get("dialog.tokenSoftLimitExceeded.title"),
             format(CodeGPTBundle.get("dialog.tokenSoftLimitExceeded.description"), tokenCount))
         .yesText(CodeGPTBundle.get("dialog.continue"))
-        .noText(CodeGPTBundle.get("dialog.cancel"))
+        .noText(CodeGPTBundle.get("shared.cancel"))
         .icon(Default)
         .doNotAsk(new DoNotAskOption.Adapter() {
           @Override

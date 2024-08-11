@@ -22,7 +22,10 @@ import javax.swing.text.DefaultStyledDocument
 import javax.swing.text.StyleConstants
 import javax.swing.text.StyleContext
 
-class CustomTextPane(private val onSubmit: (String) -> Unit) : JTextPane() {
+class CustomTextPane(
+    private val highlightedTextRanges: MutableList<Pair<TextRange, Boolean>>,
+    private val onSubmit: (String) -> Unit
+) : JTextPane() {
 
     init {
         isOpaque = false
@@ -39,7 +42,15 @@ class CustomTextPane(private val onSubmit: (String) -> Unit) : JTextPane() {
         inputMap.put(KeyStroke.getKeyStroke("ENTER"), "text-submit")
         actionMap.put("text-submit", object : AbstractAction() {
             override fun actionPerformed(e: ActionEvent) {
-                onSubmit(text)
+                var textWithoutActions = text
+                highlightedTextRanges.forEach {
+                    val (textRange, replacement) = it
+                    if (replacement) {
+                        textWithoutActions =
+                            textWithoutActions.replace(text.substring(textRange.startOffset, textRange.endOffset), "")
+                    }
+                }
+                onSubmit(textWithoutActions.trim())
             }
         })
     }
@@ -47,7 +58,8 @@ class CustomTextPane(private val onSubmit: (String) -> Unit) : JTextPane() {
     fun appendHighlightedText(
         text: String,
         searchChar: Char = '@',
-        withWhitespace: Boolean = true
+        withWhitespace: Boolean = true,
+        replacement: Boolean = true
     ): TextRange? {
         val lastIndex = this.text.lastIndexOf(searchChar)
         if (lastIndex != -1) {
@@ -68,8 +80,9 @@ class CustomTextPane(private val onSubmit: (String) -> Unit) : JTextPane() {
                 JBUI.CurrentTheme.GotItTooltip.codeBackground(true)
             )
 
-            document.remove(lastIndex + 1, document.length - (lastIndex + 1))
-            document.insertString(lastIndex + 1, text, fileNameStyle)
+            val startOffset = lastIndex + 1
+            document.remove(startOffset, document.length - startOffset)
+            document.insertString(startOffset, text, fileNameStyle)
             styledDocument.setCharacterAttributes(
                 lastIndex,
                 text.length,
@@ -83,7 +96,11 @@ class CustomTextPane(private val onSubmit: (String) -> Unit) : JTextPane() {
                     styleContext.getStyle(StyleContext.DEFAULT_STYLE)
                 )
             }
-            return TextRange(lastIndex, lastIndex + text.length)
+            val modifiedStartOffset = if (searchChar == '@') startOffset - 1 else startOffset
+            val endOffset = startOffset + text.length + (if (withWhitespace) 1 else 0)
+            val textRange = TextRange(modifiedStartOffset, endOffset)
+            highlightedTextRanges.add(Pair(textRange, replacement))
+            return textRange
         }
         return null
     }
