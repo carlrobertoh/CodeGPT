@@ -6,6 +6,7 @@ codegpt-core/src/main/java/grammar/*
 !codegpt-core/src/main/java/grammar/TypeScriptParserBase.java
 
 .gradle
+.kotlin
 build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
