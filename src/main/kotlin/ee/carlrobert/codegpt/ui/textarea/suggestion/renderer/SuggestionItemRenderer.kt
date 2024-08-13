@@ -14,7 +14,9 @@ import ee.carlrobert.codegpt.ui.textarea.suggestion.item.*
 import ee.carlrobert.codegpt.ui.textarea.suggestion.renderer.SuggestionItemRendererTextUtils.highlightSearchText
 import ee.carlrobert.codegpt.ui.textarea.suggestion.renderer.SuggestionItemRendererTextUtils.searchText
 import ee.carlrobert.codegpt.ui.textarea.suggestion.renderer.SuggestionItemRendererTextUtils.truncate
+import java.awt.image.BufferedImage
 import javax.swing.Icon
+import javax.swing.ImageIcon
 import javax.swing.JLabel
 import javax.swing.JPanel
 
@@ -83,14 +85,17 @@ class FolderItemRenderer(textPane: CustomTextPane) : BaseItemRenderer(textPane) 
 }
 
 class DefaultItemRenderer(textPane: CustomTextPane) : BaseItemRenderer(textPane) {
+    companion object {
+        private val EMPTY_ICON = ImageIcon(BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB))
+    }
+
     override fun render(component: JLabel, value: SuggestionItem): JPanel {
         val label = component.apply {
-            disabledIcon = value.icon
             isEnabled = value.enabled
         }
         return createPanel(
             label,
-            value.icon,
+            value.icon ?: EMPTY_ICON,
             getTitle(value),
             getDescription(value),
             if (value.enabled) null else "This action can only be used with CodeGPT provider."

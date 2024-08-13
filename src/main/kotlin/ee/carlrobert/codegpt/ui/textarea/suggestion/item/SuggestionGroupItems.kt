@@ -112,5 +112,5 @@ class DocumentationSuggestionGroupItem : SuggestionGroupItem {
             }
             .map {
                 DocumentationActionItem(DocumentationDetails(it.name ?: "", it.url ?: ""))
-            } + listOf(CreateDocumentationActionItem())
+            } + listOf(CreateDocumentationActionItem(), ViewAllDocumentationsActionItem())
 }

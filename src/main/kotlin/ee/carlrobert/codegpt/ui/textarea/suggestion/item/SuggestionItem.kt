@@ -6,7 +6,7 @@ import javax.swing.Icon
 
 interface SuggestionItem {
     val displayName: String
-    val icon: Icon
+    val icon: Icon?
     val enabled: Boolean
         get() = true
 }

@@ -8,6 +8,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import ee.carlrobert.codegpt.CodeGPTBundle
 import ee.carlrobert.codegpt.CodeGPTKeys
 import ee.carlrobert.codegpt.settings.GeneralSettings
+import ee.carlrobert.codegpt.settings.documentation.DocumentationsConfigurable
 import ee.carlrobert.codegpt.settings.persona.PersonaDetails
 import ee.carlrobert.codegpt.settings.persona.PersonaSettings
 import ee.carlrobert.codegpt.settings.persona.PersonasConfigurable
@@ -81,6 +82,20 @@ class CreateDocumentationActionItem : SuggestionActionItem {
                 searchChar = ':',
             )
         }
+    }
+}
+
+class ViewAllDocumentationsActionItem : SuggestionActionItem {
+    override val displayName: String =
+        "${CodeGPTBundle.get("suggestionActionItem.viewDocumentations.displayName")} →"
+    override val icon = null
+    override val enabled = GeneralSettings.getSelectedService() == ServiceType.CODEGPT
+
+    override fun execute(project: Project, textPane: CustomTextPane) {
+        service<ShowSettingsUtil>().showSettingsDialog(
+            project,
+            DocumentationsConfigurable::class.java
+        )
     }
 }
 
