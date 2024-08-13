@@ -33,19 +33,7 @@ class SuggestionsPopupManager(
         })
     }
     private val list = SuggestionList(listModel, textPane) {
-        when (it) {
-            is SuggestionActionItem -> {
-                it.execute(project, textPane)
-                hidePopup()
-            }
-
-            is SuggestionGroupItem -> {
-                selectedActionGroup = it
-                updateSuggestions()
-                textPane.appendHighlightedText(it.groupPrefix, withWhitespace = false)
-                textPane.requestFocus()
-            }
-        }
+        handleSuggestionItemSelection(it)
     }
     private val defaultActions: MutableList<SuggestionItem> = mutableListOf(
         FileSuggestionGroupItem(project),
@@ -108,6 +96,22 @@ class SuggestionsPopupManager(
         listModel.addAll(defaultActions)
         popup?.content?.revalidate()
         popup?.content?.repaint()
+    }
+
+    private fun handleSuggestionItemSelection(item: SuggestionItem) {
+        when (item) {
+            is SuggestionActionItem -> {
+                hidePopup()
+                item.execute(project, textPane)
+            }
+
+            is SuggestionGroupItem -> {
+                selectedActionGroup = item
+                updateSuggestions()
+                textPane.appendHighlightedText(item.groupPrefix, withWhitespace = false)
+                textPane.requestFocus()
+            }
+        }
     }
 
     private fun adjustPopupSize() {

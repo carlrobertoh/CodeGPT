@@ -16,6 +16,8 @@ import ee.carlrobert.codegpt.ui.textarea.FileSearchService
 import ee.carlrobert.codegpt.util.ResourceUtil.getDefaultPersonas
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.time.Instant
+import java.time.format.DateTimeParseException
 
 class FileSuggestionGroupItem(private val project: Project) : SuggestionGroupItem {
     override val displayName: String = CodeGPTBundle.get("suggestionGroupItem.files.displayName")
@@ -102,7 +104,7 @@ class DocumentationSuggestionGroupItem : SuggestionGroupItem {
 
     override suspend fun getSuggestions(searchText: String?): List<SuggestionActionItem> =
         service<DocumentationSettings>().state.documentations
-            .take(10)
+            .sortedByDescending { parseDateTime(it.lastUsedDateTime) }
             .filter {
                 if (searchText.isNullOrEmpty()) {
                     true
@@ -110,7 +112,18 @@ class DocumentationSuggestionGroupItem : SuggestionGroupItem {
                     it.name?.contains(searchText, true) ?: false
                 }
             }
+            .take(10)
             .map {
                 DocumentationActionItem(DocumentationDetails(it.name ?: "", it.url ?: ""))
             } + listOf(CreateDocumentationActionItem(), ViewAllDocumentationsActionItem())
+
+    private fun parseDateTime(dateTimeString: String?): Instant {
+        return dateTimeString?.let {
+            try {
+                Instant.parse(it)
+            } catch (e: DateTimeParseException) {
+                Instant.EPOCH
+            }
+        } ?: Instant.EPOCH
+    }
 }

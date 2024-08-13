@@ -36,6 +36,7 @@ abstract class BaseItemRenderer(private val textPane: CustomTextPane) : ItemRend
         val searchText = textPane.text.searchText()
         label.apply {
             this.icon = icon
+            disabledIcon = icon
             iconTextGap = 4
             text = searchText?.let { title.highlightSearchText(it) } ?: title
         }
@@ -98,7 +99,7 @@ class DefaultItemRenderer(textPane: CustomTextPane) : BaseItemRenderer(textPane)
             value.icon ?: EMPTY_ICON,
             getTitle(value),
             getDescription(value),
-            if (value.enabled) null else "This action can only be used with CodeGPT provider."
+            if (value.enabled) null else "This action can only be used with CodeGPT provider"
         ).apply {
             isEnabled = value.enabled
         }

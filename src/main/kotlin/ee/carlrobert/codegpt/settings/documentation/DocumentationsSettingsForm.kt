@@ -43,8 +43,11 @@ class DocumentationsSettingsForm {
                     .align(Align.FILL)
                     .resizableColumn()
                     .applyToComponent {
-                        preferredSize = Dimension(650, 250)
+                        preferredSize = Dimension(600, 400)
                     }
+            }
+            row {
+                text("Documentations can be included in the chat suggestions popup by pressing the @ symbol.")
             }
         }
     }
@@ -132,7 +135,7 @@ class DocumentationsSettingsForm {
     private fun JBTable.setupTableColumns() {
         columnModel.apply {
             getColumn(0).preferredWidth = 200
-            getColumn(1).preferredWidth = 450
+            getColumn(1).preferredWidth = 400
         }
     }
 }

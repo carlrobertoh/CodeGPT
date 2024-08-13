@@ -49,7 +49,7 @@ class SuggestionsPopupBuilder {
             .createComponentPopupBuilder(popupPanel, preferableFocusComponent)
             .setMovable(true)
             .setCancelOnClickOutside(false)
-            .setCancelOnWindowDeactivation(false)
+            .setCancelOnWindowDeactivation(true)
             .setRequestFocus(true)
             .setMinSize(Dimension(480, 30))
             .setCancelCallback(onCancel)
