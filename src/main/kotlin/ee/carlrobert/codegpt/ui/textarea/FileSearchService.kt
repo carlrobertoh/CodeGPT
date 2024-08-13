@@ -6,19 +6,10 @@ import com.intellij.openapi.vfs.VirtualFile
 import ee.carlrobert.codegpt.CodeGPTKeys
 import ee.carlrobert.codegpt.ReferencedFile
 import ee.carlrobert.codegpt.actions.IncludeFilesInContextNotifier
-import ee.carlrobert.codegpt.util.file.FileUtil
-import kotlinx.coroutines.*
 import java.io.File
 
 @Service
 class FileSearchService private constructor(val project: Project) {
-    private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-
-    fun searchFiles(searchText: String): List<VirtualFile> = runBlocking {
-        withContext(scope.coroutineContext) {
-            FileUtil.searchProjectFiles(project, searchText)
-        }
-    }
 
     fun addFileToSession(file: VirtualFile) {
         val filesIncluded =
