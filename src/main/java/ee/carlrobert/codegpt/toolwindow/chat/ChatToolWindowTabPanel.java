@@ -254,6 +254,12 @@ public class ChatToolWindowTabPanel implements Disposable {
     }
     message.setUserMessage(text);
     message.setWebSearchIncluded(webSearchIncluded);
+
+    var addedDocumentation = CodeGPTKeys.ADDED_DOCUMENTATION.get(project);
+    if (addedDocumentation != null) {
+      message.setDocumentationDetails(addedDocumentation);
+    }
+
     sendMessage(message, ConversationType.DEFAULT);
     return Unit.INSTANCE;
   }

@@ -7,6 +7,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.components.service
 import com.intellij.openapi.observable.properties.AtomicBooleanProperty
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.TextRange
 import com.intellij.ui.components.AnActionLink
 import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.RightGap
@@ -30,9 +31,11 @@ class UserInputPanel(
     private val onStop: () -> Unit
 ) : JPanel(BorderLayout()) {
 
-    private val textPane = CustomTextPane { handleSubmit() }
+    private val highlightedTextRanges: MutableList<Pair<TextRange, Boolean>> = mutableListOf()
+
+    private val textPane = CustomTextPane(highlightedTextRanges) { handleSubmit(it) }
         .apply {
-            addKeyListener(CustomTextPaneKeyAdapter(project, this) {
+            addKeyListener(CustomTextPaneKeyAdapter(project, this, highlightedTextRanges) {
                 webSearchIncluded = true
             })
         }
@@ -44,7 +47,7 @@ class UserInputPanel(
             Icons.Send
         ) {
             override fun actionPerformed(e: AnActionEvent) {
-                handleSubmit()
+                handleSubmit(textPane.text)
             }
         }
     )
@@ -107,13 +110,10 @@ class UserInputPanel(
 
     override fun getInsets(): Insets = JBUI.insets(4)
 
-    private fun handleSubmit() {
-        val text = textPane.text
-            // TODO
-            .replace("@web", "")
-            .trim()
+    private fun handleSubmit(text: String) {
         if (text.isNotEmpty()) {
             onSubmit(text, webSearchIncluded)
+            highlightedTextRanges.clear()
             textPane.text = ""
         }
     }

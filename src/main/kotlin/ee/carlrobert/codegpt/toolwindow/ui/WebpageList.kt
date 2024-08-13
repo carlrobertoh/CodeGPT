@@ -39,6 +39,7 @@ class WebpageList(model: DefaultListModel<Details>) : JBList<Details>(model) {
     private fun setupUI() {
         border = JBUI.Borders.emptyBottom(8)
         cellRenderer = WebpageListCellRenderer()
+        isOpaque = false
         setEmptyText("")
     }
 
