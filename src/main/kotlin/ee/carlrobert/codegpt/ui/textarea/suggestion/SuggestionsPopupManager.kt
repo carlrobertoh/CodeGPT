@@ -73,9 +73,9 @@ class SuggestionsPopupManager(
         list.selectNext()
     }
 
-    suspend fun updateSuggestions(searchText: String? = null, updateSuggestionsJob: Job? = null) {
+    suspend fun updateSuggestions(searchText: String? = null) {
         val suggestions = withContext(Dispatchers.Default) {
-            selectedActionGroup?.getSuggestions(searchText, updateSuggestionsJob) ?: emptyList()
+            selectedActionGroup?.getSuggestions(searchText) ?: emptyList()
         }
 
         withContext(Dispatchers.Main) {
