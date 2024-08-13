@@ -14,9 +14,9 @@ import java.io.File
 class FileSearchService private constructor(val project: Project) {
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
-    fun searchFiles(searchText: String): List<String> = runBlocking {
+    fun searchFiles(searchText: String): List<VirtualFile> = runBlocking {
         withContext(scope.coroutineContext) {
-            FileUtil.searchProjectFiles(project, searchText).map { it.path }
+            FileUtil.searchProjectFiles(project, searchText)
         }
     }
 

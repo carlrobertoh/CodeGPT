@@ -1,7 +1,10 @@
-package ee.carlrobert.codegpt.ui.textarea
+package ee.carlrobert.codegpt.ui.textarea.suggestion
 
 import com.intellij.ui.components.JBList
 import com.intellij.util.ui.JBUI
+import ee.carlrobert.codegpt.ui.textarea.CustomTextPane
+import ee.carlrobert.codegpt.ui.textarea.suggestion.item.SuggestionItem
+import ee.carlrobert.codegpt.ui.textarea.suggestion.renderer.SuggestionListCellRenderer
 import java.awt.KeyboardFocusManager
 import java.awt.event.KeyAdapter
 import java.awt.event.KeyEvent
@@ -58,7 +61,7 @@ class SuggestionList(
 
     private fun handleEnterKey() {
         val item = model.getElementAt(selectedIndex)
-        if (item is SuggestionItem.ActionItem && item.action.enabled() || item !is SuggestionItem.ActionItem) {
+        if (item.enabled) {
             onSelected(item)
         }
     }
@@ -80,7 +83,7 @@ class SuggestionList(
         val index = locationToIndex(e.point)
         if (index >= 0) {
             val item = model.getElementAt(index)
-            if (item is SuggestionItem.ActionItem && item.action.enabled() || item !is SuggestionItem.ActionItem) {
+            if (item.enabled) {
                 onSelected(item)
             }
             e.consume()

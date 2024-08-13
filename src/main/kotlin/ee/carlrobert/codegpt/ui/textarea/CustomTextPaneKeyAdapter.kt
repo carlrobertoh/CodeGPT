@@ -5,7 +5,8 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
 import com.jetbrains.rd.util.AtomicReference
-import ee.carlrobert.codegpt.conversations.Conversation
+import ee.carlrobert.codegpt.CodeGPTKeys
+import ee.carlrobert.codegpt.ui.textarea.suggestion.SuggestionsPopupManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -17,16 +18,20 @@ import javax.swing.text.StyledDocument
 class CustomTextPaneKeyAdapter(
     private val project: Project,
     private val textPane: CustomTextPane,
+    private val highlightedTextRanges: MutableList<Pair<TextRange, Boolean>>,
     onWebSearchIncluded: () -> Unit
 ) : KeyAdapter() {
 
-    private val suggestionsPopupManager = SuggestionsPopupManager(project, textPane, onWebSearchIncluded)
+    private val suggestionsPopupManager =
+        SuggestionsPopupManager(project, textPane, onWebSearchIncluded)
     private val popupOpenedAtRange: AtomicReference<TextRange?> = AtomicReference(null)
 
     override fun keyReleased(e: KeyEvent) {
         if (textPane.text.isEmpty()) {
             // TODO: Remove only the files that were added via shortcuts
             project.service<FileSearchService>().removeFilesFromSession()
+            project.putUserData(CodeGPTKeys.ADDED_DOCUMENTATION, null)
+            highlightedTextRanges.clear()
             suggestionsPopupManager.hidePopup()
             return
         }
