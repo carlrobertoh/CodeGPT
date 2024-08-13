@@ -19,7 +19,6 @@ class CustomTextPaneKeyAdapter(
     onWebSearchIncluded: () -> Unit
 ) : KeyAdapter() {
 
-    private var updateSuggestionsJob: Job? = null
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private val suggestionsPopupManager =
         SuggestionsPopupManager(project, textPane, onWebSearchIncluded)
@@ -99,8 +98,7 @@ class CustomTextPaneKeyAdapter(
     }
 
     private fun updateSuggestions() {
-        updateSuggestionsJob?.cancel()
-        updateSuggestionsJob = scope.launch {
+        scope.launch {
             withContext(Dispatchers.Main) {
                 val text = textPane.text
                 val lastAtIndex = text.lastIndexOf('@')
@@ -110,10 +108,7 @@ class CustomTextPaneKeyAdapter(
                         val searchText = text.substring(lastAtSearchIndex + 1)
                         if (searchText.isNotEmpty()) {
                             launch {
-                                suggestionsPopupManager.updateSuggestions(
-                                    searchText,
-                                    updateSuggestionsJob
-                                )
+                                suggestionsPopupManager.updateSuggestions(searchText)
                             }
                         }
                     }
