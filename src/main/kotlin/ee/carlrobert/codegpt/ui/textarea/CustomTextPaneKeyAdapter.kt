@@ -1,15 +1,12 @@
 package ee.carlrobert.codegpt.ui.textarea
 
-import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
 import com.jetbrains.rd.util.AtomicReference
 import ee.carlrobert.codegpt.CodeGPTKeys
 import ee.carlrobert.codegpt.ui.textarea.suggestion.SuggestionsPopupManager
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.awt.event.KeyAdapter
 import java.awt.event.KeyEvent
 import javax.swing.text.StyleContext
@@ -22,6 +19,8 @@ class CustomTextPaneKeyAdapter(
     onWebSearchIncluded: () -> Unit
 ) : KeyAdapter() {
 
+    private var updateSuggestionsJob: Job? = null
+    private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private val suggestionsPopupManager =
         SuggestionsPopupManager(project, textPane, onWebSearchIncluded)
     private val popupOpenedAtRange: AtomicReference<TextRange?> = AtomicReference(null)
@@ -100,15 +99,22 @@ class CustomTextPaneKeyAdapter(
     }
 
     private fun updateSuggestions() {
-        CoroutineScope(Dispatchers.Default).launch {
-            runInEdt {
-                val lastAtIndex = textPane.text.lastIndexOf('@')
+        updateSuggestionsJob?.cancel()
+        updateSuggestionsJob = scope.launch {
+            withContext(Dispatchers.Main) {
+                val text = textPane.text
+                val lastAtIndex = text.lastIndexOf('@')
                 if (lastAtIndex != -1) {
-                    val lastAtSearchIndex = textPane.text.lastIndexOf(':')
+                    val lastAtSearchIndex = text.lastIndexOf(':')
                     if (lastAtSearchIndex != -1) {
-                        val searchText = textPane.text.substring(lastAtSearchIndex + 1)
+                        val searchText = text.substring(lastAtSearchIndex + 1)
                         if (searchText.isNotEmpty()) {
-                            suggestionsPopupManager.updateSuggestions(searchText)
+                            launch {
+                                suggestionsPopupManager.updateSuggestions(
+                                    searchText,
+                                    updateSuggestionsJob
+                                )
+                            }
                         }
                     }
                 } else {
