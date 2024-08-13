@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt.ui.textarea
 
 import com.intellij.openapi.components.service
+import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.colors.EditorFontType
 import com.intellij.openapi.editor.ex.util.EditorUtil
@@ -27,6 +28,10 @@ class CustomTextPane(
     private val onSubmit: (String) -> Unit
 ) : JTextPane() {
 
+    companion object {
+        private val logger = thisLogger()
+    }
+
     init {
         isOpaque = false
         background = JBColor.namedColor("Editor.SearchField.background")
@@ -42,15 +47,7 @@ class CustomTextPane(
         inputMap.put(KeyStroke.getKeyStroke("ENTER"), "text-submit")
         actionMap.put("text-submit", object : AbstractAction() {
             override fun actionPerformed(e: ActionEvent) {
-                var textWithoutActions = text
-                highlightedTextRanges.forEach {
-                    val (textRange, replacement) = it
-                    if (replacement) {
-                        textWithoutActions =
-                            textWithoutActions.replace(text.substring(textRange.startOffset, textRange.endOffset), "")
-                    }
-                }
-                onSubmit(textWithoutActions.trim())
+                onSubmit(removeHighlightedText(text))
             }
         })
     }
@@ -121,6 +118,24 @@ class CustomTextPane(
                 insets.left,
                 g2d.fontMetrics.maxAscent + insets.top
             )
+        }
+    }
+
+    private fun removeHighlightedText(text: String): String {
+        try {
+            var result = text
+            highlightedTextRanges.forEach { (textRange, replacement) ->
+                if (replacement) {
+                    result = result.replace(
+                        text.substring(textRange.startOffset, textRange.endOffset),
+                        ""
+                    )
+                }
+            }
+            return result.trim()
+        } catch (e: Exception) {
+            logger.error("Error while removing highlighted text", e)
+            return text
         }
     }
 }

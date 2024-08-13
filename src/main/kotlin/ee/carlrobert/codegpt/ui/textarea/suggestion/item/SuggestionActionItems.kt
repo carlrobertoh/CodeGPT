@@ -8,6 +8,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import ee.carlrobert.codegpt.CodeGPTBundle
 import ee.carlrobert.codegpt.CodeGPTKeys
 import ee.carlrobert.codegpt.settings.GeneralSettings
+import ee.carlrobert.codegpt.settings.documentation.DocumentationSettings
 import ee.carlrobert.codegpt.settings.documentation.DocumentationsConfigurable
 import ee.carlrobert.codegpt.settings.persona.PersonaDetails
 import ee.carlrobert.codegpt.settings.persona.PersonaSettings
@@ -64,6 +65,7 @@ class DocumentationActionItem(
 
     override fun execute(project: Project, textPane: CustomTextPane) {
         CodeGPTKeys.ADDED_DOCUMENTATION.set(project, documentationDetails)
+        service<DocumentationSettings>().updateLastUsedDateTime(documentationDetails.url)
         textPane.appendHighlightedText(documentationDetails.name, ':')
     }
 }
@@ -77,6 +79,8 @@ class CreateDocumentationActionItem : SuggestionActionItem {
     override fun execute(project: Project, textPane: CustomTextPane) {
         val addDocumentationDialog = AddDocumentationDialog(project)
         if (addDocumentationDialog.showAndGet()) {
+            service<DocumentationSettings>()
+                .updateLastUsedDateTime(addDocumentationDialog.documentationDetails.url)
             textPane.appendHighlightedText(
                 addDocumentationDialog.documentationDetails.name,
                 searchChar = ':',
@@ -120,5 +124,6 @@ class WebSearchActionItem(private val onWebSearchIncluded: () -> Unit) : Suggest
 
     override fun execute(project: Project, textPane: CustomTextPane) {
         onWebSearchIncluded()
+        textPane.appendHighlightedText("web")
     }
 }
