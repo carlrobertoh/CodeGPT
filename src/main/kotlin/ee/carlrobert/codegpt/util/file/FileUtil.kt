@@ -11,11 +11,9 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.util.io.FileUtil.createDirectory
-import com.intellij.openapi.util.text.StringUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileFilter
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings.getLlamaModelsPath
-import kotlinx.coroutines.Job
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -229,13 +227,12 @@ object FileUtil {
         project: Project,
         query: String,
         maxResults: Int = 6,
-        job: Job? = null
     ): List<VirtualFile> {
-        val results = TreeSet<SearchResult>(compareByDescending { it.score })
+        val results = mutableListOf<SearchResult>()
         val fileIndex = project.service<ProjectFileIndex>()
 
         fileIndex.iterateContent({ file ->
-            if (job != null && job.isCancelled) {
+            if (results.size > 9) {
                 return@iterateContent false
             }
 
@@ -260,31 +257,18 @@ object FileUtil {
     }
 
     private fun calculateScore(file: VirtualFile, query: String): Int {
-        var score = 0
+        val fileName = file.nameWithoutExtension.lowercase()
+        val lowercaseQuery = query.lowercase()
 
-        val fileName = file.name
-        if (fileName.contains(query, ignoreCase = true)) {
-            score += 10
-            if (fileName.startsWith(query, ignoreCase = true)) {
-                score += 5
-            }
+        return when {
+            fileName == lowercaseQuery -> 100
+            fileName.startsWith(lowercaseQuery) -> 50
+            lowercaseQuery in fileName -> 25
+            fileName.length < lowercaseQuery.length && lowercaseQuery.startsWith(fileName) -> 15
+            else -> 0
         }
-
-        if (StringUtil.containsIgnoreCase(fileName, query)) {
-            score += 3
-        }
-
-        try {
-            val content = String(file.contentsToByteArray(), Charsets.UTF_8)
-            if (content.contains(query, ignoreCase = true)) {
-                score += 2
-            }
-        } catch (e: Exception) {
-            // Ignore
-        }
-
-        return score
     }
+
 }
 
 data class SearchResult(val file: VirtualFile, val score: Int)

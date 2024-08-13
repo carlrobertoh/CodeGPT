@@ -2,7 +2,6 @@ package ee.carlrobert.codegpt.ui.textarea.suggestion.item
 
 import com.intellij.openapi.project.Project
 import ee.carlrobert.codegpt.ui.textarea.CustomTextPane
-import kotlinx.coroutines.Job
 import javax.swing.Icon
 
 interface SuggestionItem {
@@ -19,8 +18,5 @@ interface SuggestionActionItem : SuggestionItem {
 interface SuggestionGroupItem : SuggestionItem {
     val groupPrefix: String
 
-    suspend fun getSuggestions(
-        searchText: String? = null,
-        updateSuggestionsJob: Job?
-    ): List<SuggestionItem>
+    suspend fun getSuggestions(searchText: String? = null): List<SuggestionItem>
 }
