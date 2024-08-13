@@ -15,6 +15,7 @@ import com.intellij.openapi.util.text.StringUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileFilter
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings.getLlamaModelsPath
+import kotlinx.coroutines.Job
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -228,11 +229,16 @@ object FileUtil {
         project: Project,
         query: String,
         maxResults: Int = 6,
+        job: Job? = null
     ): List<VirtualFile> {
-        val results = mutableListOf<SearchResult>()
+        val results = TreeSet<SearchResult>(compareByDescending { it.score })
         val fileIndex = project.service<ProjectFileIndex>()
 
         fileIndex.iterateContent({ file ->
+            if (job != null && job.isCancelled) {
+                return@iterateContent false
+            }
+
             val score = calculateScore(file, query)
             if (score > 0) {
                 results.add(SearchResult(file, score))

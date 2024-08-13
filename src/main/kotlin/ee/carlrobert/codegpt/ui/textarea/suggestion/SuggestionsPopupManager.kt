@@ -1,14 +1,11 @@
 package ee.carlrobert.codegpt.ui.textarea.suggestion
 
-import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.vcsUtil.showAbove
 import ee.carlrobert.codegpt.ui.textarea.CustomTextPane
 import ee.carlrobert.codegpt.ui.textarea.suggestion.item.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import java.awt.Dimension
 import java.awt.Point
 import javax.swing.DefaultListModel
@@ -21,6 +18,7 @@ class SuggestionsPopupManager(
     private val textPane: CustomTextPane,
     onWebSearchIncluded: () -> Unit,
 ) {
+    private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
     private var selectedActionGroup: SuggestionGroupItem? = null
     private var popup: JBPopup? = null
@@ -75,13 +73,12 @@ class SuggestionsPopupManager(
         list.selectNext()
     }
 
-    fun updateSuggestions(searchText: String? = null) {
-        val suggestions = runBlocking {
-            withContext(Dispatchers.Default) {
-                selectedActionGroup?.getSuggestions(searchText) ?: emptyList()
-            }
+    suspend fun updateSuggestions(searchText: String? = null, updateSuggestionsJob: Job? = null) {
+        val suggestions = withContext(Dispatchers.Default) {
+            selectedActionGroup?.getSuggestions(searchText, updateSuggestionsJob) ?: emptyList()
         }
-        runInEdt {
+
+        withContext(Dispatchers.Main) {
             listModel.clear()
             listModel.addAll(suggestions)
             list.revalidate()
@@ -107,7 +104,9 @@ class SuggestionsPopupManager(
 
             is SuggestionGroupItem -> {
                 selectedActionGroup = item
-                updateSuggestions()
+                scope.launch {
+                    updateSuggestions()
+                }
                 textPane.appendHighlightedText(item.groupPrefix, withWhitespace = false)
                 textPane.requestFocus()
             }

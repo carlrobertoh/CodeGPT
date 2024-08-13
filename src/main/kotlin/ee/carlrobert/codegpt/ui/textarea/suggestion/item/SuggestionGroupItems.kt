@@ -12,9 +12,10 @@ import ee.carlrobert.codegpt.settings.GeneralSettings
 import ee.carlrobert.codegpt.settings.documentation.DocumentationSettings
 import ee.carlrobert.codegpt.settings.service.ServiceType
 import ee.carlrobert.codegpt.ui.DocumentationDetails
-import ee.carlrobert.codegpt.ui.textarea.FileSearchService
 import ee.carlrobert.codegpt.util.ResourceUtil.getDefaultPersonas
+import ee.carlrobert.codegpt.util.file.FileUtil
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.withContext
 import java.time.Instant
 import java.time.format.DateTimeParseException
@@ -24,7 +25,7 @@ class FileSuggestionGroupItem(private val project: Project) : SuggestionGroupIte
     override val groupPrefix = "file:"
     override val icon = AllIcons.FileTypes.Any_type
 
-    override suspend fun getSuggestions(searchText: String?): List<SuggestionActionItem> {
+    override suspend fun getSuggestions(searchText: String?, updateSuggestionsJob: Job?): List<SuggestionActionItem> {
         if (searchText == null) {
             val projectFileIndex = project.service<ProjectFileIndex>()
             return readAction {
@@ -33,9 +34,7 @@ class FileSuggestionGroupItem(private val project: Project) : SuggestionGroupIte
                     .toFileSuggestions()
             }
         }
-        return project.service<FileSearchService>()
-            .searchFiles(searchText)
-            .toFileSuggestions()
+        return FileUtil.searchProjectFiles(project, searchText, job = updateSuggestionsJob).toFileSuggestions()
     }
 
     private fun Iterable<VirtualFile>.toFileSuggestions() = take(10).map { FileActionItem(it) }
@@ -48,7 +47,7 @@ class FolderSuggestionGroupItem(private val project: Project) : SuggestionGroupI
     override val groupPrefix = "folder:"
     override val icon = AllIcons.Nodes.Folder
 
-    override suspend fun getSuggestions(searchText: String?): List<SuggestionActionItem> {
+    override suspend fun getSuggestions(searchText: String?, updateSuggestionsJob: Job?): List<SuggestionActionItem> {
         if (searchText == null) {
             return getProjectFolders(project).toFolderSuggestions()
         }
@@ -83,7 +82,7 @@ class PersonaSuggestionGroupItem : SuggestionGroupItem {
     override val groupPrefix = "persona:"
     override val icon = AllIcons.General.User
 
-    override suspend fun getSuggestions(searchText: String?): List<SuggestionActionItem> =
+    override suspend fun getSuggestions(searchText: String?, updateSuggestionsJob: Job?): List<SuggestionActionItem> =
         getDefaultPersonas()
             .filter {
                 if (searchText.isNullOrEmpty()) {
@@ -102,7 +101,7 @@ class DocumentationSuggestionGroupItem : SuggestionGroupItem {
     override val icon = AllIcons.Toolwindows.Documentation
     override val enabled = GeneralSettings.getSelectedService() == ServiceType.CODEGPT
 
-    override suspend fun getSuggestions(searchText: String?): List<SuggestionActionItem> =
+    override suspend fun getSuggestions(searchText: String?, updateSuggestionsJob: Job?): List<SuggestionActionItem> =
         service<DocumentationSettings>().state.documentations
             .sortedByDescending { parseDateTime(it.lastUsedDateTime) }
             .filter {
