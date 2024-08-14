@@ -20,7 +20,7 @@ dependencies {
     implementation("io.github.bonede:tree-sitter-json:0.21.0a")
     implementation("io.github.bonede:tree-sitter-kotlin:0.3.6")
     implementation("io.github.bonede:tree-sitter-latex:0.3.0a")
-    implementation("io.github.bonede:tree-sitter-lua:2.1.3a")
+    implementation("io.github.bonede:tree-sitter-lua:2.1.3")
     implementation("io.github.bonede:tree-sitter-m68k:0.2.7a")
     implementation("io.github.bonede:tree-sitter-markdown:0.7.1a")
     implementation("io.github.bonede:tree-sitter-objc:main-a")
