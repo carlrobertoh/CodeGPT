@@ -9,7 +9,7 @@ import com.intellij.ui.dsl.builder.panel
 import com.intellij.ui.dsl.gridLayout.UnscaledGaps
 import com.intellij.util.ui.JBUI
 import ee.carlrobert.codegpt.settings.persona.PersonaSettings
-import ee.carlrobert.codegpt.ui.textarea.CustomTextPane
+import ee.carlrobert.codegpt.ui.textarea.PromptTextField
 import ee.carlrobert.codegpt.ui.textarea.suggestion.item.*
 import ee.carlrobert.codegpt.ui.textarea.suggestion.renderer.SuggestionItemRendererTextUtils.highlightSearchText
 import ee.carlrobert.codegpt.ui.textarea.suggestion.renderer.SuggestionItemRendererTextUtils.searchText
@@ -24,7 +24,7 @@ interface ItemRenderer {
     fun render(component: JLabel, value: SuggestionItem): JPanel
 }
 
-abstract class BaseItemRenderer(private val textPane: CustomTextPane) : ItemRenderer {
+abstract class BaseItemRenderer(private val textField: PromptTextField) : ItemRenderer {
     protected fun createPanel(
         label: JLabel,
         icon: Icon,
@@ -33,7 +33,7 @@ abstract class BaseItemRenderer(private val textPane: CustomTextPane) : ItemRend
         toolTipText: String?,
         truncateFromStart: Boolean = false
     ): JPanel {
-        val searchText = textPane.text.searchText()
+        val searchText = textField.text.searchText()
         label.apply {
             this.icon = icon
             disabledIcon = icon
@@ -60,7 +60,7 @@ abstract class BaseItemRenderer(private val textPane: CustomTextPane) : ItemRend
     }
 }
 
-class FileItemRenderer(textPane: CustomTextPane) : BaseItemRenderer(textPane) {
+class FileItemRenderer(textPane: PromptTextField) : BaseItemRenderer(textPane) {
     override fun render(component: JLabel, value: SuggestionItem): JPanel {
         val item = value as FileActionItem
         val icon =
@@ -71,7 +71,7 @@ class FileItemRenderer(textPane: CustomTextPane) : BaseItemRenderer(textPane) {
     }
 }
 
-class FolderItemRenderer(textPane: CustomTextPane) : BaseItemRenderer(textPane) {
+class FolderItemRenderer(textPane: PromptTextField) : BaseItemRenderer(textPane) {
     override fun render(component: JLabel, value: SuggestionItem): JPanel {
         val item = value as FolderActionItem
         return createPanel(
@@ -85,7 +85,7 @@ class FolderItemRenderer(textPane: CustomTextPane) : BaseItemRenderer(textPane) 
     }
 }
 
-class DefaultItemRenderer(textPane: CustomTextPane) : BaseItemRenderer(textPane) {
+class DefaultItemRenderer(textPane: PromptTextField) : BaseItemRenderer(textPane) {
     companion object {
         private val EMPTY_ICON = ImageIcon(BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB))
     }
@@ -120,7 +120,7 @@ class DefaultItemRenderer(textPane: CustomTextPane) : BaseItemRenderer(textPane)
         }
 }
 
-class PersonaItemRenderer(textPane: CustomTextPane) : BaseItemRenderer(textPane) {
+class PersonaItemRenderer(textPane: PromptTextField) : BaseItemRenderer(textPane) {
     override fun render(component: JLabel, value: SuggestionItem): JPanel {
         val item = value as PersonaActionItem
         return createPanel(
@@ -133,7 +133,7 @@ class PersonaItemRenderer(textPane: CustomTextPane) : BaseItemRenderer(textPane)
     }
 }
 
-class DocumentationItemRenderer(textPane: CustomTextPane) : BaseItemRenderer(textPane) {
+class DocumentationItemRenderer(textPane: PromptTextField) : BaseItemRenderer(textPane) {
     override fun render(component: JLabel, value: SuggestionItem): JPanel {
         val item = value as DocumentationActionItem
         return createPanel(
@@ -146,7 +146,7 @@ class DocumentationItemRenderer(textPane: CustomTextPane) : BaseItemRenderer(tex
     }
 }
 
-class RendererFactory(private val textPane: CustomTextPane) {
+class RendererFactory(private val textPane: PromptTextField) {
     fun getRenderer(item: SuggestionItem): ItemRenderer {
         return when (item) {
             is FileActionItem -> FileItemRenderer(textPane)

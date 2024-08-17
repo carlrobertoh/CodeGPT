@@ -11,10 +11,7 @@ object SuggestionItemRendererTextUtils {
         val lastAtIndex = this.lastIndexOf('@')
         if (lastAtIndex == -1) return null
 
-        val lastColonIndex = this.lastIndexOf(':')
-        if (lastColonIndex == -1) return null
-
-        return this.substring(lastColonIndex + 1).takeIf { it.isNotEmpty() }
+        return this.substring(lastAtIndex + 1).takeIf { it.isNotEmpty() }
     }
 
     fun String.truncate(maxWidth: Int, truncateFromStart: Boolean = false): String {

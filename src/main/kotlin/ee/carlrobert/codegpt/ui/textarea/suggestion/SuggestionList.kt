@@ -2,7 +2,7 @@ package ee.carlrobert.codegpt.ui.textarea.suggestion
 
 import com.intellij.ui.components.JBList
 import com.intellij.util.ui.JBUI
-import ee.carlrobert.codegpt.ui.textarea.CustomTextPane
+import ee.carlrobert.codegpt.ui.textarea.PromptTextField
 import ee.carlrobert.codegpt.ui.textarea.suggestion.item.SuggestionItem
 import ee.carlrobert.codegpt.ui.textarea.suggestion.renderer.SuggestionListCellRenderer
 import java.awt.KeyboardFocusManager
@@ -15,7 +15,7 @@ import javax.swing.ListSelectionModel
 
 class SuggestionList(
     listModel: DefaultListModel<SuggestionItem>,
-    private val textPane: CustomTextPane,
+    private val textPane: PromptTextField,
     private val onSelected: (SuggestionItem) -> Unit
 ) : JBList<SuggestionItem>(listModel) {
 
@@ -25,6 +25,19 @@ class SuggestionList(
         setupKeyListener()
         setupMouseListener()
         setupMouseMotionListener()
+    }
+
+    fun selectNext() {
+        updateSelectedIndex(if (selectedIndex < model.size - 1) selectedIndex + 1 else 0)
+    }
+
+    fun selectPrevious() {
+        updateSelectedIndex(if (selectedIndex > 0) selectedIndex - 1 else model.size - 1)
+    }
+
+    private fun updateSelectedIndex(newIndex: Int) {
+        selectedIndex = newIndex
+        ensureIndexIsVisible(newIndex)
     }
 
     private fun setupUI() {
@@ -100,11 +113,5 @@ class SuggestionList(
                 }
             }
         })
-    }
-
-    fun selectNext() {
-        val newIndex = if (selectedIndex < model.size - 1) selectedIndex + 1 else 0
-        selectedIndex = newIndex
-        ensureIndexIsVisible(newIndex)
     }
 }

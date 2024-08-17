@@ -17,7 +17,7 @@ class SuggestionsPopupBuilder {
     private var preferableFocusComponent: JComponent? = null
     private var onCancel: () -> Boolean = { true }
 
-    fun setPreferableFocusComponent(preferableFocusComponent: JComponent): SuggestionsPopupBuilder {
+    fun setPreferableFocusComponent(preferableFocusComponent: JComponent?): SuggestionsPopupBuilder {
         this.preferableFocusComponent = preferableFocusComponent
         return this
     }
