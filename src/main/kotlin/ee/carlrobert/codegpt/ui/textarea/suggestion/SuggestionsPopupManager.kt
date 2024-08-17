@@ -3,7 +3,7 @@ package ee.carlrobert.codegpt.ui.textarea.suggestion
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.vcsUtil.showAbove
-import ee.carlrobert.codegpt.ui.textarea.CustomTextPane
+import ee.carlrobert.codegpt.ui.textarea.PromptTextField
 import ee.carlrobert.codegpt.ui.textarea.suggestion.item.*
 import kotlinx.coroutines.*
 import java.awt.Dimension
@@ -15,11 +15,9 @@ import javax.swing.event.ListDataListener
 
 class SuggestionsPopupManager(
     private val project: Project,
-    private val textPane: CustomTextPane,
-    onWebSearchIncluded: () -> Unit,
+    private val textField: PromptTextField,
 ) {
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-
     private var selectedActionGroup: SuggestionGroupItem? = null
     private var popup: JBPopup? = null
     private var originalLocation: Point? = null
@@ -30,7 +28,7 @@ class SuggestionsPopupManager(
             override fun contentsChanged(e: ListDataEvent) {}
         })
     }
-    private val list = SuggestionList(listModel, textPane) {
+    private val list = SuggestionList(listModel, textField) {
         handleSuggestionItemSelection(it)
     }
     private val defaultActions: MutableList<SuggestionItem> = mutableListOf(
@@ -38,10 +36,10 @@ class SuggestionsPopupManager(
         FolderSuggestionGroupItem(project),
         PersonaSuggestionGroupItem(),
         DocumentationSuggestionGroupItem(),
-        WebSearchActionItem(onWebSearchIncluded),
+        WebSearchActionItem(),
     )
 
-    fun showPopup(component: JComponent) {
+    fun showPopup(component: JComponent? = null) {
         popup = SuggestionsPopupBuilder()
             .setPreferableFocusComponent(component)
             .setOnCancel {
@@ -49,11 +47,9 @@ class SuggestionsPopupManager(
                 true
             }
             .build(list)
-        popup?.showAbove(component)
-        originalLocation = component.locationOnScreen
+        popup?.showAbove(textField)
+        originalLocation = textField.locationOnScreen
         reset(true)
-        // TODO: Apply initial focus to the popup until a proper search mechanism is in place.
-        requestFocus()
         selectNext()
     }
 
@@ -65,24 +61,28 @@ class SuggestionsPopupManager(
         return popup?.isVisible ?: false
     }
 
-    fun requestFocus() {
-        list.requestFocus()
-    }
-
     fun selectNext() {
+        list.requestFocus()
         list.selectNext()
     }
 
-    suspend fun updateSuggestions(searchText: String? = null) {
-        val suggestions = withContext(Dispatchers.Default) {
-            selectedActionGroup?.getSuggestions(searchText) ?: emptyList()
-        }
+    fun selectPrevious() {
+        list.requestFocus()
+        list.selectPrevious()
+    }
 
-        withContext(Dispatchers.Main) {
-            listModel.clear()
-            listModel.addAll(suggestions)
-            list.revalidate()
-            list.repaint()
+    fun updateSuggestions(searchText: String? = null) {
+        scope.launch {
+            val suggestions = withContext(Dispatchers.Default) {
+                selectedActionGroup?.getSuggestions(searchText) ?: emptyList()
+            }
+
+            withContext(Dispatchers.Main) {
+                listModel.clear()
+                listModel.addAll(suggestions)
+                list.revalidate()
+                list.repaint()
+            }
         }
     }
 
@@ -99,16 +99,13 @@ class SuggestionsPopupManager(
         when (item) {
             is SuggestionActionItem -> {
                 hidePopup()
-                item.execute(project, textPane)
+                item.execute(project, textField)
             }
 
             is SuggestionGroupItem -> {
                 selectedActionGroup = item
-                scope.launch {
-                    updateSuggestions()
-                }
-                textPane.appendHighlightedText(item.groupPrefix, withWhitespace = false)
-                textPane.requestFocus()
+                updateSuggestions()
+                textField.requestFocus()
             }
         }
     }
@@ -121,7 +118,6 @@ class SuggestionsPopupManager(
         list.repaint()
 
         popup?.size = Dimension(list.preferredSize.width, list.preferredSize.height + 32)
-
         originalLocation?.let { original ->
             val newY = original.y - list.preferredSize.height - 32
             popup?.setLocation(Point(original.x, maxOf(newY, 0)))
