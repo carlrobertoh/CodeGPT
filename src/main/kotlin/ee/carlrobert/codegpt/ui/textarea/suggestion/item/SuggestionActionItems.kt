@@ -16,16 +16,16 @@ import ee.carlrobert.codegpt.settings.persona.PersonasConfigurable
 import ee.carlrobert.codegpt.settings.service.ServiceType
 import ee.carlrobert.codegpt.ui.AddDocumentationDialog
 import ee.carlrobert.codegpt.ui.DocumentationDetails
-import ee.carlrobert.codegpt.ui.textarea.CustomTextPane
 import ee.carlrobert.codegpt.ui.textarea.FileSearchService
+import ee.carlrobert.codegpt.ui.textarea.PromptTextField
 
 class FileActionItem(val file: VirtualFile) : SuggestionActionItem {
     override val displayName = file.name
     override val icon = file.fileType.icon ?: AllIcons.FileTypes.Any_type
 
-    override fun execute(project: Project, textPane: CustomTextPane) {
+    override fun execute(project: Project, textPane: PromptTextField) {
         project.getService(FileSearchService::class.java).addFileToSession(file)
-        textPane.appendHighlightedText(file.name, ':', replacement = false)
+        textPane.addInlineText("file", file.name, this)
     }
 }
 
@@ -33,12 +33,12 @@ class FolderActionItem(val folder: VirtualFile) : SuggestionActionItem {
     override val displayName = folder.name
     override val icon = AllIcons.Nodes.Folder
 
-    override fun execute(project: Project, textPane: CustomTextPane) {
+    override fun execute(project: Project, textPane: PromptTextField) {
         val fileSearchService = project.service<FileSearchService>()
         folder.children
             .filter { !it.isDirectory }
             .forEach { fileSearchService.addFileToSession(it) }
-        textPane.appendHighlightedText(folder.path, ':', replacement = false)
+        textPane.addInlineText("folder", folder.path, this)
     }
 }
 
@@ -46,13 +46,13 @@ class PersonaActionItem(val personaDetails: PersonaDetails) : SuggestionActionIt
     override val displayName = personaDetails.name
     override val icon = AllIcons.General.User
 
-    override fun execute(project: Project, textPane: CustomTextPane) {
+    override fun execute(project: Project, textPane: PromptTextField) {
         service<PersonaSettings>().state.selectedPersona.apply {
             id = personaDetails.id
             name = personaDetails.name
             instructions = personaDetails.instructions
         }
-        textPane.appendHighlightedText(personaDetails.name, ':')
+        textPane.addInlineText("persona", personaDetails.name, this)
     }
 }
 
@@ -63,10 +63,10 @@ class DocumentationActionItem(
     override val icon = AllIcons.Toolwindows.Documentation
     override val enabled = GeneralSettings.getSelectedService() == ServiceType.CODEGPT
 
-    override fun execute(project: Project, textPane: CustomTextPane) {
+    override fun execute(project: Project, textPane: PromptTextField) {
         CodeGPTKeys.ADDED_DOCUMENTATION.set(project, documentationDetails)
         service<DocumentationSettings>().updateLastUsedDateTime(documentationDetails.url)
-        textPane.appendHighlightedText(documentationDetails.name, ':')
+        textPane.addInlineText("doc", documentationDetails.name, this)
     }
 }
 
@@ -76,14 +76,15 @@ class CreateDocumentationActionItem : SuggestionActionItem {
     override val icon = AllIcons.General.Add
     override val enabled = GeneralSettings.getSelectedService() == ServiceType.CODEGPT
 
-    override fun execute(project: Project, textPane: CustomTextPane) {
+    override fun execute(project: Project, textPane: PromptTextField) {
         val addDocumentationDialog = AddDocumentationDialog(project)
         if (addDocumentationDialog.showAndGet()) {
             service<DocumentationSettings>()
                 .updateLastUsedDateTime(addDocumentationDialog.documentationDetails.url)
-            textPane.appendHighlightedText(
+            textPane.addInlineText(
+                "doc",
                 addDocumentationDialog.documentationDetails.name,
-                searchChar = ':',
+                this
             )
         }
     }
@@ -95,7 +96,7 @@ class ViewAllDocumentationsActionItem : SuggestionActionItem {
     override val icon = null
     override val enabled = GeneralSettings.getSelectedService() == ServiceType.CODEGPT
 
-    override fun execute(project: Project, textPane: CustomTextPane) {
+    override fun execute(project: Project, textPane: PromptTextField) {
         service<ShowSettingsUtil>().showSettingsDialog(
             project,
             DocumentationsConfigurable::class.java
@@ -108,7 +109,7 @@ class CreatePersonaActionItem : SuggestionActionItem {
         CodeGPTBundle.get("suggestionActionItem.createPersona.displayName")
     override val icon = AllIcons.General.Add
 
-    override fun execute(project: Project, textPane: CustomTextPane) {
+    override fun execute(project: Project, textPane: PromptTextField) {
         service<ShowSettingsUtil>().showSettingsDialog(
             project,
             PersonasConfigurable::class.java
@@ -116,14 +117,13 @@ class CreatePersonaActionItem : SuggestionActionItem {
     }
 }
 
-class WebSearchActionItem(private val onWebSearchIncluded: () -> Unit) : SuggestionActionItem {
+class WebSearchActionItem : SuggestionActionItem {
     override val displayName: String =
         CodeGPTBundle.get("suggestionActionItem.webSearch.displayName")
     override val icon = AllIcons.General.Web
     override val enabled = GeneralSettings.getSelectedService() == ServiceType.CODEGPT
 
-    override fun execute(project: Project, textPane: CustomTextPane) {
-        onWebSearchIncluded()
-        textPane.appendHighlightedText("web")
+    override fun execute(project: Project, textPane: PromptTextField) {
+        textPane.addInlineText("web", null, this)
     }
 }

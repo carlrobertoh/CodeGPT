@@ -30,15 +30,16 @@ import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.TotalTokensDetails;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.TotalTokensPanel;
 import ee.carlrobert.codegpt.toolwindow.ui.ChatToolWindowLandingPanel;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
+import ee.carlrobert.codegpt.ui.textarea.AppliedActionInlay;
 import ee.carlrobert.codegpt.ui.textarea.UserInputPanel;
+import ee.carlrobert.codegpt.ui.textarea.suggestion.item.WebSearchActionItem;
 import ee.carlrobert.codegpt.util.EditorUtil;
 import ee.carlrobert.codegpt.util.file.FileUtil;
 import java.awt.BorderLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.UUID;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -53,7 +54,7 @@ public class ChatToolWindowTabPanel implements Disposable {
   private final Project project;
   private final JPanel rootPanel;
   private final Conversation conversation;
-  private final UserInputPanel textArea;
+  private final UserInputPanel userInputPanel;
   private final ConversationService conversationService;
   private final TotalTokensPanel totalTokensPanel;
   private final ChatToolWindowScrollablePanel toolWindowScrollablePanel;
@@ -70,8 +71,12 @@ public class ChatToolWindowTabPanel implements Disposable {
         conversation,
         EditorUtil.getSelectedEditorSelectedText(project),
         this);
-    textArea = new UserInputPanel(project, this::handleSubmit, this::handleCancel);
-    textArea.requestFocus();
+    userInputPanel = new UserInputPanel(
+        project,
+        totalTokensPanel,
+        this::handleSubmit,
+        this::handleCancel);
+    userInputPanel.requestFocus();
     rootPanel = createRootPanel();
 
     if (conversation.getMessages().isEmpty()) {
@@ -98,7 +103,7 @@ public class ChatToolWindowTabPanel implements Disposable {
   }
 
   public void requestFocusForTextArea() {
-    textArea.requestFocus();
+    userInputPanel.requestFocus();
   }
 
   public void displayLandingView() {
@@ -228,18 +233,18 @@ public class ChatToolWindowTabPanel implements Disposable {
             conversationService,
             responsePanel,
             totalTokensPanel,
-            textArea) {
+            userInputPanel) {
           @Override
           public void handleTokensExceededPolicyAccepted() {
             call(callParameters, responsePanel);
           }
         });
-    textArea.setSubmitEnabled(false);
+    userInputPanel.setSubmitEnabled(false);
 
     requestHandler.call(callParameters);
   }
 
-  private Unit handleSubmit(String text, boolean webSearchIncluded) {
+  private Unit handleSubmit(String text, List<AppliedActionInlay> appliedInlayActions) {
     var message = new Message(text);
     var editor = EditorUtil.getSelectedEditor(project);
     if (editor != null) {
@@ -253,7 +258,8 @@ public class ChatToolWindowTabPanel implements Disposable {
       }
     }
     message.setUserMessage(text);
-    message.setWebSearchIncluded(webSearchIncluded);
+    message.setWebSearchIncluded(appliedInlayActions.stream()
+        .anyMatch(it -> it.getSuggestion() instanceof WebSearchActionItem));
 
     var addedDocumentation = CodeGPTKeys.ADDED_DOCUMENTATION.get(project);
     if (addedDocumentation != null) {
@@ -278,7 +284,7 @@ public class ChatToolWindowTabPanel implements Disposable {
         JBUI.Borders.empty(8)));
     panel.add(JBUI.Panels.simplePanel(totalTokensPanel)
         .withBorder(JBUI.Borders.emptyBottom(8)), BorderLayout.NORTH);
-    panel.add(JBUI.Panels.simplePanel(textArea), BorderLayout.CENTER);
+    panel.add(JBUI.Panels.simplePanel(userInputPanel), BorderLayout.CENTER);
     return panel;
   }
 
@@ -329,20 +335,10 @@ public class ChatToolWindowTabPanel implements Disposable {
   }
 
   private JPanel createRootPanel() {
-    var gbc = new GridBagConstraints();
-    gbc.fill = GridBagConstraints.BOTH;
-    gbc.weighty = 1;
-    gbc.weightx = 1;
-    gbc.gridx = 0;
-    gbc.gridy = 0;
-
-    var rootPanel = new JPanel(new GridBagLayout());
-    rootPanel.add(createScrollPaneWithSmartScroller(toolWindowScrollablePanel), gbc);
-
-    gbc.weighty = 0;
-    gbc.fill = GridBagConstraints.HORIZONTAL;
-    gbc.gridy = 1;
-    rootPanel.add(createUserPromptPanel(), gbc);
+    var rootPanel = new JPanel(new BorderLayout());
+    rootPanel.add(createScrollPaneWithSmartScroller(toolWindowScrollablePanel),
+        BorderLayout.CENTER);
+    rootPanel.add(createUserPromptPanel(), BorderLayout.SOUTH);
     return rootPanel;
   }
 }

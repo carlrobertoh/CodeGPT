@@ -21,7 +21,6 @@ import java.time.format.DateTimeParseException
 
 class FileSuggestionGroupItem(private val project: Project) : SuggestionGroupItem {
     override val displayName: String = CodeGPTBundle.get("suggestionGroupItem.files.displayName")
-    override val groupPrefix = "file:"
     override val icon = AllIcons.FileTypes.Any_type
 
     override suspend fun getSuggestions(searchText: String?): List<SuggestionActionItem> {
@@ -43,7 +42,6 @@ class FolderSuggestionGroupItem(private val project: Project) : SuggestionGroupI
     private val projectFoldersCache = mutableMapOf<Project, List<VirtualFile>>()
 
     override val displayName: String = CodeGPTBundle.get("suggestionGroupItem.folders.displayName")
-    override val groupPrefix = "folder:"
     override val icon = AllIcons.Nodes.Folder
 
     override suspend fun getSuggestions(searchText: String?): List<SuggestionActionItem> {
@@ -78,7 +76,6 @@ class FolderSuggestionGroupItem(private val project: Project) : SuggestionGroupI
 
 class PersonaSuggestionGroupItem : SuggestionGroupItem {
     override val displayName: String = CodeGPTBundle.get("suggestionGroupItem.personas.displayName")
-    override val groupPrefix = "persona:"
     override val icon = AllIcons.General.User
 
     override suspend fun getSuggestions(searchText: String?): List<SuggestionActionItem> =
@@ -96,7 +93,6 @@ class PersonaSuggestionGroupItem : SuggestionGroupItem {
 
 class DocumentationSuggestionGroupItem : SuggestionGroupItem {
     override val displayName: String = CodeGPTBundle.get("suggestionGroupItem.docs.displayName")
-    override val groupPrefix = "doc:"
     override val icon = AllIcons.Toolwindows.Documentation
     override val enabled = GeneralSettings.getSelectedService() == ServiceType.CODEGPT
 
