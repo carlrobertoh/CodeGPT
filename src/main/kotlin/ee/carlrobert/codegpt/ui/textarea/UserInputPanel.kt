@@ -7,7 +7,6 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.components.service
 import com.intellij.openapi.observable.properties.AtomicBooleanProperty
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.TextRange
 import com.intellij.ui.components.AnActionLink
 import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.RightGap
@@ -21,25 +20,22 @@ import ee.carlrobert.codegpt.conversations.ConversationsState
 import ee.carlrobert.codegpt.settings.GeneralSettings
 import ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowContentManager
 import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.ModelComboBoxAction
+import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.TotalTokensPanel
 import ee.carlrobert.codegpt.ui.IconActionButton
 import java.awt.*
 import javax.swing.JPanel
 
 class UserInputPanel(
     private val project: Project,
-    private val onSubmit: (String, Boolean) -> Unit,
+    private val totalTokensPanel: TotalTokensPanel,
+    private val onSubmit: (String, List<AppliedActionInlay>?) -> Unit,
     private val onStop: () -> Unit
 ) : JPanel(BorderLayout()) {
 
-    private val highlightedTextRanges: MutableList<Pair<TextRange, Boolean>> = mutableListOf()
+    val text: String
+        get() = promptTextField.text
 
-    private val textPane = CustomTextPane(highlightedTextRanges) { handleSubmit(it) }
-        .apply {
-            addKeyListener(CustomTextPaneKeyAdapter(project, this, highlightedTextRanges) {
-                webSearchIncluded = true
-            })
-        }
-
+    private val promptTextField = PromptTextField(project, ::updateUserTokens, ::handleSubmit)
     private val submitButton = IconActionButton(
         object : AnAction(
             CodeGPTBundle.get("smartTextPane.submitButton.title"),
@@ -47,7 +43,7 @@ class UserInputPanel(
             Icons.Send
         ) {
             override fun actionPerformed(e: AnActionEvent) {
-                handleSubmit(textPane.text)
+                handleSubmit(promptTextField.text)
             }
         }
     )
@@ -63,14 +59,10 @@ class UserInputPanel(
         }
     ).apply { isEnabled = false }
     private val imageActionSupported = AtomicBooleanProperty(isImageActionSupported())
-    private var webSearchIncluded: Boolean = false
-
-    val text: String
-        get() = textPane.text
 
     init {
         isOpaque = false
-        add(textPane, BorderLayout.CENTER)
+        add(promptTextField, BorderLayout.CENTER)
         add(getFooter(), BorderLayout.SOUTH)
     }
 
@@ -80,8 +72,8 @@ class UserInputPanel(
     }
 
     override fun requestFocus() {
-        textPane.requestFocus()
-        textPane.requestFocusInWindow()
+        promptTextField.requestFocus()
+        promptTextField.requestFocusInWindow()
     }
 
     override fun paintComponent(g: Graphics) {
@@ -97,7 +89,7 @@ class UserInputPanel(
         val g2 = g.create() as Graphics2D
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
         g2.color = JBUI.CurrentTheme.ActionButton.focusedBorder()
-        if (textPane.isFocusOwner) {
+        if (promptTextField.isFocusOwner) {
             g2.stroke = BasicStroke(1.5F)
         }
         g2.drawRoundRect(0, 0, width - 1, height - 1, 16, 16)
@@ -106,12 +98,14 @@ class UserInputPanel(
 
     override fun getInsets(): Insets = JBUI.insets(4)
 
-    private fun handleSubmit(text: String) {
+    private fun handleSubmit(text: String, appliedInlays: List<AppliedActionInlay>? = emptyList()) {
         if (text.isNotEmpty()) {
-            onSubmit(text, webSearchIncluded)
-            highlightedTextRanges.clear()
-            textPane.text = ""
+            onSubmit(text, appliedInlays)
         }
+    }
+
+    private fun updateUserTokens(text: String) {
+        totalTokensPanel.updateUserPromptTokens(text)
     }
 
     private fun getFooter(): JPanel {
