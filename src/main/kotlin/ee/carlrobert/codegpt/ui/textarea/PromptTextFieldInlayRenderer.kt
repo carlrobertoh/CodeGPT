@@ -82,12 +82,12 @@ class PromptTextFieldInlayRenderer(
         val startX = (target.x + JBUI.scale(5)).toInt()
         val startY = (target.y + (target.height - textHeight) / 2 + metrics.ascent).toInt()
 
-        g.color = service<EditorColorsManager>().globalScheme.defaultForeground
+        g.color = textAttributes?.foregroundColor ?: JBColor.foreground()
         g.drawString(actionPrefix, startX, startY)
 
         if (!text.isNullOrEmpty()) {
             val prefixWidth = metrics.stringWidth(actionPrefix)
-            g.color = textAttributes?.foregroundColor ?: JBColor.foreground()
+            g.color = service<EditorColorsManager>().globalScheme.defaultForeground
             g.drawString(":$text", startX + prefixWidth, startY)
         }
     }
