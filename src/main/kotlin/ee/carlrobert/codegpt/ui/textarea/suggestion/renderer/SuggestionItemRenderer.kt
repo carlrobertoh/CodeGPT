@@ -2,11 +2,11 @@ package ee.carlrobert.codegpt.ui.textarea.suggestion.renderer
 
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.components.service
+import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.ui.JBColor
 import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.panel
-import com.intellij.ui.dsl.gridLayout.UnscaledGaps
 import com.intellij.util.ui.JBUI
 import ee.carlrobert.codegpt.settings.persona.PersonaSettings
 import ee.carlrobert.codegpt.ui.textarea.PromptTextField
@@ -46,11 +46,11 @@ abstract class BaseItemRenderer(private val textField: PromptTextField) : ItemRe
                 cell(label)
                 if (description != null) {
                     text(description.truncate(480 - label.width - 32, truncateFromStart))
-                        .customize(UnscaledGaps(left = 8))
                         .align(AlignX.RIGHT)
                         .applyToComponent {
                             font = JBUI.Fonts.smallFont()
                             foreground = JBColor.gray
+                            border = JBUI.Borders.emptyLeft(8)
                         }
                 }
             }

@@ -5,7 +5,6 @@ import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.dsl.builder.panel
-import com.intellij.ui.dsl.gridLayout.UnscaledGaps
 import com.intellij.util.ui.JBUI
 import ee.carlrobert.codegpt.CodeGPTBundle
 import java.awt.Dimension
@@ -34,13 +33,13 @@ class SuggestionsPopupBuilder {
             horizontalScrollBarPolicy = ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER
         }
         val popupPanel = panel {
-            row { cell(scrollPane).customize(UnscaledGaps.EMPTY) }
+            row { cell(scrollPane)/*.customize(UnscaledGaps.EMPTY)*/ }
             separator()
             row {
                 text(CodeGPTBundle.get("shared.escToCancel"))
-                    .customize(UnscaledGaps(left = 4))
                     .applyToComponent {
                         font = JBUI.Fonts.smallFont()
+                        border = JBUI.Borders.emptyLeft(4)
                     }
             }
         }

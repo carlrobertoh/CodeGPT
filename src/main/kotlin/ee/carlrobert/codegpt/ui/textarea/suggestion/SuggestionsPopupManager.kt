@@ -2,7 +2,9 @@ package ee.carlrobert.codegpt.ui.textarea.suggestion
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopup
-import com.intellij.vcsUtil.showAbove
+import com.intellij.openapi.ui.popup.JBPopupListener
+import com.intellij.openapi.ui.popup.LightweightWindowEvent
+import com.intellij.ui.awt.RelativePoint
 import ee.carlrobert.codegpt.ui.textarea.PromptTextField
 import ee.carlrobert.codegpt.ui.textarea.suggestion.item.*
 import kotlinx.coroutines.*
@@ -123,4 +125,20 @@ class SuggestionsPopupManager(
             popup?.setLocation(Point(original.x, maxOf(newY, 0)))
         }
     }
+}
+
+fun JBPopup.showAbove(component: JComponent) {
+    val northWest = RelativePoint(component, Point())
+
+    addListener(object : JBPopupListener {
+        override fun beforeShown(event: LightweightWindowEvent) {
+            val location = Point(locationOnScreen).apply {
+                y = northWest.screenPoint.y - size.height
+            }
+
+            setLocation(location)
+            removeListener(this)
+        }
+    })
+    show(northWest)
 }
