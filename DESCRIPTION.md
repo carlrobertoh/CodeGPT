@@ -1,68 +1,66 @@
 <!-- Plugin description -->
 
-## CodeGPT: Your Free, Open-Source AI Copilot for Coding
+Introducing CodeGPT, an AI-powered personal copilot, designed to generate high quality code and support you in various programming activities.
 
-CodeGPT is your go-to AI assistant, supporting your entire software development journey with a strong focus on privacy. Access top-tier language models from OpenAI, Anthropic, Azure, Mistral, and others, or opt for a locally hosted model for an offline development experience. CodeGPT leverages technologies like **Ollama** and **llama.cpp**, keeping you productive even when you're off the grid. 
+Access top-tier language models from OpenAI, Anthropic, Azure, Mistral, and others, or opt for a locally hosted model for an offline development experience. Leveraging technologies like **Ollama** and **llama.cpp**, CodeGPT keeps you productive even when you're off the grid. 
 
-> Our extension offers immediate, free access to `gpt-4o-mini` with built-in usage limits and no additional registration needed.
+The extension offers immediate, **FREE** access to `gpt-4o-mini` with built-in usage limits and no additional registration needed.
 
-## Core Features
-
-Leveraging large language models, CodeGPT offers a wide range of features to enhance your coding experience, including, but not limited to:
-
-### Chat
+## Chat
 
 Get instant coding advice through a ChatGPT-like interface that accepts image input. Ask questions, share screenshots, seek explanations, or get guidance on your projects without leaving your IDE.
 
-![Chat with Vision](https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/plugin-description/chat-interface-resized.png?raw=true)
+### Use images
 
-### Code Completions
+Chat with your images. Upload manually or let CodeGPT auto-detect your screenshots.
 
-Receive single-line or whole-function autocomplete suggestions as you type.
+![Use images](https://www.codegpt.ee/images/features/use-images-w800.png)
 
-![Code Completions](https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/plugin-description/inline-completion-resized.png?raw=true)
+### Reference your files and folders
 
-### Web Search
+Quickly access and reference your project files and folders for context-aware coding assistance.
 
-Improve your coding with real-time web search capabilities. Instantly access the latest information and insights directly within your coding environment.
+![Reference files and folders](https://www.codegpt.ee/images/features/reference-files-w800.png)
 
-![Web Search](https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/plugin-description/web-search.png?raw=true)
+### Search the web
 
-### Customized Personas
+Connect your favourite LLM to the web. CodeGPT will search for the most relevant information to answer your questions.
 
-Quickly define and switch between various prompts to make the assistant work for you, whether you're learning, writing, or proofreading. The plugin comes with over 600 pre-defined personas, allowing you to customize the assistant to your needs. 
+![Web search](https://www.codegpt.ee/images/features/web-search-w800.png)
 
-![Customized Personas](https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/plugin-description/personas.png?raw=true)
+### Customize your assistant
 
-### Fast Edit
+Choose between multiple different personas for your specific needs, whether you're looking to learn, write or proofread. 
 
-Transform your code using natural language instructions. Highlight the code you want to modify, describe the desired changes, and watch CodeGPT work its magic.
+![Customize your assistant](https://www.codegpt.ee/images/features/persona-suggestions-w800.png)
 
-![Fast Edits](https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/plugin-description/fast-edits-resized.png?raw=true)
+## Code
 
-### Commit Message Generation
+Get helpful code completions as you type, edit your code using natural language, create clear and concise commit messages automatically, and more. CodeGPT equips you with cutting-edge tools to streamline your workflow.
 
-Generate meaningful commit messages based on the changes made in your codebase. CodeGPT can analyze the diff of your staged changes and suggest concise and descriptive commit messages.
+### Autocomplete your code
 
-![Commit Message Generation](https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/plugin-description/generate-commit-message-resized.png?raw=true)
+Generate meaningful Receive single-line or whole-function autocomplete suggestions as you type.
 
-### Name Suggestions
+![Autocomplete your code](https://www.codegpt.ee/images/features/inline-completion-w800.png)
+
+### Edit code in natural language
+
+Highlight the code you want to modify, describe the desired changes, and watch CodeGPT work its magic.
+
+![Edit code](https://www.codegpt.ee/images/features/edit-code-w800.png)
+
+### Get name suggestions
 
 Get context-aware naming suggestions for methods, variables, and more.
 
-![Name Suggestions](https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/plugin-description/name-suggestions-resized.png?raw=true)
+![Name suggestions](https://www.codegpt.ee/images/features/name-suggestions-w800.png)
 
-### Reference Files
+### Generate commit messages
 
-Reference specific files or documentation during your chat sessions, ensuring that responses are always relevant and accurate.
+Generate concise and descriptive commit messages based on the changes made in your codebase.
 
-![Reference Files](https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/plugin-description/old/reference-files-modal-resized.png?raw=true)
-
-### OpenAI Compatibility
-
-Connect the plugin with privately hosted models. We provide integration with most cloud providers that are OpenAI-compatible, such as Together.ai, Grok, Anyscale, and others, as well as the option to customize your own setup.
-
-![OpenAI Compatibility](https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/plugin-description/old/openai-compatibility-resized.png?raw=true)
+![Generate commit messages](https://www.codegpt.ee/images/features/generate-commit-message-w800.png)
 
 ### Offline Development Support
 
