@@ -18,10 +18,14 @@ import ee.carlrobert.codegpt.actions.AttachImageAction
 import ee.carlrobert.codegpt.conversations.ConversationService
 import ee.carlrobert.codegpt.conversations.ConversationsState
 import ee.carlrobert.codegpt.settings.GeneralSettings
+import ee.carlrobert.codegpt.settings.service.ServiceType
+import ee.carlrobert.codegpt.settings.service.codegpt.CodeGPTServiceSettings
+import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings
 import ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowContentManager
 import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.ModelComboBoxAction
 import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.TotalTokensPanel
 import ee.carlrobert.codegpt.ui.IconActionButton
+import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel
 import java.awt.*
 import javax.swing.JPanel
 
@@ -143,6 +147,34 @@ class UserInputPanel(
     }
 
     private fun isImageActionSupported(): Boolean {
-        return service<GeneralSettings>().state.selectedService.isImageActionSupported
+        return when (service<GeneralSettings>().state.selectedService) {
+            ServiceType.CUSTOM_OPENAI,
+            ServiceType.ANTHROPIC,
+            ServiceType.OLLAMA -> true
+
+            ServiceType.CODEGPT -> {
+                listOf(
+                    "gpt-4o",
+                    "gpt-4o-mini",
+                    "claude-3-opus",
+                    "claude-3.5-sonnet"
+                ).contains(
+                    service<CodeGPTServiceSettings>()
+                        .state
+                        .chatCompletionSettings
+                        .model
+                )
+            }
+
+            ServiceType.OPENAI -> {
+                listOf(
+                    OpenAIChatCompletionModel.GPT_4_VISION_PREVIEW.code,
+                    OpenAIChatCompletionModel.GPT_4_O.code,
+                    OpenAIChatCompletionModel.GPT_4_O_MINI.code
+                ).contains(service<OpenAISettings>().state.model)
+            }
+
+            else -> false
+        }
     }
 }
