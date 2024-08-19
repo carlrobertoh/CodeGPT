@@ -6,6 +6,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Web documentation support [#650](https://github.com/carlrobertoh/CodeGPT/pull/650)
+- Improved user prompt text field component [#665](https://github.com/carlrobertoh/CodeGPT/pull/665)
+  - Spellchecking
+  - Auto-enclosing brackets, quotes, etc.
+  - Removable suggestion action inlays
+  - Context menu for copy-pasting, and more
+- DeepSeek Coder V2 model for CodeGPT users
+- Image support for Custom OpenAI-compatible providers
+
+### Fixed
+- IDE freezes caused by long running file search queries [#652](https://github.com/carlrobertoh/CodeGPT/pull/652)
+
 ## [2.9.0-233] - 2024-08-03
 
 ### Added
