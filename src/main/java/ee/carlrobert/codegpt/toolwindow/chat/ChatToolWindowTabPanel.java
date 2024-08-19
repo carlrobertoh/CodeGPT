@@ -31,6 +31,8 @@ import ee.carlrobert.codegpt.toolwindow.ui.ChatToolWindowLandingPanel;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.codegpt.ui.textarea.AppliedActionInlay;
 import ee.carlrobert.codegpt.ui.textarea.UserInputPanel;
+import ee.carlrobert.codegpt.ui.textarea.suggestion.item.DocumentationActionItem;
+import ee.carlrobert.codegpt.ui.textarea.suggestion.item.PersonaActionItem;
 import ee.carlrobert.codegpt.ui.textarea.suggestion.item.WebSearchActionItem;
 import ee.carlrobert.codegpt.util.EditorUtil;
 import ee.carlrobert.codegpt.util.file.FileUtil;
@@ -260,8 +262,17 @@ public class ChatToolWindowTabPanel implements Disposable {
         .anyMatch(it -> it.getSuggestion() instanceof WebSearchActionItem));
 
     var addedDocumentation = CodeGPTKeys.ADDED_DOCUMENTATION.get(project);
-    if (addedDocumentation != null) {
+    var appliedInlayExists = appliedInlayActions.stream()
+        .anyMatch(it -> it.getSuggestion() instanceof DocumentationActionItem);
+    if (addedDocumentation != null && appliedInlayExists) {
       message.setDocumentationDetails(addedDocumentation);
+    }
+
+    var addedPersona = CodeGPTKeys.ADDED_PERSONA.get(project);
+    var personaInlayExists = appliedInlayActions.stream()
+            .anyMatch(it -> it.getSuggestion() instanceof PersonaActionItem);
+    if (addedPersona != null && personaInlayExists) {
+      message.setPersonaDetails(addedPersona);
     }
 
     sendMessage(message, ConversationType.DEFAULT);

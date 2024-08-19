@@ -410,8 +410,15 @@ public class CompletionRequestProvider {
     var message = callParameters.getMessage();
     var messages = new ArrayList<OpenAIChatCompletionMessage>();
     if (callParameters.getConversationType() == ConversationType.DEFAULT) {
-      messages.add(
-          new OpenAIChatCompletionStandardMessage("system", PersonaSettings.getSystemPrompt()));
+      var sessionPersonaDetails = callParameters.getMessage().getPersonaDetails();
+      if (callParameters.getMessage().getPersonaDetails() == null) {
+        messages.add(
+            new OpenAIChatCompletionStandardMessage("system", PersonaSettings.getSystemPrompt()));
+      } else {
+        messages.add(new OpenAIChatCompletionStandardMessage(
+            "system",
+            sessionPersonaDetails.instructions()));
+      }
     }
     if (callParameters.getConversationType() == ConversationType.FIX_COMPILE_ERRORS) {
       messages.add(

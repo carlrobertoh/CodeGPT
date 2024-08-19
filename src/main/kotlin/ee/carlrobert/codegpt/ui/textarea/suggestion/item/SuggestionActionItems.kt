@@ -11,7 +11,6 @@ import ee.carlrobert.codegpt.settings.GeneralSettings
 import ee.carlrobert.codegpt.settings.documentation.DocumentationSettings
 import ee.carlrobert.codegpt.settings.documentation.DocumentationsConfigurable
 import ee.carlrobert.codegpt.settings.persona.PersonaDetails
-import ee.carlrobert.codegpt.settings.persona.PersonaSettings
 import ee.carlrobert.codegpt.settings.persona.PersonasConfigurable
 import ee.carlrobert.codegpt.settings.service.ServiceType
 import ee.carlrobert.codegpt.ui.AddDocumentationDialog
@@ -25,7 +24,7 @@ class FileActionItem(val file: VirtualFile) : SuggestionActionItem {
 
     override fun execute(project: Project, textPane: PromptTextField) {
         project.getService(FileSearchService::class.java).addFileToSession(file)
-        textPane.addInlineText("file", file.name, this)
+        textPane.addInlayElement("file", file.name, this)
     }
 }
 
@@ -38,7 +37,7 @@ class FolderActionItem(val folder: VirtualFile) : SuggestionActionItem {
         folder.children
             .filter { !it.isDirectory }
             .forEach { fileSearchService.addFileToSession(it) }
-        textPane.addInlineText("folder", folder.path, this)
+        textPane.addInlayElement("folder", folder.path, this)
     }
 }
 
@@ -47,12 +46,8 @@ class PersonaActionItem(val personaDetails: PersonaDetails) : SuggestionActionIt
     override val icon = AllIcons.General.User
 
     override fun execute(project: Project, textPane: PromptTextField) {
-        service<PersonaSettings>().state.selectedPersona.apply {
-            id = personaDetails.id
-            name = personaDetails.name
-            instructions = personaDetails.instructions
-        }
-        textPane.addInlineText("persona", personaDetails.name, this)
+        CodeGPTKeys.ADDED_PERSONA.set(project, personaDetails)
+        textPane.addInlayElement("persona", personaDetails.name, this)
     }
 }
 
@@ -66,7 +61,7 @@ class DocumentationActionItem(
     override fun execute(project: Project, textPane: PromptTextField) {
         CodeGPTKeys.ADDED_DOCUMENTATION.set(project, documentationDetails)
         service<DocumentationSettings>().updateLastUsedDateTime(documentationDetails.url)
-        textPane.addInlineText("doc", documentationDetails.name, this)
+        textPane.addInlayElement("doc", documentationDetails.name, this)
     }
 }
 
@@ -81,7 +76,7 @@ class CreateDocumentationActionItem : SuggestionActionItem {
         if (addDocumentationDialog.showAndGet()) {
             service<DocumentationSettings>()
                 .updateLastUsedDateTime(addDocumentationDialog.documentationDetails.url)
-            textPane.addInlineText(
+            textPane.addInlayElement(
                 "doc",
                 addDocumentationDialog.documentationDetails.name,
                 this
@@ -124,6 +119,6 @@ class WebSearchActionItem : SuggestionActionItem {
     override val enabled = GeneralSettings.getSelectedService() == ServiceType.CODEGPT
 
     override fun execute(project: Project, textPane: PromptTextField) {
-        textPane.addInlineText("web", null, this)
+        textPane.addInlayElement("web", null, this)
     }
 }

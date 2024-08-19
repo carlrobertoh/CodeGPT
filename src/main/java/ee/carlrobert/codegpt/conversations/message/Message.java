@@ -2,6 +2,7 @@ package ee.carlrobert.codegpt.conversations.message;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import ee.carlrobert.codegpt.settings.persona.PersonaDetails;
 import ee.carlrobert.codegpt.ui.DocumentationDetails;
 import ee.carlrobert.llm.client.you.completion.YouSerpResult;
 import java.util.List;
@@ -20,6 +21,7 @@ public class Message {
   private @Nullable String imageFilePath;
   private boolean webSearchIncluded;
   private DocumentationDetails documentationDetails;
+  private PersonaDetails personaDetails;
 
   public Message(String prompt, String response) {
     this(prompt);
@@ -98,6 +100,14 @@ public class Message {
 
   public void setDocumentationDetails(DocumentationDetails documentationDetails) {
     this.documentationDetails = documentationDetails;
+  }
+
+  public PersonaDetails getPersonaDetails() {
+    return personaDetails;
+  }
+
+  public void setPersonaDetails(PersonaDetails personaDetails) {
+    this.personaDetails = personaDetails;
   }
 
   @Override
