@@ -4,7 +4,6 @@ import com.intellij.ide.IdeEventQueue
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.application.runUndoTransparentWriteAction
-import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Inlay
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
@@ -15,7 +14,6 @@ import com.intellij.ui.ComponentUtil.findParentByCondition
 import com.intellij.ui.EditorTextField
 import com.intellij.util.ui.JBUI
 import ee.carlrobert.codegpt.CodeGPTBundle
-import ee.carlrobert.codegpt.CodeGPTKeys
 import ee.carlrobert.codegpt.ui.textarea.suggestion.SuggestionsPopupManager
 import ee.carlrobert.codegpt.ui.textarea.suggestion.item.SuggestionActionItem
 import ee.carlrobert.codegpt.ui.textarea.suggestion.item.SuggestionItem
@@ -59,7 +57,7 @@ class PromptTextField(
         )
     }
 
-    fun addInlineText(actionPrefix: String, text: String?, actionItem: SuggestionActionItem) {
+    fun addInlayElement(actionPrefix: String, text: String?, actionItem: SuggestionActionItem) {
         editor?.let {
             val startOffset = it.caretModel.offset - 1
 
@@ -114,8 +112,6 @@ class PromptTextField(
                 onTextChanged(event.document.text)
 
                 if (event.document.text.isEmpty()) {
-                    project.service<FileSearchService>().removeFilesFromSession()
-                    project.putUserData(CodeGPTKeys.ADDED_DOCUMENTATION, null)
                     suggestionsPopupManager.hidePopup()
                     clearInlays()
                     return
