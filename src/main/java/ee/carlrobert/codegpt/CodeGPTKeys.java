@@ -3,6 +3,7 @@ package ee.carlrobert.codegpt;
 import com.intellij.openapi.editor.EditorCustomElementRenderer;
 import com.intellij.openapi.editor.Inlay;
 import com.intellij.openapi.util.Key;
+import ee.carlrobert.codegpt.settings.persona.PersonaDetails;
 import ee.carlrobert.codegpt.ui.DocumentationDetails;
 import ee.carlrobert.llm.client.codegpt.CodeGPTUserDetails;
 import java.util.List;
@@ -23,4 +24,6 @@ public class CodeGPTKeys {
       Key.create("codegpt.userDetails");
   public static final Key<DocumentationDetails> ADDED_DOCUMENTATION =
       Key.create("codegpt.addedDocumentation");
+  public static final Key<PersonaDetails> ADDED_PERSONA =
+      Key.create("codegpt.addedPersona");
 }

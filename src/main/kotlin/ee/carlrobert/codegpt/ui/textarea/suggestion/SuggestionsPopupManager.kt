@@ -93,8 +93,6 @@ class SuggestionsPopupManager(
             listModel.clear()
         }
         listModel.addAll(defaultActions)
-        popup?.content?.revalidate()
-        popup?.content?.repaint()
     }
 
     private fun handleSuggestionItemSelection(item: SuggestionItem) {
