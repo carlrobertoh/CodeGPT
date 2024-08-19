@@ -44,8 +44,8 @@ class PromptTextField(
 
     init {
         isOneLineMode = false
+        isOpaque = false
         minimumSize = Dimension(100, 40)
-        background = Color(0, 0, 0, 0)
         document.addDocumentListener(getDocumentListener(onTextChanged))
         setPlaceholder(CodeGPTBundle.get("toolwindow.chat.textArea.emptyText"))
         IdeEventQueue.getInstance().addDispatcher(
