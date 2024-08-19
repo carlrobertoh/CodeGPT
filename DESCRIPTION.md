@@ -22,6 +22,12 @@ Quickly access and reference your project files and folders for context-aware co
 
 ![Reference files and folders](https://www.codegpt.ee/images/features/reference-files-w800.png)
 
+### Reference web documentations
+
+Easily pull in relevant web documentation into your chat for quick reference—whether it’s API docs, library guides, framework manuals, or something else.
+
+![Reference files and folders](https://www.codegpt.ee/images/features/reference-docs-w800.png)
+
 ### Search the web
 
 Connect your favourite LLM to the web. CodeGPT will search for the most relevant information to answer your questions.
