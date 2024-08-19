@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.10.0-233] - 2024-08-19
+
 ### Added
 
 - Web documentation support [#650](https://github.com/carlrobertoh/CodeGPT/pull/650)
@@ -18,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Image support for Custom OpenAI-compatible providers
 
 ### Fixed
+
 - IDE freezes caused by long running file search queries [#652](https://github.com/carlrobertoh/CodeGPT/pull/652)
 
 ## [2.9.0-233] - 2024-08-03
@@ -587,7 +590,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `OPENAI_API_KEY` persistence, key is saved in the OS password safe from now on
 
-[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.9.0-233...HEAD
+[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.10.0-233...HEAD
+[2.10.0-233]: https://github.com/carlrobertoh/CodeGPT/compare/v2.9.0-233...v2.10.0-233
 [2.9.0-233]: https://github.com/carlrobertoh/CodeGPT/compare/v2.8.5-233...v2.9.0-233
 [2.8.5-233]: https://github.com/carlrobertoh/CodeGPT/compare/v2.8.4-233...v2.8.5-233
 [2.8.4-233]: https://github.com/carlrobertoh/CodeGPT/compare/v2.8.3-233...v2.8.4-233
@@ -632,5 +636,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [2.0.4]: https://github.com/carlrobertoh/CodeGPT/compare/v2.0.3...v2.0.4
 [2.0.3]: https://github.com/carlrobertoh/CodeGPT/compare/v2.0.2...v2.0.3
 [2.0.2]: https://github.com/carlrobertoh/CodeGPT/compare/v2.0.1...v2.0.2
-[2.0.1]: https://github.com/carlrobertoh/CodeGPT/commits/v2.0.1
+[2.0.1]: https://github.com/carlrobertoh/CodeGPT/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/carlrobertoh/CodeGPT/commits/v2.0.0
