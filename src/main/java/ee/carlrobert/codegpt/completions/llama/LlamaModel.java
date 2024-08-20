@@ -199,7 +199,7 @@ public enum LlamaModel {
       Interacting with Codestral will help level up the developer’s coding game and reduce the \
       risk of errors and bugs.""",
       PromptTemplate.MIXTRAL_INSTRUCT,
-      InfillPromptTemplate.CODE_GEMMA,
+      InfillPromptTemplate.CODESTRAL,
       List.of(
           HuggingFaceModel.CODESTRAL_22B_32K_Q3_K_M,
           HuggingFaceModel.CODESTRAL_22B_32K_Q4_K_M,
