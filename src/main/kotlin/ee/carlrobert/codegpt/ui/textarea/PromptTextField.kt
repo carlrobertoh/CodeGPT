@@ -142,9 +142,6 @@ class PromptTextFieldEventDispatcher(
             && owner is PromptTextField
             && owner.dispatcherId == textField.dispatcherId
         ) {
-            owner.revalidate()
-            owner.repaint()
-
             if (e is KeyEvent) {
                 if (e.id == KeyEvent.KEY_PRESSED) {
                     when (e.keyCode) {
