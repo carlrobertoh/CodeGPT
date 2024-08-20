@@ -6,7 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [2.10.0-241.1] - 2024-08-19
+### Fixed
+
+- Codestral Infill templates for code completion in llama.cpp [#667](https://github.com/carlrobertoh/CodeGPT/pull/667)
+
+## [2.10.0-233] - 2024-08-19
+
+### Added
 
 - Web documentation support [#650](https://github.com/carlrobertoh/CodeGPT/pull/650)
 - Improved user prompt text field component [#665](https://github.com/carlrobertoh/CodeGPT/pull/665)
