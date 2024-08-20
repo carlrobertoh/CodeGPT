@@ -268,6 +268,7 @@ public class ChatToolWindowTabPanel implements Disposable {
         .anyMatch(it -> it.getSuggestion() instanceof DocumentationActionItem);
     if (addedDocumentation != null && appliedInlayExists) {
       message.setDocumentationDetails(addedDocumentation);
+      CodeGPTKeys.ADDED_DOCUMENTATION.set(project, null);
     }
 
     var addedPersona = CodeGPTKeys.ADDED_PERSONA.get(project);
@@ -275,6 +276,7 @@ public class ChatToolWindowTabPanel implements Disposable {
             .anyMatch(it -> it.getSuggestion() instanceof PersonaActionItem);
     if (addedPersona != null && personaInlayExists) {
       message.setPersonaDetails(addedPersona);
+      CodeGPTKeys.ADDED_PERSONA.set(project, null);
     }
 
     sendMessage(message, ConversationType.DEFAULT);
