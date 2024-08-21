@@ -5,12 +5,15 @@ import git4idea.GitUtil
 import git4idea.branch.GitBranchUtil
 import java.time.LocalDate
 
-enum class Placeholder(val description: String) {
-    DATE_ISO_8601("Current date in ISO 8601 format, e.g. 2021-01-01."),
-    BRANCH_NAME("The name of the current branch."),
-    PREFIX("Code before the cursor."),
-    SUFFIX("Code after the cursor."),
-    FIM_PROMPT("Prebuilt Fill-In-The-Middle (FIM) prompt using the specified template."),
+enum class Placeholder(val description: String, val code: String) {
+    DATE_ISO_8601("Current date in ISO 8601 format, e.g. 2021-01-01.", "$" + "DATE_ISO_8601"),
+    BRANCH_NAME("The name of the current branch.", "$" + "BRANCH_NAME"),
+    PREFIX("Code before the cursor.", "$" + "PREFIX"),
+    SUFFIX("Code after the cursor.", "$" + "SUFFIX"),
+    FIM_PROMPT(
+        "Prebuilt Fill-In-The-Middle (FIM) prompt using the specified template.",
+        "$" + "FIM_PROMPT"
+    ),
 }
 
 interface PlaceholderStrategy {
