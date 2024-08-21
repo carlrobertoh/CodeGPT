@@ -18,7 +18,6 @@ import ee.carlrobert.codegpt.ui.textarea.suggestion.SuggestionsPopupManager
 import ee.carlrobert.codegpt.ui.textarea.suggestion.item.SuggestionActionItem
 import ee.carlrobert.codegpt.ui.textarea.suggestion.item.SuggestionItem
 import java.awt.AWTEvent
-import java.awt.Color
 import java.awt.Dimension
 import java.awt.KeyboardFocusManager
 import java.awt.event.InputEvent
@@ -30,6 +29,8 @@ data class AppliedActionInlay(
     val suggestion: SuggestionItem,
     val inlay: Inlay<PromptTextFieldInlayRenderer?>,
 )
+
+const val AT_CHAR = '@'
 
 class PromptTextField(
     project: Project,
@@ -59,7 +60,10 @@ class PromptTextField(
 
     fun addInlayElement(actionPrefix: String, text: String?, actionItem: SuggestionActionItem) {
         editor?.let {
-            val startOffset = it.caretModel.offset - 1
+            val startOffset = it.document.text.lastIndexOf(AT_CHAR)
+            if (startOffset == -1) {
+                throw IllegalStateException("No '@' symbol found in the text")
+            }
 
             runUndoTransparentWriteAction {
                 it.document.deleteString(startOffset, it.document.textLength)
@@ -128,10 +132,6 @@ class PromptTextFieldEventDispatcher(
     private val onSubmit: () -> Unit
 ) : IdeEventQueue.EventDispatcher {
 
-    companion object {
-        const val AT_CHAR = '@'
-    }
-
     override fun dispatch(e: AWTEvent): Boolean {
         val owner =
             findParentByCondition(KeyboardFocusManager.getCurrentKeyboardFocusManager().focusOwner) { component ->
@@ -192,13 +192,17 @@ class PromptTextFieldEventDispatcher(
     }
 
     private fun selectNextSuggestion(event: KeyEvent) {
-        suggestionsPopupManager.selectNext()
-        event.consume()
+        if (suggestionsPopupManager.isPopupVisible()) {
+            suggestionsPopupManager.selectNext()
+            event.consume()
+        }
     }
 
     private fun selectPreviousSuggestion(event: KeyEvent) {
-        suggestionsPopupManager.selectPrevious()
-        event.consume()
+        if (suggestionsPopupManager.isPopupVisible()) {
+            suggestionsPopupManager.selectPrevious()
+            event.consume()
+        }
     }
 
     private fun showPopup(event: KeyEvent) {
