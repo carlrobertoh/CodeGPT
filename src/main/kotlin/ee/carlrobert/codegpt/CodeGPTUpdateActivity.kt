@@ -4,6 +4,7 @@ import com.intellij.ide.plugins.InstalledPluginsState
 import com.intellij.notification.NotificationAction
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.components.service
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
@@ -27,7 +28,7 @@ class CodeGPTUpdateActivity : ProjectActivity {
 
     private fun schedulePluginUpdateChecks(project: Project) {
         val command = {
-            if (ConfigurationSettings.getCurrentState().isCheckForPluginUpdates) {
+            if (service<ConfigurationSettings>().state.checkForPluginUpdates) {
                 CheckForUpdatesTask(project).queue()
             }
         }
@@ -57,7 +58,7 @@ class CodeGPTUpdateActivity : ProjectActivity {
                 .addAction(NotificationAction.createSimpleExpiring(
                     CodeGPTBundle.get("shared.notification.doNotShowAgain")
                 ) {
-                    ConfigurationSettings.getCurrentState().isCheckForPluginUpdates = false
+                    service<ConfigurationSettings>().state.checkForPluginUpdates = false
                 })
                 .notify(project)
         }

@@ -34,7 +34,9 @@ class CommitMessageTemplate private constructor(project: Project) {
 
     fun getSystemPrompt(): String =
         service<ConfigurationSettings>().state.commitMessagePrompt.let { template ->
-            placeholderStrategyMapping.entries.fold(template) { acc, (placeholder, strategy) ->
+            placeholderStrategyMapping.entries.fold(
+                template ?: ""
+            ) { acc, (placeholder, strategy) ->
                 acc.replace("{${placeholder.name}}", strategy.getReplacementValue())
             }
         }

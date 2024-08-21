@@ -86,7 +86,7 @@ class DefaultCompletionRequestHandlerTest : IntegrationTest() {
 
   fun testLlamaChatCompletionCall() {
     useLlamaService()
-    ConfigurationSettings.getCurrentState().maxTokens = 99
+    service<ConfigurationSettings>().state.maxTokens = 99
     service<PersonaSettings>().state.selectedPersona.instructions = "TEST_SYSTEM_PROMPT"
     val message = Message("TEST_PROMPT")
     val conversation = ConversationService.getInstance().startConversation()
@@ -121,7 +121,7 @@ class DefaultCompletionRequestHandlerTest : IntegrationTest() {
 
   fun testOllamaChatCompletionCall() {
     useOllamaService()
-    ConfigurationSettings.getCurrentState().maxTokens = 99
+    service<ConfigurationSettings>().state.maxTokens = 99
     service<PersonaSettings>().state.selectedPersona.instructions = "TEST_SYSTEM_PROMPT"
     val message = Message("TEST_PROMPT")
     val conversation = ConversationService.getInstance().startConversation()

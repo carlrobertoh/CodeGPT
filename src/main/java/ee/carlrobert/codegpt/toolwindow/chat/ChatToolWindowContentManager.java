@@ -38,7 +38,7 @@ public final class ChatToolWindowContentManager {
   public void sendMessage(Message message, ConversationType conversationType) {
     getToolWindow().show();
 
-    if (ConfigurationSettings.getCurrentState().isCreateNewChatOnEachAction()
+    if (ConfigurationSettings.getState().getCreateNewChatOnEachAction()
         || ConversationsState.getCurrentConversation() == null) {
       createNewTabPanel().sendMessage(message, conversationType);
       return;
@@ -113,11 +113,11 @@ public final class ChatToolWindowContentManager {
     var toolWindow = toolWindowManager.getToolWindow("CodeGPT");
     // https://intellij-support.jetbrains.com/hc/en-us/community/posts/11533368171026/comments/11538403084562
     return Objects.requireNonNullElseGet(toolWindow, () -> toolWindowManager
-            .registerToolWindow(RegisterToolWindowTask.closable(
-                    "CodeGPT",
-                    () -> "CodeGPT",
-                    Icons.DefaultSmall,
-                    ToolWindowAnchor.RIGHT)));
+        .registerToolWindow(RegisterToolWindowTask.closable(
+            "CodeGPT",
+            () -> "CodeGPT",
+            Icons.DefaultSmall,
+            ToolWindowAnchor.RIGHT)));
   }
 
   private Optional<Content> tryFindFirstChatTabContent() {

@@ -30,7 +30,7 @@ class CodeGPTProjectActivity : ProjectActivity {
         }
 
         if (!ApplicationManager.getApplication().isUnitTestMode
-            && ConfigurationSettings.getCurrentState().isCheckForNewScreenshots
+            && service<ConfigurationSettings>().state.checkForPluginUpdates
         ) {
             val desktopPath = Paths.get(System.getProperty("user.home"), "Desktop")
             project.service<FileWatcher>().watch(desktopPath) {
@@ -62,7 +62,7 @@ class CodeGPTProjectActivity : ProjectActivity {
             .addAction(NotificationAction.createSimpleExpiring(
                 CodeGPTBundle.get("shared.notification.doNotShowAgain")
             ) {
-                ConfigurationSettings.getCurrentState().isCheckForNewScreenshots = false
+                service<ConfigurationSettings>().state.checkForNewScreenshots = false
             })
             .notify(project)
     }

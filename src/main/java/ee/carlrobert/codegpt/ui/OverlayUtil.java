@@ -138,7 +138,7 @@ public class OverlayUtil {
           @Override
           public void rememberChoice(boolean isSelected, int exitCode) {
             if (isSelected) {
-              ConfigurationSettings.getCurrentState().setIgnoreGitCommitTokenLimit(true);
+              ConfigurationSettings.getState().setIgnoreGitCommitTokenLimit(true);
             }
           }
 

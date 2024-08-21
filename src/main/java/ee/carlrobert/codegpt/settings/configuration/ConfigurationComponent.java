@@ -52,7 +52,9 @@ public class ConfigurationComponent {
   private final IntegerField maxTokensField;
   private final JBTextField temperatureField;
 
-  public ConfigurationComponent(Disposable parentDisposable, ConfigurationState configuration) {
+  public ConfigurationComponent(
+      Disposable parentDisposable,
+      ConfigurationSettingsState configuration) {
     table = new JBTable(new DefaultTableModel(
         EditorActionsUtil.toArray(configuration.getTableData()),
         new String[]{
@@ -99,26 +101,26 @@ public class ConfigurationComponent {
 
     checkForPluginUpdatesCheckBox = new JBCheckBox(
         CodeGPTBundle.get("configurationConfigurable.checkForPluginUpdates.label"),
-        configuration.isCheckForPluginUpdates());
+        configuration.getCheckForPluginUpdates());
     checkForNewScreenshotsCheckBox = new JBCheckBox(
         CodeGPTBundle.get("configurationConfigurable.checkForNewScreenshots.label"),
-        configuration.isCheckForNewScreenshots());
+        configuration.getCheckForNewScreenshots());
     openNewTabCheckBox = new JBCheckBox(
         CodeGPTBundle.get("configurationConfigurable.openNewTabCheckBox.label"),
-        configuration.isCreateNewChatOnEachAction());
+        configuration.getCreateNewChatOnEachAction());
     methodNameGenerationCheckBox = new JBCheckBox(
         CodeGPTBundle.get("configurationConfigurable.enableMethodNameGeneration.label"),
-        configuration.isMethodNameGenerationEnabled());
+        configuration.getMethodNameGenerationEnabled());
     autoFormattingCheckBox = new JBCheckBox(
         CodeGPTBundle.get("configurationConfigurable.autoFormatting.label"),
-        configuration.isAutoFormattingEnabled());
+        configuration.getAutoFormattingEnabled());
     autocompletionPostProcessingCheckBox = new JBCheckBox(
         CodeGPTBundle.get("configurationConfigurable.autocompletionPostProcessing.label"),
-        configuration.isAutocompletionPostProcessingEnabled()
+        configuration.getAutocompletionPostProcessingEnabled()
     );
     autocompletionContextAwareCheckBox = new JBCheckBox(
         CodeGPTBundle.get("configurationConfigurable.autocompletionContextAwareCheckBox.label"),
-        configuration.isAutocompletionPostProcessingEnabled()
+        configuration.getAutocompletionContextAwareEnabled()
     );
 
     mainPanel = FormBuilder.createFormBuilder()
@@ -146,11 +148,11 @@ public class ConfigurationComponent {
     return mainPanel;
   }
 
-  public ConfigurationState getCurrentFormState() {
-    var state = new ConfigurationState();
+  public ConfigurationSettingsState getCurrentFormState() {
+    var state = new ConfigurationSettingsState();
     state.setTableData(getTableData());
     state.setMaxTokens(maxTokensField.getValue());
-    state.setTemperature(Double.parseDouble(temperatureField.getText()));
+    state.setTemperature(Float.parseFloat(temperatureField.getText()));
     state.setCommitMessagePrompt(commitMessagePromptTextArea.getText());
     state.setCheckForPluginUpdates(checkForPluginUpdatesCheckBox.isSelected());
     state.setCheckForNewScreenshots(checkForNewScreenshotsCheckBox.isSelected());
@@ -163,20 +165,20 @@ public class ConfigurationComponent {
   }
 
   public void resetForm() {
-    var configuration = ConfigurationSettings.getCurrentState();
+    var configuration = ConfigurationSettings.getState();
     setTableData(configuration.getTableData());
     maxTokensField.setValue(configuration.getMaxTokens());
     temperatureField.setText(String.valueOf(configuration.getTemperature()));
     commitMessagePromptTextArea.setText(configuration.getCommitMessagePrompt());
-    checkForPluginUpdatesCheckBox.setSelected(configuration.isCheckForPluginUpdates());
-    checkForNewScreenshotsCheckBox.setSelected(configuration.isCheckForNewScreenshots());
-    openNewTabCheckBox.setSelected(configuration.isCreateNewChatOnEachAction());
-    methodNameGenerationCheckBox.setSelected(configuration.isMethodNameGenerationEnabled());
-    autoFormattingCheckBox.setSelected(configuration.isAutoFormattingEnabled());
+    checkForPluginUpdatesCheckBox.setSelected(configuration.getCheckForPluginUpdates());
+    checkForNewScreenshotsCheckBox.setSelected(configuration.getCheckForNewScreenshots());
+    openNewTabCheckBox.setSelected(configuration.getCreateNewChatOnEachAction());
+    methodNameGenerationCheckBox.setSelected(configuration.getMethodNameGenerationEnabled());
+    autoFormattingCheckBox.setSelected(configuration.getAutoFormattingEnabled());
     autocompletionPostProcessingCheckBox.setSelected(
-        configuration.isAutocompletionPostProcessingEnabled());
+        configuration.getAutocompletionPostProcessingEnabled());
     autocompletionContextAwareCheckBox.setSelected(
-        configuration.isAutocompletionContextAwareEnabled());
+        configuration.getAutocompletionContextAwareEnabled());
   }
 
   private Map<String, String> getTableData() {
