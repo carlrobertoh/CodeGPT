@@ -38,7 +38,7 @@ public class ProjectCompilationStatusListener implements CompilationStatusListen
       int errors,
       int warnings,
       @NotNull CompileContext compileContext) {
-    var success = !ConfigurationSettings.getCurrentState().isCaptureCompileErrors()
+    var success = !ConfigurationSettings.getState().getCaptureCompileErrors()
         || (!aborted && errors == 0 && warnings == 0);
     if (success) {
       return;
@@ -53,7 +53,7 @@ public class ProjectCompilationStatusListener implements CompilationStatusListen
                   .sendMessage(getMultiFileMessage(compileContext), FIX_COMPILE_ERRORS)))
           .addAction(NotificationAction.createSimpleExpiring(
               CodeGPTBundle.get("shared.notification.doNotShowAgain"),
-              () -> ConfigurationSettings.getCurrentState().setCaptureCompileErrors(false)))
+              () -> ConfigurationSettings.getState().setCaptureCompileErrors(false)))
           .notify(project);
     }
   }

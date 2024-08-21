@@ -53,7 +53,7 @@ class CodeGPTInlineCompletionProvider : DebouncedInlineCompletionProvider() {
         return InlineCompletionSuggestion.Default(channelFlow {
             val caretOffset = withContext(Dispatchers.EDT) { editor.caretModel.offset }
             val infillContext =
-                if (service<ConfigurationSettings>().state.isAutocompletionContextAwareEnabled)
+                if (service<ConfigurationSettings>().state.autocompletionContextAwareEnabled)
                     service<CompletionContextService>().findContext(editor, caretOffset)
                 else null
             val infillRequest = if (infillContext == null) {
@@ -85,7 +85,7 @@ class CodeGPTInlineCompletionProvider : DebouncedInlineCompletionProvider() {
                         val settings = service<ConfigurationSettings>().state
                         try {
                             var inlineText = it.toString()
-                            if (settings.isAutocompletionPostProcessingEnabled) {
+                            if (settings.autocompletionPostProcessingEnabled) {
                                 inlineText = CodeCompletionParserFactory
                                     .getParserForFileExtension(request.file.virtualFile.extension)
                                     .parse(
@@ -106,7 +106,7 @@ class CodeGPTInlineCompletionProvider : DebouncedInlineCompletionProvider() {
                             }
                         } catch (t: Throwable) {
                             logger.error(t)
-                            settings.isAutocompletionPostProcessingEnabled = false
+                            settings.autocompletionPostProcessingEnabled = false
                         }
                     }
                 )

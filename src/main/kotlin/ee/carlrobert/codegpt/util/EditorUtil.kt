@@ -5,6 +5,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.PathManager
 import com.intellij.openapi.application.runUndoTransparentWriteAction
 import com.intellij.openapi.command.WriteCommandAction
+import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.EditorFactory
@@ -155,7 +156,7 @@ object EditorUtil {
                     StringUtil.convertLineSeparators(newText)
                 )
 
-                if (ConfigurationSettings.getCurrentState().isAutoFormattingEnabled) {
+                if (service<ConfigurationSettings>().state.autoFormattingEnabled) {
                     reformatDocument(
                         project,
                         document,

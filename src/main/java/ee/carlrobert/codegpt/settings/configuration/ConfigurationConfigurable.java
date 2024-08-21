@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt.settings.configuration;
 
 import com.intellij.openapi.Disposable;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.util.Disposer;
 import ee.carlrobert.codegpt.CodeGPTBundle;
@@ -27,19 +28,19 @@ public class ConfigurationConfigurable implements Configurable {
     parentDisposable = Disposer.newDisposable();
     component = new ConfigurationComponent(
         parentDisposable,
-        ConfigurationSettings.getCurrentState());
+        ConfigurationSettings.getState());
     return component.getPanel();
   }
 
   @Override
   public boolean isModified() {
-    return !component.getCurrentFormState()
-        .equals(ConfigurationSettings.getCurrentState());
+    return !component.getCurrentFormState().equals(ConfigurationSettings.getState());
   }
 
   @Override
   public void apply() {
-    ConfigurationSettings.getInstance().loadState(component.getCurrentFormState());
+    ApplicationManager.getApplication().getService(ConfigurationSettings.class)
+        .loadState(component.getCurrentFormState());
     EditorActionsUtil.refreshActions();
   }
 
