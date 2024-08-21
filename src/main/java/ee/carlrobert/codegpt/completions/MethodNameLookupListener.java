@@ -18,8 +18,8 @@ public class MethodNameLookupListener implements LookupManagerListener {
 
   @Override
   public void activeLookupChanged(@Nullable Lookup oldLookup, @Nullable Lookup newLookup) {
-    if (!ConfigurationSettings.getCurrentState().isMethodNameGenerationEnabled()
-        || !CompletionRequestService.getInstance().isRequestAllowed()
+    if (!ConfigurationSettings.getState().getMethodNameGenerationEnabled()
+        || !CompletionRequestService.isRequestAllowed()
         || !(newLookup instanceof LookupImpl lookup)) {
       return;
     }

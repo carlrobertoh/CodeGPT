@@ -170,7 +170,7 @@ public final class CodeCompletionServiceOld implements Disposable {
       // ignore
     }
     editor.getCaretModel().moveToOffset(offset + text.length());
-    if (ConfigurationSettings.getCurrentState().isAutoFormattingEnabled()) {
+    if (ConfigurationSettings.getState().getAutoFormattingEnabled()) {
       EditorUtil.reformatDocument(project, document, offset, offset + text.length());
     }
   }

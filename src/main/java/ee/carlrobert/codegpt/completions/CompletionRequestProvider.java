@@ -134,7 +134,7 @@ public class CompletionRequestProvider {
             new OpenAIChatCompletionStandardMessage("user", context)))
         .setModel(model)
         .setStream(true)
-        .setMaxTokens(ConfigurationSettings.getCurrentState().getMaxTokens())
+        .setMaxTokens(ConfigurationSettings.getState().getMaxTokens())
         .build();
   }
 
@@ -202,7 +202,7 @@ public class CompletionRequestProvider {
         systemPrompt,
         message.getPrompt(),
         conversation.getMessages());
-    var configuration = ConfigurationSettings.getCurrentState();
+    var configuration = ConfigurationSettings.getState();
     return new LlamaCompletionRequest.Builder(prompt)
         .setN_predict(configuration.getMaxTokens())
         .setTemperature(configuration.getTemperature())
@@ -217,7 +217,7 @@ public class CompletionRequestProvider {
   public OpenAIChatCompletionRequest buildOpenAIChatCompletionRequest(
       @Nullable String model,
       CallParameters callParameters) {
-    var configuration = ConfigurationSettings.getCurrentState();
+    var configuration = ConfigurationSettings.getState();
     var requestBuilder = new OpenAIChatCompletionRequest.Builder(
         buildOpenAIMessages(model, callParameters))
         .setModel(model)
@@ -242,7 +242,7 @@ public class CompletionRequestProvider {
   public GoogleCompletionRequest buildGoogleChatCompletionRequest(
       @Nullable String model,
       CallParameters callParameters) {
-    var configuration = ConfigurationSettings.getCurrentState();
+    var configuration = ConfigurationSettings.getState();
     return new GoogleCompletionRequest.Builder(buildGoogleMessages(model, callParameters))
         .generationConfig(new GoogleGenerationConfig.Builder()
             .maxOutputTokens(configuration.getMaxTokens())
@@ -309,7 +309,7 @@ public class CompletionRequestProvider {
 
   public ClaudeCompletionRequest buildAnthropicChatCompletionRequest(
       CallParameters callParameters) {
-    var configuration = ConfigurationSettings.getCurrentState();
+    var configuration = ConfigurationSettings.getState();
     var settings = AnthropicSettings.getCurrentState();
     var request = new ClaudeCompletionRequest();
     request.setModel(settings.getModel());
@@ -342,14 +342,14 @@ public class CompletionRequestProvider {
   public OllamaChatCompletionRequest buildOllamaChatCompletionRequest(
       CallParameters callParameters
   ) {
-    var configuration = ConfigurationSettings.getCurrentState();
+    var configuration = ConfigurationSettings.getState();
     var settings = ApplicationManager.getApplication().getService(OllamaSettings.class).getState();
     return new OllamaChatCompletionRequest
         .Builder(settings.getModel(), buildOllamaMessages(callParameters))
         .setStream(true)
         .setOptions(new OllamaParameters.Builder()
             .numPredict(configuration.getMaxTokens())
-            .temperature(configuration.getTemperature())
+            .temperature((double) configuration.getTemperature())
             .build())
         .build();
   }
@@ -474,7 +474,7 @@ public class CompletionRequestProvider {
 
     int totalUsage = messages.parallelStream()
         .mapToInt(encodingManager::countMessageTokens)
-        .sum() + ConfigurationSettings.getCurrentState().getMaxTokens();
+        .sum() + ConfigurationSettings.getState().getMaxTokens();
     int modelMaxTokens;
     try {
       modelMaxTokens = OpenAIChatCompletionModel.findByCode(model).getMaxTokens();
@@ -550,7 +550,7 @@ public class CompletionRequestProvider {
     int totalUsage = messages.parallelStream()
         .mapToInt(message -> encodingManager.countMessageTokens(message.getRole(),
             String.join(",", message.getParts().stream().map(GoogleContentPart::getText).toList())))
-        .sum() + ConfigurationSettings.getCurrentState().getMaxTokens();
+        .sum() + ConfigurationSettings.getState().getMaxTokens();
     int modelMaxTokens;
     try {
       modelMaxTokens = GoogleModel.findByCode(model).getMaxTokens();

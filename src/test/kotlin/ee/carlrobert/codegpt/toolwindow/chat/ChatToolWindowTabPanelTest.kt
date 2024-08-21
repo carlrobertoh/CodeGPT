@@ -346,10 +346,10 @@ class ChatToolWindowTabPanelTest : IntegrationTest() {
 
   fun testSendingLlamaMessage() {
     useLlamaService()
-    val configurationState = ConfigurationSettings.getCurrentState()
+    val configurationState = service<ConfigurationSettings>().state
     service<PersonaSettings>().state.selectedPersona.instructions = "TEST_SYSTEM_PROMPT"
     configurationState.maxTokens = 1000
-    configurationState.temperature = 0.1
+    configurationState.temperature = 0.1f
     val llamaSettings = LlamaSettings.getCurrentState()
     llamaSettings.isUseCustomModel = false
     llamaSettings.huggingFaceModel = HuggingFaceModel.CODE_LLAMA_7B_Q4
@@ -379,7 +379,7 @@ class ChatToolWindowTabPanelTest : IntegrationTest() {
             conversation.messages),
           configurationState.maxTokens,
           true,
-          configurationState.temperature,
+          configurationState.temperature.toDouble(),
           llamaSettings.topK,
           llamaSettings.topP,
           llamaSettings.minP,

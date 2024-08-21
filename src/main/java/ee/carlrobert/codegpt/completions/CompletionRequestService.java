@@ -161,7 +161,7 @@ public final class CompletionRequestService {
       String systemPrompt,
       String gitDiff,
       CompletionEventListener<String> eventListener) {
-    var configuration = ConfigurationSettings.getCurrentState();
+    var configuration = ConfigurationSettings.getState();
     var openaiRequestBuilder = new Builder(List.of(
         new OpenAIChatCompletionStandardMessage("system", systemPrompt),
         new OpenAIChatCompletionStandardMessage("user", gitDiff)))

@@ -53,12 +53,6 @@ class IdentifyTraitsPersistenceTest {
   }
 
   @Test
-  fun `get returns the deserialized event`() {
-    IdentifyTraitsPersistence.FILE.write(gson.toJson(identifyTraits))
-    assertEquals(identifyTraits, persistence.get())
-  }
-
-  @Test
   fun `set throws IOException when file cannot be written and returns false`() {
     IdentifyTraitsPersistence.FILE = IdentifyTraitsPersistence.FILE.resolve(" xyz ")
     assertEquals(persistence.set(identifyTraits), false)

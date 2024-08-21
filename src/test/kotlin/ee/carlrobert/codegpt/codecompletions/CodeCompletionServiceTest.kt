@@ -83,7 +83,7 @@ class CodeCompletionServiceTest : IntegrationTest() {
     }
 
     fun testApplyInlayAction() {
-        ConfigurationSettings.getCurrentState().isAutoFormattingEnabled = false
+        ConfigurationSettings.getState().autoFormattingEnabled = false
         myFixture.configureByText(
             "CompletionTest.java",
             getResourceContent("/codecompletions/code-completion-file.txt")
