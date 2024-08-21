@@ -6,7 +6,7 @@ import com.intellij.openapi.components.service
 import ee.carlrobert.codegpt.completions.llama.LlamaModel
 import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey
 import ee.carlrobert.codegpt.credentials.CredentialsStore.getCredential
-import ee.carlrobert.codegpt.settings.configuration.Placeholder
+import ee.carlrobert.codegpt.settings.configuration.Placeholder.*
 import ee.carlrobert.codegpt.settings.service.codegpt.CodeGPTServiceSettings
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
@@ -140,11 +140,16 @@ object CodeCompletionRequestFactory {
         details: InfillRequestDetails
     ): Any {
         if (value !is String) return value
+
         return when (value) {
-            "$" + Placeholder.FIM_PROMPT -> template.buildPrompt(details)
-            "$" + Placeholder.PREFIX -> details.prefix
-            "$" + Placeholder.SUFFIX -> details.suffix
-            else -> value
+            FIM_PROMPT.code -> template.buildPrompt(details)
+            PREFIX.code -> details.prefix
+            SUFFIX.code -> details.suffix
+            else -> {
+                return value.takeIf { it.contains(PREFIX.code) || it.contains(SUFFIX.code) }
+                    ?.replace(PREFIX.code, details.prefix)
+                    ?.replace(SUFFIX.code, details.suffix) ?: value
+            }
         }
     }
 
