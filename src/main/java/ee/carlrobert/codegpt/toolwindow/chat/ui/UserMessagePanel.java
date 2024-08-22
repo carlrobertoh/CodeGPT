@@ -12,7 +12,7 @@ import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.CodeGPTKeys;
 import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.conversations.message.Message;
-import ee.carlrobert.codegpt.events.Details;
+import ee.carlrobert.codegpt.events.WebSearchEventDetails;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.toolwindow.ui.WebpageList;
 import java.awt.BorderLayout;
@@ -66,9 +66,10 @@ public class UserMessagePanel extends JPanel {
     var panel = new JPanel(new BorderLayout());
     panel.setOpaque(false);
     if (addedDocumentation != null) {
-      var listModel = new DefaultListModel<Details>();
-      listModel.addElement(new Details(UUID.randomUUID().toString(), addedDocumentation.getName(),
-          addedDocumentation.getUrl(), addedDocumentation.getUrl()));
+      var listModel = new DefaultListModel<WebSearchEventDetails>();
+      listModel.addElement(
+          new WebSearchEventDetails(UUID.randomUUID(), addedDocumentation.getName(),
+              addedDocumentation.getUrl(), addedDocumentation.getUrl()));
       panel.add(createWebpageListPanel(new WebpageList(listModel)), BorderLayout.NORTH);
     }
 
@@ -98,6 +99,7 @@ public class UserMessagePanel extends JPanel {
         project,
         false,
         true,
+        false,
         false,
         parentDisposable)
         .withResponse(prompt);
