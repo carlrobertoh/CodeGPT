@@ -121,8 +121,7 @@ abstract class ToolWindowCompletionResponseEventListener implements
 
   @Override
   public void handleCodeGPTEvent(CodeGPTEvent event) {
-    ApplicationManager.getApplication().invokeLater(() ->
-        responseContainer.displayWebSearchItem(event.getEvent().getDetails()));
+    responseContainer.handleCodeGPTEvent(event);
   }
 
   private void stopStreaming(ChatMessageResponseBody responseContainer) {

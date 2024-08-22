@@ -32,6 +32,7 @@ import ee.carlrobert.codegpt.toolwindow.ui.ChatToolWindowLandingPanel;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.codegpt.ui.textarea.AppliedActionInlay;
 import ee.carlrobert.codegpt.ui.textarea.UserInputPanel;
+import ee.carlrobert.codegpt.ui.textarea.suggestion.item.CreateDocumentationActionItem;
 import ee.carlrobert.codegpt.ui.textarea.suggestion.item.DocumentationActionItem;
 import ee.carlrobert.codegpt.ui.textarea.suggestion.item.PersonaActionItem;
 import ee.carlrobert.codegpt.ui.textarea.suggestion.item.WebSearchActionItem;
@@ -175,7 +176,8 @@ public class ChatToolWindowTabPanel implements Disposable {
         .withReloadAction(() -> reloadMessage(message, conversation, conversationType))
         .withDeleteAction(() -> removeMessage(message.getId(), conversation))
         .addContent(
-            new ChatMessageResponseBody(project, true, false, message.isWebSearchIncluded(), this));
+            new ChatMessageResponseBody(project, true, false, message.isWebSearchIncluded(),
+                message.getDocumentationDetails() != null, this));
   }
 
   private void reloadMessage(
@@ -265,7 +267,8 @@ public class ChatToolWindowTabPanel implements Disposable {
 
     var addedDocumentation = CodeGPTKeys.ADDED_DOCUMENTATION.get(project);
     var appliedInlayExists = appliedInlayActions.stream()
-        .anyMatch(it -> it.getSuggestion() instanceof DocumentationActionItem);
+        .anyMatch(it -> it.getSuggestion() instanceof DocumentationActionItem
+            || it.getSuggestion() instanceof CreateDocumentationActionItem);
     if (addedDocumentation != null && appliedInlayExists) {
       message.setDocumentationDetails(addedDocumentation);
       CodeGPTKeys.ADDED_DOCUMENTATION.set(project, null);
@@ -273,7 +276,7 @@ public class ChatToolWindowTabPanel implements Disposable {
 
     var addedPersona = CodeGPTKeys.ADDED_PERSONA.get(project);
     var personaInlayExists = appliedInlayActions.stream()
-            .anyMatch(it -> it.getSuggestion() instanceof PersonaActionItem);
+        .anyMatch(it -> it.getSuggestion() instanceof PersonaActionItem);
     if (addedPersona != null && personaInlayExists) {
       message.setPersonaDetails(addedPersona);
       CodeGPTKeys.ADDED_PERSONA.set(project, null);

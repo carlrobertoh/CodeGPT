@@ -57,6 +57,7 @@ dependencies {
   implementation(platform(libs.jackson.bom))
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8")
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+  implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
   implementation(libs.flexmark.all) {
     // vulnerable transitive dependency
     exclude(group = "org.jsoup", module = "jsoup")

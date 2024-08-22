@@ -16,14 +16,15 @@ import com.intellij.ui.dsl.builder.panel
 import com.intellij.ui.jcef.JBCefApp
 import com.intellij.util.ui.JBUI
 import ee.carlrobert.codegpt.CodeGPTBundle
-import ee.carlrobert.codegpt.events.Details
+import ee.carlrobert.codegpt.events.WebSearchEventDetails
 import org.cef.browser.CefRendering
 import java.awt.*
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import javax.swing.*
 
-class WebpageList(model: DefaultListModel<Details>) : JBList<Details>(model) {
+class WebpageList(model: DefaultListModel<WebSearchEventDetails>) :
+    JBList<WebSearchEventDetails>(model) {
 
     init {
         setModel(model)
@@ -135,7 +136,7 @@ class WebpageListCellRenderer : DefaultListCellRenderer() {
         super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus).apply {
             setOpaque(false)
         }.let { component ->
-            if (component is JLabel && value is Details) {
+            if (component is JLabel && value is WebSearchEventDetails) {
                 component.apply {
                     icon = AllIcons.General.Web
                     iconTextGap = 4
