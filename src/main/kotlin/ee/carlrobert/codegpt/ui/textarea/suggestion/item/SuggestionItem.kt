@@ -12,7 +12,7 @@ interface SuggestionItem {
 }
 
 interface SuggestionActionItem : SuggestionItem {
-    fun execute(project: Project, textPane: PromptTextField)
+    suspend fun execute(project: Project, textPane: PromptTextField)
 }
 
 interface SuggestionGroupItem : SuggestionItem {
