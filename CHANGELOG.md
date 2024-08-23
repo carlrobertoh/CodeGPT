@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.10.2-223] - 2024-08-23
+
 ### Added
 
 - Progress display for web docs
@@ -598,7 +600,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `OPENAI_API_KEY` persistence, key is saved in the OS password safe from now on
 
-[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.10.1-223...HEAD
+[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.10.2-223...HEAD
+[2.10.2-223]: https://github.com/carlrobertoh/CodeGPT/compare/v2.10.1-223...v2.10.2-223
 [2.10.1-223]: https://github.com/carlrobertoh/CodeGPT/compare/v2.10.0-223...v2.10.1-223
 [2.10.0-223]: https://github.com/carlrobertoh/CodeGPT/compare/v2.9.0-223...v2.10.0-223
 [2.9.0-223]: https://github.com/carlrobertoh/CodeGPT/compare/v2.8.5-223...v2.9.0-223
