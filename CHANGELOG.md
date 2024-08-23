@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Progress display for web docs
+
+### Fixed
+
+- Code completion prompt creation from placeholders
+- Prompt text field inlay offset and up/down key events
+
 ## [2.10.1-241.1] - 2024-08-20
 
 ### Fixed
