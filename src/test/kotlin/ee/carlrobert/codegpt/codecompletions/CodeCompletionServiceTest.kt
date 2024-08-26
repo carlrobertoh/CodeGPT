@@ -39,14 +39,17 @@ class CodeCompletionServiceTest : IntegrationTest() {
             assertThat(request.method).isEqualTo("POST")
             assertThat(request.body)
                 .extracting("prompt")
-                .isEqualTo(InfillPromptTemplate.CODE_LLAMA.buildPrompt(
-                    InfillRequestDetails(
-                        prefix,
-                        suffix,
-                        null
+                .isEqualTo(
+                    InfillPromptTemplate.CODE_LLAMA.buildPrompt(
+                        InfillRequest.Builder(prefix, suffix).build()
                     )
-                ))
-            listOf(jsonMapResponse(e("content", expectedCompletion), e("stop", true)))
+                )
+            listOf(
+                jsonMapResponse(
+                    e("content", expectedCompletion),
+                    e("stop", true)
+                )
+            )
         })
 
         myFixture.type('c')

@@ -1,7 +1,7 @@
 package ee.carlrobert.codegpt.settings.service.llama.form;
 
 import ee.carlrobert.codegpt.codecompletions.InfillPromptTemplate;
-import ee.carlrobert.codegpt.codecompletions.InfillRequestDetails;
+import ee.carlrobert.codegpt.codecompletions.InfillRequest;
 
 public class InfillPromptTemplatePanel extends BasePromptTemplatePanel<InfillPromptTemplate> {
 
@@ -17,6 +17,6 @@ public class InfillPromptTemplatePanel extends BasePromptTemplatePanel<InfillPro
 
   @Override
   protected String buildPromptDescription(InfillPromptTemplate template) {
-    return template.buildPrompt(new InfillRequestDetails("PREFIX", "SUFFIX", null));
+    return template.buildPrompt(new InfillRequest.Builder("PREFIX", "SUFFIX").build());
   }
 }
