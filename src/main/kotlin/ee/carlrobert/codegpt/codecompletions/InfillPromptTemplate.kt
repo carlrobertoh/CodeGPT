@@ -3,14 +3,14 @@ package ee.carlrobert.codegpt.codecompletions
 enum class InfillPromptTemplate(val label: String, val stopTokens: List<String>?) {
 
     OPENAI("OpenAI", null) {
-        override fun buildPrompt(infillDetails: InfillRequestDetails): String {
+        override fun buildPrompt(infillDetails: InfillRequest): String {
             val infillPrompt =
                 "<|fim_prefix|> ${infillDetails.prefix} <|fim_suffix|>${infillDetails.suffix} <|fim_middle|>"
             return createDefaultMultiFilePrompt(infillDetails, infillPrompt)
         }
     },
     CODE_LLAMA("Code Llama", listOf("<EOT>")) {
-        override fun buildPrompt(infillDetails: InfillRequestDetails): String {
+        override fun buildPrompt(infillDetails: InfillRequest): String {
             val infillPrompt = "<PRE> ${infillDetails.prefix} <SUF>${infillDetails.suffix} <MID>"
             return createDefaultMultiFilePrompt(infillDetails, infillPrompt)
         }
@@ -19,7 +19,7 @@ enum class InfillPromptTemplate(val label: String, val stopTokens: List<String>?
         "CodeGemma Instruct",
         listOf("<|file_separator|>", "<|fim_prefix|>", "<|fim_suffix|>", "<|fim_middle|>", "<eos>")
     ) {
-        override fun buildPrompt(infillDetails: InfillRequestDetails): String {
+        override fun buildPrompt(infillDetails: InfillRequest): String {
             // see https://huggingface.co/google/codegemma-7b#for-code-completion
             val infillPrompt =
                 "<|fim_prefix|>${infillDetails.prefix}<|fim_suffix|>${infillDetails.suffix}<|fim_middle|>"
@@ -36,7 +36,7 @@ enum class InfillPromptTemplate(val label: String, val stopTokens: List<String>?
         }
     },
     CODE_QWEN("CodeQwen1.5", listOf("<|endoftext|>")) {
-        override fun buildPrompt(infillDetails: InfillRequestDetails): String {
+        override fun buildPrompt(infillDetails: InfillRequest): String {
             // see https://github.com/QwenLM/CodeQwen1.5?tab=readme-ov-file#2-file-level-code-completion-fill-in-the-middle
             val infillPrompt =
                 "<fim_prefix>${infillDetails.prefix}<fim_suffix>${infillDetails.suffix}<fim_middle>"
@@ -54,14 +54,14 @@ enum class InfillPromptTemplate(val label: String, val stopTokens: List<String>?
         }
     },
     STABILITY("Stability AI", listOf("<|endoftext|>")) {
-        override fun buildPrompt(infillDetails: InfillRequestDetails): String {
+        override fun buildPrompt(infillDetails: InfillRequest): String {
             val infillPrompt =
                 "<fim_prefix>${infillDetails.prefix}<fim_suffix>${infillDetails.suffix}<fim_middle>"
             return createDefaultMultiFilePrompt(infillDetails, infillPrompt)
         }
     },
     DEEPSEEK_CODER("DeepSeek Coder", listOf("<|EOT|>")) {
-        override fun buildPrompt(infillDetails: InfillRequestDetails): String {
+        override fun buildPrompt(infillDetails: InfillRequest): String {
             // see https://github.com/deepseek-ai/DeepSeek-Coder?tab=readme-ov-file#2-code-insertion
             val infillPrompt =
                 "<｜fim▁begin｜>${infillDetails.prefix}<｜fim▁hole｜>${infillDetails.suffix}<｜fim▁end｜>"
@@ -76,7 +76,7 @@ enum class InfillPromptTemplate(val label: String, val stopTokens: List<String>?
         }
     },
     STAR_CODER("StarCoder2", listOf("<|endoftext|>")) {
-        override fun buildPrompt(infillDetails: InfillRequestDetails): String {
+        override fun buildPrompt(infillDetails: InfillRequest): String {
             // see https://huggingface.co/spaces/bigcode/bigcode-playground/blob/main/app.py
             val infillPrompt =
                 "<fim_prefix>${infillDetails.prefix} <fim_suffix> ${infillDetails.suffix}<fim_middle>"
@@ -94,14 +94,14 @@ enum class InfillPromptTemplate(val label: String, val stopTokens: List<String>?
         }
     },
     CODESTRAL("Codestral", listOf("</s>")) {
-        override fun buildPrompt(infillDetails: InfillRequestDetails): String {
+        override fun buildPrompt(infillDetails: InfillRequest): String {
             // see https://github.com/mistralai/mistral-common/blob/master/src/mistral_common/tokens/tokenizers/base.py
             val infillPrompt = "[SUFFIX]${infillDetails.suffix}[PREFIX]${infillDetails.prefix}[MIDDLE]"
             return createDefaultMultiFilePrompt(infillDetails, infillPrompt)
         }
     };
 
-    abstract fun buildPrompt(infillDetails: InfillRequestDetails): String
+    abstract fun buildPrompt(infillDetails: InfillRequest): String
 
     override fun toString(): String {
         return label
@@ -109,7 +109,7 @@ enum class InfillPromptTemplate(val label: String, val stopTokens: List<String>?
 
     companion object {
         private fun createDefaultMultiFilePrompt(
-            infillDetails: InfillRequestDetails,
+            infillDetails: InfillRequest,
             infillPrompt: String
         ): String {
             val context = infillDetails.context

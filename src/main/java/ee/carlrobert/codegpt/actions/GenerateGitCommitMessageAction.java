@@ -1,7 +1,6 @@
 package ee.carlrobert.codegpt.actions;
 
 import static com.intellij.openapi.ui.Messages.OK;
-import static com.intellij.util.ObjectUtils.tryCast;
 import static java.util.stream.Collectors.joining;
 
 import com.intellij.notification.Notification;
@@ -12,12 +11,10 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.WriteCommandAction;
-import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vcs.FilePath;
+import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.vcs.VcsDataKeys;
-import com.intellij.openapi.vcs.changes.Change;
-import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vcs.VcsException;
 import com.intellij.vcs.commit.CommitWorkflowUi;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.EncodingManager;
@@ -25,19 +22,19 @@ import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.completions.CompletionRequestService;
 import ee.carlrobert.codegpt.settings.configuration.CommitMessageTemplate;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
+import ee.carlrobert.codegpt.util.CommitWorkflowChanges;
+import ee.carlrobert.codegpt.util.GitUtil;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.completion.CompletionEventListener;
-import java.io.BufferedReader;
-import java.io.File;
+import git4idea.repo.GitRepositoryManager;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import okhttp3.sse.EventSource;
 import org.jetbrains.annotations.NotNull;
 
@@ -56,18 +53,20 @@ public class GenerateGitCommitMessageAction extends AnAction {
 
   @Override
   public void update(@NotNull AnActionEvent event) {
-    var commitWorkflowUi = event.getData(VcsDataKeys.COMMIT_WORKFLOW_UI);
-    if (commitWorkflowUi == null) {
-      event.getPresentation().setVisible(false);
-      return;
-    }
+    ApplicationManager.getApplication().invokeLater(() -> {
+      var commitWorkflowUi = event.getData(VcsDataKeys.COMMIT_WORKFLOW_UI);
+      if (commitWorkflowUi == null) {
+        event.getPresentation().setVisible(false);
+        return;
+      }
 
-    var callAllowed = CompletionRequestService.isRequestAllowed();
-    event.getPresentation().setEnabled(callAllowed
-        && new CommitWorkflowChanges(commitWorkflowUi).isFilesSelected());
-    event.getPresentation().setText(CodeGPTBundle.get(callAllowed
-        ? "action.generateCommitMessage.title"
-        : "action.generateCommitMessage.missingCredentials"));
+      var callAllowed = CompletionRequestService.isRequestAllowed();
+      event.getPresentation().setEnabled(callAllowed
+          && new CommitWorkflowChanges(commitWorkflowUi).isFilesSelected());
+      event.getPresentation().setText(CodeGPTBundle.get(callAllowed
+          ? "action.generateCommitMessage.title"
+          : "action.generateCommitMessage.missingCredentials"));
+    });
   }
 
   @Override
@@ -77,7 +76,7 @@ public class GenerateGitCommitMessageAction extends AnAction {
       return;
     }
 
-    var gitDiff = getGitDiff(event, project);
+    var gitDiff = getDiff(event, project);
     var tokenCount = encodingManager.countTokens(gitDiff);
     if (tokenCount > MAX_TOKEN_COUNT_WARNING
         && OverlayUtil.showTokenSoftLimitWarningDialog(tokenCount) != OK) {
@@ -97,6 +96,57 @@ public class GenerateGitCommitMessageAction extends AnAction {
   @Override
   public @NotNull ActionUpdateThread getActionUpdateThread() {
     return ActionUpdateThread.EDT;
+  }
+
+  private String getDiff(AnActionEvent event, Project project) {
+    var commitWorkflowUi = Optional.ofNullable(event.getData(VcsDataKeys.COMMIT_WORKFLOW_UI))
+        .orElseThrow(() -> new IllegalStateException("Could not retrieve commit workflow ui."));
+    var changes = new CommitWorkflowChanges(commitWorkflowUi);
+    var projectBasePath = project.getBasePath();
+
+    try {
+      return ApplicationManager.getApplication().executeOnPooledThread(() -> {
+        try {
+          var repository = GitRepositoryManager.getInstance(project)
+              .getRepositoryForFile(project.getWorkspaceFile());
+          if (repository == null) {
+            return "";
+          }
+
+          var stagedGitDiff = String.join("\n", GitUtil.getStagedDiff(project, repository));
+          var unstagedGitDiff = String.join("\n", GitUtil.getUnstagedDiff(project, repository));
+          var newFilesContent =
+              getNewFilesDiff(projectBasePath, changes.getIncludedUnversionedFilePaths());
+          return Map.of(
+                  "Unstaged git diff", unstagedGitDiff,
+                  "Staged git diff", stagedGitDiff,
+                  "New files", newFilesContent)
+              .entrySet().stream()
+              .filter(entry -> !entry.getValue().isEmpty())
+              .map(entry -> "%s:%n%s".formatted(entry.getKey(), entry.getValue()))
+              .collect(joining("\n\n"));
+        } catch (VcsException e) {
+          throw new RuntimeException("Unable to get staged diff", e);
+        }
+      }).get();
+    } catch (InterruptedException | ExecutionException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private static String getNewFilesDiff(String projectPath, List<String> filePaths) {
+    return filePaths.stream()
+        .map(pathString -> {
+          var filePath = Path.of(pathString);
+          var relativePath = Path.of(projectPath).relativize(filePath);
+          try {
+            return "New file '" + relativePath + "' content:\n" + Files.readString(filePath);
+          } catch (IOException ignored) {
+            return null;
+          }
+        })
+        .filter(Objects::nonNull)
+        .collect(joining("\n"));
   }
 
   private CompletionEventListener<String> getEventListener(
@@ -124,98 +174,5 @@ public class GenerateGitCommitMessageAction extends AnAction {
             NotificationType.ERROR));
       }
     };
-  }
-
-  private String getGitDiff(AnActionEvent event, Project project) {
-    var commitWorkflowUi = Optional.ofNullable(event.getData(VcsDataKeys.COMMIT_WORKFLOW_UI))
-        .orElseThrow(() -> new IllegalStateException("Could not retrieve commit workflow ui."));
-    var changes = new CommitWorkflowChanges(commitWorkflowUi);
-    var projectBasePath = project.getBasePath();
-    var gitDiff = getGitDiff(projectBasePath, changes.getIncludedVersionedFilePaths(), false);
-    var stagedGitDiff = getGitDiff(projectBasePath, changes.getIncludedVersionedFilePaths(), true);
-    var newFilesContent =
-        getNewFilesDiff(projectBasePath, changes.getIncludedUnversionedFilePaths());
-
-    return Map.of(
-            "Git diff", gitDiff,
-            "Staged git diff", stagedGitDiff,
-            "New files", newFilesContent)
-        .entrySet().stream()
-        .filter(entry -> !entry.getValue().isEmpty())
-        .map(entry -> "%s:%n%s".formatted(entry.getKey(), entry.getValue()))
-        .collect(joining("\n\n"));
-  }
-
-  private String getGitDiff(String projectPath, List<String> filePaths, boolean cached) {
-    if (filePaths.isEmpty()) {
-      return "";
-    }
-
-    var process = createGitDiffProcess(projectPath, filePaths, cached);
-    return new BufferedReader(new InputStreamReader(process.getInputStream()))
-        .lines()
-        .collect(joining("\n"));
-  }
-
-  private String getNewFilesDiff(String projectPath, List<String> filePaths) {
-    return filePaths.stream()
-        .map(pathString -> {
-          var filePath = Path.of(pathString);
-          var relativePath = Path.of(projectPath).relativize(filePath);
-          try {
-            return "New file '" + relativePath + "' content:\n" + Files.readString(filePath);
-          } catch (IOException ignored) {
-            return null;
-          }
-        })
-        .filter(Objects::nonNull)
-        .collect(joining("\n"));
-  }
-
-  private Process createGitDiffProcess(String projectPath, List<String> filePaths, boolean cached) {
-    var command = new ArrayList<String>();
-    command.add("git");
-    command.add("diff");
-    if (cached) {
-      command.add("--cached");
-    }
-    command.addAll(filePaths);
-
-    var processBuilder = new ProcessBuilder(command);
-    processBuilder.directory(new File(projectPath));
-    try {
-      return processBuilder.start();
-    } catch (IOException ex) {
-      throw new RuntimeException("Unable to start git diff process", ex);
-    }
-  }
-
-  static class CommitWorkflowChanges {
-
-    private final List<String> includedVersionedFilePaths;
-    private final List<String> includedUnversionedFilePaths;
-
-    CommitWorkflowChanges(CommitWorkflowUi commitWorkflowUi) {
-      includedVersionedFilePaths = commitWorkflowUi.getIncludedChanges().stream()
-          .map(Change::getVirtualFile)
-          .filter(Objects::nonNull)
-          .map(VirtualFile::getPath)
-          .toList();
-      includedUnversionedFilePaths = commitWorkflowUi.getIncludedUnversionedFiles().stream()
-          .map(FilePath::getPath)
-          .toList();
-    }
-
-    public List<String> getIncludedVersionedFilePaths() {
-      return includedVersionedFilePaths;
-    }
-
-    public List<String> getIncludedUnversionedFilePaths() {
-      return includedUnversionedFilePaths;
-    }
-
-    public boolean isFilesSelected() {
-      return !includedVersionedFilePaths.isEmpty() || !includedUnversionedFilePaths.isEmpty();
-    }
   }
 }

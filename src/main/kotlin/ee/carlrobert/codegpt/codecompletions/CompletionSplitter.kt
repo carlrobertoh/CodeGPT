@@ -5,8 +5,8 @@ class CompletionSplitter {
         fun split(completionText: String): String {
             val boundaryPredicates = listOf<(Char) -> Boolean>(
                 { Character.isWhitespace(it) },
-                { isBoundaryCharacter(it) },
-                { !isBoundaryCharacter(it) && !Character.isWhitespace(it) }
+                { it.isBoundaryCharacter() },
+                { !it.isBoundaryCharacter() && !Character.isWhitespace(it) }
             )
             for (predicate in boundaryPredicates) {
                 val blockIndex =
@@ -36,10 +36,10 @@ class CompletionSplitter {
             return endIndex
         }
 
-        private fun isBoundaryCharacter(c: Char): Boolean = c in "()[]{}<>~!@#$%^&*-+=|\\;:'\",./?"
-
         internal fun interface BoundaryFinder {
             fun isBoundaryCharacter(c: Char): Boolean
         }
     }
 }
+
+fun Char?.isBoundaryCharacter(): Boolean = this != null && this in "()[]{}<>~!@#$%^&*-+=|\\;:'\",./?"

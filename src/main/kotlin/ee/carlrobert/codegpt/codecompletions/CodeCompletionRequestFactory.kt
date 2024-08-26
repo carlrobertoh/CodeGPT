@@ -12,6 +12,7 @@ import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettingsState
 import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings
+import ee.carlrobert.llm.client.codegpt.request.CodeCompletionRequest
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest
 import ee.carlrobert.llm.client.ollama.completion.request.OllamaCompletionRequest
 import ee.carlrobert.llm.client.ollama.completion.request.OllamaParameters
@@ -23,30 +24,34 @@ import java.nio.charset.StandardCharsets
 
 object CodeCompletionRequestFactory {
 
+    private const val MAX_TOKENS = 128
+
     @JvmStatic
-    fun buildCodeGPTRequest(details: InfillRequestDetails): OpenAITextCompletionRequest {
+    fun buildCodeGPTRequest(details: InfillRequest): CodeCompletionRequest {
         val settings = service<CodeGPTServiceSettings>().state.codeCompletionSettings
-        return OpenAITextCompletionRequest.Builder(details.prefix)
-            .setSuffix(details.suffix)
-            .setStream(true)
+        return CodeCompletionRequest.Builder()
             .setModel(settings.model)
-            .setMaxTokens(getMaxTokens(details.prefix, details.suffix))
-            .setTemperature(0.4)
+            .setPrefix(details.prefix)
+            .setSuffix(details.suffix)
+            .setFileExtension(details.fileDetails?.fileExtension)
+            .setFileContent(details.fileDetails?.fileContent)
+            .setStagedDiff(details.vcsDetails?.stagedDiff)
+            .setUnstagedDiff(details.vcsDetails?.unstagedDiff)
             .build()
     }
 
     @JvmStatic
-    fun buildOpenAIRequest(details: InfillRequestDetails): OpenAITextCompletionRequest {
+    fun buildOpenAIRequest(details: InfillRequest): OpenAITextCompletionRequest {
         return OpenAITextCompletionRequest.Builder(details.prefix)
             .setSuffix(details.suffix)
             .setStream(true)
-            .setMaxTokens(getMaxTokens(details.prefix, details.suffix))
+            .setMaxTokens(MAX_TOKENS)
             .setTemperature(0.4)
             .build()
     }
 
     @JvmStatic
-    fun buildCustomRequest(details: InfillRequestDetails): Request {
+    fun buildCustomRequest(details: InfillRequest): Request {
         val settings = service<CustomServiceSettings>().state.codeCompletionSettings
         val credential = getCredential(CredentialKey.CUSTOM_SERVICE_API_KEY)
         return buildCustomRequest(
@@ -61,7 +66,7 @@ object CodeCompletionRequestFactory {
 
     @JvmStatic
     fun buildCustomRequest(
-        details: InfillRequestDetails,
+        details: InfillRequest,
         url: String,
         headers: Map<String, String>,
         body: Map<String, Any>,
@@ -93,21 +98,19 @@ object CodeCompletionRequestFactory {
     }
 
     @JvmStatic
-    fun buildLlamaRequest(details: InfillRequestDetails): LlamaCompletionRequest {
+    fun buildLlamaRequest(details: InfillRequest): LlamaCompletionRequest {
         val settings = LlamaSettings.getCurrentState()
         val promptTemplate = getLlamaInfillPromptTemplate(settings)
         val prompt = promptTemplate.buildPrompt(details)
-        println("PROMPT: ")
-        println(prompt)
         return LlamaCompletionRequest.Builder(prompt)
-            .setN_predict(getMaxTokens(details.prefix, details.suffix))
+            .setN_predict(MAX_TOKENS)
             .setStream(true)
             .setTemperature(0.4)
             .setStop(promptTemplate.stopTokens)
             .build()
     }
 
-    fun buildOllamaRequest(details: InfillRequestDetails): OllamaCompletionRequest {
+    fun buildOllamaRequest(details: InfillRequest): OllamaCompletionRequest {
         val settings = service<OllamaSettings>().state
         return OllamaCompletionRequest.Builder(
             settings.model,
@@ -116,7 +119,7 @@ object CodeCompletionRequestFactory {
             .setOptions(
                 OllamaParameters.Builder()
                     .stop(settings.fimTemplate.stopTokens)
-                    .numPredict(getMaxTokens(details.prefix, details.suffix))
+                    .numPredict(MAX_TOKENS)
                     .temperature(0.4)
                     .build()
             )
@@ -137,7 +140,7 @@ object CodeCompletionRequestFactory {
     private fun transformValue(
         value: Any,
         template: InfillPromptTemplate,
-        details: InfillRequestDetails
+        details: InfillRequest
     ): Any {
         if (value !is String) return value
 
@@ -152,15 +155,4 @@ object CodeCompletionRequestFactory {
             }
         }
     }
-
-    private fun getMaxTokens(prefix: String, suffix: String): Int {
-        if ((prefix.isNotEmpty() && isBoundaryCharacter(prefix[prefix.length - 1]))
-            || (suffix.isNotEmpty() && isBoundaryCharacter(suffix[0]))
-        ) {
-            return 16
-        }
-        return 36
-    }
-
-    private fun isBoundaryCharacter(c: Char): Boolean = c in "()[]{}<>~!@#$%^&*-+=|\\;:'\",./?"
 }
