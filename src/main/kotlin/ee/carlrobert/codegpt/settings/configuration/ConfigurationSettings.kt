@@ -34,6 +34,7 @@ class ConfigurationSettingsState : BaseState() {
     var autoFormattingEnabled by property(true)
     var autocompletionPostProcessingEnabled by property(false)
     var autocompletionContextAwareEnabled by property(false)
+    var autocompletionGitContextEnabled by property(true)
     var tableData by map<String, String>()
 
     init {

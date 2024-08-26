@@ -13,7 +13,7 @@ import com.intellij.util.ui.FormBuilder
 import ee.carlrobert.codegpt.CodeGPTBundle
 import ee.carlrobert.codegpt.codecompletions.CodeCompletionRequestFactory
 import ee.carlrobert.codegpt.codecompletions.InfillPromptTemplate
-import ee.carlrobert.codegpt.codecompletions.InfillRequestDetails
+import ee.carlrobert.codegpt.codecompletions.InfillRequest
 import ee.carlrobert.codegpt.completions.CompletionRequestService
 import ee.carlrobert.codegpt.settings.configuration.Placeholder
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceCodeCompletionSettingsState
@@ -29,7 +29,6 @@ import java.awt.FlowLayout
 import javax.swing.Box
 import javax.swing.JButton
 import javax.swing.JPanel
-import javax.swing.SwingUtilities
 
 class CustomServiceCodeCompletionForm(
     state: CustomServiceCodeCompletionSettingsState,
@@ -110,7 +109,13 @@ class CustomServiceCodeCompletionForm(
                 }
             )
             .addComponent(tabbedPane)
-            .addComponent(ComponentPanelBuilder.createCommentComponent(getHtmlDescription(), true, 100))
+            .addComponent(
+                ComponentPanelBuilder.createCommentComponent(
+                    getHtmlDescription(),
+                    true,
+                    100
+                )
+            )
             .addComponentFillVertically(JPanel(), 0)
             .panel
 
@@ -145,7 +150,7 @@ class CustomServiceCodeCompletionForm(
     private fun testConnection() {
         CompletionRequestService.getInstance().getCustomOpenAICompletionAsync(
             CodeCompletionRequestFactory.buildCustomRequest(
-                InfillRequestDetails("Hello", "!", null),
+                InfillRequest.Builder("Hello", "!").build(),
                 urlField.text,
                 tabbedPane.headers,
                 tabbedPane.body,
@@ -188,11 +193,7 @@ class CustomServiceCodeCompletionForm(
 
         val description = StringEscapeUtils.escapeHtml4(
             template.buildPrompt(
-                InfillRequestDetails(
-                    "PREFIX",
-                    "SUFFIX",
-                    null
-                )
+                InfillRequest.Builder("PREFIX", "SUFFIX").build(),
             )
         )
         HelpTooltip()

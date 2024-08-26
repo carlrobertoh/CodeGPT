@@ -44,11 +44,7 @@ class CodeCompletionServiceTest : IntegrationTest() {
                 .extracting("prompt")
                 .isEqualTo(
                     InfillPromptTemplate.CODE_LLAMA.buildPrompt(
-                        InfillRequestDetails(
-                            prefix,
-                            suffix,
-                            null
-                        )
+                        InfillRequest.Builder(prefix, suffix).build()
                     )
                 )
             listOf(

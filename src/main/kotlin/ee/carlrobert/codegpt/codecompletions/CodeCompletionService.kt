@@ -35,12 +35,12 @@ class CodeCompletionService {
         }
 
     fun getCodeCompletionAsync(
-        requestDetails: InfillRequestDetails,
+        requestDetails: InfillRequest,
         eventListener: CompletionEventListener<String>
     ): EventSource =
         when (val selectedService = GeneralSettings.getSelectedService()) {
             CODEGPT -> CompletionClientProvider.getCodeGPTClient()
-                .getCompletionAsync(buildCodeGPTRequest(requestDetails), eventListener)
+                .getCodeCompletionAsync(buildCodeGPTRequest(requestDetails), eventListener)
 
             OPENAI -> CompletionClientProvider.getOpenAIClient()
                 .getCompletionAsync(buildOpenAIRequest(requestDetails), eventListener)

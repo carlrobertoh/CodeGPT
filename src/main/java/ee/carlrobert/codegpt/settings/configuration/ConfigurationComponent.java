@@ -48,6 +48,7 @@ public class ConfigurationComponent {
   private final JBCheckBox autoFormattingCheckBox;
   private final JBCheckBox autocompletionPostProcessingCheckBox;
   private final JBCheckBox autocompletionContextAwareCheckBox;
+  private final JBCheckBox autocompletionGitContextCheckBox;
   private final JTextArea commitMessagePromptTextArea;
   private final IntegerField maxTokensField;
   private final JBTextField temperatureField;
@@ -122,6 +123,10 @@ public class ConfigurationComponent {
         CodeGPTBundle.get("configurationConfigurable.autocompletionContextAwareCheckBox.label"),
         configuration.getAutocompletionContextAwareEnabled()
     );
+    autocompletionGitContextCheckBox = new JBCheckBox(
+        CodeGPTBundle.get("configurationConfigurable.autocompletionGitContextCheckBox.label"),
+        configuration.getAutocompletionGitContextEnabled()
+    );
 
     mainPanel = FormBuilder.createFormBuilder()
         .addComponent(tablePanel)
@@ -133,6 +138,7 @@ public class ConfigurationComponent {
         .addComponent(autoFormattingCheckBox)
         .addComponent(autocompletionPostProcessingCheckBox)
         .addComponent(autocompletionContextAwareCheckBox)
+        .addComponent(autocompletionGitContextCheckBox)
         .addVerticalGap(4)
         .addComponent(new TitledSeparator(
             CodeGPTBundle.get("configurationConfigurable.section.assistant.title")))
@@ -161,6 +167,7 @@ public class ConfigurationComponent {
     state.setAutoFormattingEnabled(autoFormattingCheckBox.isSelected());
     state.setAutocompletionPostProcessingEnabled(autocompletionPostProcessingCheckBox.isSelected());
     state.setAutocompletionContextAwareEnabled(autocompletionContextAwareCheckBox.isSelected());
+    state.setAutocompletionGitContextEnabled(autocompletionGitContextCheckBox.isSelected());
     return state;
   }
 
@@ -179,6 +186,9 @@ public class ConfigurationComponent {
         configuration.getAutocompletionPostProcessingEnabled());
     autocompletionContextAwareCheckBox.setSelected(
         configuration.getAutocompletionContextAwareEnabled());
+    autocompletionGitContextCheckBox.setSelected(
+        configuration.getAutocompletionGitContextEnabled()
+    );
   }
 
   private Map<String, String> getTableData() {
