@@ -24,6 +24,22 @@ import okhttp3.sse.EventSources.createFactory
 @Service(Service.Level.PROJECT)
 class CodeCompletionService {
 
+    // TODO: Consolidate logic in ModelComboBoxAction
+    fun getSelectedModelCode(): String? {
+        return when (service<GeneralSettings>().state.selectedService) {
+            CODEGPT -> service<CodeGPTServiceSettings>().state.codeCompletionSettings.model
+            OPENAI -> "gpt-3.5-turbo-instruct"
+            CUSTOM_OPENAI -> service<CustomServiceSettings>().state
+                .codeCompletionSettings
+                .body
+                .getOrDefault("model", null) as String
+
+            LLAMA_CPP -> "LlamaSettings.getCurrentState()."
+            OLLAMA -> service<OllamaSettings>().state.model
+            else -> null
+        }
+    }
+
     fun isCodeCompletionsEnabled(selectedService: ServiceType): Boolean =
         when (selectedService) {
             CODEGPT -> service<CodeGPTServiceSettings>().state.codeCompletionSettings.codeCompletionsEnabled

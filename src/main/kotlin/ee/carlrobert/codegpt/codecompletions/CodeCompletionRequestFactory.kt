@@ -3,6 +3,7 @@ package ee.carlrobert.codegpt.codecompletions
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.intellij.openapi.components.service
+import ee.carlrobert.codegpt.EncodingManager
 import ee.carlrobert.codegpt.completions.llama.LlamaModel
 import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey
 import ee.carlrobert.codegpt.credentials.CredentialsStore.getCredential
@@ -42,8 +43,9 @@ object CodeCompletionRequestFactory {
 
     @JvmStatic
     fun buildOpenAIRequest(details: InfillRequest): OpenAITextCompletionRequest {
-        return OpenAITextCompletionRequest.Builder(details.prefix)
-            .setSuffix(details.suffix)
+        val (prefix, suffix) = getCompletionContext(details)
+        return OpenAITextCompletionRequest.Builder(prefix)
+            .setSuffix(suffix)
             .setStream(true)
             .setMaxTokens(MAX_TOKENS)
             .setTemperature(0.4)
@@ -116,6 +118,7 @@ object CodeCompletionRequestFactory {
             settings.model,
             settings.fimTemplate.buildPrompt(details)
         )
+            .setStream(true)
             .setOptions(
                 OllamaParameters.Builder()
                     .stop(settings.fimTemplate.stopTokens)
@@ -144,15 +147,41 @@ object CodeCompletionRequestFactory {
     ): Any {
         if (value !is String) return value
 
+        val (prefix, suffix) = getCompletionContext(details)
         return when (value) {
             FIM_PROMPT.code -> template.buildPrompt(details)
-            PREFIX.code -> details.prefix
-            SUFFIX.code -> details.suffix
+            PREFIX.code -> prefix
+            SUFFIX.code -> suffix
             else -> {
                 return value.takeIf { it.contains(PREFIX.code) || it.contains(SUFFIX.code) }
-                    ?.replace(PREFIX.code, details.prefix)
-                    ?.replace(SUFFIX.code, details.suffix) ?: value
+                    ?.replace(PREFIX.code, prefix)
+                    ?.replace(SUFFIX.code, suffix) ?: value
             }
         }
+    }
+
+    private fun getCompletionContext(request: InfillRequest): Pair<String, String> {
+        val encodingManager = EncodingManager.getInstance()
+        val truncatedPrefix = encodingManager.truncateText(request.prefix, 128, false)
+        val truncatedSuffix = encodingManager.truncateText(request.suffix, 128, true)
+        val vcsDetails = request.vcsDetails ?: return truncatedPrefix to truncatedSuffix
+
+        val stagedDiff = if (vcsDetails.stagedDiff != null)
+            encodingManager.truncateText(vcsDetails.stagedDiff, 200, true)
+        else
+            ""
+        val unstagedDiff = if (vcsDetails.unstagedDiff != null)
+            encodingManager.truncateText(vcsDetails.unstagedDiff, 200, true)
+        else
+            ""
+        val prompt: String = if (vcsDetails.stagedDiff != null)
+            """
+            ${"/*\n${stagedDiff + unstagedDiff}\n\n*/"}
+            $truncatedPrefix
+            """.trimIndent()
+        else
+            truncatedPrefix
+
+        return prompt to truncatedSuffix
     }
 }
