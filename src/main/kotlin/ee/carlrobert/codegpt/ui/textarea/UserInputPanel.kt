@@ -150,6 +150,7 @@ class UserInputPanel(
         return when (service<GeneralSettings>().state.selectedService) {
             ServiceType.CUSTOM_OPENAI,
             ServiceType.ANTHROPIC,
+            ServiceType.AZURE,
             ServiceType.OLLAMA -> true
 
             ServiceType.CODEGPT -> {
