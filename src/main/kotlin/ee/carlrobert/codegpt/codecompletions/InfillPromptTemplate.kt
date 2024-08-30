@@ -1,8 +1,8 @@
 package ee.carlrobert.codegpt.codecompletions
 
-enum class InfillPromptTemplate(val label: String, val stopTokens: List<String>?) {
+enum class InfillPromptTemplate(val label: String, val stopTokens: List<String>? = listOf("\n\n")) {
 
-    OPENAI("OpenAI", null) {
+    OPENAI("OpenAI") {
         override fun buildPrompt(infillDetails: InfillRequest): String {
             val infillPrompt =
                 "<|fim_prefix|> ${infillDetails.prefix} <|fim_suffix|>${infillDetails.suffix} <|fim_middle|>"
@@ -15,10 +15,7 @@ enum class InfillPromptTemplate(val label: String, val stopTokens: List<String>?
             return createDefaultMultiFilePrompt(infillDetails, infillPrompt)
         }
     },
-    CODE_GEMMA(
-        "CodeGemma Instruct",
-        listOf("<|file_separator|>", "<|fim_prefix|>", "<|fim_suffix|>", "<|fim_middle|>", "<eos>")
-    ) {
+    CODE_GEMMA("CodeGemma Instruct") {
         override fun buildPrompt(infillDetails: InfillRequest): String {
             // see https://huggingface.co/google/codegemma-7b#for-code-completion
             val infillPrompt =
@@ -60,7 +57,7 @@ enum class InfillPromptTemplate(val label: String, val stopTokens: List<String>?
             return createDefaultMultiFilePrompt(infillDetails, infillPrompt)
         }
     },
-    DEEPSEEK_CODER("DeepSeek Coder", listOf("<|EOT|>")) {
+    DEEPSEEK_CODER("DeepSeek Coder", listOf("<|EOT|>", "<｜end▁of▁sentence｜>")) {
         override fun buildPrompt(infillDetails: InfillRequest): String {
             // see https://github.com/deepseek-ai/DeepSeek-Coder?tab=readme-ov-file#2-code-insertion
             val infillPrompt =

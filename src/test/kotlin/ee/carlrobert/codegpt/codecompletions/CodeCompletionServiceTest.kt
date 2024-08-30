@@ -1,7 +1,7 @@
 package ee.carlrobert.codegpt.codecompletions
 
 import com.intellij.openapi.editor.VisualPosition
-import ee.carlrobert.codegpt.CodeGPTKeys.PREVIOUS_INLAY_TEXT
+import ee.carlrobert.codegpt.CodeGPTKeys.REMAINING_EDITOR_COMPLETION
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
 import ee.carlrobert.codegpt.util.file.FileUtil.getResourceContent
 import ee.carlrobert.llm.client.http.RequestEntity
@@ -54,6 +54,6 @@ class CodeCompletionServiceTest : IntegrationTest() {
 
         myFixture.type('c')
 
-        waitExpecting { "TEST_OUTPUT" == PREVIOUS_INLAY_TEXT[myFixture.editor] }
+        waitExpecting { "TEST_OUTPUT" == REMAINING_EDITOR_COMPLETION[myFixture.editor] }
     }
 }

@@ -20,4 +20,8 @@ public class CodeGPTKeys {
       Key.create("codegpt.addedDocumentation");
   public static final Key<PersonaDetails> ADDED_PERSONA =
       Key.create("codegpt.addedPersona");
+  public static final Key<String> REMAINING_EDITOR_COMPLETION =
+      Key.create("codegpt.editorCompletionLines");
+  public static final Key<Boolean> IS_FETCHING_COMPLETION =
+      Key.create("codegpt.isFetchingCompletion");
 }

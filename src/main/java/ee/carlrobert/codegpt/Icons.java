@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt;
 
 import com.intellij.openapi.util.IconLoader;
+import com.intellij.ui.AnimatedIcon;
 import javax.swing.Icon;
 
 public final class Icons {
@@ -27,4 +28,5 @@ public final class Icons {
   public static final Icon Upload = IconLoader.getIcon("/icons/upload.svg", Icons.class);
   public static final Icon GreenCheckmark =
       IconLoader.getIcon("/icons/greenCheckmark.svg", Icons.class);
+  public static final Icon StatusBarCompletionInProgress = new AnimatedIcon.Default();
 }

@@ -72,7 +72,7 @@
         <applicationService serviceImplementation="ee.carlrobert.codegpt.codecompletions.psi.CompletionContextService"/>
         <inline.completion.provider
           id="CodeGPTInlineCompletionProvider"
-          implementation="ee.carlrobert.codegpt.codecompletions.CodeGPTInlineCompletionProvider"/>
+          implementation="ee.carlrobert.codegpt.codecompletions.DebouncedCodeCompletionProvider"/>
         <toolWindow id="CodeGPT" icon="ee.carlrobert.codegpt.Icons.DefaultSmall" anchor="right"
             factoryClass="ee.carlrobert.codegpt.toolwindow.ProjectToolWindowFactory"/>
         <notificationGroup id="CodeGPT Notification Group" displayType="BALLOON" key="notification.group.name"/>

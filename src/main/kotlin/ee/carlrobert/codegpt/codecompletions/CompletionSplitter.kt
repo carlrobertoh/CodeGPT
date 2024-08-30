@@ -22,7 +22,7 @@ class CompletionSplitter {
             fullCompletion: String,
             isBoundaryCharacter: BoundaryFinder
         ): Int {
-            if (!isBoundaryCharacter.isBoundaryCharacter(fullCompletion[0])) {
+            if (fullCompletion.isEmpty() || !isBoundaryCharacter.isBoundaryCharacter(fullCompletion[0])) {
                 return -1
             }
 
