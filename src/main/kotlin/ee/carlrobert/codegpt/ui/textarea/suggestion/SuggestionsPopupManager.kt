@@ -97,11 +97,7 @@ class SuggestionsPopupManager(
         when (item) {
             is SuggestionActionItem -> {
                 hidePopup()
-                scope.launch {
-                    withContext(Dispatchers.Main) {
-                        item.execute(project, textField)
-                    }
-                }
+                item.execute(project, textField)
             }
 
             is SuggestionGroupItem -> {

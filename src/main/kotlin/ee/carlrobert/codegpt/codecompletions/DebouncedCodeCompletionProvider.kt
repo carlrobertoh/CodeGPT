@@ -3,6 +3,8 @@ package ee.carlrobert.codegpt.codecompletions
 import com.intellij.codeInsight.inline.completion.*
 import com.intellij.codeInsight.inline.completion.elements.InlineCompletionElement
 import com.intellij.codeInsight.inline.completion.elements.InlineCompletionGrayTextElement
+import com.intellij.codeInsight.inline.completion.suggestion.InlineCompletionSingleSuggestion
+import com.intellij.codeInsight.inline.completion.suggestion.InlineCompletionSuggestion
 import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
@@ -38,6 +40,9 @@ class DebouncedCodeCompletionProvider : DebouncedInlineCompletionProvider() {
     override val id: InlineCompletionProviderID
         get() = InlineCompletionProviderID("CodeGPTInlineCompletionProvider")
 
+    override val suggestionUpdateManager: CodeCompletionSuggestionUpdateAdapter
+        get() = CodeCompletionSuggestionUpdateAdapter()
+
     override val insertHandler: InlineCompletionInsertHandler
         get() = CodeCompletionInsertHandler()
 
@@ -49,7 +54,7 @@ class DebouncedCodeCompletionProvider : DebouncedInlineCompletionProvider() {
         if (request.event is InlineCompletionEvent.DirectCall) {
             val activeCompletionLine = REMAINING_EDITOR_COMPLETION.get(editor)
             if (activeCompletionLine != null && activeCompletionLine.isNotEmpty()) {
-                return InlineCompletionSuggestion.Default(channelFlow {
+                return InlineCompletionSingleSuggestion.build(elements = channelFlow {
                     launch {
                         trySend(
                             InlineCompletionGrayTextElement(
@@ -64,10 +69,10 @@ class DebouncedCodeCompletionProvider : DebouncedInlineCompletionProvider() {
         val project = editor.project
         if (project == null) {
             logger.error("Could not find project")
-            return InlineCompletionSuggestion.Default(emptyFlow())
+            return InlineCompletionSingleSuggestion.build(elements = emptyFlow())
         }
 
-        return InlineCompletionSuggestion.Default(channelFlow {
+        return InlineCompletionSingleSuggestion.build(elements = channelFlow {
             REMAINING_EDITOR_COMPLETION.set(request, "")
             IS_FETCHING_COMPLETION.set(request.editor, true)
 
