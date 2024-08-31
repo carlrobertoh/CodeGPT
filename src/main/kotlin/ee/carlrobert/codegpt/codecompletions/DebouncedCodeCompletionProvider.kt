@@ -46,19 +46,12 @@ class DebouncedCodeCompletionProvider : DebouncedInlineCompletionProvider() {
 
     override suspend fun getSuggestionDebounced(request: InlineCompletionRequest): InlineCompletionSuggestion {
         val editor = request.editor
-        if (request.event is InlineCompletionEvent.DirectCall) {
-            val activeCompletionLine = REMAINING_EDITOR_COMPLETION.get(editor)
-            if (activeCompletionLine != null && activeCompletionLine.isNotEmpty()) {
-                return InlineCompletionSuggestion.Default(channelFlow {
-                    launch {
-                        trySend(
-                            InlineCompletionGrayTextElement(
-                                activeCompletionLine.lines().take(2).joinToString("\n")
-                            )
-                        )
-                    }
-                })
-            }
+        val remainingCompletion = REMAINING_EDITOR_COMPLETION.get(editor)
+        if (request.event is InlineCompletionEvent.DirectCall
+            && remainingCompletion != null
+            && remainingCompletion.isNotEmpty()
+        ) {
+            return sendNextSuggestion(remainingCompletion)
         }
 
         val project = editor.project
@@ -123,5 +116,16 @@ class DebouncedCodeCompletionProvider : DebouncedInlineCompletionProvider() {
             REMAINING_EDITOR_COMPLETION.set(editor, fullMessage)
         }
     }
-}
 
+    private fun sendNextSuggestion(nextCompletion: String): InlineCompletionSuggestion {
+        return InlineCompletionSuggestion.Default(channelFlow {
+            launch {
+                trySend(
+                    InlineCompletionGrayTextElement(
+                        nextCompletion.lines().take(2).joinToString("\n")
+                    )
+                )
+            }
+        })
+    }
+}

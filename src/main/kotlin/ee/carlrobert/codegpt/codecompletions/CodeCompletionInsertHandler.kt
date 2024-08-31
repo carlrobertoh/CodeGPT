@@ -34,8 +34,7 @@ class CodeCompletionInsertHandler : InlineCompletionInsertHandler {
         REMAINING_EDITOR_COMPLETION.set(editor, remainingCompletion)
 
         if (remainingCompletion.isNotEmpty()) {
-            val handler = InlineCompletion.getHandlerOrNull(editor)
-            handler?.invoke(
+            InlineCompletion.getHandlerOrNull(editor)?.invoke(
                 InlineCompletionEvent.DirectCall(editor, editor.caretModel.currentCaret)
             )
 
