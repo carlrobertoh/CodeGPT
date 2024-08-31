@@ -86,10 +86,11 @@
     <actions>
         <action
           id="codegpt.applyInlaysNextWord"
+          text="Apply next word"
           class="ee.carlrobert.codegpt.codecompletions.ApplyNextWordInlayAction">
-            <keyboard-shortcut first-keystroke="control alt RIGHT" keymap="$default"/>
-            <keyboard-shortcut first-keystroke="control meta RIGHT" keymap="Mac OS X" replace-all="true"/>
-            <keyboard-shortcut first-keystroke="control meta RIGHT" keymap="Mac OS X 10.5+" replace-all="true"/>
+            <keyboard-shortcut first-keystroke="control meta alt RIGHT" keymap="$default"/>
+            <keyboard-shortcut first-keystroke="control meta alt RIGHT" keymap="Mac OS X" replace-all="true"/>
+            <keyboard-shortcut first-keystroke="control meta alt RIGHT" keymap="Mac OS X 10.5+" replace-all="true"/>
             <override-text place="MainMenu" text="Accept Next Word"/>
             <override-text place="EditorPopup" text="Accept Next Word"/>
         </action>

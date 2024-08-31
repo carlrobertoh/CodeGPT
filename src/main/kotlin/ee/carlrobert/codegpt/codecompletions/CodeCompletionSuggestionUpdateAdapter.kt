@@ -19,7 +19,7 @@ class CodeCompletionSuggestionUpdateAdapter :
             return Invalidated
         }
 
-        val completionText = variant.elements.firstOrNull()?.text ?: return Invalidated
+        val completionText = variant.elements.joinToString("") { it.text }
         val textToInsert = event.toRequest().run {
             CompletionSplitter.split(completionText)
         }
