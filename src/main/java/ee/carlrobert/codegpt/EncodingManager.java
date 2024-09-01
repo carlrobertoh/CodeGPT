@@ -20,6 +20,9 @@ import java.util.stream.Stream;
 @Service
 public final class EncodingManager {
 
+  private static final String SPECIAL_START = "<|";
+  private static final String SPECIAL_END = "|>";
+
   private static final Logger LOG = Logger.getInstance(EncodingManager.class);
 
   private final EncodingRegistry registry = Encodings.newDefaultEncodingRegistry();
@@ -76,7 +79,8 @@ public final class EncodingManager {
    * @return The truncated text.
    */
   public String truncateText(String text, int maxTokens, boolean fromStart) {
-    var tokens = encoding.encode(text);
+    var textWithSpecialEncodingsRemoved = text.replace(SPECIAL_START, "").replace(SPECIAL_END, "");
+    var tokens = encoding.encode(textWithSpecialEncodingsRemoved);
     int tokensToRetrieve = Math.min(maxTokens, tokens.size());
     int startIndex = fromStart ? 0 : tokens.size() - tokensToRetrieve;
     var truncatedList =

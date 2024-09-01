@@ -19,19 +19,22 @@ import java.util.function.BooleanSupplier
 interface ShortcutsTestMixin {
 
   fun useCodeGPTService() {
-    GeneralSettings.getCurrentState().selectedService = ServiceType.CODEGPT
+    service<GeneralSettings>().state.selectedService = ServiceType.CODEGPT
     setCredential(CODEGPT_API_KEY, "TEST_API_KEY")
-    service<CodeGPTServiceSettings>().state.chatCompletionSettings.model = "TEST_MODEL"
+    service<CodeGPTServiceSettings>().state.run {
+      chatCompletionSettings.model = "TEST_MODEL"
+      codeCompletionSettings.model = "TEST_CODE_MODEL"
+      codeCompletionSettings.codeCompletionsEnabled = true
+    }
   }
 
-  fun useOpenAIService() {
-    useOpenAIService("gpt-4")
-  }
-
-  fun useOpenAIService(model: String? = "gpt-4") {
-    GeneralSettings.getCurrentState().selectedService = ServiceType.OPENAI
+  fun useOpenAIService(chatModel: String? = "gpt-4") {
+    service<GeneralSettings>().state.selectedService = ServiceType.OPENAI
     setCredential(OPENAI_API_KEY, "TEST_API_KEY")
-    OpenAISettings.getCurrentState().model = model
+    service<OpenAISettings>().state.run {
+      model = chatModel
+      isCodeCompletionsEnabled = true
+    }
   }
 
   fun useAzureService() {
