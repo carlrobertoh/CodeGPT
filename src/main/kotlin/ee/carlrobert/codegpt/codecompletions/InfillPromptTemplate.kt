@@ -72,7 +72,7 @@ enum class InfillPromptTemplate(val label: String, val stopTokens: List<String>?
             }
         }
     },
-    STAR_CODER("StarCoder2", listOf("<|endoftext|>")) {
+    STAR_CODER("StarCoder2", listOf("<|endoftext|>", "<file_sep>")) {
         override fun buildPrompt(infillDetails: InfillRequest): String {
             // see https://huggingface.co/spaces/bigcode/bigcode-playground/blob/main/app.py
             val infillPrompt =

@@ -27,8 +27,9 @@ object InfillRequestUtil {
             )
         val project = request.editor.project ?: return infillRequestBuilder.build()
 
-        val gitRepository =
-            project.service<GitRepositoryManager>().getRepositoryForFile(project.workspaceFile)
+        val repositoryManager = project.service<GitRepositoryManager>()
+        val gitRepository = repositoryManager.getRepositoryForFile(project.workspaceFile)
+            ?: repositoryManager.repositories.firstOrNull()
         if (service<ConfigurationSettings>().state.autocompletionGitContextEnabled && gitRepository != null) {
             try {
                 val stagedDiff = GitUtil.getStagedDiff(project, gitRepository)
