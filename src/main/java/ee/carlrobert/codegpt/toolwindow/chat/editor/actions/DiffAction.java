@@ -15,18 +15,18 @@ import org.jetbrains.annotations.Nullable;
 
 public class DiffAction extends AbstractAction {
 
-  private final EditorEx toolwindowEditor;
+  private final EditorEx editor;
   private final Point locationOnScreen;
 
-  public DiffAction(EditorEx toolwindowEditor, @Nullable Point locationOnScreen) {
+  public DiffAction(EditorEx editor, @Nullable Point locationOnScreen) {
     super("Diff", Actions.DiffWithClipboard);
-    this.toolwindowEditor = toolwindowEditor;
+    this.editor = editor;
     this.locationOnScreen = locationOnScreen;
   }
 
   @Override
   public void actionPerformed(ActionEvent event) {
-    var project = requireNonNull(toolwindowEditor.getProject());
+    var project = requireNonNull(editor.getProject());
     var mainEditor = FileEditorManager.getInstance(project).getSelectedTextEditor();
     if (mainEditor != null && !EditorUtil.hasSelection(mainEditor) && locationOnScreen != null) {
       OverlayUtil.showSelectedEditorSelectionWarning(project, locationOnScreen);
@@ -35,7 +35,7 @@ public class DiffAction extends AbstractAction {
 
     EditorDiffUtil.showDiff(
         project,
-        toolwindowEditor,
+        editor,
         mainEditor.getSelectionModel().getSelectedText());
   }
 }

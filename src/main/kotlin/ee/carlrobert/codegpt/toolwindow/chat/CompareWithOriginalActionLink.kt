@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.toolwindow.chat
 
+import com.intellij.icons.AllIcons.Actions
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.editor.Editor
@@ -17,6 +18,10 @@ class CompareWithOriginalActionLink(
     CompareWithOriginalAction(project, toolwindowEditor, highlightedText),
     highlightedText
 ) {
+
+    init {
+        setIcon(Actions.Diff)
+    }
 
     class CompareWithOriginalAction(
         private val project: Project,

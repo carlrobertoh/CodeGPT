@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 public class ReplaceCodeInMainEditorAction extends AnAction {
 
   public ReplaceCodeInMainEditorAction() {
-    super("Replace in Main Editor", "Replace code in main editor", AllIcons.Actions.Replace);
+    super("Replace Selection", "Replace selected code in main editor", AllIcons.Actions.Replace);
     EditorActionsUtil.registerAction(this);
   }
 
