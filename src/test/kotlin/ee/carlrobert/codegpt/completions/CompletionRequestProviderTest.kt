@@ -31,6 +31,7 @@ class CompletionRequestProviderTest : IntegrationTest() {
           conversation,
           ConversationType.DEFAULT,
           Message("TEST_CHAT_COMPLETION_PROMPT"),
+          null,
           false))
 
     assertThat(request.messages)
@@ -60,6 +61,7 @@ class CompletionRequestProviderTest : IntegrationTest() {
           conversation,
           ConversationType.DEFAULT,
           Message("TEST_CHAT_COMPLETION_PROMPT"),
+          null,
           false))
 
     assertThat(request.messages)
@@ -89,6 +91,7 @@ class CompletionRequestProviderTest : IntegrationTest() {
           conversation,
           ConversationType.DEFAULT,
           secondMessage,
+          null,
           true))
 
     assertThat(request.messages)
@@ -119,6 +122,7 @@ class CompletionRequestProviderTest : IntegrationTest() {
           conversation,
           ConversationType.DEFAULT,
           Message("TEST_CHAT_COMPLETION_PROMPT"),
+          null,
           false))
 
     assertThat(request.messages)
@@ -145,6 +149,7 @@ class CompletionRequestProviderTest : IntegrationTest() {
             conversation,
             ConversationType.DEFAULT,
             createDummyMessage(100),
+            null,
             false)) }
   }
 

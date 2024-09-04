@@ -97,6 +97,7 @@ public class UserMessagePanel extends JPanel {
       Disposable parentDisposable) {
     return new ChatMessageResponseBody(
         project,
+        null,
         false,
         true,
         false,

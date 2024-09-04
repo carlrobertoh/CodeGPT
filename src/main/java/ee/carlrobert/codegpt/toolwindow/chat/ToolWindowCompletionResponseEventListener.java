@@ -111,6 +111,7 @@ abstract class ToolWindowCompletionResponseEventListener implements
     ApplicationManager.getApplication().invokeLater(() -> {
       try {
         responsePanel.enableActions();
+        responseContainer.enableActions();
         totalTokensPanel.updateUserPromptTokens(textArea.getText());
         totalTokensPanel.updateConversationTokens(callParameters.getConversation());
       } finally {

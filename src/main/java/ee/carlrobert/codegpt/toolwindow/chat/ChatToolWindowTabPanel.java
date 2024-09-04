@@ -119,6 +119,13 @@ public class ChatToolWindowTabPanel implements Disposable {
   }
 
   public void sendMessage(Message message, ConversationType conversationType) {
+    sendMessage(message, conversationType, null);
+  }
+
+  public void sendMessage(
+      Message message,
+      ConversationType conversationType,
+      @Nullable String highlightedText) {
     ApplicationManager.getApplication().invokeLater(() -> {
       var referencedFiles = project.getUserData(CodeGPTKeys.SELECTED_FILES);
       var chatToolWindowPanel = project.getService(ChatToolWindowContentManager.class)
@@ -139,7 +146,8 @@ public class ChatToolWindowTabPanel implements Disposable {
 
       var userMessagePanel = new UserMessagePanel(project, message, this);
       var attachedFilePath = CodeGPTKeys.IMAGE_ATTACHMENT_FILE_PATH.get(project);
-      var callParameters = getCallParameters(conversationType, message, attachedFilePath);
+      var callParameters =
+          getCallParameters(conversationType, message, highlightedText, attachedFilePath);
       if (callParameters.getImageData() != null) {
         message.setImageFilePath(attachedFilePath);
         chatToolWindowPanel.ifPresent(panel -> panel.clearNotifications(project));
@@ -149,7 +157,7 @@ public class ChatToolWindowTabPanel implements Disposable {
       var messagePanel = toolWindowScrollablePanel.addMessage(message.getId());
       messagePanel.add(userMessagePanel);
 
-      var responsePanel = createResponsePanel(message, conversationType);
+      var responsePanel = createResponsePanel(callParameters, conversationType);
       messagePanel.add(responsePanel);
       call(callParameters, responsePanel);
     });
@@ -158,8 +166,10 @@ public class ChatToolWindowTabPanel implements Disposable {
   private CallParameters getCallParameters(
       ConversationType conversationType,
       Message message,
+      @Nullable String highlightedText,
       @Nullable String attachedFilePath) {
-    var callParameters = new CallParameters(conversation, conversationType, message, false);
+    var callParameters = new CallParameters(conversation, conversationType, message,
+        highlightedText, false);
     if (attachedFilePath != null && !attachedFilePath.isEmpty()) {
       try {
         callParameters.setImageData(Files.readAllBytes(Path.of(attachedFilePath)));
@@ -171,12 +181,20 @@ public class ChatToolWindowTabPanel implements Disposable {
     return callParameters;
   }
 
-  private ResponsePanel createResponsePanel(Message message, ConversationType conversationType) {
+  private ResponsePanel createResponsePanel(
+      CallParameters callParameters,
+      ConversationType conversationType) {
+    var message = callParameters.getMessage();
     return new ResponsePanel()
         .withReloadAction(() -> reloadMessage(message, conversation, conversationType))
         .withDeleteAction(() -> removeMessage(message.getId(), conversation))
         .addContent(
-            new ChatMessageResponseBody(project, true, false, message.isWebSearchIncluded(),
+            new ChatMessageResponseBody(
+                project,
+                callParameters.getHighlightedText(),
+                true,
+                false,
+                message.isWebSearchIncluded(),
                 message.getDocumentationDetails() != null, this));
   }
 
@@ -197,7 +215,8 @@ public class ChatToolWindowTabPanel implements Disposable {
       if (responsePanel != null) {
         message.setResponse("");
         conversationService.saveMessage(conversation, message);
-        call(new CallParameters(conversation, conversationType, message, true), responsePanel);
+        call(new CallParameters(conversation, conversationType, message, null, true),
+            responsePanel);
       }
 
       totalTokensPanel.updateConversationTokens(conversation);
@@ -251,6 +270,7 @@ public class ChatToolWindowTabPanel implements Disposable {
   private Unit handleSubmit(String text, List<AppliedActionInlay> appliedInlayActions) {
     var message = new Message(text);
     var editor = EditorUtil.getSelectedEditor(project);
+    String highlightedText = null;
     if (editor != null) {
       var selectionModel = editor.getSelectionModel();
       var selectedText = selectionModel.getSelectedText();
@@ -258,6 +278,7 @@ public class ChatToolWindowTabPanel implements Disposable {
         var fileExtension = FileUtil.getFileExtension(
             ((EditorImpl) editor).getVirtualFile().getName());
         message = new Message(text + format("%n```%s%n%s%n```", fileExtension, selectedText));
+        highlightedText = selectedText;
         selectionModel.removeSelection();
       }
     }
@@ -282,7 +303,7 @@ public class ChatToolWindowTabPanel implements Disposable {
       CodeGPTKeys.ADDED_PERSONA.set(project, null);
     }
 
-    sendMessage(message, ConversationType.DEFAULT);
+    sendMessage(message, ConversationType.DEFAULT, highlightedText);
     return Unit.INSTANCE;
   }
 
