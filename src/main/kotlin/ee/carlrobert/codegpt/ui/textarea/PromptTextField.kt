@@ -12,6 +12,7 @@ import com.intellij.openapi.fileTypes.FileTypes
 import com.intellij.openapi.project.Project
 import com.intellij.ui.ComponentUtil.findParentByCondition
 import com.intellij.ui.EditorTextField
+import com.intellij.ui.JBColor
 import com.intellij.util.ui.JBUI
 import ee.carlrobert.codegpt.CodeGPTBundle
 import ee.carlrobert.codegpt.ui.textarea.suggestion.SuggestionsPopupManager
@@ -45,7 +46,7 @@ class PromptTextField(
 
     init {
         isOneLineMode = false
-        isOpaque = false
+        background = JBColor.background()
         minimumSize = Dimension(100, 40)
         document.addDocumentListener(getDocumentListener(onTextChanged))
         setPlaceholder(CodeGPTBundle.get("toolwindow.chat.textArea.emptyText"))
