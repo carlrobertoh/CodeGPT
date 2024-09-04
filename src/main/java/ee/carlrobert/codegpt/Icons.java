@@ -27,4 +27,6 @@ public final class Icons {
   public static final Icon Upload = IconLoader.getIcon("/icons/upload.svg", Icons.class);
   public static final Icon GreenCheckmark =
       IconLoader.getIcon("/icons/greenCheckmark.svg", Icons.class);
+  public static final Icon SendToTheLeft =
+      IconLoader.getIcon("/icons/sendToTheLeft.svg", Icons.class);
 }

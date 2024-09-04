@@ -33,6 +33,7 @@ import ee.carlrobert.codegpt.toolwindow.chat.DirectApplyActionLink;
 import ee.carlrobert.codegpt.toolwindow.chat.editor.actions.CopyAction;
 import ee.carlrobert.codegpt.toolwindow.chat.editor.actions.DiffAction;
 import ee.carlrobert.codegpt.toolwindow.chat.editor.actions.EditAction;
+import ee.carlrobert.codegpt.toolwindow.chat.editor.actions.InsertAtCaretAction;
 import ee.carlrobert.codegpt.toolwindow.chat.editor.actions.NewFileAction;
 import ee.carlrobert.codegpt.toolwindow.chat.editor.actions.ReplaceSelectionAction;
 import ee.carlrobert.codegpt.ui.IconActionButton;
@@ -82,9 +83,9 @@ public class ResponseEditorPanel extends JPanel implements Disposable {
 
     if (highlightedText != null && !highlightedText.isEmpty()) {
       directLinksPanel.setVisible(false);
-      directLinksPanel.setBorder(JBUI.Borders.emptyTop(4));
+      directLinksPanel.setBorder(JBUI.Borders.emptyTop(8));
       directLinksPanel.add(new CompareWithOriginalActionLink(project, editor, highlightedText));
-      directLinksPanel.add(Box.createHorizontalStrut(8));
+      directLinksPanel.add(Box.createHorizontalStrut(12));
       directLinksPanel.add(new DirectApplyActionLink(project, editor, highlightedText));
       add(directLinksPanel, BorderLayout.SOUTH);
     }
@@ -179,6 +180,7 @@ public class ResponseEditorPanel extends JPanel implements Disposable {
     var actionGroup = new DefaultCompactActionGroup("EDITOR_TOOLBAR_ACTION_GROUP", false);
     actionGroup.add(new CopyAction(editor));
     actionGroup.add(new ReplaceSelectionAction(editor));
+    actionGroup.add(new InsertAtCaretAction(editor));
     actionGroup.addSeparator();
 
     var wrapper = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
