@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Proper streaming support
     - Git context integration
 
+### Fixed
+
+- Prompt text field background transparency issues
+
 ## [2.10.2-241.1] - 2024-08-23
 
 ### Added
