@@ -8,7 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- 'Direct Apply' and 'Compare with Original' tool window editor actions for generated code
+- Multiple tool window editor actions for generated code:
+  - Direct apply: Directly replaces the highlighted code in the main editor with the generated code
+  - Compare with Original: Opens a diff view to compare the generated code with the highlighted code
+  - Insert at Caret: Inserts the generated code at the exact location of the caret in the main editor
 - Vision support for Azure models
 - General improvements to code completions, including:
     - Proper streaming support

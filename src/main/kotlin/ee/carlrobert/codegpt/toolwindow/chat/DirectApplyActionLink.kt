@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.toolwindow.chat
 
+import com.intellij.icons.AllIcons.Actions
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.command.WriteCommandAction
@@ -19,6 +20,10 @@ class DirectApplyActionLink(
     DirectApplyAction(project, toolwindowEditor, highlightedText),
     highlightedText
 ) {
+
+    init {
+        setIcon(Actions.Selectall)
+    }
 
     class DirectApplyAction(
         private val project: Project,
