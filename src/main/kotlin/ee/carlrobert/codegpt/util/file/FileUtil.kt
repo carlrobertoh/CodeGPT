@@ -85,11 +85,6 @@ object FileUtil {
         }
     }
 
-    @JvmStatic
-    fun getEditorFile(editor: Editor): VirtualFile? {
-        return FileDocumentManager.getInstance().getFile(editor.document)
-    }
-
     private fun tryCreateDirectory(directoryPath: Path) {
         Files.exists(directoryPath).takeUnless { it } ?: return
         try {

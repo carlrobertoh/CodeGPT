@@ -28,6 +28,8 @@ import com.intellij.ui.components.ActionLink;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.actions.toolwindow.ReplaceCodeInMainEditorAction;
+import ee.carlrobert.codegpt.toolwindow.chat.CompareWithOriginalActionLink;
+import ee.carlrobert.codegpt.toolwindow.chat.DirectApplyActionLink;
 import ee.carlrobert.codegpt.toolwindow.chat.editor.actions.CopyAction;
 import ee.carlrobert.codegpt.toolwindow.chat.editor.actions.DiffAction;
 import ee.carlrobert.codegpt.toolwindow.chat.editor.actions.EditAction;
@@ -40,16 +42,19 @@ import java.awt.FlowLayout;
 import javax.swing.Box;
 import javax.swing.JPanel;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class ResponseEditorPanel extends JPanel implements Disposable {
 
   private final Editor editor;
+  private final JPanel directLinksPanel = new JPanel(new FlowLayout(FlowLayout.TRAILING, 0, 0));
 
   public ResponseEditorPanel(
       Project project,
       String code,
       String markdownLanguage,
       boolean readOnly,
+      @Nullable String highlightedText,
       Disposable disposableParent) {
     super(new BorderLayout());
     setBorder(JBUI.Borders.empty(8, 0));
@@ -59,7 +64,6 @@ public class ResponseEditorPanel extends JPanel implements Disposable {
         project,
         findLanguageExtensionMapping(markdownLanguage).getValue(),
         StringUtil.convertLineSeparators(code));
-
     var group = new DefaultActionGroup();
     group.add(new ReplaceCodeInMainEditorAction());
     String originalGroupId = ((EditorEx) editor).getContextMenuGroupId();
@@ -76,7 +80,20 @@ public class ResponseEditorPanel extends JPanel implements Disposable {
         findLanguageExtensionMapping(markdownLanguage).getValue());
     add(editor.getComponent(), BorderLayout.CENTER);
 
+    if (highlightedText != null && !highlightedText.isEmpty()) {
+      directLinksPanel.setVisible(false);
+      directLinksPanel.setBorder(JBUI.Borders.emptyTop(4));
+      directLinksPanel.add(new CompareWithOriginalActionLink(project, editor, highlightedText));
+      directLinksPanel.add(Box.createHorizontalStrut(8));
+      directLinksPanel.add(new DirectApplyActionLink(project, editor, highlightedText));
+      add(directLinksPanel, BorderLayout.SOUTH);
+    }
+
     Disposer.register(disposableParent, this);
+  }
+
+  public void showEditorActions() {
+    directLinksPanel.setVisible(true);
   }
 
   @Override

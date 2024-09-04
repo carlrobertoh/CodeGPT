@@ -10,21 +10,24 @@ public class CallParameters {
   private final ConversationType conversationType;
   private final Message message;
   private final boolean retry;
+  private final String highlightedText;
   private @Nullable String imageMediaType;
   private byte[] imageData;
 
   public CallParameters(Conversation conversation, Message message) {
-    this(conversation, ConversationType.DEFAULT, message, false);
+    this(conversation, ConversationType.DEFAULT, message, null, false);
   }
 
   public CallParameters(
       Conversation conversation,
       ConversationType conversationType,
       Message message,
+      @Nullable String highlightedText,
       boolean retry) {
     this.conversation = conversation;
     this.conversationType = conversationType;
     this.message = message;
+    this.highlightedText = highlightedText;
     this.retry = retry;
   }
 
@@ -58,5 +61,9 @@ public class CallParameters {
 
   public void setImageData(byte[] imageData) {
     this.imageData = imageData;
+  }
+
+  public @Nullable String getHighlightedText() {
+    return highlightedText;
   }
 }

@@ -42,7 +42,7 @@ class DefaultCompletionRequestHandlerTest : IntegrationTest() {
         jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "!")))))
     })
 
-    requestHandler.call(CallParameters(conversation, ConversationType.DEFAULT, message, false))
+    requestHandler.call(CallParameters(conversation, message))
 
     waitExpecting { "Hello!" == message.response }
   }
@@ -79,7 +79,7 @@ class DefaultCompletionRequestHandlerTest : IntegrationTest() {
     val message = Message("TEST_PROMPT")
     val requestHandler = CompletionRequestHandler(getRequestEventListener(message))
 
-    requestHandler.call(CallParameters(conversation, ConversationType.DEFAULT, message, false))
+    requestHandler.call(CallParameters(conversation, message))
 
     waitExpecting { "Hello!" == message.response }
   }
@@ -114,7 +114,7 @@ class DefaultCompletionRequestHandlerTest : IntegrationTest() {
           e("stop", true)))
     })
 
-    requestHandler.call(CallParameters(conversation, ConversationType.DEFAULT, message, false))
+    requestHandler.call(CallParameters(conversation, message))
 
     waitExpecting { "Hello!" == message.response }
   }
@@ -152,7 +152,8 @@ class DefaultCompletionRequestHandlerTest : IntegrationTest() {
       )
     })
 
-    requestHandler.call(CallParameters(conversation, ConversationType.DEFAULT, message, false))
+    requestHandler.call(CallParameters(conversation, message))
+
     waitExpecting { "Hello!" == message.response }
   }
 
@@ -187,7 +188,7 @@ class DefaultCompletionRequestHandlerTest : IntegrationTest() {
       )
     })
 
-    requestHandler.call(CallParameters(conversation, ConversationType.DEFAULT, message, false))
+    requestHandler.call(CallParameters(conversation, message))
 
     waitExpecting { "Hello!" == message.response }
   }
@@ -218,7 +219,7 @@ class DefaultCompletionRequestHandlerTest : IntegrationTest() {
         jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "!")))))
     })
 
-    requestHandler.call(CallParameters(conversation, ConversationType.DEFAULT, message, false))
+    requestHandler.call(CallParameters(conversation, message))
 
     waitExpecting { "Hello!" == message.response }
   }

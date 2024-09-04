@@ -47,6 +47,7 @@ import javax.swing.Icon;
 import javax.swing.JPanel;
 import javax.swing.JTextPane;
 import javax.swing.SwingConstants;
+import org.jetbrains.annotations.Nullable;
 
 public class ChatMessageResponseBody extends JPanel {
 
@@ -58,24 +59,19 @@ public class ChatMessageResponseBody extends JPanel {
   private final WebpageList webpageList = new WebpageList(webpageListModel);
   private final JPanel webDocProgressContainer = new JPanel();
   private final AsyncProcessIcon spinner = new AsyncProcessIcon("sign_in_spinner");
+  private final @Nullable String highlightedText;
   private ResponseEditorPanel currentlyProcessedEditorPanel;
   private JTextPane currentlyProcessedTextPane;
   private JPanel webpageListPanel;
   private boolean responseReceived;
 
   public ChatMessageResponseBody(Project project, Disposable parentDisposable) {
-    this(project, false, parentDisposable);
+    this(project, null, false, false, false, false, parentDisposable);
   }
 
   public ChatMessageResponseBody(
       Project project,
-      boolean withGhostText,
-      Disposable parentDisposable) {
-    this(project, withGhostText, false, false, false, parentDisposable);
-  }
-
-  public ChatMessageResponseBody(
-      Project project,
+      @Nullable String highlightedText,
       boolean withGhostText,
       boolean readOnly,
       boolean webSearchIncluded,
@@ -83,6 +79,7 @@ public class ChatMessageResponseBody extends JPanel {
       Disposable parentDisposable) {
     super(new BorderLayout());
     this.project = project;
+    this.highlightedText = highlightedText;
     this.parentDisposable = parentDisposable;
     this.streamParser = new StreamParser();
     this.readOnly = readOnly;
@@ -104,6 +101,14 @@ public class ChatMessageResponseBody extends JPanel {
       prepareProcessingText(!readOnly);
       currentlyProcessedTextPane.setText(
           "<html><p style=\"margin-top: 4px; margin-bottom: 8px;\">&#8205;</p></html>");
+    }
+  }
+
+  public void enableActions() {
+    if (highlightedText != null
+        && !highlightedText.isEmpty()
+        && currentlyProcessedEditorPanel != null) {
+      currentlyProcessedEditorPanel.showEditorActions();
     }
   }
 
@@ -265,6 +270,11 @@ public class ChatMessageResponseBody extends JPanel {
   }
 
   private void prepareProcessingText(boolean caretVisible) {
+    if (highlightedText != null && !highlightedText.isEmpty()
+        && currentlyProcessedEditorPanel != null) {
+      currentlyProcessedEditorPanel.showEditorActions();
+    }
+
     currentlyProcessedEditorPanel = null;
     currentlyProcessedTextPane = createTextPane("", caretVisible);
     add(currentlyProcessedTextPane);
@@ -274,7 +284,8 @@ public class ChatMessageResponseBody extends JPanel {
     hideCaret();
     currentlyProcessedTextPane = null;
     currentlyProcessedEditorPanel =
-        new ResponseEditorPanel(project, code, markdownLanguage, readOnly, parentDisposable);
+        new ResponseEditorPanel(project, code, markdownLanguage, readOnly, highlightedText,
+            parentDisposable);
     add(currentlyProcessedEditorPanel);
   }
 
