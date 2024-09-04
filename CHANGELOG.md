@@ -6,7 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [2.10.2-233] - 2024-08-23
+### Added
+
+- 'Direct Apply' and 'Compare with Original' tool window editor actions for generated code
+- Vision support for Azure models
+- General improvements to code completions, including:
+    - Proper streaming support
+    - Git context integration
+
+## [2.10.2-241.1] - 2024-08-23
 
 ### Added
 
