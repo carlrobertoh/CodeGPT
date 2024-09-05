@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Prompt text field background transparency issues
+- OpenRouter default template for custom OpenAI provider
+- Ollama streaming requests
 
 ## [2.10.2-223] - 2024-08-23
 
