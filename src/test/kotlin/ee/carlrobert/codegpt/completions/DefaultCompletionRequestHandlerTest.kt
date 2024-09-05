@@ -146,9 +146,18 @@ class DefaultCompletionRequestHandlerTest : IntegrationTest() {
           true
         )
       listOf(
-        jsonMapResponse("message", jsonMap(e("content", "Hel"), e("role", "assistant"))),
-        jsonMapResponse("message", jsonMap(e("content", "lo"), e("role", "assistant"))),
-        jsonMapResponse("message", jsonMap(e("content", "!"), e("role", "assistant")))
+        jsonMapResponse(
+          e("message", jsonMap(e("content", "Hel"), e("role", "assistant"))),
+          e("done", false)),
+        jsonMapResponse(
+            e("message", jsonMap(e("content", "lo"), e("role", "assistant"))),
+            e("done", false)),
+        jsonMapResponse(
+            e("message", jsonMap(e("content", "!"), e("role", "assistant"))),
+            e("done", false)),
+        jsonMapResponse(
+            e("message", jsonMap(e("content", ""), e("role", "assistant"))),
+            e("done", true))
       )
     })
 
