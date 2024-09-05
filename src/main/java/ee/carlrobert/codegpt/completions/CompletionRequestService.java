@@ -5,7 +5,7 @@ import com.intellij.openapi.components.Service;
 import com.intellij.openapi.diagnostic.Logger;
 import ee.carlrobert.codegpt.codecompletions.CodeCompletionRequestFactory;
 import ee.carlrobert.codegpt.codecompletions.CodeCompletionRequestProvider;
-import ee.carlrobert.codegpt.codecompletions.InfillRequestDetails;
+import ee.carlrobert.codegpt.codecompletions.InfillRequest;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
 import ee.carlrobert.codegpt.credentials.CredentialsStore;
@@ -133,13 +133,13 @@ public final class CompletionRequestService {
   }
 
   public EventSource getCodeCompletionAsync(
-      InfillRequestDetails requestDetails,
+      InfillRequest requestDetails,
       CompletionEventListener<String> eventListener) {
     var httpClient = CompletionClientProvider.getDefaultClientBuilder().build();
     var requestProvider = new CodeCompletionRequestProvider(requestDetails);
     return switch (GeneralSettings.getCurrentState().getSelectedService()) {
       case CODEGPT -> CompletionClientProvider.getCodeGPTClient()
-          .getCompletionAsync(
+          .getCodeCompletionAsync(
               CodeCompletionRequestFactory.buildCodeGPTRequest(requestDetails),
               eventListener);
       case OPENAI -> CompletionClientProvider.getOpenAIClient()

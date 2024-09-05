@@ -16,7 +16,7 @@ open class ToolwindowEditorActionLink(
     private val highlightedText: String,
 ) : AnActionLink(title, action) {
 
-    private val mainEditor = project.service<FileEditorManager>().selectedTextEditor
+    private val mainEditor = FileEditorManager.getInstance(project).selectedTextEditor
     private val documentListener = object : DocumentListener {
         override fun documentChanged(event: DocumentEvent) {
             updateActionState()

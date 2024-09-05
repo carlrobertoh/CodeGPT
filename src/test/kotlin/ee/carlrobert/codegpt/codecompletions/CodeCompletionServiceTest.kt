@@ -15,26 +15,28 @@ import org.assertj.core.api.Assertions.assertThat
 import testsupport.IntegrationTest
 
 class CodeCompletionServiceTest : IntegrationTest() {
-    private val cursorPosition = VisualPosition(3, 0)
+    private val cursorPosition = VisualPosition(1, 0)
 
     fun testFetchCodeCompletionLlama() {
         useLlamaService()
         LlamaSettings.getCurrentState().isCodeCompletionsEnabled = true
         myFixture.configureByText(
             "CompletionTest.java",
-            getResourceContent("/codecompletions/code-completion-file.txt")
+            """
+                [INPUT]
+
+                [\INPUT]
+            """.trimIndent()
         )
         val editor = myFixture.editor
         val expectedCompletion = "TEST_SINGLE_LINE_OUTPUT\nTEST_MULTI_LINE_OUTPUT"
         val prefix = """
-             ${"z".repeat(245)}
              [INPUT]
              c
              """.trimIndent() // 128 tokens
         val suffix = """
              
              [\INPUT]
-             ${"z".repeat(247)}
              """.trimIndent() // 128 tokens
         expectLlama(StreamHttpExchange { request: RequestEntity ->
             assertThat(request.uri.path)

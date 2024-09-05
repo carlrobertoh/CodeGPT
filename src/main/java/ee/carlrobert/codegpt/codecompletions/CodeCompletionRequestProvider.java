@@ -9,15 +9,15 @@ public class CodeCompletionRequestProvider {
 
   private static final int MAX_TOKENS = 128;
 
-  private final InfillRequestDetails details;
+  private final InfillRequest request;
 
-  public CodeCompletionRequestProvider(InfillRequestDetails details) {
-    this.details = details;
+  public CodeCompletionRequestProvider(InfillRequest request) {
+    this.request = request;
   }
 
   public OpenAITextCompletionRequest buildOpenAIRequest() {
-    return new OpenAITextCompletionRequest.Builder(details.getPrefix())
-        .setSuffix(details.getSuffix())
+    return new OpenAITextCompletionRequest.Builder(request.getPrefix())
+        .setSuffix(request.getSuffix())
         .setStream(true)
         .setMaxTokens(MAX_TOKENS)
         .setTemperature(0.1)
@@ -26,8 +26,7 @@ public class CodeCompletionRequestProvider {
 
   public LlamaCompletionRequest buildLlamaRequest() {
     InfillPromptTemplate promptTemplate = getLlamaInfillPromptTemplate();
-    String prompt = promptTemplate.buildPrompt(
-        new InfillRequestDetails(details.getPrefix(), details.getSuffix(), null));
+    String prompt = promptTemplate.buildPrompt(request);
     return new LlamaCompletionRequest.Builder(prompt)
         .setN_predict(MAX_TOKENS)
         .setStream(true)

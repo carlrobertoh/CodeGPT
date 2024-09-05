@@ -23,13 +23,13 @@ class CodeCompletionEventListener implements CompletionEventListener<String> {
 
   private final Editor editor;
   private final int caretOffset;
-  private final InfillRequestDetails requestDetails;
+  private final InfillRequest requestDetails;
   private final BackgroundableProcessIndicator progressIndicator;
 
   public CodeCompletionEventListener(
       Editor editor,
       int caretOffset,
-      InfillRequestDetails requestDetails,
+      InfillRequest requestDetails,
       @Nullable BackgroundableProcessIndicator progressIndicator) {
     this.editor = editor;
     this.caretOffset = caretOffset;
