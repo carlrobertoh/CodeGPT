@@ -59,12 +59,9 @@ object CodeGPTAvailableModels {
 
     @JvmStatic
     val CODE_MODELS: List<CodeGPTModel> = listOf(
-        CodeGPTModel("Codestral", "codestral", Icons.OpenAI, INDIVIDUAL),
         CodeGPTModel("GPT-3.5 Turbo Instruct", "gpt-3.5-turbo-instruct", Icons.OpenAI, INDIVIDUAL),
         CodeGPTModel("StarCoder (16B)", "starcoder-16b", Icons.CodeGPTModel, FREE),
         CodeGPTModel("StarCoder (7B) - FREE", "starcoder-7b", Icons.CodeGPTModel, FREE),
-        CodeGPTModel("Code Llama (70B)", "codellama:code", Icons.CodeGPTModel, FREE),
-        CodeGPTModel("Code Llama Python (70B)", "codellama-python", Icons.CodeGPTModel, FREE),
         CodeGPTModel("WizardCoder Python (34B)", "wizardcoder-python", Icons.CodeGPTModel, FREE),
         CodeGPTModel("Phind Code LLaMA v2 (34B)", "phind-codellama", Icons.CodeGPTModel, FREE)
     )
