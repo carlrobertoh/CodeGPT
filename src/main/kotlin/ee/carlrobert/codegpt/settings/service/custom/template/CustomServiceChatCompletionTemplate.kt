@@ -111,7 +111,7 @@ enum class CustomServiceChatCompletionTemplate(
         ),
         getDefaultBodyParams(
             mapOf(
-                "model" to "meta-llama/llama-3-8b-instruct:free",
+                "model" to "meta-llama/llama-3.1-8b-instruct:free",
                 "max_tokens" to 1024
             )
         )
