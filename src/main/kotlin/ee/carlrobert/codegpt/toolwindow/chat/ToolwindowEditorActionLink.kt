@@ -33,7 +33,7 @@ open class ToolwindowEditorActionLink(
         val startIndex = mainEditor?.document?.text?.indexOf(highlightedText)
         runInEdt {
             isEnabled = startIndex != null && startIndex != -1
-            toolTipText = if (isEnabled) null else "Original state has changed"
+            toolTipText = if (isEnabled) null else "Original editor state has changed"
         }
     }
 }
