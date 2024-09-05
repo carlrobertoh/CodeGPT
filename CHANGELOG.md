@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.11.0-223] - 2024-09-05
+
 ### Added
 
 - Multiple tool window editor actions for generated code:
@@ -617,7 +619,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `OPENAI_API_KEY` persistence, key is saved in the OS password safe from now on
 
-[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.10.2-223...HEAD
+[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.11.0-223...HEAD
+[2.11.0-223]: https://github.com/carlrobertoh/CodeGPT/compare/v2.10.2-223...v2.11.0-223
 [2.10.2-223]: https://github.com/carlrobertoh/CodeGPT/compare/v2.10.1-223...v2.10.2-223
 [2.10.1-223]: https://github.com/carlrobertoh/CodeGPT/compare/v2.10.0-223...v2.10.1-223
 [2.10.0-223]: https://github.com/carlrobertoh/CodeGPT/compare/v2.9.0-223...v2.10.0-223
