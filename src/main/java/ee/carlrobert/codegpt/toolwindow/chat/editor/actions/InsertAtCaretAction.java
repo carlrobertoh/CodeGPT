@@ -36,7 +36,7 @@ public class InsertAtCaretAction extends TrackableAction {
       return;
     }
 
-    insertTextAtCaret(mainEditor, locationOnScreen);
+    insertTextAtCaret(mainEditor);
   }
 
   @Nullable
@@ -54,16 +54,11 @@ public class InsertAtCaretAction extends TrackableAction {
         .orElse(null);
   }
 
-  private void insertTextAtCaret(Editor mainEditor, @Nullable Point locationOnScreen) {
+  private void insertTextAtCaret(Editor mainEditor) {
     runUndoTransparentWriteAction(() -> {
       mainEditor.getDocument().insertString(
           mainEditor.getCaretModel().getOffset(),
           editor.getDocument().getText());
-      if (locationOnScreen != null) {
-        OverlayUtil.showInfoBalloon(
-            "Text successfully inserted at the current cursor position.",
-            locationOnScreen);
-      }
       return null;
     });
   }
