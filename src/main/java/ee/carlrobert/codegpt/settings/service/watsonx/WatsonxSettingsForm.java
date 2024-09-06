@@ -33,6 +33,7 @@ public class WatsonxSettingsForm {
     private final JBCheckBox onPremCheckbox;
     private final JBPasswordField apiKeyField;
     private final JBPasswordField onPremApiKeyField;
+    private final ComboBox regionComboBox;
     private final JBTextField onPremHostField;
     private final JBTextField usernameField;
     private final JBCheckBox zenApiKeyCheckbox;
@@ -82,6 +83,9 @@ public class WatsonxSettingsForm {
         getStartedLink.setToolTipText(getStartedUrl);
         getStartedLink.addActionListener(new OpenUrlAction());
 
+        regionComboBox = new ComboBox(new String[] {"Dallas", "Frankfurt", "London", "Tokyo"});
+        regionComboBox.setSelectedItem(settings.getRegion());
+
         apiKeyField = new JBPasswordField();
         apiKeyField.setColumns(35);
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
@@ -117,6 +121,10 @@ public class WatsonxSettingsForm {
 
         onCloudAuthenticationFieldPanel = new UI.PanelFactory().grid()
                 .add(UI.PanelFactory.panel(getStartedLink))
+                .add(UI.PanelFactory.panel(regionComboBox)
+                        .withLabel(CodeGPTBundle.get("settingsConfigurable.service.watsonx.cloudRegion.label"))
+                        .withComment(CodeGPTBundle.get("settingsConfigurable.service.watsonx.cloudRegion.comment"))
+                        .resizeX(false))
                 .add(UI.PanelFactory.panel(apiKeyField)
                         .withLabel(CodeGPTBundle.get("settingsConfigurable.service.watsonx.onCloudApiKey.label"))
                         .withComment(CodeGPTBundle.get(
@@ -258,6 +266,7 @@ public class WatsonxSettingsForm {
         state.setOnPremHost(onPremHostField.getText());
         state.setUsername(usernameField.getText());
         state.setZenApiKey(zenApiKeyCheckbox.isSelected());
+        state.setRegion((String)regionComboBox.getSelectedItem());
         state.setApiVersion(apiVersionField.getText());
         state.setSpaceId(spaceIdField.getText());
         state.setProjectId(projectIdField.getText());

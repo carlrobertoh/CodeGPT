@@ -8,6 +8,7 @@ public class WatsonxSettingsState {
     private String username;
     private boolean isOnPrem = false;
     private boolean isZenApiKey = false;
+    private String region = "us-south";
     private String apiVersion = "2024-03-14";
     // use this model as default
     private String model = "ibm/granite-3b-code-instruct";
@@ -55,6 +56,12 @@ public class WatsonxSettingsState {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getRegion() {return region;}
+
+    public void setRegion(String region) {
+        this.region = region;
     }
 
     public String getApiVersion() {
@@ -170,12 +177,10 @@ public class WatsonxSettingsState {
             return false;
         }
         ee.carlrobert.codegpt.settings.service.watsonx.WatsonxSettingsState that = (ee.carlrobert.codegpt.settings.service.watsonx.WatsonxSettingsState) o;
-        return Objects.equals(apiVersion, that.apiVersion) && Objects.equals(spaceId, that.spaceId) && Objects.equals(projectId, that.projectId) && Objects.equals(model, that.model) && Objects.equals(temperature,that.temperature) && Objects.equals(topP,that.topP) && Objects.equals(topK,that.topK) && Objects.equals(randomSeed,that.randomSeed) && Objects.equals(repetitionPenalty,that.repetitionPenalty) && Objects.equals(maxNewTokens, that.maxNewTokens) && Objects.equals(minNewTokens,that.minNewTokens) && Objects.equals(isGreedyDecoding,that.isGreedyDecoding) && Objects.equals(isOnPrem,that.isOnPrem) && Objects.equals(isZenApiKey,that.isZenApiKey);
-
+        return Objects.equals(apiVersion, that.apiVersion) && Objects.equals(region, that.region) && Objects.equals(spaceId, that.spaceId) && Objects.equals(projectId, that.projectId) && Objects.equals(model, that.model) && Objects.equals(temperature,that.temperature) && Objects.equals(topP,that.topP) && Objects.equals(topK,that.topK) && Objects.equals(randomSeed,that.randomSeed) && Objects.equals(repetitionPenalty,that.repetitionPenalty) && Objects.equals(maxNewTokens, that.maxNewTokens) && Objects.equals(minNewTokens,that.minNewTokens) && Objects.equals(isGreedyDecoding,that.isGreedyDecoding) && Objects.equals(isOnPrem,that.isOnPrem) && Objects.equals(isZenApiKey,that.isZenApiKey);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(apiVersion, model, apiVersion, projectId, spaceId,temperature,topP,topK,randomSeed,includeStopSequence,stopSequences,repetitionPenalty, maxNewTokens,minNewTokens,isGreedyDecoding,isOnPrem,isZenApiKey);
-    }
+        return Objects.hash(apiVersion, region, model, apiVersion, projectId, spaceId,temperature,topP,topK,randomSeed,includeStopSequence,stopSequences,repetitionPenalty, maxNewTokens,minNewTokens,isGreedyDecoding,isOnPrem,isZenApiKey);    }
 }

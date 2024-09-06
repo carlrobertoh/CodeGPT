@@ -35,10 +35,18 @@ public class CompletionClientProvider {
   }
 
   public static WatsonxClient getWatsonxClient() {
+    String regionCode = switch(WatsonxSettings.getCurrentState().getRegion()) {
+      case "Dallas" -> "us-south";
+      case "Frankfurt" -> "eu-de";
+      case "London" -> "eu-gb";
+      case "Tokyo" -> "jp-tok";
+      default -> "us-south";
+    };
+    String host = WatsonxSettings.getCurrentState().isOnPrem() ? WatsonxSettings.getCurrentState().getOnPremHost() : "https://" + regionCode + ".ml.cloud.ibm.com";
     return new WatsonxClient.Builder(getCredential(CredentialKey.WATSONX_API_KEY))
             .setApiVersion(WatsonxSettings.getCurrentState().getApiVersion())
             .setIsOnPrem(WatsonxSettings.getCurrentState().isOnPrem())
-            .setHost(WatsonxSettings.getCurrentState().getOnPremHost())
+            .setHost(host)
             .setUsername(WatsonxSettings.getCurrentState().getUsername())
             .setIsZenApiKey(WatsonxSettings.getCurrentState().isZenApiKey())
             .build(getDefaultClientBuilder());
