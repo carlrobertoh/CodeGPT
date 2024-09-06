@@ -18,6 +18,7 @@ import ee.carlrobert.codegpt.settings.service.google.GoogleSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
+import ee.carlrobert.codegpt.settings.service.watsonx.WatsonxSettings;
 import ee.carlrobert.codegpt.util.ApplicationUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -92,6 +93,10 @@ public class GeneralSettings implements PersistentStateComponent<GeneralSettings
         ApplicationManager.getApplication().getService(OllamaSettings.class).getState()
             .setModel(conversation.getModel());
         break;
+      case WATSONX:
+        ApplicationManager.getApplication().getService(WatsonxSettings.class).getState()
+                .setModel(conversation.getModel());
+        break;
       default:
         break;
     }
@@ -144,6 +149,11 @@ public class GeneralSettings implements PersistentStateComponent<GeneralSettings
             .getService(GoogleSettings.class)
             .getState()
             .getModel();
+      case WATSONX:
+        return ApplicationManager.getApplication()
+                .getService(WatsonxSettings.class)
+                .getState()
+                .getModel();
       default:
         return "Unknown";
     }

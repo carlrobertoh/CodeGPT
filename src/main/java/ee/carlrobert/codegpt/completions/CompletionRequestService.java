@@ -126,6 +126,9 @@ public final class CompletionRequestService {
             settings.getModel(),
             eventListener);
       }
+      case WATSONX -> CompletionClientProvider.getWatsonxClient().getCompletionAsync(
+              requestProvider.buildWatsonxChatCompletionRequest(callParameters),
+              eventListener);
     };
   }
 
@@ -285,7 +288,7 @@ public final class CompletionRequestService {
           AzureSettings.getCurrentState().isUseAzureApiKeyAuthentication()
               ? CredentialKey.AZURE_OPENAI_API_KEY
               : CredentialKey.AZURE_ACTIVE_DIRECTORY_TOKEN);
-      case CODEGPT, CUSTOM_OPENAI, ANTHROPIC, LLAMA_CPP, OLLAMA -> true;
+      case CODEGPT, CUSTOM_OPENAI, ANTHROPIC, LLAMA_CPP, OLLAMA, WATSONX -> true;
       case GOOGLE -> CredentialsStore.INSTANCE.isCredentialSet(CredentialKey.GOOGLE_API_KEY);
     };
   }

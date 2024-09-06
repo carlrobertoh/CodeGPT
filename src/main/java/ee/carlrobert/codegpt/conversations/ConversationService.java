@@ -13,6 +13,7 @@ import ee.carlrobert.codegpt.settings.service.google.GoogleSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
+import ee.carlrobert.codegpt.settings.service.watsonx.WatsonxSettings;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -208,6 +209,9 @@ public final class ConversationService {
           .getState()
           .getModel();
       case GOOGLE -> application.getService(GoogleSettings.class)
+          .getState()
+          .getModel();
+      case WATSONX -> application.getService(WatsonxSettings.class)
           .getState()
           .getModel();
     };

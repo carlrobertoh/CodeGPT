@@ -7,6 +7,7 @@ import ee.carlrobert.codegpt.codecompletions.CodeCompletionRequestFactory.buildC
 import ee.carlrobert.codegpt.codecompletions.CodeCompletionRequestFactory.buildLlamaRequest
 import ee.carlrobert.codegpt.codecompletions.CodeCompletionRequestFactory.buildOllamaRequest
 import ee.carlrobert.codegpt.codecompletions.CodeCompletionRequestFactory.buildOpenAIRequest
+import ee.carlrobert.codegpt.codecompletions.CodeCompletionRequestFactory.buildWatsonxRequest
 import ee.carlrobert.codegpt.completions.CompletionClientProvider
 import ee.carlrobert.codegpt.settings.GeneralSettings
 import ee.carlrobert.codegpt.settings.service.ServiceType
@@ -16,6 +17,7 @@ import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
 import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings
+import ee.carlrobert.codegpt.settings.service.watsonx.WatsonxSettings
 import ee.carlrobert.llm.client.openai.completion.OpenAITextCompletionEventSourceListener
 import ee.carlrobert.llm.completion.CompletionEventListener
 import okhttp3.sse.EventSource
@@ -46,6 +48,7 @@ class CodeCompletionService {
             OPENAI -> OpenAISettings.getCurrentState().isCodeCompletionsEnabled
             CUSTOM_OPENAI -> service<CustomServiceSettings>().state.codeCompletionSettings.codeCompletionsEnabled
             LLAMA_CPP -> LlamaSettings.isCodeCompletionsPossible()
+            WATSONX -> WatsonxSettings.isCodeCompletionsPossible()
             OLLAMA -> service<OllamaSettings>().state.codeCompletionsEnabled
             else -> false
         }
@@ -73,6 +76,9 @@ class CodeCompletionService {
 
             LLAMA_CPP -> CompletionClientProvider.getLlamaClient()
                 .getChatCompletionAsync(buildLlamaRequest(requestDetails), eventListener)
+
+            WATSONX -> CompletionClientProvider.getWatsonxClient()
+                .getCompletionAsync(buildWatsonxRequest(requestDetails), eventListener)
 
             else -> throw IllegalArgumentException("Code completion not supported for ${selectedService.name}")
         }
