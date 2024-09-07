@@ -8,19 +8,13 @@ import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.EnumComboBoxModel;
 
 import com.intellij.ui.TitledSeparator;
-import com.intellij.ui.components.JBLabel;
-import com.intellij.ui.components.JBPasswordField;
-import com.intellij.ui.components.JBTextField;
-import com.intellij.ui.components.JBCheckBox;
+import com.intellij.ui.components.*;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.UI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.credentials.CredentialsStore;
-import ee.carlrobert.codegpt.settings.service.watsonx.WatsonxSettings;
-import ee.carlrobert.codegpt.settings.service.watsonx.WatsonxSettingsState;
 import ee.carlrobert.llm.client.watsonx.completion.WatsonxCompletionModel;
 
-import ee.carlrobert.codegpt.ui.UIUtil;
 
 import javax.swing.*;
 import java.awt.*;
@@ -30,7 +24,8 @@ import org.jetbrains.annotations.Nullable;
 
 public class WatsonxSettingsForm {
 
-    private final JBCheckBox onPremCheckbox;
+    private final JBRadioButton onPremRadio;
+    private final JBRadioButton onCloudRadio;
     private final JBPasswordField apiKeyField;
     private final JBPasswordField onPremApiKeyField;
     private final ComboBox regionComboBox;
@@ -41,7 +36,7 @@ public class WatsonxSettingsForm {
     private final JPanel onPremAuthenticationFieldPanel;
     private final JPanel onCloudAuthenticationFieldPanel;
 
-    private final String getStartedText = "Click here to get started with IBM watsonx.ai as a Service";
+    private final String getStartedText = "Get started with IBM watsonx.ai as a Service";
     private final String getStartedUrl = "https://dataplatform.cloud.ibm.com/registration/stepone?context=wx";
     private final JButton getStartedLink;
     private final JBTextField apiVersionField;
@@ -49,7 +44,8 @@ public class WatsonxSettingsForm {
     private final JBTextField spaceIdField;
 
     private final ComboBox modelComboBox;
-    private final JBCheckBox greedyDecodingCheckbox;
+    private final JBRadioButton greedyDecodingRadio;
+    private final JBRadioButton sampleDecodingRadio;
     private final JBTextField temperatureField;
     private final JBTextField topKField;
     private final JBTextField topPField;
@@ -62,7 +58,9 @@ public class WatsonxSettingsForm {
     private final JPanel sampleParametersFieldPanel;
 
     public WatsonxSettingsForm(WatsonxSettingsState settings) {
-        onPremCheckbox = new JBCheckBox("Watsonx.ai on-premises software", false);
+        onPremRadio = new JBRadioButton("Watsonx.ai on-premises software", false);
+        onCloudRadio = new JBRadioButton("Watsonx.ai as a Service", true);
+
         onPremHostField = new JBTextField(settings.getOnPremHost(), 35);
 
         usernameField = new JBTextField(settings.getUsername(), 35);
@@ -76,9 +74,12 @@ public class WatsonxSettingsForm {
             }
         }
         getStartedLink = new JButton();
-        getStartedLink.setText("<HTML><FONT color=\"#0f62fe\"><U>"+getStartedText+"</U></FONT>");
+        getStartedLink.setText("<HTML><FONT color=\"#0f62fe\">"+getStartedText+"</FONT>");
         getStartedLink.setHorizontalAlignment(SwingConstants.LEFT);
         getStartedLink.setBorderPainted(false);
+        getStartedLink.setContentAreaFilled(false);
+        getStartedLink.setFocusPainted(false);
+        getStartedLink.setOpaque(false);
         getStartedLink.setCursor(new Cursor(Cursor.HAND_CURSOR));
         getStartedLink.setToolTipText(getStartedUrl);
         getStartedLink.addActionListener(new OpenUrlAction());
@@ -135,7 +136,8 @@ public class WatsonxSettingsForm {
         apiVersionField = new JBTextField(settings.getApiVersion(), 35);
         projectIdField = new JBTextField(settings.getProjectId(), 35);
         spaceIdField = new JBTextField(settings.getSpaceId(), 35);
-        greedyDecodingCheckbox = new JBCheckBox("Greedy decoding", false);
+        greedyDecodingRadio = new JBRadioButton("Greedy decoding", false);
+        sampleDecodingRadio = new JBRadioButton("Sample decoding", true);
 
         modelComboBox = new ComboBox<>(new EnumComboBoxModel(WatsonxCompletionModel.class));
         modelComboBox.setSelectedItem(WatsonxCompletionModel.findByCode(settings.getModel()));
@@ -176,18 +178,33 @@ public class WatsonxSettingsForm {
 
         registerPanelsVisibility(settings);
 
-        onPremCheckbox.addActionListener(e -> {
-            onPremAuthenticationFieldPanel.setVisible(!onPremAuthenticationFieldPanel.isVisible());
-            onCloudAuthenticationFieldPanel.setVisible(!onCloudAuthenticationFieldPanel.isVisible());
-            settings.setOnPrem(!settings.isOnPrem());
+        onPremRadio.addActionListener(e -> {
+            settings.setOnPrem(true);
+            onCloudRadio.setSelected(false);
+            onPremAuthenticationFieldPanel.setVisible(true);
+            onCloudAuthenticationFieldPanel.setVisible(false);
+
         });
 
-        greedyDecodingCheckbox.addActionListener(e -> {
-            sampleParametersFieldPanel.setVisible(!sampleParametersFieldPanel.isVisible());
-            settings.setGreedyDecoding(!settings.isGreedyDecoding());
+        onCloudRadio.addActionListener(e -> {
+            settings.setOnPrem(false);
+            onPremRadio.setSelected(false);
+            onPremAuthenticationFieldPanel.setVisible(false);
+            onCloudAuthenticationFieldPanel.setVisible(true);
+
         });
 
+        greedyDecodingRadio.addActionListener(e -> {
+            settings.setGreedyDecoding(true);
+            sampleDecodingRadio.setSelected(false);
+            sampleParametersFieldPanel.setVisible(false);
+        });
 
+        sampleDecodingRadio.addActionListener(e -> {
+            settings.setGreedyDecoding(false);
+            greedyDecodingRadio.setSelected(false);
+            sampleParametersFieldPanel.setVisible(true);
+        });
     }
 
     private void registerPanelsVisibility(WatsonxSettingsState settings) {
@@ -200,8 +217,10 @@ public class WatsonxSettingsForm {
         return FormBuilder.createFormBuilder()
                 .addComponent(new TitledSeparator("Connection Parameters"))
                 .addComponent(UI.PanelFactory.grid()
-                        .add(UI.PanelFactory.panel(onPremCheckbox)
-                            .resizeX(false)).createPanel())
+                        .add(UI.PanelFactory.panel(onCloudRadio)
+                                .resizeX(false))
+                        .add(UI.PanelFactory.panel(onPremRadio)
+                                .resizeX(false)).createPanel())
                 .addComponent(onCloudAuthenticationFieldPanel)
                 .addComponent(onPremAuthenticationFieldPanel)
                 .addComponent(UI.PanelFactory.grid()
@@ -245,13 +264,14 @@ public class WatsonxSettingsForm {
                                 .resizeX(false))
                         .add(UI.PanelFactory.panel(includeStopSequenceCheckbox)
                                 .resizeX(false))
-
                         .add(UI.PanelFactory.panel(repetitionPenaltyField)
                                 .withLabel("Repetition Penalty:")
                                 .withComment(CodeGPTBundle.get(
                                         "settingsConfigurable.service.watsonx.repetitionPenalty.comment"))
                                 .resizeX(false))
-                        .add(UI.PanelFactory.panel(greedyDecodingCheckbox)
+                        .add(UI.PanelFactory.panel(greedyDecodingRadio)
+                                .resizeX(false))
+                        .add(UI.PanelFactory.panel(sampleDecodingRadio)
                                 .resizeX(false))
                         .createPanel())
                 .addComponent(sampleParametersFieldPanel)
@@ -262,7 +282,7 @@ public class WatsonxSettingsForm {
     public WatsonxSettingsState getCurrentState() {
         var state = new WatsonxSettingsState();
         state.setModel(((WatsonxCompletionModel) modelComboBox.getSelectedItem()).getCode());
-        state.setOnPrem(onPremCheckbox.isSelected());
+        state.setOnPrem(onPremRadio.isSelected());
         state.setOnPremHost(onPremHostField.getText());
         state.setUsername(usernameField.getText());
         state.setZenApiKey(zenApiKeyCheckbox.isSelected());
@@ -270,7 +290,7 @@ public class WatsonxSettingsForm {
         state.setApiVersion(apiVersionField.getText());
         state.setSpaceId(spaceIdField.getText());
         state.setProjectId(projectIdField.getText());
-        state.setGreedyDecoding(greedyDecodingCheckbox.isSelected());
+        state.setGreedyDecoding(greedyDecodingRadio.isSelected());
         state.setMaxNewTokens(Integer.valueOf(maxNewTokensField.getText()));
         state.setMinNewTokens(Integer.valueOf(minNewTokensField.getText()));
         state.setTemperature(Double.valueOf(temperatureField.getText()));
@@ -285,7 +305,8 @@ public class WatsonxSettingsForm {
 
     public void resetForm() {
         var state = WatsonxSettings.getCurrentState();
-        onPremCheckbox.setSelected(state.isOnPrem());
+        onPremRadio.setSelected(state.isOnPrem());
+        onCloudRadio.setSelected(!state.isOnPrem());
         onPremHostField.setText(state.getOnPremHost());
         usernameField.setText(state.getUsername());
         zenApiKeyCheckbox.setSelected(state.isZenApiKey());
@@ -293,7 +314,8 @@ public class WatsonxSettingsForm {
         apiVersionField.setText(state.getApiVersion());
         spaceIdField.setText(state.getSpaceId());
         projectIdField.setText(state.getProjectId());
-        greedyDecodingCheckbox.setSelected(state.isGreedyDecoding());
+        greedyDecodingRadio.setSelected(state.isGreedyDecoding());
+        sampleDecodingRadio.setSelected(!state.isGreedyDecoding());
         modelComboBox.setSelectedItem(WatsonxCompletionModel.findByCode(state.getModel()));
         maxNewTokensField.setText(String.valueOf(state.getMaxNewTokens()));
         minNewTokensField.setText(String.valueOf(state.getMinNewTokens()));
