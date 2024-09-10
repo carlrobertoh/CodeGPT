@@ -11,19 +11,28 @@ object GitUtil {
 
     @Throws(VcsException::class)
     @JvmStatic
-    fun getStagedDiff(project: Project, gitRepository: GitRepository): List<String> {
-        return getGitDiff(project, gitRepository, true)
+    fun getStagedDiff(
+        project: Project,
+        gitRepository: GitRepository,
+        includedVersionedFilePaths: List<String> = emptyList()
+    ): List<String> {
+        return getGitDiff(project, gitRepository, includedVersionedFilePaths, true)
     }
 
     @Throws(VcsException::class)
     @JvmStatic
-    fun getUnstagedDiff(project: Project, gitRepository: GitRepository): List<String> {
-        return getGitDiff(project, gitRepository, false)
+    fun getUnstagedDiff(
+        project: Project,
+        gitRepository: GitRepository,
+        includedUnversionedFilePaths: List<String> = emptyList()
+    ): List<String> {
+        return getGitDiff(project, gitRepository, includedUnversionedFilePaths, false)
     }
 
     private fun getGitDiff(
         project: Project,
         gitRepository: GitRepository,
+        filePaths: List<String>,
         staged: Boolean
     ): List<String> {
         val handler = GitLineHandler(project, gitRepository.root, GitCommand.DIFF)
@@ -37,9 +46,19 @@ object GitUtil {
             "--no-color",
         )
 
+        filePaths.forEach { path ->
+            handler.addParameters(path)
+        }
+
         val commandResult = Git.getInstance().runCommand(handler)
         return commandResult.output.filter {
-            listOf("diff --git", "index ", "---", "- ", "+++").none { prefix -> it.startsWith(prefix) }
+            listOf(
+                "diff --git",
+                "index ",
+                "---",
+                "- ",
+                "+++"
+            ).none { prefix -> it.startsWith(prefix) }
         }
     }
 }

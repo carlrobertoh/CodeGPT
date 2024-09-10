@@ -12,7 +12,6 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.vcs.VcsDataKeys;
 import com.intellij.openapi.vcs.VcsException;
 import com.intellij.vcs.commit.CommitWorkflowUi;
@@ -113,8 +112,14 @@ public class GenerateGitCommitMessageAction extends AnAction {
             return "";
           }
 
-          var stagedGitDiff = String.join("\n", GitUtil.getStagedDiff(project, repository));
-          var unstagedGitDiff = String.join("\n", GitUtil.getUnstagedDiff(project, repository));
+          var stagedGitDiff = String.join("\n", GitUtil.getStagedDiff(
+              project,
+              repository,
+              changes.getIncludedVersionedFilePaths()));
+          var unstagedGitDiff = String.join("\n", GitUtil.getUnstagedDiff(
+              project,
+              repository,
+              changes.getIncludedUnversionedFilePaths()));
           var newFilesContent =
               getNewFilesDiff(projectBasePath, changes.getIncludedUnversionedFilePaths());
           return Map.of(
