@@ -11,11 +11,7 @@ class AddSelectionToContextAction : BaseEditorAction {
 
     constructor() : this(AllIcons.General.Add)
 
-    constructor(icon: Icon) : super(
-        "Add to Chat Context",
-        "Adds the current selection to the chat context for generating code",
-        icon
-    ) {
+    constructor(icon: Icon) : super(icon) {
         EditorActionsUtil.registerAction(this)
     }
 

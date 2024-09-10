@@ -15,11 +15,7 @@ class EditCodeAction : BaseEditorAction {
 
     constructor() : this(Icons.Sparkle)
 
-    constructor(icon: Icon) : super(
-        "Edit Code",
-        "Allow LLM to edit code directly in your editor",
-        icon
-    ) {
+    constructor(icon: Icon) : super(icon) {
         registerCustomShortcutSet(
             CustomShortcutSet(
                 KeyStroke.getKeyStroke(

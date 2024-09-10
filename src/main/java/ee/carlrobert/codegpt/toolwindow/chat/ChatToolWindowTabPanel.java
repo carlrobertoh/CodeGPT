@@ -287,14 +287,15 @@ public class ChatToolWindowTabPanel implements Disposable {
 
     if (appliedInlayActions.stream().anyMatch(it -> it instanceof AppliedSuggestionActionInlay)) {
       message.setWebSearchIncluded(appliedInlayActions.stream()
-          .anyMatch(
-              it -> ((AppliedSuggestionActionInlay) it).getSuggestion() instanceof WebSearchActionItem));
+          .anyMatch(it -> ((AppliedSuggestionActionInlay) it).getSuggestion()
+              instanceof WebSearchActionItem));
 
       var addedDocumentation = CodeGPTKeys.ADDED_DOCUMENTATION.get(project);
       var appliedInlayExists = appliedInlayActions.stream()
           .anyMatch(it ->
               ((AppliedSuggestionActionInlay) it).getSuggestion() instanceof DocumentationActionItem
-                  || ((AppliedSuggestionActionInlay) it).getSuggestion() instanceof CreateDocumentationActionItem);
+                  || ((AppliedSuggestionActionInlay) it).getSuggestion()
+                  instanceof CreateDocumentationActionItem);
       if (addedDocumentation != null && appliedInlayExists) {
         message.setDocumentationDetails(addedDocumentation);
         CodeGPTKeys.ADDED_DOCUMENTATION.set(project, null);
@@ -303,7 +304,8 @@ public class ChatToolWindowTabPanel implements Disposable {
       var addedPersona = CodeGPTKeys.ADDED_PERSONA.get(project);
       var personaInlayExists = appliedInlayActions.stream()
           .anyMatch(
-              it -> ((AppliedSuggestionActionInlay) it).getSuggestion() instanceof PersonaActionItem);
+              it -> ((AppliedSuggestionActionInlay) it).getSuggestion()
+                  instanceof PersonaActionItem);
       if (addedPersona != null && personaInlayExists) {
         message.setPersonaDetails(addedPersona);
         CodeGPTKeys.ADDED_PERSONA.set(project, null);

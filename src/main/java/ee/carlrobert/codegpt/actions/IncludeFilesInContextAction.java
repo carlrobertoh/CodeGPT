@@ -6,9 +6,9 @@ import static ee.carlrobert.codegpt.settings.IncludedFilesSettingsState.DEFAULT_
 import static ee.carlrobert.codegpt.settings.IncludedFilesSettingsState.DEFAULT_REPEATABLE_CONTEXT;
 import static java.lang.String.format;
 
+import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
@@ -26,11 +26,11 @@ import com.intellij.util.ui.UI.PanelFactory;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.CodeGPTKeys;
 import ee.carlrobert.codegpt.EncodingManager;
+import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.ReferencedFile;
 import ee.carlrobert.codegpt.settings.IncludedFilesSettings;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import ee.carlrobert.codegpt.ui.checkbox.FileCheckboxTree;
-import ee.carlrobert.codegpt.ui.checkbox.PsiElementCheckboxTree;
 import ee.carlrobert.codegpt.ui.checkbox.VirtualFileCheckboxTree;
 import ee.carlrobert.codegpt.util.file.FileUtil;
 import java.awt.Dimension;
@@ -49,11 +49,7 @@ public class IncludeFilesInContextAction extends AnAction {
   private static final Logger LOG = Logger.getInstance(IncludeFilesInContextAction.class);
 
   public IncludeFilesInContextAction() {
-    this("action.includeFilesInContext.title");
-  }
-
-  public IncludeFilesInContextAction(String customTitleKey) {
-    super(CodeGPTBundle.get(customTitleKey));
+    super(Icons.AddFile);
   }
 
   @Override
