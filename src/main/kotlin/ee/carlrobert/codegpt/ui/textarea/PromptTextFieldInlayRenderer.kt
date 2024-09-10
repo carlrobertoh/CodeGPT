@@ -12,27 +12,39 @@ import com.intellij.openapi.editor.event.EditorMouseEvent
 import com.intellij.openapi.editor.event.EditorMouseListener
 import com.intellij.openapi.editor.event.EditorMouseMotionListener
 import com.intellij.openapi.editor.markup.TextAttributes
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.ui.popup.JBPopup
+import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.ui.JBColor
+import com.intellij.ui.awt.RelativePoint
 import com.intellij.util.ui.JBUI
 import java.awt.Cursor
+import java.awt.Dimension
 import java.awt.Graphics2D
+import java.awt.Point
 import java.awt.event.MouseEvent
 import java.awt.geom.Rectangle2D
 
 class PromptTextFieldInlayRenderer(
+    private val project: Project,
     private val actionPrefix: String,
     private val text: String?,
+    private val fileName: String,
+    private val tooltipText: String?,
     private val onClose: (Inlay<*>) -> Unit
 ) : EditorCustomElementRenderer {
 
     private val closeIcon = AllIcons.Actions.Close
+    private val helpIcon = AllIcons.General.ContextHelp
+
+    private var tooltip: JBPopup? = null
 
     override fun calcWidthInPixels(inlay: Inlay<*>): Int {
         val editor = inlay.editor
         val font = editor.colorsScheme.getFont(EditorFontType.PLAIN)
         val textWidth = editor.component.getFontMetrics(font)
             .stringWidth(actionPrefix + (if (text != null) ":$text" else ""))
-        return textWidth + closeIcon.iconWidth + JBUI.scale(10)
+        return textWidth + closeIcon.iconWidth + JBUI.scale(10) + helpIcon.iconWidth + JBUI.scale(10)
     }
 
     override fun paint(
@@ -51,6 +63,9 @@ class PromptTextFieldInlayRenderer(
         drawBorder(g, target)
         drawText(g, target, editor, currentTextAttributes)
         drawCloseIcon(g, target)
+        if (tooltipText != null) {
+            drawHelpIcon(g, target)
+        }
 
         addMouseListeners(editor, inlay, target)
     }
@@ -98,20 +113,90 @@ class PromptTextFieldInlayRenderer(
         closeIcon.paintIcon(null, g, iconX, iconY)
     }
 
+    private fun drawHelpIcon(g: Graphics2D, target: Rectangle2D) {
+        val iconX =
+            (target.x + target.width - closeIcon.iconWidth - helpIcon.iconWidth - JBUI.scale(10)).toInt()
+        val iconY = (target.y + (target.height - helpIcon.iconHeight) / 2).toInt()
+        helpIcon.paintIcon(null, g, iconX, iconY)
+    }
+
+    private fun showTooltip(inlay: Inlay<*>) {
+        if (tooltipText != null) {
+            hideTooltip()
+
+            val tooltipContent = CodePreviewTooltipContent(project, fileName, tooltipText)
+            tooltip = JBPopupFactory.getInstance()
+                .createComponentPopupBuilder(
+                    tooltipContent,
+                    tooltipContent.getFocusableComponent()
+                )
+                .setTitle("Code Preview")
+                .setResizable(true)
+                .setMovable(true)
+                .setStretchToOwnerHeight(true)
+                .setStretchToOwnerWidth(true)
+                .setMinSize(
+                    Dimension(
+                        tooltipContent.preferredSize?.width ?: 240,
+                        (tooltipContent.preferredSize?.height ?: 0)
+                    )
+                )
+                .createPopup()
+            tooltip?.show(
+                RelativePoint(
+                    inlay.editor.contentComponent,
+                    calculatePopupPoint(inlay, tooltipContent)
+                )
+            )
+        }
+    }
+
+    private fun calculatePopupPoint(
+        inlay: Inlay<*>,
+        tooltipContent: CodePreviewTooltipContent
+    ): Point {
+        val visibleArea = inlay.editor.scrollingModel.visibleArea
+        val inlayBounds = inlay.bounds
+        if (inlayBounds != null) {
+            val x = inlayBounds.x
+            val tooltipHeight = tooltipContent.preferredSize?.height ?: 0
+            val y = inlayBounds.y - tooltipHeight
+            return Point(x, y)
+        }
+        return Point(visibleArea.x, visibleArea.y)
+    }
+
+    private fun hideTooltip() {
+        tooltip?.dispose()
+    }
+
     private fun addMouseListeners(editor: Editor, inlay: Inlay<*>, target: Rectangle2D) {
-        fun isWithinIconBounds(e: MouseEvent): Boolean {
-            val iconX = (target.x + target.width - closeIcon.iconWidth - JBUI.scale(5)).toInt()
-            val iconY = (target.y + (target.height - closeIcon.iconHeight) / 2).toInt()
-            return e.x >= iconX && e.x <= iconX + closeIcon.iconWidth &&
-                    e.y >= iconY && e.y <= iconY + closeIcon.iconHeight
+        fun isWithinIconBounds(e: MouseEvent, icon: javax.swing.Icon, offsetX: Int): Boolean {
+            val iconX = when (icon) {
+                closeIcon -> (target.x + target.width - closeIcon.iconWidth - JBUI.scale(5)).toInt()
+                helpIcon -> (target.x + target.width - closeIcon.iconWidth - helpIcon.iconWidth - JBUI.scale(
+                    10
+                )).toInt()
+
+                else -> return false
+            }
+            val iconY = (target.y + (target.height - icon.iconHeight) / 2).toInt()
+            return e.x >= iconX && e.x <= iconX + icon.iconWidth &&
+                    e.y >= iconY && e.y <= iconY + icon.iconHeight
         }
 
-        fun updateCursor(event: MouseEvent, inlay: Inlay<*>) {
+        fun updateCursor(event: EditorMouseEvent, inlay: Inlay<*>) {
             editor.contentComponent.let {
                 if (inlay.isValid) {
                     val inlayBounds = inlay.bounds
-                    if (inlayBounds != null && inlayBounds.contains(event.x, event.y)) {
-                        it.cursor = if (isWithinIconBounds(event)) {
+                    if (inlayBounds != null && inlayBounds.contains(
+                            event.mouseEvent.x,
+                            event.mouseEvent.y
+                        )
+                    ) {
+                        it.cursor = if (isWithinIconBounds(event.mouseEvent, closeIcon, 0) ||
+                            isWithinIconBounds(event.mouseEvent, helpIcon, 0)
+                        ) {
                             Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
                         } else {
                             Cursor.getDefaultCursor()
@@ -125,15 +210,26 @@ class PromptTextFieldInlayRenderer(
 
         editor.addEditorMouseMotionListener(object : EditorMouseMotionListener {
             override fun mouseMoved(event: EditorMouseEvent) {
-                updateCursor(event.mouseEvent, inlay)
+                updateCursor(event, inlay)
             }
         })
 
         editor.addEditorMouseListener(object : EditorMouseListener {
             override fun mouseClicked(event: EditorMouseEvent) {
-                if (isWithinIconBounds(event.mouseEvent)) {
-                    onClose(inlay)
-                    event.consume()
+                when {
+                    isWithinIconBounds(
+                        event.mouseEvent,
+                        closeIcon,
+                        JBUI.scale(helpIcon.iconWidth + 10)
+                    ) -> {
+                        onClose(inlay)
+                        event.consume()
+                    }
+
+                    isWithinIconBounds(event.mouseEvent, helpIcon, JBUI.scale(5)) -> {
+                        showTooltip(inlay)
+                        event.consume()
+                    }
                 }
             }
         })

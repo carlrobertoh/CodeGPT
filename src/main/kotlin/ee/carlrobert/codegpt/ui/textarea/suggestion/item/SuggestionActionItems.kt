@@ -10,6 +10,7 @@ import com.intellij.openapi.vcs.changes.VcsIgnoreManager
 import com.intellij.openapi.vfs.VirtualFile
 import ee.carlrobert.codegpt.CodeGPTBundle
 import ee.carlrobert.codegpt.CodeGPTKeys
+import ee.carlrobert.codegpt.Icons
 import ee.carlrobert.codegpt.settings.GeneralSettings
 import ee.carlrobert.codegpt.settings.documentation.DocumentationSettings
 import ee.carlrobert.codegpt.settings.documentation.DocumentationsConfigurable

@@ -13,6 +13,10 @@ import org.jetbrains.annotations.Nullable;
 
 public abstract class BaseEditorAction extends AnAction {
 
+  BaseEditorAction(@Nullable Icon icon) {
+    super(icon);
+  }
+
   BaseEditorAction(
       @Nullable @NlsActions.ActionText String text,
       @Nullable @NlsActions.ActionDescription String description,
