@@ -11,6 +11,8 @@ import ee.carlrobert.codegpt.CodeGPTBundle
 import ee.carlrobert.codegpt.Icons
 import ee.carlrobert.codegpt.settings.GeneralSettings
 import ee.carlrobert.codegpt.settings.documentation.DocumentationSettings
+import ee.carlrobert.codegpt.settings.persona.PersonaDetails
+import ee.carlrobert.codegpt.settings.persona.PersonaSettings
 import ee.carlrobert.codegpt.settings.service.ServiceType
 import ee.carlrobert.codegpt.ui.DocumentationDetails
 import ee.carlrobert.codegpt.util.GitUtil
@@ -81,13 +83,19 @@ class PersonaSuggestionGroupItem : SuggestionGroupItem {
     override val displayName: String = CodeGPTBundle.get("suggestionGroupItem.personas.displayName")
     override val icon = AllIcons.General.User
 
-    override suspend fun getSuggestions(searchText: String?): List<SuggestionActionItem> =
-        getDefaultPersonas()
+    override suspend fun getSuggestions(searchText: String?): List<SuggestionActionItem> {
+        val userCreatedPersonas = service<PersonaSettings>().state.userCreatedPersonas
+            .map {
+                PersonaDetails(it.id, it.name ?: "Unknown", it.instructions ?: "Unknown")
+            }
+            .toMutableList()
+        return (userCreatedPersonas + getDefaultPersonas())
             .filter {
                 searchText.isNullOrEmpty() || it.name.contains(searchText, true)
             }
             .map { PersonaActionItem(it) }
             .take(10) + listOf(CreatePersonaActionItem())
+    }
 }
 
 class DocumentationSuggestionGroupItem : SuggestionGroupItem {
