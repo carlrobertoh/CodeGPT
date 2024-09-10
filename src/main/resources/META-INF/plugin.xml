@@ -101,6 +101,29 @@
                 class="com.intellij.openapi.actionSystem.DefaultActionGroup"
                 popup="true"
                 icon="ee.carlrobert.codegpt.Icons.DefaultSmall">
+                <action id="CodeGPT.NewChat"
+                  class="ee.carlrobert.codegpt.actions.editor.AskAction"
+                  text="New Chat"
+                  description="Creates a new chat session">
+                    <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift N" replace-all="true"/>
+                </action>
+                <action id="CodeGPT.AddSelectionToContext"
+                  class="ee.carlrobert.codegpt.actions.editor.AddSelectionToContextAction"
+                  text="Add to Chat Context"
+                  description="Adds the selected text to the CodeGPT context">
+                    <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift A" replace-all="true"/>
+                </action>
+                <action
+                  id="CodeGPT.EditCode"
+                  class="ee.carlrobert.codegpt.actions.editor.EditCodeAction">
+                    <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift E" replace-all="true"/>
+                </action>
+                <action
+                  id="CodeGPT.IncludeFileInContext"
+                  class="ee.carlrobert.codegpt.actions.IncludeFilesInContextAction">
+                    <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift I" replace-all="true"/>
+                </action>
+                <separator/>
             </group>
             <add-to-group group-id="EditorPopupMenu1" anchor="first"/>
             <separator/>
@@ -131,6 +154,9 @@
             <action
               id="CodeGPT.ModifySelectionAction"
               class="ee.carlrobert.codegpt.actions.editor.EditCodeAction" />
+            <action
+              id="CodeGPT.AddSelectionToContextAction"
+              class="ee.carlrobert.codegpt.actions.editor.AddSelectionToContextAction" />
             <add-to-group
               group-id="Floating.CodeToolbar"
               relative-to-action="ProjectViewPopupMenuRefactoringGroup"

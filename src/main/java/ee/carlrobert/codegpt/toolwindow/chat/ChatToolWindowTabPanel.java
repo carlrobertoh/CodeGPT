@@ -7,6 +7,7 @@ import static java.lang.String.format;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.editor.SelectionModel;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
 import com.intellij.util.ui.JBUI;
@@ -30,6 +31,8 @@ import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.TotalTokensPanel;
 import ee.carlrobert.codegpt.toolwindow.ui.ChatToolWindowLandingPanel;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.codegpt.ui.textarea.AppliedActionInlay;
+import ee.carlrobert.codegpt.ui.textarea.AppliedCodeActionInlay;
+import ee.carlrobert.codegpt.ui.textarea.AppliedSuggestionActionInlay;
 import ee.carlrobert.codegpt.ui.textarea.UserInputPanel;
 import ee.carlrobert.codegpt.ui.textarea.suggestion.item.CreateDocumentationActionItem;
 import ee.carlrobert.codegpt.ui.textarea.suggestion.item.DocumentationActionItem;
@@ -266,7 +269,7 @@ public class ChatToolWindowTabPanel implements Disposable {
     requestHandler.call(callParameters);
   }
 
-  private Unit handleSubmit(String text, List<AppliedActionInlay> appliedInlayActions) {
+  private Unit handleSubmit(String text, List<? extends AppliedActionInlay> appliedInlayActions) {
     var message = new Message(text);
     var editor = EditorUtil.getSelectedEditor(project);
     String highlightedText = null;
@@ -281,24 +284,48 @@ public class ChatToolWindowTabPanel implements Disposable {
       }
     }
     message.setUserMessage(text);
-    message.setWebSearchIncluded(appliedInlayActions.stream()
-        .anyMatch(it -> it.getSuggestion() instanceof WebSearchActionItem));
 
-    var addedDocumentation = CodeGPTKeys.ADDED_DOCUMENTATION.get(project);
-    var appliedInlayExists = appliedInlayActions.stream()
-        .anyMatch(it -> it.getSuggestion() instanceof DocumentationActionItem
-            || it.getSuggestion() instanceof CreateDocumentationActionItem);
-    if (addedDocumentation != null && appliedInlayExists) {
-      message.setDocumentationDetails(addedDocumentation);
-      CodeGPTKeys.ADDED_DOCUMENTATION.set(project, null);
-    }
+    if (appliedInlayActions.stream().anyMatch(it -> it instanceof AppliedSuggestionActionInlay)) {
+      message.setWebSearchIncluded(appliedInlayActions.stream()
+          .anyMatch(
+              it -> ((AppliedSuggestionActionInlay) it).getSuggestion() instanceof WebSearchActionItem));
 
-    var addedPersona = CodeGPTKeys.ADDED_PERSONA.get(project);
-    var personaInlayExists = appliedInlayActions.stream()
-        .anyMatch(it -> it.getSuggestion() instanceof PersonaActionItem);
-    if (addedPersona != null && personaInlayExists) {
-      message.setPersonaDetails(addedPersona);
-      CodeGPTKeys.ADDED_PERSONA.set(project, null);
+      var addedDocumentation = CodeGPTKeys.ADDED_DOCUMENTATION.get(project);
+      var appliedInlayExists = appliedInlayActions.stream()
+          .anyMatch(it ->
+              ((AppliedSuggestionActionInlay) it).getSuggestion() instanceof DocumentationActionItem
+                  || ((AppliedSuggestionActionInlay) it).getSuggestion() instanceof CreateDocumentationActionItem);
+      if (addedDocumentation != null && appliedInlayExists) {
+        message.setDocumentationDetails(addedDocumentation);
+        CodeGPTKeys.ADDED_DOCUMENTATION.set(project, null);
+      }
+
+      var addedPersona = CodeGPTKeys.ADDED_PERSONA.get(project);
+      var personaInlayExists = appliedInlayActions.stream()
+          .anyMatch(
+              it -> ((AppliedSuggestionActionInlay) it).getSuggestion() instanceof PersonaActionItem);
+      if (addedPersona != null && personaInlayExists) {
+        message.setPersonaDetails(addedPersona);
+        CodeGPTKeys.ADDED_PERSONA.set(project, null);
+      }
+    } else if (appliedInlayActions.stream().anyMatch(it -> it instanceof AppliedCodeActionInlay)) {
+      var stringBuilder = new StringBuilder(text);
+      var resultStringBuilder = new StringBuilder();
+      for (var actionInlay : appliedInlayActions) {
+        var inlayOffset = actionInlay.getInlay().getOffset();
+        var code = ((AppliedCodeActionInlay) actionInlay).getCode();
+        var fileExtension = FileUtil.getFileExtension(editor.getVirtualFile().getName());
+        resultStringBuilder.append(
+            stringBuilder.substring(0, Math.min(stringBuilder.length(), inlayOffset)) + '\n' + """
+                ```%s
+                %s
+                ```
+                """.formatted(fileExtension, code));
+        stringBuilder.delete(0, inlayOffset);
+      }
+
+      message.setUserMessage(resultStringBuilder.toString());
+      message.setPrompt(resultStringBuilder.toString());
     }
 
     sendMessage(message, ConversationType.DEFAULT, highlightedText);
@@ -374,5 +401,9 @@ public class ChatToolWindowTabPanel implements Disposable {
         BorderLayout.CENTER);
     rootPanel.add(createUserPromptPanel(), BorderLayout.SOUTH);
     return rootPanel;
+  }
+
+  public void addSelection(String fileName, SelectionModel selectionModel) {
+    userInputPanel.addSelection(fileName, selectionModel);
   }
 }

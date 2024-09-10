@@ -50,6 +50,10 @@ public final class ChatToolWindowContentManager {
         .sendMessage(message, conversationType);
   }
 
+  public Optional<ChatToolWindowTabPanel> tryFindActiveChatTabPanel() {
+    return tryFindChatTabbedPane().flatMap(ChatToolWindowTabbedPane::tryFindActiveTabPanel);
+  }
+
   public void displayConversation(@NotNull Conversation conversation) {
     displayChatTab();
     tryFindChatTabbedPane()
