@@ -26,8 +26,9 @@ class CodeGPTServiceForm {
 
     private val chatCompletionModelComboBox =
         ComboBox(ListComboBoxModel(CodeGPTAvailableModels.ALL_CHAT_MODELS)).apply {
-            selectedItem =
-                CodeGPTAvailableModels.findByCode(service<CodeGPTServiceSettings>().state.chatCompletionSettings.model)
+            val chatModel = service<CodeGPTServiceSettings>().state.chatCompletionSettings.model
+            selectedItem = CodeGPTAvailableModels.findByCode(chatModel)
+                ?: CodeGPTAvailableModels.BASE_CHAT_MODELS[0]
             renderer = CustomComboBoxRenderer()
         }
 
@@ -38,8 +39,9 @@ class CodeGPTServiceForm {
 
     private val codeCompletionModelComboBox =
         ComboBox(ListComboBoxModel(CodeGPTAvailableModels.CODE_MODELS)).apply {
-            selectedItem =
-                CodeGPTAvailableModels.findByCode(service<CodeGPTServiceSettings>().state.codeCompletionSettings.model)
+            val codeModel = service<CodeGPTServiceSettings>().state.codeCompletionSettings.model
+            selectedItem = CodeGPTAvailableModels.findByCode(codeModel)
+                ?: CodeGPTAvailableModels.CODE_MODELS[0]
             renderer = CustomComboBoxRenderer()
         }
 
