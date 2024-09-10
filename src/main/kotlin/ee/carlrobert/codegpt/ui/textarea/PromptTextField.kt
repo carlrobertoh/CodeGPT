@@ -15,6 +15,7 @@ import com.intellij.ui.EditorTextField
 import com.intellij.ui.JBColor
 import com.intellij.util.ui.JBUI
 import ee.carlrobert.codegpt.CodeGPTBundle
+import ee.carlrobert.codegpt.CodeGPTKeys.IS_PROMPT_TEXT_FIELD_DOCUMENT
 import ee.carlrobert.codegpt.ui.textarea.suggestion.SuggestionsPopupManager
 import ee.carlrobert.codegpt.ui.textarea.suggestion.item.SuggestionActionItem
 import ee.carlrobert.codegpt.ui.textarea.suggestion.item.SuggestionItem
@@ -49,6 +50,7 @@ class PromptTextField(
         background = JBColor.background()
         minimumSize = Dimension(100, 40)
         document.addDocumentListener(getDocumentListener(onTextChanged))
+        IS_PROMPT_TEXT_FIELD_DOCUMENT.set(document, true)
         setPlaceholder(CodeGPTBundle.get("toolwindow.chat.textArea.emptyText"))
         IdeEventQueue.getInstance().addDispatcher(
             PromptTextFieldEventDispatcher(this, suggestionsPopupManager, appliedInlays) {

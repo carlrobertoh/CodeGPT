@@ -26,4 +26,6 @@ public class CodeGPTKeys {
       Key.create("codegpt.addedDocumentation");
   public static final Key<PersonaDetails> ADDED_PERSONA =
       Key.create("codegpt.addedPersona");
+  public static final Key<Boolean> IS_PROMPT_TEXT_FIELD_DOCUMENT =
+      Key.create("codegpt.isPromptTextFieldDocument");
 }
