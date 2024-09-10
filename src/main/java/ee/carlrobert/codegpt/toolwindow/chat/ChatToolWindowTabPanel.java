@@ -7,6 +7,8 @@ import static java.lang.String.format;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.SelectionModel;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
 import com.intellij.util.ui.JBUI;
@@ -30,6 +32,8 @@ import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.TotalTokensPanel;
 import ee.carlrobert.codegpt.toolwindow.ui.ChatToolWindowLandingPanel;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.codegpt.ui.textarea.AppliedActionInlay;
+import ee.carlrobert.codegpt.ui.textarea.AppliedCodeActionInlay;
+import ee.carlrobert.codegpt.ui.textarea.AppliedSuggestionActionInlay;
 import ee.carlrobert.codegpt.ui.textarea.UserInputPanel;
 import ee.carlrobert.codegpt.ui.textarea.suggestion.item.CreateDocumentationActionItem;
 import ee.carlrobert.codegpt.ui.textarea.suggestion.item.DocumentationActionItem;
@@ -266,7 +270,7 @@ public class ChatToolWindowTabPanel implements Disposable {
     requestHandler.call(callParameters);
   }
 
-  private Unit handleSubmit(String text, List<AppliedActionInlay> appliedInlayActions) {
+  private Unit handleSubmit(String text, List<? extends AppliedActionInlay> appliedInlayActions) {
     var message = new Message(text);
     var editor = EditorUtil.getSelectedEditor(project);
     String highlightedText = null;
@@ -281,28 +285,107 @@ public class ChatToolWindowTabPanel implements Disposable {
       }
     }
     message.setUserMessage(text);
-    message.setWebSearchIncluded(appliedInlayActions.stream()
-        .anyMatch(it -> it.getSuggestion() instanceof WebSearchActionItem));
+    processAppliedInlayActions(message, appliedInlayActions, text, editor);
+    sendMessage(message, ConversationType.DEFAULT, highlightedText);
+    return Unit.INSTANCE;
+  }
 
+  private void processAppliedInlayActions(
+      Message message,
+      List<? extends AppliedActionInlay> appliedInlayActions,
+      String text,
+      Editor editor) {
+    for (var action : appliedInlayActions) {
+      if (action instanceof AppliedSuggestionActionInlay) {
+        processSuggestionActions(
+            message,
+            filterActions(appliedInlayActions, AppliedSuggestionActionInlay.class));
+      } else if (action instanceof AppliedCodeActionInlay) {
+        processCodeActions(
+            message,
+            filterActions(appliedInlayActions, AppliedCodeActionInlay.class),
+            text,
+            editor);
+      }
+    }
+  }
+
+  private <T extends AppliedActionInlay> List<T> filterActions(
+      List<? extends AppliedActionInlay> actions,
+      Class<T> actionClass) {
+    return actions.stream()
+        .filter(actionClass::isInstance)
+        .map(actionClass::cast)
+        .toList();
+  }
+
+  private boolean containsWebSearchActionInlay(List<AppliedSuggestionActionInlay> actions) {
+    return actions.stream().anyMatch(it -> it.getSuggestion() instanceof WebSearchActionItem);
+  }
+
+  private void processSuggestionActions(
+      Message message,
+      List<AppliedSuggestionActionInlay> actions) {
+    message.setWebSearchIncluded(containsWebSearchActionInlay(actions));
+    processDocumentationAction(message, actions);
+    processPersonaAction(message, actions);
+  }
+
+  private void processDocumentationAction(
+      Message message,
+      List<AppliedSuggestionActionInlay> actions) {
     var addedDocumentation = CodeGPTKeys.ADDED_DOCUMENTATION.get(project);
-    var appliedInlayExists = appliedInlayActions.stream()
-        .anyMatch(it -> it.getSuggestion() instanceof DocumentationActionItem
-            || it.getSuggestion() instanceof CreateDocumentationActionItem);
+    var appliedInlayExists = actions.stream().anyMatch(it -> {
+      var suggestion = it.getSuggestion();
+      return suggestion instanceof DocumentationActionItem
+          || suggestion instanceof CreateDocumentationActionItem;
+    });
+
     if (addedDocumentation != null && appliedInlayExists) {
       message.setDocumentationDetails(addedDocumentation);
       CodeGPTKeys.ADDED_DOCUMENTATION.set(project, null);
     }
+  }
 
+  private void processPersonaAction(Message message, List<AppliedSuggestionActionInlay> actions) {
     var addedPersona = CodeGPTKeys.ADDED_PERSONA.get(project);
-    var personaInlayExists = appliedInlayActions.stream()
+    var personaInlayExists = actions.stream()
         .anyMatch(it -> it.getSuggestion() instanceof PersonaActionItem);
+
     if (addedPersona != null && personaInlayExists) {
       message.setPersonaDetails(addedPersona);
       CodeGPTKeys.ADDED_PERSONA.set(project, null);
     }
+  }
 
-    sendMessage(message, ConversationType.DEFAULT, highlightedText);
-    return Unit.INSTANCE;
+  private void processCodeActions(Message message, List<AppliedCodeActionInlay> actions,
+      String text, Editor editor) {
+    var stringBuilder = new StringBuilder(text);
+    var resultStringBuilder = new StringBuilder();
+    int lastProcessedIndex = 0;
+
+    for (var actionInlay : actions) {
+      var inlayOffset = actionInlay.getInlay().getOffset();
+      var fileExtension = FileUtil.getFileExtension(editor.getVirtualFile().getName());
+
+      resultStringBuilder
+          .append(stringBuilder, lastProcessedIndex, Math.min(stringBuilder.length(), inlayOffset))
+          .append('\n')
+          .append(formatCodeBlock(fileExtension, actionInlay.getCode()))
+          .append('\n');
+
+      lastProcessedIndex = inlayOffset;
+    }
+
+    resultStringBuilder.append(stringBuilder, lastProcessedIndex, stringBuilder.length());
+
+    var result = resultStringBuilder.toString();
+    message.setUserMessage(result);
+    message.setPrompt(result);
+  }
+
+  private String formatCodeBlock(String fileExtension, String code) {
+    return String.format("```%s\n%s\n```", fileExtension, code);
   }
 
   private Unit handleCancel() {
@@ -374,5 +457,9 @@ public class ChatToolWindowTabPanel implements Disposable {
         BorderLayout.CENTER);
     rootPanel.add(createUserPromptPanel(), BorderLayout.SOUTH);
     return rootPanel;
+  }
+
+  public void addSelection(String fileName, SelectionModel selectionModel) {
+    userInputPanel.addSelection(fileName, selectionModel);
   }
 }

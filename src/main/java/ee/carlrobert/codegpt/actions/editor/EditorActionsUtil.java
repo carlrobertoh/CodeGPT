@@ -43,14 +43,9 @@ public class EditorActionsUtil {
 
   public static void refreshActions() {
     AnAction actionGroup =
-        ActionManager.getInstance().getAction("action.editor.group.EditorActionGroup");
+        ActionManager.getInstance().getAction("CodeGPT.MyEditorActionsGroup");
     if (actionGroup instanceof DefaultActionGroup group) {
       group.removeAll();
-      group.add(new AskAction());
-      group.add(new EditCodeAction(Actions.EditSource));
-      group.add(new CustomPromptAction());
-      group.addSeparator();
-
       var configuredActions = ConfigurationSettings.getState().getTableData();
       configuredActions.forEach((label, prompt) -> {
         // using label as action description to prevent com.intellij.diagnostic.PluginException
@@ -77,8 +72,6 @@ public class EditorActionsUtil {
         };
         group.add(action);
       });
-      group.addSeparator();
-      group.add(new IncludeFilesInContextAction("action.includeFileInContext.title"));
     }
   }
 

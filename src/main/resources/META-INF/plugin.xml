@@ -101,6 +101,43 @@
                 class="com.intellij.openapi.actionSystem.DefaultActionGroup"
                 popup="true"
                 icon="ee.carlrobert.codegpt.Icons.DefaultSmall">
+                <action
+                  id="CodeGPT.NewChat"
+                  class="ee.carlrobert.codegpt.actions.editor.OpenNewChatAction"
+                  text="New Chat"
+                  description="Creates a new chat session">
+                    <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt shift N" replace-all="true"/>
+                </action>
+                <action
+                  id="CodeGPT.AddSelectionToContext"
+                  class="ee.carlrobert.codegpt.actions.editor.AddSelectionToContextAction"
+                  text="Include Selection in Prompt"
+                  description="Adds the selected text to the CodeGPT context">
+                    <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift I" replace-all="true"/>
+                </action>
+                <action
+                  id="CodeGPT.EditCode"
+                  text="Edit Code"
+                  class="ee.carlrobert.codegpt.actions.editor.EditCodeAction">
+                    <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift K" replace-all="true"/>
+                </action>
+                <action
+                  id="CodeGPT.IncludeFileInContext"
+                  text="Include File In Prompt"
+                  class="ee.carlrobert.codegpt.actions.IncludeFilesInContextAction">
+                    <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt shift F" replace-all="true"/>
+                </action>
+                <action
+                  id="CodeGPT.AskQuestion"
+                  text="Ask Question"
+                  class="ee.carlrobert.codegpt.actions.editor.AskQuestionAction">
+                    <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt shift Q" replace-all="true"/>
+                </action>
+                <separator/>
+                <group id="CodeGPT.MyEditorActionsGroup"
+                  text="My Actions"
+                  class="com.intellij.openapi.actionSystem.DefaultActionGroup">
+                </group>
             </group>
             <add-to-group group-id="EditorPopupMenu1" anchor="first"/>
             <separator/>
@@ -118,6 +155,7 @@
               icon="ee.carlrobert.codegpt.Icons.DefaultSmall">
                 <action
                   id="CodeGPT.IncludeFilesInContextAction"
+                  text="Include Files In Prompt"
                   class="ee.carlrobert.codegpt.actions.IncludeFilesInContextAction" />
             </group>
             <add-to-group
@@ -130,7 +168,16 @@
         <group id="CodeGPT.FloatingCodeToolbarMenuRootGroup">
             <action
               id="CodeGPT.ModifySelectionAction"
-              class="ee.carlrobert.codegpt.actions.editor.EditCodeAction" />
+              text="CodeGPT: Edit Code"
+              class="ee.carlrobert.codegpt.actions.editor.EditCodeAction">
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift K" replace-all="true"/>
+            </action>
+            <action
+              id="CodeGPT.AddSelectionToContextAction"
+              text="CodeGPT: Include Selection in Prompt"
+              class="ee.carlrobert.codegpt.actions.editor.AddSelectionToContextAction">
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift I" replace-all="true"/>
+            </action>
             <add-to-group
               group-id="Floating.CodeToolbar"
               relative-to-action="ProjectViewPopupMenuRefactoringGroup"
