@@ -16,7 +16,7 @@ class EditCodeAction : BaseEditorAction {
     constructor() : this(Icons.Sparkle)
 
     constructor(icon: Icon) : super(
-        "CodeGPT: Edit Code",
+        "Edit Code",
         "Allow LLM to edit code directly in your editor",
         icon
     ) {

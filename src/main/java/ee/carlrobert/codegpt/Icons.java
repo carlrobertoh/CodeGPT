@@ -11,8 +11,6 @@ public final class Icons {
       IconLoader.getIcon("/icons/codegpt-small.svg", Icons.class);
   public static final Icon CodeGPTModel =
       IconLoader.getIcon("/icons/codegpt-model.svg", Icons.class);
-  public static final Icon CodeSpan =
-      IconLoader.getIcon("/icons/codeSpan.svg", Icons.class);
   public static final Icon Anthropic = IconLoader.getIcon("/icons/anthropic.svg", Icons.class);
   public static final Icon Azure = IconLoader.getIcon("/icons/azure.svg", Icons.class);
   public static final Icon Databricks = IconLoader.getIcon("/icons/dbrx.svg", Icons.class);

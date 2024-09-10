@@ -45,12 +45,12 @@ public class EditorActionsUtil {
     AnAction actionGroup =
         ActionManager.getInstance().getAction("action.editor.group.EditorActionGroup");
     if (actionGroup instanceof DefaultActionGroup group) {
-      // group.removeAll();
-     /* group.add(new AskAction());
-      group.add(new EditCodeAction(Actions.EditSource));
+      group.removeAll();
+      group.add(new AskAction());
       group.add(new AddSelectionToContextAction());
-      group.add(new CustomPromptAction());*/
-      // group.addSeparator();
+      group.add(new EditCodeAction(Actions.EditSource));
+      group.add(new CustomPromptAction());
+      group.addSeparator();
 
       var configuredActions = ConfigurationSettings.getState().getTableData();
       configuredActions.forEach((label, prompt) -> {
@@ -76,10 +76,10 @@ public class EditorActionsUtil {
             toolWindowContentManager.sendMessage(message);
           }
         };
-        // group.add(action);
+        group.add(action);
       });
-      // group.addSeparator();
-      // group.add(new IncludeFilesInContextAction("action.includeFileInContext.title"));
+      group.addSeparator();
+      group.add(new IncludeFilesInContextAction("action.includeFileInContext.title"));
     }
   }
 

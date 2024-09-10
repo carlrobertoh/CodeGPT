@@ -1,15 +1,11 @@
 package ee.carlrobert.codegpt.actions.editor
 
 import com.intellij.icons.AllIcons
-import com.intellij.openapi.actionSystem.CustomShortcutSet
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowContentManager
-import java.awt.event.InputEvent
-import java.awt.event.KeyEvent
 import javax.swing.Icon
-import javax.swing.KeyStroke
 
 class AddSelectionToContextAction : BaseEditorAction {
 
@@ -20,14 +16,6 @@ class AddSelectionToContextAction : BaseEditorAction {
         "Adds the current selection to the chat context for generating code",
         icon
     ) {
-        registerCustomShortcutSet(
-            CustomShortcutSet(
-                KeyStroke.getKeyStroke(
-                    KeyEvent.VK_I,
-                    InputEvent.SHIFT_DOWN_MASK or InputEvent.META_DOWN_MASK
-                )
-            ), null
-        )
         EditorActionsUtil.registerAction(this)
     }
 
@@ -37,6 +25,5 @@ class AddSelectionToContextAction : BaseEditorAction {
             .tryFindActiveChatTabPanel()
             .orElseThrow()
         chatTabPanel.addSelection(editor.virtualFile.name, editor.selectionModel)
-
     }
 }
