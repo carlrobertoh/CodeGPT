@@ -7,6 +7,7 @@ import static java.lang.String.format;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.SelectionModel;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
@@ -284,54 +285,103 @@ public class ChatToolWindowTabPanel implements Disposable {
       }
     }
     message.setUserMessage(text);
-
-    if (appliedInlayActions.stream().anyMatch(it -> it instanceof AppliedSuggestionActionInlay)) {
-      message.setWebSearchIncluded(appliedInlayActions.stream()
-          .anyMatch(it -> ((AppliedSuggestionActionInlay) it).getSuggestion()
-              instanceof WebSearchActionItem));
-
-      var addedDocumentation = CodeGPTKeys.ADDED_DOCUMENTATION.get(project);
-      var appliedInlayExists = appliedInlayActions.stream()
-          .anyMatch(it ->
-              ((AppliedSuggestionActionInlay) it).getSuggestion() instanceof DocumentationActionItem
-                  || ((AppliedSuggestionActionInlay) it).getSuggestion()
-                  instanceof CreateDocumentationActionItem);
-      if (addedDocumentation != null && appliedInlayExists) {
-        message.setDocumentationDetails(addedDocumentation);
-        CodeGPTKeys.ADDED_DOCUMENTATION.set(project, null);
-      }
-
-      var addedPersona = CodeGPTKeys.ADDED_PERSONA.get(project);
-      var personaInlayExists = appliedInlayActions.stream()
-          .anyMatch(
-              it -> ((AppliedSuggestionActionInlay) it).getSuggestion()
-                  instanceof PersonaActionItem);
-      if (addedPersona != null && personaInlayExists) {
-        message.setPersonaDetails(addedPersona);
-        CodeGPTKeys.ADDED_PERSONA.set(project, null);
-      }
-    } else if (appliedInlayActions.stream().anyMatch(it -> it instanceof AppliedCodeActionInlay)) {
-      var stringBuilder = new StringBuilder(text);
-      var resultStringBuilder = new StringBuilder();
-      for (var actionInlay : appliedInlayActions) {
-        var inlayOffset = actionInlay.getInlay().getOffset();
-        var code = ((AppliedCodeActionInlay) actionInlay).getCode();
-        var fileExtension = FileUtil.getFileExtension(editor.getVirtualFile().getName());
-        resultStringBuilder.append(
-            stringBuilder.substring(0, Math.min(stringBuilder.length(), inlayOffset)) + '\n' + """
-                ```%s
-                %s
-                ```
-                """.formatted(fileExtension, code));
-        stringBuilder.delete(0, inlayOffset);
-      }
-
-      message.setUserMessage(resultStringBuilder.toString());
-      message.setPrompt(resultStringBuilder.toString());
-    }
-
+    processAppliedInlayActions(message, appliedInlayActions, text, editor);
     sendMessage(message, ConversationType.DEFAULT, highlightedText);
     return Unit.INSTANCE;
+  }
+
+  private void processAppliedInlayActions(
+      Message message,
+      List<? extends AppliedActionInlay> appliedInlayActions,
+      String text,
+      Editor editor) {
+    if (containsSuggestionActionInlay(appliedInlayActions)) {
+      processSuggestionActions(message, appliedInlayActions);
+    } else if (containsCodeActionInlay(appliedInlayActions)) {
+      processCodeActions(message, appliedInlayActions, text, editor);
+    }
+  }
+
+  private boolean containsSuggestionActionInlay(List<? extends AppliedActionInlay> actions) {
+    return actions.stream().anyMatch(it -> it instanceof AppliedSuggestionActionInlay);
+  }
+
+  private boolean containsCodeActionInlay(List<? extends AppliedActionInlay> actions) {
+    return actions.stream().anyMatch(it -> it instanceof AppliedCodeActionInlay);
+  }
+
+  private boolean containsWebSearchActionInlay(List<? extends AppliedActionInlay> actions) {
+    return actions.stream()
+        .filter(AppliedSuggestionActionInlay.class::isInstance)
+        .map(AppliedSuggestionActionInlay.class::cast)
+        .anyMatch(it -> it.getSuggestion() instanceof WebSearchActionItem);
+  }
+
+  private void processSuggestionActions(
+      Message message,
+      List<? extends AppliedActionInlay> actions) {
+    message.setWebSearchIncluded(containsWebSearchActionInlay(actions));
+    processDocumentationAction(message, actions);
+    processPersonaAction(message, actions);
+  }
+
+  private void processDocumentationAction(Message message,
+      List<? extends AppliedActionInlay> actions) {
+    var addedDocumentation = CodeGPTKeys.ADDED_DOCUMENTATION.get(project);
+    var appliedInlayExists = actions.stream()
+        .anyMatch(it -> {
+          var suggestion = ((AppliedSuggestionActionInlay) it).getSuggestion();
+          return suggestion instanceof DocumentationActionItem
+              || suggestion instanceof CreateDocumentationActionItem;
+        });
+
+    if (addedDocumentation != null && appliedInlayExists) {
+      message.setDocumentationDetails(addedDocumentation);
+      CodeGPTKeys.ADDED_DOCUMENTATION.set(project, null);
+    }
+  }
+
+  private void processPersonaAction(Message message, List<? extends AppliedActionInlay> actions) {
+    var addedPersona = CodeGPTKeys.ADDED_PERSONA.get(project);
+    var personaInlayExists = actions.stream()
+        .anyMatch(
+            it -> ((AppliedSuggestionActionInlay) it).getSuggestion() instanceof PersonaActionItem);
+
+    if (addedPersona != null && personaInlayExists) {
+      message.setPersonaDetails(addedPersona);
+      CodeGPTKeys.ADDED_PERSONA.set(project, null);
+    }
+  }
+
+  private void processCodeActions(Message message, List<? extends AppliedActionInlay> actions,
+      String text, Editor editor) {
+    var stringBuilder = new StringBuilder(text);
+    var resultStringBuilder = new StringBuilder();
+    int lastProcessedIndex = 0;
+
+    for (var actionInlay : actions) {
+      var inlayOffset = actionInlay.getInlay().getOffset();
+      var code = ((AppliedCodeActionInlay) actionInlay).getCode();
+      var fileExtension = FileUtil.getFileExtension(editor.getVirtualFile().getName());
+
+      resultStringBuilder
+          .append(stringBuilder, lastProcessedIndex, Math.min(stringBuilder.length(), inlayOffset))
+          .append('\n')
+          .append(formatCodeBlock(fileExtension, code))
+          .append('\n');
+
+      lastProcessedIndex = inlayOffset;
+    }
+
+    resultStringBuilder.append(stringBuilder, lastProcessedIndex, stringBuilder.length());
+
+    var result = resultStringBuilder.toString();
+    message.setUserMessage(result);
+    message.setPrompt(result);
+  }
+
+  private String formatCodeBlock(String fileExtension, String code) {
+    return String.format("```%s\n%s\n```", fileExtension, code);
   }
 
   private Unit handleCancel() {
