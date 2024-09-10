@@ -19,6 +19,7 @@ import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vcs.FilePath;
 import com.intellij.openapi.vcs.VcsDataKeys;
+import com.intellij.openapi.vcs.VcsException;
 import com.intellij.openapi.vcs.changes.Change;
 import com.intellij.openapi.vcs.changes.ui.ChangesBrowserBase;
 import com.intellij.openapi.vcs.changes.ui.CommitDialogChangesBrowser;
@@ -30,16 +31,14 @@ import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.completions.CompletionRequestService;
 import ee.carlrobert.codegpt.settings.configuration.CommitMessageTemplate;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
+import ee.carlrobert.codegpt.util.GitUtil;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.completion.CompletionEventListener;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.AbstractMap;
-import java.util.ArrayList;
+import git4idea.repo.GitRepositoryManager;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import okhttp3.sse.EventSource;
@@ -78,7 +77,8 @@ public class GenerateGitCommitMessageAction extends AnAction {
       return;
     }
 
-    var gitDiff = getGitDiff(
+    var gitDiff = getDiff(
+        event,
         project,
         getIncludedChangesFilePaths(event),
         getIncludedUnversionedFilePaths(event));
@@ -103,6 +103,44 @@ public class GenerateGitCommitMessageAction extends AnAction {
   @Override
   public @NotNull ActionUpdateThread getActionUpdateThread() {
     return ActionUpdateThread.EDT;
+  }
+
+  private String getDiff(
+      AnActionEvent event,
+      Project project,
+      List<String> includedChangesFilePaths,
+      List<String> includedUnversionedFilePaths) {
+    try {
+      return ApplicationManager.getApplication().executeOnPooledThread(() -> {
+        try {
+          var repository = GitRepositoryManager.getInstance(project)
+              .getRepositoryForFile(project.getWorkspaceFile());
+          if (repository == null) {
+            return "";
+          }
+
+          var stagedGitDiff = String.join("\n", GitUtil.getStagedDiff(
+              project,
+              repository,
+              includedChangesFilePaths));
+          var unstagedGitDiff = String.join("\n", GitUtil.getUnstagedDiff(
+              project,
+              repository,
+              includedUnversionedFilePaths));
+          return Map.of(
+                  "Unstaged git diff", unstagedGitDiff,
+                  "Staged git diff", stagedGitDiff)
+              .entrySet().stream()
+              .filter(entry -> !entry.getValue().isEmpty())
+              .map(entry -> "%s:%n%s".formatted(entry.getKey(), entry.getValue()))
+              .collect(joining("\n\n"));
+        } catch (VcsException e) {
+          throw new RuntimeException("Unable to get staged diff", e);
+        }
+      }).get();
+    } catch (InterruptedException | ExecutionException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   private CompletionEventListener<String> getEventListener(
@@ -137,42 +175,6 @@ public class GenerateGitCommitMessageAction extends AnAction {
         event.getData(VcsDataKeys.COMMIT_MESSAGE_CONTROL),
         CommitMessage.class);
     return commitMessage != null ? commitMessage.getEditorField().getEditor() : null;
-  }
-
-  private String getGitDiff(
-      Project project,
-      List<String> includedChangesFilePaths,
-      List<String> includedUnversionedFilePaths) {
-    return Stream.of(
-            new AbstractMap.SimpleEntry<>(includedChangesFilePaths, true),
-            new AbstractMap.SimpleEntry<>(includedUnversionedFilePaths, false))
-        .filter(entry -> !entry.getKey().isEmpty())
-        .map(entry -> {
-          var process =
-              createGitDiffProcess(project.getBasePath(), entry.getKey(), entry.getValue());
-          return new BufferedReader(new InputStreamReader(process.getInputStream()))
-              .lines()
-              .collect(joining("\n"));
-        })
-        .collect(joining("\n"));
-  }
-
-  private Process createGitDiffProcess(String projectPath, List<String> filePaths, boolean cached) {
-    var command = new ArrayList<String>();
-    command.add("git");
-    command.add("diff");
-    if (cached) {
-      command.add("--cached");
-    }
-    command.addAll(filePaths);
-
-    var processBuilder = new ProcessBuilder(command);
-    processBuilder.directory(new File(projectPath));
-    try {
-      return processBuilder.start();
-    } catch (IOException ex) {
-      throw new RuntimeException("Unable to start git diff process", ex);
-    }
   }
 
   private @NotNull List<String> getFilePaths(
