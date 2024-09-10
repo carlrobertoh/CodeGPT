@@ -6,7 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [2.11.0-233] - 2024-09-05
+### Added
+
+- Quick code snippet referencing in prompts [#690](https://github.com/carlrobertoh/CodeGPT/issues/690)
+- Name suggestions for languages other than Java [#615](https://github.com/carlrobertoh/CodeGPT/issues/615)
+
+### Fixed
+
+- Prompt text field persona suggestions [#685](https://github.com/carlrobertoh/CodeGPT/issues/685)
+- Git commit dialog selected changes not being included in diff
+
+## [2.11.0-241.1] - 2024-09-05
 
 ### Added
 
