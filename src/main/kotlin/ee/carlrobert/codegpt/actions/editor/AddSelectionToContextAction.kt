@@ -5,15 +5,8 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowContentManager
-import javax.swing.Icon
 
-class AddSelectionToContextAction : BaseEditorAction {
-
-    constructor() : this(AllIcons.General.Add)
-
-    constructor(icon: Icon) : super(icon) {
-        EditorActionsUtil.registerAction(this)
-    }
+class AddSelectionToContextAction : BaseEditorAction(AllIcons.General.Add) {
 
     override fun actionPerformed(project: Project, editor: Editor, selectedText: String) {
         val chatToolWindowContentManager = project.service<ChatToolWindowContentManager>()

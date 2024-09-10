@@ -27,7 +27,7 @@ class CodePreviewTooltipContent(
     fileContent: String
 ) : JPanel() {
 
-    private val fileType = FileTypeManager.getInstance().getFileTypeByFileName(fileName)
+    private val fileType = service<FileTypeManager>().getFileTypeByFileName(fileName)
     private val editor: EditorEx
 
     init {
