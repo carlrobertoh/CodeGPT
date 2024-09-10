@@ -149,8 +149,10 @@ class PromptTextField(
     }
 
     private fun clear() {
-        runInEdt { text = "" }
-        clearInlays()
+        runInEdt {
+            text = ""
+            clearInlays()
+        }
     }
 
     private fun clearInlays() {

@@ -295,45 +295,51 @@ public class ChatToolWindowTabPanel implements Disposable {
       List<? extends AppliedActionInlay> appliedInlayActions,
       String text,
       Editor editor) {
-    if (containsSuggestionActionInlay(appliedInlayActions)) {
-      processSuggestionActions(message, appliedInlayActions);
-    } else if (containsCodeActionInlay(appliedInlayActions)) {
-      processCodeActions(message, appliedInlayActions, text, editor);
+    for (var action : appliedInlayActions) {
+      if (action instanceof AppliedSuggestionActionInlay) {
+        processSuggestionActions(
+            message,
+            filterActions(appliedInlayActions, AppliedSuggestionActionInlay.class));
+      } else if (action instanceof AppliedCodeActionInlay) {
+        processCodeActions(
+            message,
+            filterActions(appliedInlayActions, AppliedCodeActionInlay.class),
+            text,
+            editor);
+      }
     }
   }
 
-  private boolean containsSuggestionActionInlay(List<? extends AppliedActionInlay> actions) {
-    return actions.stream().anyMatch(it -> it instanceof AppliedSuggestionActionInlay);
-  }
-
-  private boolean containsCodeActionInlay(List<? extends AppliedActionInlay> actions) {
-    return actions.stream().anyMatch(it -> it instanceof AppliedCodeActionInlay);
-  }
-
-  private boolean containsWebSearchActionInlay(List<? extends AppliedActionInlay> actions) {
+  private <T extends AppliedActionInlay> List<T> filterActions(
+      List<? extends AppliedActionInlay> actions,
+      Class<T> actionClass) {
     return actions.stream()
-        .filter(AppliedSuggestionActionInlay.class::isInstance)
-        .map(AppliedSuggestionActionInlay.class::cast)
-        .anyMatch(it -> it.getSuggestion() instanceof WebSearchActionItem);
+        .filter(actionClass::isInstance)
+        .map(actionClass::cast)
+        .toList();
+  }
+
+  private boolean containsWebSearchActionInlay(List<AppliedSuggestionActionInlay> actions) {
+    return actions.stream().anyMatch(it -> it.getSuggestion() instanceof WebSearchActionItem);
   }
 
   private void processSuggestionActions(
       Message message,
-      List<? extends AppliedActionInlay> actions) {
+      List<AppliedSuggestionActionInlay> actions) {
     message.setWebSearchIncluded(containsWebSearchActionInlay(actions));
     processDocumentationAction(message, actions);
     processPersonaAction(message, actions);
   }
 
-  private void processDocumentationAction(Message message,
-      List<? extends AppliedActionInlay> actions) {
+  private void processDocumentationAction(
+      Message message,
+      List<AppliedSuggestionActionInlay> actions) {
     var addedDocumentation = CodeGPTKeys.ADDED_DOCUMENTATION.get(project);
-    var appliedInlayExists = actions.stream()
-        .anyMatch(it -> {
-          var suggestion = ((AppliedSuggestionActionInlay) it).getSuggestion();
-          return suggestion instanceof DocumentationActionItem
-              || suggestion instanceof CreateDocumentationActionItem;
-        });
+    var appliedInlayExists = actions.stream().anyMatch(it -> {
+      var suggestion = it.getSuggestion();
+      return suggestion instanceof DocumentationActionItem
+          || suggestion instanceof CreateDocumentationActionItem;
+    });
 
     if (addedDocumentation != null && appliedInlayExists) {
       message.setDocumentationDetails(addedDocumentation);
@@ -341,11 +347,10 @@ public class ChatToolWindowTabPanel implements Disposable {
     }
   }
 
-  private void processPersonaAction(Message message, List<? extends AppliedActionInlay> actions) {
+  private void processPersonaAction(Message message, List<AppliedSuggestionActionInlay> actions) {
     var addedPersona = CodeGPTKeys.ADDED_PERSONA.get(project);
     var personaInlayExists = actions.stream()
-        .anyMatch(
-            it -> ((AppliedSuggestionActionInlay) it).getSuggestion() instanceof PersonaActionItem);
+        .anyMatch(it -> it.getSuggestion() instanceof PersonaActionItem);
 
     if (addedPersona != null && personaInlayExists) {
       message.setPersonaDetails(addedPersona);
@@ -353,7 +358,7 @@ public class ChatToolWindowTabPanel implements Disposable {
     }
   }
 
-  private void processCodeActions(Message message, List<? extends AppliedActionInlay> actions,
+  private void processCodeActions(Message message, List<AppliedCodeActionInlay> actions,
       String text, Editor editor) {
     var stringBuilder = new StringBuilder(text);
     var resultStringBuilder = new StringBuilder();
@@ -361,13 +366,12 @@ public class ChatToolWindowTabPanel implements Disposable {
 
     for (var actionInlay : actions) {
       var inlayOffset = actionInlay.getInlay().getOffset();
-      var code = ((AppliedCodeActionInlay) actionInlay).getCode();
       var fileExtension = FileUtil.getFileExtension(editor.getVirtualFile().getName());
 
       resultStringBuilder
           .append(stringBuilder, lastProcessedIndex, Math.min(stringBuilder.length(), inlayOffset))
           .append('\n')
-          .append(formatCodeBlock(fileExtension, code))
+          .append(formatCodeBlock(fileExtension, actionInlay.getCode()))
           .append('\n');
 
       lastProcessedIndex = inlayOffset;

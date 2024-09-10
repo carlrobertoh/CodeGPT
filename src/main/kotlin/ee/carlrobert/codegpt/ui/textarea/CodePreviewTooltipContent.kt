@@ -39,8 +39,9 @@ class CodePreviewTooltipContent(
 
         add(editor.component, BorderLayout.CENTER)
 
+        // TODO
         val minHeight = 80
-        val contentHeight = calculateContentHeight(editor) + 56
+        val contentHeight = calculateContentHeight(editor) + 56 // Popup header height?
         val editorHeight = maxOf(minHeight, contentHeight)
 
         preferredSize = Dimension(400, editorHeight)
@@ -80,9 +81,7 @@ class CodePreviewTooltipContent(
     }
 
     private fun calculateContentHeight(editor: EditorEx): Int {
-        val lineHeight = editor.lineHeight
-        val lineCount = editor.document.lineCount
-        return lineHeight * lineCount
+        return editor.lineHeight * editor.document.lineCount
     }
 
     fun dispose() {
