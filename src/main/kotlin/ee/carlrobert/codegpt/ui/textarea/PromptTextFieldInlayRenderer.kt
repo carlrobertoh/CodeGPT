@@ -24,6 +24,7 @@ import java.awt.Graphics2D
 import java.awt.Point
 import java.awt.event.MouseEvent
 import java.awt.geom.Rectangle2D
+import javax.swing.Icon
 
 class PromptTextFieldInlayRenderer(
     private val project: Project,
@@ -171,7 +172,7 @@ class PromptTextFieldInlayRenderer(
     }
 
     private fun addMouseListeners(editor: Editor, inlay: Inlay<*>, target: Rectangle2D) {
-        fun isWithinIconBounds(e: MouseEvent, icon: javax.swing.Icon, offsetX: Int): Boolean {
+        fun isWithinIconBounds(e: MouseEvent, icon: Icon): Boolean {
             val iconX = when (icon) {
                 closeIcon -> (target.x + target.width - closeIcon.iconWidth - JBUI.scale(5)).toInt()
                 helpIcon -> (target.x + target.width - closeIcon.iconWidth - helpIcon.iconWidth - JBUI.scale(
@@ -189,19 +190,12 @@ class PromptTextFieldInlayRenderer(
             editor.contentComponent.let {
                 if (inlay.isValid) {
                     val inlayBounds = inlay.bounds
-                    if (inlayBounds != null && inlayBounds.contains(
-                            event.mouseEvent.x,
-                            event.mouseEvent.y
-                        )
-                    ) {
-                        it.cursor = if (isWithinIconBounds(event.mouseEvent, closeIcon, 0) ||
-                            isWithinIconBounds(event.mouseEvent, helpIcon, 0)
-                        ) {
-                            Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
-                        } else {
-                            Cursor.getDefaultCursor()
-                        }
-                        return@let
+                    val mouseX = event.mouseEvent.x.toDouble()
+                    val mouseY = event.mouseEvent.y.toDouble()
+
+                    if (inlayBounds != null && inlayBounds.contains(mouseX, mouseY)) {
+                        it.cursor = Cursor.getDefaultCursor()
+                        return
                     }
                 }
                 it.cursor = Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR)
@@ -210,23 +204,31 @@ class PromptTextFieldInlayRenderer(
 
         editor.addEditorMouseMotionListener(object : EditorMouseMotionListener {
             override fun mouseMoved(event: EditorMouseEvent) {
-                updateCursor(event, inlay)
+                findInlayAtMouseEvent(event)?.let {
+                    updateCursor(event, it)
+                }
+            }
+
+            private fun findInlayAtMouseEvent(event: EditorMouseEvent): Inlay<*>? {
+                val offset = editor.logicalPositionToOffset(event.logicalPosition)
+                val inlays = editor.inlayModel.getInlineElementsInRange(offset, offset)
+                return inlays.firstOrNull { inlay ->
+                    val inlayBounds = editor.visualPositionToXY(inlay.visualPosition)
+                    val mousePoint = event.mouseEvent.point
+                    inlayBounds.x <= mousePoint.x && mousePoint.x <= inlayBounds.x + inlay.widthInPixels
+                }
             }
         })
 
         editor.addEditorMouseListener(object : EditorMouseListener {
             override fun mouseClicked(event: EditorMouseEvent) {
                 when {
-                    isWithinIconBounds(
-                        event.mouseEvent,
-                        closeIcon,
-                        JBUI.scale(helpIcon.iconWidth + 10)
-                    ) -> {
+                    isWithinIconBounds(event.mouseEvent, closeIcon) -> {
                         onClose(inlay)
                         event.consume()
                     }
 
-                    isWithinIconBounds(event.mouseEvent, helpIcon, JBUI.scale(5)) -> {
+                    isWithinIconBounds(event.mouseEvent, helpIcon) -> {
                         showTooltip(inlay)
                         event.consume()
                     }
