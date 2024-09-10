@@ -111,7 +111,7 @@
                 <action
                   id="CodeGPT.AddSelectionToContext"
                   class="ee.carlrobert.codegpt.actions.editor.AddSelectionToContextAction"
-                  text="Add to Chat Context"
+                  text="Include Selection in Prompt"
                   description="Adds the selected text to the CodeGPT context">
                     <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift I" replace-all="true"/>
                 </action>
@@ -123,7 +123,7 @@
                 </action>
                 <action
                   id="CodeGPT.IncludeFileInContext"
-                  text="Include File In Context..."
+                  text="Include File In Prompt"
                   class="ee.carlrobert.codegpt.actions.IncludeFilesInContextAction">
                     <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt shift F" replace-all="true"/>
                 </action>
@@ -155,7 +155,7 @@
               icon="ee.carlrobert.codegpt.Icons.DefaultSmall">
                 <action
                   id="CodeGPT.IncludeFilesInContextAction"
-                  text="Include Files In Context..."
+                  text="Include Files In Prompt"
                   class="ee.carlrobert.codegpt.actions.IncludeFilesInContextAction" />
             </group>
             <add-to-group
@@ -174,7 +174,7 @@
             </action>
             <action
               id="CodeGPT.AddSelectionToContextAction"
-              text="CodeGPT: Add Selection to Context"
+              text="CodeGPT: Include Selection in Prompt"
               class="ee.carlrobert.codegpt.actions.editor.AddSelectionToContextAction">
                 <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift I" replace-all="true"/>
             </action>
