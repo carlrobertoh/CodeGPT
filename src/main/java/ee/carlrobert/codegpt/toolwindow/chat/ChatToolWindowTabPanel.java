@@ -308,7 +308,8 @@ public class ChatToolWindowTabPanel implements Disposable {
       var selectionModel = editor.getSelectionModel();
       var selectedText = selectionModel.getSelectedText();
       if (selectedText != null && !selectedText.isEmpty()) {
-        var fileExtension = FileUtil.getFileExtension(editor.getVirtualFile().getName());
+        var fileExtension = FileUtil.getFileExtension(
+            ((EditorEx) editor).getVirtualFile().getName());
         highlightedTextMd = format("\n```%s\n%s\n```\n", fileExtension, selectedText);
         selectionModel.removeSelection();
       }

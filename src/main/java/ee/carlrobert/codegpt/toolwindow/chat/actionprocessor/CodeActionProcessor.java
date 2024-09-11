@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt.toolwindow.chat.actionprocessor;
 
 import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.ex.EditorEx;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.ui.textarea.AppliedActionInlay;
 import ee.carlrobert.codegpt.ui.textarea.AppliedCodeActionInlay;
@@ -20,7 +21,8 @@ public class CodeActionProcessor implements ActionProcessor {
   private void processCodeAction(AppliedCodeActionInlay action, Editor editor,
       StringBuilder promptBuilder) {
     promptBuilder
-        .append("\n```%s\n".formatted(FileUtil.getFileExtension(editor.getVirtualFile().getName())))
+        .append("\n```%s\n".formatted(
+            FileUtil.getFileExtension(((EditorEx) editor).getVirtualFile().getName())))
         .append(action.getCode())
         .append("\n```\n");
   }
