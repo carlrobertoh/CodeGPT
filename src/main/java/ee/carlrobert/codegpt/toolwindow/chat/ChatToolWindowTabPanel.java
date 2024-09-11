@@ -39,6 +39,7 @@ import ee.carlrobert.codegpt.ui.textarea.AppliedSuggestionActionInlay;
 import ee.carlrobert.codegpt.ui.textarea.UserInputPanel;
 import ee.carlrobert.codegpt.ui.textarea.suggestion.item.CreateDocumentationActionItem;
 import ee.carlrobert.codegpt.ui.textarea.suggestion.item.DocumentationActionItem;
+import ee.carlrobert.codegpt.ui.textarea.suggestion.item.GitCommitActionItem;
 import ee.carlrobert.codegpt.ui.textarea.suggestion.item.PersonaActionItem;
 import ee.carlrobert.codegpt.ui.textarea.suggestion.item.WebSearchActionItem;
 import ee.carlrobert.codegpt.util.EditorUtil;
@@ -49,6 +50,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Function;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import kotlin.Unit;
@@ -302,7 +304,8 @@ public class ChatToolWindowTabPanel implements Disposable {
       if (action instanceof AppliedSuggestionActionInlay) {
         processSuggestionActions(
             message,
-            filterActions(appliedInlayActions, AppliedSuggestionActionInlay.class));
+            filterActions(appliedInlayActions, AppliedSuggestionActionInlay.class),
+            text);
       } else if (action instanceof AppliedCodeActionInlay) {
         processCodeActions(
             message,
@@ -328,10 +331,12 @@ public class ChatToolWindowTabPanel implements Disposable {
 
   private void processSuggestionActions(
       Message message,
-      List<AppliedSuggestionActionInlay> actions) {
+      List<AppliedSuggestionActionInlay> actions,
+      String text) {
     message.setWebSearchIncluded(containsWebSearchActionInlay(actions));
     processDocumentationAction(message, actions);
     processPersonaAction(message, actions);
+    processGitCommitAction(message, actions, text);
   }
 
   private void processDocumentationAction(
@@ -361,20 +366,24 @@ public class ChatToolWindowTabPanel implements Disposable {
     }
   }
 
-  private void processCodeActions(Message message, List<AppliedCodeActionInlay> actions,
-      String text, Editor editor) {
+  private <T extends AppliedActionInlay> void processActions(
+      Message message,
+      List<T> actions,
+      String text,
+      Function<T, String> codeExtractor,
+      Function<T, String> languageExtractor) {
     var stringBuilder = new StringBuilder(text);
     var resultStringBuilder = new StringBuilder();
     int lastProcessedIndex = 0;
 
     for (var actionInlay : actions) {
       var inlayOffset = actionInlay.getInlay().getOffset();
-      var fileExtension = FileUtil.getFileExtension(((EditorEx) editor).getVirtualFile().getName());
 
       resultStringBuilder
           .append(stringBuilder, lastProcessedIndex, Math.min(stringBuilder.length(), inlayOffset))
           .append('\n')
-          .append(formatCodeBlock(fileExtension, actionInlay.getCode()))
+          .append(formatCodeBlock(languageExtractor.apply(actionInlay),
+              codeExtractor.apply(actionInlay)))
           .append('\n');
 
       lastProcessedIndex = inlayOffset;
@@ -385,6 +394,39 @@ public class ChatToolWindowTabPanel implements Disposable {
     var result = resultStringBuilder.toString();
     message.setUserMessage(result);
     message.setPrompt(result);
+  }
+
+  private void processGitCommitAction(
+      Message message,
+      List<AppliedSuggestionActionInlay> actions,
+      String text) {
+    var gitCommitInlays = actions.stream()
+        .filter(it -> it.getSuggestion() instanceof GitCommitActionItem)
+        .toList();
+
+    if (!gitCommitInlays.isEmpty()) {
+      processActions(
+          message,
+          gitCommitInlays,
+          text,
+          action -> ((GitCommitActionItem) action.getSuggestion()).getDiffString(),
+          action -> "shell"
+      );
+    }
+  }
+
+  private void processCodeActions(
+      Message message,
+      List<AppliedCodeActionInlay> actions,
+      String text,
+      Editor editor) {
+    processActions(
+        message,
+        actions,
+        text,
+        AppliedCodeActionInlay::getCode,
+        action -> FileUtil.getFileExtension(((EditorEx) editor).getVirtualFile().getName())
+    );
   }
 
   private String formatCodeBlock(String fileExtension, String code) {
