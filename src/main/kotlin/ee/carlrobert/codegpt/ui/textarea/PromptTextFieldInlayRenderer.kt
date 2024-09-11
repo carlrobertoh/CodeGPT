@@ -45,6 +45,11 @@ class PromptTextFieldInlayRenderer(
         val font = editor.colorsScheme.getFont(EditorFontType.PLAIN)
         val textWidth = editor.component.getFontMetrics(font)
             .stringWidth(actionPrefix + (if (text != null) ":$text" else ""))
+
+        if (tooltipText.isNullOrEmpty()) {
+            return textWidth + closeIcon.iconWidth + JBUI.scale(10)
+        }
+
         return textWidth + closeIcon.iconWidth + JBUI.scale(10) + helpIcon.iconWidth + JBUI.scale(10)
     }
 
