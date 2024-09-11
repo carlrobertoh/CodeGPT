@@ -114,6 +114,8 @@ public class ChatMessageResponseBody extends JPanel {
 
   public ChatMessageResponseBody withResponse(String response) {
     for (var message : MarkdownUtil.splitCodeBlocks(response)) {
+      currentlyProcessedEditorPanel = null;
+      currentlyProcessedTextPane = null;
       processResponse(message, message.startsWith("```"), false);
     }
 
@@ -250,12 +252,12 @@ public class ChatMessageResponseBody extends JPanel {
       var codeBlock = ((FencedCodeBlock) child);
       var code = codeBlock.getContentChars().unescape();
       if (!code.isEmpty()) {
-        ApplicationManager.getApplication().invokeLater(() -> {
-          if (currentlyProcessedEditorPanel == null) {
+        if (currentlyProcessedEditorPanel == null) {
+          ApplicationManager.getApplication().invokeAndWait(() -> {
             prepareProcessingCode(code, codeBlock.getInfo().unescape());
-          }
-          EditorUtil.updateEditorDocument(currentlyProcessedEditorPanel.getEditor(), code);
-        });
+          });
+        }
+        EditorUtil.updateEditorDocument(currentlyProcessedEditorPanel.getEditor(), code);
       }
     }
   }
@@ -283,9 +285,9 @@ public class ChatMessageResponseBody extends JPanel {
   private void prepareProcessingCode(String code, String markdownLanguage) {
     hideCaret();
     currentlyProcessedTextPane = null;
-    currentlyProcessedEditorPanel =
-        new ResponseEditorPanel(project, code, markdownLanguage, readOnly, highlightedText,
-            parentDisposable);
+    currentlyProcessedEditorPanel = new ResponseEditorPanel(project, code, markdownLanguage,
+        readOnly, highlightedText,
+        parentDisposable);
     add(currentlyProcessedEditorPanel);
   }
 

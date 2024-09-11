@@ -1,15 +1,14 @@
 package ee.carlrobert.codegpt.ui.textarea.suggestion.item
 
 import com.intellij.icons.AllIcons
-import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.application.readAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.options.ShowSettingsUtil
+import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.vcs.changes.VcsIgnoreManager
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.util.concurrency.AppExecutorUtil
 import ee.carlrobert.codegpt.CodeGPTBundle
 import ee.carlrobert.codegpt.CodeGPTKeys
 import ee.carlrobert.codegpt.EncodingManager
@@ -121,12 +120,21 @@ class GitCommitActionItem(
     }
 
     fun getDiffString(): String {
-        return ReadAction.nonBlocking<String> {
-            val repository = GitUtil.getProjectRepository(project) ?: return@nonBlocking ""
-            val diff = GitUtil.getCommitDiff(project, repository, gitCommit.id.asString())
-                .joinToString("\n")
-            service<EncodingManager>().truncateText(diff, MAX_TOKENS, true)
-        }.submit(AppExecutorUtil.getAppExecutorService()).get()
+        return ProgressManager.getInstance().runProcessWithProgressSynchronously<String, Exception>(
+            {
+                val repository = GitUtil.getProjectRepository(project)
+                    ?: return@runProcessWithProgressSynchronously ""
+
+                val commitId = gitCommit.id.asString()
+                val diff = GitUtil.getCommitDiff(project, repository, commitId)
+                    .joinToString("\n")
+
+                service<EncodingManager>().truncateText(diff, MAX_TOKENS, true)
+            },
+            "Getting Diff",
+            true,
+            project
+        )
     }
 }
 
