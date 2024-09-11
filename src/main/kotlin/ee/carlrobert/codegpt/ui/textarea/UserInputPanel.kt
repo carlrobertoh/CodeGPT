@@ -4,6 +4,7 @@ import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.ActionPlaces
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.application.invokeLater
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.SelectionModel
 import com.intellij.openapi.observable.properties.AtomicBooleanProperty
@@ -81,8 +82,9 @@ class UserInputPanel(
     }
 
     override fun requestFocus() {
-        promptTextField.requestFocus()
-        promptTextField.requestFocusInWindow()
+        invokeLater {
+            promptTextField.requestFocusInWindow()
+        }
     }
 
     override fun paintComponent(g: Graphics) {

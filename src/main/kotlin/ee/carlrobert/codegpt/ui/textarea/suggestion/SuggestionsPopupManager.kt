@@ -85,6 +85,7 @@ class SuggestionsPopupManager(
                 listModel.addAll(suggestions)
                 list.revalidate()
                 list.repaint()
+                selectNext()
             }
         }
     }
