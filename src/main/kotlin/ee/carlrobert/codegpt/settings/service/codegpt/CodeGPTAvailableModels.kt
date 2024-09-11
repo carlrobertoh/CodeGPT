@@ -7,21 +7,20 @@ import javax.swing.Icon
 
 object CodeGPTAvailableModels {
 
+    val DEFAULT_CHAT_MODEL = CodeGPTModel("GPT-4o", "gpt-4o", Icons.OpenAI, INDIVIDUAL)
+    val DEFAULT_CODE_MODEL = CodeGPTModel("GPT-3.5 Turbo Instruct", "gpt-3.5-turbo-instruct", Icons.OpenAI, INDIVIDUAL)
+
     @JvmStatic
     fun getToolWindowModels(pricingPlan: PricingPlan?): List<CodeGPTModel> {
-        val anonymousModels = listOf(
-            CodeGPTModel("GPT-4o", "gpt-4o", Icons.OpenAI, INDIVIDUAL),
-            CodeGPTModel("Claude 3.5 Sonnet", "claude-3.5-sonnet", Icons.Anthropic, INDIVIDUAL),
-            CodeGPTModel("Llama 3.1 (405B)", "llama-3.1-405b", Icons.Meta, INDIVIDUAL),
-            CodeGPTModel("DeepSeek Coder V2", "deepseek-coder-v2", Icons.DeepSeek, INDIVIDUAL),
-            CodeGPTModel("GPT-4o mini - FREE", "gpt-4o-mini", Icons.OpenAI, ANONYMOUS),
-            CodeGPTModel("Llama 3 (8B) - FREE", "llama-3-8b", Icons.Meta, ANONYMOUS)
-        )
-        if (pricingPlan == null) {
-            return anonymousModels
-        }
         return when (pricingPlan) {
-            ANONYMOUS -> anonymousModels
+            null, ANONYMOUS -> listOf(
+                CodeGPTModel("GPT-4o", "gpt-4o", Icons.OpenAI, INDIVIDUAL),
+                CodeGPTModel("Claude 3.5 Sonnet", "claude-3.5-sonnet", Icons.Anthropic, INDIVIDUAL),
+                CodeGPTModel("Llama 3.1 (405B)", "llama-3.1-405b", Icons.Meta, INDIVIDUAL),
+                CodeGPTModel("DeepSeek Coder V2", "deepseek-coder-v2", Icons.DeepSeek, INDIVIDUAL),
+                CodeGPTModel("GPT-4o mini - FREE", "gpt-4o-mini", Icons.OpenAI, ANONYMOUS),
+                CodeGPTModel("Llama 3 (8B) - FREE", "llama-3-8b", Icons.Meta, ANONYMOUS)
+            )
 
             FREE -> listOf(
                 CodeGPTModel("GPT-4o", "gpt-4o", Icons.OpenAI, INDIVIDUAL),
@@ -32,12 +31,19 @@ object CodeGPTAvailableModels {
                 CodeGPTModel("Code Llama (70B)", "codellama:chat", Icons.Meta, FREE),
             )
 
-            else -> BASE_CHAT_MODELS
+            INDIVIDUAL -> listOf(
+                CodeGPTModel("GPT-4o", "gpt-4o", Icons.OpenAI, INDIVIDUAL),
+                CodeGPTModel("Claude 3 Opus", "claude-3-opus", Icons.Anthropic, INDIVIDUAL),
+                CodeGPTModel("Claude 3.5 Sonnet", "claude-3.5-sonnet", Icons.Anthropic, INDIVIDUAL),
+                CodeGPTModel("Llama 3.1 (405B)", "llama-3.1-405b", Icons.Meta, INDIVIDUAL),
+                CodeGPTModel("DeepSeek Coder V2", "deepseek-coder-v2", Icons.DeepSeek, INDIVIDUAL),
+                CodeGPTModel("DBRX", "dbrx", Icons.Databricks, INDIVIDUAL),
+            )
         }
     }
 
     @JvmStatic
-    val BASE_CHAT_MODELS: List<CodeGPTModel> = listOf(
+    val ALL_CHAT_MODELS: List<CodeGPTModel> = listOf(
         CodeGPTModel("GPT-4o", "gpt-4o", Icons.OpenAI, INDIVIDUAL),
         CodeGPTModel("GPT-4o mini", "gpt-4o-mini", Icons.OpenAI, ANONYMOUS),
         CodeGPTModel("Claude 3 Opus", "claude-3-opus", Icons.Anthropic, INDIVIDUAL),
@@ -46,10 +52,6 @@ object CodeGPTAvailableModels {
         CodeGPTModel("Llama 3 (70B)", "llama-3-70b", Icons.Meta, FREE),
         CodeGPTModel("DeepSeek Coder V2", "deepseek-coder-v2", Icons.DeepSeek, INDIVIDUAL),
         CodeGPTModel("DBRX", "dbrx", Icons.Databricks, INDIVIDUAL),
-    )
-
-    @JvmStatic
-    val ALL_CHAT_MODELS: List<CodeGPTModel> = BASE_CHAT_MODELS + listOf(
         CodeGPTModel("Llama 3 (8B) - FREE", "llama-3-8b", Icons.Meta, ANONYMOUS),
         CodeGPTModel("Code Llama (70B)", "codellama:chat", Icons.Meta, FREE),
         CodeGPTModel("Mixtral (8x22B)", "mixtral-8x22b", Icons.CodeGPTModel, FREE),
@@ -58,8 +60,8 @@ object CodeGPTAvailableModels {
     )
 
     @JvmStatic
-    val CODE_MODELS: List<CodeGPTModel> = listOf(
-        CodeGPTModel("GPT-3.5 Turbo Instruct", "gpt-3.5-turbo-instruct", Icons.OpenAI, INDIVIDUAL),
+    val ALL_CODE_MODELS: List<CodeGPTModel> = listOf(
+        DEFAULT_CODE_MODEL,
         CodeGPTModel("StarCoder (16B)", "starcoder-16b", Icons.CodeGPTModel, FREE),
         CodeGPTModel("StarCoder (7B) - FREE", "starcoder-7b", Icons.CodeGPTModel, FREE),
         CodeGPTModel("WizardCoder Python (34B)", "wizardcoder-python", Icons.CodeGPTModel, FREE),
@@ -68,7 +70,7 @@ object CodeGPTAvailableModels {
 
     @JvmStatic
     fun findByCode(code: String?): CodeGPTModel? {
-        return ALL_CHAT_MODELS.union(CODE_MODELS).firstOrNull { it.code == code }
+        return ALL_CHAT_MODELS.union(ALL_CODE_MODELS).firstOrNull { it.code == code }
     }
 }
 
