@@ -23,6 +23,7 @@ import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
+import ee.carlrobert.codegpt.toolwindow.chat.actionprocessor.ActionProcessorFactory;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ChatMessageResponseBody;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ChatToolWindowScrollablePanel;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ResponsePanel;
@@ -32,14 +33,7 @@ import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.TotalTokensPanel;
 import ee.carlrobert.codegpt.toolwindow.ui.ChatToolWindowLandingPanel;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.codegpt.ui.textarea.AppliedActionInlay;
-import ee.carlrobert.codegpt.ui.textarea.AppliedCodeActionInlay;
-import ee.carlrobert.codegpt.ui.textarea.AppliedSuggestionActionInlay;
 import ee.carlrobert.codegpt.ui.textarea.UserInputPanel;
-import ee.carlrobert.codegpt.ui.textarea.suggestion.item.CreateDocumentationActionItem;
-import ee.carlrobert.codegpt.ui.textarea.suggestion.item.DocumentationActionItem;
-import ee.carlrobert.codegpt.ui.textarea.suggestion.item.GitCommitActionItem;
-import ee.carlrobert.codegpt.ui.textarea.suggestion.item.PersonaActionItem;
-import ee.carlrobert.codegpt.ui.textarea.suggestion.item.WebSearchActionItem;
 import ee.carlrobert.codegpt.util.EditorUtil;
 import ee.carlrobert.codegpt.util.file.FileUtil;
 import java.awt.BorderLayout;
@@ -48,7 +42,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Function;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import kotlin.Unit;
@@ -272,162 +265,46 @@ public class ChatToolWindowTabPanel implements Disposable {
     requestHandler.call(callParameters);
   }
 
+  private String processEditorSelection(Editor editor, Message message) {
+    if (editor == null) {
+      return null;
+    }
+
+    SelectionModel selectionModel = editor.getSelectionModel();
+    String selectedText = selectionModel.getSelectedText();
+    if (selectedText == null || selectedText.isEmpty()) {
+      return null;
+    }
+
+    String fileExtension = FileUtil.getFileExtension(editor.getVirtualFile().getName());
+    message.setPrompt(
+        message.getPrompt() + String.format("%n```%s%n%s%n```", fileExtension, selectedText));
+    selectionModel.removeSelection();
+    return selectedText;
+  }
+
   private Unit handleSubmit(String text, List<? extends AppliedActionInlay> appliedInlayActions) {
     var message = new Message(text);
     var editor = EditorUtil.getSelectedEditor(project);
-    String highlightedText = null;
-    if (editor != null) {
-      var selectionModel = editor.getSelectionModel();
-      var selectedText = selectionModel.getSelectedText();
-      if (selectedText != null && !selectedText.isEmpty()) {
-        var fileExtension = FileUtil.getFileExtension(editor.getVirtualFile().getName());
-        message = new Message(text + format("%n```%s%n%s%n```", fileExtension, selectedText));
-        highlightedText = selectedText;
-        selectionModel.removeSelection();
-      }
-    }
-    message.setUserMessage(text);
-    processAppliedInlayActions(message, appliedInlayActions, text, editor);
-    sendMessage(message, ConversationType.DEFAULT, highlightedText);
-    return Unit.INSTANCE;
-  }
 
-  private void processAppliedInlayActions(
-      Message message,
-      List<? extends AppliedActionInlay> appliedInlayActions,
-      String text,
-      Editor editor) {
-    for (var action : appliedInlayActions) {
-      if (action instanceof AppliedSuggestionActionInlay) {
-        processSuggestionActions(
-            message,
-            filterActions(appliedInlayActions, AppliedSuggestionActionInlay.class),
-            text);
-      } else if (action instanceof AppliedCodeActionInlay) {
-        processCodeActions(
-            message,
-            filterActions(appliedInlayActions, AppliedCodeActionInlay.class),
-            text,
-            editor);
-      }
-    }
-  }
+    var remainingText = new StringBuilder(text);
+    var promptBuilder = new StringBuilder();
 
-  private <T extends AppliedActionInlay> List<T> filterActions(
-      List<? extends AppliedActionInlay> actions,
-      Class<T> actionClass) {
-    return actions.stream()
-        .filter(actionClass::isInstance)
-        .map(actionClass::cast)
-        .toList();
-  }
-
-  private boolean containsWebSearchActionInlay(List<AppliedSuggestionActionInlay> actions) {
-    return actions.stream().anyMatch(it -> it.getSuggestion() instanceof WebSearchActionItem);
-  }
-
-  private void processSuggestionActions(
-      Message message,
-      List<AppliedSuggestionActionInlay> actions,
-      String text) {
-    message.setWebSearchIncluded(containsWebSearchActionInlay(actions));
-    processDocumentationAction(message, actions);
-    processPersonaAction(message, actions);
-    processGitCommitAction(message, actions, text);
-  }
-
-  private void processDocumentationAction(
-      Message message,
-      List<AppliedSuggestionActionInlay> actions) {
-    var addedDocumentation = CodeGPTKeys.ADDED_DOCUMENTATION.get(project);
-    var appliedInlayExists = actions.stream().anyMatch(it -> {
-      var suggestion = it.getSuggestion();
-      return suggestion instanceof DocumentationActionItem
-          || suggestion instanceof CreateDocumentationActionItem;
-    });
-
-    if (addedDocumentation != null && appliedInlayExists) {
-      message.setDocumentationDetails(addedDocumentation);
-      CodeGPTKeys.ADDED_DOCUMENTATION.set(project, null);
-    }
-  }
-
-  private void processPersonaAction(Message message, List<AppliedSuggestionActionInlay> actions) {
-    var addedPersona = CodeGPTKeys.ADDED_PERSONA.get(project);
-    var personaInlayExists = actions.stream()
-        .anyMatch(it -> it.getSuggestion() instanceof PersonaActionItem);
-
-    if (addedPersona != null && personaInlayExists) {
-      message.setPersonaDetails(addedPersona);
-      CodeGPTKeys.ADDED_PERSONA.set(project, null);
-    }
-  }
-
-  private <T extends AppliedActionInlay> void processActions(
-      Message message,
-      List<T> actions,
-      String text,
-      Function<T, String> codeExtractor,
-      Function<T, String> languageExtractor) {
-    var stringBuilder = new StringBuilder(text);
-    var resultStringBuilder = new StringBuilder();
-    int lastProcessedIndex = 0;
-
-    for (var actionInlay : actions) {
+    for (var actionInlay : appliedInlayActions) {
       var inlayOffset = actionInlay.getInlay().getOffset();
-
-      resultStringBuilder
-          .append(stringBuilder, lastProcessedIndex, Math.min(stringBuilder.length(), inlayOffset))
-          .append('\n')
-          .append(formatCodeBlock(languageExtractor.apply(actionInlay),
-              codeExtractor.apply(actionInlay)))
-          .append('\n');
-
-      lastProcessedIndex = inlayOffset;
+      promptBuilder.append(remainingText, 0, Math.min(inlayOffset, remainingText.length()))
+          .append("\n");
+      ActionProcessorFactory.getProcessor(actionInlay)
+          .process(message, actionInlay, editor, promptBuilder);
+      remainingText.delete(0, inlayOffset);
     }
+    promptBuilder.append(remainingText);
 
-    resultStringBuilder.append(stringBuilder, lastProcessedIndex, stringBuilder.length());
+    message.setUserMessage(promptBuilder.toString());
+    message.setPrompt(promptBuilder.toString());
 
-    var result = resultStringBuilder.toString();
-    message.setUserMessage(result);
-    message.setPrompt(result);
-  }
-
-  private void processGitCommitAction(
-      Message message,
-      List<AppliedSuggestionActionInlay> actions,
-      String text) {
-    var gitCommitInlays = actions.stream()
-        .filter(it -> it.getSuggestion() instanceof GitCommitActionItem)
-        .toList();
-
-    if (!gitCommitInlays.isEmpty()) {
-      processActions(
-          message,
-          gitCommitInlays,
-          text,
-          action -> ((GitCommitActionItem) action.getSuggestion()).getDiffString(),
-          action -> "shell"
-      );
-    }
-  }
-
-  private void processCodeActions(
-      Message message,
-      List<AppliedCodeActionInlay> actions,
-      String text,
-      Editor editor) {
-    processActions(
-        message,
-        actions,
-        text,
-        AppliedCodeActionInlay::getCode,
-        action -> FileUtil.getFileExtension(editor.getVirtualFile().getName())
-    );
-  }
-
-  private String formatCodeBlock(String fileExtension, String code) {
-    return String.format("```%s\n%s\n```", fileExtension, code);
+    sendMessage(message, ConversationType.DEFAULT, processEditorSelection(editor, message));
+    return Unit.INSTANCE;
   }
 
   private Unit handleCancel() {
