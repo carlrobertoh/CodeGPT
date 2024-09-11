@@ -133,8 +133,6 @@ class PromptTextFieldInlayRenderer(
                 .setTitle("Code Preview")
                 .setResizable(true)
                 .setMovable(true)
-                .setStretchToOwnerHeight(true)
-                .setStretchToOwnerWidth(true)
                 .setMinSize(
                     Dimension(
                         tooltipContent.preferredSize?.width ?: 240,
