@@ -12,7 +12,7 @@ jsoup = "1.17.2"
 jtokkit = "1.1.0"
 junit = "5.11.0"
 kotlin = "2.0.0"
-llm-client = "0.8.16"
+llm-client = "0.8.17"
 okio = "3.9.0"
 tree-sitter = "0.22.6a"
 
