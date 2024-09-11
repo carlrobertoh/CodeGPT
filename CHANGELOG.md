@@ -10,11 +10,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Quick code snippet referencing in prompts [#690](https://github.com/carlrobertoh/CodeGPT/issues/690)
 - Name suggestions for languages other than Java [#615](https://github.com/carlrobertoh/CodeGPT/issues/615)
+- Improved  
 
 ### Fixed
 
 - Prompt text field persona suggestions [#685](https://github.com/carlrobertoh/CodeGPT/issues/685)
+- Text field autofocus when opening the chat toolwindow [#691](https://github.com/carlrobertoh/CodeGPT/issues/691)
 - Git commit dialog selected changes not being included in diff
+
+### Improved
+
+- Model combobox menu UI/UX by extracting the providers into standalone subgroups [#681](https://github.com/carlrobertoh/CodeGPT/pull/681)
+- Prompt text field inlay rendering
 
 ## [2.11.0-241.1] - 2024-09-05
 
