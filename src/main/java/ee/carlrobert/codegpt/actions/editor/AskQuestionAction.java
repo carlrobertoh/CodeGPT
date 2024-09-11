@@ -2,7 +2,7 @@ package ee.carlrobert.codegpt.actions.editor;
 
 import static java.lang.String.format;
 
-import com.intellij.icons.ExpUiIcons;
+import com.intellij.icons.AllIcons.General;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
@@ -25,7 +25,7 @@ public class AskQuestionAction extends BaseEditorAction {
   private static String previousUserPrompt = "";
 
   AskQuestionAction() {
-    super(ExpUiIcons.General.QuestionMark);
+    super(General.QuestionDialog);
   }
 
   @Override
