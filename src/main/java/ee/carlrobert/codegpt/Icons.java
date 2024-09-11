@@ -34,5 +34,7 @@ public final class Icons {
       IconLoader.getIcon("/icons/openNewTab.svg", Icons.class);
   public static final Icon AddFile =
       IconLoader.getIcon("/icons/addFile.svg", Icons.class);
+  public static final Icon VCS =
+      IconLoader.getIcon("/icons/vcs.svg", Icons.class);
   public static final Icon StatusBarCompletionInProgress = new AnimatedIcon.Default();
 }

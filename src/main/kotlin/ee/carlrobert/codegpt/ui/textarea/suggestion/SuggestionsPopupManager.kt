@@ -34,6 +34,7 @@ class SuggestionsPopupManager(
     private val defaultActions: MutableList<SuggestionItem> = mutableListOf(
         FileSuggestionGroupItem(project),
         FolderSuggestionGroupItem(project),
+        GitSuggestionGroupItem(project),
         PersonaSuggestionGroupItem(),
         DocumentationSuggestionGroupItem(),
         WebSearchActionItem(),
