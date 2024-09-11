@@ -8,15 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Git history referencing in prompts
 - Quick code snippet referencing in prompts [#690](https://github.com/carlrobertoh/CodeGPT/issues/690)
 - Name suggestions for languages other than Java [#615](https://github.com/carlrobertoh/CodeGPT/issues/615)
-- Improved  
 
 ### Fixed
 
 - Prompt text field persona suggestions [#685](https://github.com/carlrobertoh/CodeGPT/issues/685)
 - Text field autofocus when opening the chat toolwindow [#691](https://github.com/carlrobertoh/CodeGPT/issues/691)
 - Git commit dialog selected changes not being included in diff
+- Ollama server host configuration overriding [#684](https://github.com/carlrobertoh/CodeGPT/issues/684)
 
 ### Improved
 
