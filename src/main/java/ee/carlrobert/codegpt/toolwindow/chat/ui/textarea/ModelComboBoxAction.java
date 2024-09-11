@@ -95,9 +95,10 @@ public class ModelComboBoxAction extends ComboBoxAction {
     if (availableProviders.contains(CODEGPT)) {
       actionGroup.addSeparator("CodeGPT");
       actionGroup.addAll(getCodeGPTModelActions(project, presentation));
+      actionGroup.addSeparator();
     }
+    actionGroup.addSeparator("Cloud Providers");
     if (availableProviders.contains(OPENAI)) {
-      actionGroup.addSeparator("OpenAI");
       var openaiGroup = DefaultActionGroup.createPopupGroup(() -> "OpenAI");
       openaiGroup.getTemplatePresentation().setIcon(Icons.OpenAI);
       List.of(
@@ -109,10 +110,9 @@ public class ModelComboBoxAction extends ComboBoxAction {
       actionGroup.add(openaiGroup);
     }
     if (availableProviders.contains(CUSTOM_OPENAI)) {
-      actionGroup.addSeparator("Custom OpenAI");
       actionGroup.add(createModelAction(
           CUSTOM_OPENAI,
-          ApplicationManager.getApplication().getService(CustomServiceSettings.class)
+          "Custom: " + ApplicationManager.getApplication().getService(CustomServiceSettings.class)
               .getState()
               .getTemplate()
               .getProviderName(),
@@ -120,7 +120,6 @@ public class ModelComboBoxAction extends ComboBoxAction {
           presentation));
     }
     if (availableProviders.contains(ANTHROPIC)) {
-      actionGroup.addSeparator("Anthropic");
       actionGroup.add(createModelAction(
           ANTHROPIC,
           "Anthropic (Claude)",
@@ -128,12 +127,10 @@ public class ModelComboBoxAction extends ComboBoxAction {
           presentation));
     }
     if (availableProviders.contains(AZURE)) {
-      actionGroup.addSeparator("Azure");
       actionGroup.add(
           createModelAction(AZURE, "Azure OpenAI", Icons.Azure, presentation));
     }
     if (availableProviders.contains(GOOGLE)) {
-      actionGroup.addSeparator("Google");
       var googleGroup = DefaultActionGroup.createPopupGroup(() -> "Google (Gemini)");
       googleGroup.getTemplatePresentation().setIcon(Icons.Google);
       Arrays.stream(GoogleModel.values())
@@ -142,7 +139,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
       actionGroup.add(googleGroup);
     }
     if (availableProviders.contains(LLAMA_CPP)) {
-      actionGroup.addSeparator("LLaMA C/C++");
+      actionGroup.addSeparator("Local Providers");
       actionGroup.add(createModelAction(
           LLAMA_CPP,
           getLlamaCppPresentationText(),
@@ -150,7 +147,6 @@ public class ModelComboBoxAction extends ComboBoxAction {
           presentation));
     }
     if (availableProviders.contains(OLLAMA)) {
-      actionGroup.addSeparator("Ollama");
       var ollamaGroup = DefaultActionGroup.createPopupGroup(() -> "Ollama");
       ollamaGroup.getTemplatePresentation().setIcon(Icons.Ollama);
       ApplicationManager.getApplication()
