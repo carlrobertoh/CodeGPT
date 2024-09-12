@@ -65,13 +65,13 @@ class SuggestionsPopupManager(
     }
 
     fun selectNext() {
-        list.requestFocus()
         list.selectNext()
+        list.requestFocus()
     }
 
     fun selectPrevious() {
-        list.requestFocus()
         list.selectPrevious()
+        list.requestFocus()
     }
 
     fun updateSuggestions(searchText: String? = null) {
@@ -85,7 +85,6 @@ class SuggestionsPopupManager(
                 listModel.addAll(suggestions)
                 list.revalidate()
                 list.repaint()
-                selectNext()
             }
         }
     }
