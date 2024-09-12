@@ -32,7 +32,7 @@ class FileSuggestionGroupItem(private val project: Project) : SuggestionGroupIte
         if (searchText == null) {
             val projectFileIndex = project.service<ProjectFileIndex>()
             return readAction {
-                project.service<FileEditorManager>().openFiles
+                FileEditorManager.getInstance(project).openFiles
                     .filter { projectFileIndex.isInContent(it) }
                     .toFileSuggestions()
             }
