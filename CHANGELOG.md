@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- New `o1-preview` and `o1-mini` models for CodeGPT users 
+
 ## [2.11.1-233] - 2024-09-12
 
 ### Added
