@@ -34,6 +34,7 @@ class SuggestionsPopupManager(
     private val defaultActions: MutableList<SuggestionItem> = mutableListOf(
         FileSuggestionGroupItem(project),
         FolderSuggestionGroupItem(project),
+        GitSuggestionGroupItem(project),
         PersonaSuggestionGroupItem(),
         DocumentationSuggestionGroupItem(),
         WebSearchActionItem(),
@@ -62,13 +63,13 @@ class SuggestionsPopupManager(
     }
 
     fun selectNext() {
-        list.requestFocus()
         list.selectNext()
+        list.requestFocus()
     }
 
     fun selectPrevious() {
-        list.requestFocus()
         list.selectPrevious()
+        list.requestFocus()
     }
 
     fun updateSuggestions(searchText: String? = null) {

@@ -24,4 +24,6 @@ public class CodeGPTKeys {
       Key.create("codegpt.editorCompletionLines");
   public static final Key<Boolean> IS_FETCHING_COMPLETION =
       Key.create("codegpt.isFetchingCompletion");
+  public static final Key<Boolean> IS_PROMPT_TEXT_FIELD_DOCUMENT =
+      Key.create("codegpt.isPromptTextFieldDocument");
 }

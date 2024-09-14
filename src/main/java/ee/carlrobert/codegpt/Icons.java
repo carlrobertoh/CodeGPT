@@ -31,5 +31,13 @@ public final class Icons {
       IconLoader.getIcon("/icons/greenCheckmark.svg", Icons.class);
   public static final Icon SendToTheLeft =
       IconLoader.getIcon("/icons/sendToTheLeft.svg", Icons.class);
+  public static final Icon OpenNewTab =
+      IconLoader.getIcon("/icons/openNewTab.svg", Icons.class);
+  public static final Icon AddFile =
+      IconLoader.getIcon("/icons/addFile.svg", Icons.class);
+  public static final Icon VCS =
+      IconLoader.getIcon("/icons/vcs.svg", Icons.class);
+  public static final Icon QuestionMark =
+      IconLoader.getIcon("/icons/questionMark.svg", Icons.class);
   public static final Icon StatusBarCompletionInProgress = new AnimatedIcon.Default();
 }

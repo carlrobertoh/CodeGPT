@@ -8,6 +8,7 @@ import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.ui.dsl.gridLayout.UnscaledGaps
 import com.intellij.util.ui.JBUI
+import ee.carlrobert.codegpt.EncodingManager
 import ee.carlrobert.codegpt.settings.persona.PersonaSettings
 import ee.carlrobert.codegpt.ui.textarea.PromptTextField
 import ee.carlrobert.codegpt.ui.textarea.suggestion.item.*
@@ -133,6 +134,21 @@ class PersonaItemRenderer(textPane: PromptTextField) : BaseItemRenderer(textPane
     }
 }
 
+class GitCommitItemRenderer(textPane: PromptTextField) : BaseItemRenderer(textPane) {
+    override fun render(component: JLabel, value: SuggestionItem): JPanel {
+        val item = value as GitCommitActionItem
+        val author = item.gitCommit.author.name
+        val truncatedAuthor = if (author.length > 32) "${author.take(32)}..." else author
+        return createPanel(
+            component,
+            item.icon,
+            item.displayName,
+            "${item.gitCommit.id.asString().take(6)} • $truncatedAuthor",
+            null,
+        )
+    }
+}
+
 class DocumentationItemRenderer(textPane: PromptTextField) : BaseItemRenderer(textPane) {
     override fun render(component: JLabel, value: SuggestionItem): JPanel {
         val item = value as DocumentationActionItem
@@ -152,6 +168,7 @@ class RendererFactory(private val textPane: PromptTextField) {
             is FileActionItem -> FileItemRenderer(textPane)
             is FolderActionItem -> FolderItemRenderer(textPane)
             is PersonaActionItem -> PersonaItemRenderer(textPane)
+            is GitCommitActionItem -> GitCommitItemRenderer(textPane)
             is DocumentationActionItem -> DocumentationItemRenderer(textPane)
             else -> DefaultItemRenderer(textPane)
         }

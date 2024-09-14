@@ -4,7 +4,9 @@ import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.ActionPlaces
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.application.invokeLater
 import com.intellij.openapi.components.service
+import com.intellij.openapi.editor.SelectionModel
 import com.intellij.openapi.observable.properties.AtomicBooleanProperty
 import com.intellij.openapi.project.Project
 import com.intellij.ui.components.AnActionLink
@@ -76,8 +78,9 @@ class UserInputPanel(
     }
 
     override fun requestFocus() {
-        promptTextField.requestFocus()
-        promptTextField.requestFocusInWindow()
+        invokeLater {
+            promptTextField.requestFocusInWindow()
+        }
     }
 
     override fun paintComponent(g: Graphics) {
@@ -177,5 +180,16 @@ class UserInputPanel(
 
             else -> false
         }
+    }
+
+    fun addSelection(fileName: String, selectionModel: SelectionModel) {
+        promptTextField.addInlayElement(
+            "code",
+            "$fileName (${selectionModel.selectionStartPosition?.line}:${selectionModel.selectionEndPosition?.line})",
+            fileName = fileName,
+            tooltipText = selectionModel.selectedText
+        )
+        promptTextField.requestFocusInWindow()
+        selectionModel.removeSelection()
     }
 }

@@ -3,10 +3,12 @@ package ee.carlrobert.codegpt.ui.textarea.suggestion.item
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.components.service
 import com.intellij.openapi.options.ShowSettingsUtil
+import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import ee.carlrobert.codegpt.CodeGPTBundle
 import ee.carlrobert.codegpt.CodeGPTKeys
+import ee.carlrobert.codegpt.EncodingManager
 import ee.carlrobert.codegpt.settings.GeneralSettings
 import ee.carlrobert.codegpt.settings.documentation.DocumentationSettings
 import ee.carlrobert.codegpt.settings.documentation.DocumentationsConfigurable
@@ -17,6 +19,8 @@ import ee.carlrobert.codegpt.ui.AddDocumentationDialog
 import ee.carlrobert.codegpt.ui.DocumentationDetails
 import ee.carlrobert.codegpt.ui.textarea.FileSearchService
 import ee.carlrobert.codegpt.ui.textarea.PromptTextField
+import ee.carlrobert.codegpt.util.GitUtil
+import git4idea.GitCommit
 
 class FileActionItem(val file: VirtualFile) : SuggestionActionItem {
     override val displayName = file.name
@@ -82,6 +86,43 @@ class CreateDocumentationActionItem : SuggestionActionItem {
                 this
             )
         }
+    }
+}
+
+class GitCommitActionItem(
+    private val project: Project,
+    val gitCommit: GitCommit,
+) : SuggestionActionItem {
+
+    companion object {
+        private const val MAX_TOKENS = 4096
+    }
+
+    val description: String = gitCommit.id.asString().take(6)
+
+    override val displayName: String = gitCommit.subject
+    override val icon = AllIcons.Vcs.CommitNode
+
+    override fun execute(project: Project, textPane: PromptTextField) {
+        textPane.addInlayElement("commit", gitCommit.id.asString().take(6), this)
+    }
+
+    fun getDiffString(): String {
+        return ProgressManager.getInstance().runProcessWithProgressSynchronously<String, Exception>(
+            {
+                val repository = GitUtil.getProjectRepository(project)
+                    ?: return@runProcessWithProgressSynchronously ""
+
+                val commitId = gitCommit.id.asString()
+                val diff = GitUtil.getCommitDiff(project, repository, commitId)
+                    .joinToString("\n")
+
+                service<EncodingManager>().truncateText(diff, MAX_TOKENS, true)
+            },
+            "Getting Diff",
+            true,
+            project
+        )
     }
 }
 

@@ -8,10 +8,10 @@ import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowContentManager;
 import org.jetbrains.annotations.NotNull;
 
-public class AskAction extends AnAction {
+public class OpenNewChatAction extends AnAction {
 
-  public AskAction() {
-    super("New Chat", "Chat with CodeGPT", Icons.Sparkle);
+  public OpenNewChatAction() {
+    super(Icons.OpenNewTab);
     EditorActionsUtil.registerAction(this);
   }
 

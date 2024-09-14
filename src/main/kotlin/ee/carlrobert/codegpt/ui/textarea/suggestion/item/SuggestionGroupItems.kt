@@ -8,16 +8,21 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.vfs.VirtualFile
 import ee.carlrobert.codegpt.CodeGPTBundle
+import ee.carlrobert.codegpt.Icons
 import ee.carlrobert.codegpt.settings.GeneralSettings
 import ee.carlrobert.codegpt.settings.documentation.DocumentationSettings
+import ee.carlrobert.codegpt.settings.persona.PersonaDetails
+import ee.carlrobert.codegpt.settings.persona.PersonaSettings
 import ee.carlrobert.codegpt.settings.service.ServiceType
 import ee.carlrobert.codegpt.ui.DocumentationDetails
+import ee.carlrobert.codegpt.util.GitUtil
 import ee.carlrobert.codegpt.util.ResourceUtil.getDefaultPersonas
 import ee.carlrobert.codegpt.util.file.FileUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.time.Instant
 import java.time.format.DateTimeParseException
+import javax.swing.Icon
 
 class FileSuggestionGroupItem(private val project: Project) : SuggestionGroupItem {
     override val displayName: String = CodeGPTBundle.get("suggestionGroupItem.files.displayName")
@@ -78,17 +83,19 @@ class PersonaSuggestionGroupItem : SuggestionGroupItem {
     override val displayName: String = CodeGPTBundle.get("suggestionGroupItem.personas.displayName")
     override val icon = AllIcons.General.User
 
-    override suspend fun getSuggestions(searchText: String?): List<SuggestionActionItem> =
-        getDefaultPersonas()
+    override suspend fun getSuggestions(searchText: String?): List<SuggestionActionItem> {
+        val userCreatedPersonas = service<PersonaSettings>().state.userCreatedPersonas
+            .map {
+                PersonaDetails(it.id, it.name ?: "Unknown", it.instructions ?: "Unknown")
+            }
+            .toMutableList()
+        return (userCreatedPersonas + getDefaultPersonas())
             .filter {
-                if (searchText.isNullOrEmpty()) {
-                    true
-                } else {
-                    it.name.contains(searchText, true)
-                }
+                searchText.isNullOrEmpty() || it.name.contains(searchText, true)
             }
             .map { PersonaActionItem(it) }
             .take(10) + listOf(CreatePersonaActionItem())
+    }
 }
 
 class DocumentationSuggestionGroupItem : SuggestionGroupItem {
@@ -119,5 +126,22 @@ class DocumentationSuggestionGroupItem : SuggestionGroupItem {
                 Instant.EPOCH
             }
         } ?: Instant.EPOCH
+    }
+}
+
+class GitSuggestionGroupItem(private val project: Project) : SuggestionGroupItem {
+    override val displayName: String = CodeGPTBundle.get("suggestionGroupItem.git.displayName")
+    override val icon: Icon = Icons.VCS
+
+    override suspend fun getSuggestions(searchText: String?): List<SuggestionActionItem> {
+        return withContext(Dispatchers.Default) {
+            GitUtil.getProjectRepository(project)?.let {
+                GitUtil.getAllRecentCommits(project, it, searchText)
+                    .take(10)
+                    .map { commit ->
+                        GitCommitActionItem(project, commit)
+                    }
+            } ?: emptyList()
+        }
     }
 }

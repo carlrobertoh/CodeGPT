@@ -133,19 +133,21 @@ public class ResponseEditorPanel extends JPanel implements Disposable {
     editorEx.setVerticalScrollbarVisible(false);
     editorEx.getContentComponent().setBorder(JBUI.Borders.emptyLeft(4));
     editorEx.setBorder(IdeBorderFactory.createBorder(ColorUtil.fromHex("#48494b")));
-    editorEx.setPermanentHeaderComponent(createHeaderComponent(editorEx, extension));
+    editorEx.setPermanentHeaderComponent(createHeaderComponent(editorEx, extension, readOnly));
     editorEx.setHeaderComponent(null);
   }
 
-  private JPanel createHeaderComponent(EditorEx editorEx, String extension) {
+  private JPanel createHeaderComponent(EditorEx editorEx, String extension, boolean readOnly) {
     var headerComponent = new JPanel(new BorderLayout());
     headerComponent.setBorder(
         JBUI.Borders.compound(
             JBUI.Borders.customLine(ColorUtil.fromHex("#48494b"), 1, 1, 0, 1),
             JBUI.Borders.empty(4)));
     headerComponent.add(createExpandLink(editorEx), BorderLayout.LINE_START);
-    headerComponent.add(createHeaderActions(extension, editorEx).getComponent(),
-        BorderLayout.LINE_END);
+    if (!readOnly) {
+      headerComponent.add(
+          createHeaderActions(extension, editorEx).getComponent(), BorderLayout.LINE_END);
+    }
     return headerComponent;
   }
 

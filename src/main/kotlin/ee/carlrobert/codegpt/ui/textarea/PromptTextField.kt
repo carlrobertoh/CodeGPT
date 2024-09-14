@@ -15,6 +15,7 @@ import com.intellij.ui.EditorTextField
 import com.intellij.ui.JBColor
 import com.intellij.util.ui.JBUI
 import ee.carlrobert.codegpt.CodeGPTBundle
+import ee.carlrobert.codegpt.CodeGPTKeys.IS_PROMPT_TEXT_FIELD_DOCUMENT
 import ee.carlrobert.codegpt.ui.textarea.suggestion.SuggestionsPopupManager
 import ee.carlrobert.codegpt.ui.textarea.suggestion.item.SuggestionActionItem
 import ee.carlrobert.codegpt.ui.textarea.suggestion.item.SuggestionItem
@@ -26,10 +27,19 @@ import java.awt.event.KeyEvent
 import java.awt.event.MouseEvent
 import java.util.*
 
-data class AppliedActionInlay(
-    val suggestion: SuggestionItem,
-    val inlay: Inlay<PromptTextFieldInlayRenderer?>,
-)
+interface AppliedActionInlay {
+    val inlay: Inlay<PromptTextFieldInlayRenderer?>
+}
+
+data class AppliedSuggestionActionInlay(
+    override val inlay: Inlay<PromptTextFieldInlayRenderer?>,
+    val suggestion: SuggestionItem?,
+) : AppliedActionInlay
+
+data class AppliedCodeActionInlay(
+    override val inlay: Inlay<PromptTextFieldInlayRenderer?>,
+    val code: String
+) : AppliedActionInlay
 
 const val AT_CHAR = '@'
 
@@ -49,6 +59,7 @@ class PromptTextField(
         background = JBColor.background()
         minimumSize = Dimension(100, 40)
         document.addDocumentListener(getDocumentListener(onTextChanged))
+        IS_PROMPT_TEXT_FIELD_DOCUMENT.set(document, true)
         setPlaceholder(CodeGPTBundle.get("toolwindow.chat.textArea.emptyText"))
         IdeEventQueue.getInstance().addDispatcher(
             PromptTextFieldEventDispatcher(this, suggestionsPopupManager, appliedInlays) {
@@ -59,28 +70,66 @@ class PromptTextField(
         )
     }
 
-    fun addInlayElement(actionPrefix: String, text: String?, actionItem: SuggestionActionItem) {
+    fun addInlayElement(actionPrefix: String, text: String?, actionItem: SuggestionActionItem?) {
         editor?.let {
             val startOffset = it.document.text.lastIndexOf(AT_CHAR)
             if (startOffset == -1) {
                 throw IllegalStateException("No '@' symbol found in the text")
             }
 
-            runUndoTransparentWriteAction {
-                it.document.deleteString(startOffset, it.document.textLength)
-                it.document.setText(it.document.text + " ")
-                appliedInlays.add(
-                    AppliedActionInlay(
-                        actionItem,
-                        it.inlayModel.addInlineElement(
-                            startOffset,
-                            true,
-                            PromptTextFieldInlayRenderer(actionPrefix, text) { inlay ->
-                                inlay.dispose()
-                            })!!,
-                    )
-                )
-                it.caretModel.moveToOffset(it.document.textLength)
+            addInlayElement(startOffset, actionPrefix, text, actionItem)
+        }
+    }
+
+    fun addInlayElement(
+        actionPrefix: String,
+        text: String,
+        fileName: String? = null,
+        tooltipText: String? = null
+    ) {
+        editor?.let {
+            addInlayElement(
+                it.caretModel.offset,
+                actionPrefix,
+                text,
+                fileName = fileName,
+                tooltipText = tooltipText
+            )
+        }
+    }
+
+    private fun addInlayElement(
+        startOffset: Int,
+        actionPrefix: String,
+        text: String?,
+        actionItem: SuggestionActionItem? = null,
+        fileName: String? = null,
+        tooltipText: String? = null
+    ) {
+        runUndoTransparentWriteAction {
+            document.deleteString(startOffset, document.textLength)
+            document.setText(document.text + " ")
+            val inlay = editor?.inlayModel?.addInlineElement(
+                startOffset,
+                true,
+                PromptTextFieldInlayRenderer(
+                    project,
+                    actionPrefix,
+                    text,
+                    fileName ?: "",
+                    tooltipText
+                ) { inlay ->
+                    appliedInlays.removeIf { appliedInlay -> appliedInlay.inlay == inlay }
+                    inlay.dispose()
+                })
+            if (inlay != null) {
+                // TODO
+                if (tooltipText == null) {
+                    appliedInlays.add(AppliedSuggestionActionInlay(inlay, actionItem))
+                } else {
+                    appliedInlays.add(AppliedCodeActionInlay(inlay, tooltipText))
+                }
+                editor?.caretModel?.moveToOffset(document.textLength)
             }
         }
     }
@@ -100,8 +149,10 @@ class PromptTextField(
     }
 
     private fun clear() {
-        runInEdt { text = "" }
-        clearInlays()
+        runInEdt {
+            text = ""
+            clearInlays()
+        }
     }
 
     private fun clearInlays() {
