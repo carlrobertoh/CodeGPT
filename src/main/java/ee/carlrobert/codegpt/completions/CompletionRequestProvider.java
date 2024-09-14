@@ -316,9 +316,13 @@ public class CompletionRequestProvider {
     prompt += "\n"+callParameters.getMessage().getPrompt();
     var builder = new WatsonxCompletionRequest.Builder(prompt);
     builder.setDecodingMethod(settings.isGreedyDecoding() ? "greedy" : "sample");
-    builder.setModelId(settings.getModel());
-    builder.setProjectId(settings.getProjectId());
-    builder.setSpaceId(settings.getSpaceId());
+    if (settings.getDeploymentId() != null && !settings.getDeploymentId().isEmpty()) {
+      builder.setDeploymentId(settings.getDeploymentId());
+    } else {
+      builder.setModelId(settings.getModel());
+      builder.setProjectId(settings.getProjectId());
+      builder.setSpaceId(settings.getSpaceId());
+    }
     builder.setMaxNewTokens(settings.getMaxNewTokens());
     builder.setMinNewTokens(settings.getMinNewTokens());
     builder.setTemperature(settings.getTemperature());

@@ -33,9 +33,13 @@ object CodeCompletionRequestFactory {
         val settings = WatsonxSettings.getCurrentState();
         val builder = WatsonxCompletionRequest.Builder(details.prefix)
         builder.setDecodingMethod(if (settings.isGreedyDecoding) "greedy" else "sample")
-        builder.setModelId(settings.model)
-        builder.setProjectId(settings.projectId)
-        builder.setSpaceId(settings.spaceId)
+        if (settings.deploymentId != null && !settings.deploymentId.isEmpty()) {
+            builder.setDeploymentId(settings.deploymentId);
+        } else {
+            builder.setModelId(settings.model)
+            builder.setProjectId(settings.projectId)
+            builder.setSpaceId(settings.spaceId)
+        }
         builder.setMaxNewTokens(settings.maxNewTokens)
         builder.setMinNewTokens(settings.minNewTokens)
         builder.setTemperature(settings.temperature)
