@@ -1,13 +1,6 @@
 package ee.carlrobert.codegpt.toolwindow.chat.ui.textarea;
 
-import static ee.carlrobert.codegpt.settings.service.ServiceType.ANTHROPIC;
-import static ee.carlrobert.codegpt.settings.service.ServiceType.AZURE;
-import static ee.carlrobert.codegpt.settings.service.ServiceType.CODEGPT;
-import static ee.carlrobert.codegpt.settings.service.ServiceType.CUSTOM_OPENAI;
-import static ee.carlrobert.codegpt.settings.service.ServiceType.GOOGLE;
-import static ee.carlrobert.codegpt.settings.service.ServiceType.LLAMA_CPP;
-import static ee.carlrobert.codegpt.settings.service.ServiceType.OLLAMA;
-import static ee.carlrobert.codegpt.settings.service.ServiceType.OPENAI;
+import static ee.carlrobert.codegpt.settings.service.ServiceType.*;
 import static java.lang.String.format;
 
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
@@ -34,9 +27,11 @@ import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.llm.client.google.models.GoogleModel;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 import javax.swing.Icon;
 import javax.swing.JComponent;
 import org.jetbrains.annotations.NotNull;
@@ -138,6 +133,14 @@ public class ModelComboBoxAction extends ComboBoxAction {
                       googleGroup.add(createGoogleModelAction(model, presentation)));
       actionGroup.add(googleGroup);
     }
+    if (availableProviders.contains(WATSONX)) {
+      actionGroup.addSeparator("IBM");
+      actionGroup.add(createModelAction(
+              WATSONX,
+              "Watsonx",
+              Icons.Watsonx,
+              presentation));
+    }
     if (availableProviders.contains(LLAMA_CPP)) {
       actionGroup.addSeparator("Local Providers");
       actionGroup.add(createModelAction(
@@ -215,6 +218,10 @@ public class ModelComboBoxAction extends ComboBoxAction {
       case GOOGLE:
         templatePresentation.setText("Google (Gemini)");
         templatePresentation.setIcon(Icons.Google);
+        break;
+      case WATSONX:
+        templatePresentation.setIcon(Icons.Watsonx);
+        templatePresentation.setText("Watsonx");
         break;
       default:
         break;

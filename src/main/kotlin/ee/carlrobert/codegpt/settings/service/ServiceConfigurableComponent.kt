@@ -15,6 +15,7 @@ import ee.carlrobert.codegpt.settings.service.codegpt.CodeGPTServiceForm
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceConfigurable
 import ee.carlrobert.codegpt.settings.service.google.GoogleSettingsConfigurable
 import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettingsConfigurable
+import ee.carlrobert.codegpt.settings.service.WatsonxServiceConfigurable
 import javax.swing.JPanel
 
 class ServiceConfigurableComponent {
@@ -60,7 +61,8 @@ class ServiceConfigurableComponent {
             "Google" to GoogleSettingsConfigurable::class.java,
             "LLaMA C/C++ (Local)" to LlamaServiceConfigurable::class.java,
             "Ollama (Local)" to OllamaSettingsConfigurable::class.java,
-        ).entries.forEach { (name, configurableClass) ->
+            "Watsonx" to WatsonxServiceConfigurable::class.java,
+            ).entries.forEach { (name, configurableClass) ->
             formBuilder.addComponent(ActionLink(name) {
                 val context = service<DataManager>().getDataContext(it.source as ActionLink)
                 val settings = Settings.KEY.getData(context)

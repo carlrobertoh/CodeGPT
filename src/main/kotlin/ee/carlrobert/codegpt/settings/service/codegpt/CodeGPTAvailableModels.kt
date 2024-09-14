@@ -48,6 +48,15 @@ object CodeGPTAvailableModels {
     val ALL_CHAT_MODELS: List<CodeGPTModel> = listOf(
         CodeGPTModel("o1-preview", "o1-preview", Icons.OpenAI, INDIVIDUAL),
         CodeGPTModel("o1-mini", "o1-mini", Icons.OpenAI, FREE),
+        CodeGPTModel("Mixtral (8x7B)", "mistralai/mixtral-8x7b-instruct-v01", Icons.Watsonx, INDIVIDUAL),
+        CodeGPTModel("Mistral Large", "mistralai/mistral-large", Icons.Watsonx, INDIVIDUAL),
+        CodeGPTModel("Llama 3.1 Instruct (70B)", "meta-llama/llama-3-1-70b-instruct", Icons.Watsonx, INDIVIDUAL),
+        CodeGPTModel("Llama 3.1 Instruct (8B)", "meta-llama/llama-3-1-8b-instruct", Icons.Watsonx, INDIVIDUAL),
+        CodeGPTModel("Llama 2 Chat (70B)", "meta-llama/llama-2-70b-chat", Icons.Watsonx, INDIVIDUAL),
+        CodeGPTModel("Llama 2 Chat (13B)", "meta-llama/llama-2-13b-chat", Icons.Watsonx, INDIVIDUAL),
+        CodeGPTModel("IBM Granite 13B Instruct V2", "ibm/granite-13b-instruct-v2", Icons.Watsonx, INDIVIDUAL),
+        CodeGPTModel("IBM Granite 13B Chat V2", "ibm/granite-13b-chat-v2", Icons.Watsonx, INDIVIDUAL),
+        CodeGPTModel("IBM Granite 20B Multilingual", "ibm/granite-20b-multilingual", Icons.Watsonx, INDIVIDUAL),
         CodeGPTModel("GPT-4o mini", "gpt-4o-mini", Icons.OpenAI, ANONYMOUS),
         CodeGPTModel("Claude 3 Opus", "claude-3-opus", Icons.Anthropic, INDIVIDUAL),
         CodeGPTModel("Claude 3.5 Sonnet", "claude-3.5-sonnet", Icons.Anthropic, INDIVIDUAL),
@@ -65,6 +74,11 @@ object CodeGPTAvailableModels {
     @JvmStatic
     val ALL_CODE_MODELS: List<CodeGPTModel> = listOf(
         DEFAULT_CODE_MODEL,
+        CodeGPTModel("Code Llama 34B Instruct", "codellama/codellama-34b-instruct", Icons.Watsonx, INDIVIDUAL),
+        CodeGPTModel("IBM Granite 3B Code Instruct", "ibm/granite-3b-code-instruct", Icons.Watsonx, INDIVIDUAL),
+        CodeGPTModel("IBM Granite 8B Code Instruct", "ibm/granite-8b-code-instruct", Icons.Watsonx, INDIVIDUAL),
+        CodeGPTModel("IBM Granite 20B Code Instruct", "ibm/granite-20b-code-instruct", Icons.Watsonx, INDIVIDUAL),
+        CodeGPTModel("IBM Granite 34B Code Instruct", "ibm/granite-34b-code-instruct", Icons.Watsonx, INDIVIDUAL),
         CodeGPTModel("StarCoder (16B)", "starcoder-16b", Icons.CodeGPTModel, FREE),
         CodeGPTModel("StarCoder (7B) - FREE", "starcoder-7b", Icons.CodeGPTModel, FREE),
         CodeGPTModel("WizardCoder Python (34B)", "wizardcoder-python", Icons.CodeGPTModel, FREE),

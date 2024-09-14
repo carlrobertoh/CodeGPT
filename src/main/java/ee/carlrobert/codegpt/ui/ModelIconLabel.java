@@ -30,6 +30,9 @@ public class ModelIconLabel extends JBLabel {
     if ("google.chat.completion".equals(clientCode)) {
       setIcon(Icons.Google);
     }
+    if ("watsonx.chat.completion".equals(clientCode)) {
+      setIcon(Icons.Watsonx);
+    }
     setText(formatModelName(modelCode));
     setFont(JBFont.small());
     setHorizontalAlignment(SwingConstants.LEADING);

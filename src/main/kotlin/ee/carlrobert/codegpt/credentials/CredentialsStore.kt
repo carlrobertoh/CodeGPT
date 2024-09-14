@@ -43,5 +43,6 @@ object CredentialsStore {
         LLAMA_API_KEY,
         GOOGLE_API_KEY,
         OLLAMA_API_KEY,
+        WATSONX_API_KEY
     }
 }

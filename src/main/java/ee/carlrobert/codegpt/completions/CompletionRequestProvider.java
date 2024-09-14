@@ -28,6 +28,7 @@ import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
+import ee.carlrobert.codegpt.settings.service.watsonx.WatsonxSettings;
 import ee.carlrobert.codegpt.util.file.FileUtil;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeBase64Source;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionDetailedMessage;
@@ -55,6 +56,7 @@ import ee.carlrobert.llm.client.openai.completion.request.OpenAIImageUrl;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIMessageImageURLContent;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIMessageTextContent;
 import ee.carlrobert.llm.client.openai.completion.request.RequestDocumentationDetails;
+import ee.carlrobert.llm.client.watsonx.completion.WatsonxCompletionRequest;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -305,6 +307,33 @@ public class CompletionRequestProvider {
     } catch (JsonProcessingException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  public WatsonxCompletionRequest buildWatsonxChatCompletionRequest(
+          CallParameters callParameters) {
+    var settings = WatsonxSettings.getCurrentState();
+    String prompt = PersonaSettings.getSystemPrompt();
+    prompt += "\n"+callParameters.getMessage().getPrompt();
+    var builder = new WatsonxCompletionRequest.Builder(prompt);
+    builder.setDecodingMethod(settings.isGreedyDecoding() ? "greedy" : "sample");
+    if (settings.getDeploymentId() != null && !settings.getDeploymentId().isEmpty()) {
+      builder.setDeploymentId(settings.getDeploymentId());
+    } else {
+      builder.setModelId(settings.getModel());
+      builder.setProjectId(settings.getProjectId());
+      builder.setSpaceId(settings.getSpaceId());
+    }
+    builder.setMaxNewTokens(settings.getMaxNewTokens());
+    builder.setMinNewTokens(settings.getMinNewTokens());
+    builder.setTemperature(settings.getTemperature());
+    builder.setStopSequences(settings.getStopSequences().isEmpty() ? null : settings.getStopSequences().split(","));
+    builder.setTopP(settings.getTopP());
+    builder.setTopK(settings.getTopK());
+    builder.setIncludeStopSequence(settings.getIncludeStopSequence());
+    builder.setRandomSeed(settings.getRandomSeed());
+    builder.setRepetitionPenalty(settings.getRepetitionPenalty());
+    builder.setStream(true);
+    return builder.build();
   }
 
   public ClaudeCompletionRequest buildAnthropicChatCompletionRequest(

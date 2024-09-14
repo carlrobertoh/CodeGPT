@@ -18,6 +18,7 @@ import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
 import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings
+import ee.carlrobert.codegpt.settings.service.watsonx.WatsonxSettings
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.channelFlow
@@ -95,6 +96,7 @@ class DebouncedCodeCompletionProvider : DebouncedInlineCompletionProvider() {
             ServiceType.CUSTOM_OPENAI -> service<CustomServiceSettings>().state.codeCompletionSettings.codeCompletionsEnabled
             ServiceType.LLAMA_CPP -> LlamaSettings.isCodeCompletionsPossible()
             ServiceType.OLLAMA -> service<OllamaSettings>().state.codeCompletionsEnabled
+            ServiceType.WATSONX -> WatsonxSettings.isCodeCompletionsPossible()
             ServiceType.ANTHROPIC,
             ServiceType.AZURE,
             ServiceType.GOOGLE,

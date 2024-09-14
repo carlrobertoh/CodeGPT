@@ -8,22 +8,53 @@ import ee.carlrobert.codegpt.completions.llama.LlamaModel
 import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey
 import ee.carlrobert.codegpt.credentials.CredentialsStore.getCredential
 import ee.carlrobert.codegpt.settings.configuration.Placeholder.*
+import ee.carlrobert.codegpt.settings.persona.PersonaSettings.Companion.getSystemPrompt
 import ee.carlrobert.codegpt.settings.service.codegpt.CodeGPTServiceSettings
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettingsState
 import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings
 import ee.carlrobert.llm.client.codegpt.request.CodeCompletionRequest
+import ee.carlrobert.codegpt.settings.service.watsonx.WatsonxSettings
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest
 import ee.carlrobert.llm.client.ollama.completion.request.OllamaCompletionRequest
 import ee.carlrobert.llm.client.ollama.completion.request.OllamaParameters
 import ee.carlrobert.llm.client.openai.completion.request.OpenAITextCompletionRequest
+import ee.carlrobert.llm.client.watsonx.completion.WatsonxCompletionRequest
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.nio.charset.StandardCharsets
 
 object CodeCompletionRequestFactory {
+
+    @JvmStatic
+    fun buildWatsonxRequest(details: InfillRequest): WatsonxCompletionRequest {
+        val settings = WatsonxSettings.getCurrentState();
+        val builder = WatsonxCompletionRequest.Builder(details.prefix)
+        builder.setDecodingMethod(if (settings.isGreedyDecoding) "greedy" else "sample")
+        if (settings.deploymentId != null && !settings.deploymentId.isEmpty()) {
+            builder.setDeploymentId(settings.deploymentId);
+        } else {
+            builder.setModelId(settings.model)
+            builder.setProjectId(settings.projectId)
+            builder.setSpaceId(settings.spaceId)
+        }
+        builder.setMaxNewTokens(settings.maxNewTokens)
+        builder.setMinNewTokens(settings.minNewTokens)
+        builder.setTemperature(settings.temperature)
+        builder.setStopSequences(
+            if (settings.stopSequences.isEmpty()) null else settings.stopSequences.split(",".toRegex())
+                .dropLastWhile { it.isEmpty() }
+                .toTypedArray())
+        builder.setTopP(settings.topP)
+        builder.setTopK(settings.topK)
+        builder.setIncludeStopSequence(settings.includeStopSequence)
+        builder.setRandomSeed(settings.randomSeed)
+        builder.setRepetitionPenalty(settings.repetitionPenalty)
+        builder.setStream(true)
+        return builder.build()
+    }
 
     private const val MAX_TOKENS = 128
 
@@ -158,6 +189,7 @@ object CodeCompletionRequestFactory {
                     ?.replace(SUFFIX.code, suffix) ?: value
             }
         }
+        return 36
     }
 
     private fun getCompletionContext(request: InfillRequest): Pair<String, String> {

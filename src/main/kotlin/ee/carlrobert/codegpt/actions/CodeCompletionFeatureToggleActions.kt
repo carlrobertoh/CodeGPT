@@ -12,6 +12,7 @@ import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
 import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings
+import ee.carlrobert.codegpt.settings.service.watsonx.WatsonxSettings
 
 abstract class CodeCompletionFeatureToggleActions(
     private val enableFeatureAction: Boolean
@@ -19,14 +20,11 @@ abstract class CodeCompletionFeatureToggleActions(
 
     override fun actionPerformed(e: AnActionEvent) = when (GeneralSettings.getSelectedService()) {
         CODEGPT -> service<CodeGPTServiceSettings>().state.codeCompletionSettings::codeCompletionsEnabled::set
-
         OPENAI -> OpenAISettings.getCurrentState()::setCodeCompletionsEnabled
-
         LLAMA_CPP -> LlamaSettings.getCurrentState()::setCodeCompletionsEnabled
-
         OLLAMA -> service<OllamaSettings>().state::codeCompletionsEnabled::set
-
         CUSTOM_OPENAI -> service<CustomServiceSettings>().state.codeCompletionSettings::codeCompletionsEnabled::set
+        WATSONX -> WatsonxSettings.getCurrentState()::setCodeCompletionsEnabled
 
         ANTHROPIC,
         AZURE,
@@ -44,7 +42,9 @@ abstract class CodeCompletionFeatureToggleActions(
             OPENAI,
             CUSTOM_OPENAI,
             LLAMA_CPP,
-            OLLAMA -> true
+            OLLAMA,
+            WATSONX
+            -> true
 
             ANTHROPIC,
             AZURE,

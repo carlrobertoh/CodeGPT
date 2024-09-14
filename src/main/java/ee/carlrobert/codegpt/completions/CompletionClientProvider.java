@@ -10,6 +10,7 @@ import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
+import ee.carlrobert.codegpt.settings.service.watsonx.WatsonxSettings;
 import ee.carlrobert.llm.client.anthropic.ClaudeClient;
 import ee.carlrobert.llm.client.azure.AzureClient;
 import ee.carlrobert.llm.client.azure.AzureCompletionRequestParams;
@@ -18,6 +19,7 @@ import ee.carlrobert.llm.client.google.GoogleClient;
 import ee.carlrobert.llm.client.llama.LlamaClient;
 import ee.carlrobert.llm.client.ollama.OllamaClient;
 import ee.carlrobert.llm.client.openai.OpenAIClient;
+import ee.carlrobert.llm.client.watsonx.WatsonxClient;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.concurrent.TimeUnit;
@@ -30,6 +32,24 @@ public class CompletionClientProvider {
     return new CodeGPTClient(
         getCredential(CredentialKey.CODEGPT_API_KEY),
         getDefaultClientBuilder());
+  }
+
+  public static WatsonxClient getWatsonxClient() {
+    String regionCode = switch(WatsonxSettings.getCurrentState().getRegion()) {
+      case "Dallas" -> "us-south";
+      case "Frankfurt" -> "eu-de";
+      case "London" -> "eu-gb";
+      case "Tokyo" -> "jp-tok";
+      default -> "us-south";
+    };
+    String host = WatsonxSettings.getCurrentState().isOnPrem() ? WatsonxSettings.getCurrentState().getOnPremHost() : "https://" + regionCode + ".ml.cloud.ibm.com";
+    return new WatsonxClient.Builder(getCredential(CredentialKey.WATSONX_API_KEY))
+            .setApiVersion(WatsonxSettings.getCurrentState().getApiVersion())
+            .setIsOnPrem(WatsonxSettings.getCurrentState().isOnPrem())
+            .setHost(host)
+            .setUsername(WatsonxSettings.getCurrentState().getUsername())
+            .setIsZenApiKey(WatsonxSettings.getCurrentState().isZenApiKey())
+            .build(getDefaultClientBuilder());
   }
 
   public static OpenAIClient getOpenAIClient() {

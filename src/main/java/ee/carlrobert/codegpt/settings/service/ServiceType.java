@@ -12,7 +12,9 @@ public enum ServiceType {
   AZURE("AZURE", "service.azure.title", "azure.chat.completion"),
   GOOGLE("GOOGLE", "service.google.title", "google.chat.completion"),
   LLAMA_CPP("LLAMA_CPP", "service.llama.title", "llama.chat.completion"),
-  OLLAMA("OLLAMA", "service.ollama.title", "ollama.chat.completion");
+  OLLAMA("OLLAMA", "service.ollama.title", "ollama.chat.completion"),
+  WATSONX("WATSONX", "service.watsonx.title", "watsonx.chat.completion");
+
 
   private final String code;
   private final String label;
