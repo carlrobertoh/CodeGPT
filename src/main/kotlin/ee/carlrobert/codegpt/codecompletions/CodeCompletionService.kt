@@ -8,6 +8,7 @@ import ee.carlrobert.codegpt.codecompletions.CodeCompletionRequestFactory.buildL
 import ee.carlrobert.codegpt.codecompletions.CodeCompletionRequestFactory.buildOllamaRequest
 import ee.carlrobert.codegpt.codecompletions.CodeCompletionRequestFactory.buildOpenAIRequest
 import ee.carlrobert.codegpt.completions.CompletionClientProvider
+import ee.carlrobert.codegpt.completions.llama.LlamaModel
 import ee.carlrobert.codegpt.settings.GeneralSettings
 import ee.carlrobert.codegpt.settings.service.ServiceType
 import ee.carlrobert.codegpt.settings.service.ServiceType.*
@@ -34,7 +35,7 @@ class CodeCompletionService {
                 .body
                 .getOrDefault("model", null) as String
 
-            LLAMA_CPP -> "LlamaSettings.getCurrentState()."
+            LLAMA_CPP -> LlamaModel.findByHuggingFaceModel(LlamaSettings.getCurrentState().huggingFaceModel).label
             OLLAMA -> service<OllamaSettings>().state.model
             else -> null
         }

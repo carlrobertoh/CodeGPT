@@ -50,6 +50,23 @@ enum class InfillPromptTemplate(val label: String, val stopTokens: List<String>?
             }
         }
     },
+    CODE_QWEN_2_5("CodeQwen2.5", listOf()) {
+        override fun buildPrompt(infillDetails: InfillRequest): String {
+            val infillPrompt =
+                "<|fim_prefix|> ${infillDetails.prefix} <|fim_suffix|>${infillDetails.suffix} <|fim_middle|>"
+            return if (infillDetails.context == null || infillDetails.context.contextElements.isEmpty()) {
+                infillPrompt
+            } else {
+                "<|repo_name|>${infillDetails.context.getRepoName()}\n" +
+                        infillDetails.context.contextElements.map {
+                            "<|file_sep|>${it.filePath()} \n" +
+                                    it.text()
+                        }.joinToString("") { it + "\n" } +
+                        "<|file_sep|>${infillDetails.context.enclosingElement.filePath()} \n" +
+                        infillPrompt
+            }
+        }
+    },
     STABILITY("Stability AI", listOf("<|endoftext|>")) {
         override fun buildPrompt(infillDetails: InfillRequest): String {
             val infillPrompt =
