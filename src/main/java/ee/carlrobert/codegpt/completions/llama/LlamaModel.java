@@ -172,11 +172,16 @@ public enum LlamaModel {
           HuggingFaceModel.CODE_QWEN_1_5_7B_Q6_K)),
   CODE_QWEN2_5_CODER(
       "CodeQwen2.5 Coder", """
-          Qwen2.5-Coder is the latest series of Code-Specific Qwen large language models (formerly known as CodeQwen).\
+          Qwen2.5-Coder is the latest series of Code-Specific Qwen large language models \
+          (formerly known as CodeQwen).
           It brings the following improvements upon CodeQwen1.5:
           
-          - Significantly improvements in code generation, code reasoning and code fixing. Base on the strong Qwen2.5, we scale up the training tokens into 5.5 trillion including source code, text-code grounding, Synthetic data, etc.
-          - A more comprehensive foundation for real-world applications such as Code Agents. Not only enhancing coding capabilities but also maintaining its strengths in mathematics and general competencies.
+          - Significantly improvements in code generation, code reasoning and code fixing. \
+          Base on the strong Qwen2.5, we scale up the training tokens into 5.5 trillion including \
+          source code, text-code grounding, Synthetic data, etc.
+          - A more comprehensive foundation for real-world applications such as Code Agents. \
+          Not only enhancing coding capabilities but also maintaining its strengths in \
+          mathematics and general competencies.
           - Long-context Support up to 128K tokens.
           """,
       PromptTemplate.CODE_QWEN,

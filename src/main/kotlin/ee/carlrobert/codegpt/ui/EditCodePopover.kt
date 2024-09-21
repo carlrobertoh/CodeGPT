@@ -21,7 +21,6 @@ import com.intellij.util.ui.JBUI
 import ee.carlrobert.codegpt.CodeGPTBundle
 import ee.carlrobert.codegpt.actions.editor.EditCodeSubmissionHandler
 import ee.carlrobert.codegpt.settings.GeneralSettings
-import ee.carlrobert.codegpt.settings.service.ServiceType.CODEGPT
 import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.ModelComboBoxAction
 import ee.carlrobert.codegpt.util.ApplicationUtil
 import kotlinx.coroutines.CoroutineScope
@@ -195,8 +194,7 @@ class EditCodePopover(private val editor: Editor) {
                     ModelComboBoxAction(
                         ApplicationUtil.findCurrentProject(),
                         {},
-                        GeneralSettings.getSelectedService(),
-                        listOf(CODEGPT)
+                        GeneralSettings.getSelectedService()
                     )
                         .createCustomComponent(ActionPlaces.UNKNOWN)
                 ).align(AlignX.RIGHT)

@@ -47,6 +47,7 @@ interface ShortcutsTestMixin {
     GeneralSettings.getCurrentState().selectedService = ServiceType.LLAMA_CPP
     LlamaSettings.getCurrentState().serverPort = null
     LlamaSettings.getCurrentState().isCodeCompletionsEnabled = codeCompletionsEnabled
+    LlamaSettings.getCurrentState().huggingFaceModel = HuggingFaceModel.CODE_LLAMA_7B_Q4
   }
 
   fun useOllamaService() {

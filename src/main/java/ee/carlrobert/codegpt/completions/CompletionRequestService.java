@@ -6,6 +6,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import ee.carlrobert.codegpt.codecompletions.CodeCompletionRequestFactory;
 import ee.carlrobert.codegpt.codecompletions.CodeCompletionRequestProvider;
 import ee.carlrobert.codegpt.codecompletions.InfillRequest;
+import ee.carlrobert.codegpt.actions.editor.EditCodeRequestParams;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
 import ee.carlrobert.codegpt.credentials.CredentialsStore;
@@ -16,7 +17,6 @@ import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettings;
 import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
 import ee.carlrobert.codegpt.settings.service.codegpt.CodeGPTServiceSettings;
-import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings;
 import ee.carlrobert.codegpt.settings.service.google.GoogleSettings;
 import ee.carlrobert.codegpt.settings.service.google.GoogleSettingsState;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
@@ -83,10 +83,9 @@ public final class CompletionRequestService {
       CallParameters callParameters,
       CompletionEventListener<String> eventListener) {
     var application = ApplicationManager.getApplication();
-    var requestProvider = new CompletionRequestProvider(callParameters.getConversation());
     return switch (GeneralSettings.getSelectedService()) {
       case CODEGPT -> CompletionClientProvider.getCodeGPTClient().getChatCompletionAsync(
-          requestProvider.buildOpenAIChatCompletionRequest(
+          CompletionRequestProvider.buildOpenAIChatCompletionRequest(
               application.getService(CodeGPTServiceSettings.class)
                   .getState()
                   .getChatCompletionSettings()
@@ -95,38 +94,83 @@ public final class CompletionRequestService {
           eventListener
       );
       case OPENAI -> CompletionClientProvider.getOpenAIClient().getChatCompletionAsync(
-          requestProvider.buildOpenAIChatCompletionRequest(
+          CompletionRequestProvider.buildOpenAIChatCompletionRequest(
               OpenAISettings.getCurrentState().getModel(),
               callParameters),
           eventListener);
       case CUSTOM_OPENAI -> getCustomOpenAIChatCompletionAsync(
-          requestProvider.buildCustomOpenAIChatCompletionRequest(
-              application.getService(CustomServiceSettings.class)
-                  .getState()
-                  .getChatCompletionSettings(),
-              callParameters),
+          CompletionRequestProvider.buildCustomOpenAIChatCompletionRequest(callParameters),
           eventListener);
       case ANTHROPIC -> CompletionClientProvider.getClaudeClient().getCompletionAsync(
-          requestProvider.buildAnthropicChatCompletionRequest(callParameters),
+          CompletionRequestProvider.buildAnthropicChatCompletionRequest(callParameters),
           eventListener);
       case AZURE -> CompletionClientProvider.getAzureClient().getChatCompletionAsync(
-          requestProvider.buildOpenAIChatCompletionRequest(null, callParameters),
+          CompletionRequestProvider.buildOpenAIChatCompletionRequest(null, callParameters),
           eventListener);
       case LLAMA_CPP -> CompletionClientProvider.getLlamaClient().getChatCompletionAsync(
-          requestProvider.buildLlamaCompletionRequest(
+          CompletionRequestProvider.buildLlamaCompletionRequest(
               callParameters.getMessage(),
+              callParameters.getConversation(),
               callParameters.getConversationType()),
           eventListener);
       case OLLAMA -> CompletionClientProvider.getOllamaClient().getChatCompletionAsync(
-          requestProvider.buildOllamaChatCompletionRequest(callParameters),
+          CompletionRequestProvider.buildOllamaChatCompletionRequest(callParameters),
           eventListener);
       case GOOGLE -> {
         var settings = application.getService(GoogleSettings.class).getState();
         yield CompletionClientProvider.getGoogleClient().getChatCompletionAsync(
-            requestProvider.buildGoogleChatCompletionRequest(
+            CompletionRequestProvider.buildGoogleChatCompletionRequest(
                 settings.getModel(),
                 callParameters),
             settings.getModel(),
+            eventListener);
+      }
+    };
+  }
+
+  public EventSource getEditCodeCompletionAsync(
+      EditCodeRequestParams params,
+      CompletionEventListener<String> eventListener) {
+    var input = "%s\n\n%s".formatted(params.getPrompt(), params.getSelectedText());
+    return switch (GeneralSettings.getSelectedService()) {
+      case CODEGPT -> CompletionClientProvider.getCodeGPTClient().getChatCompletionAsync(
+          CompletionRequestProvider.buildEditCodeRequest(
+              input,
+              ApplicationManager.getApplication().getService(CodeGPTServiceSettings.class)
+                  .getState()
+                  .getChatCompletionSettings()
+                  .getModel()
+          ),
+          eventListener
+      );
+      case OPENAI -> CompletionClientProvider.getOpenAIClient().getChatCompletionAsync(
+          CompletionRequestProvider.buildEditCodeRequest(
+              input,
+              OpenAISettings.getCurrentState().getModel()),
+          eventListener);
+      case CUSTOM_OPENAI -> getCustomOpenAIChatCompletionAsync(
+          CompletionRequestProvider.buildCustomOpenAIEditCodeRequest(input),
+          eventListener);
+      case ANTHROPIC -> CompletionClientProvider.getClaudeClient().getCompletionAsync(
+          CompletionRequestProvider.buildAnthropicEditCodeRequest(input),
+          eventListener);
+      case AZURE -> CompletionClientProvider.getAzureClient().getChatCompletionAsync(
+          CompletionRequestProvider.buildEditCodeRequest(input, null),
+          eventListener);
+      case LLAMA_CPP -> CompletionClientProvider.getLlamaClient().getChatCompletionAsync(
+          CompletionRequestProvider.buildLlamaEditCodeRequest(input),
+          eventListener);
+      case OLLAMA -> CompletionClientProvider.getOllamaClient().getChatCompletionAsync(
+          CompletionRequestProvider.buildOllamaEditCodeRequest(input),
+          eventListener);
+      case GOOGLE -> {
+        var model =
+            ApplicationManager.getApplication().getService(GoogleSettings.class)
+                .getState()
+                .getModel();
+        yield CompletionClientProvider.getGoogleClient().getChatCompletionAsync(
+            CompletionRequestProvider.buildGoogleEditCodeRequest(input),
+            model,
             eventListener);
       }
     };

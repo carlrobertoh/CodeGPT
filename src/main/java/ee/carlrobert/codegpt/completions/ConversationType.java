@@ -7,4 +7,5 @@ public enum ConversationType {
   FIX_COMPILE_ERRORS,
   MULTI_FILE,
   INLINE_COMPLETION,
+  EDIT_CODE
 }
