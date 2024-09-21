@@ -4,10 +4,8 @@ import com.intellij.openapi.components.service
 import ee.carlrobert.codegpt.conversations.Conversation
 import ee.carlrobert.codegpt.conversations.ConversationService
 import ee.carlrobert.codegpt.conversations.message.Message
-import ee.carlrobert.codegpt.settings.GeneralSettings
 import ee.carlrobert.codegpt.settings.persona.DEFAULT_PROMPT
 import ee.carlrobert.codegpt.settings.persona.PersonaSettings
-import ee.carlrobert.codegpt.settings.service.ServiceType
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.groups.Tuple
@@ -24,8 +22,7 @@ class CompletionRequestProviderTest : IntegrationTest() {
     conversation.addMessage(firstMessage)
     conversation.addMessage(secondMessage)
 
-    val request = CompletionRequestProvider(conversation)
-      .buildOpenAIChatCompletionRequest(
+    val request = CompletionRequestProvider.buildOpenAIChatCompletionRequest(
         OpenAIChatCompletionModel.GPT_3_5.code,
         CallParameters(
           conversation,
@@ -54,8 +51,7 @@ class CompletionRequestProviderTest : IntegrationTest() {
     conversation.addMessage(firstMessage)
     conversation.addMessage(secondMessage)
 
-    val request = CompletionRequestProvider(conversation)
-      .buildOpenAIChatCompletionRequest(
+    val request = CompletionRequestProvider.buildOpenAIChatCompletionRequest(
         OpenAIChatCompletionModel.GPT_3_5.code,
         CallParameters(
           conversation,
@@ -84,8 +80,7 @@ class CompletionRequestProviderTest : IntegrationTest() {
     conversation.addMessage(firstMessage)
     conversation.addMessage(secondMessage)
 
-    val request = CompletionRequestProvider(conversation)
-      .buildOpenAIChatCompletionRequest(
+    val request = CompletionRequestProvider.buildOpenAIChatCompletionRequest(
         OpenAIChatCompletionModel.GPT_3_5.code,
         CallParameters(
           conversation,
@@ -115,8 +110,7 @@ class CompletionRequestProviderTest : IntegrationTest() {
     conversation.addMessage(remainingMessage)
     conversation.discardTokenLimits()
 
-    val request = CompletionRequestProvider(conversation)
-      .buildOpenAIChatCompletionRequest(
+    val request = CompletionRequestProvider.buildOpenAIChatCompletionRequest(
         OpenAIChatCompletionModel.GPT_3_5.code,
         CallParameters(
           conversation,
@@ -142,8 +136,7 @@ class CompletionRequestProviderTest : IntegrationTest() {
     conversation.addMessage(createDummyMessage(1500))
 
     assertThrows(TotalUsageExceededException::class.java) {
-      CompletionRequestProvider(conversation)
-        .buildOpenAIChatCompletionRequest(
+      CompletionRequestProvider.buildOpenAIChatCompletionRequest(
           OpenAIChatCompletionModel.GPT_3_5.code,
           CallParameters(
             conversation,

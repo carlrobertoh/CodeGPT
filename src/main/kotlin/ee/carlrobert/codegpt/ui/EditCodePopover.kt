@@ -24,18 +24,17 @@ import com.intellij.util.ui.JBUI
 import ee.carlrobert.codegpt.CodeGPTBundle
 import ee.carlrobert.codegpt.actions.editor.EditCodeSubmissionHandler
 import ee.carlrobert.codegpt.settings.GeneralSettings
-import ee.carlrobert.codegpt.settings.service.ServiceType.CODEGPT
 import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.ModelComboBoxAction
 import ee.carlrobert.codegpt.util.ApplicationUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import java.awt.event.KeyAdapter
+import java.awt.event.KeyEvent
 import javax.swing.JButton
 import javax.swing.JPanel
 import javax.swing.event.DocumentEvent
-import java.awt.event.KeyEvent
-import java.awt.event.KeyAdapter
 
 data class ObservableProperties(
     val submitted: AtomicBooleanProperty = AtomicBooleanProperty(false),
@@ -122,8 +121,7 @@ class EditCodePopover(private val editor: Editor) {
                     ModelComboBoxAction(
                         ApplicationUtil.findCurrentProject(),
                         {},
-                        GeneralSettings.getSelectedService(),
-                        listOf(CODEGPT)
+                        GeneralSettings.getSelectedService()
                     )
                         .createCustomComponent(ActionPlaces.UNKNOWN)
                 ).align(AlignX.RIGHT)

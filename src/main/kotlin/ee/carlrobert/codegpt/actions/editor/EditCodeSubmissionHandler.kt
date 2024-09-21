@@ -8,10 +8,10 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.util.TextRange
 import com.intellij.openapi.util.text.StringUtil
 import com.jetbrains.rd.util.AtomicReference
-import ee.carlrobert.codegpt.completions.CompletionClientProvider
-import ee.carlrobert.codegpt.completions.CompletionRequestProvider
-import ee.carlrobert.codegpt.settings.service.codegpt.CodeGPTServiceSettings
+import ee.carlrobert.codegpt.completions.CompletionRequestService
 import ee.carlrobert.codegpt.ui.ObservableProperties
+
+data class EditCodeRequestParams(val prompt: String, val selectedText: String)
 
 class EditCodeSubmissionHandler(
     private val editor: Editor,
@@ -35,12 +35,8 @@ class EditCodeSubmissionHandler(
         }
         runInEdt { editor.selectionModel.removeSelection() }
 
-        // TODO: Support other providers
-        CompletionClientProvider.getCodeGPTClient().getChatCompletionAsync(
-            CompletionRequestProvider.buildEditCodeRequest(
-                "$userPrompt\n\n$selectedText",
-                service<CodeGPTServiceSettings>().state.chatCompletionSettings.model
-            ),
+        service<CompletionRequestService>().getEditCodeCompletionAsync(
+            EditCodeRequestParams(userPrompt, selectedText),
             EditCodeCompletionListener(editor, observableProperties, selectionTextRange)
         )
     }
