@@ -120,6 +120,18 @@ public enum HuggingFaceModel {
   CODE_QWEN_1_5_7B_Q6_K(7, 6, "Qwen_-_CodeQwen1.5-7B-Chat-gguf",
           "CodeQwen1.5-7B-Chat.Q6_K.gguf", "RichardErkhov", 6.38),
 
+  CODE_QWEN_2_5_1_5B_Q6_K(1, 6, "Qwen2.5-Coder-1.5B-Instruct-GGUF",
+      "qwen2.5-coder-1.5b-instruct-q6_k.gguf", "Qwen", 1.46),
+  CODE_QWEN_2_5_1_5B_Q8_0(1, 8, "Qwen2.5-Coder-1.5B-Instruct-GGUF",
+      "qwen2.5-coder-1.5b-instruct-q8_0.gguf", "Qwen", 1.89),
+
+  CODE_QWEN_2_5_7B_Q4_K_M(7, 4, "Qwen2.5-Coder-7B-Instruct-GGUF",
+      "Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf", "bartowski", 4.68),
+  CODE_QWEN_2_5_7B_Q6_K(7, 6, "Qwen2.5-Coder-7B-Instruct-GGUF",
+      "Qwen2.5-Coder-7B-Instruct-Q6_K.gguf", "bartowski", 6.25),
+  CODE_QWEN_2_5_7B_Q8_0(7, 8, "Qwen2.5-Coder-7B-Instruct-GGUF",
+      "Qwen2.5-Coder-7B-Instruct-Q8_0.gguf", "bartowski", 8.1),
+
   STABLE_CODE_3B_Q3_K_M(SC3, 3, "stable-code-instruct-3b-Q3_K_M.gguf", 1.39),
   STABLE_CODE_3B_Q4_K_M(SC3, 4, "stable-code-instruct-3b-Q4_K_M.gguf", 1.71),
   STABLE_CODE_3B_Q5_K_M(SC3, 5, "stable-code-instruct-3b-Q5_K_M.gguf", 1.99),
