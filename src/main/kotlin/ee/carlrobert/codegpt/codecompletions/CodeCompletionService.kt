@@ -8,6 +8,7 @@ import ee.carlrobert.codegpt.codecompletions.CodeCompletionRequestFactory.buildL
 import ee.carlrobert.codegpt.codecompletions.CodeCompletionRequestFactory.buildOllamaRequest
 import ee.carlrobert.codegpt.codecompletions.CodeCompletionRequestFactory.buildOpenAIRequest
 import ee.carlrobert.codegpt.completions.CompletionClientProvider
+import ee.carlrobert.codegpt.completions.llama.LlamaModel
 import ee.carlrobert.codegpt.settings.GeneralSettings
 import ee.carlrobert.codegpt.settings.service.ServiceType
 import ee.carlrobert.codegpt.settings.service.ServiceType.*
@@ -23,6 +24,22 @@ import okhttp3.sse.EventSources.createFactory
 
 @Service(Service.Level.PROJECT)
 class CodeCompletionService {
+
+    // TODO: Consolidate logic in ModelComboBoxAction
+    fun getSelectedModelCode(): String? {
+        return when (service<GeneralSettings>().state.selectedService) {
+            CODEGPT -> service<CodeGPTServiceSettings>().state.codeCompletionSettings.model
+            OPENAI -> "gpt-3.5-turbo-instruct"
+            CUSTOM_OPENAI -> service<CustomServiceSettings>().state
+                .codeCompletionSettings
+                .body
+                .getOrDefault("model", null) as String
+
+            LLAMA_CPP -> LlamaModel.findByHuggingFaceModel(LlamaSettings.getCurrentState().huggingFaceModel).label
+            OLLAMA -> service<OllamaSettings>().state.model
+            else -> null
+        }
+    }
 
     fun isCodeCompletionsEnabled(selectedService: ServiceType): Boolean =
         when (selectedService) {

@@ -162,7 +162,7 @@ public enum PromptTemplate {
               .toString();
     }
   },
-  CODE_QWEN("CodeQwen1.5", List.of("<|endoftext|>")) {
+  CODE_QWEN("CodeQwen", List.of("<|endoftext|>")) {
     @Override
     public String buildPrompt(String systemPrompt, String userPrompt, List<Message> history) {
       StringBuilder prompt = new StringBuilder();
