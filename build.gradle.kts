@@ -73,12 +73,6 @@ tasks.register<Exec>("updateSubmodules") {
   commandLine("git", "submodule", "update", "--init", "--recursive")
 }
 
-tasks.register<Copy>("copyLlamaSubmodule") {
-  dependsOn("updateSubmodules")
-  from(layout.projectDirectory.file("src/main/cpp/llama.cpp"))
-  into(layout.buildDirectory.dir("idea-sandbox/plugins/CodeGPT/llama.cpp"))
-}
-
 tasks {
   wrapper {
     gradleVersion = properties("gradleVersion").get()
@@ -126,7 +120,10 @@ tasks {
 
   prepareSandbox {
     enabled = true
-    dependsOn("copyLlamaSubmodule")
+    dependsOn("updateSubmodules")
+    from("src/main/cpp/llama.cpp") {
+      into("CodeGPT/llama.cpp")
+    }
   }
 
   signPlugin {
