@@ -8,6 +8,7 @@ import com.intellij.ui.EnumComboBoxModel;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
+import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
 import java.awt.FlowLayout;
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -31,7 +32,8 @@ public abstract class BasePromptTemplatePanel<T extends Enum<T>> extends JPanel 
     super(new FlowLayout(FlowLayout.LEADING, 0, 0));
     this.enumClass = enumClass;
     promptTemplateComboBox = new ComboBox<>(new EnumComboBoxModel<>(enumClass));
-    promptTemplateComboBox.setSelectedItem(initiallySelectedTemplate);
+    promptTemplateComboBox.setSelectedItem(
+        initiallySelectedTemplate == null ? PromptTemplate.CODE_QWEN : initiallySelectedTemplate);
     promptTemplateComboBox.setEnabled(enabled);
     promptTemplateComboBox.addItemListener(
         item -> updatePromptTemplateHelpTooltip(enumClass.cast(item.getItem())));
@@ -45,7 +47,9 @@ public abstract class BasePromptTemplatePanel<T extends Enum<T>> extends JPanel 
         CodeGPTBundle.get(helpTextKey),
         true);
     promptTemplateHelpText.setBorder(JBUI.Borders.empty(0, 4));
-    updatePromptTemplateHelpTooltip(initiallySelectedTemplate);
+    if (initiallySelectedTemplate != null) {
+      updatePromptTemplateHelpTooltip(initiallySelectedTemplate);
+    }
   }
 
   public void setPromptTemplate(T promptTemplate) {

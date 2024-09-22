@@ -1,6 +1,5 @@
 package ee.carlrobert.codegpt.toolwindow.chat;
 
-import static ee.carlrobert.codegpt.completions.CompletionRequestProvider.getPromptWithContext;
 import static ee.carlrobert.codegpt.ui.UIUtil.createScrollPaneWithSmartScroller;
 import static java.lang.String.format;
 
@@ -18,6 +17,7 @@ import ee.carlrobert.codegpt.actions.ActionType;
 import ee.carlrobert.codegpt.completions.CallParameters;
 import ee.carlrobert.codegpt.completions.CompletionRequestHandler;
 import ee.carlrobert.codegpt.completions.CompletionRequestService;
+import ee.carlrobert.codegpt.completions.CompletionRequestUtil;
 import ee.carlrobert.codegpt.completions.ConversationType;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationService;
@@ -134,7 +134,8 @@ public class ChatToolWindowTabPanel implements Disposable {
             .toList();
         message.setReferencedFilePaths(referencedFilePaths);
         message.setUserMessage(message.getPrompt());
-        message.setPrompt(getPromptWithContext(referencedFiles, message.getPrompt()));
+        message.setPrompt(
+            CompletionRequestUtil.getPromptWithContext(referencedFiles, message.getPrompt()));
 
         totalTokensPanel.updateReferencedFilesTokens(referencedFiles);
 
