@@ -300,21 +300,22 @@ public class ChatToolWindowTabPanel implements Disposable {
     }
     promptBuilder.append(remainingText);
 
-    String highlightedTextMd = "";
+    String selectedText = "";
+    String selectedTextMd = "";
     if (editor != null) {
       var selectionModel = editor.getSelectionModel();
-      var selectedText = selectionModel.getSelectedText();
+      selectedText = selectionModel.getSelectedText();
       if (selectedText != null && !selectedText.isEmpty()) {
         var fileExtension = FileUtil.getFileExtension(editor.getVirtualFile().getName());
-        highlightedTextMd = format("\n```%s\n%s\n```\n", fileExtension, selectedText);
+        selectedTextMd = format("\n```%s\n%s\n```\n", fileExtension, selectedText);
         selectionModel.removeSelection();
       }
     }
 
-    message.setUserMessage(highlightedTextMd + promptBuilder);
-    message.setPrompt(highlightedTextMd + promptBuilder);
+    message.setUserMessage(selectedTextMd + promptBuilder);
+    message.setPrompt(selectedTextMd + promptBuilder);
 
-    sendMessage(message, ConversationType.DEFAULT, processEditorSelection(editor, message));
+    sendMessage(message, ConversationType.DEFAULT, selectedText);
     return Unit.INSTANCE;
   }
 
