@@ -12,6 +12,7 @@ import com.intellij.openapi.components.Storage;
 import ee.carlrobert.codegpt.codecompletions.InfillPromptTemplate;
 import ee.carlrobert.codegpt.completions.HuggingFaceModel;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
+import ee.carlrobert.codegpt.completions.llama.PromptTemplate;
 import ee.carlrobert.codegpt.credentials.CredentialsStore;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.service.llama.form.LlamaSettingsForm;
@@ -42,13 +43,16 @@ public class LlamaSettings implements PersistentStateComponent<LlamaSettingsStat
     // Catch if model's name has changed which could lead to
     // HuggingFaceModel or PromptTemplates not being found
     if (this.state.getHuggingFaceModel() == null) {
-      this.state.setHuggingFaceModel(HuggingFaceModel.CODE_LLAMA_7B_Q4);
-    }
-    if (this.state.getRemoteModelInfillPromptTemplate() == null) {
-      this.state.setRemoteModelInfillPromptTemplate(InfillPromptTemplate.CODE_LLAMA);
+      this.state.setHuggingFaceModel(HuggingFaceModel.CODE_QWEN_2_5_1_5B_Q8_0);
     }
     if (this.state.getLocalModelPromptTemplate() == null) {
-      this.state.setLocalModelInfillPromptTemplate(InfillPromptTemplate.CODE_LLAMA);
+      this.state.setLocalModelPromptTemplate(PromptTemplate.CODE_QWEN);
+    }
+    if (this.state.getRemoteModelInfillPromptTemplate() == null) {
+      this.state.setRemoteModelInfillPromptTemplate(InfillPromptTemplate.CODE_QWEN_2_5);
+    }
+    if (this.state.getLocalModelInfillPromptTemplate() == null) {
+      this.state.setLocalModelInfillPromptTemplate(InfillPromptTemplate.CODE_QWEN);
     }
   }
 

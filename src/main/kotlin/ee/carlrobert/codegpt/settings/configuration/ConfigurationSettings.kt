@@ -2,7 +2,7 @@ package ee.carlrobert.codegpt.settings.configuration
 
 import com.intellij.openapi.components.*
 import ee.carlrobert.codegpt.actions.editor.EditorActionsUtil
-import ee.carlrobert.codegpt.completions.CompletionRequestProvider.GENERATE_COMMIT_MESSAGE_SYSTEM_PROMPT
+import ee.carlrobert.codegpt.completions.CompletionRequestUtil.GENERATE_COMMIT_MESSAGE_SYSTEM_PROMPT
 import kotlin.math.max
 import kotlin.math.min
 

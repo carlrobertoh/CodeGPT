@@ -84,11 +84,10 @@ public class GenerateGitCommitMessageAction extends AnAction {
 
     var commitWorkflowUi = event.getData(VcsDataKeys.COMMIT_WORKFLOW_UI);
     if (commitWorkflowUi != null) {
-      CompletionRequestService.getInstance()
-          .generateCommitMessageAsync(
-              project.getService(CommitMessageTemplate.class).getSystemPrompt(),
-              gitDiff,
-              getEventListener(project, commitWorkflowUi));
+      CompletionRequestService.getInstance().getCommitMessageAsync(
+          project.getService(CommitMessageTemplate.class).getSystemPrompt(),
+          gitDiff,
+          getEventListener(project, commitWorkflowUi));
     }
   }
 
