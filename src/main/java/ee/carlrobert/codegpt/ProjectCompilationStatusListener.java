@@ -12,7 +12,7 @@ import com.intellij.openapi.compiler.CompileContext;
 import com.intellij.openapi.compiler.CompilerMessage;
 import com.intellij.openapi.compiler.CompilerMessageCategory;
 import com.intellij.openapi.project.Project;
-import ee.carlrobert.codegpt.completions.CompletionRequestProvider;
+import ee.carlrobert.codegpt.completions.CompletionRequestUtil;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowContentManager;
@@ -69,7 +69,7 @@ public class ProjectCompilationStatusListener implements CompilationStatusListen
         .map(ReferencedFile::getFilePath)
         .toList());
     message.setUserMessage(message.getPrompt());
-    message.setPrompt(CompletionRequestProvider.getPromptWithContext(
+    message.setPrompt(CompletionRequestUtil.getPromptWithContext(
         new ArrayList<>(errorMapping.keySet()),
         prompt));
     return message;

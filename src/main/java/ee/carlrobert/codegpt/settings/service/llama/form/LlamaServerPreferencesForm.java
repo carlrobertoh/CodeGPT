@@ -388,8 +388,9 @@ public class LlamaServerPreferencesForm {
   }
 
   public PromptTemplate getPromptTemplate() {
-    return isRunLocalServer() ? llamaModelPreferencesForm.getPromptTemplate()
+    var template = isRunLocalServer() ? llamaModelPreferencesForm.getPromptTemplate()
         : remotePromptTemplatePanel.getPromptTemplate();
+    return template == null ? PromptTemplate.CODE_QWEN : template;
   }
 
   public @Nullable String getApiKey() {

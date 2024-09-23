@@ -92,11 +92,10 @@ public class GenerateGitCommitMessageAction extends AnAction {
     var editor = getCommitMessageEditor(event);
     if (editor != null) {
       ((EditorEx) editor).setCaretVisible(false);
-      CompletionRequestService.getInstance()
-          .generateCommitMessageAsync(
-              project.getService(CommitMessageTemplate.class).getSystemPrompt(),
-              gitDiff,
-              getEventListener(project, editor.getDocument()));
+      CompletionRequestService.getInstance().getCommitMessageAsync(
+          project.getService(CommitMessageTemplate.class).getSystemPrompt(),
+          gitDiff,
+          getEventListener(project, editor.getDocument()));
     }
   }
 

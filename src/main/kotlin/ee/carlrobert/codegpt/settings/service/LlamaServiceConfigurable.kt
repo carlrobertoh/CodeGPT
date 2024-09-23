@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt.settings.service
 
 import com.intellij.openapi.components.service
+import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.options.Configurable
 import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.LLAMA_API_KEY
 import ee.carlrobert.codegpt.credentials.CredentialsStore.getCredential
