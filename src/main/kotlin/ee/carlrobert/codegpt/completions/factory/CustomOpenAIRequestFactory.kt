@@ -19,7 +19,7 @@ class CustomOpenAIRequest(val request: Request) : CompletionRequest
 
 class CustomOpenAIRequestFactory : BaseRequestFactory() {
 
-    override fun createChatCompletionRequest(callParameters: CallParameters): CustomOpenAIRequest {
+    override fun createChatRequest(callParameters: CallParameters): CustomOpenAIRequest {
         val request = buildCustomOpenAIChatCompletionRequest(
             service<CustomServiceSettings>()
                 .state

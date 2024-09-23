@@ -66,7 +66,7 @@ public final class CompletionRequestService {
   public String getLookupCompletion(String prompt) {
     return getChatCompletion(
         CompletionRequestFactory.getFactory(GeneralSettings.getSelectedService())
-            .createLookupCompletionRequest(prompt));
+            .createLookupRequest(prompt));
   }
 
   public EventSource getCommitMessageAsync(
@@ -75,7 +75,7 @@ public final class CompletionRequestService {
       CompletionEventListener<String> eventListener) {
     return getChatCompletionAsync(
         CompletionRequestFactory.getFactory(GeneralSettings.getSelectedService())
-            .createCommitMessageCompletionRequest(systemPrompt, gitDiff),
+            .createCommitMessageRequest(systemPrompt, gitDiff),
         eventListener);
   }
 
@@ -85,7 +85,7 @@ public final class CompletionRequestService {
     var input = "%s\n\n%s".formatted(params.getPrompt(), params.getSelectedText());
     return getChatCompletionAsync(
         CompletionRequestFactory.getFactory(GeneralSettings.getSelectedService())
-            .createEditCodeCompletionRequest(input),
+            .createEditCodeRequest(input),
         eventListener);
   }
 
@@ -94,7 +94,7 @@ public final class CompletionRequestService {
       CompletionEventListener<String> eventListener) {
     return getChatCompletionAsync(
         CompletionRequestFactory.getFactory(GeneralSettings.getSelectedService())
-            .createChatCompletionRequest(callParameters),
+            .createChatRequest(callParameters),
         eventListener);
   }
 

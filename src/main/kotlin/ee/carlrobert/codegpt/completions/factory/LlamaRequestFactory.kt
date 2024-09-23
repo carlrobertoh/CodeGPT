@@ -6,46 +6,28 @@ import ee.carlrobert.codegpt.completions.CallParameters
 import ee.carlrobert.codegpt.completions.CompletionRequestUtil.FIX_COMPILE_ERRORS_SYSTEM_PROMPT
 import ee.carlrobert.codegpt.completions.ConversationType
 import ee.carlrobert.codegpt.completions.llama.LlamaModel
+import ee.carlrobert.codegpt.completions.llama.PromptTemplate
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
-import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings.Companion.getState
 import ee.carlrobert.codegpt.settings.persona.PersonaSettings.Companion.getSystemPrompt
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest
 
 class LlamaRequestFactory : BaseRequestFactory() {
 
-    override fun createChatCompletionRequest(callParameters: CallParameters): LlamaCompletionRequest {
-        val settings = service<LlamaSettings>().state
-        val promptTemplate = if (settings.isRunLocalServer) {
-            if (settings.isUseCustomModel)
-                settings.localModelPromptTemplate
-            else
-                LlamaModel.findByHuggingFaceModel(settings.huggingFaceModel).promptTemplate
-        } else {
-            settings.remoteModelPromptTemplate
-        }
-
+    override fun createChatRequest(callParameters: CallParameters): LlamaCompletionRequest {
+        val promptTemplate = getPromptTemplate()
         val systemPrompt =
             if (callParameters.conversationType == ConversationType.FIX_COMPILE_ERRORS)
                 FIX_COMPILE_ERRORS_SYSTEM_PROMPT
             else
                 getSystemPrompt()
-
         val prompt = promptTemplate.buildPrompt(
             systemPrompt,
             callParameters.message.prompt,
             callParameters.conversation.messages
         )
-        val configuration = getState()
-        return LlamaCompletionRequest.Builder(prompt)
-            .setN_predict(configuration.maxTokens)
-            .setTemperature(configuration.temperature.toDouble())
-            .setTop_k(settings.topK)
-            .setTop_p(settings.topP)
-            .setMin_p(settings.minP)
-            .setRepeat_penalty(settings.repeatPenalty)
-            .setStop(promptTemplate.stopTokens)
-            .build()
+
+        return buildLlamaRequest(prompt, promptTemplate.stopTokens, true)
     }
 
     override fun createBasicCompletionRequest(
@@ -53,8 +35,16 @@ class LlamaRequestFactory : BaseRequestFactory() {
         userPrompt: String,
         stream: Boolean
     ): LlamaCompletionRequest {
+        val promptTemplate = getPromptTemplate()
+        val finalPrompt =
+            promptTemplate.buildPrompt(systemPrompt, userPrompt, listOf())
+
+        return buildLlamaRequest(finalPrompt, emptyList(), stream)
+    }
+
+    private fun getPromptTemplate(): PromptTemplate {
         val settings = service<LlamaSettings>().state
-        val promptTemplate = if (settings.isRunLocalServer) {
+        return if (settings.isRunLocalServer) {
             if (settings.isUseCustomModel)
                 settings.localModelPromptTemplate
             else
@@ -62,17 +52,24 @@ class LlamaRequestFactory : BaseRequestFactory() {
         } else {
             settings.remoteModelPromptTemplate
         }
-        val configuration = service<ConfigurationSettings>().state
-        val finalPrompt =
-            promptTemplate.buildPrompt(systemPrompt, userPrompt, listOf())
-        return LlamaCompletionRequest.Builder(finalPrompt)
-            .setN_predict(configuration.maxTokens)
-            .setTemperature(configuration.temperature.toDouble())
-            .setTop_k(settings.topK)
-            .setTop_p(settings.topP)
-            .setMin_p(settings.minP)
+    }
+
+    private fun buildLlamaRequest(
+        prompt: String,
+        stopTokens: List<String>,
+        stream: Boolean = false
+    ): LlamaCompletionRequest {
+        val configSettings = service<ConfigurationSettings>().state
+        val llamaSettings = service<LlamaSettings>().state
+        return LlamaCompletionRequest.Builder(prompt)
+            .setN_predict(configSettings.maxTokens)
+            .setTemperature(configSettings.temperature.toDouble())
+            .setTop_k(llamaSettings.topK)
+            .setTop_p(llamaSettings.topP)
+            .setMin_p(llamaSettings.minP)
+            .setRepeat_penalty(llamaSettings.repeatPenalty)
+            .setStop(stopTokens)
             .setStream(stream)
-            .setRepeat_penalty(settings.repeatPenalty)
             .build()
     }
 }
