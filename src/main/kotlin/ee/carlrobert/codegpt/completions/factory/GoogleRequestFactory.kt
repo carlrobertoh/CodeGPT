@@ -23,7 +23,7 @@ import java.nio.file.Path
 
 class GoogleRequestFactory : BaseRequestFactory() {
 
-    override fun createChatCompletionRequest(callParameters: CallParameters): GoogleCompletionRequest {
+    override fun createChatRequest(callParameters: CallParameters): GoogleCompletionRequest {
         val configuration = service<ConfigurationSettings>().state
         val messages = buildGoogleMessages(service<GoogleSettings>().state.model, callParameters)
         return GoogleCompletionRequest.Builder(messages)

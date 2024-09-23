@@ -23,7 +23,7 @@ class CompletionRequestProviderTest : IntegrationTest() {
         conversation.addMessage(firstMessage)
         conversation.addMessage(secondMessage)
 
-        val request = OpenAIRequestFactory().createChatCompletionRequest(
+        val request = OpenAIRequestFactory().createChatRequest(
             CallParameters(
                 conversation,
                 ConversationType.DEFAULT,
@@ -54,7 +54,7 @@ class CompletionRequestProviderTest : IntegrationTest() {
         conversation.addMessage(firstMessage)
         conversation.addMessage(secondMessage)
 
-        val request = OpenAIRequestFactory().createChatCompletionRequest(
+        val request = OpenAIRequestFactory().createChatRequest(
             CallParameters(
                 conversation,
                 ConversationType.DEFAULT,
@@ -85,7 +85,7 @@ class CompletionRequestProviderTest : IntegrationTest() {
         conversation.addMessage(firstMessage)
         conversation.addMessage(secondMessage)
 
-        val request = OpenAIRequestFactory().createChatCompletionRequest(
+        val request = OpenAIRequestFactory().createChatRequest(
             CallParameters(
                 conversation,
                 ConversationType.DEFAULT,
@@ -117,7 +117,7 @@ class CompletionRequestProviderTest : IntegrationTest() {
         conversation.addMessage(remainingMessage)
         conversation.discardTokenLimits()
 
-        val request = OpenAIRequestFactory().createChatCompletionRequest(
+        val request = OpenAIRequestFactory().createChatRequest(
             CallParameters(
                 conversation,
                 ConversationType.DEFAULT,
@@ -145,7 +145,7 @@ class CompletionRequestProviderTest : IntegrationTest() {
         conversation.addMessage(createDummyMessage(1500))
 
         assertThrows(TotalUsageExceededException::class.java) {
-            OpenAIRequestFactory().createChatCompletionRequest(
+            OpenAIRequestFactory().createChatRequest(
                 CallParameters(
                     conversation,
                     ConversationType.DEFAULT,

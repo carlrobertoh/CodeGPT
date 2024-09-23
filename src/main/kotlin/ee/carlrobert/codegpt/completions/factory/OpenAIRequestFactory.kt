@@ -24,7 +24,7 @@ import java.nio.file.Path
 
 class OpenAIRequestFactory : CompletionRequestFactory {
 
-    override fun createChatCompletionRequest(callParameters: CallParameters): OpenAIChatCompletionRequest {
+    override fun createChatRequest(callParameters: CallParameters): OpenAIChatCompletionRequest {
         val model = service<OpenAISettings>().state.model
         val configuration = service<ConfigurationSettings>().state
         val requestBuilder: OpenAIChatCompletionRequest.Builder =
@@ -36,11 +36,11 @@ class OpenAIRequestFactory : CompletionRequestFactory {
         return requestBuilder.build()
     }
 
-    override fun createEditCodeCompletionRequest(input: String): OpenAIChatCompletionRequest {
+    override fun createEditCodeRequest(input: String): OpenAIChatCompletionRequest {
         return buildEditCodeRequest(input, service<OpenAISettings>().state.model)
     }
 
-    override fun createCommitMessageCompletionRequest(
+    override fun createCommitMessageRequest(
         systemPrompt: String,
         gitDiff: String
     ): CompletionRequest {
@@ -52,7 +52,7 @@ class OpenAIRequestFactory : CompletionRequestFactory {
         )
     }
 
-    override fun createLookupCompletionRequest(prompt: String): CompletionRequest {
+    override fun createLookupRequest(prompt: String): CompletionRequest {
         return createBasicCompletionRequest(
             GENERATE_METHOD_NAMES_SYSTEM_PROMPT,
             prompt,

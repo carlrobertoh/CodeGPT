@@ -10,7 +10,7 @@ import ee.carlrobert.llm.completion.CompletionRequest
 
 class AzureRequestFactory : BaseRequestFactory() {
 
-    override fun createChatCompletionRequest(callParameters: CallParameters): OpenAIChatCompletionRequest {
+    override fun createChatRequest(callParameters: CallParameters): OpenAIChatCompletionRequest {
         val configuration = service<ConfigurationSettings>().state
         val requestBuilder: OpenAIChatCompletionRequest.Builder =
             OpenAIChatCompletionRequest.Builder(buildOpenAIMessages(null, callParameters))

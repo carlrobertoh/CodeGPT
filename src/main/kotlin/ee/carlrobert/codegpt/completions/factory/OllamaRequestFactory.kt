@@ -18,7 +18,7 @@ import java.util.*
 
 class OllamaRequestFactory : BaseRequestFactory() {
 
-    override fun createChatCompletionRequest(callParameters: CallParameters): OllamaChatCompletionRequest {
+    override fun createChatRequest(callParameters: CallParameters): OllamaChatCompletionRequest {
         val configuration = service<ConfigurationSettings>().state
         val settings = service<OllamaSettings>().state
         return OllamaChatCompletionRequest.Builder(

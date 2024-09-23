@@ -11,7 +11,7 @@ import ee.carlrobert.llm.completion.CompletionRequest
 
 class ClaudeRequestFactory : BaseRequestFactory() {
 
-    override fun createChatCompletionRequest(callParameters: CallParameters): ClaudeCompletionRequest {
+    override fun createChatRequest(callParameters: CallParameters): ClaudeCompletionRequest {
         return ClaudeCompletionRequest().apply {
             model = service<AnthropicSettings>().state.model
             maxTokens = service<ConfigurationSettings>().state.maxTokens
