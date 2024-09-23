@@ -44,11 +44,20 @@ class OpenAIRequestFactory : CompletionRequestFactory {
         systemPrompt: String,
         gitDiff: String
     ): CompletionRequest {
-        return createBasicCompletionRequest(systemPrompt, gitDiff, isStream = true)
+        return createBasicCompletionRequest(
+            systemPrompt,
+            gitDiff,
+            service<OpenAISettings>().state.model,
+            true
+        )
     }
 
     override fun createLookupCompletionRequest(prompt: String): CompletionRequest {
-        return createBasicCompletionRequest(GENERATE_METHOD_NAMES_SYSTEM_PROMPT, prompt)
+        return createBasicCompletionRequest(
+            GENERATE_METHOD_NAMES_SYSTEM_PROMPT,
+            prompt,
+            service<OpenAISettings>().state.model
+        )
     }
 
     companion object {
