@@ -10,6 +10,7 @@
  ******************************************************************************/
 package ee.carlrobert.codegpt.telemetry.core.service.segment;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.rudderstack.sdk.java.analytics.RudderAnalytics;
 import com.rudderstack.sdk.java.analytics.messages.IdentifyMessage;
@@ -96,6 +97,10 @@ public class SegmentBroker implements IMessageBroker {
 
     @Override
     public void send(TelemetryEvent event) {
+        if (ApplicationManager.getApplication().isUnitTestMode()) {
+            return;
+        }
+
         try {
             if (analytics.get() == null) {
                 LOGGER.warn("Could not send " + event.getType() + " event '" + event.getName() + "': no analytics instance present.");

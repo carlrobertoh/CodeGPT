@@ -33,7 +33,6 @@ import com.intellij.util.concurrency.annotations.RequiresReadLock;
 import com.intellij.util.concurrency.annotations.RequiresWriteLock;
 import ee.carlrobert.codegpt.CodeGPTKeys;
 import ee.carlrobert.codegpt.actions.CodeCompletionEnabledListener;
-import ee.carlrobert.codegpt.completions.CompletionRequestService;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import ee.carlrobert.codegpt.util.EditorUtil;
 import java.awt.event.KeyEvent;
@@ -98,9 +97,10 @@ public final class CodeCompletionServiceOld implements Disposable {
 
     callDebouncer.debounce(
         Void.class,
-        (progressIndicator) -> CompletionRequestService.getInstance().getCodeCompletionAsync(
-            request,
-            new CodeCompletionEventListener(editor, offset, request, progressIndicator)),
+        (progressIndicator) -> project.getService(CodeCompletionService.class)
+            .getCodeCompletionAsync(
+                request,
+                new CodeCompletionEventListener(editor, offset, request, progressIndicator)),
         750,
         TimeUnit.MILLISECONDS);
   }
