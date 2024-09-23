@@ -55,17 +55,21 @@ public class MethodNameLookupListener implements LookupManagerListener {
       LookupImpl lookup,
       Application application,
       String prompt) {
-    CompletionRequestService.getInstance().getLookupCompletion(prompt)
-        .ifPresent(response -> {
-          for (var value : response.split(",")) {
-            application.invokeLater(() -> application.runReadAction(() -> {
-              lookup.addItem(
-                  LookupElementBuilder.create(value.trim()).withIcon(Icons.Sparkle),
-                  PrefixMatcher.ALWAYS_TRUE);
-              lookup.refreshUi(true, true);
-            }));
-          }
-        });
+    try {
+      var response = CompletionRequestService.getInstance().getLookupCompletion(prompt);
+      if (!response.isEmpty()) {
+        for (var value : response.split(",")) {
+          application.invokeLater(() -> application.runReadAction(() -> {
+            lookup.addItem(
+                LookupElementBuilder.create(value.trim()).withIcon(Icons.Sparkle),
+                PrefixMatcher.ALWAYS_TRUE);
+            lookup.refreshUi(true, true);
+          }));
+        }
+      }
+    } catch (Exception e) {
+      throw new RuntimeException("Failed to add completion lookup values", e);
+    }
   }
 
   private enum PSIMethodMapping {
