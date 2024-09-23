@@ -6,8 +6,8 @@
     <img alt="plugin-icon" src="https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/icon.png?raw=true">
   </a>
   <h1 style="margin: 0;" align="center">CodeGPT</h1>
-  <p>
-    A JetBrains extension providing access to state-of-the-art LLMs, such as GPT-4, Claude 3, Code Llama, and others, all for free
+  <p style="width: 640px">
+    The leading open-source AI copilot for JetBrains. Connect to any model in any environment, and customize your coding experience in any way you like.
   </p>
 </div>
 
@@ -21,7 +21,7 @@
   <summary>Table of Contents</summary>
   <ol>
     <li><a href="#about-the-project">About The Project</a></li>
-    <li><a href="#quick-start-guide">Quick Start Guide</a></li>
+    <li><a href="#core-features">Core Features</a></li>
     <li>
       <a href="#getting-started">Getting Started</a>
       <ul>
@@ -31,10 +31,14 @@
       </ul>
     </li>
     <li><a href="#features">Features</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#running-locally">Running Locally</a></li>
+    <li><a href="#privacy">Privacy</a></li>
+    <li><a href="#feedback">Feedback</a></li>
     <li><a href="#license">License</a></li>
   </ol>
 </details>
+
+![Plugin screenshot](https://www.codegpt.ee/images/main.png)
 
 ## About The Project
 
@@ -42,57 +46,31 @@ CodeGPT is your go-to AI coding assistant, offering assistance throughout your e
 
 ## Core Features
 
-Leveraging large language models, CodeGPT offers a wide range of features to enhance your coding experience, including, but not limited to:
+CodeGPT offers a wide range of features to enhance your coding experience:
 
-### Code Completions
+### Chat
+- Engage in natural language conversations about your code
+- Get explanations, suggestions, and answers to your programming questions
+- Upload and discuss images related to your code or project
 
-Receive single-line or whole-function autocomplete suggestions as you type.
+### Code
+- Receive context-aware code completions as you type
+- Edit existing code using natural language instructions
+- Generate descriptive commit messages automatically
+- Get naming suggestions for variables, methods, and classes
 
-![Code Completions](https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/new/inline-completion.png?raw=true)
+### Customize
+- Choose from multiple AI models, including local and self-hosted options
+- Personalize your AI assistant with different personas
+- Configure custom commands for repetitive tasks
 
-### Chat (with Vision)
+### Integrate
+- Reference project files and folders for context-aware assistance
+- Access web documentation directly within your chat sessions
+- Incorporate Git history into your conversations
+- Perform web searches without leaving your IDE
 
-Get instant coding advice through a ChatGPT-like interface. Ask questions, seek explanations, or get guidance on your projects without leaving your IDE.
-
-CodeGPT also supports vision models and image understanding, allowing you to attach images for more context-aware assistance. It can detect new screenshots automatically, saving you time by eliminating the need to manually upload images each time you take a screenshot.
-
-![Chat with Vision](https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/new/chat-interface.png?raw=true)
-
-### Fast Edit
-
-Transform your code effortlessly using natural language instructions. Highlight the code you want to modify, describe the desired changes, and let CodeGPT implement them automatically.
-
-![Fast Edits](https://www.codegpt.ee/fast-code-edits-cover.png)
-
-### Commit Message Generation
-
-CodeGPT can generate meaningful commit messages based on the changes made in your codebase. It analyzes the diff of your staged changes and suggests concise and descriptive commit messages, saving you time and effort.
-
-![Commit Message Generation](https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/new/generate-commit-message.png?raw=true)
-
-### Reference Files
-
-CodeGPT allows you to reference specific files or documentation during your chat sessions, ensuring that responses are always relevant and accurate.
-
-![Reference Files](https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/new/reference-files-modal.png?raw=true)
-
-### Name Suggestions
-
-Stuck on naming a method or variable? CodeGPT offers context-aware suggestions, helping you adhere to best practices and maintain readability in your codebase.
-
-![Name Suggestions](https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/method-name-suggestions.png?raw=true)
-
-### OpenAI Compatibility
-
-Interested in trying out 800t/s or getting access to new models as soon as they're released? We provide integration with most cloud providers that are OpenAI-compatible, such as Together.ai, Grok, Anyscale, and others, as well as the option to customize your own setup.
-
-![OpenAI Compatibility](https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/openai-compatibility.png?raw=true)
-
-### Offline Development Support
-
-CodeGPT supports a completely offline development workflow by allowing you to connect to a locally hosted language model. This ensures that your code and data remain private and secure within your local environment, eliminating the need for an internet connection or sharing sensitive information with third-party servers.
-
-![Offline Development Support](https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/new/llama-settings.png?raw=true)
+For a full list of features and detailed descriptions, visit our [official documentation](https://docs.codegpt.ee/features).
 
 ## Running locally
 
