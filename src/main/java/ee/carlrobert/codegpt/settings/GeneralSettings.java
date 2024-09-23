@@ -98,7 +98,7 @@ public class GeneralSettings implements PersistentStateComponent<GeneralSettings
     state.setSelectedService(provider);
     if (project != null) {
       project.getMessageBus()
-          .syncPublisher(ProviderChangeNotifier.getPROVIDER_CHANGE_TOPIC())
+          .syncPublisher(ProviderChangeNotifier.getTOPIC())
           .providerChanged(provider);
     }
   }
