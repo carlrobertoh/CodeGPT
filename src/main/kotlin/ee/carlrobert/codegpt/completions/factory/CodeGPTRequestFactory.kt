@@ -11,7 +11,7 @@ import ee.carlrobert.llm.client.openai.completion.request.RequestDocumentationDe
 
 class CodeGPTRequestFactory : BaseRequestFactory() {
 
-    override fun createChatCompletionRequest(callParameters: CallParameters): OpenAIChatCompletionRequest {
+    override fun createChatRequest(callParameters: CallParameters): OpenAIChatCompletionRequest {
         val model = service<CodeGPTServiceSettings>().state.chatCompletionSettings.model
         val configuration = service<ConfigurationSettings>().state
         val requestBuilder: OpenAIChatCompletionRequest.Builder =

@@ -7,13 +7,10 @@ import ee.carlrobert.codegpt.settings.service.ServiceType
 import ee.carlrobert.llm.completion.CompletionRequest
 
 interface CompletionRequestFactory {
-    fun createChatCompletionRequest(callParameters: CallParameters): CompletionRequest
-    fun createEditCodeCompletionRequest(input: String): CompletionRequest
-    fun createCommitMessageCompletionRequest(
-        systemPrompt: String,
-        gitDiff: String
-    ): CompletionRequest
-    fun createLookupCompletionRequest(prompt: String): CompletionRequest
+    fun createChatRequest(callParameters: CallParameters): CompletionRequest
+    fun createEditCodeRequest(input: String): CompletionRequest
+    fun createCommitMessageRequest(systemPrompt: String, gitDiff: String): CompletionRequest
+    fun createLookupRequest(prompt: String): CompletionRequest
 
     companion object {
         @JvmStatic
@@ -33,18 +30,18 @@ interface CompletionRequestFactory {
 }
 
 abstract class BaseRequestFactory : CompletionRequestFactory {
-    override fun createEditCodeCompletionRequest(input: String): CompletionRequest {
+    override fun createEditCodeRequest(input: String): CompletionRequest {
         return createBasicCompletionRequest(EDIT_CODE_SYSTEM_PROMPT, input, true)
     }
 
-    override fun createCommitMessageCompletionRequest(
+    override fun createCommitMessageRequest(
         systemPrompt: String,
         gitDiff: String
     ): CompletionRequest {
         return createBasicCompletionRequest(systemPrompt, gitDiff, true)
     }
 
-    override fun createLookupCompletionRequest(prompt: String): CompletionRequest {
+    override fun createLookupRequest(prompt: String): CompletionRequest {
         return createBasicCompletionRequest(GENERATE_METHOD_NAMES_SYSTEM_PROMPT, prompt)
     }
 
