@@ -1,5 +1,7 @@
 package ee.carlrobert.codegpt.settings;
 
+import com.intellij.openapi.application.ApplicationManager;
+import ee.carlrobert.codegpt.settings.service.ProviderChangeNotifier;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 
 public class GeneralSettingsState {
@@ -28,5 +30,10 @@ public class GeneralSettingsState {
 
   public void setSelectedService(ServiceType selectedService) {
     this.selectedService = selectedService;
+
+    ApplicationManager.getApplication()
+        .getMessageBus()
+        .syncPublisher(ProviderChangeNotifier.getTOPIC())
+        .providerChanged(selectedService);
   }
 }

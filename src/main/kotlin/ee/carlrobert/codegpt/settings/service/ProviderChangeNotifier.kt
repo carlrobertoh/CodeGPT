@@ -8,7 +8,6 @@ interface ProviderChangeNotifier {
 
     companion object {
         @JvmStatic
-        val PROVIDER_CHANGE_TOPIC =
-            Topic.create("providerChange", ProviderChangeNotifier::class.java)
+        val TOPIC = Topic.create("providerChange", ProviderChangeNotifier::class.java)
     }
 }

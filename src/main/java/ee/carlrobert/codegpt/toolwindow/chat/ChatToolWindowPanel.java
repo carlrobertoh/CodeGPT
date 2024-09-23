@@ -77,7 +77,7 @@ public class ChatToolWindowPanel extends SimpleToolWindowPanel {
         (AttachImageNotifier) filePath -> imageFileAttachmentNotification.show(
             Path.of(filePath).getFileName().toString(),
             "File path: " + filePath));
-    messageBusConnection.subscribe(ProviderChangeNotifier.getPROVIDER_CHANGE_TOPIC(),
+    messageBusConnection.subscribe(ProviderChangeNotifier.getTOPIC(),
         (ProviderChangeNotifier) provider -> {
           if (provider == ServiceType.CODEGPT) {
             var userDetails = CodeGPTKeys.CODEGPT_USER_DETAILS.get(project);
