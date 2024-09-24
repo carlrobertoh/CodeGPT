@@ -14,6 +14,7 @@ import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.RightGap
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.util.ui.JBUI
+import com.intellij.util.ui.UIUtil
 import ee.carlrobert.codegpt.CodeGPTBundle
 import ee.carlrobert.codegpt.Icons
 import ee.carlrobert.codegpt.actions.AttachImageAction
@@ -29,6 +30,9 @@ import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.TotalTokensPanel
 import ee.carlrobert.codegpt.ui.IconActionButton
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel
 import java.awt.*
+import java.awt.geom.Area
+import java.awt.geom.Rectangle2D
+import java.awt.geom.RoundRectangle2D
 import javax.swing.JPanel
 
 class UserInputPanel(
@@ -37,6 +41,10 @@ class UserInputPanel(
     private val onSubmit: (String, List<AppliedActionInlay>?) -> Unit,
     private val onStop: () -> Unit
 ) : JPanel(BorderLayout()) {
+
+    companion object {
+        private const val CORNER_RADIUS = 16
+    }
 
     val text: String
         get() = promptTextField.text
@@ -71,7 +79,7 @@ class UserInputPanel(
         }
 
     init {
-        isOpaque = false
+        background = UIUtil.getTextFieldBackground()
         add(promptTextField, BorderLayout.CENTER)
         add(getFooter(), BorderLayout.SOUTH)
     }
@@ -90,11 +98,20 @@ class UserInputPanel(
     override fun paintComponent(g: Graphics) {
         val g2 = g.create() as Graphics2D
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+
+        val area = Area(Rectangle2D.Float(0f, 0f, width.toFloat(), height.toFloat()))
+        val roundedRect = RoundRectangle2D.Float(0f, 0f, width.toFloat(), height.toFloat(), CORNER_RADIUS.toFloat(), CORNER_RADIUS.toFloat())
+        area.intersect(Area(roundedRect))
+
+        g2.clip = area
+
         g2.color = background
-        g2.fillRoundRect(0, 0, width - 1, height - 1, 16, 16)
-        super.paintComponent(g)
+        g2.fill(area)
+
+        super.paintComponent(g2)
         g2.dispose()
     }
+
 
     override fun paintBorder(g: Graphics) {
         val g2 = g.create() as Graphics2D
@@ -103,7 +120,7 @@ class UserInputPanel(
         if (promptTextField.isFocusOwner) {
             g2.stroke = BasicStroke(1.5F)
         }
-        g2.drawRoundRect(0, 0, width - 1, height - 1, 16, 16)
+        g2.drawRoundRect(0, 0, width - 1, height - 1, CORNER_RADIUS, CORNER_RADIUS)
         g2.dispose()
     }
 
@@ -145,7 +162,7 @@ class UserInputPanel(
                     }
                 }.align(AlignX.RIGHT)
             })
-        }
+        }.andTransparent()
     }
 
     private fun isImageActionSupported(): Boolean {
