@@ -56,7 +56,6 @@ class PromptTextField(
 
     init {
         isOneLineMode = false
-        background = JBColor.background()
         minimumSize = Dimension(100, 40)
         document.addDocumentListener(getDocumentListener(onTextChanged))
         IS_PROMPT_TEXT_FIELD_DOCUMENT.set(document, true)

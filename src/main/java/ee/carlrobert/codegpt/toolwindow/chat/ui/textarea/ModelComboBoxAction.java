@@ -38,6 +38,7 @@ import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.llm.client.google.models.GoogleModel;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
+import java.awt.Color;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
@@ -87,6 +88,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
       @NotNull String place) {
     ComboBoxButton button = createComboBoxButton(presentation);
     button.setBorder(null);
+    button.putClientProperty("JButton.backgroundColor", new Color(0, 0, 0, 0));
     return button;
   }
 
