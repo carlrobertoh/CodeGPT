@@ -13,15 +13,12 @@ import static java.lang.String.format;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.actionSystem.ex.ComboBoxAction;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.popup.JBPopup;
-import com.intellij.openapi.ui.popup.ListPopup;
 import ee.carlrobert.codegpt.CodeGPTKeys;
 import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
@@ -45,7 +42,6 @@ import java.util.function.Consumer;
 import javax.swing.Icon;
 import javax.swing.JComponent;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class ModelComboBoxAction extends ComboBoxAction {
 
@@ -90,14 +86,6 @@ public class ModelComboBoxAction extends ComboBoxAction {
     button.setBorder(null);
     button.putClientProperty("JButton.backgroundColor", new Color(0, 0, 0, 0));
     return button;
-  }
-
-  @Override
-  protected JBPopup createActionPopup(DefaultActionGroup group, @NotNull DataContext context,
-      @Nullable Runnable disposeCallback) {
-    ListPopup popup = (ListPopup) super.createActionPopup(group, context, disposeCallback);
-    popup.setShowSubmenuOnHover(true);
-    return popup;
   }
 
   private AnAction[] getCodeGPTModelActions(Project project, Presentation presentation) {
