@@ -19,3 +19,5 @@ updates:
     directory: "/codegpt-treesitter"
     schedule:
       interval: "daily"
+    ignore:
+      - dependency-name: "*"
