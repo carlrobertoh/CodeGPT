@@ -7,7 +7,7 @@
   </a>
   <h1 style="margin: 0;" align="center">CodeGPT</h1>
   <p style="width: 640px">
-    The leading open-source AI copilot for JetBrains. Connect to any model in any environment, and customize your coding experience in any way you like.
+    The leading open-source AI copilot for <a target="_blank" href="https://plugins.jetbrains.com/plugin/21056-codegpt">JetBrains</a>. Connect to any model in any environment, and customize your coding experience in any way you like.
   </p>
 </div>
 
