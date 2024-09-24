@@ -26,7 +26,6 @@ class ClaudeRequestFactory : BaseRequestFactory() {
                         ClaudeCompletionStandardMessage("assistant", prevMessage.response)
                     )
                 }
-                .toList()
 
             when {
                 callParameters.imageMediaType != null && callParameters.imageData.isNotEmpty() -> {
