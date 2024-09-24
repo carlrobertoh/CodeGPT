@@ -14,6 +14,7 @@ import com.intellij.openapi.util.TextRange
 import com.intellij.ui.ComponentUtil.findParentByCondition
 import com.intellij.ui.EditorTextField
 import com.intellij.util.ui.JBUI
+import com.intellij.util.ui.UIUtil
 import ee.carlrobert.codegpt.CodeGPTBundle
 import ee.carlrobert.codegpt.CodeGPTKeys.IS_PROMPT_TEXT_FIELD_DOCUMENT
 import ee.carlrobert.codegpt.ui.textarea.suggestion.SuggestionsPopupManager
@@ -56,6 +57,7 @@ class PromptTextField(
 
     init {
         isOneLineMode = false
+        background = UIUtil.getTextFieldBackground()
         minimumSize = Dimension(100, 40)
         document.addDocumentListener(getDocumentListener(onTextChanged))
         IS_PROMPT_TEXT_FIELD_DOCUMENT.set(document, true)
