@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Anthropic (Claude) chat requests [#707](https://github.com/carlrobertoh/CodeGPT/issues/707)
+
 ## [2.11.2-223] - 2024-09-24
 
 ### Added
