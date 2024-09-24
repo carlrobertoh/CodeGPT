@@ -42,33 +42,39 @@
 
 ## About The Project
 
-CodeGPT is your go-to AI coding assistant, offering assistance throughout your entire software development journey while keeping privacy in mind. Access state-of-the-art large language models from leading providers such as OpenAI, Anthropic, Azure, Mistral, and others, or connect to a locally hosted model for a completely offline and transparent development experience.
+CodeGPT is an AI-powered code assistant designed to help you with various programming activities. It is a great alternative to GitHub Copilot, AI Assistant, Codiumate, or any other extension on the JetBrains marketplace.
+
+We equip you with the latest models, advanced tools, and on-premise solutions that are designed to significantly enhance your developer experience.
+
+Access top-tier language models from OpenAI, Anthropic, Azure, Mistral, and others, or opt for a self-hosted model for a full offline experience.
 
 ## Core Features
 
-CodeGPT offers a wide range of features to enhance your coding experience:
+CodeGPT offers a wide range of features to enhance your development experience:
 
 ### Chat
-- Engage in natural language conversations about your code
-- Get explanations, suggestions, and answers to your programming questions
-- Upload and discuss images related to your code or project
+
+- **Use images:** Chat with your images. Upload manually or let CodeGPT auto-detect your screenshots. 
+
+- **Reference your files and folders:** Quickly access and reference your project files and folders for context-aware coding assistance.
+
+- **Reference web docs:** Quickly reference web docs in your chat session, such as API guides, library manuals, and more. 
+
+- **Reference git history:** Quickly reference commit logs and changes in your chat session 
+
+- **Search the web:** Connect your favourite LLM to the web. CodeGPT will search for the most relevant information to answer your questions. 
+
+- **Customize your assistant:** Choose between multiple different personas for your specific needs, whether you're looking to learn, write or proofread.
 
 ### Code
-- Receive context-aware code completions as you type
-- Edit existing code using natural language instructions
-- Generate descriptive commit messages automatically
-- Get naming suggestions for variables, methods, and classes
 
-### Customize
-- Choose from multiple AI models, including local and self-hosted options
-- Personalize your AI assistant with different personas
-- Configure custom commands for repetitive tasks
+- **Autocomplete your code:** Receive single-line or whole-function autocomplete suggestions as you type.
 
-### Integrate
-- Reference project files and folders for context-aware assistance
-- Access web documentation directly within your chat sessions
-- Incorporate Git history into your conversations
-- Perform web searches without leaving your IDE
+- **Edit code in natural language:** Highlight the code you want to modify, describe the desired changes, and watch CodeGPT work its magic.
+
+- **Get name suggestions:** Get context-aware naming suggestions for methods, variables, and more.
+
+- **Generate commit messages:** Generate concise and descriptive commit messages based on the changes made in your codebase.
 
 For a full list of features and detailed descriptions, visit our [official documentation](https://docs.codegpt.ee/features).
 
