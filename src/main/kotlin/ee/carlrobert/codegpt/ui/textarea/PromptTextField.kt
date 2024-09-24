@@ -10,9 +10,9 @@ import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.fileTypes.FileTypes
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.TextRange
 import com.intellij.ui.ComponentUtil.findParentByCondition
 import com.intellij.ui.EditorTextField
-import com.intellij.ui.JBColor
 import com.intellij.util.ui.JBUI
 import ee.carlrobert.codegpt.CodeGPTBundle
 import ee.carlrobert.codegpt.CodeGPTKeys.IS_PROMPT_TEXT_FIELD_DOCUMENT
@@ -215,8 +215,9 @@ class PromptTextFieldEventDispatcher(
                         }
 
                         KeyEvent.VK_ENTER -> {
-                            if (e.modifiersEx and InputEvent.SHIFT_DOWN_MASK == 0
-                                && e.modifiersEx and InputEvent.ALT_DOWN_MASK == 0
+                            if (e.isShiftDown) {
+                                handleShiftEnter(e)
+                            } else if (e.modifiersEx and InputEvent.ALT_DOWN_MASK == 0
                                 && e.modifiersEx and InputEvent.CTRL_DOWN_MASK == 0
                             ) {
                                 onSubmit()
@@ -240,6 +241,28 @@ class PromptTextFieldEventDispatcher(
             }
         }
         return false
+    }
+
+    private fun handleShiftEnter(e: KeyEvent) {
+        textField.editor?.let { editor ->
+            runUndoTransparentWriteAction {
+                val document = editor.document
+                val caretModel = editor.caretModel
+                val offset = caretModel.offset
+                val lineEndOffset = document.getLineEndOffset(document.getLineNumber(offset))
+                val remainingText = if (offset < lineEndOffset) {
+                    val textAfterCursor = document.getText(TextRange(offset, lineEndOffset))
+                    document.deleteString(offset, lineEndOffset)
+                    textAfterCursor
+                } else {
+                    ""
+                }
+
+                document.insertString(offset, "\n" + remainingText)
+                caretModel.moveToOffset(offset + 1)
+            }
+        }
+        e.consume()
     }
 
     private fun selectNextSuggestion(event: KeyEvent) {
