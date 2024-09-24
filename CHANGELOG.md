@@ -13,7 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Model popup submenu auto-hover
+- Model popup submenu auto-hover [#681](https://github.com/carlrobertoh/CodeGPT/issues/681)
+- Prompt text field newline creation [#694](https://github.com/carlrobertoh/CodeGPT/issues/694)
+- Prompt text field theme issues [#701](https://github.com/carlrobertoh/CodeGPT/issues/701)
 
 ## [2.11.1-241.1] - 2024-09-12
 
