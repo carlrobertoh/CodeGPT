@@ -8,8 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Edit Code and naming suggestions feature support for all providers
+- Edit Code and Name Suggestions feature support for all providers
 - Qwen 2.5 Coder models and prompt templates
+
+### Fixed
+
+- Model popup submenu auto-hover
 
 ## [2.11.1-223] - 2024-09-12
 
