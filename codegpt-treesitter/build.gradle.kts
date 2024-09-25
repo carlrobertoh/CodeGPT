@@ -13,7 +13,7 @@ dependencies {
     implementation("io.github.bonede:tree-sitter-c-sharp:0.20.0a")
     implementation("io.github.bonede:tree-sitter-fortran:master-a")
     implementation("io.github.bonede:tree-sitter-gitattributes:0.1.6")
-    implementation("io.github.bonede:tree-sitter-go:0.21.0a")
+    implementation("io.github.bonede:tree-sitter-go:0.21.0")
     implementation("io.github.bonede:tree-sitter-graphql:master-a")
     implementation("io.github.bonede:tree-sitter-html:0.20.3")
     implementation("io.github.bonede:tree-sitter-javascript:0.21.2")
