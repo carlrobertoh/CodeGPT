@@ -6,6 +6,22 @@ We equip you with the latest models, advanced tools, and on-premise solutions th
 
 Access top-tier language models from OpenAI, Anthropic, Azure, Mistral, and others, or opt for a self-hosted model for a full offline experience.
 
+## From cloud providers to custom setups
+
+Access market-leading LLMs with your own key, or use a privately hosted model within your corporate network.
+
+- **Bring your own key:** Connect the plugin with your preferred provider using your own API key. Use our [hosted service](https://codegpt.ee/#pricing) for a full experience.
+
+- **Customize your own setup:** Connect the plugin with privately hosted models. Use our OpenAI API-compatible provider configuration for end-to-end integration.
+
+## Build your own local AI assistant
+
+CodeGPT is the leading open-source extension for connecting your locally running LLM with your favourite JetBrains IDE. We provide full AI-assisted experience without sending your data externally or requiring an internet connection.
+
+- **Ollama integration:** CodeGPT will automatically detect and utilize the models handled by Ollama without any additional setup.
+- **GGUF support:** Easily connect your custom model
+- **LLaMA C/C++ integration:** Run dozens of open-source LLMs with just a few clicks, without needing any additional third-party software.
+
 ## Core Features
 
 CodeGPT offers a wide range of features to enhance your development experience:
