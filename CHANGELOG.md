@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Qwen 2.5 (72B) and o1 models (CodeGPT, OpenAI)
+- Free limited access to SOTA models (CodeGPT)
+
 ## [2.11.3-233] - 2024-09-25
 
 ### Fixed
