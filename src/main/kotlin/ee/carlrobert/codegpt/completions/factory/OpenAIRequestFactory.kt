@@ -2,13 +2,10 @@ package ee.carlrobert.codegpt.completions.factory
 
 import com.intellij.openapi.components.service
 import ee.carlrobert.codegpt.EncodingManager
-import ee.carlrobert.codegpt.completions.CallParameters
-import ee.carlrobert.codegpt.completions.CompletionRequestFactory
+import ee.carlrobert.codegpt.completions.*
 import ee.carlrobert.codegpt.completions.CompletionRequestUtil.EDIT_CODE_SYSTEM_PROMPT
 import ee.carlrobert.codegpt.completions.CompletionRequestUtil.FIX_COMPILE_ERRORS_SYSTEM_PROMPT
 import ee.carlrobert.codegpt.completions.CompletionRequestUtil.GENERATE_METHOD_NAMES_SYSTEM_PROMPT
-import ee.carlrobert.codegpt.completions.ConversationType
-import ee.carlrobert.codegpt.completions.TotalUsageExceededException
 import ee.carlrobert.codegpt.conversations.ConversationsState
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings.Companion.getState
@@ -17,62 +14,93 @@ import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings
 import ee.carlrobert.codegpt.util.file.FileUtil.getImageMediaType
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel
 import ee.carlrobert.llm.client.openai.completion.request.*
-import ee.carlrobert.llm.completion.CompletionRequest
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
 
 class OpenAIRequestFactory : CompletionRequestFactory {
 
-    override fun createChatRequest(callParameters: CallParameters): OpenAIChatCompletionRequest {
+    override fun createChatRequest(params: ChatCompletionRequestParameters): OpenAIChatCompletionRequest {
+        val (callParameters) = params
         val model = service<OpenAISettings>().state.model
         val configuration = service<ConfigurationSettings>().state
         val requestBuilder: OpenAIChatCompletionRequest.Builder =
             OpenAIChatCompletionRequest.Builder(buildOpenAIMessages(model, callParameters))
                 .setModel(model)
-                .setMaxTokens(configuration.maxTokens)
+        if ("o1-mini" == model || "o1-preview" == model) {
+            requestBuilder
+                .setMaxCompletionTokens(configuration.maxTokens)
+                .setStream(false)
+                .setMaxTokens(null)
+                .setTemperature(null)
+                .setPresencePenalty(null)
+                .setFrequencyPenalty(null)
+        } else {
+            requestBuilder
                 .setStream(true)
+                .setMaxTokens(configuration.maxTokens)
                 .setTemperature(configuration.temperature.toDouble())
+        }
         return requestBuilder.build()
     }
 
-    override fun createEditCodeRequest(input: String): OpenAIChatCompletionRequest {
-        return buildEditCodeRequest(input, service<OpenAISettings>().state.model)
+    override fun createEditCodeRequest(params: EditCodeRequestParameters): OpenAIChatCompletionRequest {
+        val model = service<OpenAISettings>().state.model
+        if (model == "o1-mini" || model == "o1-preview") {
+            return buildBasicO1Request(model, params.prompt, EDIT_CODE_SYSTEM_PROMPT)
+        }
+        return createBasicCompletionRequest(EDIT_CODE_SYSTEM_PROMPT, params.prompt, model, true)
     }
 
-    override fun createCommitMessageRequest(
-        systemPrompt: String,
-        gitDiff: String
-    ): CompletionRequest {
-        return createBasicCompletionRequest(
-            systemPrompt,
-            gitDiff,
-            service<OpenAISettings>().state.model,
-            true
-        )
+    override fun createCommitMessageRequest(params: CommitMessageRequestParameters): OpenAIChatCompletionRequest {
+        val model = service<OpenAISettings>().state.model
+        val (gitDiff, systemPrompt) = params
+        if (model == "o1-mini" || model == "o1-preview") {
+            return buildBasicO1Request(model, gitDiff, systemPrompt)
+        }
+        return createBasicCompletionRequest(systemPrompt, gitDiff, model, true)
     }
 
-    override fun createLookupRequest(prompt: String): CompletionRequest {
-        return createBasicCompletionRequest(
-            GENERATE_METHOD_NAMES_SYSTEM_PROMPT,
-            prompt,
-            service<OpenAISettings>().state.model
-        )
+    override fun createLookupRequest(params: LookupRequestCallParameters): OpenAIChatCompletionRequest {
+        val model = service<OpenAISettings>().state.model
+        val (prompt) = params
+        if (model == "o1-mini" || model == "o1-preview") {
+            return buildBasicO1Request(model, prompt, GENERATE_METHOD_NAMES_SYSTEM_PROMPT)
+        }
+        return createBasicCompletionRequest(GENERATE_METHOD_NAMES_SYSTEM_PROMPT, prompt, model)
     }
 
     companion object {
-        fun buildEditCodeRequest(
-            input: String,
-            model: String? = null
+        fun buildBasicO1Request(
+            model: String,
+            prompt: String,
+            systemPrompt: String = "",
+            maxCompletionTokens: Int = 4096
         ): OpenAIChatCompletionRequest {
-            return createBasicCompletionRequest(EDIT_CODE_SYSTEM_PROMPT, input, model, true)
+            val messages = if (systemPrompt.isEmpty()) {
+                listOf(OpenAIChatCompletionStandardMessage("user", prompt))
+            } else {
+                listOf(
+                    OpenAIChatCompletionStandardMessage("user", systemPrompt),
+                    OpenAIChatCompletionStandardMessage("user", prompt)
+                )
+            }
+            return OpenAIChatCompletionRequest.Builder(messages)
+                .setModel(model)
+                .setMaxCompletionTokens(maxCompletionTokens)
+                .setStream(false)
+                .setTemperature(null)
+                .setFrequencyPenalty(null)
+                .setPresencePenalty(null)
+                .setMaxTokens(null)
+                .build()
         }
 
         fun buildOpenAIMessages(
             model: String?,
             callParameters: CallParameters
         ): List<OpenAIChatCompletionMessage> {
-            val messages = buildOpenAIMessages(callParameters)
+            val messages = buildOpenAIChatMessages(model, callParameters)
 
             if (model == null) {
                 return messages
@@ -104,21 +132,24 @@ class OpenAIRequestFactory : CompletionRequestFactory {
             )
         }
 
-        private fun buildOpenAIMessages(
+        private fun buildOpenAIChatMessages(
+            model: String?,
             callParameters: CallParameters
         ): MutableList<OpenAIChatCompletionMessage> {
             val message = callParameters.message
             val messages = mutableListOf<OpenAIChatCompletionMessage>()
+            val role = if ("o1-mini" == model || "o1-preview" == model) "user" else "system"
+
             if (callParameters.conversationType == ConversationType.DEFAULT) {
                 val sessionPersonaDetails = callParameters.message.personaDetails
                 if (callParameters.message.personaDetails == null) {
                     messages.add(
-                        OpenAIChatCompletionStandardMessage("system", getSystemPrompt())
+                        OpenAIChatCompletionStandardMessage(role, getSystemPrompt())
                     )
                 } else {
                     messages.add(
                         OpenAIChatCompletionStandardMessage(
-                            "system",
+                            role,
                             sessionPersonaDetails.instructions
                         )
                     )
@@ -126,7 +157,7 @@ class OpenAIRequestFactory : CompletionRequestFactory {
             }
             if (callParameters.conversationType == ConversationType.FIX_COMPILE_ERRORS) {
                 messages.add(
-                    OpenAIChatCompletionStandardMessage("system", FIX_COMPILE_ERRORS_SYSTEM_PROMPT)
+                    OpenAIChatCompletionStandardMessage(role, FIX_COMPILE_ERRORS_SYSTEM_PROMPT)
                 )
             }
 

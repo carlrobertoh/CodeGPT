@@ -112,6 +112,9 @@ abstract class ToolWindowCompletionResponseEventListener implements
       try {
         responsePanel.enableActions();
         responseContainer.enableActions();
+        if (!responseContainer.isResponseReceived() && !fullMessage.isEmpty()) {
+          responseContainer.withResponse(fullMessage);
+        }
         totalTokensPanel.updateUserPromptTokens(textArea.getText());
         totalTokensPanel.updateConversationTokens(callParameters.getConversation());
       } finally {

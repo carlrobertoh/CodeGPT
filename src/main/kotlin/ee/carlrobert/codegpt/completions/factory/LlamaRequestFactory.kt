@@ -2,7 +2,7 @@ package ee.carlrobert.codegpt.completions.factory
 
 import com.intellij.openapi.components.service
 import ee.carlrobert.codegpt.completions.BaseRequestFactory
-import ee.carlrobert.codegpt.completions.CallParameters
+import ee.carlrobert.codegpt.completions.ChatCompletionRequestParameters
 import ee.carlrobert.codegpt.completions.CompletionRequestUtil.FIX_COMPILE_ERRORS_SYSTEM_PROMPT
 import ee.carlrobert.codegpt.completions.ConversationType
 import ee.carlrobert.codegpt.completions.llama.LlamaModel
@@ -14,7 +14,8 @@ import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest
 
 class LlamaRequestFactory : BaseRequestFactory() {
 
-    override fun createChatRequest(callParameters: CallParameters): LlamaCompletionRequest {
+    override fun createChatRequest(params: ChatCompletionRequestParameters): LlamaCompletionRequest {
+        val (callParameters) = params
         val promptTemplate = getPromptTemplate()
         val systemPrompt =
             if (callParameters.conversationType == ConversationType.FIX_COMPILE_ERRORS)
@@ -33,6 +34,7 @@ class LlamaRequestFactory : BaseRequestFactory() {
     override fun createBasicCompletionRequest(
         systemPrompt: String,
         userPrompt: String,
+        maxTokens: Int,
         stream: Boolean
     ): LlamaCompletionRequest {
         val promptTemplate = getPromptTemplate()

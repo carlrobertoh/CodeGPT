@@ -3,6 +3,7 @@ package ee.carlrobert.codegpt.completions.factory
 import com.intellij.openapi.components.service
 import ee.carlrobert.codegpt.completions.BaseRequestFactory
 import ee.carlrobert.codegpt.completions.CallParameters
+import ee.carlrobert.codegpt.completions.ChatCompletionRequestParameters
 import ee.carlrobert.codegpt.completions.CompletionRequestUtil.FIX_COMPILE_ERRORS_SYSTEM_PROMPT
 import ee.carlrobert.codegpt.completions.ConversationType
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
@@ -18,7 +19,8 @@ import java.util.*
 
 class OllamaRequestFactory : BaseRequestFactory() {
 
-    override fun createChatRequest(callParameters: CallParameters): OllamaChatCompletionRequest {
+    override fun createChatRequest(params: ChatCompletionRequestParameters): OllamaChatCompletionRequest {
+        val (callParameters) = params
         val configuration = service<ConfigurationSettings>().state
         val settings = service<OllamaSettings>().state
         return OllamaChatCompletionRequest.Builder(
@@ -38,6 +40,7 @@ class OllamaRequestFactory : BaseRequestFactory() {
     override fun createBasicCompletionRequest(
         systemPrompt: String,
         userPrompt: String,
+        maxTokens: Int,
         stream: Boolean
     ): OllamaChatCompletionRequest {
         return OllamaChatCompletionRequest.Builder(

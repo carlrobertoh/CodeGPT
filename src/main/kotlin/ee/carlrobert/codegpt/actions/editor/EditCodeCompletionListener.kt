@@ -34,7 +34,12 @@ class EditCodeCompletionListener(
     }
 
     override fun onComplete(messageBuilder: StringBuilder) {
-        runInEdt { cleanupAndFormat() }
+        runInEdt {
+            if (replacedLength == 0 && messageBuilder.isNotEmpty()) {
+                handleDiff(messageBuilder.toString())
+            }
+            cleanupAndFormat()
+        }
         observableProperties.loading.set(false)
     }
 
@@ -73,7 +78,6 @@ class EditCodeCompletionListener(
         val document = editor.document
         val startOffset = selectionTextRange.startOffset
         val endOffset = selectionTextRange.endOffset
-
         runUndoTransparentWriteAction {
             val remainingOriginalLength = endOffset - (startOffset + replacedLength)
             if (remainingOriginalLength > 0) {
