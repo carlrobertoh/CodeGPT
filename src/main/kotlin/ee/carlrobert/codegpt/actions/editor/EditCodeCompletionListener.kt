@@ -41,7 +41,12 @@ class EditCodeCompletionListener(
         followUpButton.isEnabled = true
         acceptButton.isEnabled = true
         spinner.isVisible = false
-        runInEdt { cleanupAndFormat() }
+        runInEdt {
+            if (replacedLength == 0 && messageBuilder.isNotEmpty()) {
+                handleDiff(messageBuilder.toString())
+            }
+            cleanupAndFormat()
+        }
     }
 
     override fun onError(error: ErrorDetails, ex: Throwable) {
@@ -81,7 +86,6 @@ class EditCodeCompletionListener(
         val document = editor.document
         val startOffset = selectionTextRange.startOffset
         val endOffset = selectionTextRange.endOffset
-
         runUndoTransparentWriteAction {
             val remainingOriginalLength = endOffset - (startOffset + replacedLength)
             if (remainingOriginalLength > 0) {

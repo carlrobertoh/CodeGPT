@@ -24,12 +24,14 @@ class CompletionRequestProviderTest : IntegrationTest() {
         conversation.addMessage(secondMessage)
 
         val request = OpenAIRequestFactory().createChatRequest(
-            CallParameters(
-                conversation,
-                ConversationType.DEFAULT,
-                Message("TEST_CHAT_COMPLETION_PROMPT"),
-                null,
-                false
+            ChatCompletionRequestParameters(
+                CallParameters(
+                    conversation,
+                    ConversationType.DEFAULT,
+                    Message("TEST_CHAT_COMPLETION_PROMPT"),
+                    null,
+                    false
+                )
             )
         )
 
@@ -55,12 +57,14 @@ class CompletionRequestProviderTest : IntegrationTest() {
         conversation.addMessage(secondMessage)
 
         val request = OpenAIRequestFactory().createChatRequest(
-            CallParameters(
-                conversation,
-                ConversationType.DEFAULT,
-                Message("TEST_CHAT_COMPLETION_PROMPT"),
-                null,
-                false
+            ChatCompletionRequestParameters(
+                CallParameters(
+                    conversation,
+                    ConversationType.DEFAULT,
+                    Message("TEST_CHAT_COMPLETION_PROMPT"),
+                    null,
+                    false
+                )
             )
         )
 
@@ -86,12 +90,14 @@ class CompletionRequestProviderTest : IntegrationTest() {
         conversation.addMessage(secondMessage)
 
         val request = OpenAIRequestFactory().createChatRequest(
-            CallParameters(
-                conversation,
-                ConversationType.DEFAULT,
-                secondMessage,
-                null,
-                true
+            ChatCompletionRequestParameters(
+                CallParameters(
+                    conversation,
+                    ConversationType.DEFAULT,
+                    secondMessage,
+                    null,
+                    true
+                )
             )
         )
 
@@ -118,12 +124,14 @@ class CompletionRequestProviderTest : IntegrationTest() {
         conversation.discardTokenLimits()
 
         val request = OpenAIRequestFactory().createChatRequest(
-            CallParameters(
-                conversation,
-                ConversationType.DEFAULT,
-                Message("TEST_CHAT_COMPLETION_PROMPT"),
-                null,
-                false
+            ChatCompletionRequestParameters(
+                CallParameters(
+                    conversation,
+                    ConversationType.DEFAULT,
+                    Message("TEST_CHAT_COMPLETION_PROMPT"),
+                    null,
+                    false
+                )
             )
         )
 
@@ -146,12 +154,14 @@ class CompletionRequestProviderTest : IntegrationTest() {
 
         assertThrows(TotalUsageExceededException::class.java) {
             OpenAIRequestFactory().createChatRequest(
-                CallParameters(
-                    conversation,
-                    ConversationType.DEFAULT,
-                    createDummyMessage(100),
-                    null,
-                    false
+                ChatCompletionRequestParameters(
+                    CallParameters(
+                        conversation,
+                        ConversationType.DEFAULT,
+                        createDummyMessage(100),
+                        null,
+                        false
+                    )
                 )
             )
         }

@@ -89,7 +89,6 @@ public class CompletionClientProvider {
     return builder.build(getDefaultClientBuilder());
   }
 
-
   public static GoogleClient getGoogleClient() {
     return new GoogleClient.Builder(getCredential(CredentialKey.GOOGLE_API_KEY))
         .build(getDefaultClientBuilder());

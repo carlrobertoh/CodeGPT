@@ -14,10 +14,12 @@ public final class Icons {
   public static final Icon Azure = IconLoader.getIcon("/icons/azure.svg", Icons.class);
   public static final Icon Databricks = IconLoader.getIcon("/icons/dbrx.svg", Icons.class);
   public static final Icon DeepSeek = IconLoader.getIcon("/icons/deepseek.png", Icons.class);
+  public static final Icon Qwen = IconLoader.getIcon("/icons/qwen.png", Icons.class);
   public static final Icon Google = IconLoader.getIcon("/icons/google.svg", Icons.class);
   public static final Icon Llama = IconLoader.getIcon("/icons/llama.svg", Icons.class);
   public static final Icon OpenAI = IconLoader.getIcon("/icons/openai.svg", Icons.class);
   public static final Icon Meta = IconLoader.getIcon("/icons/meta.svg", Icons.class);
+  public static final Icon Mistral = IconLoader.getIcon("/icons/mistral.svg", Icons.class);
   public static final Icon Send = IconLoader.getIcon("/icons/send.svg", Icons.class);
   public static final Icon Sparkle = IconLoader.getIcon("/icons/sparkle.svg", Icons.class);
   public static final Icon You = IconLoader.getIcon("/icons/you.svg", Icons.class);

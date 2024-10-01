@@ -3,7 +3,9 @@ package ee.carlrobert.codegpt.completions;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.diagnostic.Logger;
-import ee.carlrobert.codegpt.actions.editor.EditCodeRequestParams;
+import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.progress.Task;
 import ee.carlrobert.codegpt.completions.factory.CustomOpenAIRequest;
 import ee.carlrobert.codegpt.credentials.CredentialsStore;
 import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey;
@@ -26,12 +28,15 @@ import ee.carlrobert.llm.completion.CompletionEventListener;
 import ee.carlrobert.llm.completion.CompletionRequest;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
+import javax.swing.SwingUtilities;
 import okhttp3.Request;
 import okhttp3.sse.EventSource;
 import okhttp3.sse.EventSources;
+import org.jetbrains.annotations.NotNull;
 
 @Service
 public final class CompletionRequestService {
@@ -63,50 +68,50 @@ public final class CompletionRequestService {
         new OpenAIChatCompletionEventSourceListener(eventListener));
   }
 
-  public String getLookupCompletion(String prompt) {
-    return getChatCompletion(
-        CompletionRequestFactory.getFactory(GeneralSettings.getSelectedService())
-            .createLookupRequest(prompt));
+  public String getLookupCompletion(LookupRequestCallParameters params) {
+    var request = CompletionRequestFactory
+        .getFactory(GeneralSettings.getSelectedService())
+        .createLookupRequest(params);
+    return getChatCompletion(request);
   }
 
   public EventSource getCommitMessageAsync(
-      String systemPrompt,
-      String gitDiff,
+      CommitMessageRequestParameters params,
       CompletionEventListener<String> eventListener) {
-    return getChatCompletionAsync(
-        CompletionRequestFactory.getFactory(GeneralSettings.getSelectedService())
-            .createCommitMessageRequest(systemPrompt, gitDiff),
-        eventListener);
+    var request = CompletionRequestFactory
+        .getFactory(GeneralSettings.getSelectedService())
+        .createCommitMessageRequest(params);
+    return getChatCompletionAsync(request, eventListener);
   }
 
   public EventSource getEditCodeCompletionAsync(
-      EditCodeRequestParams params,
+      EditCodeRequestParameters params,
       CompletionEventListener<String> eventListener) {
-    var input = "%s\n\n%s".formatted(params.getPrompt(), params.getSelectedText());
-    return getChatCompletionAsync(
-        CompletionRequestFactory.getFactory(GeneralSettings.getSelectedService())
-            .createEditCodeRequest(input),
-        eventListener);
+    var request = CompletionRequestFactory
+        .getFactory(GeneralSettings.getSelectedService())
+        .createEditCodeRequest(params);
+    return getChatCompletionAsync(request, eventListener);
   }
 
   public EventSource getChatCompletionAsync(
-      CallParameters callParameters,
-      CompletionEventListener<String> eventListener) {
-    return getChatCompletionAsync(
-        CompletionRequestFactory.getFactory(GeneralSettings.getSelectedService())
-            .createChatRequest(callParameters),
-        eventListener);
-  }
-
-  private EventSource getChatCompletionAsync(
       CompletionRequest request,
       CompletionEventListener<String> eventListener) {
     if (request instanceof OpenAIChatCompletionRequest completionRequest) {
       return switch (GeneralSettings.getSelectedService()) {
-        case CODEGPT -> CompletionClientProvider.getCodeGPTClient()
-            .getChatCompletionAsync(completionRequest, eventListener);
-        case OPENAI -> CompletionClientProvider.getOpenAIClient()
-            .getChatCompletionAsync(completionRequest, eventListener);
+        case CODEGPT -> {
+          if (List.of("o1-mini", "o1-preview").contains(completionRequest.getModel())) {
+            yield getO1ChatCompletionAsync(completionRequest, eventListener);
+          }
+          yield CompletionClientProvider.getCodeGPTClient()
+              .getChatCompletionAsync(completionRequest, eventListener);
+        }
+        case OPENAI -> {
+          if (List.of("o1-mini", "o1-preview").contains(completionRequest.getModel())) {
+            yield getO1ChatCompletionAsync(completionRequest, eventListener);
+          }
+          yield CompletionClientProvider.getOpenAIClient()
+              .getChatCompletionAsync(completionRequest, eventListener);
+        }
         case AZURE -> CompletionClientProvider.getAzureClient()
             .getChatCompletionAsync(completionRequest, eventListener);
         default -> throw new RuntimeException("Unknown service selected");
@@ -142,7 +147,33 @@ public final class CompletionRequestService {
     throw new IllegalStateException("Unknown request type: " + request.getClass());
   }
 
-  private String getChatCompletion(CompletionRequest request) {
+  private EventSource getO1ChatCompletionAsync(
+      OpenAIChatCompletionRequest request,
+      CompletionEventListener<String> eventListener) {
+    ProgressManager.getInstance()
+        .run(new Task.Backgroundable(null, "CodeGPT: Processing o1 request") {
+          @Override
+          public void run(@NotNull ProgressIndicator indicator) {
+            indicator.setIndeterminate(true);
+            var response = CompletionRequestService.getInstance().getChatCompletion(request);
+            SwingUtilities.invokeLater(() -> eventListener.onComplete(new StringBuilder(response)));
+          }
+        });
+
+    return new EventSource() {
+      @Override
+      public @NotNull Request request() {
+        return new Request.Builder().build(); // dummy
+      }
+
+      @Override
+      public void cancel() {
+        eventListener.onCancelled(new StringBuilder("Cancelled"));
+      }
+    };
+  }
+
+  public String getChatCompletion(CompletionRequest request) {
     if (request instanceof OpenAIChatCompletionRequest completionRequest) {
       var response = switch (GeneralSettings.getSelectedService()) {
         case CODEGPT -> CompletionClientProvider.getCodeGPTClient()

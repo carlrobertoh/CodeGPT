@@ -16,6 +16,9 @@ public interface CompletionResponseEventListener {
   default void handleTokensExceeded(Conversation conversation, Message message) {
   }
 
+  default void handleCompleted(String fullMessage) {
+  }
+
   default void handleCompleted(String fullMessage, CallParameters callParameters) {
   }
 

@@ -10,10 +10,9 @@ import com.intellij.util.ui.AsyncProcessIcon
 import com.intellij.openapi.util.text.StringUtil
 import com.jetbrains.rd.util.AtomicReference
 import ee.carlrobert.codegpt.completions.CompletionRequestService
+import ee.carlrobert.codegpt.completions.EditCodeRequestParameters
 import ee.carlrobert.codegpt.ui.ObservableProperties
 import javax.swing.JButton
-
-data class EditCodeRequestParams(val prompt: String, val selectedText: String)
 
 class EditCodeSubmissionHandler(
     private val editor: Editor,
@@ -44,7 +43,7 @@ class EditCodeSubmissionHandler(
         runInEdt { editor.selectionModel.removeSelection() }
 
         service<CompletionRequestService>().getEditCodeCompletionAsync(
-            EditCodeRequestParams(userPrompt, selectedText),
+            EditCodeRequestParameters(userPrompt, selectedText),
             EditCodeCompletionListener(
                 editor,
                 selectionTextRange,

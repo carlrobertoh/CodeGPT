@@ -2,7 +2,7 @@ package ee.carlrobert.codegpt.completions.factory
 
 import com.intellij.openapi.components.service
 import ee.carlrobert.codegpt.completions.BaseRequestFactory
-import ee.carlrobert.codegpt.completions.CallParameters
+import ee.carlrobert.codegpt.completions.ChatCompletionRequestParameters
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
 import ee.carlrobert.codegpt.settings.persona.PersonaSettings
 import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettings
@@ -11,7 +11,8 @@ import ee.carlrobert.llm.completion.CompletionRequest
 
 class ClaudeRequestFactory : BaseRequestFactory() {
 
-    override fun createChatRequest(callParameters: CallParameters): ClaudeCompletionRequest {
+    override fun createChatRequest(params: ChatCompletionRequestParameters): ClaudeCompletionRequest {
+        val (callParameters) = params
         return ClaudeCompletionRequest().apply {
             model = service<AnthropicSettings>().state.model
             maxTokens = service<ConfigurationSettings>().state.maxTokens
@@ -57,15 +58,16 @@ class ClaudeRequestFactory : BaseRequestFactory() {
     override fun createBasicCompletionRequest(
         systemPrompt: String,
         userPrompt: String,
+        maxTokens: Int,
         stream: Boolean
     ): CompletionRequest {
         return ClaudeCompletionRequest().apply {
             system = systemPrompt
             isStream = stream
-            maxTokens = service<ConfigurationSettings>().state.maxTokens
             model = service<AnthropicSettings>().state.model
             messages =
                 listOf<ClaudeCompletionMessage>(ClaudeCompletionStandardMessage("user", userPrompt))
+            this.maxTokens = maxTokens
         }
     }
 }

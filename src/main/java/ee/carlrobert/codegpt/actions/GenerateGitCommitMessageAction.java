@@ -28,6 +28,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.Icons;
+import ee.carlrobert.codegpt.completions.CommitMessageRequestParameters;
 import ee.carlrobert.codegpt.completions.CompletionRequestService;
 import ee.carlrobert.codegpt.settings.configuration.CommitMessageTemplate;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
@@ -93,8 +94,9 @@ public class GenerateGitCommitMessageAction extends AnAction {
     if (editor != null) {
       ((EditorEx) editor).setCaretVisible(false);
       CompletionRequestService.getInstance().getCommitMessageAsync(
-          project.getService(CommitMessageTemplate.class).getSystemPrompt(),
-          gitDiff,
+          new CommitMessageRequestParameters(
+              gitDiff,
+              project.getService(CommitMessageTemplate.class).getSystemPrompt()),
           getEventListener(project, editor.getDocument()));
     }
   }
@@ -151,11 +153,14 @@ public class GenerateGitCommitMessageAction extends AnAction {
       @Override
       public void onMessage(String message, EventSource eventSource) {
         messageBuilder.append(message);
-        var application = ApplicationManager.getApplication();
-        application.invokeLater(() ->
-            application.runWriteAction(() ->
-                WriteCommandAction.runWriteCommandAction(project, () ->
-                    document.setText(messageBuilder))));
+        updateCommitMessage(messageBuilder.toString());
+      }
+
+      @Override
+      public void onComplete(StringBuilder result) {
+        if (messageBuilder.isEmpty()) {
+          updateCommitMessage(result.toString());
+        }
       }
 
       @Override
@@ -165,6 +170,14 @@ public class GenerateGitCommitMessageAction extends AnAction {
             "CodeGPT",
             error.getMessage(),
             NotificationType.ERROR));
+      }
+
+      private void updateCommitMessage(String message) {
+        var application = ApplicationManager.getApplication();
+        application.invokeLater(() ->
+            application.runWriteAction(() ->
+                WriteCommandAction.runWriteCommandAction(project, () ->
+                    document.setText(messageBuilder))));
       }
     };
   }

@@ -113,6 +113,10 @@ public class ChatMessageResponseBody extends JPanel {
   }
 
   public ChatMessageResponseBody withResponse(String response) {
+    if (!responseReceived) {
+      removeAll();
+    }
+
     for (var message : MarkdownUtil.splitCodeBlocks(response)) {
       currentlyProcessedEditorPanel = null;
       currentlyProcessedTextPane = null;
@@ -361,5 +365,9 @@ public class ChatMessageResponseBody extends JPanel {
     panel.add(title, BorderLayout.NORTH);
     panel.add(listPanel, BorderLayout.CENTER);
     return panel;
+  }
+
+  public boolean isResponseReceived() {
+    return responseReceived;
   }
 }
