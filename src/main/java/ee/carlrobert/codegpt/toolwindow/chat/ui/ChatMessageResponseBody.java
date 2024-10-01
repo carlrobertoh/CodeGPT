@@ -118,8 +118,6 @@ public class ChatMessageResponseBody extends JPanel {
     }
 
     for (var message : MarkdownUtil.splitCodeBlocks(response)) {
-      currentlyProcessedEditorPanel = null;
-      currentlyProcessedTextPane = null;
       processResponse(message, message.startsWith("```"), false);
     }
 
@@ -267,23 +265,30 @@ public class ChatMessageResponseBody extends JPanel {
   }
 
   private void processText(String markdownText, boolean caretVisible) {
+    var html = convertMdToHtml(markdownText);
+    if (currentlyProcessedTextPane == null) {
+      prepareProcessingText(caretVisible);
+    }
     ApplicationManager.getApplication().invokeLater(() -> {
-      if (currentlyProcessedTextPane == null) {
-        prepareProcessingText(caretVisible);
-      }
-      currentlyProcessedTextPane.setText(convertMdToHtml(markdownText));
+      currentlyProcessedTextPane.setText(html);
     });
   }
 
   private void prepareProcessingText(boolean caretVisible) {
-    if (highlightedText != null && !highlightedText.isEmpty()
+    if (highlightedText != null
+        && !highlightedText.isEmpty()
         && currentlyProcessedEditorPanel != null) {
-      currentlyProcessedEditorPanel.showEditorActions();
+      ApplicationManager.getApplication().invokeLater(() -> {
+        currentlyProcessedEditorPanel.showEditorActions();
+      });
     }
 
     currentlyProcessedEditorPanel = null;
     currentlyProcessedTextPane = createTextPane("", caretVisible);
-    add(currentlyProcessedTextPane);
+
+    ApplicationManager.getApplication().invokeLater(() -> {
+      add(currentlyProcessedTextPane);
+    });
   }
 
   private void prepareProcessingCode(String code, String markdownLanguage) {
