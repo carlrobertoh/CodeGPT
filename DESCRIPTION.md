@@ -1,26 +1,22 @@
 <!-- Plugin description -->
 
-CodeGPT is an AI-powered code assistant designed to help you with various programming activities. It is a great alternative to GitHub Copilot, AI Assistant, Codiumate, or any other extension on the JetBrains marketplace.
+CodeGPT is an AI-powered code assistant designed to help you with various programming activities. It's a powerful alternative to GitHub Copilot, AI Assistant, Codiumate, and other JetBrains plugins.
 
-We equip you with the latest models, advanced tools, and on-premise solutions that are designed to significantly enhance your developer experience.
+## Highly Configurable
 
-Access top-tier language models from OpenAI, Anthropic, Azure, Mistral, and others, or opt for a self-hosted model for a full offline experience.
+Access top-tier language models (LLMs) with your own API key or use privately hosted models within your corporate network.
 
-## From cloud providers to custom setups
+- **Cloud Providers & Custom Setups:** Integrate top-tier models from OpenAI, Anthropic, Azure, Mistral, or use self-hosted models for offline use.
+- **Bring Your Own Key:** Connect with your preferred provider using your API key.
+- **Custom Setup:** Integrate privately hosted models with OpenAI API-compatible configuration.
 
-Access market-leading LLMs with your own key, or use a privately hosted model within your corporate network.
+## Build Your Own Local AI Assistant
 
-- **Bring your own key:** Connect the plugin with your preferred provider using your own API key. Use our [hosted service](https://codegpt.ee/#pricing) for a full experience.
+CodeGPT is the leading open-source extension for connecting your locally running LLM with JetBrains IDEs. Enjoy full AI assistance without sending data externally or needing an internet connection.
 
-- **Customize your own setup:** Connect the plugin with privately hosted models. Use our OpenAI API-compatible provider configuration for end-to-end integration.
-
-## Build your own local AI assistant
-
-CodeGPT is the leading open-source extension for connecting your locally running LLM with your favourite JetBrains IDE. We provide full AI-assisted experience without sending your data externally or requiring an internet connection.
-
-- **Ollama integration:** CodeGPT will automatically detect and utilize the models handled by Ollama without any additional setup.
-- **GGUF support:** Easily connect your custom model
-- **LLaMA C/C++ integration:** Run dozens of open-source LLMs with just a few clicks, without needing any additional third-party software.
+- **Ollama Integration:** Automatically detect and utilize Ollama-managed models.
+- **GGUF Support:** Easily connect custom models.
+- **LLaMA C/C++ Integration:** Run various open-source LLMs without third-party software.
 
 ## Core Features
 
@@ -96,9 +92,7 @@ Integrate local open-source language models into your coding environment and enj
 
 ## Privacy
 
-**Your data stays yours.** CodeGPT **does not** collect or store any kind of sensitive information.
-
-However, with users' consent, we do collect anonymous usage data, which we use to understand how users interact with the extension, including the most-used features and preferred providers.
+**Your data stays yours.** CodeGPT **does not** collect or store any sensitive information. With users' consent, we collect anonymous usage data to understand how users interact with the extension, including the most-used features and preferred providers.
 
 ## License
 
