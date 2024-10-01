@@ -47,6 +47,7 @@ import javax.swing.Icon;
 import javax.swing.JPanel;
 import javax.swing.JTextPane;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import org.jetbrains.annotations.Nullable;
 
 public class ChatMessageResponseBody extends JPanel {
@@ -113,10 +114,6 @@ public class ChatMessageResponseBody extends JPanel {
   }
 
   public ChatMessageResponseBody withResponse(String response) {
-    if (!responseReceived) {
-      removeAll();
-    }
-
     for (var message : MarkdownUtil.splitCodeBlocks(response)) {
       processResponse(message, message.startsWith("```"), false);
     }
