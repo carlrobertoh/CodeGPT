@@ -7,10 +7,10 @@ import ee.carlrobert.codegpt.settings.service.ServiceType
 import ee.carlrobert.llm.completion.CompletionRequest
 
 interface CompletionRequestFactory {
-    fun createChatRequest(callParameters: CallParameters): CompletionRequest
-    fun createEditCodeRequest(input: String): CompletionRequest
-    fun createCommitMessageRequest(systemPrompt: String, gitDiff: String): CompletionRequest
-    fun createLookupRequest(prompt: String): CompletionRequest
+    fun createChatRequest(params: ChatCompletionRequestParameters): CompletionRequest
+    fun createEditCodeRequest(params: EditCodeRequestParameters): CompletionRequest
+    fun createCommitMessageRequest(params: CommitMessageRequestParameters): CompletionRequest
+    fun createLookupRequest(params: LookupRequestCallParameters): CompletionRequest
 
     companion object {
         @JvmStatic
@@ -30,24 +30,23 @@ interface CompletionRequestFactory {
 }
 
 abstract class BaseRequestFactory : CompletionRequestFactory {
-    override fun createEditCodeRequest(input: String): CompletionRequest {
-        return createBasicCompletionRequest(EDIT_CODE_SYSTEM_PROMPT, input, true)
+    override fun createEditCodeRequest(params: EditCodeRequestParameters): CompletionRequest {
+        val prompt = "${params.prompt}\n\n${params.selectedText}"
+        return createBasicCompletionRequest(EDIT_CODE_SYSTEM_PROMPT, prompt, 8192, true)
     }
 
-    override fun createCommitMessageRequest(
-        systemPrompt: String,
-        gitDiff: String
-    ): CompletionRequest {
-        return createBasicCompletionRequest(systemPrompt, gitDiff, true)
+    override fun createCommitMessageRequest(params: CommitMessageRequestParameters): CompletionRequest {
+        return createBasicCompletionRequest(params.systemPrompt, params.gitDiff, 512, true)
     }
 
-    override fun createLookupRequest(prompt: String): CompletionRequest {
-        return createBasicCompletionRequest(GENERATE_METHOD_NAMES_SYSTEM_PROMPT, prompt)
+    override fun createLookupRequest(params: LookupRequestCallParameters): CompletionRequest {
+        return createBasicCompletionRequest(GENERATE_METHOD_NAMES_SYSTEM_PROMPT, params.prompt, 512)
     }
 
     abstract fun createBasicCompletionRequest(
         systemPrompt: String,
         userPrompt: String,
+        maxTokens: Int = 4096,
         stream: Boolean = false
     ): CompletionRequest
 }

@@ -14,14 +14,17 @@ import org.apache.http.HttpHeaders
 import org.assertj.core.api.Assertions.assertThat
 import testsupport.IntegrationTest
 
-class DefaultCompletionRequestHandlerTest : IntegrationTest() {
+class DefaultToolwindowChatCompletionRequestHandlerTest : IntegrationTest() {
 
   fun testOpenAIChatCompletionCall() {
     useOpenAIService()
     service<PersonaSettings>().state.selectedPersona.instructions = "TEST_SYSTEM_PROMPT"
     val message = Message("TEST_PROMPT")
     val conversation = ConversationService.getInstance().startConversation()
-    val requestHandler = CompletionRequestHandler(getRequestEventListener(message))
+    val requestHandler =
+      ToolwindowChatCompletionRequestHandler(
+        getRequestEventListener(message)
+      )
     expectOpenAI(StreamHttpExchange { request: RequestEntity ->
       assertThat(request.uri.path).isEqualTo("/v1/chat/completions")
       assertThat(request.method).isEqualTo("POST")
@@ -77,7 +80,10 @@ class DefaultCompletionRequestHandlerTest : IntegrationTest() {
         jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "!")))))
     })
     val message = Message("TEST_PROMPT")
-    val requestHandler = CompletionRequestHandler(getRequestEventListener(message))
+    val requestHandler =
+      ToolwindowChatCompletionRequestHandler(
+        getRequestEventListener(message)
+      )
 
     requestHandler.call(CallParameters(conversation, message))
 
@@ -91,7 +97,10 @@ class DefaultCompletionRequestHandlerTest : IntegrationTest() {
     val message = Message("TEST_PROMPT")
     val conversation = ConversationService.getInstance().startConversation()
     conversation.addMessage(Message("Ping", "Pong"))
-    val requestHandler = CompletionRequestHandler(getRequestEventListener(message))
+    val requestHandler =
+      ToolwindowChatCompletionRequestHandler(
+        getRequestEventListener(message)
+      )
     expectLlama(StreamHttpExchange { request: RequestEntity ->
       assertThat(request.uri.path).isEqualTo("/completion")
       assertThat(request.body)
@@ -125,7 +134,10 @@ class DefaultCompletionRequestHandlerTest : IntegrationTest() {
     service<PersonaSettings>().state.selectedPersona.instructions = "TEST_SYSTEM_PROMPT"
     val message = Message("TEST_PROMPT")
     val conversation = ConversationService.getInstance().startConversation()
-    val requestHandler = CompletionRequestHandler(getRequestEventListener(message))
+    val requestHandler =
+      ToolwindowChatCompletionRequestHandler(
+        getRequestEventListener(message)
+      )
     expectOllama(NdJsonStreamHttpExchange { request: RequestEntity ->
       assertThat(request.uri.path).isEqualTo("/api/chat")
       assertThat(request.headers[HttpHeaders.AUTHORIZATION]!![0]).isEqualTo("Bearer TEST_API_KEY")
@@ -171,7 +183,10 @@ class DefaultCompletionRequestHandlerTest : IntegrationTest() {
     service<PersonaSettings>().state.selectedPersona.instructions = "TEST_SYSTEM_PROMPT"
     val message = Message("TEST_PROMPT")
     val conversation = ConversationService.getInstance().startConversation()
-    val requestHandler = CompletionRequestHandler(getRequestEventListener(message))
+    val requestHandler =
+      ToolwindowChatCompletionRequestHandler(
+        getRequestEventListener(message)
+      )
     expectGoogle(StreamHttpExchange { request: RequestEntity ->
       assertThat(request.uri.path).isEqualTo("/v1/models/gemini-pro:streamGenerateContent")
       assertThat(request.method).isEqualTo("POST")
@@ -207,7 +222,10 @@ class DefaultCompletionRequestHandlerTest : IntegrationTest() {
     service<PersonaSettings>().state.selectedPersona.instructions = "TEST_SYSTEM_PROMPT"
     val message = Message("TEST_PROMPT")
     val conversation = ConversationService.getInstance().startConversation()
-    val requestHandler = CompletionRequestHandler(getRequestEventListener(message))
+    val requestHandler =
+      ToolwindowChatCompletionRequestHandler(
+        getRequestEventListener(message)
+      )
     expectCodeGPT(StreamHttpExchange { request: RequestEntity ->
       assertThat(request.uri.path).isEqualTo("/v1/chat/completions")
       assertThat(request.method).isEqualTo("POST")

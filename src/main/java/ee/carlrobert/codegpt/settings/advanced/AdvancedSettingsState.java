@@ -11,8 +11,8 @@ public class AdvancedSettingsState {
   private boolean proxyAuthSelected;
   private String proxyUsername;
   private String proxyPassword;
-  private int connectTimeout = 30;
-  private int readTimeout = 30;
+  private int connectTimeout = 120;
+  private int readTimeout = 120;
 
   public String getProxyHost() {
     return proxyHost;

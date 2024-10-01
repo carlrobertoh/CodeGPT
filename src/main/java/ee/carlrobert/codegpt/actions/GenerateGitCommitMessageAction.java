@@ -18,6 +18,7 @@ import com.intellij.vcs.commit.CommitWorkflowUi;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.Icons;
+import ee.carlrobert.codegpt.completions.CommitMessageRequestParameters;
 import ee.carlrobert.codegpt.completions.CompletionRequestService;
 import ee.carlrobert.codegpt.settings.configuration.CommitMessageTemplate;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
@@ -85,8 +86,9 @@ public class GenerateGitCommitMessageAction extends AnAction {
     var commitWorkflowUi = event.getData(VcsDataKeys.COMMIT_WORKFLOW_UI);
     if (commitWorkflowUi != null) {
       CompletionRequestService.getInstance().getCommitMessageAsync(
-          project.getService(CommitMessageTemplate.class).getSystemPrompt(),
-          gitDiff,
+          new CommitMessageRequestParameters(
+              gitDiff,
+              project.getService(CommitMessageTemplate.class).getSystemPrompt()),
           getEventListener(project, commitWorkflowUi));
     }
   }
@@ -162,11 +164,22 @@ public class GenerateGitCommitMessageAction extends AnAction {
       @Override
       public void onMessage(String message, EventSource eventSource) {
         messageBuilder.append(message);
-        var application = ApplicationManager.getApplication();
-        application.invokeLater(() ->
-            application.runWriteAction(() ->
-                WriteCommandAction.runWriteCommandAction(project, () ->
-                    commitWorkflowUi.getCommitMessageUi().setText(messageBuilder.toString()))));
+        updateCommitMessage(messageBuilder.toString());
+      }
+
+      @Override
+      public void onComplete(StringBuilder result) {
+        if (messageBuilder.isEmpty()) {
+          updateCommitMessage(result.toString());
+        }
+      }
+
+      private void updateCommitMessage(String message) {
+        ApplicationManager.getApplication().invokeLater(() ->
+            WriteCommandAction.runWriteCommandAction(project, () ->
+                commitWorkflowUi.getCommitMessageUi().setText(message)
+            )
+        );
       }
 
       @Override

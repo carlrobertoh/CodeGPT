@@ -14,49 +14,46 @@ object CodeGPTAvailableModels {
     fun getToolWindowModels(pricingPlan: PricingPlan?): List<CodeGPTModel> {
         return when (pricingPlan) {
             null, ANONYMOUS -> listOf(
-                CodeGPTModel("GPT-4o", "gpt-4o", Icons.OpenAI, INDIVIDUAL),
-                CodeGPTModel("Claude 3.5 Sonnet", "claude-3.5-sonnet", Icons.Anthropic, INDIVIDUAL),
-                CodeGPTModel("Llama 3.1 (405B)", "llama-3.1-405b", Icons.Meta, INDIVIDUAL),
-                CodeGPTModel("DeepSeek Coder V2", "deepseek-coder-v2", Icons.DeepSeek, INDIVIDUAL),
+                CodeGPTModel("o1-mini", "o1-mini", Icons.OpenAI, INDIVIDUAL),
+                CodeGPTModel("GPT-4o", "gpt-4o", Icons.OpenAI, FREE),
+                CodeGPTModel("Claude 3.5 Sonnet", "claude-3.5-sonnet", Icons.Anthropic, FREE),
+                CodeGPTModel("Llama 3.1 (405B)", "llama-3.1-405b", Icons.Meta, FREE),
+                CodeGPTModel("DeepSeek Coder V2 - FREE", "deepseek-coder-v2", Icons.DeepSeek, ANONYMOUS),
                 CodeGPTModel("GPT-4o mini - FREE", "gpt-4o-mini", Icons.OpenAI, ANONYMOUS),
-                CodeGPTModel("Llama 3 (8B) - FREE", "llama-3-8b", Icons.Meta, ANONYMOUS)
             )
 
             FREE -> listOf(
-                CodeGPTModel("GPT-4o", "gpt-4o", Icons.OpenAI, INDIVIDUAL),
-                CodeGPTModel("Claude 3.5 Sonnet", "claude-3.5-sonnet", Icons.Anthropic, INDIVIDUAL),
-                CodeGPTModel("GPT-4o mini", "gpt-4o-mini", Icons.OpenAI, ANONYMOUS),
-                CodeGPTModel("Llama 3 (70B)", "llama-3-70b", Icons.Meta, FREE),
-                CodeGPTModel("Mixtral (8x22B)", "mixtral-8x22b", Icons.CodeGPTModel, FREE),
-                CodeGPTModel("Code Llama (70B)", "codellama:chat", Icons.Meta, FREE),
+                CodeGPTModel("o1-mini", "o1-mini", Icons.OpenAI, INDIVIDUAL),
+                CodeGPTModel("GPT-4o", "gpt-4o", Icons.OpenAI, FREE),
+                CodeGPTModel("Claude 3.5 Sonnet", "claude-3.5-sonnet", Icons.Anthropic, FREE),
+                CodeGPTModel("Llama 3.1 (405B)", "llama-3.1-405b", Icons.Meta, FREE),
+                CodeGPTModel("DeepSeek Coder V2", "deepseek-coder-v2", Icons.DeepSeek, ANONYMOUS),
+                CodeGPTModel("Qwen 2.5 (72B)", "qwen-2.5-72b", Icons.Qwen, FREE),
+                CodeGPTModel("Mixtral (8x22B)", "mixtral-8x22b", Icons.Mistral, FREE),
             )
 
             INDIVIDUAL -> listOf(
-                CodeGPTModel("GPT-4o", "gpt-4o", Icons.OpenAI, INDIVIDUAL),
+                CodeGPTModel("o1-mini", "o1-mini", Icons.OpenAI, INDIVIDUAL),
+                CodeGPTModel("GPT-4o", "gpt-4o", Icons.OpenAI, FREE),
+                CodeGPTModel("Claude 3.5 Sonnet", "claude-3.5-sonnet", Icons.Anthropic, FREE),
                 CodeGPTModel("Claude 3 Opus", "claude-3-opus", Icons.Anthropic, INDIVIDUAL),
-                CodeGPTModel("Claude 3.5 Sonnet", "claude-3.5-sonnet", Icons.Anthropic, INDIVIDUAL),
-                CodeGPTModel("Llama 3.1 (405B)", "llama-3.1-405b", Icons.Meta, INDIVIDUAL),
-                CodeGPTModel("DeepSeek Coder V2", "deepseek-coder-v2", Icons.DeepSeek, INDIVIDUAL),
-                CodeGPTModel("DBRX", "dbrx", Icons.Databricks, INDIVIDUAL),
+                CodeGPTModel("Llama 3.1 (405B)", "llama-3.1-405b", Icons.Meta, FREE),
+                CodeGPTModel("DeepSeek Coder V2", "deepseek-coder-v2", Icons.DeepSeek, FREE),
             )
         }
     }
 
     @JvmStatic
     val ALL_CHAT_MODELS: List<CodeGPTModel> = listOf(
-        CodeGPTModel("GPT-4o", "gpt-4o", Icons.OpenAI, INDIVIDUAL),
+        CodeGPTModel("o1-mini", "o1-mini", Icons.OpenAI, INDIVIDUAL),
+        CodeGPTModel("GPT-4o", "gpt-4o", Icons.OpenAI, FREE),
         CodeGPTModel("GPT-4o mini", "gpt-4o-mini", Icons.OpenAI, ANONYMOUS),
         CodeGPTModel("Claude 3 Opus", "claude-3-opus", Icons.Anthropic, INDIVIDUAL),
-        CodeGPTModel("Claude 3.5 Sonnet", "claude-3.5-sonnet", Icons.Anthropic, INDIVIDUAL),
-        CodeGPTModel("Llama 3.1 (405B)", "llama-3.1-405b", Icons.Meta, INDIVIDUAL),
-        CodeGPTModel("Llama 3 (70B)", "llama-3-70b", Icons.Meta, FREE),
-        CodeGPTModel("DeepSeek Coder V2", "deepseek-coder-v2", Icons.DeepSeek, INDIVIDUAL),
-        CodeGPTModel("DBRX", "dbrx", Icons.Databricks, INDIVIDUAL),
-        CodeGPTModel("Llama 3 (8B) - FREE", "llama-3-8b", Icons.Meta, ANONYMOUS),
-        CodeGPTModel("Code Llama (70B)", "codellama:chat", Icons.Meta, FREE),
-        CodeGPTModel("Mixtral (8x22B)", "mixtral-8x22b", Icons.CodeGPTModel, FREE),
-        CodeGPTModel("DeepSeek Coder (33B)", "deepseek-coder-33b", Icons.CodeGPTModel, FREE),
-        CodeGPTModel("WizardLM-2 (8x22B)", "wizardlm-2-8x22b", Icons.CodeGPTModel, FREE)
+        CodeGPTModel("Claude 3.5 Sonnet", "claude-3.5-sonnet", Icons.Anthropic, FREE),
+        CodeGPTModel("Llama 3.1 (405B)", "llama-3.1-405b", Icons.Meta, FREE),
+        CodeGPTModel("DeepSeek Coder V2", "deepseek-coder-v2", Icons.DeepSeek, FREE),
+        CodeGPTModel("Mixtral (8x22B)", "mixtral-8x22b", Icons.Mistral, FREE),
+        CodeGPTModel("Qwen 2.5 (72B)", "qwen-2.5-72b", Icons.Qwen, FREE),
     )
 
     @JvmStatic
@@ -65,7 +62,6 @@ object CodeGPTAvailableModels {
         CodeGPTModel("StarCoder (16B)", "starcoder-16b", Icons.CodeGPTModel, FREE),
         CodeGPTModel("StarCoder (7B) - FREE", "starcoder-7b", Icons.CodeGPTModel, FREE),
         CodeGPTModel("WizardCoder Python (34B)", "wizardcoder-python", Icons.CodeGPTModel, FREE),
-        CodeGPTModel("Phind Code LLaMA v2 (34B)", "phind-codellama", Icons.CodeGPTModel, FREE)
     )
 
     @JvmStatic

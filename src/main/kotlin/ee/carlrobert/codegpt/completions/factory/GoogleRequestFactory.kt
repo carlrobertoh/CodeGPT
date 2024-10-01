@@ -2,11 +2,8 @@ package ee.carlrobert.codegpt.completions.factory
 
 import com.intellij.openapi.components.service
 import ee.carlrobert.codegpt.EncodingManager
-import ee.carlrobert.codegpt.completions.BaseRequestFactory
-import ee.carlrobert.codegpt.completions.CallParameters
+import ee.carlrobert.codegpt.completions.*
 import ee.carlrobert.codegpt.completions.CompletionRequestUtil.FIX_COMPILE_ERRORS_SYSTEM_PROMPT
-import ee.carlrobert.codegpt.completions.ConversationType
-import ee.carlrobert.codegpt.completions.TotalUsageExceededException
 import ee.carlrobert.codegpt.conversations.ConversationsState
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
 import ee.carlrobert.codegpt.settings.persona.PersonaSettings
@@ -23,7 +20,8 @@ import java.nio.file.Path
 
 class GoogleRequestFactory : BaseRequestFactory() {
 
-    override fun createChatRequest(callParameters: CallParameters): GoogleCompletionRequest {
+    override fun createChatRequest(params: ChatCompletionRequestParameters): GoogleCompletionRequest {
+        val (callParameters) = params
         val configuration = service<ConfigurationSettings>().state
         val messages = buildGoogleMessages(service<GoogleSettings>().state.model, callParameters)
         return GoogleCompletionRequest.Builder(messages)
@@ -38,6 +36,7 @@ class GoogleRequestFactory : BaseRequestFactory() {
     override fun createBasicCompletionRequest(
         systemPrompt: String,
         userPrompt: String,
+        maxTokens: Int,
         stream: Boolean
     ): GoogleCompletionRequest {
         val configuration = service<ConfigurationSettings>().state
@@ -50,7 +49,7 @@ class GoogleRequestFactory : BaseRequestFactory() {
         )
             .generationConfig(
                 GoogleGenerationConfig.Builder()
-                    .maxOutputTokens(configuration.maxTokens)
+                    .maxOutputTokens(maxTokens)
                     .temperature(configuration.temperature.toDouble()).build()
             )
             .build()

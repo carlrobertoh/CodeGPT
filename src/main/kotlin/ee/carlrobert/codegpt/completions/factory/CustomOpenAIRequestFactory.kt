@@ -3,7 +3,7 @@ package ee.carlrobert.codegpt.completions.factory
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.intellij.openapi.components.service
 import ee.carlrobert.codegpt.completions.BaseRequestFactory
-import ee.carlrobert.codegpt.completions.CallParameters
+import ee.carlrobert.codegpt.completions.ChatCompletionRequestParameters
 import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey
 import ee.carlrobert.codegpt.credentials.CredentialsStore.getCredential
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceChatCompletionSettingsState
@@ -19,7 +19,8 @@ class CustomOpenAIRequest(val request: Request) : CompletionRequest
 
 class CustomOpenAIRequestFactory : BaseRequestFactory() {
 
-    override fun createChatRequest(callParameters: CallParameters): CustomOpenAIRequest {
+    override fun createChatRequest(params: ChatCompletionRequestParameters): CustomOpenAIRequest {
+        val (callParameters) = params
         val request = buildCustomOpenAIChatCompletionRequest(
             service<CustomServiceSettings>()
                 .state
@@ -34,6 +35,7 @@ class CustomOpenAIRequestFactory : BaseRequestFactory() {
     override fun createBasicCompletionRequest(
         systemPrompt: String,
         userPrompt: String,
+        maxTokens: Int,
         stream: Boolean
     ): CompletionRequest {
         val request = buildCustomOpenAIChatCompletionRequest(

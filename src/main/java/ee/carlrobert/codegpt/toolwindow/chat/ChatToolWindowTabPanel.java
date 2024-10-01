@@ -15,10 +15,10 @@ import ee.carlrobert.codegpt.CodeGPTKeys;
 import ee.carlrobert.codegpt.ReferencedFile;
 import ee.carlrobert.codegpt.actions.ActionType;
 import ee.carlrobert.codegpt.completions.CallParameters;
-import ee.carlrobert.codegpt.completions.CompletionRequestHandler;
 import ee.carlrobert.codegpt.completions.CompletionRequestService;
 import ee.carlrobert.codegpt.completions.CompletionRequestUtil;
 import ee.carlrobert.codegpt.completions.ConversationType;
+import ee.carlrobert.codegpt.completions.ToolwindowChatCompletionRequestHandler;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
@@ -60,7 +60,7 @@ public class ChatToolWindowTabPanel implements Disposable {
   private final TotalTokensPanel totalTokensPanel;
   private final ChatToolWindowScrollablePanel toolWindowScrollablePanel;
 
-  private @Nullable CompletionRequestHandler requestHandler;
+  private @Nullable ToolwindowChatCompletionRequestHandler requestHandler;
 
   public ChatToolWindowTabPanel(@NotNull Project project, @NotNull Conversation conversation) {
     this.project = project;
@@ -250,7 +250,7 @@ public class ChatToolWindowTabPanel implements Disposable {
       return;
     }
 
-    requestHandler = new CompletionRequestHandler(
+    requestHandler = new ToolwindowChatCompletionRequestHandler(
         new ToolWindowCompletionResponseEventListener(
             conversationService,
             responsePanel,
