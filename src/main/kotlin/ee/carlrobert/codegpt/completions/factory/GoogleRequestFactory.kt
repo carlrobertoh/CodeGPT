@@ -159,7 +159,12 @@ class GoogleRequestFactory : BaseRequestFactory() {
                 )
             )
         } else {
-            messages.add(GoogleCompletionContent("user", listOf(message.prompt)))
+            messages.add(
+                GoogleCompletionContent(
+                    "user",
+                    listOf(getPromptWithFilesContext(callParameters))
+                )
+            )
         }
 
         return messages

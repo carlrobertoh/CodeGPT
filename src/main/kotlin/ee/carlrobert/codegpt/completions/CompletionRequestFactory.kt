@@ -49,4 +49,17 @@ abstract class BaseRequestFactory : CompletionRequestFactory {
         maxTokens: Int = 4096,
         stream: Boolean = false
     ): CompletionRequest
+
+    protected fun getPromptWithFilesContext(callParameters: CallParameters): String {
+        return callParameters.referencedFiles?.let {
+            if (it.isEmpty()) {
+                callParameters.message.prompt
+            } else {
+                CompletionRequestUtil.getPromptWithContext(
+                    it,
+                    callParameters.message.prompt
+                )
+            }
+        } ?: return callParameters.message.prompt
+    }
 }

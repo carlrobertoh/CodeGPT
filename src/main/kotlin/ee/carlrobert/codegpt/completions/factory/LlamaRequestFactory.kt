@@ -24,7 +24,7 @@ class LlamaRequestFactory : BaseRequestFactory() {
                 getSystemPrompt()
         val prompt = promptTemplate.buildPrompt(
             systemPrompt,
-            callParameters.message.prompt,
+            getPromptWithFilesContext(callParameters),
             callParameters.conversation.messages
         )
 

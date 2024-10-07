@@ -102,6 +102,7 @@ public class UserMessagePanel extends JPanel {
         true,
         false,
         false,
+        false,
         parentDisposable)
         .withResponse(prompt);
   }

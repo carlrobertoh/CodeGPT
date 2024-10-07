@@ -25,6 +25,7 @@ data class Event @JsonCreator constructor(
         ANALYZE_WEB_DOC_STARTED,
         ANALYZE_WEB_DOC_COMPLETED,
         ANALYZE_WEB_DOC_FAILED,
+        PROCESS_CONTEXT,
         WEB_SEARCH_ITEM
     }
 }
@@ -52,6 +53,13 @@ data class AnalysisFailedEventDetails(
     val error: String
 ) : EventDetails
 
+data class ProcessContextEventDetails(
+    val id: UUID,
+    val name: String,
+    val description: String,
+    val status: String
+) : EventDetails
+
 data class DefaultEventDetails(
     val id: UUID,
     val name: String,
@@ -76,6 +84,10 @@ class EventDeserializer : StdDeserializer<Event>(Event::class.java) {
 
             EventType.ANALYZE_WEB_DOC_FAILED -> {
                 objectMapper.treeToValue(detailsNode, AnalysisFailedEventDetails::class.java)
+            }
+
+            EventType.PROCESS_CONTEXT -> {
+                objectMapper.treeToValue(detailsNode, ProcessContextEventDetails::class.java)
             }
 
             else -> {

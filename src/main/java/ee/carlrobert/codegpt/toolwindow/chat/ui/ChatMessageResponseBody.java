@@ -27,6 +27,7 @@ import ee.carlrobert.codegpt.events.AnalysisCompletedEventDetails;
 import ee.carlrobert.codegpt.events.AnalysisFailedEventDetails;
 import ee.carlrobert.codegpt.events.CodeGPTEvent;
 import ee.carlrobert.codegpt.events.EventDetails;
+import ee.carlrobert.codegpt.events.ProcessContextEventDetails;
 import ee.carlrobert.codegpt.events.WebSearchEventDetails;
 import ee.carlrobert.codegpt.settings.GeneralSettingsConfigurable;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
@@ -44,10 +45,10 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.Icon;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JTextPane;
 import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
 import org.jetbrains.annotations.Nullable;
 
 public class ChatMessageResponseBody extends JPanel {
@@ -59,7 +60,9 @@ public class ChatMessageResponseBody extends JPanel {
   private final DefaultListModel<WebSearchEventDetails> webpageListModel = new DefaultListModel<>();
   private final WebpageList webpageList = new WebpageList(webpageListModel);
   private final JPanel webDocProgressContainer = new JPanel();
-  private final AsyncProcessIcon spinner = new AsyncProcessIcon("sign_in_spinner");
+  private final JPanel progressContainer = new JPanel();
+  private final AsyncProcessIcon webDocsSpinner = new AsyncProcessIcon("web_docs_spinner");
+  private final AsyncProcessIcon processSpinner = new AsyncProcessIcon("process_spinner");
   private final @Nullable String highlightedText;
   private ResponseEditorPanel currentlyProcessedEditorPanel;
   private JTextPane currentlyProcessedTextPane;
@@ -67,7 +70,7 @@ public class ChatMessageResponseBody extends JPanel {
   private boolean responseReceived;
 
   public ChatMessageResponseBody(Project project, Disposable parentDisposable) {
-    this(project, null, false, false, false, false, parentDisposable);
+    this(project, null, false, false, false, false, false, parentDisposable);
   }
 
   public ChatMessageResponseBody(
@@ -77,8 +80,8 @@ public class ChatMessageResponseBody extends JPanel {
       boolean readOnly,
       boolean webSearchIncluded,
       boolean webDocIncluded,
+      boolean fileContextIncluded,
       Disposable parentDisposable) {
-    super(new BorderLayout());
     this.project = project;
     this.highlightedText = highlightedText;
     this.parentDisposable = parentDisposable;
@@ -96,6 +99,12 @@ public class ChatMessageResponseBody extends JPanel {
       webDocProgressContainer.setLayout(new BoxLayout(webDocProgressContainer, BoxLayout.Y_AXIS));
       webDocProgressContainer.setBorder(JBUI.Borders.emptyBottom(8));
       add(webDocProgressContainer);
+    }
+
+    if (fileContextIncluded) {
+      progressContainer.setLayout(new BoxLayout(progressContainer, BoxLayout.Y_AXIS));
+      progressContainer.setBorder(JBUI.Borders.emptyBottom(8));
+      add(progressContainer);
     }
 
     if (withGhostText) {
@@ -209,6 +218,7 @@ public class ChatMessageResponseBody extends JPanel {
             case ANALYZE_WEB_DOC_STARTED -> showWebDocsProgress();
             case ANALYZE_WEB_DOC_COMPLETED -> completeWebDocsProgress(event.getDetails());
             case ANALYZE_WEB_DOC_FAILED -> failWebDocsProgress(event.getDetails());
+            case PROCESS_CONTEXT -> showProcessContextEvent(event.getDetails());
             default -> {
             }
           }
@@ -305,7 +315,7 @@ public class ChatMessageResponseBody extends JPanel {
 
   private void showWebDocsProgress() {
     var wrapper = new JPanel(new FlowLayout(FlowLayout.LEADING, 0, 0));
-    wrapper.add(spinner);
+    wrapper.add(webDocsSpinner);
     wrapper.add(Box.createHorizontalStrut(4));
     wrapper.add(new JBLabel(
         CodeGPTBundle.get("chatMessageResponseBody.webDocs.startProgress.label")).withFont(
@@ -325,8 +335,48 @@ public class ChatMessageResponseBody extends JPanel {
     }
   }
 
+  private void showProcessContextEvent(EventDetails eventDetails) {
+    if (eventDetails instanceof ProcessContextEventDetails details) {
+      switch (details.getStatus()) {
+        case "STARTED": {
+          updateProgressContainer(details.getDescription(), null);
+          break;
+        }
+        case "FAILED": {
+          updateProgressContainer(details.getDescription(), General.Error);
+          break;
+        }
+        case "COMPLETED": {
+          updateProgressContainer(details.getDescription(), Icons.GreenCheckmark);
+          break;
+        }
+        default:
+          break;
+      }
+    }
+  }
+
   private void updateWebDocsProgressLabel(String text, Icon icon) {
     updateWebDocsProgress(new JBLabel(text, icon, SwingConstants.LEADING).withFont(JBFont.small()));
+  }
+
+  private void updateProgressContainer(String text, @Nullable Icon icon) {
+    ApplicationManager.getApplication().invokeLater(() -> {
+      progressContainer.removeAll();
+      JComponent wrapper;
+      if (icon != null) {
+        wrapper = new JBLabel(text, icon, SwingConstants.LEADING);
+        ((JBLabel) wrapper).setHorizontalTextPosition(SwingConstants.LEADING);
+      } else {
+        wrapper = new JPanel(new FlowLayout(FlowLayout.LEADING, 0, 0));
+        wrapper.add(new JBLabel(text));
+        wrapper.add(Box.createHorizontalStrut(4));
+        wrapper.add(processSpinner);
+      }
+      progressContainer.add(JBUI.Panels.simplePanel(wrapper));
+      progressContainer.revalidate();
+      progressContainer.repaint();
+    });
   }
 
   private void updateWebDocsProgress(Component content) {
