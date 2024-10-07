@@ -18,7 +18,6 @@ import ee.carlrobert.codegpt.ReferencedFile;
 import ee.carlrobert.codegpt.actions.ActionType;
 import ee.carlrobert.codegpt.completions.CallParameters;
 import ee.carlrobert.codegpt.completions.CompletionRequestService;
-import ee.carlrobert.codegpt.completions.CompletionRequestUtil;
 import ee.carlrobert.codegpt.completions.ConversationType;
 import ee.carlrobert.codegpt.completions.ToolwindowChatCompletionRequestHandler;
 import ee.carlrobert.codegpt.conversations.Conversation;
@@ -136,8 +135,6 @@ public class ChatToolWindowTabPanel implements Disposable {
             .toList();
         message.setReferencedFilePaths(referencedFilePaths);
         message.setUserMessage(message.getPrompt());
-        message.setPrompt(
-            CompletionRequestUtil.getPromptWithContext(referencedFiles, message.getPrompt()));
 
         totalTokensPanel.updateReferencedFilesTokens(referencedFiles);
 
@@ -149,6 +146,7 @@ public class ChatToolWindowTabPanel implements Disposable {
       var attachedFilePath = CodeGPTKeys.IMAGE_ATTACHMENT_FILE_PATH.get(project);
       var callParameters =
           getCallParameters(conversationType, message, highlightedText, attachedFilePath);
+      callParameters.setReferencedFiles(referencedFiles);
       if (callParameters.getImageData() != null) {
         message.setImageFilePath(attachedFilePath);
         chatToolWindowPanel.ifPresent(panel -> panel.clearNotifications(project));
@@ -182,10 +180,23 @@ public class ChatToolWindowTabPanel implements Disposable {
     return callParameters;
   }
 
+  private boolean hasReferencedFilePaths(Message message) {
+    return message.getReferencedFilePaths() != null && !message.getReferencedFilePaths().isEmpty();
+  }
+
+  private boolean hasReferencedFilePaths(Conversation conversation) {
+    return conversation.getMessages().stream()
+        .anyMatch(
+            it -> it.getReferencedFilePaths() != null && !it.getReferencedFilePaths().isEmpty());
+  }
+
   private ResponsePanel createResponsePanel(
       CallParameters callParameters,
       ConversationType conversationType) {
     var message = callParameters.getMessage();
+    var fileContextIncluded =
+        hasReferencedFilePaths(message) || hasReferencedFilePaths(conversation);
+
     return new ResponsePanel()
         .withReloadAction(() -> reloadMessage(message, conversation, conversationType))
         .withDeleteAction(() -> removeMessage(message.getId(), conversation))
@@ -196,7 +207,9 @@ public class ChatToolWindowTabPanel implements Disposable {
                 true,
                 false,
                 message.isWebSearchIncluded(),
-                message.getDocumentationDetails() != null, this));
+                message.getDocumentationDetails() != null,
+                fileContextIncluded,
+                this));
   }
 
   private void reloadMessage(

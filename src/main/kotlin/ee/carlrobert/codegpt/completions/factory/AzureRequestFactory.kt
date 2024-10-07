@@ -12,8 +12,11 @@ class AzureRequestFactory : BaseRequestFactory() {
 
     override fun createChatRequest(params: ChatCompletionRequestParameters): OpenAIChatCompletionRequest {
         val configuration = service<ConfigurationSettings>().state
+        val (callParameters) = params
         val requestBuilder: OpenAIChatCompletionRequest.Builder =
-            OpenAIChatCompletionRequest.Builder(buildOpenAIMessages(null, params.callParameters))
+            OpenAIChatCompletionRequest.Builder(
+                buildOpenAIMessages(null, callParameters, callParameters.referencedFiles)
+            )
                 .setMaxTokens(configuration.maxTokens)
                 .setStream(true)
                 .setTemperature(configuration.temperature.toDouble())

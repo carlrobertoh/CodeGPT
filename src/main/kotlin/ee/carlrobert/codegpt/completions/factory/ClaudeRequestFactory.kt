@@ -48,7 +48,10 @@ class ClaudeRequestFactory : BaseRequestFactory() {
 
                 else -> {
                     messages.add(
-                        ClaudeCompletionStandardMessage("user", callParameters.message.prompt)
+                        ClaudeCompletionStandardMessage(
+                            "user",
+                            getPromptWithFilesContext(callParameters)
+                        )
                     )
                 }
             }

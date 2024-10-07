@@ -160,9 +160,9 @@ object FileUtil {
     }
 
     @JvmStatic
-    fun getResourceContent(name: String?): String {
+    fun getResourceContent(filePath: String?): String {
         try {
-            Objects.requireNonNull(name?.let { FileUtil::class.java.getResourceAsStream(it) })
+            Objects.requireNonNull(filePath?.let { FileUtil::class.java.getResourceAsStream(it) })
                 .use { stream ->
                     return String(stream.readAllBytes(), StandardCharsets.UTF_8)
                 }
