@@ -65,7 +65,8 @@ enum class CustomServiceTemplate(
     MISTRAL_AI(
         "Mistral AI",
         "https://docs.mistral.ai/getting-started/quickstart",
-        CustomServiceChatCompletionTemplate.MISTRAL_AI
+        CustomServiceChatCompletionTemplate.MISTRAL_AI,
+        CustomServiceCodeCompletionTemplate.MISTRAL_AI
     ),
     OPEN_ROUTER(
         "OpenRouter",
