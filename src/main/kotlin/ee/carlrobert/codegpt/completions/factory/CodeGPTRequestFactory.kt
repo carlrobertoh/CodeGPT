@@ -7,6 +7,8 @@ import ee.carlrobert.codegpt.completions.factory.OpenAIRequestFactory.Companion.
 import ee.carlrobert.codegpt.completions.factory.OpenAIRequestFactory.Companion.buildOpenAIMessages
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
 import ee.carlrobert.codegpt.settings.service.codegpt.CodeGPTServiceSettings
+import ee.carlrobert.llm.client.openai.completion.request.Context
+import ee.carlrobert.llm.client.openai.completion.request.FileContext
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest
 import ee.carlrobert.llm.client.openai.completion.request.RequestDocumentationDetails
 
@@ -19,6 +21,7 @@ class CodeGPTRequestFactory : BaseRequestFactory() {
         val requestBuilder: OpenAIChatCompletionRequest.Builder =
             OpenAIChatCompletionRequest.Builder(buildOpenAIMessages(model, callParameters))
                 .setModel(model)
+
         if ("o1-mini" == model || "o1-preview" == model) {
             requestBuilder
                 .setMaxCompletionTokens(configuration.maxTokens)
@@ -42,6 +45,13 @@ class CodeGPTRequestFactory : BaseRequestFactory() {
             requestDocumentationDetails.url = documentationDetails.url
             requestBuilder.setDocumentationDetails(requestDocumentationDetails)
         }
+        callParameters.referencedFiles?.let {
+            val fileContexts = it.map { file ->
+                FileContext(file.fileName, file.fileContent)
+            }
+            requestBuilder.setContext(Context(fileContexts))
+        }
+
         return requestBuilder.build()
     }
 

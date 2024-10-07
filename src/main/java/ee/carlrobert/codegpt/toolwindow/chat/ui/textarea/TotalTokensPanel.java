@@ -152,7 +152,7 @@ public class TotalTokensPanel extends JPanel {
             "Referenced Files Tokens", totalTokensDetails.getReferencedFilesTokens()))
             .entrySet().stream()
             .map(entry -> format(
-                "<p style=\"margin: 0;\"><small>%s: <strong>%d</strong></small></p>",
+                "<p style=\"margin: 0; padding: 0;\"><small>%s: <strong>%d</strong></small></p>",
                 entry.getKey(),
                 entry.getValue()))
             .collect(Collectors.joining());
@@ -165,14 +165,16 @@ public class TotalTokensPanel extends JPanel {
   private String getIconToolTipText(String html) {
     if (!GeneralSettings.isSelected(ServiceType.OPENAI)) {
       return """
-          <html
-          <p style="margin: 4px 0;">
+          <html>
+          <body style="margin: 0; padding: 0;">
+          %s
+          <p style="margin-top: 8px;">
           <small>
-          <strong>ⓘ Keep in mind that the output values might vary across different
-          large language models due to variations in their encoding methods.</strong>
+          <strong>Note:</strong> Output values might vary across different large language models 
+          due to variations in their encoding methods.
           </small>
           </p>
-          %s
+          </body>
           </html>""".formatted(html);
     }
     return "<html" + html + "</html>";

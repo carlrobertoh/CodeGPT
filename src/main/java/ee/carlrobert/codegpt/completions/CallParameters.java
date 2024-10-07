@@ -1,7 +1,9 @@
 package ee.carlrobert.codegpt.completions;
 
+import ee.carlrobert.codegpt.ReferencedFile;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.message.Message;
+import java.util.List;
 import org.jetbrains.annotations.Nullable;
 
 public class CallParameters {
@@ -11,8 +13,9 @@ public class CallParameters {
   private final Message message;
   private final boolean retry;
   private final String highlightedText;
-  private @Nullable String imageMediaType;
+  private String imageMediaType;
   private byte[] imageData;
+  private List<ReferencedFile> referencedFiles;
 
   public CallParameters(Conversation conversation, Message message) {
     this(conversation, ConversationType.DEFAULT, message, null, false);
@@ -65,5 +68,13 @@ public class CallParameters {
 
   public @Nullable String getHighlightedText() {
     return highlightedText;
+  }
+
+  public @Nullable List<ReferencedFile> getReferencedFiles() {
+    return referencedFiles;
+  }
+
+  public void setReferencedFiles(List<ReferencedFile> referencedFiles) {
+    this.referencedFiles = referencedFiles;
   }
 }

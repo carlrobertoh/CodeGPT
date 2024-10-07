@@ -25,7 +25,11 @@ class CustomOpenAIRequestFactory : BaseRequestFactory() {
             service<CustomServiceSettings>()
                 .state
                 .chatCompletionSettings,
-            OpenAIRequestFactory.buildOpenAIMessages(null, callParameters),
+            OpenAIRequestFactory.buildOpenAIMessages(
+                null,
+                callParameters,
+                callParameters.referencedFiles
+            ),
             true,
             getCredential(CredentialKey.CUSTOM_SERVICE_API_KEY)
         )

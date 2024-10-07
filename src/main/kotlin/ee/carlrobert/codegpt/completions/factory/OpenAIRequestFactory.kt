@@ -2,6 +2,7 @@ package ee.carlrobert.codegpt.completions.factory
 
 import com.intellij.openapi.components.service
 import ee.carlrobert.codegpt.EncodingManager
+import ee.carlrobert.codegpt.ReferencedFile
 import ee.carlrobert.codegpt.completions.*
 import ee.carlrobert.codegpt.completions.CompletionRequestUtil.EDIT_CODE_SYSTEM_PROMPT
 import ee.carlrobert.codegpt.completions.CompletionRequestUtil.FIX_COMPILE_ERRORS_SYSTEM_PROMPT
@@ -25,7 +26,9 @@ class OpenAIRequestFactory : CompletionRequestFactory {
         val model = service<OpenAISettings>().state.model
         val configuration = service<ConfigurationSettings>().state
         val requestBuilder: OpenAIChatCompletionRequest.Builder =
-            OpenAIChatCompletionRequest.Builder(buildOpenAIMessages(model, callParameters))
+            OpenAIChatCompletionRequest.Builder(
+                buildOpenAIMessages(model, callParameters, callParameters.referencedFiles)
+            )
                 .setModel(model)
         if ("o1-mini" == model || "o1-preview" == model) {
             requestBuilder
@@ -41,6 +44,7 @@ class OpenAIRequestFactory : CompletionRequestFactory {
                 .setMaxTokens(configuration.maxTokens)
                 .setTemperature(configuration.temperature.toDouble())
         }
+
         return requestBuilder.build()
     }
 
@@ -98,9 +102,10 @@ class OpenAIRequestFactory : CompletionRequestFactory {
 
         fun buildOpenAIMessages(
             model: String?,
-            callParameters: CallParameters
+            callParameters: CallParameters,
+            referencedFiles: List<ReferencedFile>? = mutableListOf()
         ): List<OpenAIChatCompletionMessage> {
-            val messages = buildOpenAIChatMessages(model, callParameters)
+            val messages = buildOpenAIChatMessages(model, callParameters, referencedFiles)
 
             if (model == null) {
                 return messages
@@ -134,7 +139,8 @@ class OpenAIRequestFactory : CompletionRequestFactory {
 
         private fun buildOpenAIChatMessages(
             model: String?,
-            callParameters: CallParameters
+            callParameters: CallParameters,
+            referencedFiles: List<ReferencedFile>? = mutableListOf()
         ): MutableList<OpenAIChatCompletionMessage> {
             val message = callParameters.message
             val messages = mutableListOf<OpenAIChatCompletionMessage>()
@@ -212,7 +218,12 @@ class OpenAIRequestFactory : CompletionRequestFactory {
                     )
                 )
             } else {
-                messages.add(OpenAIChatCompletionStandardMessage("user", message.prompt))
+                val prompt = if (referencedFiles.isNullOrEmpty()) {
+                    message.prompt
+                } else {
+                    CompletionRequestUtil.getPromptWithContext(referencedFiles, message.prompt)
+                }
+                messages.add(OpenAIChatCompletionStandardMessage("user", prompt))
             }
             return messages
         }

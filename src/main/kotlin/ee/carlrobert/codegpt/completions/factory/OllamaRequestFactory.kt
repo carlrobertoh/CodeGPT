@@ -87,7 +87,15 @@ class OllamaRequestFactory : BaseRequestFactory() {
                 } catch (e: IOException) {
                     throw RuntimeException(e)
                 }
-            } ?: messages.add(OllamaChatCompletionMessage("user", prevMessage.prompt, null))
+            } ?: run {
+                messages.add(
+                    OllamaChatCompletionMessage(
+                        "user",
+                        getPromptWithFilesContext(callParameters),
+                        null
+                    )
+                )
+            }
 
             messages.add(OllamaChatCompletionMessage("assistant", prevMessage.response, null))
         }
