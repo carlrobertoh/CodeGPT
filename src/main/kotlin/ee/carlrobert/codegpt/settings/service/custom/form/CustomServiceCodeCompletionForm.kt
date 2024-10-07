@@ -39,6 +39,10 @@ class CustomServiceCodeCompletionForm(
         CodeGPTBundle.get("codeCompletionsForm.enableFeatureText"),
         state.codeCompletionsEnabled
     )
+    private val parseResponseAsChatCompletionsCheckBox = JBCheckBox(
+        CodeGPTBundle.get("codeCompletionsForm.parseResponseAsChatCompletions"),
+        state.parseResponseAsChatCompletions
+    )
     private val promptTemplateComboBox =
         ComboBox(EnumComboBoxModel(InfillPromptTemplate::class.java)).apply {
             selectedItem = state.infillTemplate
@@ -63,6 +67,12 @@ class CustomServiceCodeCompletionForm(
         get() = featureEnabledCheckBox.isSelected
         set(enabled) {
             featureEnabledCheckBox.isSelected = enabled
+        }
+
+    var parseResponseAsChatCompletions: Boolean
+        get() = parseResponseAsChatCompletionsCheckBox.isSelected
+        set(enabled) {
+            parseResponseAsChatCompletionsCheckBox.isSelected = enabled
         }
 
     var infillTemplate: InfillPromptTemplate
@@ -93,6 +103,8 @@ class CustomServiceCodeCompletionForm(
         get() = FormBuilder.createFormBuilder()
             .addVerticalGap(8)
             .addComponent(featureEnabledCheckBox)
+            .addVerticalGap(4)
+            .addComponent(parseResponseAsChatCompletionsCheckBox)
             .addVerticalGap(4)
             .addLabeledComponent(
                 "FIM template:",
@@ -140,6 +152,7 @@ class CustomServiceCodeCompletionForm(
 
     fun resetForm(settings: CustomServiceCodeCompletionSettingsState) {
         featureEnabledCheckBox.isSelected = settings.codeCompletionsEnabled
+        parseResponseAsChatCompletionsCheckBox.isSelected = settings.parseResponseAsChatCompletions
         promptTemplateComboBox.selectedItem = settings.infillTemplate
         urlField.text = settings.url
         tabbedPane.headers = settings.headers
