@@ -17,6 +17,7 @@ import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
 import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings
+import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionEventSourceListener
 import ee.carlrobert.llm.client.openai.completion.OpenAITextCompletionEventSourceListener
 import ee.carlrobert.llm.completion.CompletionEventListener
 import okhttp3.sse.EventSource
@@ -66,7 +67,11 @@ class CodeCompletionService {
                 CompletionClientProvider.getDefaultClientBuilder().build()
             ).newEventSource(
                 buildCustomRequest(requestDetails),
-                OpenAITextCompletionEventSourceListener(eventListener)
+                if (service<CustomServiceSettings>().state.codeCompletionSettings.parseResponseAsChatCompletions) {
+                    OpenAIChatCompletionEventSourceListener(eventListener)
+                } else {
+                    OpenAITextCompletionEventSourceListener(eventListener)
+                }
             )
 
             OLLAMA -> CompletionClientProvider.getOllamaClient()

@@ -63,6 +63,7 @@ class CustomServiceForm {
                     url = template.codeCompletionTemplate.url
                     headers = template.codeCompletionTemplate.headers
                     body = template.codeCompletionTemplate.body
+                    parseResponseAsChatCompletions = template.codeCompletionTemplate.parseResponseAsChatCompletions
                 }
                 tabbedPane.setEnabledAt(1, true)
             } else {
@@ -102,6 +103,7 @@ class CustomServiceForm {
                 || chatCompletionsForm.headers != chatCompletionSettings.headers
                 || chatCompletionsForm.body != chatCompletionSettings.body
                 || codeCompletionsForm.codeCompletionsEnabled != codeCompletionSettings.codeCompletionsEnabled
+                || codeCompletionsForm.parseResponseAsChatCompletions != codeCompletionSettings.parseResponseAsChatCompletions
                 || codeCompletionsForm.infillTemplate != codeCompletionSettings.infillTemplate
                 || codeCompletionsForm.url != codeCompletionSettings.url
                 || codeCompletionsForm.headers != codeCompletionSettings.headers
@@ -118,6 +120,7 @@ class CustomServiceForm {
             }
             codeCompletionSettings = CustomServiceCodeCompletionSettingsState().apply {
                 codeCompletionsEnabled = codeCompletionsForm.codeCompletionsEnabled
+                parseResponseAsChatCompletions = codeCompletionsForm.parseResponseAsChatCompletions
                 infillTemplate = codeCompletionsForm.infillTemplate
                 url = codeCompletionsForm.url
                 headers = codeCompletionsForm.headers
