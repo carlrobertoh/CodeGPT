@@ -3,7 +3,8 @@ package ee.carlrobert.codegpt.settings.service.custom.template
 enum class CustomServiceCodeCompletionTemplate(
     val url: String,
     val headers: MutableMap<String, String>,
-    val body: MutableMap<String, Any>
+    val body: MutableMap<String, Any>,
+    val parseResponseAsChatCompletions: Boolean = false
 ) {
     ANYSCALE(
         "https://api.endpoints.anyscale.com/v1/completions",
@@ -36,6 +37,19 @@ enum class CustomServiceCodeCompletionTemplate(
             "temperature" to 0.2,
             "max_tokens" to 24
         )
+    ),
+    MISTRAL_AI(
+        "https://api.mistral.ai/v1/fim/completions",
+        getDefaultHeaders("Authorization", "Bearer \$CUSTOM_SERVICE_API_KEY"),
+        mutableMapOf(
+            "stream" to true,
+            "prompt" to "\$PREFIX",
+            "suffix" to "\$SUFFIX",
+            "model" to "codestral-latest",
+            "temperature" to 0.7,
+            "max_tokens" to 1024
+        ),
+        true
     ),
     TOGETHER(
         "https://api.together.xyz/v1/completions",
