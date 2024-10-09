@@ -2,6 +2,7 @@ package ee.carlrobert.codegpt.toolwindow.chat;
 
 import static ee.carlrobert.codegpt.ui.UIUtil.createScrollPaneWithSmartScroller;
 import static java.lang.String.format;
+import static java.util.Collections.emptyList;
 
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
@@ -36,11 +37,15 @@ import ee.carlrobert.codegpt.ui.textarea.UserInputPanel;
 import ee.carlrobert.codegpt.util.EditorUtil;
 import ee.carlrobert.codegpt.util.file.FileUtil;
 import java.awt.BorderLayout;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Stream;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import kotlin.Unit;
@@ -137,11 +142,27 @@ public class ChatToolWindowTabPanel implements Disposable {
         message.setReferencedFilePaths(referencedFilePaths);
         message.setUserMessage(message.getPrompt());
 
-        totalTokensPanel.updateReferencedFilesTokens(referencedFiles);
-
         chatToolWindowPanel.ifPresent(panel -> panel.clearNotifications(project));
+      } else {
+        referencedFiles = conversation.getMessages().stream()
+            .flatMap(prevMessage -> {
+              if (prevMessage.getReferencedFilePaths() != null) {
+                return prevMessage.getReferencedFilePaths().stream();
+              }
+              return Stream.empty();
+            })
+            .map(filePath -> {
+              try {
+                return new ReferencedFile(new File(filePath));
+              } catch (Exception e) {
+                return null;
+              }
+            })
+            .filter(Objects::nonNull)
+            .toList();
       }
       totalTokensPanel.updateConversationTokens(conversation);
+      totalTokensPanel.updateReferencedFilesTokens(referencedFiles);
 
       var userMessagePanel = new UserMessagePanel(project, message, this);
       var attachedFilePath = CodeGPTKeys.IMAGE_ATTACHMENT_FILE_PATH.get(project);

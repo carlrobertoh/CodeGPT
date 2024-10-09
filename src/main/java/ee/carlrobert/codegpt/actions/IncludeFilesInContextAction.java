@@ -6,7 +6,6 @@ import static ee.carlrobert.codegpt.settings.IncludedFilesSettingsState.DEFAULT_
 import static ee.carlrobert.codegpt.settings.IncludedFilesSettingsState.DEFAULT_REPEATABLE_CONTEXT;
 import static java.lang.String.format;
 
-import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DataContext;
@@ -149,7 +148,9 @@ public class IncludeFilesInContextAction extends AnAction {
 
     private String getVirtualFileContent(VirtualFile virtualFile) {
       try {
-        return new String(Files.readAllBytes(Paths.get(virtualFile.getPath())));
+        if (!virtualFile.isDirectory()) {
+          return new String(Files.readAllBytes(Paths.get(virtualFile.getPath())));
+        }
       } catch (IOException ex) {
         LOG.error(ex);
       }
