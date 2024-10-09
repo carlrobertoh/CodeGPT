@@ -273,10 +273,10 @@ public class ChatMessageResponseBody extends JPanel {
 
   private void processText(String markdownText, boolean caretVisible) {
     var html = convertMdToHtml(markdownText);
-    if (currentlyProcessedTextPane == null) {
-      prepareProcessingText(caretVisible);
-    }
     ApplicationManager.getApplication().invokeLater(() -> {
+      if (currentlyProcessedTextPane == null) {
+        prepareProcessingText(caretVisible);
+      }
       currentlyProcessedTextPane.setText(html);
     });
   }
@@ -285,17 +285,12 @@ public class ChatMessageResponseBody extends JPanel {
     if (highlightedText != null
         && !highlightedText.isEmpty()
         && currentlyProcessedEditorPanel != null) {
-      ApplicationManager.getApplication().invokeLater(() -> {
-        currentlyProcessedEditorPanel.showEditorActions();
-      });
+      currentlyProcessedEditorPanel.showEditorActions();
     }
 
     currentlyProcessedEditorPanel = null;
     currentlyProcessedTextPane = createTextPane("", caretVisible);
-
-    ApplicationManager.getApplication().invokeLater(() -> {
-      add(currentlyProcessedTextPane);
-    });
+    add(currentlyProcessedTextPane);
   }
 
   private void prepareProcessingCode(String code, String markdownLanguage) {
