@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Support high context limits (up to 200k tokens) via RAG when chatting with files (CodeGPT)
+- Gemini 1.5 Pro model (Google)
+- Legacy response support for text completions in code completions (Custom OpenAI)
+
+### Fixed
+
+- Chat UI threading issues [#730](https://github.com/carlrobertoh/CodeGPT/issues/730) 
+
 ## [2.11.4-241.1] - 2024-10-01
 
 ### Added
