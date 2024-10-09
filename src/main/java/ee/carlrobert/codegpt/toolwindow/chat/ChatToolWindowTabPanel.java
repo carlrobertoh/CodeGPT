@@ -51,6 +51,8 @@ public class ChatToolWindowTabPanel implements Disposable {
 
   private static final Logger LOG = Logger.getInstance(ChatToolWindowTabPanel.class);
 
+  private final ChatSession chatSession;
+
   private final Project project;
   private final JPanel rootPanel;
   private final Conversation conversation;
@@ -64,6 +66,7 @@ public class ChatToolWindowTabPanel implements Disposable {
   public ChatToolWindowTabPanel(@NotNull Project project, @NotNull Conversation conversation) {
     this.project = project;
     this.conversation = conversation;
+    this.chatSession = new ChatSession();
     conversationService = ConversationService.getInstance();
     toolWindowScrollablePanel = new ChatToolWindowScrollablePanel();
     totalTokensPanel = new TotalTokensPanel(
@@ -165,8 +168,13 @@ public class ChatToolWindowTabPanel implements Disposable {
       Message message,
       @Nullable String highlightedText,
       @Nullable String attachedFilePath) {
-    var callParameters = new CallParameters(conversation, conversationType, message,
-        highlightedText, false);
+    var callParameters = new CallParameters(
+        chatSession.getId(),
+        conversation,
+        conversationType,
+        message,
+        highlightedText,
+        false);
     if (attachedFilePath != null && !attachedFilePath.isEmpty()) {
       try {
         callParameters.setImageData(Files.readAllBytes(Path.of(attachedFilePath)));
@@ -227,7 +235,13 @@ public class ChatToolWindowTabPanel implements Disposable {
       if (responsePanel != null) {
         message.setResponse("");
         conversationService.saveMessage(conversation, message);
-        call(new CallParameters(conversation, conversationType, message, null, true),
+        call(new CallParameters(
+                chatSession.getId(),
+                conversation,
+                conversationType,
+                message,
+                null,
+                true),
             responsePanel);
       }
 
