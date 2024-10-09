@@ -25,13 +25,7 @@ class CompletionRequestProviderTest : IntegrationTest() {
 
         val request = OpenAIRequestFactory().createChatRequest(
             ChatCompletionRequestParameters(
-                CallParameters(
-                    conversation,
-                    ConversationType.DEFAULT,
-                    Message("TEST_CHAT_COMPLETION_PROMPT"),
-                    null,
-                    false
-                )
+                CallParameters(conversation, Message("TEST_CHAT_COMPLETION_PROMPT"))
             )
         )
 
@@ -58,13 +52,7 @@ class CompletionRequestProviderTest : IntegrationTest() {
 
         val request = OpenAIRequestFactory().createChatRequest(
             ChatCompletionRequestParameters(
-                CallParameters(
-                    conversation,
-                    ConversationType.DEFAULT,
-                    Message("TEST_CHAT_COMPLETION_PROMPT"),
-                    null,
-                    false
-                )
+                CallParameters(conversation, Message("TEST_CHAT_COMPLETION_PROMPT"))
             )
         )
 
@@ -92,6 +80,7 @@ class CompletionRequestProviderTest : IntegrationTest() {
         val request = OpenAIRequestFactory().createChatRequest(
             ChatCompletionRequestParameters(
                 CallParameters(
+                    null,
                     conversation,
                     ConversationType.DEFAULT,
                     secondMessage,
@@ -125,13 +114,7 @@ class CompletionRequestProviderTest : IntegrationTest() {
 
         val request = OpenAIRequestFactory().createChatRequest(
             ChatCompletionRequestParameters(
-                CallParameters(
-                    conversation,
-                    ConversationType.DEFAULT,
-                    Message("TEST_CHAT_COMPLETION_PROMPT"),
-                    null,
-                    false
-                )
+                CallParameters(conversation, Message("TEST_CHAT_COMPLETION_PROMPT"))
             )
         )
 
@@ -155,13 +138,7 @@ class CompletionRequestProviderTest : IntegrationTest() {
         assertThrows(TotalUsageExceededException::class.java) {
             OpenAIRequestFactory().createChatRequest(
                 ChatCompletionRequestParameters(
-                    CallParameters(
-                        conversation,
-                        ConversationType.DEFAULT,
-                        createDummyMessage(100),
-                        null,
-                        false
-                    )
+                    CallParameters(conversation, createDummyMessage(100))
                 )
             )
         }

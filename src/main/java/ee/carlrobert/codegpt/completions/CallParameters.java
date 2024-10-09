@@ -4,10 +4,12 @@ import ee.carlrobert.codegpt.ReferencedFile;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import java.util.List;
+import java.util.UUID;
 import org.jetbrains.annotations.Nullable;
 
 public class CallParameters {
 
+  private final UUID sessionId;
   private final Conversation conversation;
   private final ConversationType conversationType;
   private final Message message;
@@ -18,20 +20,31 @@ public class CallParameters {
   private List<ReferencedFile> referencedFiles;
 
   public CallParameters(Conversation conversation, Message message) {
-    this(conversation, ConversationType.DEFAULT, message, null, false);
+    this(null, conversation, message);
   }
 
+  public CallParameters(UUID sessionId, Conversation conversation, Message message) {
+    this(sessionId, conversation, ConversationType.DEFAULT, message, null, false);
+  }
+
+  // TODO: Builder
   public CallParameters(
+      UUID sessionId,
       Conversation conversation,
       ConversationType conversationType,
       Message message,
       @Nullable String highlightedText,
       boolean retry) {
+    this.sessionId = sessionId;
     this.conversation = conversation;
     this.conversationType = conversationType;
     this.message = message;
     this.highlightedText = highlightedText;
     this.retry = retry;
+  }
+
+  public UUID getSessionId() {
+    return sessionId;
   }
 
   public Conversation getConversation() {

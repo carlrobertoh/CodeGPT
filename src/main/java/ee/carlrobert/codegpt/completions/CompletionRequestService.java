@@ -15,6 +15,7 @@ import ee.carlrobert.codegpt.settings.service.azure.AzureSettings;
 import ee.carlrobert.codegpt.settings.service.google.GoogleSettings;
 import ee.carlrobert.llm.client.DeserializationUtil;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionRequest;
+import ee.carlrobert.llm.client.codegpt.request.chat.ChatCompletionRequest;
 import ee.carlrobert.llm.client.google.completion.GoogleCompletionRequest;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
 import ee.carlrobert.llm.client.ollama.completion.request.OllamaChatCompletionRequest;
@@ -98,13 +99,6 @@ public final class CompletionRequestService {
       CompletionEventListener<String> eventListener) {
     if (request instanceof OpenAIChatCompletionRequest completionRequest) {
       return switch (GeneralSettings.getSelectedService()) {
-        case CODEGPT -> {
-          if (List.of("o1-mini", "o1-preview").contains(completionRequest.getModel())) {
-            yield getO1ChatCompletionAsync(completionRequest, eventListener);
-          }
-          yield CompletionClientProvider.getCodeGPTClient()
-              .getChatCompletionAsync(completionRequest, eventListener);
-        }
         case OPENAI -> {
           if (List.of("o1-mini", "o1-preview").contains(completionRequest.getModel())) {
             yield getO1ChatCompletionAsync(completionRequest, eventListener);
@@ -116,6 +110,13 @@ public final class CompletionRequestService {
             .getChatCompletionAsync(completionRequest, eventListener);
         default -> throw new RuntimeException("Unknown service selected");
       };
+    }
+    if (request instanceof ChatCompletionRequest completionRequest) {
+      if (List.of("o1-mini", "o1-preview").contains(completionRequest.getModel())) {
+        return getO1ChatCompletionAsync(completionRequest, eventListener);
+      }
+      return CompletionClientProvider.getCodeGPTClient()
+          .getChatCompletionAsync(completionRequest, eventListener);
     }
     if (request instanceof CustomOpenAIRequest completionRequest) {
       return getCustomOpenAIChatCompletionAsync(completionRequest.getRequest(), eventListener);
@@ -148,7 +149,7 @@ public final class CompletionRequestService {
   }
 
   private EventSource getO1ChatCompletionAsync(
-      OpenAIChatCompletionRequest request,
+      CompletionRequest request,
       CompletionEventListener<String> eventListener) {
     ProgressManager.getInstance()
         .run(new Task.Backgroundable(null, "CodeGPT: Processing o1 request") {
@@ -176,14 +177,17 @@ public final class CompletionRequestService {
   public String getChatCompletion(CompletionRequest request) {
     if (request instanceof OpenAIChatCompletionRequest completionRequest) {
       var response = switch (GeneralSettings.getSelectedService()) {
-        case CODEGPT -> CompletionClientProvider.getCodeGPTClient()
-            .getChatCompletion(completionRequest);
         case OPENAI -> CompletionClientProvider.getOpenAIClient()
             .getChatCompletion(completionRequest);
         case AZURE -> CompletionClientProvider.getAzureClient()
             .getChatCompletion(completionRequest);
         default -> throw new RuntimeException("Unknown service selected");
       };
+      return tryExtractContent(response).orElseThrow();
+    }
+    if (request instanceof ChatCompletionRequest completionRequest) {
+      var response =
+          CompletionClientProvider.getCodeGPTClient().getChatCompletion(completionRequest);
       return tryExtractContent(response).orElseThrow();
     }
     if (request instanceof CustomOpenAIRequest completionRequest) {
