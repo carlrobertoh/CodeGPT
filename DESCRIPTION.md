@@ -34,7 +34,9 @@ Chat with your images. Upload manually or let CodeGPT auto-detect your screensho
 
 **Reference your files and folders**
 
-Quickly access and reference your project files and folders for context-aware coding assistance.
+Quickly access and reference your project files and folders for context-aware coding assistance. 
+
+With our **$10** pricing plan, you can chat with files containing up to **200k tokens** using any of our offered models.
 
 ![Reference files and folders](https://www.codegpt.ee/images/features/reference-files-w800.png)
 
