@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.11.5-241.1] - 2024-10-10
+
 ### Added
 
 - Support high context limits (up to 200k tokens) via RAG when chatting with files (CodeGPT)
@@ -14,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Chat UI threading issues [#730](https://github.com/carlrobertoh/CodeGPT/issues/730) 
+- Chat UI threading issues [#730](https://github.com/carlrobertoh/CodeGPT/issues/730)
 
 ## [2.11.4-241.1] - 2024-10-01
 
@@ -675,7 +677,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `OPENAI_API_KEY` persistence, key is saved in the OS password safe from now on
 
-[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.11.4-241.1...HEAD
+[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.11.5-241.1...HEAD
+[2.11.5-241.1]: https://github.com/carlrobertoh/CodeGPT/compare/v2.11.4-241.1...v2.11.5-241.1
 [2.11.4-241.1]: https://github.com/carlrobertoh/CodeGPT/compare/v2.11.3-241.1...v2.11.4-241.1
 [2.11.3-241.1]: https://github.com/carlrobertoh/CodeGPT/compare/v2.11.2-223...v2.11.3-241.1
 [2.11.2-223]: https://github.com/carlrobertoh/CodeGPT/compare/v2.11.1-223...v2.11.2-223
