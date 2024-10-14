@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt.toolwindow.chat.actionprocessor;
 
 import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.project.Project;
 import ee.carlrobert.codegpt.CodeGPTKeys;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.ui.textarea.AppliedActionInlay;
@@ -10,6 +11,7 @@ import ee.carlrobert.codegpt.ui.textarea.suggestion.item.DocumentationActionItem
 import ee.carlrobert.codegpt.ui.textarea.suggestion.item.GitCommitActionItem;
 import ee.carlrobert.codegpt.ui.textarea.suggestion.item.PersonaActionItem;
 import ee.carlrobert.codegpt.ui.textarea.suggestion.item.WebSearchActionItem;
+import org.jetbrains.annotations.Nullable;
 
 public class SuggestionActionProcessor implements ActionProcessor {
 
@@ -25,17 +27,20 @@ public class SuggestionActionProcessor implements ActionProcessor {
   private void processSuggestionAction(
       Message message,
       AppliedSuggestionActionInlay action,
-      Editor editor,
+      @Nullable Editor editor,
       StringBuilder promptBuilder) {
     message.setWebSearchIncluded(action.getSuggestion() instanceof WebSearchActionItem);
-    processDocumentationAction(message, action, editor);
-    processPersonaAction(message, action, editor);
+    if (editor != null) {
+      processDocumentationAction(message, action, editor.getProject());
+      processPersonaAction(message, action, editor.getProject());
+    }
     processGitCommitAction(action, promptBuilder);
   }
 
-  private void processDocumentationAction(Message message, AppliedSuggestionActionInlay action,
-      Editor editor) {
-    var project = editor.getProject();
+  private void processDocumentationAction(
+      Message message,
+      AppliedSuggestionActionInlay action,
+      Project project) {
     var addedDocumentation = CodeGPTKeys.ADDED_DOCUMENTATION.get(project);
     var appliedInlayExists = action.getSuggestion() instanceof DocumentationActionItem
         || action.getSuggestion() instanceof CreateDocumentationActionItem;
@@ -46,9 +51,10 @@ public class SuggestionActionProcessor implements ActionProcessor {
     }
   }
 
-  private void processPersonaAction(Message message, AppliedSuggestionActionInlay action,
-      Editor editor) {
-    var project = editor.getProject();
+  private void processPersonaAction(
+      Message message,
+      AppliedSuggestionActionInlay action,
+      Project project) {
     var addedPersona = CodeGPTKeys.ADDED_PERSONA.get(project);
     var personaInlayExists = action.getSuggestion() instanceof PersonaActionItem;
     if (addedPersona != null && personaInlayExists) {
