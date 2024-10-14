@@ -27,21 +27,12 @@ object EditorDiffUtil {
         val mainEditor = project.service<FileEditorManager>().selectedTextEditor ?: return
         val mainEditorFile =
             service<FileDocumentManager>().getFile(mainEditor.document) ?: return
-        val tempFile = createTempDiffFile(mainEditor, toolwindowEditor, highlightedText)
+        val tempFile = LightVirtualFile(
+            mainEditorFile.name,
+            createTempDiffContent(mainEditor, toolwindowEditor, highlightedText)
+        )
         DiffManager.getInstance()
             .showDiff(project, createDiffRequest(project, tempFile, mainEditor, mainEditorFile))
-    }
-
-    private fun createTempDiffFile(
-        mainEditor: Editor,
-        toolwindowEditor: Editor,
-        highlightedText: String
-    ): VirtualFile {
-        val diffContent = createTempDiffContent(mainEditor, toolwindowEditor, highlightedText)
-        val toolwindowEditorFile =
-            service<FileDocumentManager>().getFile(toolwindowEditor.document)
-                ?: throw IllegalStateException("Toolwindow editor file not found")
-        return LightVirtualFile("content_diff_${toolwindowEditorFile.name}", diffContent)
     }
 
     private fun createTempDiffContent(
