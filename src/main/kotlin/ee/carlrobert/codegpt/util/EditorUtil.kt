@@ -1,6 +1,5 @@
 package ee.carlrobert.codegpt.util
 
-import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.PathManager
 import com.intellij.openapi.application.runUndoTransparentWriteAction
@@ -10,7 +9,6 @@ import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.editor.EditorKind
-import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl
@@ -32,18 +30,10 @@ object EditorUtil {
             String.format("%s/%s", PathManager.getTempPath(), fileName),
             code
         )
-        val existingDocument = FileDocumentManager.getInstance().getDocument(lightVirtualFile)
-        val document = existingDocument ?: EditorFactory.getInstance().createDocument(code)
-
-        disableHighlighting(project, document)
-
-        return EditorFactory.getInstance().createEditor(
-            document,
-            project,
-            lightVirtualFile,
-            true,
-            EditorKind.MAIN_EDITOR
-        )
+        val editorFactory = EditorFactory.getInstance()
+        val document = editorFactory.createDocument(code)
+        return editorFactory
+            .createEditor(document, project, lightVirtualFile, true, EditorKind.MAIN_EDITOR)
     }
 
     @JvmStatic
@@ -130,14 +120,6 @@ object EditorUtil {
         psiDocumentManager.commitDocument(document)
         psiDocumentManager.getPsiFile(document)?.let { file ->
             CodeStyleManager.getInstance(project).reformatText(file, startOffset, endOffset)
-        }
-    }
-
-    @JvmStatic
-    fun disableHighlighting(project: Project, document: Document) {
-        val psiFile = PsiDocumentManager.getInstance(project).getPsiFile(document)
-        psiFile?.let {
-            DaemonCodeAnalyzer.getInstance(project).setHighlightingEnabled(psiFile, false)
         }
     }
 
