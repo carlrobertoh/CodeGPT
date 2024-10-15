@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- High CPU usage [#716](https://github.com/carlrobertoh/CodeGPT/issues/716)
+- NPE on suggestion actions when no files are opened in editor [#725](https://github.com/carlrobertoh/CodeGPT/issues/725)
+- Inconsistent text rendering in the chat tool window
+
 ## [2.11.5-233] - 2024-10-10
 
 ### Added
