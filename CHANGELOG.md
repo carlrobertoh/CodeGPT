@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.11.6-233] - 2024-10-15
+
 ### Fixed
 
 - High CPU usage [#716](https://github.com/carlrobertoh/CodeGPT/issues/716)
@@ -683,7 +685,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `OPENAI_API_KEY` persistence, key is saved in the OS password safe from now on
 
-[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.11.5-233...HEAD
+[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.11.6-233...HEAD
+[2.11.6-233]: https://github.com/carlrobertoh/CodeGPT/compare/v2.11.5-233...v2.11.6-233
 [2.11.5-233]: https://github.com/carlrobertoh/CodeGPT/compare/v2.11.4-233...v2.11.5-233
 [2.11.4-233]: https://github.com/carlrobertoh/CodeGPT/compare/v2.11.3-233...v2.11.4-233
 [2.11.3-233]: https://github.com/carlrobertoh/CodeGPT/compare/v2.11.2-223...v2.11.3-233
