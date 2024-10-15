@@ -273,12 +273,10 @@ public class ChatMessageResponseBody extends JPanel {
 
   private void processText(String markdownText, boolean caretVisible) {
     var html = convertMdToHtml(markdownText);
-    ApplicationManager.getApplication().invokeLater(() -> {
-      if (currentlyProcessedTextPane == null) {
-        prepareProcessingText(caretVisible);
-      }
-      currentlyProcessedTextPane.setText(html);
-    });
+    if (currentlyProcessedTextPane == null) {
+      prepareProcessingText(caretVisible);
+    }
+    currentlyProcessedTextPane.setText(html);
   }
 
   private void prepareProcessingText(boolean caretVisible) {
