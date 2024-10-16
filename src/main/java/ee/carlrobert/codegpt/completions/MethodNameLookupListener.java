@@ -57,7 +57,7 @@ public class MethodNameLookupListener implements LookupManagerListener {
       String prompt) {
     try {
       var response = CompletionRequestService.getInstance()
-          .getLookupCompletion(new LookupRequestCallParameters(prompt));
+          .getLookupCompletion(new LookupCompletionParameters(prompt));
       if (!response.isEmpty()) {
         for (var value : response.split(",")) {
           application.invokeLater(() -> application.runReadAction(() -> {

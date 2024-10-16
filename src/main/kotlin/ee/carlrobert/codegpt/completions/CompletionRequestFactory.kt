@@ -7,10 +7,10 @@ import ee.carlrobert.codegpt.settings.service.ServiceType
 import ee.carlrobert.llm.completion.CompletionRequest
 
 interface CompletionRequestFactory {
-    fun createChatRequest(params: ChatCompletionRequestParameters): CompletionRequest
-    fun createEditCodeRequest(params: EditCodeRequestParameters): CompletionRequest
-    fun createCommitMessageRequest(params: CommitMessageRequestParameters): CompletionRequest
-    fun createLookupRequest(params: LookupRequestCallParameters): CompletionRequest
+    fun createChatRequest(params: ChatCompletionParameters): CompletionRequest
+    fun createEditCodeRequest(params: EditCodeCompletionParameters): CompletionRequest
+    fun createCommitMessageRequest(params: CommitMessageCompletionParameters): CompletionRequest
+    fun createLookupRequest(params: LookupCompletionParameters): CompletionRequest
 
     companion object {
         @JvmStatic
@@ -30,16 +30,16 @@ interface CompletionRequestFactory {
 }
 
 abstract class BaseRequestFactory : CompletionRequestFactory {
-    override fun createEditCodeRequest(params: EditCodeRequestParameters): CompletionRequest {
+    override fun createEditCodeRequest(params: EditCodeCompletionParameters): CompletionRequest {
         val prompt = "Code to modify:\n${params.selectedText}\n\nInstructions: ${params.prompt}"
         return createBasicCompletionRequest(EDIT_CODE_SYSTEM_PROMPT, prompt, 8192, true)
     }
 
-    override fun createCommitMessageRequest(params: CommitMessageRequestParameters): CompletionRequest {
+    override fun createCommitMessageRequest(params: CommitMessageCompletionParameters): CompletionRequest {
         return createBasicCompletionRequest(params.systemPrompt, params.gitDiff, 512, true)
     }
 
-    override fun createLookupRequest(params: LookupRequestCallParameters): CompletionRequest {
+    override fun createLookupRequest(params: LookupCompletionParameters): CompletionRequest {
         return createBasicCompletionRequest(GENERATE_METHOD_NAMES_SYSTEM_PROMPT, params.prompt, 512)
     }
 
@@ -50,7 +50,7 @@ abstract class BaseRequestFactory : CompletionRequestFactory {
         stream: Boolean = false
     ): CompletionRequest
 
-    protected fun getPromptWithFilesContext(callParameters: CallParameters): String {
+    protected fun getPromptWithFilesContext(callParameters: ChatCompletionParameters): String {
         return callParameters.referencedFiles?.let {
             if (it.isEmpty()) {
                 callParameters.message.prompt

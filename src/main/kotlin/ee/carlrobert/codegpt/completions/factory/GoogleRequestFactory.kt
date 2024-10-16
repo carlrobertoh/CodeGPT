@@ -20,10 +20,9 @@ import java.nio.file.Path
 
 class GoogleRequestFactory : BaseRequestFactory() {
 
-    override fun createChatRequest(params: ChatCompletionRequestParameters): GoogleCompletionRequest {
-        val (callParameters) = params
+    override fun createChatRequest(params: ChatCompletionParameters): GoogleCompletionRequest {
         val configuration = service<ConfigurationSettings>().state
-        val messages = buildGoogleMessages(service<GoogleSettings>().state.model, callParameters)
+        val messages = buildGoogleMessages(service<GoogleSettings>().state.model, params)
         return GoogleCompletionRequest.Builder(messages)
             .generationConfig(
                 GoogleGenerationConfig.Builder()
@@ -57,9 +56,9 @@ class GoogleRequestFactory : BaseRequestFactory() {
 
     private fun buildGoogleMessages(
         model: String?,
-        callParameters: CallParameters
+        params: ChatCompletionParameters
     ): List<GoogleCompletionContent> {
-        val messages = buildGoogleMessages(callParameters)
+        val messages = buildGoogleMessages(params)
 
         if (model == null) {
             return messages
@@ -81,7 +80,7 @@ class GoogleRequestFactory : BaseRequestFactory() {
             } else {
                 tryReducingGoogleMessagesOrThrow(
                     messages,
-                    callParameters.conversation.isDiscardTokenLimit,
+                    params.conversation.isDiscardTokenLimit,
                     totalUsage,
                     googleModel.maxTokens
                 )
@@ -89,11 +88,11 @@ class GoogleRequestFactory : BaseRequestFactory() {
         } ?: messages
     }
 
-    private fun buildGoogleMessages(callParameters: CallParameters): List<GoogleCompletionContent> {
-        val message = callParameters.message
+    private fun buildGoogleMessages(params: ChatCompletionParameters): List<GoogleCompletionContent> {
+        val message = params.message
         val messages = mutableListOf<GoogleCompletionContent>()
 
-        when (callParameters.conversationType) {
+        when (params.conversationType) {
             ConversationType.DEFAULT -> {
                 messages.add(
                     GoogleCompletionContent(
@@ -114,8 +113,8 @@ class GoogleRequestFactory : BaseRequestFactory() {
             else -> {}
         }
 
-        for (prevMessage in callParameters.conversation.messages) {
-            if (callParameters.isRetry && prevMessage.id == message.id) {
+        for (prevMessage in params.conversation.messages) {
+            if (params.retry && prevMessage.id == message.id) {
                 break
             }
 
@@ -143,15 +142,15 @@ class GoogleRequestFactory : BaseRequestFactory() {
             messages.add(GoogleCompletionContent("model", listOf(prevMessage.response)))
         }
 
-        if (callParameters.imageMediaType != null && callParameters.imageData.isNotEmpty()) {
+        if (params.imageMediaType != null && params.imageData != null) {
             messages.add(
                 GoogleCompletionContent(
                     listOf(
                         GoogleContentPart(
                             null,
                             GoogleContentPart.Blob(
-                                callParameters.imageMediaType,
-                                callParameters.imageData
+                                params.imageMediaType,
+                                params.imageData
                             )
                         ),
                         GoogleContentPart(message.prompt)
@@ -162,7 +161,7 @@ class GoogleRequestFactory : BaseRequestFactory() {
             messages.add(
                 GoogleCompletionContent(
                     "user",
-                    listOf(getPromptWithFilesContext(callParameters))
+                    listOf(getPromptWithFilesContext(params))
                 )
             )
         }

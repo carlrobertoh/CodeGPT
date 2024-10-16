@@ -69,7 +69,7 @@ public final class CompletionRequestService {
         new OpenAIChatCompletionEventSourceListener(eventListener));
   }
 
-  public String getLookupCompletion(LookupRequestCallParameters params) {
+  public String getLookupCompletion(LookupCompletionParameters params) {
     var request = CompletionRequestFactory
         .getFactory(GeneralSettings.getSelectedService())
         .createLookupRequest(params);
@@ -77,7 +77,7 @@ public final class CompletionRequestService {
   }
 
   public EventSource getCommitMessageAsync(
-      CommitMessageRequestParameters params,
+      CommitMessageCompletionParameters params,
       CompletionEventListener<String> eventListener) {
     var request = CompletionRequestFactory
         .getFactory(GeneralSettings.getSelectedService())
@@ -86,7 +86,7 @@ public final class CompletionRequestService {
   }
 
   public EventSource getEditCodeCompletionAsync(
-      EditCodeRequestParameters params,
+      EditCodeCompletionParameters params,
       CompletionEventListener<String> eventListener) {
     var request = CompletionRequestFactory
         .getFactory(GeneralSettings.getSelectedService())
