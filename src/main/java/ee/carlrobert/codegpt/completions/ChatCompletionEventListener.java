@@ -10,12 +10,12 @@ import okhttp3.sse.EventSource;
 
 public class ChatCompletionEventListener implements CompletionEventListener<String> {
 
-  private final CallParameters callParameters;
+  private final ChatCompletionParameters callParameters;
   private final CompletionResponseEventListener eventListener;
   private final StringBuilder messageBuilder = new StringBuilder();
 
   public ChatCompletionEventListener(
-      CallParameters callParameters,
+      ChatCompletionParameters callParameters,
       CompletionResponseEventListener eventListener) {
     this.callParameters = callParameters;
     this.eventListener = eventListener;

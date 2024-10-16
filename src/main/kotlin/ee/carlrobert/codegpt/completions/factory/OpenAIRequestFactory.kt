@@ -21,13 +21,12 @@ import java.nio.file.Path
 
 class OpenAIRequestFactory : CompletionRequestFactory {
 
-    override fun createChatRequest(params: ChatCompletionRequestParameters): OpenAIChatCompletionRequest {
-        val (callParameters) = params
+    override fun createChatRequest(params: ChatCompletionParameters): OpenAIChatCompletionRequest {
         val model = service<OpenAISettings>().state.model
         val configuration = service<ConfigurationSettings>().state
         val requestBuilder: OpenAIChatCompletionRequest.Builder =
             OpenAIChatCompletionRequest.Builder(
-                buildOpenAIMessages(model, callParameters, callParameters.referencedFiles)
+                buildOpenAIMessages(model, params, params.referencedFiles)
             )
                 .setModel(model)
         if ("o1-mini" == model || "o1-preview" == model) {
@@ -48,7 +47,7 @@ class OpenAIRequestFactory : CompletionRequestFactory {
         return requestBuilder.build()
     }
 
-    override fun createEditCodeRequest(params: EditCodeRequestParameters): OpenAIChatCompletionRequest {
+    override fun createEditCodeRequest(params: EditCodeCompletionParameters): OpenAIChatCompletionRequest {
         val model = service<OpenAISettings>().state.model
         val prompt = "Code to modify:\n${params.selectedText}\n\nInstructions: ${params.prompt}"
         if (model == "o1-mini" || model == "o1-preview") {
@@ -57,7 +56,7 @@ class OpenAIRequestFactory : CompletionRequestFactory {
         return createBasicCompletionRequest(EDIT_CODE_SYSTEM_PROMPT, prompt, model, true)
     }
 
-    override fun createCommitMessageRequest(params: CommitMessageRequestParameters): OpenAIChatCompletionRequest {
+    override fun createCommitMessageRequest(params: CommitMessageCompletionParameters): OpenAIChatCompletionRequest {
         val model = service<OpenAISettings>().state.model
         val (gitDiff, systemPrompt) = params
         if (model == "o1-mini" || model == "o1-preview") {
@@ -66,7 +65,7 @@ class OpenAIRequestFactory : CompletionRequestFactory {
         return createBasicCompletionRequest(systemPrompt, gitDiff, model, true)
     }
 
-    override fun createLookupRequest(params: LookupRequestCallParameters): OpenAIChatCompletionRequest {
+    override fun createLookupRequest(params: LookupCompletionParameters): OpenAIChatCompletionRequest {
         val model = service<OpenAISettings>().state.model
         val (prompt) = params
         if (model == "o1-mini" || model == "o1-preview") {
@@ -103,7 +102,7 @@ class OpenAIRequestFactory : CompletionRequestFactory {
 
         fun buildOpenAIMessages(
             model: String?,
-            callParameters: CallParameters,
+            callParameters: ChatCompletionParameters,
             referencedFiles: List<ReferencedFile>? = mutableListOf()
         ): List<OpenAIChatCompletionMessage> {
             val messages = buildOpenAIChatMessages(model, callParameters, referencedFiles)
@@ -140,7 +139,7 @@ class OpenAIRequestFactory : CompletionRequestFactory {
 
         private fun buildOpenAIChatMessages(
             model: String?,
-            callParameters: CallParameters,
+            callParameters: ChatCompletionParameters,
             referencedFiles: List<ReferencedFile>? = mutableListOf()
         ): MutableList<OpenAIChatCompletionMessage> {
             val message = callParameters.message
@@ -169,7 +168,7 @@ class OpenAIRequestFactory : CompletionRequestFactory {
             }
 
             for (prevMessage in callParameters.conversation.messages) {
-                if (callParameters.isRetry && prevMessage.id == message.id) {
+                if (callParameters.retry && prevMessage.id == message.id) {
                     break
                 }
                 val prevMessageImageFilePath = prevMessage.imageFilePath
@@ -203,7 +202,7 @@ class OpenAIRequestFactory : CompletionRequestFactory {
                 )
             }
 
-            if (callParameters.imageMediaType != null && callParameters.imageData.isNotEmpty()) {
+            if (callParameters.imageMediaType != null && callParameters.imageData != null) {
                 messages.add(
                     OpenAIChatCompletionDetailedMessage(
                         "user",

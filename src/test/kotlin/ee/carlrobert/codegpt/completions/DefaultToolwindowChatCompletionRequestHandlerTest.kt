@@ -16,246 +16,275 @@ import testsupport.IntegrationTest
 
 class DefaultToolwindowChatCompletionRequestHandlerTest : IntegrationTest() {
 
-  fun testOpenAIChatCompletionCall() {
-    useOpenAIService()
-    service<PersonaSettings>().state.selectedPersona.instructions = "TEST_SYSTEM_PROMPT"
-    val message = Message("TEST_PROMPT")
-    val conversation = ConversationService.getInstance().startConversation()
-    val requestHandler =
-      ToolwindowChatCompletionRequestHandler(
-        getRequestEventListener(message)
-      )
-    expectOpenAI(StreamHttpExchange { request: RequestEntity ->
-      assertThat(request.uri.path).isEqualTo("/v1/chat/completions")
-      assertThat(request.method).isEqualTo("POST")
-      assertThat(request.headers[HttpHeaders.AUTHORIZATION]!![0]).isEqualTo("Bearer TEST_API_KEY")
-      assertThat(request.body)
-        .extracting(
-          "model",
-          "messages")
-        .containsExactly(
-          "gpt-4",
-          listOf(
-            mapOf("role" to "system", "content" to "TEST_SYSTEM_PROMPT"),
-            mapOf("role" to "user", "content" to "TEST_PROMPT")))
-      listOf(
-        jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("role", "assistant")))),
-        jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "Hel")))),
-        jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "lo")))),
-        jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "!")))))
-    })
+    fun testOpenAIChatCompletionCall() {
+        useOpenAIService()
+        service<PersonaSettings>().state.selectedPersona.instructions = "TEST_SYSTEM_PROMPT"
+        val message = Message("TEST_PROMPT")
+        val conversation = ConversationService.getInstance().startConversation()
+        expectOpenAI(StreamHttpExchange { request: RequestEntity ->
+            assertThat(request.uri.path).isEqualTo("/v1/chat/completions")
+            assertThat(request.method).isEqualTo("POST")
+            assertThat(request.headers[HttpHeaders.AUTHORIZATION]!![0]).isEqualTo("Bearer TEST_API_KEY")
+            assertThat(request.body)
+                .extracting(
+                    "model",
+                    "messages"
+                )
+                .containsExactly(
+                    "gpt-4",
+                    listOf(
+                        mapOf("role" to "system", "content" to "TEST_SYSTEM_PROMPT"),
+                        mapOf("role" to "user", "content" to "TEST_PROMPT")
+                    )
+                )
+            listOf(
+                jsonMapResponse(
+                    "choices",
+                    jsonArray(jsonMap("delta", jsonMap("role", "assistant")))
+                ),
+                jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "Hel")))),
+                jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "lo")))),
+                jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "!"))))
+            )
+        })
+        val requestHandler =
+            ToolwindowChatCompletionRequestHandler(getRequestEventListener(message))
 
-    requestHandler.call(CallParameters(conversation, message))
+        requestHandler.call(ChatCompletionParameters.builder(conversation, message).build())
 
-    waitExpecting { "Hello!" == message.response }
-  }
-
-  fun testAzureChatCompletionCall() {
-    useAzureService()
-    service<PersonaSettings>().state.selectedPersona.instructions = "TEST_SYSTEM_PROMPT"
-    val conversationService = ConversationService.getInstance()
-    val prevMessage = Message("TEST_PREV_PROMPT")
-    prevMessage.response = "TEST_PREV_RESPONSE"
-    val conversation = conversationService.startConversation()
-    conversation.addMessage(prevMessage)
-    conversationService.saveConversation(conversation)
-    expectAzure(StreamHttpExchange { request: RequestEntity ->
-      assertThat(request.uri.path).isEqualTo(
-        "/openai/deployments/TEST_DEPLOYMENT_ID/chat/completions")
-      assertThat(request.uri.query).isEqualTo("api-version=TEST_API_VERSION")
-      assertThat(request.headers["Api-key"]!![0]).isEqualTo("TEST_API_KEY")
-      assertThat(request.headers["X-llm-application-tag"]!![0]).isEqualTo("codegpt")
-      assertThat(request.body)
-        .extracting("messages")
-        .isEqualTo(
-          listOf(
-            mapOf("role" to "system", "content" to "TEST_SYSTEM_PROMPT"),
-            mapOf("role" to "user", "content" to "TEST_PREV_PROMPT"),
-            mapOf("role" to "assistant", "content" to "TEST_PREV_RESPONSE"),
-            mapOf("role" to "user", "content" to "TEST_PROMPT")))
-      listOf(
-        jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("role", "assistant")))),
-        jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "Hel")))),
-        jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "lo")))),
-        jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "!")))))
-    })
-    val message = Message("TEST_PROMPT")
-    val requestHandler =
-      ToolwindowChatCompletionRequestHandler(
-        getRequestEventListener(message)
-      )
-
-    requestHandler.call(CallParameters(conversation, message))
-
-    waitExpecting { "Hello!" == message.response }
-  }
-
-  fun testLlamaChatCompletionCall() {
-    useLlamaService()
-    service<ConfigurationSettings>().state.maxTokens = 99
-    service<PersonaSettings>().state.selectedPersona.instructions = "TEST_SYSTEM_PROMPT"
-    val message = Message("TEST_PROMPT")
-    val conversation = ConversationService.getInstance().startConversation()
-    conversation.addMessage(Message("Ping", "Pong"))
-    val requestHandler =
-      ToolwindowChatCompletionRequestHandler(
-        getRequestEventListener(message)
-      )
-    expectLlama(StreamHttpExchange { request: RequestEntity ->
-      assertThat(request.uri.path).isEqualTo("/completion")
-      assertThat(request.body)
-        .extracting(
-          "prompt",
-          "n_predict",
-          "stream")
-        .containsExactly(
-          LLAMA.buildPrompt(
-            "TEST_SYSTEM_PROMPT",
-            "TEST_PROMPT",
-            conversation.messages),
-          99,
-          true)
-      listOf<String?>(
-        jsonMapResponse("content", "Hel"),
-        jsonMapResponse("content", "lo!"),
-        jsonMapResponse(
-          e("content", ""),
-          e("stop", true)))
-    })
-
-    requestHandler.call(CallParameters(conversation, message))
-
-    waitExpecting { "Hello!" == message.response }
-  }
-
-  fun testOllamaChatCompletionCall() {
-    useOllamaService()
-    service<ConfigurationSettings>().state.maxTokens = 99
-    service<PersonaSettings>().state.selectedPersona.instructions = "TEST_SYSTEM_PROMPT"
-    val message = Message("TEST_PROMPT")
-    val conversation = ConversationService.getInstance().startConversation()
-    val requestHandler =
-      ToolwindowChatCompletionRequestHandler(
-        getRequestEventListener(message)
-      )
-    expectOllama(NdJsonStreamHttpExchange { request: RequestEntity ->
-      assertThat(request.uri.path).isEqualTo("/api/chat")
-      assertThat(request.headers[HttpHeaders.AUTHORIZATION]!![0]).isEqualTo("Bearer TEST_API_KEY")
-      assertThat(request.body)
-        .extracting(
-          "model",
-          "messages",
-          "options.num_predict",
-          "stream"
-        )
-        .containsExactly(
-          HuggingFaceModel.LLAMA_3_8B_Q6_K.code,
-          listOf(
-            mapOf("role" to "system", "content" to "TEST_SYSTEM_PROMPT"),
-            mapOf("role" to "user", "content" to "TEST_PROMPT")
-          ),
-          99,
-          true
-        )
-      listOf(
-        jsonMapResponse(
-          e("message", jsonMap(e("content", "Hel"), e("role", "assistant"))),
-          e("done", false)),
-        jsonMapResponse(
-            e("message", jsonMap(e("content", "lo"), e("role", "assistant"))),
-            e("done", false)),
-        jsonMapResponse(
-            e("message", jsonMap(e("content", "!"), e("role", "assistant"))),
-            e("done", false)),
-        jsonMapResponse(
-            e("message", jsonMap(e("content", ""), e("role", "assistant"))),
-            e("done", true))
-      )
-    })
-
-    requestHandler.call(CallParameters(conversation, message))
-
-    waitExpecting { "Hello!" == message.response }
-  }
-
-  fun testGoogleChatCompletionCall() {
-    useGoogleService()
-    service<PersonaSettings>().state.selectedPersona.instructions = "TEST_SYSTEM_PROMPT"
-    val message = Message("TEST_PROMPT")
-    val conversation = ConversationService.getInstance().startConversation()
-    val requestHandler =
-      ToolwindowChatCompletionRequestHandler(
-        getRequestEventListener(message)
-      )
-    expectGoogle(StreamHttpExchange { request: RequestEntity ->
-      assertThat(request.uri.path).isEqualTo("/v1/models/gemini-pro:streamGenerateContent")
-      assertThat(request.method).isEqualTo("POST")
-      assertThat(request.uri.query).isEqualTo("key=TEST_API_KEY&alt=sse")
-      assertThat(request.body)
-        .extracting("contents")
-        .isEqualTo(
-          listOf(
-          mapOf("parts" to listOf(mapOf("text" to "TEST_SYSTEM_PROMPT")), "role" to "user"),
-          mapOf("parts" to listOf(mapOf("text" to "Understood.")), "role" to "model"),
-          mapOf("parts" to listOf(mapOf("text" to "TEST_PROMPT")), "role" to "user"),
-          )
-        )
-      listOf(
-        jsonMapResponse(
-          "candidates",
-          jsonArray(jsonMap("content", jsonMap("parts", jsonArray(jsonMap("text", "Hello")))))
-        ),
-        jsonMapResponse(
-          "candidates",
-          jsonArray(jsonMap("content", jsonMap("parts", jsonArray(jsonMap("text", "!")))))
-        )
-      )
-    })
-
-    requestHandler.call(CallParameters(conversation, message))
-
-    waitExpecting { "Hello!" == message.response }
-  }
-
-  fun testCodeGPTServiceChatCompletionCall() {
-    useCodeGPTService()
-    service<PersonaSettings>().state.selectedPersona.instructions = "TEST_SYSTEM_PROMPT"
-    val message = Message("TEST_PROMPT")
-    val conversation = ConversationService.getInstance().startConversation()
-    val requestHandler =
-      ToolwindowChatCompletionRequestHandler(
-        getRequestEventListener(message)
-      )
-    expectCodeGPT(StreamHttpExchange { request: RequestEntity ->
-      assertThat(request.uri.path).isEqualTo("/v1/chat/completions")
-      assertThat(request.method).isEqualTo("POST")
-      assertThat(request.headers[HttpHeaders.AUTHORIZATION]!![0]).isEqualTo("Bearer TEST_API_KEY")
-      assertThat(request.body)
-        .extracting(
-          "model",
-          "messages")
-        .containsExactly(
-          "TEST_MODEL",
-          listOf(
-            mapOf("role" to "system", "content" to "TEST_SYSTEM_PROMPT"),
-            mapOf("role" to "user", "content" to "TEST_PROMPT")))
-      listOf(
-        jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("role", "assistant")))),
-        jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "Hel")))),
-        jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "lo")))),
-        jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "!")))))
-    })
-
-    requestHandler.call(CallParameters(conversation, message))
-
-    waitExpecting { "Hello!" == message.response }
-  }
-
-  private fun getRequestEventListener(message: Message): CompletionResponseEventListener {
-    return object : CompletionResponseEventListener {
-      override fun handleCompleted(fullMessage: String, callParameters: CallParameters) {
-        message.response = fullMessage
-      }
+        waitExpecting { "Hello!" == message.response }
     }
-  }
+
+    fun testAzureChatCompletionCall() {
+        useAzureService()
+        service<PersonaSettings>().state.selectedPersona.instructions = "TEST_SYSTEM_PROMPT"
+        val conversationService = ConversationService.getInstance()
+        val prevMessage = Message("TEST_PREV_PROMPT")
+        prevMessage.response = "TEST_PREV_RESPONSE"
+        val conversation = conversationService.startConversation()
+        conversation.addMessage(prevMessage)
+        conversationService.saveConversation(conversation)
+        expectAzure(StreamHttpExchange { request: RequestEntity ->
+            assertThat(request.uri.path).isEqualTo(
+                "/openai/deployments/TEST_DEPLOYMENT_ID/chat/completions"
+            )
+            assertThat(request.uri.query).isEqualTo("api-version=TEST_API_VERSION")
+            assertThat(request.headers["Api-key"]!![0]).isEqualTo("TEST_API_KEY")
+            assertThat(request.headers["X-llm-application-tag"]!![0]).isEqualTo("codegpt")
+            assertThat(request.body)
+                .extracting("messages")
+                .isEqualTo(
+                    listOf(
+                        mapOf("role" to "system", "content" to "TEST_SYSTEM_PROMPT"),
+                        mapOf("role" to "user", "content" to "TEST_PREV_PROMPT"),
+                        mapOf("role" to "assistant", "content" to "TEST_PREV_RESPONSE"),
+                        mapOf("role" to "user", "content" to "TEST_PROMPT")
+                    )
+                )
+            listOf(
+                jsonMapResponse(
+                    "choices",
+                    jsonArray(jsonMap("delta", jsonMap("role", "assistant")))
+                ),
+                jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "Hel")))),
+                jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "lo")))),
+                jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "!"))))
+            )
+        })
+        val message = Message("TEST_PROMPT")
+        val requestHandler =
+            ToolwindowChatCompletionRequestHandler(getRequestEventListener(message))
+
+        requestHandler.call(ChatCompletionParameters.builder(conversation, message).build())
+
+        waitExpecting { "Hello!" == message.response }
+    }
+
+    fun testLlamaChatCompletionCall() {
+        useLlamaService()
+        service<ConfigurationSettings>().state.maxTokens = 99
+        service<PersonaSettings>().state.selectedPersona.instructions = "TEST_SYSTEM_PROMPT"
+        val message = Message("TEST_PROMPT")
+        val conversation = ConversationService.getInstance().startConversation()
+        conversation.addMessage(Message("Ping", "Pong"))
+        expectLlama(StreamHttpExchange { request: RequestEntity ->
+            assertThat(request.uri.path).isEqualTo("/completion")
+            assertThat(request.body)
+                .extracting(
+                    "prompt",
+                    "n_predict",
+                    "stream"
+                )
+                .containsExactly(
+                    LLAMA.buildPrompt(
+                        "TEST_SYSTEM_PROMPT",
+                        "TEST_PROMPT",
+                        conversation.messages
+                    ),
+                    99,
+                    true
+                )
+            listOf<String?>(
+                jsonMapResponse("content", "Hel"),
+                jsonMapResponse("content", "lo!"),
+                jsonMapResponse(
+                    e("content", ""),
+                    e("stop", true)
+                )
+            )
+        })
+        val requestHandler =
+            ToolwindowChatCompletionRequestHandler(getRequestEventListener(message))
+
+        requestHandler.call(ChatCompletionParameters.builder(conversation, message).build())
+
+        waitExpecting { "Hello!" == message.response }
+    }
+
+    fun testOllamaChatCompletionCall() {
+        useOllamaService()
+        service<ConfigurationSettings>().state.maxTokens = 99
+        service<PersonaSettings>().state.selectedPersona.instructions = "TEST_SYSTEM_PROMPT"
+        val message = Message("TEST_PROMPT")
+        val conversation = ConversationService.getInstance().startConversation()
+        expectOllama(NdJsonStreamHttpExchange { request: RequestEntity ->
+            assertThat(request.uri.path).isEqualTo("/api/chat")
+            assertThat(request.headers[HttpHeaders.AUTHORIZATION]!![0]).isEqualTo("Bearer TEST_API_KEY")
+            assertThat(request.body)
+                .extracting(
+                    "model",
+                    "messages",
+                    "options.num_predict",
+                    "stream"
+                )
+                .containsExactly(
+                    HuggingFaceModel.LLAMA_3_8B_Q6_K.code,
+                    listOf(
+                        mapOf("role" to "system", "content" to "TEST_SYSTEM_PROMPT"),
+                        mapOf("role" to "user", "content" to "TEST_PROMPT")
+                    ),
+                    99,
+                    true
+                )
+            listOf(
+                jsonMapResponse(
+                    e("message", jsonMap(e("content", "Hel"), e("role", "assistant"))),
+                    e("done", false)
+                ),
+                jsonMapResponse(
+                    e("message", jsonMap(e("content", "lo"), e("role", "assistant"))),
+                    e("done", false)
+                ),
+                jsonMapResponse(
+                    e("message", jsonMap(e("content", "!"), e("role", "assistant"))),
+                    e("done", false)
+                ),
+                jsonMapResponse(
+                    e("message", jsonMap(e("content", ""), e("role", "assistant"))),
+                    e("done", true)
+                )
+            )
+        })
+        val requestHandler =
+            ToolwindowChatCompletionRequestHandler(getRequestEventListener(message))
+
+        requestHandler.call(ChatCompletionParameters.builder(conversation, message).build())
+
+        waitExpecting { "Hello!" == message.response }
+    }
+
+    fun testGoogleChatCompletionCall() {
+        useGoogleService()
+        service<PersonaSettings>().state.selectedPersona.instructions = "TEST_SYSTEM_PROMPT"
+        val message = Message("TEST_PROMPT")
+        val conversation = ConversationService.getInstance().startConversation()
+        expectGoogle(StreamHttpExchange { request: RequestEntity ->
+            assertThat(request.uri.path).isEqualTo("/v1/models/gemini-pro:streamGenerateContent")
+            assertThat(request.method).isEqualTo("POST")
+            assertThat(request.uri.query).isEqualTo("key=TEST_API_KEY&alt=sse")
+            assertThat(request.body)
+                .extracting("contents")
+                .isEqualTo(
+                    listOf(
+                        mapOf(
+                            "parts" to listOf(mapOf("text" to "TEST_SYSTEM_PROMPT")),
+                            "role" to "user"
+                        ),
+                        mapOf("parts" to listOf(mapOf("text" to "Understood.")), "role" to "model"),
+                        mapOf("parts" to listOf(mapOf("text" to "TEST_PROMPT")), "role" to "user"),
+                    )
+                )
+            listOf(
+                jsonMapResponse(
+                    "candidates",
+                    jsonArray(
+                        jsonMap(
+                            "content",
+                            jsonMap("parts", jsonArray(jsonMap("text", "Hello")))
+                        )
+                    )
+                ),
+                jsonMapResponse(
+                    "candidates",
+                    jsonArray(jsonMap("content", jsonMap("parts", jsonArray(jsonMap("text", "!")))))
+                )
+            )
+        })
+        val requestHandler =
+            ToolwindowChatCompletionRequestHandler(getRequestEventListener(message))
+
+        requestHandler.call(ChatCompletionParameters.builder(conversation, message).build())
+
+        waitExpecting { "Hello!" == message.response }
+    }
+
+    fun testCodeGPTServiceChatCompletionCall() {
+        useCodeGPTService()
+        service<PersonaSettings>().state.selectedPersona.instructions = "TEST_SYSTEM_PROMPT"
+        val message = Message("TEST_PROMPT")
+        val conversation = ConversationService.getInstance().startConversation()
+        expectCodeGPT(StreamHttpExchange { request: RequestEntity ->
+            assertThat(request.uri.path).isEqualTo("/v1/chat/completions")
+            assertThat(request.method).isEqualTo("POST")
+            assertThat(request.headers[HttpHeaders.AUTHORIZATION]!![0]).isEqualTo("Bearer TEST_API_KEY")
+            assertThat(request.body)
+                .extracting(
+                    "model",
+                    "messages"
+                )
+                .containsExactly(
+                    "TEST_MODEL",
+                    listOf(
+                        mapOf("role" to "system", "content" to "TEST_SYSTEM_PROMPT"),
+                        mapOf("role" to "user", "content" to "TEST_PROMPT")
+                    )
+                )
+            listOf(
+                jsonMapResponse(
+                    "choices",
+                    jsonArray(jsonMap("delta", jsonMap("role", "assistant")))
+                ),
+                jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "Hel")))),
+                jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "lo")))),
+                jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "!"))))
+            )
+        })
+        val requestHandler =
+            ToolwindowChatCompletionRequestHandler(getRequestEventListener(message))
+
+        requestHandler.call(ChatCompletionParameters.builder(conversation, message).build())
+
+        waitExpecting { "Hello!" == message.response }
+    }
+
+    private fun getRequestEventListener(message: Message): CompletionResponseEventListener {
+        return object : CompletionResponseEventListener {
+            override fun handleCompleted(
+                fullMessage: String,
+                callParameters: ChatCompletionParameters
+            ) {
+                message.response = fullMessage
+            }
+        }
+    }
 }

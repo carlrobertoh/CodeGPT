@@ -8,6 +8,7 @@ import static javax.swing.event.HyperlinkEvent.EventType.ACTIVATED;
 import com.intellij.icons.AllIcons.General;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
@@ -52,6 +53,8 @@ import javax.swing.SwingConstants;
 import org.jetbrains.annotations.Nullable;
 
 public class ChatMessageResponseBody extends JPanel {
+
+  private static final Logger LOG = Logger.getInstance(ChatMessageResponseBody.class);
 
   private final Project project;
   private final Disposable parentDisposable;
@@ -123,14 +126,17 @@ public class ChatMessageResponseBody extends JPanel {
   }
 
   public ChatMessageResponseBody withResponse(String response) {
-    for (var message : MarkdownUtil.splitCodeBlocks(response)) {
-      processResponse(message, message.startsWith("```"), false);
+    try {
+      for (var message : MarkdownUtil.splitCodeBlocks(response)) {
+        processResponse(message, message.startsWith("```"), false);
+      }
+    } catch (Exception e) {
+      LOG.error("Something went wrong while processing input", e);
     }
-
     return this;
   }
 
-  public void update(String partialMessage) {
+  public void updateMessage(String partialMessage) {
     for (var item : streamParser.parse(partialMessage)) {
       processResponse(item.response(), CODE.equals(item.type()), true);
     }
@@ -261,22 +267,24 @@ public class ChatMessageResponseBody extends JPanel {
       var codeBlock = ((FencedCodeBlock) child);
       var code = codeBlock.getContentChars().unescape();
       if (!code.isEmpty()) {
-        if (currentlyProcessedEditorPanel == null) {
-          ApplicationManager.getApplication().invokeAndWait(() -> {
+        ApplicationManager.getApplication().invokeLater(() -> {
+          if (currentlyProcessedEditorPanel == null) {
             prepareProcessingCode(code, codeBlock.getInfo().unescape());
-          });
-        }
-        EditorUtil.updateEditorDocument(currentlyProcessedEditorPanel.getEditor(), code);
+          }
+          EditorUtil.updateEditorDocument(currentlyProcessedEditorPanel.getEditor(), code);
+        });
       }
     }
   }
 
   private void processText(String markdownText, boolean caretVisible) {
     var html = convertMdToHtml(markdownText);
-    if (currentlyProcessedTextPane == null) {
-      prepareProcessingText(caretVisible);
-    }
-    currentlyProcessedTextPane.setText(html);
+    ApplicationManager.getApplication().invokeLater(() -> {
+      if (currentlyProcessedTextPane == null) {
+        prepareProcessingText(caretVisible);
+      }
+      currentlyProcessedTextPane.setText(html);
+    });
   }
 
   private void prepareProcessingText(boolean caretVisible) {

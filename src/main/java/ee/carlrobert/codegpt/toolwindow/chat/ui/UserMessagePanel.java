@@ -43,6 +43,10 @@ public class UserMessagePanel extends JPanel {
       add(additionalContextPanel, BorderLayout.CENTER);
     }
 
+    if (message.getImageFilePath() != null && !message.getImageFilePath().isEmpty()) {
+      displayImage(message.getImageFilePath());
+    }
+
     var referencedFilePaths = message.getReferencedFilePaths();
     if (referencedFilePaths != null && !referencedFilePaths.isEmpty()) {
       add(createResponseBody(

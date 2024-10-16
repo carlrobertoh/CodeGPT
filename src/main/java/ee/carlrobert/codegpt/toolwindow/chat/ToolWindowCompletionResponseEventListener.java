@@ -5,7 +5,7 @@ import static com.intellij.openapi.ui.Messages.OK;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import ee.carlrobert.codegpt.EncodingManager;
-import ee.carlrobert.codegpt.completions.CallParameters;
+import ee.carlrobert.codegpt.completions.ChatCompletionParameters;
 import ee.carlrobert.codegpt.completions.CompletionResponseEventListener;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationService;
@@ -53,16 +53,10 @@ abstract class ToolWindowCompletionResponseEventListener implements
   @Override
   public void handleMessage(String partialMessage) {
     try {
-      responseContainer.update(partialMessage);
       messageBuilder.append(partialMessage);
-
-      if (!completed) {
-        var ongoingTokens = encodingManager.countTokens(messageBuilder.toString());
-        ApplicationManager.getApplication().invokeLater(() -> {
-          totalTokensPanel.update(
-              totalTokensPanel.getTokenDetails().getTotal() + ongoingTokens);
-        });
-      }
+      var ongoingTokens = encodingManager.countTokens(messageBuilder.toString());
+      responseContainer.updateMessage(partialMessage);
+      totalTokensPanel.update(totalTokensPanel.getTokenDetails().getTotal() + ongoingTokens);
     } catch (Exception e) {
       responseContainer.displayError("Something went wrong.");
       throw new RuntimeException("Error while updating the content", e);
@@ -105,7 +99,7 @@ abstract class ToolWindowCompletionResponseEventListener implements
   }
 
   @Override
-  public void handleCompleted(String fullMessage, CallParameters callParameters) {
+  public void handleCompleted(String fullMessage, ChatCompletionParameters callParameters) {
     conversationService.saveMessage(fullMessage, callParameters);
 
     ApplicationManager.getApplication().invokeLater(() -> {
