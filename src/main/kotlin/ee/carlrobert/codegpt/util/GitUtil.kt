@@ -3,6 +3,7 @@ package ee.carlrobert.codegpt.util
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.vcs.VcsException
 import git4idea.GitCommit
 import git4idea.commands.Git
@@ -62,9 +63,10 @@ object GitUtil {
     }
 
     @Throws(VcsException::class)
+    @JvmStatic
     fun getProjectRepository(project: Project): GitRepository? {
         val repositoryManager = project.service<GitRepositoryManager>()
-        return repositoryManager.getRepositoryForFile(project.workspaceFile)
+        return repositoryManager.getRepositoryForFile(project.guessProjectDir())
             ?: repositoryManager.repositories.firstOrNull()
     }
 
