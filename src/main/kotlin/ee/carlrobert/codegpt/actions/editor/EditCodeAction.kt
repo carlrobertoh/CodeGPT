@@ -5,11 +5,16 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import ee.carlrobert.codegpt.Icons
 import ee.carlrobert.codegpt.ui.EditCodePopover
+import javax.swing.Icon
 
-class EditCodeAction : BaseEditorAction(Icons.Sparkle) {
+open class EditCodeAction(icon: Icon) : BaseEditorAction(icon) {
     override fun actionPerformed(project: Project, editor: Editor, selectedText: String) {
         runInEdt {
             EditCodePopover(editor).show()
         }
     }
 }
+
+class EditCodeFloatingMenuAction : EditCodeAction(Icons.DefaultSmall)
+
+class EditCodeContextMenuAction : EditCodeAction(Icons.Sparkle)

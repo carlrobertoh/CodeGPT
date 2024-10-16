@@ -31,7 +31,7 @@ interface CompletionRequestFactory {
 
 abstract class BaseRequestFactory : CompletionRequestFactory {
     override fun createEditCodeRequest(params: EditCodeRequestParameters): CompletionRequest {
-        val prompt = "${params.prompt}\n\n${params.selectedText}"
+        val prompt = "Code to modify:\n${params.selectedText}\n\nInstructions: ${params.prompt}"
         return createBasicCompletionRequest(EDIT_CODE_SYSTEM_PROMPT, prompt, 8192, true)
     }
 

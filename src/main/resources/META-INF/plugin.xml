@@ -99,9 +99,10 @@
                     <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift I" replace-all="true"/>
                 </action>
                 <action
-                  id="CodeGPT.EditCode"
+                  id="CodeGPT.ContextMenuEditCodeAction"
                   text="Edit Code"
-                  class="ee.carlrobert.codegpt.actions.editor.EditCodeAction">
+                  description="Edit code in natural language"
+                  class="ee.carlrobert.codegpt.actions.editor.EditCodeContextMenuAction">
                     <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift K" replace-all="true"/>
                 </action>
                 <action
