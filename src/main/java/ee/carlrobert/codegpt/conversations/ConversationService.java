@@ -2,7 +2,7 @@ package ee.carlrobert.codegpt.conversations;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
-import ee.carlrobert.codegpt.completions.CallParameters;
+import ee.carlrobert.codegpt.completions.ChatCompletionParameters;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
@@ -63,11 +63,11 @@ public final class ConversationService {
     conversationsMapping.put(conversation.getClientCode(), conversations);
   }
 
-  public void saveMessage(String response, CallParameters callParameters) {
+  public void saveMessage(String response, ChatCompletionParameters callParameters) {
     var conversation = callParameters.getConversation();
     var message = callParameters.getMessage();
     var conversationMessages = conversation.getMessages();
-    if (callParameters.isRetry() && !conversationMessages.isEmpty()) {
+    if (callParameters.getRetry() && !conversationMessages.isEmpty()) {
       var messageToBeSaved = conversationMessages.stream()
           .filter(item -> item.getId().equals(message.getId()))
           .findFirst().orElseThrow();

@@ -2,8 +2,7 @@ package ee.carlrobert.codegpt.completions.factory
 
 import com.intellij.openapi.components.service
 import ee.carlrobert.codegpt.completions.BaseRequestFactory
-import ee.carlrobert.codegpt.completions.CallParameters
-import ee.carlrobert.codegpt.completions.ChatCompletionRequestParameters
+import ee.carlrobert.codegpt.completions.ChatCompletionParameters
 import ee.carlrobert.codegpt.completions.CompletionRequestUtil.FIX_COMPILE_ERRORS_SYSTEM_PROMPT
 import ee.carlrobert.codegpt.completions.ConversationType
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
@@ -19,13 +18,12 @@ import java.util.*
 
 class OllamaRequestFactory : BaseRequestFactory() {
 
-    override fun createChatRequest(params: ChatCompletionRequestParameters): OllamaChatCompletionRequest {
-        val (callParameters) = params
+    override fun createChatRequest(params: ChatCompletionParameters): OllamaChatCompletionRequest {
         val configuration = service<ConfigurationSettings>().state
         val settings = service<OllamaSettings>().state
         return OllamaChatCompletionRequest.Builder(
             settings.model,
-            buildOllamaMessages(callParameters)
+            buildOllamaMessages(params)
         )
             .setStream(true)
             .setOptions(
@@ -54,11 +52,11 @@ class OllamaRequestFactory : BaseRequestFactory() {
             .build()
     }
 
-    private fun buildOllamaMessages(callParameters: CallParameters): List<OllamaChatCompletionMessage> {
-        val message = callParameters.message
+    private fun buildOllamaMessages(params: ChatCompletionParameters): List<OllamaChatCompletionMessage> {
+        val message = params.message
         val messages = mutableListOf<OllamaChatCompletionMessage>()
 
-        when (callParameters.conversationType) {
+        when (params.conversationType) {
             ConversationType.DEFAULT -> messages.add(
                 OllamaChatCompletionMessage("system", PersonaSettings.getSystemPrompt(), null)
             )
@@ -70,8 +68,8 @@ class OllamaRequestFactory : BaseRequestFactory() {
             else -> {}
         }
 
-        for (prevMessage in callParameters.conversation.messages) {
-            if (callParameters.isRetry && prevMessage.id == message.id) break
+        for (prevMessage in params.conversation.messages) {
+            if (params.retry && prevMessage.id == message.id) break
 
             prevMessage.imageFilePath?.takeIf { it.isNotEmpty() }?.let { imagePath ->
                 try {
@@ -91,7 +89,7 @@ class OllamaRequestFactory : BaseRequestFactory() {
                 messages.add(
                     OllamaChatCompletionMessage(
                         "user",
-                        getPromptWithFilesContext(callParameters),
+                        getPromptWithFilesContext(params),
                         null
                     )
                 )
@@ -100,8 +98,8 @@ class OllamaRequestFactory : BaseRequestFactory() {
             messages.add(OllamaChatCompletionMessage("assistant", prevMessage.response, null))
         }
 
-        if (callParameters.imageMediaType != null && callParameters.imageData.isNotEmpty()) {
-            val imageBase64 = Base64.getEncoder().encodeToString(callParameters.imageData)
+        if (params.imageMediaType != null && params.imageData != null) {
+            val imageBase64 = Base64.getEncoder().encodeToString(params.imageData)
             messages.add(OllamaChatCompletionMessage("user", message.prompt, listOf(imageBase64)))
         } else {
             messages.add(OllamaChatCompletionMessage("user", message.prompt, null))

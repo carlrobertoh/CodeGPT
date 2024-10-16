@@ -28,7 +28,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.Icons;
-import ee.carlrobert.codegpt.completions.CommitMessageRequestParameters;
+import ee.carlrobert.codegpt.completions.CommitMessageCompletionParameters;
 import ee.carlrobert.codegpt.completions.CompletionRequestService;
 import ee.carlrobert.codegpt.settings.configuration.CommitMessageTemplate;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
@@ -96,7 +96,7 @@ public class GenerateGitCommitMessageAction extends AnAction {
     if (editor != null) {
       ((EditorEx) editor).setCaretVisible(false);
       CompletionRequestService.getInstance().getCommitMessageAsync(
-          new CommitMessageRequestParameters(
+          new CommitMessageCompletionParameters(
               gitDiff,
               project.getService(CommitMessageTemplate.class).getSystemPrompt()),
           getEventListener(project, editor.getDocument()));

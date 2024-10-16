@@ -4,7 +4,7 @@ import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.components.service
 import ee.carlrobert.codegpt.CodeGPTPlugin
 import ee.carlrobert.codegpt.completions.BaseRequestFactory
-import ee.carlrobert.codegpt.completions.ChatCompletionRequestParameters
+import ee.carlrobert.codegpt.completions.ChatCompletionParameters
 import ee.carlrobert.codegpt.completions.factory.OpenAIRequestFactory.Companion.buildOpenAIMessages
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
 import ee.carlrobert.codegpt.settings.service.codegpt.CodeGPTServiceSettings
@@ -13,14 +13,13 @@ import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionSt
 
 class CodeGPTRequestFactory : BaseRequestFactory() {
 
-    override fun createChatRequest(params: ChatCompletionRequestParameters): ChatCompletionRequest {
-        val (callParameters) = params
+    override fun createChatRequest(params: ChatCompletionParameters): ChatCompletionRequest {
         val model = service<CodeGPTServiceSettings>().state.chatCompletionSettings.model
         val configuration = service<ConfigurationSettings>().state
         val requestBuilder: ChatCompletionRequest.Builder =
-            ChatCompletionRequest.Builder(buildOpenAIMessages(model, callParameters))
+            ChatCompletionRequest.Builder(buildOpenAIMessages(model, params))
                 .setModel(model)
-                .setSessionId(callParameters.sessionId)
+                .setSessionId(params.sessionId)
                 .setMetadata(
                     Metadata(
                         CodeGPTPlugin.getVersion(),
@@ -40,16 +39,16 @@ class CodeGPTRequestFactory : BaseRequestFactory() {
                 .setTemperature(configuration.temperature.toDouble())
         }
 
-        if (callParameters.message.isWebSearchIncluded) {
+        if (params.message.isWebSearchIncluded) {
             requestBuilder.setWebSearchIncluded(true)
         }
-        val documentationDetails = callParameters.message.documentationDetails
+        val documentationDetails = params.message.documentationDetails
         if (documentationDetails != null) {
             requestBuilder.setDocumentationDetails(
                 DocumentationDetails(documentationDetails.name, documentationDetails.url)
             )
         }
-        callParameters.referencedFiles?.let {
+        params.referencedFiles?.let {
             val fileContexts = it.map { file ->
                 ContextFile(file.fileName, file.fileContent)
             }
@@ -81,7 +80,7 @@ class CodeGPTRequestFactory : BaseRequestFactory() {
             .build()
     }
 
-    fun buildBasicO1Request(
+    private fun buildBasicO1Request(
         model: String,
         prompt: String,
         systemPrompt: String = "",

@@ -15,7 +15,7 @@ public class ToolwindowChatCompletionRequestHandler {
     this.completionResponseEventListener = completionResponseEventListener;
   }
 
-  public void call(CallParameters callParameters) {
+  public void call(ChatCompletionParameters callParameters) {
     try {
       eventSource = startCall(callParameters);
     } catch (TotalUsageExceededException e) {
@@ -33,11 +33,11 @@ public class ToolwindowChatCompletionRequestHandler {
     }
   }
 
-  private EventSource startCall(CallParameters callParameters) {
+  private EventSource startCall(ChatCompletionParameters callParameters) {
     try {
       var request = CompletionRequestFactory
           .getFactory(GeneralSettings.getSelectedService())
-          .createChatRequest(new ChatCompletionRequestParameters(callParameters));
+          .createChatRequest(callParameters);
       return CompletionRequestService.getInstance().getChatCompletionAsync(
           request,
           new ChatCompletionEventListener(callParameters, completionResponseEventListener));
@@ -57,7 +57,7 @@ public class ToolwindowChatCompletionRequestHandler {
     completionResponseEventListener.handleError(new ErrorDetails(errorMessage), ex);
   }
 
-  private void sendInfo(CallParameters callParameters) {
+  private void sendInfo(ChatCompletionParameters callParameters) {
     TelemetryAction.COMPLETION.createActionMessage()
         .property("conversationId", callParameters.getConversation().getId().toString())
         .property("model", callParameters.getConversation().getModel())

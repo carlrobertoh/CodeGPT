@@ -2,7 +2,7 @@ package ee.carlrobert.codegpt.completions.factory
 
 import com.intellij.openapi.components.service
 import ee.carlrobert.codegpt.completions.BaseRequestFactory
-import ee.carlrobert.codegpt.completions.ChatCompletionRequestParameters
+import ee.carlrobert.codegpt.completions.ChatCompletionParameters
 import ee.carlrobert.codegpt.completions.factory.OpenAIRequestFactory.Companion.buildOpenAIMessages
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest
@@ -10,12 +10,11 @@ import ee.carlrobert.llm.completion.CompletionRequest
 
 class AzureRequestFactory : BaseRequestFactory() {
 
-    override fun createChatRequest(params: ChatCompletionRequestParameters): OpenAIChatCompletionRequest {
+    override fun createChatRequest(params: ChatCompletionParameters): OpenAIChatCompletionRequest {
         val configuration = service<ConfigurationSettings>().state
-        val (callParameters) = params
         val requestBuilder: OpenAIChatCompletionRequest.Builder =
             OpenAIChatCompletionRequest.Builder(
-                buildOpenAIMessages(null, callParameters, callParameters.referencedFiles)
+                buildOpenAIMessages(null, params, params.referencedFiles)
             )
                 .setMaxTokens(configuration.maxTokens)
                 .setStream(true)

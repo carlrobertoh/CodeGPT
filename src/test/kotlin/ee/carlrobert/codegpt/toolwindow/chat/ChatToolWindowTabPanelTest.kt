@@ -59,7 +59,7 @@ class ChatToolWindowTabPanelTest : IntegrationTest() {
             )
         })
 
-        panel.sendMessage(message)
+        panel.sendMessage(message, ConversationType.DEFAULT)
 
         waitExpecting {
             val messages = conversation.messages
@@ -161,7 +161,7 @@ class ChatToolWindowTabPanelTest : IntegrationTest() {
             )
         })
 
-        panel.sendMessage(message)
+        panel.sendMessage(message, ConversationType.DEFAULT)
 
         waitExpecting {
             val messages = conversation.messages
@@ -250,7 +250,7 @@ class ChatToolWindowTabPanelTest : IntegrationTest() {
             )
         })
 
-        panel.sendMessage(message)
+        panel.sendMessage(message, ConversationType.DEFAULT)
 
         waitExpecting {
             val messages = conversation.messages
