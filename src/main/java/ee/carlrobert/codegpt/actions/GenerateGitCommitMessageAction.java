@@ -35,7 +35,9 @@ import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.codegpt.util.GitUtil;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.completion.CompletionEventListener;
-import git4idea.repo.GitRepositoryManager;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -54,7 +56,7 @@ public class GenerateGitCommitMessageAction extends AnAction {
     super(
         CodeGPTBundle.get("action.generateCommitMessage.title"),
         CodeGPTBundle.get("action.generateCommitMessage.description"),
-        Icons.Sparkle);
+        Icons.DefaultSmall);
     encodingManager = EncodingManager.getInstance();
   }
 
@@ -114,8 +116,7 @@ public class GenerateGitCommitMessageAction extends AnAction {
     try {
       return ApplicationManager.getApplication().executeOnPooledThread(() -> {
         try {
-          var repository = GitRepositoryManager.getInstance(project)
-              .getRepositoryForFile(project.getWorkspaceFile());
+          var repository = GitUtil.getProjectRepository(project);
           if (repository == null) {
             return "";
           }
