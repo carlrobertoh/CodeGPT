@@ -11,7 +11,6 @@ import ee.carlrobert.codegpt.codecompletions.psi.CompletionContextService
 import ee.carlrobert.codegpt.codecompletions.psi.readText
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
 import ee.carlrobert.codegpt.util.GitUtil
-import git4idea.repo.GitRepositoryManager
 
 object InfillRequestUtil {
     private val logger = thisLogger()
@@ -27,13 +26,11 @@ object InfillRequestUtil {
             )
         val project = request.editor.project ?: return infillRequestBuilder.build()
 
-        val repositoryManager = project.service<GitRepositoryManager>()
-        val gitRepository = repositoryManager.getRepositoryForFile(project.workspaceFile)
-            ?: repositoryManager.repositories.firstOrNull()
-        if (service<ConfigurationSettings>().state.autocompletionGitContextEnabled && gitRepository != null) {
+        val repository = GitUtil.getProjectRepository(project)
+        if (service<ConfigurationSettings>().state.autocompletionGitContextEnabled && repository != null) {
             try {
-                val stagedDiff = GitUtil.getStagedDiff(project, gitRepository)
-                val unstagedDiff = GitUtil.getUnstagedDiff(project, gitRepository)
+                val stagedDiff = GitUtil.getStagedDiff(project, repository)
+                val unstagedDiff = GitUtil.getUnstagedDiff(project, repository)
                 if (stagedDiff.isNotEmpty() || unstagedDiff.isNotEmpty()) {
                     infillRequestBuilder.vcsDetails(
                         InfillRequest.VcsDetails(
