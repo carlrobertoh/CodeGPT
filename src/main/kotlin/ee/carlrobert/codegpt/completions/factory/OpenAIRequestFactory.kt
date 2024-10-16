@@ -50,10 +50,11 @@ class OpenAIRequestFactory : CompletionRequestFactory {
 
     override fun createEditCodeRequest(params: EditCodeRequestParameters): OpenAIChatCompletionRequest {
         val model = service<OpenAISettings>().state.model
+        val prompt = "Code to modify:\n${params.selectedText}\n\nInstructions: ${params.prompt}"
         if (model == "o1-mini" || model == "o1-preview") {
-            return buildBasicO1Request(model, params.prompt, EDIT_CODE_SYSTEM_PROMPT)
+            return buildBasicO1Request(model, prompt, EDIT_CODE_SYSTEM_PROMPT)
         }
-        return createBasicCompletionRequest(EDIT_CODE_SYSTEM_PROMPT, params.prompt, model, true)
+        return createBasicCompletionRequest(EDIT_CODE_SYSTEM_PROMPT, prompt, model, true)
     }
 
     override fun createCommitMessageRequest(params: CommitMessageRequestParameters): OpenAIChatCompletionRequest {
