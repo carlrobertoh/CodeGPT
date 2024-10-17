@@ -237,8 +237,7 @@ public class ChatToolWindowTabPanel implements Disposable {
                 true,
                 false,
                 message.isWebSearchIncluded(),
-                message.getDocumentationDetails() != null,
-                fileContextIncluded,
+                fileContextIncluded || message.getDocumentationDetails() != null,
                 this));
   }
 
@@ -287,7 +286,7 @@ public class ChatToolWindowTabPanel implements Disposable {
   private void call(ChatCompletionParameters callParameters, ResponsePanel responsePanel) {
     var responseContainer = (ChatMessageResponseBody) responsePanel.getContent();
 
-    if (!CompletionRequestService.getInstance().isAllowed()) {
+    if (!CompletionRequestService.isRequestAllowed()) {
       responseContainer.displayMissingCredential();
       return;
     }

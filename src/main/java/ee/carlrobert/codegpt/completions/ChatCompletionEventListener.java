@@ -22,6 +22,11 @@ public class ChatCompletionEventListener implements CompletionEventListener<Stri
   }
 
   @Override
+  public void onOpen() {
+    eventListener.handleRequestOpen();
+  }
+
+  @Override
   public void onEvent(String data) {
     try {
       var event = new ObjectMapper().readValue(data, CodeGPTEvent.class);

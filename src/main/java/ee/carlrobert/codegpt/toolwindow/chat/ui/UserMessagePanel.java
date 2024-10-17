@@ -99,15 +99,7 @@ public class UserMessagePanel extends JPanel {
       Project project,
       String prompt,
       Disposable parentDisposable) {
-    return new ChatMessageResponseBody(
-        project,
-        null,
-        false,
-        true,
-        false,
-        false,
-        false,
-        parentDisposable)
+    return new ChatMessageResponseBody(project, null, false, true, false, false, parentDisposable)
         .withResponse(prompt);
   }
 
