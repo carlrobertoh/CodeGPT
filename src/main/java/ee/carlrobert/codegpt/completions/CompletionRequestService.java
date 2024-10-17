@@ -232,10 +232,6 @@ public final class CompletionRequestService {
     throw new IllegalStateException("Unknown request type: " + request.getClass());
   }
 
-  public boolean isAllowed() {
-    return isRequestAllowed();
-  }
-
   public static boolean isRequestAllowed() {
     return isRequestAllowed(GeneralSettings.getSelectedService());
   }
@@ -247,8 +243,9 @@ public final class CompletionRequestService {
           AzureSettings.getCurrentState().isUseAzureApiKeyAuthentication()
               ? CredentialKey.AZURE_OPENAI_API_KEY
               : CredentialKey.AZURE_ACTIVE_DIRECTORY_TOKEN);
-      case CODEGPT, CUSTOM_OPENAI, ANTHROPIC, LLAMA_CPP, OLLAMA -> true;
+      case ANTHROPIC -> CredentialsStore.INSTANCE.isCredentialSet(CredentialKey.ANTHROPIC_API_KEY);
       case GOOGLE -> CredentialsStore.INSTANCE.isCredentialSet(CredentialKey.GOOGLE_API_KEY);
+      case CODEGPT, CUSTOM_OPENAI, LLAMA_CPP, OLLAMA -> true;
     };
   }
 
