@@ -18,12 +18,15 @@ import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.TotalTokensPanel;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.codegpt.ui.textarea.UserInputPanel;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import javax.swing.Timer;
 
 abstract class ToolWindowCompletionResponseEventListener implements
     CompletionResponseEventListener {
 
   private static final Logger LOG = Logger.getInstance(
       ToolWindowCompletionResponseEventListener.class);
+  private static final int UPDATE_INTERVAL_MS = 8;
 
   private final StringBuilder messageBuilder = new StringBuilder();
   private final EncodingManager encodingManager;
@@ -33,7 +36,8 @@ abstract class ToolWindowCompletionResponseEventListener implements
   private final TotalTokensPanel totalTokensPanel;
   private final UserInputPanel textArea;
 
-  private volatile boolean completed;
+  private final Timer updateTimer = new Timer(UPDATE_INTERVAL_MS, e -> processBufferedMessages());
+  private final ConcurrentLinkedQueue<String> messageBuffer = new ConcurrentLinkedQueue<>();
 
   public ToolWindowCompletionResponseEventListener(
       ConversationService conversationService,
@@ -51,12 +55,19 @@ abstract class ToolWindowCompletionResponseEventListener implements
   public abstract void handleTokensExceededPolicyAccepted();
 
   @Override
+  public void handleRequestOpen() {
+    updateTimer.start();
+  }
+
+  @Override
   public void handleMessage(String partialMessage) {
     try {
       messageBuilder.append(partialMessage);
       var ongoingTokens = encodingManager.countTokens(messageBuilder.toString());
-      responseContainer.updateMessage(partialMessage);
-      totalTokensPanel.update(totalTokensPanel.getTokenDetails().getTotal() + ongoingTokens);
+      messageBuffer.offer(partialMessage);
+      ApplicationManager.getApplication().invokeLater(() ->
+          totalTokensPanel.update(totalTokensPanel.getTokenDetails().getTotal() + ongoingTokens)
+      );
     } catch (Exception e) {
       responseContainer.displayError("Something went wrong.");
       throw new RuntimeException("Error while updating the content", e);
@@ -122,8 +133,22 @@ abstract class ToolWindowCompletionResponseEventListener implements
     responseContainer.handleCodeGPTEvent(event);
   }
 
+  private void processBufferedMessages() {
+    if (messageBuffer.isEmpty()) {
+      return;
+    }
+
+    StringBuilder accumulatedMessage = new StringBuilder();
+    String message;
+    while ((message = messageBuffer.poll()) != null) {
+      accumulatedMessage.append(message);
+    }
+
+    responseContainer.updateMessage(accumulatedMessage.toString());
+  }
+
   private void stopStreaming(ChatMessageResponseBody responseContainer) {
-    completed = true;
+    updateTimer.stop();
     textArea.setSubmitEnabled(true);
     responseContainer.hideCaret();
   }

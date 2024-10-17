@@ -24,4 +24,7 @@ public interface CompletionResponseEventListener {
 
   default void handleCodeGPTEvent(CodeGPTEvent event) {
   }
+
+  default void handleRequestOpen() {
+  }
 }
