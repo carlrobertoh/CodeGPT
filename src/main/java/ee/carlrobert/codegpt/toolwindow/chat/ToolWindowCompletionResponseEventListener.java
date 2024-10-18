@@ -116,7 +116,6 @@ abstract class ToolWindowCompletionResponseEventListener implements
     ApplicationManager.getApplication().invokeLater(() -> {
       try {
         responsePanel.enableActions();
-        responseContainer.enableActions();
         if (!responseContainer.isResponseReceived() && !fullMessage.isEmpty()) {
           responseContainer.withResponse(fullMessage);
         }

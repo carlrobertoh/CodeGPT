@@ -48,7 +48,8 @@ object EditorDiffUtil {
                 mainDocumentContent.substring(endIndex)
     }
 
-    private fun createDiffRequest(
+    @JvmStatic
+    fun createDiffRequest(
         project: Project,
         tempFile: VirtualFile,
         mainEditor: Editor,

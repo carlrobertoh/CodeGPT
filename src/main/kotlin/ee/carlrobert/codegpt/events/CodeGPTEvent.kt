@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt.events
 
 import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
@@ -26,7 +27,8 @@ data class Event @JsonCreator constructor(
         ANALYZE_WEB_DOC_COMPLETED,
         ANALYZE_WEB_DOC_FAILED,
         PROCESS_CONTEXT,
-        WEB_SEARCH_ITEM
+        WEB_SEARCH_ITEM,
+        APPLY_RESPONSE_DIRECTLY
     }
 }
 
@@ -66,6 +68,21 @@ data class DefaultEventDetails(
     val description: String
 ) : EventDetails
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class ApplyResponseDirectlyEventDetails(
+    val name: String,
+    val arguments: Arguments,
+    val userInput: String,
+    val assistantResponse: String
+) : EventDetails {
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    data class Arguments @JsonCreator constructor(
+        @JsonProperty("question") val question: String,
+        @JsonProperty("followUpMessage") val followUpMessage: String,
+        @JsonProperty("applicable") val applicable: Boolean
+    )
+}
+
 class EventDeserializer : StdDeserializer<Event>(Event::class.java) {
     private val objectMapper = ObjectMapper().registerKotlinModule()
 
@@ -88,6 +105,10 @@ class EventDeserializer : StdDeserializer<Event>(Event::class.java) {
 
             EventType.PROCESS_CONTEXT -> {
                 objectMapper.treeToValue(detailsNode, ProcessContextEventDetails::class.java)
+            }
+
+            EventType.APPLY_RESPONSE_DIRECTLY -> {
+                objectMapper.treeToValue(detailsNode, ApplyResponseDirectlyEventDetails::class.java)
             }
 
             else -> {

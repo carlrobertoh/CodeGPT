@@ -15,6 +15,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.JBUI;
 import com.vladsch.flexmark.ast.FencedCodeBlock;
@@ -24,6 +25,7 @@ import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.actions.ActionType;
 import ee.carlrobert.codegpt.events.AnalysisCompletedEventDetails;
 import ee.carlrobert.codegpt.events.AnalysisFailedEventDetails;
+import ee.carlrobert.codegpt.events.ApplyResponseDirectlyEventDetails;
 import ee.carlrobert.codegpt.events.CodeGPTEvent;
 import ee.carlrobert.codegpt.events.EventDetails;
 import ee.carlrobert.codegpt.events.WebSearchEventDetails;
@@ -31,6 +33,7 @@ import ee.carlrobert.codegpt.settings.GeneralSettingsConfigurable;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.toolwindow.chat.StreamParser;
 import ee.carlrobert.codegpt.toolwindow.chat.editor.ResponseEditorPanel;
+import ee.carlrobert.codegpt.toolwindow.ui.ApplyChangesResponsePanel;
 import ee.carlrobert.codegpt.toolwindow.ui.ResponseBodyProgressPanel;
 import ee.carlrobert.codegpt.toolwindow.ui.WebpageList;
 import ee.carlrobert.codegpt.ui.UIUtil;
@@ -38,6 +41,7 @@ import ee.carlrobert.codegpt.util.EditorUtil;
 import ee.carlrobert.codegpt.util.MarkdownUtil;
 import java.awt.BorderLayout;
 import java.util.Objects;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JEditorPane;
@@ -95,14 +99,6 @@ public class ChatMessageResponseBody extends JPanel {
       prepareProcessingText(!readOnly);
       currentlyProcessedTextPane.setText(
           "<html><p style=\"margin-top: 4px; margin-bottom: 8px;\">&#8205;</p></html>");
-    }
-  }
-
-  public void enableActions() {
-    if (highlightedText != null
-        && !highlightedText.isEmpty()
-        && currentlyProcessedEditorPanel != null) {
-      currentlyProcessedEditorPanel.showEditorActions();
     }
   }
 
@@ -173,7 +169,7 @@ public class ChatMessageResponseBody extends JPanel {
           "<html><p style=\"margin-top: 4px; margin-bottom: 8px;\">%s</p></html>",
           message);
       if (responseReceived) {
-        add(createTextPane(errorText, false));
+        add(createTextPane(errorText));
       } else {
         currentlyProcessedTextPane.setText(errorText);
       }
@@ -269,12 +265,6 @@ public class ChatMessageResponseBody extends JPanel {
   }
 
   private void prepareProcessingText(boolean caretVisible) {
-    if (highlightedText != null
-        && !highlightedText.isEmpty()
-        && currentlyProcessedEditorPanel != null) {
-      currentlyProcessedEditorPanel.showEditorActions();
-    }
-
     currentlyProcessedEditorPanel = null;
     currentlyProcessedTextPane = createTextPane("", caretVisible);
     add(currentlyProcessedTextPane);
@@ -314,6 +304,27 @@ public class ChatMessageResponseBody extends JPanel {
     if (eventDetails instanceof AnalysisFailedEventDetails failedEventDetails) {
       progressPanel.updateProgressContainer(failedEventDetails.getError(), General.Error);
     }
+  }
+
+  private void showApplySuggestion(EventDetails eventDetails) {
+    if (eventDetails instanceof ApplyResponseDirectlyEventDetails applyDirectlyEventDetails) {
+      var arguments = applyDirectlyEventDetails.getArguments();
+      if (arguments.getApplicable()) {
+        var container = new JPanel();
+        container.setLayout(new BoxLayout(container, BoxLayout.PAGE_AXIS));
+        container.add(Box.createVerticalStrut(8));
+        container.add(JBUI.Panels.simplePanel()
+            .withBorder(JBUI.Borders.customLine(JBColor.border(), 1, 0, 0, 0)));
+        container.add(Box.createVerticalStrut(4));
+        container.add(new ResponsePanel(false)
+            .addContent(new ApplyChangesResponsePanel(project, applyDirectlyEventDetails)));
+        add(container);
+      }
+    }
+  }
+
+  private JTextPane createTextPane(String text) {
+    return createTextPane(text, false);
   }
 
   private JTextPane createTextPane(String text, boolean caretVisible) {

@@ -28,19 +28,15 @@ import com.intellij.ui.components.ActionLink;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.actions.toolwindow.ReplaceCodeInMainEditorAction;
-import ee.carlrobert.codegpt.toolwindow.chat.CompareWithOriginalActionLink;
-import ee.carlrobert.codegpt.toolwindow.chat.DirectApplyActionLink;
+import ee.carlrobert.codegpt.toolwindow.chat.editor.actions.AutoApplyAction;
 import ee.carlrobert.codegpt.toolwindow.chat.editor.actions.CopyAction;
 import ee.carlrobert.codegpt.toolwindow.chat.editor.actions.DiffAction;
 import ee.carlrobert.codegpt.toolwindow.chat.editor.actions.EditAction;
 import ee.carlrobert.codegpt.toolwindow.chat.editor.actions.InsertAtCaretAction;
 import ee.carlrobert.codegpt.toolwindow.chat.editor.actions.NewFileAction;
 import ee.carlrobert.codegpt.toolwindow.chat.editor.actions.ReplaceSelectionAction;
-import ee.carlrobert.codegpt.ui.IconActionButton;
 import ee.carlrobert.codegpt.util.EditorUtil;
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import javax.swing.Box;
 import javax.swing.JPanel;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -48,7 +44,6 @@ import org.jetbrains.annotations.Nullable;
 public class ResponseEditorPanel extends JPanel implements Disposable {
 
   private final Editor editor;
-  private final JPanel directLinksPanel = new JPanel(new FlowLayout(FlowLayout.TRAILING, 0, 0));
 
   public ResponseEditorPanel(
       Project project,
@@ -75,26 +70,14 @@ public class ResponseEditorPanel extends JPanel implements Disposable {
       }
     }
     configureEditor(
+        project,
         (EditorEx) editor,
         readOnly,
         new ContextMenuPopupHandler.Simple(group),
         findLanguageExtensionMapping(markdownLanguage).getValue());
     add(editor.getComponent(), BorderLayout.CENTER);
 
-    if (highlightedText != null && !highlightedText.isEmpty()) {
-      directLinksPanel.setVisible(false);
-      directLinksPanel.setBorder(JBUI.Borders.emptyTop(8));
-      directLinksPanel.add(new CompareWithOriginalActionLink(project, editor, highlightedText));
-      directLinksPanel.add(Box.createHorizontalStrut(12));
-      directLinksPanel.add(new DirectApplyActionLink(project, editor, highlightedText));
-      add(directLinksPanel, BorderLayout.SOUTH);
-    }
-
     Disposer.register(disposableParent, this);
-  }
-
-  public void showEditorActions() {
-    directLinksPanel.setVisible(true);
   }
 
   @Override
@@ -107,6 +90,7 @@ public class ResponseEditorPanel extends JPanel implements Disposable {
   }
 
   private void configureEditor(
+      Project project,
       EditorEx editorEx,
       boolean readOnly,
       ContextMenuPopupHandler popupHandler,
@@ -133,22 +117,28 @@ public class ResponseEditorPanel extends JPanel implements Disposable {
     editorEx.setVerticalScrollbarVisible(false);
     editorEx.getContentComponent().setBorder(JBUI.Borders.emptyLeft(4));
     editorEx.setBorder(IdeBorderFactory.createBorder(ColorUtil.fromHex("#48494b")));
-    editorEx.setPermanentHeaderComponent(createHeaderComponent(editorEx, extension, readOnly));
+    editorEx.setPermanentHeaderComponent(
+        createHeaderComponent(project, editorEx, extension, readOnly));
     editorEx.setHeaderComponent(null);
   }
 
-  private JPanel createHeaderComponent(EditorEx editorEx, String extension, boolean readOnly) {
-    var headerComponent = new JPanel(new BorderLayout());
-    headerComponent.setBorder(
+  private JPanel createHeaderComponent(
+      Project project,
+      EditorEx editorEx,
+      String extension,
+      boolean readOnly) {
+    var headerPanel = new JPanel(new BorderLayout());
+    headerPanel.setBorder(
         JBUI.Borders.compound(
             JBUI.Borders.customLine(ColorUtil.fromHex("#48494b"), 1, 1, 0, 1),
             JBUI.Borders.empty(4)));
-    headerComponent.add(createExpandLink(editorEx), BorderLayout.LINE_START);
+    headerPanel.add(createExpandLink(editorEx), BorderLayout.LINE_START);
     if (!readOnly) {
-      headerComponent.add(
-          createHeaderActions(extension, editorEx).getComponent(), BorderLayout.LINE_END);
+      headerPanel.add(
+          createHeaderActions(project, extension, editorEx, headerPanel).getComponent(),
+          BorderLayout.LINE_END);
     }
-    return headerComponent;
+    return headerPanel;
   }
 
   private String getLinkText(boolean expanded) {
@@ -178,20 +168,20 @@ public class ResponseEditorPanel extends JPanel implements Disposable {
     return expandLink;
   }
 
-  private ActionToolbar createHeaderActions(String extension, EditorEx editorEx) {
+  private ActionToolbar createHeaderActions(
+      Project project,
+      String extension,
+      EditorEx editorEx,
+      JPanel headerPanel) {
     var actionGroup = new DefaultCompactActionGroup("EDITOR_TOOLBAR_ACTION_GROUP", false);
-    actionGroup.add(new CopyAction(editor));
-    actionGroup.add(new ReplaceSelectionAction(editor));
-    actionGroup.add(new InsertAtCaretAction(editor));
+    actionGroup.add(new AutoApplyAction(project, editorEx, headerPanel));
+    actionGroup.add(new InsertAtCaretAction(editorEx));
+    actionGroup.add(new CopyAction(editorEx));
     actionGroup.addSeparator();
-
-    var wrapper = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-    wrapper.add(new IconActionButton(new CopyAction(editor)));
-    wrapper.add(Box.createHorizontalStrut(4));
-    wrapper.add(new IconActionButton(new ReplaceSelectionAction(editor)));
 
     var menu = new JBPopupMenu();
     menu.add(new JBMenuItem(new DiffAction(editorEx, menu.getLocation())));
+    menu.add(new JBMenuItem(new ReplaceSelectionAction(editorEx, menu.getLocation())));
     menu.add(new JBMenuItem(new EditAction(editorEx)));
     menu.add(new JBMenuItem(new NewFileAction(editorEx, extension)));
 

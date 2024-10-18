@@ -68,8 +68,7 @@ object EditorUtil {
 
     @JvmStatic
     fun getSelectedEditor(project: Project): Editor? {
-        val editorManager = FileEditorManager.getInstance(project)
-        return editorManager?.selectedTextEditor
+        return FileEditorManager.getInstance(project)?.selectedTextEditor
     }
 
     @JvmStatic
