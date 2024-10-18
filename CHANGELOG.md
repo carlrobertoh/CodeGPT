@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Edit Code request building [#737](https://github.com/carlrobertoh/CodeGPT/issues/737) (OpenAI)
+- Chat UI performance issues
+- Minor issues related to git repository lookup
+
 ## [2.11.6-223] - 2024-10-15
 
 ### Fixed
