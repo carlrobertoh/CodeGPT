@@ -24,13 +24,9 @@ public class ResponsePanel extends JPanel {
   private final Body body;
 
   public ResponsePanel() {
-    this(true);
-  }
-
-  public ResponsePanel(boolean withBorder) {
     super(new BorderLayout());
-    header = new Header(withBorder);
-    body = new Body(withBorder);
+    header = new Header();
+    body = new Body();
     add(header, BorderLayout.NORTH);
     add(body, BorderLayout.CENTER);
   }
@@ -66,13 +62,9 @@ public class ResponsePanel extends JPanel {
 
     private final JPanel iconsWrapper;
 
-    Header(boolean withBorder) {
+    Header() {
       super(new BorderLayout());
-      if (withBorder) {
-        setBorder(JBUI.Borders.empty(12, 8, 4, 8));
-      } else {
-        setBorder(JBUI.Borders.empty(12, 0, 4, 0));
-      }
+      setBorder(JBUI.Borders.empty(12, 8, 4, 8));
       add(getIconLabel(), BorderLayout.LINE_START);
 
       iconsWrapper = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
@@ -134,13 +126,9 @@ public class ResponsePanel extends JPanel {
 
     private @Nullable JComponent content;
 
-    Body(boolean withHorizontalMargin) {
+    Body() {
       super(new BorderLayout());
-      if (withHorizontalMargin) {
-        setBorder(JBUI.Borders.empty(4, 8));
-      } else {
-        setBorder(JBUI.Borders.empty(4, 0));
-      }
+      setBorder(JBUI.Borders.empty(4, 8));
     }
 
     public void addContent(JComponent content) {

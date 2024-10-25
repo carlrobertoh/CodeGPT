@@ -11,7 +11,6 @@ import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
-import com.intellij.openapi.actionSystem.DefaultCompactActionGroup;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.EditorFactory;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
@@ -173,7 +172,7 @@ public class ResponseEditorPanel extends JPanel implements Disposable {
       String extension,
       EditorEx editorEx,
       JPanel headerPanel) {
-    var actionGroup = new DefaultCompactActionGroup("EDITOR_TOOLBAR_ACTION_GROUP", false);
+    var actionGroup = new DefaultActionGroup("EDITOR_TOOLBAR_ACTION_GROUP", false);
     actionGroup.add(new AutoApplyAction(project, editorEx, headerPanel));
     actionGroup.add(new InsertAtCaretAction(editorEx));
     actionGroup.add(new CopyAction(editorEx));

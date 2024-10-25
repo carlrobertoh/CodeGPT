@@ -26,15 +26,6 @@ class ResponseBodyProgressPanel : JPanel() {
         border = JBUI.Borders.empty(4, 0, 8, 0)
     }
 
-    fun updateProgressContainer(component: JComponent) {
-        runInEdt {
-            removeAll()
-            add(component)
-            revalidate()
-            repaint()
-        }
-    }
-
     fun updateProgressContainer(text: String, icon: Icon?) {
         runInEdt {
             removeAll()
