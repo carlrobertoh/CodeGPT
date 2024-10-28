@@ -6,6 +6,7 @@ import com.intellij.diff.editor.ChainDiffVirtualFile
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.actionSystem.Presentation
 import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
@@ -20,6 +21,7 @@ import com.intellij.ui.components.ActionLink
 import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.JBUI
 import ee.carlrobert.codegpt.CodeGPTBundle
+import ee.carlrobert.codegpt.EncodingManager
 import ee.carlrobert.codegpt.Icons
 import ee.carlrobert.codegpt.actions.ActionType
 import ee.carlrobert.codegpt.actions.TrackableAction
@@ -55,15 +57,10 @@ class AutoApplyAction(
 
     override fun update(e: AnActionEvent) {
         val isCodeGPTSelected = GeneralSettings.getSelectedService() == ServiceType.CODEGPT
-
-        e.presentation.apply {
-            isEnabled = isCodeGPTSelected
-            icon = if (isCodeGPTSelected) Icons.Lightning else Icons.LightningDisabled
-            text = if (isCodeGPTSelected) {
-                CodeGPTBundle.get("toolwindow.chat.editor.action.autoApply.title")
-            } else {
-                CodeGPTBundle.get("toolwindow.chat.editor.action.autoApply.disabledTitle")
-            }
+        if (isCodeGPTSelected) {
+            validateAndUpdatePresentation(e)
+        } else {
+            e.presentation.disableAction(CodeGPTBundle.get("toolwindow.chat.editor.action.autoApply.disabledTitle"))
         }
     }
 
@@ -77,8 +74,10 @@ class AutoApplyAction(
 
         headerPanel.getComponent(1).isVisible = false
 
-        val acceptLink = createDisabledActionLink("Accept")
-        val rejectLink = createDisabledActionLink("Reject")
+        val acceptLink =
+            createDisabledActionLink(CodeGPTBundle.get("toolwindow.chat.editor.action.autoApply.accept"))
+        val rejectLink =
+            createDisabledActionLink(CodeGPTBundle.get("toolwindow.chat.editor.action.autoApply.reject"))
 
         val actionsPanel = JPanel(FlowLayout(FlowLayout.TRAILING, 8, 0)).apply {
             border = JBUI.Borders.empty(4, 0)
@@ -103,7 +102,10 @@ class AutoApplyAction(
                     val errorMessage = if (it is CodeGPTException) {
                         it.detail
                     } else {
-                        "Something went wrong while applying changes. ${it.message}"
+                        CodeGPTBundle.get(
+                            "toolwindow.chat.editor.action.autoApply.error",
+                            it.message
+                        )
                     }
                     OverlayUtil.showNotification(errorMessage, NotificationType.ERROR)
                     resetState(mainEditor, actionsPanel)
@@ -113,6 +115,33 @@ class AutoApplyAction(
 
     override fun getActionUpdateThread(): ActionUpdateThread {
         return ActionUpdateThread.EDT
+    }
+
+    private fun validateAndUpdatePresentation(e: AnActionEvent) {
+        val activeEditor = e.project?.let { getSelectedEditor(project) }
+        if (activeEditor == null) {
+            e.presentation.disableAction(CodeGPTBundle.get("toolwindow.chat.editor.action.autoApply.noActiveFile"))
+            return
+        }
+
+        val fileTokenCount = service<EncodingManager>().countTokens(activeEditor.document.text)
+        if (fileTokenCount > 4096) {
+            e.presentation.disableAction(CodeGPTBundle.get("toolwindow.chat.editor.action.autoApply.fileTooLarge"))
+        } else {
+            e.presentation.enableAction()
+        }
+    }
+
+    private fun Presentation.disableAction(disabledText: String) {
+        isEnabled = false
+        icon = Icons.LightningDisabled
+        text = disabledText
+    }
+
+    private fun Presentation.enableAction() {
+        isEnabled = true
+        icon = Icons.Lightning
+        text = CodeGPTBundle.get("toolwindow.chat.editor.action.autoApply.title")
     }
 
     private fun JButton.setupLink(
@@ -171,12 +200,16 @@ internal class ApplyChangesBackgroundTask(
     private val request: AutoApplyRequest,
     private val onSuccess: (modifiedFileContent: String) -> Unit,
     private val onFailure: (ex: Exception) -> Unit,
-) : Task.Backgroundable(project, "Apply changes", true) {
+) : Task.Backgroundable(
+    project,
+    CodeGPTBundle.get("toolwindow.chat.editor.action.autoApply.taskTitle"),
+    true
+) {
 
     override fun run(indicator: ProgressIndicator) {
         indicator.isIndeterminate = false
         indicator.fraction = 1.0
-        indicator.text = "CodeGPT: Applying changes"
+        indicator.text = CodeGPTBundle.get("toolwindow.chat.editor.action.autoApply.loadingMessage")
 
         try {
             val modifiedFileContent = CompletionClientProvider.getCodeGPTClient()
