@@ -100,11 +100,8 @@ class DebouncedCodeCompletionProvider : DebouncedInlineCompletionProvider() {
             ServiceType.GOOGLE,
             null -> false
         }
-        val containsActiveCompletion =
-            REMAINING_EDITOR_COMPLETION.get(event.toRequest()?.editor)?.isNotEmpty() ?: false
 
-        return (event is InlineCompletionEvent.DocumentChange && codeCompletionsEnabled)
-                || containsActiveCompletion
+        return event is InlineCompletionEvent.DocumentChange && codeCompletionsEnabled
     }
 
     private fun ProducerScope<InlineCompletionElement>.getEventListener(
