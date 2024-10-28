@@ -128,7 +128,7 @@ public class ResponsePanel extends JPanel {
 
     Body() {
       super(new BorderLayout());
-      setBorder(JBUI.Borders.empty(4, 8, 8, 8));
+      setBorder(JBUI.Borders.empty(4, 8));
     }
 
     public void addContent(JComponent content) {

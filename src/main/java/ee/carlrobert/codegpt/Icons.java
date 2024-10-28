@@ -27,6 +27,9 @@ public final class Icons {
   public static final Icon Ollama = IconLoader.getIcon("/icons/ollama.svg", Icons.class);
   public static final Icon User = IconLoader.getIcon("/icons/user.svg", Icons.class);
   public static final Icon Upload = IconLoader.getIcon("/icons/upload.svg", Icons.class);
+  public static final Icon Lightning = IconLoader.getIcon("/icons/lightning.svg", Icons.class);
+  public static final Icon LightningDisabled =
+      IconLoader.getIcon("/icons/lightning.svg", Icons.class);
   public static final Icon GreenCheckmark =
       IconLoader.getIcon("/icons/greenCheckmark.svg", Icons.class);
   public static final Icon SendToTheLeft =

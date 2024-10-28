@@ -9,6 +9,7 @@ import com.intellij.util.ui.JBUI
 import ee.carlrobert.codegpt.Icons
 import ee.carlrobert.codegpt.events.EventDetails
 import ee.carlrobert.codegpt.events.ProcessContextEventDetails
+import ee.carlrobert.codegpt.util.MarkdownUtil.convertMdToHtml
 import java.awt.FlowLayout
 import javax.swing.*
 
@@ -22,21 +23,27 @@ class ResponseBodyProgressPanel : JPanel() {
 
     init {
         layout = BoxLayout(this, BoxLayout.Y_AXIS)
-        border = JBUI.Borders.emptyBottom(8)
+        border = JBUI.Borders.empty(4, 0, 8, 0)
     }
 
     fun updateProgressContainer(text: String, icon: Icon?) {
         runInEdt {
             removeAll()
-            val wrapper: JComponent
-            if (icon != null) {
-                wrapper = JBLabel(text, icon, SwingConstants.LEADING)
-                wrapper.horizontalTextPosition = SwingConstants.LEADING
+            val wrapper = if (icon != null) {
+                JBLabel(
+                    "<html>" + convertMdToHtml(text) + "</html>",
+                    icon,
+                    SwingConstants.LEADING
+                ).apply {
+                    horizontalAlignment = SwingConstants.LEFT
+                    horizontalTextPosition = SwingConstants.RIGHT
+                }
             } else {
-                wrapper = JPanel(FlowLayout(FlowLayout.LEADING, 0, 0))
-                wrapper.add(JBLabel(text))
-                wrapper.add(Box.createHorizontalStrut(4))
-                wrapper.add(processSpinner)
+                JPanel(FlowLayout(FlowLayout.LEADING, 0, 0)).apply {
+                    add(JBLabel("<html>" + convertMdToHtml(text) + "</html>"))
+                    add(Box.createHorizontalStrut(4))
+                    add(processSpinner)
+                }
             }
             add(JBUI.Panels.simplePanel(wrapper))
             revalidate()

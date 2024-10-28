@@ -3,36 +3,41 @@ package ee.carlrobert.codegpt.toolwindow.chat.editor.actions;
 import static java.util.Objects.requireNonNull;
 
 import com.intellij.icons.AllIcons.Actions;
-import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.ex.EditorEx;
 import ee.carlrobert.codegpt.CodeGPTBundle;
-import ee.carlrobert.codegpt.actions.ActionType;
-import ee.carlrobert.codegpt.actions.TrackableAction;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.codegpt.util.EditorUtil;
+import java.awt.Point;
+import java.awt.event.ActionEvent;
+import javax.swing.AbstractAction;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public class ReplaceSelectionAction extends TrackableAction {
+public class ReplaceSelectionAction extends AbstractAction {
 
-  public ReplaceSelectionAction(@NotNull Editor editor) {
+  private final @NotNull EditorEx toolwindowEditor;
+  private final Point locationOnScreen;
+
+  public ReplaceSelectionAction(
+      @NotNull EditorEx toolwindowEditor,
+      @Nullable Point locationOnScreen) {
     super(
-        editor,
         CodeGPTBundle.get("toolwindow.chat.editor.action.replaceSelection.title"),
-        CodeGPTBundle.get("toolwindow.chat.editor.action.replaceSelection.description"),
-        Actions.Replace,
-        ActionType.REPLACE_IN_MAIN_EDITOR);
+        Actions.Replace);
+    this.toolwindowEditor = toolwindowEditor;
+    this.locationOnScreen = locationOnScreen;
   }
 
   @Override
-  public void handleAction(@NotNull AnActionEvent event) {
-    var project = requireNonNull(event.getProject());
+  public void actionPerformed(ActionEvent event) {
+    var project = requireNonNull(toolwindowEditor.getProject());
     if (EditorUtil.isMainEditorTextSelected(project)) {
       var mainEditor = EditorUtil.getSelectedEditor(project);
       if (mainEditor != null) {
-        EditorUtil.replaceEditorSelection(mainEditor, editor.getDocument().getText());
+        EditorUtil.replaceEditorSelection(mainEditor, toolwindowEditor.getDocument().getText());
       }
     } else {
-      OverlayUtil.showSelectedEditorSelectionWarning(event);
+      OverlayUtil.showSelectedEditorSelectionWarning(project, locationOnScreen);
     }
   }
 }

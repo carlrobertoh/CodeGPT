@@ -98,14 +98,6 @@ public class ChatMessageResponseBody extends JPanel {
     }
   }
 
-  public void enableActions() {
-    if (highlightedText != null
-        && !highlightedText.isEmpty()
-        && currentlyProcessedEditorPanel != null) {
-      currentlyProcessedEditorPanel.showEditorActions();
-    }
-  }
-
   public ChatMessageResponseBody withResponse(String response) {
     try {
       for (var message : MarkdownUtil.splitCodeBlocks(response)) {
@@ -173,7 +165,7 @@ public class ChatMessageResponseBody extends JPanel {
           "<html><p style=\"margin-top: 4px; margin-bottom: 8px;\">%s</p></html>",
           message);
       if (responseReceived) {
-        add(createTextPane(errorText, false));
+        add(createTextPane(errorText));
       } else {
         currentlyProcessedTextPane.setText(errorText);
       }
@@ -269,12 +261,6 @@ public class ChatMessageResponseBody extends JPanel {
   }
 
   private void prepareProcessingText(boolean caretVisible) {
-    if (highlightedText != null
-        && !highlightedText.isEmpty()
-        && currentlyProcessedEditorPanel != null) {
-      currentlyProcessedEditorPanel.showEditorActions();
-    }
-
     currentlyProcessedEditorPanel = null;
     currentlyProcessedTextPane = createTextPane("", caretVisible);
     add(currentlyProcessedTextPane);
@@ -314,6 +300,10 @@ public class ChatMessageResponseBody extends JPanel {
     if (eventDetails instanceof AnalysisFailedEventDetails failedEventDetails) {
       progressPanel.updateProgressContainer(failedEventDetails.getError(), General.Error);
     }
+  }
+
+  private JTextPane createTextPane(String text) {
+    return createTextPane(text, false);
   }
 
   private JTextPane createTextPane(String text, boolean caretVisible) {

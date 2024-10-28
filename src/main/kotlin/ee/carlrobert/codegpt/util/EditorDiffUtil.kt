@@ -32,7 +32,7 @@ object EditorDiffUtil {
             createTempDiffContent(mainEditor, toolwindowEditor, highlightedText)
         )
         DiffManager.getInstance()
-            .showDiff(project, createDiffRequest(project, tempFile, mainEditor, mainEditorFile))
+            .showDiff(project, createDiffRequest(project, tempFile, mainEditor))
     }
 
     private fun createTempDiffContent(
@@ -48,11 +48,11 @@ object EditorDiffUtil {
                 mainDocumentContent.substring(endIndex)
     }
 
-    private fun createDiffRequest(
+    @JvmStatic
+    fun createDiffRequest(
         project: Project,
         tempFile: VirtualFile,
         mainEditor: Editor,
-        mainEditorFile: VirtualFile
     ): SimpleDiffRequest {
         val diffContentFactory = DiffContentFactory.getInstance()
         val tempFileDiffContent = diffContentFactory.create(project, tempFile).apply {
@@ -61,9 +61,9 @@ object EditorDiffUtil {
 
         return SimpleDiffRequest(
             CodeGPTBundle.get("editor.diff.title"),
-            diffContentFactory.create(project, mainEditorFile),
+            diffContentFactory.create(project, mainEditor.virtualFile),
             tempFileDiffContent,
-            mainEditorFile.name,
+            mainEditor.virtualFile.name,
             CodeGPTBundle.get("editor.diff.local.content.title")
         ).apply {
             putUserData(

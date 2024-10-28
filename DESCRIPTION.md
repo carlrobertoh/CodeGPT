@@ -26,6 +26,10 @@ CodeGPT offers a wide range of features to enhance your development experience:
 
 Get instant coding advice through a ChatGPT-like interface that accepts image input. Ask questions, share screenshots, seek explanations, or get guidance on your projects without leaving your IDE.
 
+### Auto Apply
+
+Automatically insert AI-suggested code directly into your active file. Click the Auto Apply icon to stream changes, view them in diff style, and approve or reject edits directly.
+
 **Use images**
 
 Chat with your images. Upload manually or let CodeGPT auto-detect your screenshots.
