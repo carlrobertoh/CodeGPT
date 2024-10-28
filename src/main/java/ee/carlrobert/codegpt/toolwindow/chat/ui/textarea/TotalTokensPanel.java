@@ -1,9 +1,11 @@
 package ee.carlrobert.codegpt.toolwindow.chat.ui.textarea;
 
+import static com.intellij.openapi.editor.EditorKind.MAIN_EDITOR;
 import static java.lang.String.format;
 
 import com.intellij.icons.AllIcons.General;
 import com.intellij.openapi.Disposable;
+import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.EditorFactory;
 import com.intellij.openapi.editor.event.EditorFactoryEvent;
 import com.intellij.openapi.editor.event.EditorFactoryListener;
@@ -65,14 +67,21 @@ public class TotalTokensPanel extends JPanel {
   private void addSelectionListeners(Disposable parentDisposable) {
     var editorFactory = EditorFactory.getInstance();
     for (var editor : editorFactory.getAllEditors()) {
-      editor.getSelectionModel().addSelectionListener(getSelectionListener());
+      addEditorSelectionListener(editor);
     }
+
     editorFactory.addEditorFactoryListener(new EditorFactoryListener() {
       @Override
       public void editorCreated(@NotNull EditorFactoryEvent event) {
-        event.getEditor().getSelectionModel().addSelectionListener(getSelectionListener());
+        addEditorSelectionListener(event.getEditor());
       }
     }, parentDisposable);
+  }
+
+  private void addEditorSelectionListener(Editor editor) {
+    if (MAIN_EDITOR.equals(editor.getEditorKind())) {
+      editor.getSelectionModel().addSelectionListener(getSelectionListener());
+    }
   }
 
   private SelectionListener getSelectionListener() {
@@ -96,13 +105,9 @@ public class TotalTokensPanel extends JPanel {
     label.setText(getLabelHtml(total));
   }
 
-  public void updateConversationTokens(int total) {
-    totalTokensDetails.setConversationTokens(total);
-    update();
-  }
-
   public void updateConversationTokens(Conversation conversation) {
-    updateConversationTokens(encodingManager.countConversationTokens(conversation));
+    totalTokensDetails.setConversationTokens(encodingManager.countConversationTokens(conversation));
+    update();
   }
 
   public void updateUserPromptTokens(String userPrompt) {
@@ -170,7 +175,7 @@ public class TotalTokensPanel extends JPanel {
           %s
           <p style="margin-top: 8px;">
           <small>
-          <strong>Note:</strong> Output values might vary across different large language models 
+          <strong>Note:</strong> Output values might vary across different large language models
           due to variations in their encoding methods.
           </small>
           </p>
