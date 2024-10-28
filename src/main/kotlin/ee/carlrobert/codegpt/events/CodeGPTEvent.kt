@@ -26,7 +26,7 @@ data class Event @JsonCreator constructor(
         ANALYZE_WEB_DOC_COMPLETED,
         ANALYZE_WEB_DOC_FAILED,
         PROCESS_CONTEXT,
-        WEB_SEARCH_ITEM
+        WEB_SEARCH_ITEM,
     }
 }
 
