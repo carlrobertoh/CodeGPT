@@ -17,13 +17,15 @@ import org.jetbrains.annotations.Nullable;
 
 public class InsertAtCaretAction extends TrackableAction {
 
-  public InsertAtCaretAction(@NotNull Editor editor) {
+  private final @NotNull Editor toolwindowEditor;
+
+  public InsertAtCaretAction(@NotNull Editor toolwindowEditor) {
     super(
-        editor,
         CodeGPTBundle.get("toolwindow.chat.editor.action.insertAtCaret.title"),
         CodeGPTBundle.get("toolwindow.chat.editor.action.insertAtCaret.description"),
         Icons.SendToTheLeft,
         ActionType.INSERT_AT_CARET);
+    this.toolwindowEditor = toolwindowEditor;
   }
 
   @Override
@@ -48,7 +50,7 @@ public class InsertAtCaretAction extends TrackableAction {
 
   @Nullable
   private Editor getSelectedTextEditor() {
-    return Optional.ofNullable(editor.getProject())
+    return Optional.ofNullable(toolwindowEditor.getProject())
         .map(FileEditorManager::getInstance)
         .map(FileEditorManager::getSelectedTextEditor)
         .orElse(null);
@@ -58,7 +60,7 @@ public class InsertAtCaretAction extends TrackableAction {
     runUndoTransparentWriteAction(() -> {
       mainEditor.getDocument().insertString(
           mainEditor.getCaretModel().getOffset(),
-          editor.getDocument().getText());
+          toolwindowEditor.getDocument().getText());
       return null;
     });
   }

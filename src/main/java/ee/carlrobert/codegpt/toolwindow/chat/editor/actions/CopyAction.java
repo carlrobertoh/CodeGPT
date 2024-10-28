@@ -15,18 +15,20 @@ import org.jetbrains.annotations.NotNull;
 
 public class CopyAction extends TrackableAction {
 
-  public CopyAction(@NotNull Editor editor) {
+  private final @NotNull Editor toolwindowEditor;
+
+  public CopyAction(@NotNull Editor toolwindowEditor) {
     super(
-        editor,
         CodeGPTBundle.get("toolwindow.chat.editor.action.copy.title"),
         CodeGPTBundle.get("toolwindow.chat.editor.action.copy.description"),
         Actions.Copy,
         ActionType.COPY_CODE);
+    this.toolwindowEditor = toolwindowEditor;
   }
 
   @Override
   public void handleAction(@NotNull AnActionEvent event) {
-    StringSelection stringSelection = new StringSelection(editor.getDocument().getText());
+    StringSelection stringSelection = new StringSelection(toolwindowEditor.getDocument().getText());
     Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
     clipboard.setContents(stringSelection, null);
 
@@ -36,8 +38,8 @@ public class CopyAction extends TrackableAction {
       locationOnScreen.y = locationOnScreen.y - 16;
 
       OverlayUtil.showInfoBalloon(
-              CodeGPTBundle.get("toolwindow.chat.editor.action.copy.success"),
-              locationOnScreen);
+          CodeGPTBundle.get("toolwindow.chat.editor.action.copy.success"),
+          locationOnScreen);
     }
   }
 }

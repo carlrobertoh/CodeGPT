@@ -19,7 +19,7 @@ public class DiffAction extends AbstractAction {
   private final Point locationOnScreen;
 
   public DiffAction(EditorEx editor, @Nullable Point locationOnScreen) {
-    super("Diff", Actions.DiffWithClipboard);
+    super("Diff Selection", Actions.DiffWithClipboard);
     this.editor = editor;
     this.locationOnScreen = locationOnScreen;
   }
@@ -28,7 +28,7 @@ public class DiffAction extends AbstractAction {
   public void actionPerformed(ActionEvent event) {
     var project = requireNonNull(editor.getProject());
     var mainEditor = FileEditorManager.getInstance(project).getSelectedTextEditor();
-    if (mainEditor != null && !EditorUtil.hasSelection(mainEditor) && locationOnScreen != null) {
+    if (mainEditor == null || !EditorUtil.hasSelection(mainEditor)) {
       OverlayUtil.showSelectedEditorSelectionWarning(project, locationOnScreen);
       return;
     }
@@ -36,6 +36,6 @@ public class DiffAction extends AbstractAction {
     EditorDiffUtil.showDiff(
         project,
         editor,
-        mainEditor.getSelectionModel().getSelectedText());
+        requireNonNull(mainEditor.getSelectionModel().getSelectedText()));
   }
 }
