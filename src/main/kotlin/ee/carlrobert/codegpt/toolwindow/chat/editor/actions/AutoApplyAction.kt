@@ -181,7 +181,7 @@ class AutoApplyAction(
     private fun resetState(mainEditor: Editor, actionsPanel: JPanel) {
         headerPanel.remove(actionsPanel)
         headerPanel.getComponent(1).isVisible = true
-        val fileEditorManager = project.service<FileEditorManager>()
+        val fileEditorManager = FileEditorManager.getInstance(project)
         fileEditorManager.openFile((mainEditor as EditorEx).virtualFile, true)
 
         val diffFile = fileEditorManager.openFiles.firstOrNull {
