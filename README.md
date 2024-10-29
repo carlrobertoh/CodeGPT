@@ -54,6 +54,8 @@ CodeGPT offers a wide range of features to enhance your development experience:
 
 ### Chat
 
+- **Auto Apply:** Stream AI-suggested code changes directly into your editor. Preview modifications in diff view and approve or reject them with a single click.
+
 - **Use images:** Chat with your images. Upload manually or let CodeGPT auto-detect your screenshots. 
 
 - **Reference your files and folders:** Quickly access and reference your project files and folders for context-aware coding assistance.
