@@ -8,6 +8,7 @@ import com.intellij.diff.util.DiffUtil
 import com.intellij.diff.util.Side
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
@@ -61,7 +62,7 @@ object EditorDiffUtil {
 
         return SimpleDiffRequest(
             CodeGPTBundle.get("editor.diff.title"),
-            diffContentFactory.create(project, mainEditor.virtualFile),
+            diffContentFactory.create(project, (mainEditor as EditorEx).virtualFile),
             tempFileDiffContent,
             mainEditor.virtualFile.name,
             CodeGPTBundle.get("editor.diff.local.content.title")

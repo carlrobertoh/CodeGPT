@@ -10,6 +10,7 @@ import com.intellij.openapi.actionSystem.Presentation
 import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
@@ -159,7 +160,8 @@ class AutoApplyAction(
     private fun showDiff(mainEditor: Editor, modifiedFileContent: String) {
         diffRequestId = UUID.randomUUID()
 
-        val tempDiffFile = LightVirtualFile(mainEditor.virtualFile.name, modifiedFileContent)
+        val tempDiffFile =
+            LightVirtualFile((mainEditor as EditorEx).virtualFile.name, modifiedFileContent)
         val diffRequest = createDiffRequest(project, tempDiffFile, mainEditor).apply {
             putUserData(DIFF_REQUEST_KEY, diffRequestId.toString())
         }
@@ -180,7 +182,7 @@ class AutoApplyAction(
         headerPanel.remove(actionsPanel)
         headerPanel.getComponent(1).isVisible = true
         val fileEditorManager = project.service<FileEditorManager>()
-        fileEditorManager.openFile(mainEditor.virtualFile, true)
+        fileEditorManager.openFile((mainEditor as EditorEx).virtualFile, true)
 
         val diffFile = fileEditorManager.openFiles.firstOrNull {
             it is ChainDiffVirtualFile && it.chain.requests
