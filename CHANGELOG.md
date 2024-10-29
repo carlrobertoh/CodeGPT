@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- 'Auto Apply' feature for instant AI-suggested code updates [#743](https://github.com/carlrobertoh/CodeGPT/issues/743) (CodeGPT)
+
+### Fixed
+
+- Code completion enabled/disabled state
+- Total token calculation for highlighted texts
+
 ## [2.11.7-233] - 2024-10-18
 
 ### Fixed
