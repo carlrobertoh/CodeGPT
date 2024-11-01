@@ -24,7 +24,7 @@ enum class CustomServiceCodeCompletionTemplate(
     FIREWORKS(
         "https://api.fireworks.ai/inference/v1/completions",
         getDefaultHeadersWithAuthentication(),
-        getDefaultBodyParams(mapOf("model" to "accounts/fireworks/models/starcoder-16b"))
+        getDefaultBodyParams(mapOf("model" to "accounts/fireworks/models/starcoder-7b"))
     ),
     OPENAI(
         "https://api.openai.com/v1/completions",
