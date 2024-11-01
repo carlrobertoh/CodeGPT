@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.12.1-233] - 2024-11-01
+
 ### Added
 
 - Gemini 1.5 Pro model (CodeGPT)
@@ -716,7 +718,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `OPENAI_API_KEY` persistence, key is saved in the OS password safe from now on
 
-[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.12.0-233...HEAD
+[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.12.1-233...HEAD
+[2.12.1-233]: https://github.com/carlrobertoh/CodeGPT/compare/v2.12.0-233...v2.12.1-233
 [2.12.0-233]: https://github.com/carlrobertoh/CodeGPT/compare/v2.11.7-233...v2.12.0-233
 [2.11.7-233]: https://github.com/carlrobertoh/CodeGPT/compare/v2.11.6-233...v2.11.7-233
 [2.11.6-233]: https://github.com/carlrobertoh/CodeGPT/compare/v2.11.5-233...v2.11.6-233
