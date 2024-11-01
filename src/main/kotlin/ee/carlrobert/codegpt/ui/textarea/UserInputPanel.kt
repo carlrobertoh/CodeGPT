@@ -177,6 +177,7 @@ class UserInputPanel(
                 listOf(
                     "gpt-4o",
                     "gpt-4o-mini",
+                    "gemini-pro-1.5",
                     "claude-3-opus",
                     "claude-3.5-sonnet"
                 ).contains(
