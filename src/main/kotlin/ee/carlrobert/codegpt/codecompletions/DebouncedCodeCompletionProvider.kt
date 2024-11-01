@@ -101,7 +101,14 @@ class DebouncedCodeCompletionProvider : DebouncedInlineCompletionProvider() {
             null -> false
         }
 
-        return event is InlineCompletionEvent.DocumentChange && codeCompletionsEnabled
+        if (!codeCompletionsEnabled) {
+            return false
+        }
+
+        val containsActiveCompletion =
+            REMAINING_EDITOR_COMPLETION.get(event.toRequest()?.editor)?.isNotEmpty() ?: false
+
+        return event is InlineCompletionEvent.DocumentChange || containsActiveCompletion
     }
 
     private fun ProducerScope<InlineCompletionElement>.getEventListener(
