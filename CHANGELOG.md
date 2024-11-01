@@ -6,6 +6,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Gemini 1.5 Pro model (CodeGPT)
+
+### Fixed
+
+- Code completion state when session contains active completion
+
+### Removed
+
+- StarCoder 16B model (CodeGPT)
+
 ## [2.12.0-223] - 2024-10-29
 
 ### Added
