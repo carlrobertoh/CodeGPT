@@ -207,8 +207,8 @@ class PersonasSettingsForm {
                 tableModel.addPersonaRow(
                     PersonaDetails(
                         persona.id,
-                        persona.name!!,
-                        persona.instructions!!
+                        persona.name ?: "",
+                        persona.instructions ?: ""
                     ),
                     selectedPersona.id,
                     index
