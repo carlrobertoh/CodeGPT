@@ -4,6 +4,7 @@ import com.intellij.ide.IdeEventQueue
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.application.runUndoTransparentWriteAction
+import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Inlay
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
@@ -11,6 +12,7 @@ import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.fileTypes.FileTypes
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
+import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.ComponentUtil.findParentByCondition
 import com.intellij.ui.EditorTextField
 import com.intellij.util.ui.JBUI
@@ -45,8 +47,8 @@ data class AppliedCodeActionInlay(
 const val AT_CHAR = '@'
 
 class PromptTextField(
-    project: Project,
-    onTextChanged: (String) -> Unit,
+    private val project: Project,
+    private val onTextChanged: (String) -> Unit,
     private val onSubmit: (String, List<AppliedActionInlay>) -> Unit
 ) : EditorTextField(project, FileTypes.PLAIN_TEXT), Disposable {
 
@@ -58,8 +60,6 @@ class PromptTextField(
     init {
         isOneLineMode = false
         background = UIUtil.getTextFieldBackground()
-        minimumSize = Dimension(100, 40)
-        document.addDocumentListener(getDocumentListener(onTextChanged))
         IS_PROMPT_TEXT_FIELD_DOCUMENT.set(document, true)
         setPlaceholder(CodeGPTBundle.get("toolwindow.chat.textArea.emptyText"))
         IdeEventQueue.getInstance().addDispatcher(
@@ -138,6 +138,7 @@ class PromptTextField(
     override fun createEditor(): EditorEx {
         val editorEx = super.createEditor()
         editorEx.settings.isUseSoftWraps = true
+        setupDocumentListener(editorEx)
         return editorEx
     }
 
@@ -163,9 +164,10 @@ class PromptTextField(
         }
     }
 
-    private fun getDocumentListener(onTextChanged: (String) -> Unit): DocumentListener {
-        return object : DocumentListener {
+    private fun setupDocumentListener(editor: EditorEx) {
+        editor.document.addDocumentListener(object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
+                adjustHeight(editor)
                 onTextChanged(event.document.text)
 
                 if (event.document.text.isEmpty()) {
@@ -174,7 +176,24 @@ class PromptTextField(
                     return
                 }
             }
+        }, this)
+    }
+
+    private fun adjustHeight(editor: EditorEx) {
+        val contentHeight = editor.contentComponent.preferredSize.height + 8
+        val maxHeight = JBUI.scale(getToolWindowHeight() / 2)
+        val newHeight = minOf(contentHeight, maxHeight)
+
+        runInEdt {
+            preferredSize = Dimension(width, newHeight)
+            editor.setVerticalScrollbarVisible(contentHeight > maxHeight)
+            parent?.revalidate()
         }
+    }
+
+    private fun getToolWindowHeight(): Int {
+        return project.service<ToolWindowManager>()
+            .getToolWindow("CodeGPT")?.component?.visibleRect?.height ?: 400
     }
 }
 
