@@ -39,8 +39,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Stream;
 import javax.swing.JComponent;
@@ -117,27 +118,29 @@ public class ChatToolWindowTabPanel implements Disposable {
   }
 
   public List<ReferencedFile> getReferencedFiles() {
-    List<ReferencedFile> referencedFiles = project.getUserData(CodeGPTKeys.SELECTED_FILES);
-    if (referencedFiles == null) {
-      return conversation.getMessages().stream()
-          .flatMap(prevMessage -> {
-            if (prevMessage.getReferencedFilePaths() != null) {
-              return prevMessage.getReferencedFilePaths().stream();
-            }
-            return Stream.empty();
-          })
-          .map(filePath -> {
-            try {
-              return new ReferencedFile(new File(filePath));
-            } catch (Exception e) {
-              return null;
-            }
-          })
-          .filter(Objects::nonNull)
-          .toList();
+    var referencedFiles = new LinkedHashMap<String, ReferencedFile>();
+
+    conversation.getMessages().stream()
+        .flatMap(prevMessage -> {
+          if (prevMessage.getReferencedFilePaths() != null) {
+            return prevMessage.getReferencedFilePaths().stream();
+          }
+          return Stream.empty();
+        })
+        .forEach(filePath -> {
+          try {
+            referencedFiles.put(filePath, new ReferencedFile(new File(filePath)));
+          } catch (Exception ex) {
+            LOG.error("Failed to create referenced file for path: " + filePath, ex);
+          }
+        });
+
+    List<ReferencedFile> selectedFiles = project.getUserData(CodeGPTKeys.SELECTED_FILES);
+    if (selectedFiles != null) {
+      selectedFiles.forEach(file -> referencedFiles.put(file.getFilePath(), file));
     }
 
-    return referencedFiles;
+    return new ArrayList<>(referencedFiles.values());
   }
 
   public void sendMessage(Message message, ConversationType conversationType) {
