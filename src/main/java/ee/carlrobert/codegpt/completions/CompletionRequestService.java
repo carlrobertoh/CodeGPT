@@ -16,9 +16,10 @@ import ee.carlrobert.codegpt.settings.service.google.GoogleSettings;
 import ee.carlrobert.llm.client.DeserializationUtil;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionRequest;
 import ee.carlrobert.llm.client.codegpt.request.chat.ChatCompletionRequest;
+import ee.carlrobert.llm.client.codegpt.response.CodeGPTException;
 import ee.carlrobert.llm.client.google.completion.GoogleCompletionRequest;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
-import ee.carlrobert.llm.client.ollama.completion.request.OllamaChatCompletionRequest;
+import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionEventSourceListener;
 import ee.carlrobert.llm.client.openai.completion.OpenAITextCompletionEventSourceListener;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
@@ -108,6 +109,8 @@ public final class CompletionRequestService {
         }
         case AZURE -> CompletionClientProvider.getAzureClient()
             .getChatCompletionAsync(completionRequest, eventListener);
+        case OLLAMA -> CompletionClientProvider.getOllamaClient()
+            .getChatCompletionAsync(completionRequest, eventListener);
         default -> throw new RuntimeException("Unknown service selected");
       };
     }
@@ -134,11 +137,6 @@ public final class CompletionRequestService {
               .getModel(),
           eventListener);
     }
-    if (request instanceof OllamaChatCompletionRequest completionRequest) {
-      return CompletionClientProvider.getOllamaClient().getChatCompletionAsync(
-          completionRequest,
-          eventListener);
-    }
     if (request instanceof LlamaCompletionRequest completionRequest) {
       return CompletionClientProvider.getLlamaClient().getChatCompletionAsync(
           completionRequest,
@@ -156,8 +154,14 @@ public final class CompletionRequestService {
           @Override
           public void run(@NotNull ProgressIndicator indicator) {
             indicator.setIndeterminate(true);
-            var response = CompletionRequestService.getInstance().getChatCompletion(request);
-            SwingUtilities.invokeLater(() -> eventListener.onComplete(new StringBuilder(response)));
+            try {
+              var response = CompletionRequestService.getInstance().getChatCompletion(request);
+              SwingUtilities.invokeLater(
+                  () -> eventListener.onComplete(new StringBuilder(response)));
+            } catch (CodeGPTException e) {
+              SwingUtilities.invokeLater(
+                  () -> eventListener.onError(new ErrorDetails(e.getDetail()), e));
+            }
           }
         });
 
@@ -180,6 +184,8 @@ public final class CompletionRequestService {
         case OPENAI -> CompletionClientProvider.getOpenAIClient()
             .getChatCompletion(completionRequest);
         case AZURE -> CompletionClientProvider.getAzureClient()
+            .getChatCompletion(completionRequest);
+        case OLLAMA -> CompletionClientProvider.getOllamaClient()
             .getChatCompletion(completionRequest);
         default -> throw new RuntimeException("Unknown service selected");
       };
@@ -216,12 +222,6 @@ public final class CompletionRequestService {
           .getCandidates().get(0)
           .getContent().getParts().get(0)
           .getText();
-    }
-    if (request instanceof OllamaChatCompletionRequest completionRequest) {
-      return CompletionClientProvider.getOllamaClient()
-          .getChatCompletion(completionRequest)
-          .getMessage()
-          .getContent();
     }
     if (request instanceof LlamaCompletionRequest completionRequest) {
       return CompletionClientProvider.getLlamaClient()
