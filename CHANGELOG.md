@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Ollama chat completion streaming [#744](https://github.com/carlrobertoh/CodeGPT/issues/744)
+- Non-stream chat completions error handling (CodeGPT, OpenAI) [#746](https://github.com/carlrobertoh/CodeGPT/issues/746)
+- Prompt text component height issues [#747](https://github.com/carlrobertoh/CodeGPT/issues/747)
+- Endless loading when persona name or instructions are null [#748](https://github.com/carlrobertoh/CodeGPT/issues/748)
+
 ## [2.12.1-241.1] - 2024-11-01
 
 ### Added
