@@ -43,7 +43,7 @@ public class ChatToolWindowScrollablePanel extends ScrollablePanel {
                     It looks like you haven't configured your API key yet. Visit <a href="#OPEN_SETTINGS">CodeGPT settings</a> to do so.
                   </p>
                   <p style="margin-top: 4px; margin-bottom: 4px;">
-                    Don't have an account? <a href="https://codegpt.ee">Sign up</a> for free access to all models.
+                    Don't have an account? <a href="https://codegpt.ee">Sign up</a> to get the most out of CodeGPT.
                   </p>
                   </html>""",
               false,
