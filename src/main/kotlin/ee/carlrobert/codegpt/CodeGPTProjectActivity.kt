@@ -30,7 +30,7 @@ class CodeGPTProjectActivity : ProjectActivity {
         }
 
         if (!ApplicationManager.getApplication().isUnitTestMode
-            && service<ConfigurationSettings>().state.checkForPluginUpdates
+            && service<ConfigurationSettings>().state.checkForNewScreenshots
         ) {
             val desktopPath = Paths.get(System.getProperty("user.home"), "Desktop")
             project.service<FileWatcher>().watch(desktopPath) {
