@@ -17,6 +17,6 @@ public class InfillPromptTemplatePanel extends BasePromptTemplatePanel<InfillPro
 
   @Override
   protected String buildPromptDescription(InfillPromptTemplate template) {
-    return template.buildPrompt(new InfillRequest.Builder("PREFIX", "SUFFIX").build());
+    return template.buildPrompt(new InfillRequest.Builder("PREFIX", "SUFFIX", 0).build());
   }
 }

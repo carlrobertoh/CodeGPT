@@ -2,11 +2,11 @@ package ee.carlrobert.codegpt.codecompletions
 
 import com.intellij.codeInsight.inline.completion.*
 import com.intellij.codeInsight.inline.completion.elements.InlineCompletionElement
-import com.intellij.codeInsight.inline.completion.elements.InlineCompletionGrayTextElement
 import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.util.TextRange
 import ee.carlrobert.codegpt.CodeGPTKeys.IS_FETCHING_COMPLETION
 import ee.carlrobert.codegpt.CodeGPTKeys.REMAINING_EDITOR_COMPLETION
 import ee.carlrobert.codegpt.settings.GeneralSettings
@@ -16,6 +16,7 @@ import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
 import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings
+import ee.carlrobert.codegpt.util.StringUtil.findCompletionParts
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.channelFlow
@@ -44,6 +45,14 @@ class DebouncedCodeCompletionProvider : DebouncedInlineCompletionProvider() {
     override val providerPresentation: InlineCompletionProviderPresentation
         get() = CodeCompletionProviderPresentation()
 
+    private fun String.extractUntilNewline(): String {
+        val index = this.indexOf('\n')
+        if (index == -1) {
+            return this
+        }
+        return this.substring(0, index + 1)
+    }
+
     override suspend fun getSuggestionDebounced(request: InlineCompletionRequest): InlineCompletionSuggestion {
         val editor = request.editor
         val remainingCompletion = REMAINING_EDITOR_COMPLETION.get(editor)
@@ -51,7 +60,7 @@ class DebouncedCodeCompletionProvider : DebouncedInlineCompletionProvider() {
             && remainingCompletion != null
             && remainingCompletion.isNotEmpty()
         ) {
-            return sendNextSuggestion(remainingCompletion)
+            return sendNextSuggestion(remainingCompletion.extractUntilNewline(), request)
         }
 
         val project = editor.project
@@ -69,10 +78,12 @@ class DebouncedCodeCompletionProvider : DebouncedInlineCompletionProvider() {
                 ?.loading(true)
 
             val infillRequest = InfillRequestUtil.buildInfillRequest(request)
-            val call = project.service<CodeCompletionService>().getCodeCompletionAsync(
-                infillRequest,
-                getEventListener(request.editor, infillRequest)
-            )
+            val call = project
+                .service<CodeCompletionService>()
+                .getCodeCompletionAsync(
+                    infillRequest,
+                    getEventListener(request.editor, infillRequest)
+                )
             currentCallRef.set(call)
             awaitClose { currentCallRef.getAndSet(null)?.cancel() }
         })
@@ -109,24 +120,59 @@ class DebouncedCodeCompletionProvider : DebouncedInlineCompletionProvider() {
     private fun ProducerScope<InlineCompletionElement>.getEventListener(
         editor: Editor,
         infillRequest: InfillRequest
-    ) = object : CodeCompletionCompletionEventListener(editor, infillRequest) {
-        override fun onMessage(message: String) {
-            runInEdt {
-                trySend(InlineCompletionGrayTextElement(message))
-            }
-        }
+    ) = object : CodeCompletionEventListener(editor) {
 
-        override fun onComplete(fullMessage: String) {
-            REMAINING_EDITOR_COMPLETION.set(editor, fullMessage)
+        override fun onLineReceived(completionLine: String) {
+            runInEdt {
+                val editorLineSuffix = editor.getLineSuffixAfterCaret()
+                if (editorLineSuffix.isEmpty()) {
+                    trySend(
+                        CodeCompletionTextElement(
+                            completionLine,
+                            infillRequest.caretOffset,
+                            TextRange.from(infillRequest.caretOffset, completionLine.length),
+                        )
+                    )
+                } else {
+                    var prevStartOffset = infillRequest.caretOffset
+                    val completionParts =
+                        findCompletionParts(editorLineSuffix, completionLine.trimEnd())
+
+                    completionParts.forEach { (completionPart, offsetDelta) ->
+                        val element = CodeCompletionTextElement(
+                            completionPart,
+                            infillRequest.caretOffset + offsetDelta,
+                            TextRange.from(prevStartOffset + offsetDelta, completionPart.length),
+                            offsetDelta,
+                            completionLine
+                        )
+                        prevStartOffset += completionPart.length
+
+                        trySend(element)
+                    }
+                }
+
+            }
         }
     }
 
-    private fun sendNextSuggestion(nextCompletion: String): InlineCompletionSuggestion {
+    private fun Editor.getLineSuffixAfterCaret(): String {
+        val lineEndOffset = document.getLineEndOffset(document.getLineNumber(caretModel.offset))
+        return document.getText(TextRange(caretModel.offset, lineEndOffset))
+    }
+
+    private fun sendNextSuggestion(
+        nextCompletion: String,
+        request: InlineCompletionRequest
+    ): InlineCompletionSuggestion {
+
         return InlineCompletionSuggestion.Default(channelFlow {
             launch {
                 trySend(
-                    InlineCompletionGrayTextElement(
-                        nextCompletion.lines().take(2).joinToString("\n")
+                    CodeCompletionTextElement(
+                        nextCompletion,
+                        request.startOffset,
+                        TextRange.from(request.startOffset, nextCompletion.length),
                     )
                 )
             }

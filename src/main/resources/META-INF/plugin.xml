@@ -84,6 +84,11 @@
     <resource-bundle>messages.codegpt</resource-bundle>
 
     <actions>
+        <action id="InsertInlineCompletionAction" class="ee.carlrobert.codegpt.codecompletions.CodeCompletionInsertAction" overrides="true">
+          <add-to-group group-id="InlineCompletion" anchor="first"/>
+          <keyboard-shortcut first-keystroke="TAB" keymap="$default"/>
+        </action>
+
         <group id="CodeGPTEditorPopup">
             <group id="action.editor.group.EditorActionGroup"
                 text="CodeGPT"

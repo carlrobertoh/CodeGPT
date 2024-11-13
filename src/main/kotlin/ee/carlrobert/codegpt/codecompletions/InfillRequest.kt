@@ -13,13 +13,15 @@ const val MAX_PROMPT_TOKENS = 128
 class InfillRequest private constructor(
     val prefix: String,
     val suffix: String,
+    val caretOffset: Int,
     val fileDetails: FileDetails?,
     val vcsDetails: VcsDetails?,
     val context: InfillContext?
 ) {
 
     companion object {
-        fun builder(prefix: String, suffix: String) = Builder(prefix, suffix)
+        fun builder(prefix: String, suffix: String, caretOffset: Int) =
+            Builder(prefix, suffix, caretOffset)
     }
 
     data class VcsDetails(val stagedDiff: String? = null, val unstagedDiff: String? = null)
@@ -28,13 +30,15 @@ class InfillRequest private constructor(
     class Builder {
         private val prefix: String
         private val suffix: String
+        private val caretOffset: Int
         private var fileDetails: FileDetails? = null
         private var vcsDetails: VcsDetails? = null
         private var context: InfillContext? = null
 
-        constructor(prefix: String, suffix: String) {
+        constructor(prefix: String, suffix: String, caretOffset: Int) {
             this.prefix = prefix
             this.suffix = suffix
+            this.caretOffset = caretOffset
         }
 
         constructor(document: Document, caretOffset: Int) {
@@ -48,6 +52,7 @@ class InfillRequest private constructor(
                         document.textLength
                     )
                 ).truncateText(MAX_PROMPT_TOKENS)
+            this.caretOffset = caretOffset
         }
 
         fun fileDetails(fileDetails: FileDetails) = apply { this.fileDetails = fileDetails }
@@ -55,7 +60,7 @@ class InfillRequest private constructor(
         fun context(context: InfillContext) = apply { this.context = context }
 
         fun build() =
-            InfillRequest(prefix, suffix, fileDetails, vcsDetails, context)
+            InfillRequest(prefix, suffix, caretOffset, fileDetails, vcsDetails, context)
     }
 }
 
