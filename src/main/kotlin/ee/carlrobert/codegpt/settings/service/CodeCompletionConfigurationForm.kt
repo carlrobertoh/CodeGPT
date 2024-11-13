@@ -65,7 +65,7 @@ class CodeCompletionConfigurationForm(
         promptTemplateHelpText.setToolTipText(null)
 
         val description = StringEscapeUtils.escapeHtml4(
-            template.buildPrompt(InfillRequest.Builder("PREFIX", "SUFFIX").build())
+            template.buildPrompt(InfillRequest.Builder("PREFIX", "SUFFIX", 0).build())
         )
         HelpTooltip()
             .setTitle(template.toString())
