@@ -2,11 +2,15 @@ package ee.carlrobert.codegpt.codecompletions
 
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.runReadAction
+import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.util.TextRange
 import ee.carlrobert.codegpt.CodeGPTKeys.IS_FETCHING_COMPLETION
 import ee.carlrobert.codegpt.CodeGPTKeys.REMAINING_EDITOR_COMPLETION
+import ee.carlrobert.codegpt.settings.GeneralSettings
+import ee.carlrobert.codegpt.settings.service.ServiceType
+import ee.carlrobert.codegpt.settings.service.codegpt.CodeGPTServiceSettings
 import ee.carlrobert.codegpt.ui.OverlayUtil.showNotification
 import ee.carlrobert.codegpt.util.StringUtil
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails
@@ -70,6 +74,13 @@ abstract class CodeCompletionEventListener(
     }
 
     override fun onError(error: ErrorDetails, ex: Throwable) {
+        val isCodeGPTService = GeneralSettings.getSelectedService() == ServiceType.CODEGPT
+        if (isCodeGPTService && "RATE_LIMIT_EXCEEDED" == error.code) {
+            service<CodeGPTServiceSettings>().state
+                .codeCompletionSettings
+                .codeCompletionsEnabled = false
+        }
+
         if (ex.message == null || (ex.message != null && ex.message != "Canceled")) {
             showNotification(error.message, NotificationType.ERROR)
             logger.error(error.message, ex)
