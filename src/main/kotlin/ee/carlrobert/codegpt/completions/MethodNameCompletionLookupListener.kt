@@ -68,13 +68,15 @@ class MethodNameCompletionLookupListener : LookupManagerListener {
 
     private fun addCompletionLookupValues(lookup: LookupImpl, response: String) {
         val values = response.split(",".toRegex())
+            .map { it.trim() }
             .dropLastWhile { it.isEmpty() }
             .toTypedArray()
+
         for (value in values) {
             runInEdt {
                 lookup.addItem(
                     LookupElementBuilder
-                        .create(value.trim { it <= ' ' })
+                        .create(value)
                         .withIcon(Icons.DefaultSmall),
                     PrefixMatcher.ALWAYS_TRUE
                 )
