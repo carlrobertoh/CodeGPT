@@ -35,7 +35,7 @@ enum class CustomServiceChatCompletionTemplate(
         getDefaultHeadersWithAuthentication(),
         getDefaultBodyParams(
             mapOf(
-                "model" to "accounts/fireworks/models/llama-v2-7b-chat",
+                "model" to "accounts/fireworks/models/qwen2p5-coder-32b-instruct",
                 "max_tokens" to 1024
             )
         )
