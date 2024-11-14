@@ -18,7 +18,6 @@ import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
 import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings
-import ee.carlrobert.codegpt.util.StringUtil.findCompletionParts
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.channelFlow
@@ -26,6 +25,7 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
 import okhttp3.sse.EventSource
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.math.min
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
@@ -129,8 +129,8 @@ class DebouncedCodeCompletionProvider : DebouncedInlineCompletionProvider() {
 
         override fun onLineReceived(completionLine: String) {
             runInEdt {
-                val editorLineSuffix = editor.getLineSuffixAfterCaret()
-                if (editorLineSuffix.isEmpty()) {
+                var editorLineSuffix = editor.getLineSuffixAfterCaret()
+                if (editorLineSuffix.isBlank()) {
                     trySend(
                         CodeCompletionTextElement(
                             completionLine,
@@ -139,31 +139,46 @@ class DebouncedCodeCompletionProvider : DebouncedInlineCompletionProvider() {
                         )
                     )
                 } else {
-                    var prevStartOffset = infillRequest.caretOffset
-                    val completionParts =
-                        findCompletionParts(editorLineSuffix, completionLine.trimEnd())
+                    var caretShift = 0
 
-                    completionParts.forEach { (completionPart, offsetDelta) ->
-                        val element = CodeCompletionTextElement(
-                            completionPart,
-                            infillRequest.caretOffset + offsetDelta,
-                            TextRange.from(prevStartOffset + offsetDelta, completionPart.length),
-                            offsetDelta,
+                    // TODO: Handle other scenarios
+                    val processedCompletion =
+                        if (completionLine.startsWith(editorLineSuffix.first())) {
+                            caretShift++
+                            editorLineSuffix = editorLineSuffix.substring(1)
+                            completionLine.substring(1)
+                        } else {
+                            completionLine
+                        }
+
+                    val completionWithRemovedSuffix =
+                        processedCompletion.removeSuffix(editorLineSuffix)
+
+                    trySend(
+                        CodeCompletionTextElement(
+                            completionWithRemovedSuffix,
+                            infillRequest.caretOffset + caretShift,
+                            TextRange.from(
+                                infillRequest.caretOffset + caretShift,
+                                completionWithRemovedSuffix.length
+                            ),
+                            caretShift,
                             completionLine
                         )
-                        prevStartOffset += completionPart.length
-
-                        trySend(element)
-                    }
+                    )
                 }
-
             }
         }
     }
 
     private fun Editor.getLineSuffixAfterCaret(): String {
         val lineEndOffset = document.getLineEndOffset(document.getLineNumber(caretModel.offset))
-        return document.getText(TextRange(caretModel.offset, lineEndOffset))
+        return document.getText(
+            TextRange(
+                caretModel.offset,
+                min(lineEndOffset + 1, document.textLength)
+            )
+        )
     }
 
     private fun sendNextSuggestion(
