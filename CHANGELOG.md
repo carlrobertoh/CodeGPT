@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.12.4-241.1] - 2024-11-14
+
+### Added
+
+- Qwen 2.5 Coder model for chat and code completion (CodeGPT)
+
+### Fixed
+
+- Image popup notification condition fix [#711](https://github.com/carlrobertoh/CodeGPT/issues/711)
+
 ## [2.12.3-223] - 2024-11-07
 
 ### Fixed
