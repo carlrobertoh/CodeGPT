@@ -16,7 +16,7 @@
 
     <projectListeners>
         <listener topic="com.intellij.codeInsight.lookup.LookupManagerListener"
-                  class="ee.carlrobert.codegpt.completions.MethodNameLookupListener"/>
+                  class="ee.carlrobert.codegpt.completions.MethodNameCompletionLookupListener"/>
         <listener topic="com.intellij.openapi.wm.ex.ToolWindowManagerListener"
                   class="ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowListener"/>
     </projectListeners>
