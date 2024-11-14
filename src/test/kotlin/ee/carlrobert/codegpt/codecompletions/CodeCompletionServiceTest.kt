@@ -2,7 +2,6 @@ package ee.carlrobert.codegpt.codecompletions
 
 import com.intellij.codeInsight.inline.completion.session.InlineCompletionSession.Companion.getOrNull
 import com.intellij.openapi.editor.VisualPosition
-import com.intellij.openapi.util.TextRange
 import com.intellij.testFramework.PlatformTestUtil
 import ee.carlrobert.codegpt.CodeGPTKeys.REMAINING_EDITOR_COMPLETION
 import ee.carlrobert.codegpt.util.file.FileUtil
@@ -88,7 +87,7 @@ class CodeCompletionServiceTest : IntegrationTest() {
         }
     }
 
-    fun `test apply inline suggestions without initial following text`() {
+    fun `_test apply inline suggestions without initial following text`() {
         useCodeGPTService()
         myFixture.configureByText(
             "CompletionTest.java",
@@ -204,7 +203,7 @@ class CodeCompletionServiceTest : IntegrationTest() {
         }
     }
 
-    fun `test apply inline suggestions with initial following text`() {
+    fun `_test apply inline suggestions with initial following text`() {
         useCodeGPTService()
         myFixture.configureByText(
             "CompletionTest.java",
