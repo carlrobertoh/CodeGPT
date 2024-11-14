@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [2.12.4-241.1] - 2024-11-14
+## [2.12.4-233] - 2024-11-14
 
 ### Added
 
@@ -751,7 +751,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `OPENAI_API_KEY` persistence, key is saved in the OS password safe from now on
 
-[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.12.3-233...HEAD
+[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.12.4-233...HEAD
+[2.12.4-233]: https://github.com/carlrobertoh/CodeGPT/compare/v2.12.3-233...v2.12.4-233
 [2.12.3-233]: https://github.com/carlrobertoh/CodeGPT/compare/v2.12.2-233...v2.12.3-233
 [2.12.2-233]: https://github.com/carlrobertoh/CodeGPT/compare/v2.12.1-233...v2.12.2-233
 [2.12.1-233]: https://github.com/carlrobertoh/CodeGPT/compare/v2.12.0-233...v2.12.1-233
