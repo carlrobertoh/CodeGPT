@@ -2,6 +2,7 @@ package ee.carlrobert.codegpt.codecompletions
 
 import ai.grazie.nlp.utils.takeWhitespaces
 import com.intellij.codeInsight.hint.HintManagerImpl
+import com.intellij.codeInsight.inline.completion.InlineCompletion
 import com.intellij.codeInsight.inline.completion.InlineCompletionInsertEnvironment
 import com.intellij.codeInsight.inline.completion.session.InlineCompletionContext
 import com.intellij.codeInsight.inline.completion.session.InlineCompletionSession
@@ -28,6 +29,11 @@ class CodeCompletionInsertAction :
             val elements = context.state.elements
                 .filter { it.element is CodeCompletionTextElement }
                 .map { it.element as CodeCompletionTextElement }
+
+            if (elements.isEmpty()) {
+                InlineCompletion.getHandlerOrNull(editor)?.insert()
+                return
+            }
 
             for (element in elements) {
                 val insertEnvironment = InlineCompletionInsertEnvironment(
