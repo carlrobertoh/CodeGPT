@@ -46,12 +46,6 @@ class CodeCompletionEventListener implements CompletionEventListener<String> {
     try {
       var project = editor.getProject();
       if (project != null) {
-        /*var processedOutput = CodeCompletionParserFactory
-            .getParserForFileExtension(fileExtension)
-            .parse(
-                requestDetails.getPrefix(),
-                requestDetails.getSuffix(),
-                messageBuilder.toString());*/
         var response = messageBuilder.toString();
         handleComplete(
             response.contains("\n") ? response.substring(0, response.indexOf("\n")) : response);
