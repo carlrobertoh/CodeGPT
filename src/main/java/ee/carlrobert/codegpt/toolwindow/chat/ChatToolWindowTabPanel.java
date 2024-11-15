@@ -34,6 +34,7 @@ import ee.carlrobert.codegpt.ui.textarea.AppliedActionInlay;
 import ee.carlrobert.codegpt.ui.textarea.UserInputPanel;
 import ee.carlrobert.codegpt.util.EditorUtil;
 import ee.carlrobert.codegpt.util.file.FileUtil;
+import git4idea.GitCommit;
 import java.awt.BorderLayout;
 import java.io.File;
 import java.io.IOException;
@@ -115,6 +116,14 @@ public class ChatToolWindowTabPanel implements Disposable {
   public void displayLandingView() {
     toolWindowScrollablePanel.displayLandingView(getLandingView());
     totalTokensPanel.updateConversationTokens(conversation);
+  }
+
+  public void addSelection(String fileName, SelectionModel selectionModel) {
+    userInputPanel.addSelection(fileName, selectionModel);
+  }
+
+  public void addCommitReferences(List<GitCommit> gitCommits) {
+    userInputPanel.addCommitReferences(gitCommits);
   }
 
   public List<ReferencedFile> getReferencedFiles() {
@@ -416,9 +425,5 @@ public class ChatToolWindowTabPanel implements Disposable {
         BorderLayout.CENTER);
     rootPanel.add(createUserPromptPanel(), BorderLayout.SOUTH);
     return rootPanel;
-  }
-
-  public void addSelection(String fileName, SelectionModel selectionModel) {
-    userInputPanel.addSelection(fileName, selectionModel);
   }
 }

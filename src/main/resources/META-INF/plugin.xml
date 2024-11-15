@@ -160,6 +160,18 @@
             <separator/>
         </group>
 
+        <group id="CodeGPT.VcsLogContextMenu">
+            <separator/>
+            <action
+              id="CodeGPT.ExplainGitCommitAction"
+              class="ee.carlrobert.codegpt.actions.ExplainGitCommitAction"/>
+            <add-to-group
+              group-id="Vcs.Log.ContextMenu"
+              relative-to-action="Vcs.Log.CompareRevisions"
+              anchor="after"/>
+            <separator/>
+        </group>
+
         <group id="CodeGPT.FloatingCodeToolbarMenuRootGroup">
             <action
               id="CodeGPT.FloatingMenuEditCodeAction"

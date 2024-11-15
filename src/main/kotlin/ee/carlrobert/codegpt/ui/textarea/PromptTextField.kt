@@ -71,9 +71,9 @@ class PromptTextField(
 
     fun addInlayElement(actionPrefix: String, text: String?, actionItem: SuggestionActionItem?) {
         editor?.let {
-            val startOffset = it.document.text.lastIndexOf(AT_CHAR)
+            var startOffset = it.document.text.lastIndexOf(AT_CHAR)
             if (startOffset == -1) {
-                throw IllegalStateException("No '@' symbol found in the text")
+                startOffset = it.document.textLength
             }
 
             addInlayElement(startOffset, actionPrefix, text, actionItem)

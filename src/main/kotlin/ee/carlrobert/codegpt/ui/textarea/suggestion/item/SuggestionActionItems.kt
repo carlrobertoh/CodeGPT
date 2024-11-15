@@ -126,7 +126,7 @@ class GitCommitActionItem(
                     ?: return@runProcessWithProgressSynchronously ""
 
                 val commitId = gitCommit.id.asString()
-                val diff = GitUtil.getCommitDiff(project, repository, commitId)
+                val diff = GitUtil.getCommitDiffs(project, repository, commitId)
                     .joinToString("\n")
 
                 service<EncodingManager>().truncateText(diff, MAX_TOKENS, true)
