@@ -5,6 +5,7 @@ import com.intellij.openapi.actionSystem.ActionPlaces
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.invokeLater
+import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.SelectionModel
 import com.intellij.openapi.observable.properties.AtomicBooleanProperty
@@ -28,7 +29,9 @@ import ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowContentManager
 import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.ModelComboBoxAction
 import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.TotalTokensPanel
 import ee.carlrobert.codegpt.ui.IconActionButton
+import ee.carlrobert.codegpt.ui.textarea.suggestion.item.GitCommitActionItem
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel
+import git4idea.GitCommit
 import java.awt.*
 import java.awt.geom.Area
 import java.awt.geom.Rectangle2D
@@ -100,7 +103,14 @@ class UserInputPanel(
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
 
         val area = Area(Rectangle2D.Float(0f, 0f, width.toFloat(), height.toFloat()))
-        val roundedRect = RoundRectangle2D.Float(0f, 0f, width.toFloat(), height.toFloat(), CORNER_RADIUS.toFloat(), CORNER_RADIUS.toFloat())
+        val roundedRect = RoundRectangle2D.Float(
+            0f,
+            0f,
+            width.toFloat(),
+            height.toFloat(),
+            CORNER_RADIUS.toFloat(),
+            CORNER_RADIUS.toFloat()
+        )
         area.intersect(Area(roundedRect))
 
         g2.clip = area
@@ -208,5 +218,26 @@ class UserInputPanel(
         )
         promptTextField.requestFocusInWindow()
         selectionModel.removeSelection()
+    }
+
+    fun addCommitReferences(gitCommits: List<GitCommit>) {
+        runInEdt {
+            if (promptTextField.text.isEmpty()) {
+                promptTextField.text = if (gitCommits.size == 1) {
+                    "Explain the commit: "
+                } else {
+                    "Explain the commits: "
+                }
+            }
+
+            gitCommits.forEach {
+                promptTextField.addInlayElement(
+                    "commit",
+                    it.id.toShortString(),
+                    GitCommitActionItem(project, it)
+                )
+            }
+            promptTextField.requestFocusInWindow()
+        }
     }
 }

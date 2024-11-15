@@ -71,7 +71,25 @@ object GitUtil {
     }
 
     @Throws(VcsException::class)
-    fun getCommitDiff(
+    fun getCommitsForHashes(
+        project: Project,
+        repository: GitRepository,
+        commitHashes: List<String>
+    ): List<GitCommit> {
+        val result = mutableListOf<GitCommit>()
+
+        GitHistoryUtils
+            .loadDetails(project, repository.root, { commit ->
+                if (commitHashes.contains(commit.id.asString())) {
+                    result.add(commit)
+                }
+            })
+
+        return result
+    }
+
+    @Throws(VcsException::class)
+    fun getCommitDiffs(
         project: Project,
         gitRepository: GitRepository,
         commitHash: String
