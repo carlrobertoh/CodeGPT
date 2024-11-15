@@ -38,6 +38,7 @@ abstract class ToolWindowCompletionResponseEventListener implements
 
   private final Timer updateTimer = new Timer(UPDATE_INTERVAL_MS, e -> processBufferedMessages());
   private final ConcurrentLinkedQueue<String> messageBuffer = new ConcurrentLinkedQueue<>();
+  private boolean stopped = false;
 
   public ToolWindowCompletionResponseEventListener(
       ConversationService conversationService,
@@ -134,6 +135,9 @@ abstract class ToolWindowCompletionResponseEventListener implements
 
   private void processBufferedMessages() {
     if (messageBuffer.isEmpty()) {
+      if (stopped) {
+        updateTimer.stop();
+      }
       return;
     }
 
@@ -147,7 +151,7 @@ abstract class ToolWindowCompletionResponseEventListener implements
   }
 
   private void stopStreaming(ChatMessageResponseBody responseContainer) {
-    updateTimer.stop();
+    stopped = true;
     textArea.setSubmitEnabled(true);
     responseContainer.hideCaret();
   }
