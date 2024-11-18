@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt.settings.prompts
 
 import com.intellij.openapi.options.Configurable
+import ee.carlrobert.codegpt.settings.prompts.form.PromptsForm
 import javax.swing.JComponent
 
 class PromptsConfigurable : Configurable {
@@ -16,13 +17,13 @@ class PromptsConfigurable : Configurable {
         return component.createPanel()
     }
 
-    override fun isModified(): Boolean = false
+    override fun isModified(): Boolean = component.isModified()
 
     override fun apply() {
-
+        component.applyChanges()
     }
 
     override fun reset() {
-
+        component.resetChanges()
     }
 }

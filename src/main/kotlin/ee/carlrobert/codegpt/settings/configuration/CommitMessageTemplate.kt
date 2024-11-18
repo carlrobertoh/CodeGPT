@@ -17,12 +17,8 @@ class CommitMessageTemplate private constructor(project: Project) {
             }
 
             return buildString {
-                append("<html>\n")
-                append("<body>\n")
                 append("<p>Template for generating commit messages. Use the following placeholders to insert dynamic values:</p>\n")
                 append("<ul>$placeholderDescriptions</ul>\n")
-                append("</body>\n")
-                append("</html>")
             }
         }
     }

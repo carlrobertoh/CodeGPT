@@ -12,7 +12,7 @@ object CompletionRequestUtil {
     val FIX_COMPILE_ERRORS_SYSTEM_PROMPT =
         getResourceContent("/prompts/fix-compile-errors.txt")
     val GENERATE_METHOD_NAMES_SYSTEM_PROMPT =
-        getResourceContent("/prompts/method-name-generator.txt")
+        getResourceContent("/prompts/generate-name-lookups.txt")
     val EDIT_CODE_SYSTEM_PROMPT =
         getResourceContent("/prompts/edit-code.txt")
 
