@@ -1,22 +1,21 @@
 package ee.carlrobert.codegpt.conversations.message;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import ee.carlrobert.codegpt.settings.persona.PersonaDetails;
 import ee.carlrobert.codegpt.ui.DocumentationDetails;
-import ee.carlrobert.llm.client.you.completion.YouSerpResult;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import org.jetbrains.annotations.Nullable;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Message {
 
   private final UUID id;
   private String prompt;
   private String response;
-  private String userMessage;
-  private List<YouSerpResult> serpResults;
   private List<String> referencedFilePaths;
   private @Nullable String imageFilePath;
   private boolean webSearchIncluded;
@@ -52,22 +51,6 @@ public class Message {
 
   public void setResponse(String response) {
     this.response = response;
-  }
-
-  public String getUserMessage() {
-    return userMessage;
-  }
-
-  public void setUserMessage(String userMessage) {
-    this.userMessage = userMessage;
-  }
-
-  public List<YouSerpResult> getSerpResults() {
-    return serpResults;
-  }
-
-  public void setSerpResults(List<YouSerpResult> serpResults) {
-    this.serpResults = serpResults;
   }
 
   public List<String> getReferencedFilePaths() {

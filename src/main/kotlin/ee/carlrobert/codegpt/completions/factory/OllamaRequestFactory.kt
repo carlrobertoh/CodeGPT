@@ -15,9 +15,7 @@ class OllamaRequestFactory : BaseRequestFactory() {
         val model = service<OllamaSettings>().state.model
         val configuration = service<ConfigurationSettings>().state
         val requestBuilder: OpenAIChatCompletionRequest.Builder =
-            OpenAIChatCompletionRequest.Builder(
-                buildOpenAIMessages(model, params, params.referencedFiles)
-            )
+            OpenAIChatCompletionRequest.Builder(buildOpenAIMessages(model, params))
                 .setModel(model)
                 .setMaxTokens(configuration.maxTokens)
                 .setStream(true)

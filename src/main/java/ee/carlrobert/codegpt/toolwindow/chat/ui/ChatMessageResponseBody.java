@@ -43,7 +43,7 @@ import javax.swing.DefaultListModel;
 import javax.swing.JEditorPane;
 import javax.swing.JPanel;
 import javax.swing.JTextPane;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 public class ChatMessageResponseBody extends JPanel {
 
@@ -56,26 +56,22 @@ public class ChatMessageResponseBody extends JPanel {
   private final DefaultListModel<WebSearchEventDetails> webpageListModel = new DefaultListModel<>();
   private final WebpageList webpageList = new WebpageList(webpageListModel);
   private final ResponseBodyProgressPanel progressPanel = new ResponseBodyProgressPanel();
-  private final @Nullable String highlightedText;
   private ResponseEditorPanel currentlyProcessedEditorPanel;
   private JEditorPane currentlyProcessedTextPane;
   private JPanel webpageListPanel;
-  private boolean responseReceived;
 
   public ChatMessageResponseBody(Project project, Disposable parentDisposable) {
-    this(project, null, false, false, false, false, parentDisposable);
+    this(project, false, false, false, false, parentDisposable);
   }
 
   public ChatMessageResponseBody(
       Project project,
-      @Nullable String highlightedText,
       boolean withGhostText,
       boolean readOnly,
       boolean webSearchIncluded,
       boolean withProgress,
       Disposable parentDisposable) {
     this.project = project;
-    this.highlightedText = highlightedText;
     this.parentDisposable = parentDisposable;
     this.streamParser = new StreamParser();
     this.readOnly = readOnly;
@@ -98,10 +94,13 @@ public class ChatMessageResponseBody extends JPanel {
     }
   }
 
-  public ChatMessageResponseBody withResponse(String response) {
+  public ChatMessageResponseBody withResponse(@NotNull String response) {
     try {
       for (var message : MarkdownUtil.splitCodeBlocks(response)) {
         processResponse(message, message.startsWith("```"), false);
+
+        currentlyProcessedTextPane = null;
+        currentlyProcessedEditorPanel = null;
       }
     } catch (Exception e) {
       LOG.error("Something went wrong while processing input", e);
@@ -164,7 +163,7 @@ public class ChatMessageResponseBody extends JPanel {
       var errorText = format(
           "<html><p style=\"margin-top: 4px; margin-bottom: 8px;\">%s</p></html>",
           message);
-      if (responseReceived) {
+      if (currentlyProcessedTextPane == null) {
         add(createTextPane(errorText));
       } else {
         currentlyProcessedTextPane.setText(errorText);
@@ -224,8 +223,6 @@ public class ChatMessageResponseBody extends JPanel {
   }
 
   private void processResponse(String markdownInput, boolean codeResponse, boolean caretVisible) {
-    responseReceived = true;
-
     if (codeResponse) {
       processCode(markdownInput);
     } else {
@@ -240,24 +237,20 @@ public class ChatMessageResponseBody extends JPanel {
       var codeBlock = ((FencedCodeBlock) child);
       var code = codeBlock.getContentChars().unescape();
       if (!code.isEmpty()) {
-        ApplicationManager.getApplication().invokeLater(() -> {
-          if (currentlyProcessedEditorPanel == null) {
-            prepareProcessingCode(code, codeBlock.getInfo().unescape());
-          }
-          EditorUtil.updateEditorDocument(currentlyProcessedEditorPanel.getEditor(), code);
-        });
+        if (currentlyProcessedEditorPanel == null) {
+          prepareProcessingCode(code, codeBlock.getInfo().unescape());
+        }
+        EditorUtil.updateEditorDocument(currentlyProcessedEditorPanel.getEditor(), code);
       }
     }
   }
 
   private void processText(String markdownText, boolean caretVisible) {
     var html = convertMdToHtml(markdownText);
-    ApplicationManager.getApplication().invokeLater(() -> {
-      if (currentlyProcessedTextPane == null) {
-        prepareProcessingText(caretVisible);
-      }
-      currentlyProcessedTextPane.setText(html);
-    });
+    if (currentlyProcessedTextPane == null) {
+      prepareProcessingText(caretVisible);
+    }
+    currentlyProcessedTextPane.setText(html);
   }
 
   private void prepareProcessingText(boolean caretVisible) {
@@ -269,9 +262,8 @@ public class ChatMessageResponseBody extends JPanel {
   private void prepareProcessingCode(String code, String markdownLanguage) {
     hideCaret();
     currentlyProcessedTextPane = null;
-    currentlyProcessedEditorPanel = new ResponseEditorPanel(project, code, markdownLanguage,
-        readOnly, highlightedText,
-        parentDisposable);
+    currentlyProcessedEditorPanel =
+        new ResponseEditorPanel(project, code, markdownLanguage, readOnly, parentDisposable);
     add(currentlyProcessedEditorPanel);
   }
 
@@ -337,9 +329,5 @@ public class ChatMessageResponseBody extends JPanel {
     panel.add(title, BorderLayout.NORTH);
     panel.add(listPanel, BorderLayout.CENTER);
     return panel;
-  }
-
-  public boolean isResponseReceived() {
-    return responseReceived;
   }
 }

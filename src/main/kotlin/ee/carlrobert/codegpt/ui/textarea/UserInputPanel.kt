@@ -10,6 +10,7 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.SelectionModel
 import com.intellij.openapi.observable.properties.AtomicBooleanProperty
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.components.AnActionLink
 import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.RightGap
@@ -210,11 +211,12 @@ class UserInputPanel(
         }
     }
 
-    fun addSelection(fileName: String, selectionModel: SelectionModel) {
+    fun addSelection(editorFile: VirtualFile, selectionModel: SelectionModel) {
+        val fileName = editorFile.name
         promptTextField.addInlayElement(
             "code",
             "$fileName (${selectionModel.selectionStartPosition?.line}:${selectionModel.selectionEndPosition?.line})",
-            fileName = fileName,
+            editorFile = editorFile,
             tooltipText = selectionModel.selectedText
         )
         promptTextField.requestFocusInWindow()

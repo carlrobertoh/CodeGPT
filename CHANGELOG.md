@@ -6,6 +6,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.12.5-241.1] - 2024-11-18
+
+### Added
+
+- Option to explain commits from VCS log tree [#688](https://github.com/carlrobertoh/CodeGPT/issues/688)
+
+### Fixed
+
+- Chat response streaming for messages received faster than polling rate [#757](https://github.com/carlrobertoh/CodeGPT/issues/757)
+
+### Improved
+
+- Default CodeGPT prompt instructions
+
 ## [2.12.4-241.1] - 2024-11-14
 
 ### Added
@@ -751,7 +765,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `OPENAI_API_KEY` persistence, key is saved in the OS password safe from now on
 
-[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.12.4-241.1...HEAD
+[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.12.5-241.1...HEAD
+[2.12.5-241.1]: https://github.com/carlrobertoh/CodeGPT/compare/v2.12.4-241.1...v2.12.5-241.1
 [2.12.4-241.1]: https://github.com/carlrobertoh/CodeGPT/compare/v2.12.3-241.1...v2.12.4-241.1
 [2.12.3-241.1]: https://github.com/carlrobertoh/CodeGPT/compare/v2.12.2-241.1...v2.12.3-241.1
 [2.12.2-241.1]: https://github.com/carlrobertoh/CodeGPT/compare/v2.12.1-241.1...v2.12.2-241.1

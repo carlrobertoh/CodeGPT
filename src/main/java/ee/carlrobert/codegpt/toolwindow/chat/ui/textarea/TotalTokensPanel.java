@@ -19,7 +19,9 @@ import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.ReferencedFile;
 import ee.carlrobert.codegpt.actions.IncludeFilesInContextNotifier;
 import ee.carlrobert.codegpt.conversations.Conversation;
+import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
+import ee.carlrobert.codegpt.settings.persona.PersonaSettings;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import java.awt.FlowLayout;
 import java.awt.event.MouseAdapter;
@@ -105,6 +107,13 @@ public class TotalTokensPanel extends JPanel {
     label.setText(getLabelHtml(total));
   }
 
+  public void updateConversationTokens(Conversation conversation, Message message) {
+    totalTokensDetails.setConversationTokens(
+        encodingManager.countConversationTokens(conversation)
+            + encodingManager.countMessageTokens("user", message.getPrompt()));
+    update();
+  }
+
   public void updateConversationTokens(Conversation conversation) {
     totalTokensDetails.setConversationTokens(encodingManager.countConversationTokens(conversation));
     update();
@@ -131,7 +140,8 @@ public class TotalTokensPanel extends JPanel {
       Conversation conversation,
       List<ReferencedFile> includedFiles,
       @Nullable String highlightedText) {
-    var tokenDetails = new TotalTokensDetails(encodingManager);
+    var tokenDetails = new TotalTokensDetails(
+        encodingManager.countTokens(PersonaSettings.getSystemPrompt()));
     tokenDetails.setConversationTokens(encodingManager.countConversationTokens(conversation));
     if (includedFiles != null) {
       tokenDetails.setReferencedFilesTokens(includedFiles.stream()
