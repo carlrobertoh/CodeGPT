@@ -44,6 +44,8 @@
           instance="ee.carlrobert.codegpt.settings.service.LlamaServiceConfigurable"/>
         <applicationConfigurable id="settings.codegpt.services.ollama" parentId="settings.codegpt.services" displayName="Ollama (Local)"
           instance="ee.carlrobert.codegpt.settings.service.ollama.OllamaSettingsConfigurable"/>
+        <applicationConfigurable id="settings.codegpt.prompts" parentId="settings.codegpt" displayName="Prompts"
+          instance="ee.carlrobert.codegpt.settings.prompts.PromptsConfigurable"/>
         <applicationConfigurable id="settings.codegpt.personas" parentId="settings.codegpt" displayName="Personas"
           instance="ee.carlrobert.codegpt.settings.persona.PersonasConfigurable"/>
         <applicationConfigurable id="settings.codegpt.dcoumentations" parentId="settings.codegpt" displayName="Documentations"
