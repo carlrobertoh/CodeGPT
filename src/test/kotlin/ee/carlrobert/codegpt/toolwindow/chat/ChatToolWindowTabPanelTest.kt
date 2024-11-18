@@ -106,7 +106,6 @@ class ChatToolWindowTabPanelTest : IntegrationTest() {
         useOpenAIService()
         service<PersonaSettings>().state.selectedPersona.instructions = "TEST_SYSTEM_PROMPT"
         val message = Message("TEST_MESSAGE")
-        message.userMessage = "TEST_MESSAGE"
         message.referencedFilePaths =
             listOf("TEST_FILE_PATH_1", "TEST_FILE_PATH_2", "TEST_FILE_PATH_3")
         val conversation = ConversationService.getInstance().startConversation()
@@ -202,7 +201,7 @@ class ChatToolWindowTabPanelTest : IntegrationTest() {
             )
     }
 
-    fun testSendingOpenAIMessageWithImage() {
+    fun testSendingOpenAIMessageWithImageInSession() {
         val testImagePath =
             Objects.requireNonNull(javaClass.getResource("/images/test-image.png")).path
         project.putUserData(CodeGPTKeys.IMAGE_ATTACHMENT_FILE_PATH, testImagePath)
@@ -302,7 +301,6 @@ class ChatToolWindowTabPanelTest : IntegrationTest() {
         useOpenAIService()
         service<PersonaSettings>().state.selectedPersona.instructions = "TEST_SYSTEM_PROMPT"
         val message = Message("TEST_MESSAGE")
-        message.userMessage = "TEST_MESSAGE"
         message.referencedFilePaths =
             listOf("TEST_FILE_PATH_1", "TEST_FILE_PATH_2", "TEST_FILE_PATH_3")
         val conversation = ConversationService.getInstance().startConversation()

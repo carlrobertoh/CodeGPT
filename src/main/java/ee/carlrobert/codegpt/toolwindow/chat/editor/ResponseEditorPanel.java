@@ -38,7 +38,6 @@ import ee.carlrobert.codegpt.util.EditorUtil;
 import java.awt.BorderLayout;
 import javax.swing.JPanel;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class ResponseEditorPanel extends JPanel implements Disposable {
 
@@ -49,7 +48,6 @@ public class ResponseEditorPanel extends JPanel implements Disposable {
       String code,
       String markdownLanguage,
       boolean readOnly,
-      @Nullable String highlightedText,
       Disposable disposableParent) {
     super(new BorderLayout());
     setBorder(JBUI.Borders.empty(8, 0));

@@ -2,8 +2,11 @@ package ee.carlrobert.codegpt.completions.factory
 
 import com.intellij.openapi.components.service
 import ee.carlrobert.codegpt.EncodingManager
-import ee.carlrobert.codegpt.completions.*
+import ee.carlrobert.codegpt.completions.BaseRequestFactory
+import ee.carlrobert.codegpt.completions.ChatCompletionParameters
 import ee.carlrobert.codegpt.completions.CompletionRequestUtil.FIX_COMPILE_ERRORS_SYSTEM_PROMPT
+import ee.carlrobert.codegpt.completions.ConversationType
+import ee.carlrobert.codegpt.completions.TotalUsageExceededException
 import ee.carlrobert.codegpt.conversations.ConversationsState
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
 import ee.carlrobert.codegpt.settings.persona.PersonaSettings
@@ -142,15 +145,15 @@ class GoogleRequestFactory : BaseRequestFactory() {
             messages.add(GoogleCompletionContent("model", listOf(prevMessage.response)))
         }
 
-        if (params.imageMediaType != null && params.imageData != null) {
+        if (params.imageDetails != null) {
             messages.add(
                 GoogleCompletionContent(
                     listOf(
                         GoogleContentPart(
                             null,
                             GoogleContentPart.Blob(
-                                params.imageMediaType,
-                                params.imageData
+                                params.imageDetails!!.mediaType,
+                                params.imageDetails!!.data
                             )
                         ),
                         GoogleContentPart(message.prompt)
