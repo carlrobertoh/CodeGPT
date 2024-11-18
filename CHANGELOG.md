@@ -6,6 +6,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Option to explain commits from VCS log tree [#688](https://github.com/carlrobertoh/CodeGPT/issues/688)
+
+### Fixed
+
+- Chat response streaming for messages received faster than polling rate [#757](https://github.com/carlrobertoh/CodeGPT/issues/757)
+
+### Improved
+
+- Default CodeGPT prompt instructions
+
 ## [2.12.4-233] - 2024-11-14
 
 ### Added
