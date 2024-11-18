@@ -12,6 +12,7 @@ import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.fileTypes.FileTypes
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.ComponentUtil.findParentByCondition
 import com.intellij.ui.EditorTextField
@@ -41,7 +42,8 @@ data class AppliedSuggestionActionInlay(
 
 data class AppliedCodeActionInlay(
     override val inlay: Inlay<PromptTextFieldInlayRenderer?>,
-    val code: String
+    val code: String,
+    val editorFile: VirtualFile
 ) : AppliedActionInlay
 
 const val AT_CHAR = '@'
@@ -85,7 +87,7 @@ class PromptTextField(
     fun addInlayElement(
         actionPrefix: String,
         text: String,
-        fileName: String? = null,
+        editorFile: VirtualFile? = null,
         tooltipText: String? = null
     ) {
         editor?.let {
@@ -93,7 +95,7 @@ class PromptTextField(
                 it.caretModel.offset,
                 actionPrefix,
                 text,
-                fileName = fileName,
+                editorFile = editorFile,
                 tooltipText = tooltipText
             )
         }
@@ -104,7 +106,7 @@ class PromptTextField(
         actionPrefix: String,
         text: String?,
         actionItem: SuggestionActionItem? = null,
-        fileName: String? = null,
+        editorFile: VirtualFile? = null,
         tooltipText: String? = null
     ) {
         runUndoTransparentWriteAction {
@@ -117,7 +119,7 @@ class PromptTextField(
                     project,
                     actionPrefix,
                     text,
-                    fileName ?: "",
+                    editorFile?.name ?: "",
                     tooltipText
                 ) { inlay ->
                     appliedInlays.removeIf { appliedInlay -> appliedInlay.inlay == inlay }
@@ -125,10 +127,10 @@ class PromptTextField(
                 })
             if (inlay != null) {
                 // TODO
-                if (tooltipText == null) {
-                    appliedInlays.add(AppliedSuggestionActionInlay(inlay, actionItem))
+                if (tooltipText != null && editorFile != null) {
+                    appliedInlays.add(AppliedCodeActionInlay(inlay, tooltipText, editorFile))
                 } else {
-                    appliedInlays.add(AppliedCodeActionInlay(inlay, tooltipText))
+                    appliedInlays.add(AppliedSuggestionActionInlay(inlay, actionItem))
                 }
                 editor?.caretModel?.moveToOffset(document.textLength)
             }

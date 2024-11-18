@@ -28,13 +28,16 @@ class ClaudeRequestFactory : BaseRequestFactory() {
                 }
 
             when {
-                params.imageMediaType != null && params.imageData != null -> {
+                params.imageDetails != null -> {
                     messages.add(
                         ClaudeCompletionDetailedMessage(
                             "user",
                             listOf(
                                 ClaudeMessageImageContent(
-                                    ClaudeBase64Source(params.imageMediaType, params.imageData)
+                                    ClaudeBase64Source(
+                                        params.imageDetails!!.mediaType,
+                                        params.imageDetails!!.data
+                                    )
                                 ),
                                 ClaudeMessageTextContent(params.message.prompt)
                             )

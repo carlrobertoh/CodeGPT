@@ -2,7 +2,6 @@ package ee.carlrobert.codegpt.actions.editor;
 
 import static java.lang.String.format;
 
-import com.intellij.icons.AllIcons.Actions;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
@@ -12,7 +11,6 @@ import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.project.Project;
 import ee.carlrobert.codegpt.CodeGPTKeys;
 import ee.carlrobert.codegpt.ReferencedFile;
-import ee.carlrobert.codegpt.actions.IncludeFilesInContextAction;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowContentManager;
@@ -54,16 +52,15 @@ public class EditorActionsUtil {
         var action = new BaseEditorAction(label, label) {
           @Override
           protected void actionPerformed(Project project, Editor editor, String selectedText) {
+            var toolWindowContentManager =
+                project.getService(ChatToolWindowContentManager.class);
+            toolWindowContentManager.getToolWindow().show();
+
             var fileExtension = FileUtil.getFileExtension(
                 ((EditorImpl) editor).getVirtualFile().getName());
             var message = new Message(prompt.replace(
                 "{{selectedCode}}",
                 format("%n```%s%n%s%n```", fileExtension, selectedText)));
-            message.setUserMessage(prompt.replace("{{selectedCode}}", ""));
-            var toolWindowContentManager =
-                project.getService(ChatToolWindowContentManager.class);
-            toolWindowContentManager.getToolWindow().show();
-
             message.setReferencedFilePaths(
                 Stream.ofNullable(project.getUserData(CodeGPTKeys.SELECTED_FILES))
                     .flatMap(Collection::stream)

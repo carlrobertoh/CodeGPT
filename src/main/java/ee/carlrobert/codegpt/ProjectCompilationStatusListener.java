@@ -68,7 +68,6 @@ public class ProjectCompilationStatusListener implements CompilationStatusListen
     message.setReferencedFilePaths(errorMapping.keySet().stream()
         .map(ReferencedFile::getFilePath)
         .toList());
-    message.setUserMessage(message.getPrompt());
     message.setPrompt(CompletionRequestUtil.getPromptWithContext(
         new ArrayList<>(errorMapping.keySet()),
         prompt));

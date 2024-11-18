@@ -14,6 +14,6 @@ class AddSelectionToContextAction : BaseEditorAction(AllIcons.General.Add) {
         val chatTabPanel = chatToolWindowContentManager
             .tryFindActiveChatTabPanel()
             .orElseThrow()
-        chatTabPanel.addSelection((editor as EditorEx).virtualFile.name, editor.selectionModel)
+        chatTabPanel.addSelection((editor as EditorEx).virtualFile, editor.selectionModel)
     }
 }
