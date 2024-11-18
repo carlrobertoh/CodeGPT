@@ -1,8 +1,5 @@
 package ee.carlrobert.codegpt.toolwindow.chat.ui.textarea;
 
-import ee.carlrobert.codegpt.EncodingManager;
-import ee.carlrobert.codegpt.settings.persona.PersonaSettings;
-
 public class TotalTokensDetails {
 
   private final int systemPromptTokens;
@@ -11,8 +8,8 @@ public class TotalTokensDetails {
   private int highlightedTokens;
   private int referencedFilesTokens;
 
-  public TotalTokensDetails(EncodingManager encodingManager) {
-    systemPromptTokens = encodingManager.countTokens(PersonaSettings.getSystemPrompt());
+  public TotalTokensDetails(int systemPromptTokens) {
+    this.systemPromptTokens = systemPromptTokens;
   }
 
   public int getSystemPromptTokens() {

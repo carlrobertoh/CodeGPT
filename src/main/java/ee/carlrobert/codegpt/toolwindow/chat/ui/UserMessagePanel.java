@@ -47,15 +47,10 @@ public class UserMessagePanel extends JPanel {
       displayImage(message.getImageFilePath());
     }
 
-    var referencedFilePaths = message.getReferencedFilePaths();
-    if (referencedFilePaths != null && !referencedFilePaths.isEmpty()) {
-      add(createResponseBody(
-          project,
-          message.getUserMessage(),
-          parentDisposable), BorderLayout.SOUTH);
-    } else {
-      add(createResponseBody(project, message.getPrompt(), parentDisposable), BorderLayout.SOUTH);
-    }
+    add(createResponseBody(
+        project,
+        message.getPrompt(),
+        parentDisposable), BorderLayout.SOUTH);
   }
 
   public @Nullable JPanel getAdditionalContextPanel(Project project, Message message) {
@@ -99,7 +94,7 @@ public class UserMessagePanel extends JPanel {
       Project project,
       String prompt,
       Disposable parentDisposable) {
-    return new ChatMessageResponseBody(project, null, false, true, false, false, parentDisposable)
+    return new ChatMessageResponseBody(project, false, true, false, false, parentDisposable)
         .withResponse(prompt);
   }
 

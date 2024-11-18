@@ -2,7 +2,6 @@ package ee.carlrobert.codegpt.completions.factory
 
 import com.intellij.openapi.components.service
 import ee.carlrobert.codegpt.EncodingManager
-import ee.carlrobert.codegpt.ReferencedFile
 import ee.carlrobert.codegpt.completions.*
 import ee.carlrobert.codegpt.completions.CompletionRequestUtil.EDIT_CODE_SYSTEM_PROMPT
 import ee.carlrobert.codegpt.completions.CompletionRequestUtil.FIX_COMPILE_ERRORS_SYSTEM_PROMPT
@@ -25,9 +24,7 @@ class OpenAIRequestFactory : CompletionRequestFactory {
         val model = service<OpenAISettings>().state.model
         val configuration = service<ConfigurationSettings>().state
         val requestBuilder: OpenAIChatCompletionRequest.Builder =
-            OpenAIChatCompletionRequest.Builder(
-                buildOpenAIMessages(model, params, params.referencedFiles)
-            )
+            OpenAIChatCompletionRequest.Builder(buildOpenAIMessages(model, params))
                 .setModel(model)
         if ("o1-mini" == model || "o1-preview" == model) {
             requestBuilder
@@ -103,9 +100,8 @@ class OpenAIRequestFactory : CompletionRequestFactory {
         fun buildOpenAIMessages(
             model: String?,
             callParameters: ChatCompletionParameters,
-            referencedFiles: List<ReferencedFile>? = mutableListOf()
         ): List<OpenAIChatCompletionMessage> {
-            val messages = buildOpenAIChatMessages(model, callParameters, referencedFiles)
+            val messages = buildOpenAIChatMessages(model, callParameters)
 
             if (model == null) {
                 return messages
@@ -140,7 +136,6 @@ class OpenAIRequestFactory : CompletionRequestFactory {
         private fun buildOpenAIChatMessages(
             model: String?,
             callParameters: ChatCompletionParameters,
-            referencedFiles: List<ReferencedFile>? = mutableListOf()
         ): MutableList<OpenAIChatCompletionMessage> {
             val message = callParameters.message
             val messages = mutableListOf<OpenAIChatCompletionMessage>()
@@ -202,15 +197,15 @@ class OpenAIRequestFactory : CompletionRequestFactory {
                 )
             }
 
-            if (callParameters.imageMediaType != null && callParameters.imageData != null) {
+            if (callParameters.imageDetails != null) {
                 messages.add(
                     OpenAIChatCompletionDetailedMessage(
                         "user",
                         listOf(
                             OpenAIMessageImageURLContent(
                                 OpenAIImageUrl(
-                                    callParameters.imageMediaType,
-                                    callParameters.imageData
+                                    callParameters.imageDetails!!.mediaType,
+                                    callParameters.imageDetails!!.data
                                 )
                             ),
                             OpenAIMessageTextContent(message.prompt)
@@ -218,10 +213,13 @@ class OpenAIRequestFactory : CompletionRequestFactory {
                     )
                 )
             } else {
-                val prompt = if (referencedFiles.isNullOrEmpty()) {
+                val prompt = if (callParameters.referencedFiles.isNullOrEmpty()) {
                     message.prompt
                 } else {
-                    CompletionRequestUtil.getPromptWithContext(referencedFiles, message.prompt)
+                    CompletionRequestUtil.getPromptWithContext(
+                        callParameters.referencedFiles!!,
+                        message.prompt
+                    )
                 }
                 messages.add(OpenAIChatCompletionStandardMessage("user", prompt))
             }
