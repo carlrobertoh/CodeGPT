@@ -39,6 +39,7 @@ abstract class ToolWindowCompletionResponseEventListener implements
   private final Timer updateTimer = new Timer(UPDATE_INTERVAL_MS, e -> processBufferedMessages());
   private final ConcurrentLinkedQueue<String> messageBuffer = new ConcurrentLinkedQueue<>();
   private boolean stopped = false;
+  private boolean streamResponseReceived = false;
 
   public ToolWindowCompletionResponseEventListener(
       ConversationService conversationService,
@@ -62,6 +63,8 @@ abstract class ToolWindowCompletionResponseEventListener implements
 
   @Override
   public void handleMessage(String partialMessage) {
+    streamResponseReceived = true;
+
     try {
       messageBuilder.append(partialMessage);
       var ongoingTokens = encodingManager.countTokens(messageBuilder.toString());
@@ -117,7 +120,7 @@ abstract class ToolWindowCompletionResponseEventListener implements
     ApplicationManager.getApplication().invokeLater(() -> {
       try {
         responsePanel.enableActions();
-        if (!responseContainer.isResponseReceived() && !fullMessage.isEmpty()) {
+        if (!streamResponseReceived && !fullMessage.isEmpty()) {
           responseContainer.withResponse(fullMessage);
         }
         totalTokensPanel.updateUserPromptTokens(textArea.getText());
