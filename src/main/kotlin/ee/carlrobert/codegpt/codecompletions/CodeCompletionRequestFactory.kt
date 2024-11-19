@@ -114,14 +114,21 @@ object CodeCompletionRequestFactory {
 
     fun buildOllamaRequest(details: InfillRequest): OllamaCompletionRequest {
         val settings = service<OllamaSettings>().state
+        val prompt = if (details.context == null || details.context.contextElements.isEmpty()) {
+            details.prefix
+        } else {
+            details.context.contextElements.joinToString("\n") { "#${it.filePath()}\n" + it.text() } +
+                    "#${details.context.enclosingElement.filePath()}\n" +
+                    details.prefix
+        }
         return OllamaCompletionRequest.Builder(
             settings.model,
-            settings.fimTemplate.buildPrompt(details)
+            prompt
         )
+            .setSuffix(details.suffix)
             .setStream(true)
             .setOptions(
                 OllamaParameters.Builder()
-                    .stop(settings.fimTemplate.stopTokens)
                     .numPredict(MAX_TOKENS)
                     .temperature(0.4)
                     .build()

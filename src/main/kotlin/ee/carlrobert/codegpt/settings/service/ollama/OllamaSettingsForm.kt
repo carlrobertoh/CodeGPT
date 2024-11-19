@@ -50,8 +50,7 @@ class OllamaSettingsForm {
     init {
         val settings = service<OllamaSettings>().state
         codeCompletionConfigurationForm = CodeCompletionConfigurationForm(
-            settings.codeCompletionsEnabled,
-            settings.fimTemplate
+            settings.codeCompletionsEnabled
         )
         val emptyModelsComboBoxModel =
             DefaultComboBoxModel(arrayOf("Hit refresh to see models for this host"))
@@ -122,7 +121,6 @@ class OllamaSettingsForm {
             hostField.text = host
             modelComboBox.item = model ?: ""
             codeCompletionConfigurationForm.isCodeCompletionsEnabled = codeCompletionsEnabled
-            codeCompletionConfigurationForm.fimTemplate = fimTemplate
         }
         apiKeyField.text = getCredential(OLLAMA_API_KEY)
     }
@@ -132,7 +130,6 @@ class OllamaSettingsForm {
             host = hostField.text
             model = modelComboBox.item
             codeCompletionsEnabled = codeCompletionConfigurationForm.isCodeCompletionsEnabled
-            fimTemplate = codeCompletionConfigurationForm.fimTemplate!!
         }
         setCredential(OLLAMA_API_KEY, getApiKey())
     }
@@ -141,7 +138,6 @@ class OllamaSettingsForm {
         hostField.text != host
                 || (modelComboBox.item != model && modelComboBox.isEnabled)
                 || codeCompletionConfigurationForm.isCodeCompletionsEnabled != codeCompletionsEnabled
-                || codeCompletionConfigurationForm.fimTemplate != fimTemplate
                 || getApiKey() != getCredential(OLLAMA_API_KEY)
     }
 
