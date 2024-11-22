@@ -1,0 +1,15 @@
+Your task is to improve the code's efficiency, readability, and adherence to best practices without changing its core functionality.
+
+Analyze the code and suggest optimizations that could improve its performance, readability, or maintainability. Focus on:
+
+1. Reducing time complexity
+2. Improving space efficiency
+3. Enhancing code readability
+4. Applying relevant design patterns or coding best practices
+
+Provide your optimized version of the code, along with brief comments explaining the key changes and their benefits.
+
+Keep your response concise and focused on the most impactful optimizations.
+
+Here's the code to optimize:
+{SELECTION}

@@ -4,14 +4,13 @@ import com.intellij.openapi.components.service
 import ee.carlrobert.codegpt.CodeGPTKeys
 import ee.carlrobert.codegpt.EncodingManager
 import ee.carlrobert.codegpt.ReferencedFile
-import ee.carlrobert.codegpt.completions.CompletionRequestUtil.FIX_COMPILE_ERRORS_SYSTEM_PROMPT
 import ee.carlrobert.codegpt.completions.ConversationType
 import ee.carlrobert.codegpt.completions.HuggingFaceModel
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate.LLAMA
 import ee.carlrobert.codegpt.conversations.ConversationService
 import ee.carlrobert.codegpt.conversations.message.Message
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
-import ee.carlrobert.codegpt.settings.persona.PersonaSettings
+import ee.carlrobert.codegpt.settings.prompts.PromptsSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
 import ee.carlrobert.llm.client.http.RequestEntity
 import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange
@@ -28,7 +27,8 @@ class ChatToolWindowTabPanelTest : IntegrationTest() {
 
     fun testSendingOpenAIMessage() {
         useOpenAIService()
-        service<PersonaSettings>().state.selectedPersona.instructions = "TEST_SYSTEM_PROMPT"
+        service<PromptsSettings>().state.personas.selectedPersona.instructions =
+            "TEST_SYSTEM_PROMPT"
         val message = Message("Hello!")
         val conversation = ConversationService.getInstance().startConversation()
         val panel = ChatToolWindowTabPanel(project, conversation)
@@ -104,7 +104,8 @@ class ChatToolWindowTabPanelTest : IntegrationTest() {
             )
         )
         useOpenAIService()
-        service<PersonaSettings>().state.selectedPersona.instructions = "TEST_SYSTEM_PROMPT"
+        service<PromptsSettings>().state.personas.selectedPersona.instructions =
+            "TEST_SYSTEM_PROMPT"
         val message = Message("TEST_MESSAGE")
         message.referencedFilePaths =
             listOf("TEST_FILE_PATH_1", "TEST_FILE_PATH_2", "TEST_FILE_PATH_3")
@@ -206,7 +207,8 @@ class ChatToolWindowTabPanelTest : IntegrationTest() {
             Objects.requireNonNull(javaClass.getResource("/images/test-image.png")).path
         project.putUserData(CodeGPTKeys.IMAGE_ATTACHMENT_FILE_PATH, testImagePath)
         useOpenAIService("gpt-4-vision-preview")
-        service<PersonaSettings>().state.selectedPersona.instructions = "TEST_SYSTEM_PROMPT"
+        service<PromptsSettings>().state.personas.selectedPersona.instructions =
+            "TEST_SYSTEM_PROMPT"
         val message = Message("TEST_MESSAGE")
         val conversation = ConversationService.getInstance().startConversation()
         val panel = ChatToolWindowTabPanel(project, conversation)
@@ -299,7 +301,8 @@ class ChatToolWindowTabPanelTest : IntegrationTest() {
             )
         )
         useOpenAIService()
-        service<PersonaSettings>().state.selectedPersona.instructions = "TEST_SYSTEM_PROMPT"
+        service<PromptsSettings>().state.personas.selectedPersona.instructions =
+            "TEST_SYSTEM_PROMPT"
         val message = Message("TEST_MESSAGE")
         message.referencedFilePaths =
             listOf("TEST_FILE_PATH_1", "TEST_FILE_PATH_2", "TEST_FILE_PATH_3")
@@ -317,7 +320,10 @@ class ChatToolWindowTabPanelTest : IntegrationTest() {
                 .containsExactly(
                     "gpt-4",
                     listOf(
-                        mapOf("role" to "system", "content" to FIX_COMPILE_ERRORS_SYSTEM_PROMPT),
+                        mapOf(
+                            "role" to "system",
+                            "content" to service<PromptsSettings>().state.coreActions.fixCompileErrors.instructions
+                        ),
                         mapOf(
                             "role" to "user", "content" to """
                           Use the following context to answer question at the end:
@@ -399,7 +405,8 @@ class ChatToolWindowTabPanelTest : IntegrationTest() {
     fun testSendingLlamaMessage() {
         useLlamaService()
         val configurationState = service<ConfigurationSettings>().state
-        service<PersonaSettings>().state.selectedPersona.instructions = "TEST_SYSTEM_PROMPT"
+        service<PromptsSettings>().state.personas.selectedPersona.instructions =
+            "TEST_SYSTEM_PROMPT"
         configurationState.maxTokens = 1000
         configurationState.temperature = 0.1f
         val llamaSettings = LlamaSettings.getCurrentState()

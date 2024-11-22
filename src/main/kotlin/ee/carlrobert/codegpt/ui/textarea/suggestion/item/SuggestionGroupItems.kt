@@ -11,12 +11,11 @@ import ee.carlrobert.codegpt.CodeGPTBundle
 import ee.carlrobert.codegpt.Icons
 import ee.carlrobert.codegpt.settings.GeneralSettings
 import ee.carlrobert.codegpt.settings.documentation.DocumentationSettings
-import ee.carlrobert.codegpt.settings.persona.PersonaDetails
-import ee.carlrobert.codegpt.settings.persona.PersonaSettings
+import ee.carlrobert.codegpt.settings.prompts.PersonaDetails
+import ee.carlrobert.codegpt.settings.prompts.PromptsSettings
 import ee.carlrobert.codegpt.settings.service.ServiceType
 import ee.carlrobert.codegpt.ui.DocumentationDetails
 import ee.carlrobert.codegpt.util.GitUtil
-import ee.carlrobert.codegpt.util.ResourceUtil.getDefaultPersonas
 import ee.carlrobert.codegpt.util.file.FileUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -84,12 +83,10 @@ class PersonaSuggestionGroupItem : SuggestionGroupItem {
     override val icon = AllIcons.General.User
 
     override suspend fun getSuggestions(searchText: String?): List<SuggestionActionItem> {
-        val userCreatedPersonas = service<PersonaSettings>().state.userCreatedPersonas
+        return service<PromptsSettings>().state.personas.prompts
             .map {
                 PersonaDetails(it.id, it.name ?: "Unknown", it.instructions ?: "Unknown")
             }
-            .toMutableList()
-        return (userCreatedPersonas + getDefaultPersonas())
             .filter {
                 searchText.isNullOrEmpty() || it.name.contains(searchText, true)
             }
