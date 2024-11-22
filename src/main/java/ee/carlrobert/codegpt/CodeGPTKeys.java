@@ -1,7 +1,7 @@
 package ee.carlrobert.codegpt;
 
 import com.intellij.openapi.util.Key;
-import ee.carlrobert.codegpt.settings.persona.PersonaDetails;
+import ee.carlrobert.codegpt.settings.prompts.PersonaDetails;
 import ee.carlrobert.codegpt.ui.DocumentationDetails;
 import ee.carlrobert.llm.client.codegpt.CodeGPTUserDetails;
 import java.util.List;

@@ -4,12 +4,11 @@ import com.intellij.openapi.components.service
 import ee.carlrobert.codegpt.EncodingManager
 import ee.carlrobert.codegpt.completions.BaseRequestFactory
 import ee.carlrobert.codegpt.completions.ChatCompletionParameters
-import ee.carlrobert.codegpt.completions.CompletionRequestUtil.FIX_COMPILE_ERRORS_SYSTEM_PROMPT
 import ee.carlrobert.codegpt.completions.ConversationType
 import ee.carlrobert.codegpt.completions.TotalUsageExceededException
 import ee.carlrobert.codegpt.conversations.ConversationsState
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
-import ee.carlrobert.codegpt.settings.persona.PersonaSettings
+import ee.carlrobert.codegpt.settings.prompts.PromptsSettings
 import ee.carlrobert.codegpt.settings.service.google.GoogleSettings
 import ee.carlrobert.codegpt.util.file.FileUtil
 import ee.carlrobert.llm.client.google.completion.GoogleCompletionContent
@@ -100,7 +99,7 @@ class GoogleRequestFactory : BaseRequestFactory() {
                 messages.add(
                     GoogleCompletionContent(
                         "user",
-                        listOf(PersonaSettings.getSystemPrompt())
+                        listOf(PromptsSettings.getSelectedPersonaSystemPrompt())
                     )
                 )
                 messages.add(GoogleCompletionContent("model", listOf("Understood.")))
@@ -108,7 +107,10 @@ class GoogleRequestFactory : BaseRequestFactory() {
 
             ConversationType.FIX_COMPILE_ERRORS -> {
                 messages.add(
-                    GoogleCompletionContent("user", listOf(FIX_COMPILE_ERRORS_SYSTEM_PROMPT))
+                    GoogleCompletionContent(
+                        "user",
+                        listOf(service<PromptsSettings>().state.coreActions.fixCompileErrors.instructions)
+                    )
                 )
                 messages.add(GoogleCompletionContent("model", listOf("Understood.")))
             }

@@ -1,0 +1,6 @@
+Your task is to provide a clear, concise explanation of what this code does. Focus on the main functionality and purpose of the code, avoiding unnecessary details. Explain any complex logic or algorithms if present.
+
+Provide your explanation in a few sentences, using simple language that a junior programmer could understand. If there are any notable best practices or potential improvements, briefly mention them at the end.
+
+Here's the code to analyze:
+{SELECTION}

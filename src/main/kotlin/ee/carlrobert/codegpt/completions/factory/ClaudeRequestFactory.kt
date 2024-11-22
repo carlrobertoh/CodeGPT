@@ -5,6 +5,7 @@ import ee.carlrobert.codegpt.completions.BaseRequestFactory
 import ee.carlrobert.codegpt.completions.ChatCompletionParameters
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
 import ee.carlrobert.codegpt.settings.persona.PersonaSettings
+import ee.carlrobert.codegpt.settings.prompts.PromptsSettings
 import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettings
 import ee.carlrobert.llm.client.anthropic.completion.*
 import ee.carlrobert.llm.completion.CompletionRequest
@@ -16,7 +17,7 @@ class ClaudeRequestFactory : BaseRequestFactory() {
             model = service<AnthropicSettings>().state.model
             maxTokens = service<ConfigurationSettings>().state.maxTokens
             isStream = true
-            system = PersonaSettings.getSystemPrompt()
+            system = PromptsSettings.getSelectedPersonaSystemPrompt()
 
             messages = params.conversation.messages
                 .filter { it.response != null && it.response.isNotEmpty() }

@@ -6,6 +6,7 @@ import ee.carlrobert.codegpt.conversations.ConversationService
 import ee.carlrobert.codegpt.conversations.message.Message
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
 import ee.carlrobert.codegpt.settings.persona.PersonaSettings
+import ee.carlrobert.codegpt.settings.prompts.PromptsSettings
 import ee.carlrobert.llm.client.http.RequestEntity
 import ee.carlrobert.llm.client.http.exchange.NdJsonStreamHttpExchange
 import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange
@@ -18,7 +19,7 @@ class DefaultToolwindowChatCompletionRequestHandlerTest : IntegrationTest() {
 
     fun testOpenAIChatCompletionCall() {
         useOpenAIService()
-        service<PersonaSettings>().state.selectedPersona.instructions = "TEST_SYSTEM_PROMPT"
+        service<PromptsSettings>().state.personas.selectedPersona.instructions = "TEST_SYSTEM_PROMPT"
         val message = Message("TEST_PROMPT")
         val conversation = ConversationService.getInstance().startConversation()
         expectOpenAI(StreamHttpExchange { request: RequestEntity ->
@@ -57,7 +58,7 @@ class DefaultToolwindowChatCompletionRequestHandlerTest : IntegrationTest() {
 
     fun testAzureChatCompletionCall() {
         useAzureService()
-        service<PersonaSettings>().state.selectedPersona.instructions = "TEST_SYSTEM_PROMPT"
+        service<PromptsSettings>().state.personas.selectedPersona.instructions = "TEST_SYSTEM_PROMPT"
         val conversationService = ConversationService.getInstance()
         val prevMessage = Message("TEST_PREV_PROMPT")
         prevMessage.response = "TEST_PREV_RESPONSE"
@@ -103,7 +104,7 @@ class DefaultToolwindowChatCompletionRequestHandlerTest : IntegrationTest() {
     fun testLlamaChatCompletionCall() {
         useLlamaService()
         service<ConfigurationSettings>().state.maxTokens = 99
-        service<PersonaSettings>().state.selectedPersona.instructions = "TEST_SYSTEM_PROMPT"
+        service<PromptsSettings>().state.personas.selectedPersona.instructions = "TEST_SYSTEM_PROMPT"
         val message = Message("TEST_PROMPT")
         val conversation = ConversationService.getInstance().startConversation()
         conversation.addMessage(Message("Ping", "Pong"))
@@ -144,7 +145,7 @@ class DefaultToolwindowChatCompletionRequestHandlerTest : IntegrationTest() {
     fun testOllamaChatCompletionCall() {
         useOllamaService()
         service<ConfigurationSettings>().state.maxTokens = 99
-        service<PersonaSettings>().state.selectedPersona.instructions = "TEST_SYSTEM_PROMPT"
+        service<PromptsSettings>().state.personas.selectedPersona.instructions = "TEST_SYSTEM_PROMPT"
         val message = Message("TEST_PROMPT")
         val conversation = ConversationService.getInstance().startConversation()
         expectOllama(NdJsonStreamHttpExchange { request: RequestEntity ->
@@ -183,7 +184,7 @@ class DefaultToolwindowChatCompletionRequestHandlerTest : IntegrationTest() {
 
     fun testGoogleChatCompletionCall() {
         useGoogleService()
-        service<PersonaSettings>().state.selectedPersona.instructions = "TEST_SYSTEM_PROMPT"
+        service<PromptsSettings>().state.personas.selectedPersona.instructions = "TEST_SYSTEM_PROMPT"
         val message = Message("TEST_PROMPT")
         val conversation = ConversationService.getInstance().startConversation()
         expectGoogle(StreamHttpExchange { request: RequestEntity ->
@@ -228,7 +229,7 @@ class DefaultToolwindowChatCompletionRequestHandlerTest : IntegrationTest() {
 
     fun testCodeGPTServiceChatCompletionCall() {
         useCodeGPTService()
-        service<PersonaSettings>().state.selectedPersona.instructions = "TEST_SYSTEM_PROMPT"
+        service<PromptsSettings>().state.personas.selectedPersona.instructions = "TEST_SYSTEM_PROMPT"
         val message = Message("TEST_PROMPT")
         val conversation = ConversationService.getInstance().startConversation()
         expectCodeGPT(StreamHttpExchange { request: RequestEntity ->

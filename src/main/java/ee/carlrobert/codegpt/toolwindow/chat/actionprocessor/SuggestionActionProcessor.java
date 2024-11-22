@@ -8,7 +8,6 @@ import ee.carlrobert.codegpt.ui.textarea.AppliedSuggestionActionInlay;
 import ee.carlrobert.codegpt.ui.textarea.suggestion.item.CreateDocumentationActionItem;
 import ee.carlrobert.codegpt.ui.textarea.suggestion.item.DocumentationActionItem;
 import ee.carlrobert.codegpt.ui.textarea.suggestion.item.GitCommitActionItem;
-import ee.carlrobert.codegpt.ui.textarea.suggestion.item.PersonaActionItem;
 import ee.carlrobert.codegpt.ui.textarea.suggestion.item.WebSearchActionItem;
 
 public class SuggestionActionProcessor implements ActionProcessor {
@@ -37,7 +36,6 @@ public class SuggestionActionProcessor implements ActionProcessor {
     message.setWebSearchIncluded(action.getSuggestion() instanceof WebSearchActionItem);
 
     processDocumentationAction(message, action);
-    processPersonaAction(message, action);
     processGitCommitAction(action, promptBuilder);
   }
 
@@ -49,15 +47,6 @@ public class SuggestionActionProcessor implements ActionProcessor {
     if (addedDocumentation != null && appliedInlayExists) {
       message.setDocumentationDetails(addedDocumentation);
       CodeGPTKeys.ADDED_DOCUMENTATION.set(project, null);
-    }
-  }
-
-  private void processPersonaAction(Message message, AppliedSuggestionActionInlay action) {
-    var addedPersona = CodeGPTKeys.ADDED_PERSONA.get(project);
-    var personaInlayExists = action.getSuggestion() instanceof PersonaActionItem;
-    if (addedPersona != null && personaInlayExists) {
-      message.setPersonaDetails(addedPersona);
-      CodeGPTKeys.ADDED_PERSONA.set(project, null);
     }
   }
 

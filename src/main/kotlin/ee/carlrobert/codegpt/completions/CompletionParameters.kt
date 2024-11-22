@@ -3,6 +3,7 @@ package ee.carlrobert.codegpt.completions
 import ee.carlrobert.codegpt.ReferencedFile
 import ee.carlrobert.codegpt.conversations.Conversation
 import ee.carlrobert.codegpt.conversations.message.Message
+import ee.carlrobert.codegpt.settings.prompts.PersonaDetails
 import ee.carlrobert.codegpt.util.file.FileUtil
 import java.nio.file.Files
 import java.nio.file.Path
@@ -17,7 +18,8 @@ class ChatCompletionParameters private constructor(
     var sessionId: UUID?,
     var retry: Boolean,
     var imageDetails: ImageDetails?,
-    var referencedFiles: List<ReferencedFile>?
+    var referencedFiles: List<ReferencedFile>?,
+    var persona: PersonaDetails?,
 ) : CompletionParameters {
 
     fun toBuilder(): Builder {
@@ -27,6 +29,7 @@ class ChatCompletionParameters private constructor(
             retry(this@ChatCompletionParameters.retry)
             imageDetails(this@ChatCompletionParameters.imageDetails)
             referencedFiles(this@ChatCompletionParameters.referencedFiles)
+            persona(this@ChatCompletionParameters.persona)
         }
     }
 
@@ -36,6 +39,7 @@ class ChatCompletionParameters private constructor(
         private var retry: Boolean = false
         private var imageDetails: ImageDetails? = null
         private var referencedFiles: List<ReferencedFile>? = null
+        private var persona: PersonaDetails? = null
 
         fun sessionId(sessionId: UUID?) = apply { this.sessionId = sessionId }
         fun conversationType(conversationType: ConversationType) =
@@ -55,6 +59,8 @@ class ChatCompletionParameters private constructor(
         fun referencedFiles(referencedFiles: List<ReferencedFile>?) =
             apply { this.referencedFiles = referencedFiles }
 
+        fun persona(persona: PersonaDetails?) = apply { this.persona = persona }
+
         fun build(): ChatCompletionParameters {
             return ChatCompletionParameters(
                 conversation,
@@ -63,7 +69,8 @@ class ChatCompletionParameters private constructor(
                 sessionId,
                 retry,
                 imageDetails,
-                referencedFiles
+                referencedFiles,
+                persona
             )
         }
     }

@@ -1,6 +1,8 @@
 package ee.carlrobert.codegpt.settings.configuration
 
 import com.intellij.openapi.components.service
+import ee.carlrobert.codegpt.settings.prompts.CommitMessageTemplate
+import ee.carlrobert.codegpt.settings.prompts.PromptsSettings
 import git4idea.commands.GitCommand
 import org.assertj.core.api.Assertions.assertThat
 import testsupport.VcsTestCase
@@ -12,7 +14,7 @@ class CommitMessageTemplateTest : VcsTestCase() {
         git(GitCommand.INIT)
         git(GitCommand.CHECKOUT, listOf("-b", "feature/my-cool-feature"))
         registerRepository()
-        service<ConfigurationSettings>().state.commitMessagePrompt = buildString {
+        service<PromptsSettings>().state.coreActions.generateCommitMessage.instructions = buildString {
             append("Branch: {BRANCH_NAME}\n")
             append("Date: {DATE_ISO_8601}")
         }

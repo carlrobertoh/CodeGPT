@@ -3,12 +3,11 @@ package ee.carlrobert.codegpt.completions.factory
 import com.intellij.openapi.components.service
 import ee.carlrobert.codegpt.completions.BaseRequestFactory
 import ee.carlrobert.codegpt.completions.ChatCompletionParameters
-import ee.carlrobert.codegpt.completions.CompletionRequestUtil.FIX_COMPILE_ERRORS_SYSTEM_PROMPT
 import ee.carlrobert.codegpt.completions.ConversationType
 import ee.carlrobert.codegpt.completions.llama.LlamaModel
 import ee.carlrobert.codegpt.completions.llama.PromptTemplate
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
-import ee.carlrobert.codegpt.settings.persona.PersonaSettings.Companion.getSystemPrompt
+import ee.carlrobert.codegpt.settings.prompts.PromptsSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest
 
@@ -18,9 +17,9 @@ class LlamaRequestFactory : BaseRequestFactory() {
         val promptTemplate = getPromptTemplate()
         val systemPrompt =
             if (params.conversationType == ConversationType.FIX_COMPILE_ERRORS)
-                FIX_COMPILE_ERRORS_SYSTEM_PROMPT
+                service<PromptsSettings>().state.coreActions.fixCompileErrors.instructions
             else
-                getSystemPrompt()
+                PromptsSettings.getSelectedPersonaSystemPrompt()
         val prompt = promptTemplate.buildPrompt(
             systemPrompt,
             getPromptWithFilesContext(params),
