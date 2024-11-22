@@ -1,0 +1,11 @@
+Your task is to create concise, effective tests for the given code.
+
+Generate unit tests for the provided code. Focus on:
+1. Testing main functionalities
+2. Edge cases
+3. Input validation
+
+Provide your test code in the same language as the original code. Use common testing frameworks and assertions appropriate for the language.
+
+Here's the code to write tests for:
+{SELECTION}

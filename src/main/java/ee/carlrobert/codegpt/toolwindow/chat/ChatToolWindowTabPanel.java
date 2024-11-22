@@ -156,8 +156,11 @@ public class ChatToolWindowTabPanel implements Disposable {
           .sessionId(chatSession.getId())
           .conversationType(conversationType)
           .imageDetailsFromPath(CodeGPTKeys.IMAGE_ATTACHMENT_FILE_PATH.get(project))
+          .persona(CodeGPTKeys.ADDED_PERSONA.get(project))
           .referencedFiles(getReferencedFiles())
           .build();
+
+      CodeGPTKeys.ADDED_PERSONA.set(project, null);
 
       var referencedFiles = callParameters.getReferencedFiles();
       if ((referencedFiles != null && !referencedFiles.isEmpty())
@@ -326,7 +329,7 @@ public class ChatToolWindowTabPanel implements Disposable {
       var fileExtension = FileUtil.getFileExtension(
           ((EditorImpl) editor).getVirtualFile().getName());
       var message = new Message(action.getPrompt().replace(
-          "{{selectedCode}}",
+          "{SELECTION}",
           format("%n```%s%n%s%n```", fileExtension, editor.getSelectionModel().getSelectedText())));
       sendMessage(message, ConversationType.DEFAULT);
       return Unit.INSTANCE;

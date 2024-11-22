@@ -5,6 +5,7 @@ import static java.lang.String.format;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.extensions.PluginId;
@@ -12,7 +13,7 @@ import com.intellij.openapi.project.Project;
 import ee.carlrobert.codegpt.CodeGPTKeys;
 import ee.carlrobert.codegpt.ReferencedFile;
 import ee.carlrobert.codegpt.conversations.message.Message;
-import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
+import ee.carlrobert.codegpt.settings.prompts.PromptsSettings;
 import ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowContentManager;
 import ee.carlrobert.codegpt.util.file.FileUtil;
 import java.util.Collection;
@@ -45,32 +46,37 @@ public class EditorActionsUtil {
         ActionManager.getInstance().getAction("CodeGPT.MyEditorActionsGroup");
     if (actionGroup instanceof DefaultActionGroup group) {
       group.removeAll();
-      var configuredActions = ConfigurationSettings.getState().getTableData();
-      configuredActions.forEach((label, prompt) -> {
-        // using label as action description to prevent com.intellij.diagnostic.PluginException
-        // https://github.com/carlrobertoh/CodeGPT/issues/95
-        var action = new BaseEditorAction(label, label) {
-          @Override
-          protected void actionPerformed(Project project, Editor editor, String selectedText) {
-            var toolWindowContentManager =
-                project.getService(ChatToolWindowContentManager.class);
-            toolWindowContentManager.getToolWindow().show();
+      ApplicationManager.getApplication().getService(PromptsSettings.class)
+          .getState()
+          .getChatActions()
+          .getPrompts()
+          .forEach((promptDetails) -> {
+            // using label as action description to prevent com.intellij.diagnostic.PluginException
+            // https://github.com/carlrobertoh/CodeGPT/issues/95
+            var action = new BaseEditorAction(promptDetails.getName(), promptDetails.getName()) {
+              @Override
+              protected void actionPerformed(Project project, Editor editor, String selectedText) {
+                var toolWindowContentManager =
+                    project.getService(ChatToolWindowContentManager.class);
+                toolWindowContentManager.getToolWindow().show();
 
-            var fileExtension = FileUtil.getFileExtension(
+                var fileExtension = FileUtil.getFileExtension(
                 ((EditorImpl) editor).getVirtualFile().getName());
-            var message = new Message(prompt.replace(
-                "{{selectedCode}}",
-                format("%n```%s%n%s%n```", fileExtension, selectedText)));
-            message.setReferencedFilePaths(
-                Stream.ofNullable(project.getUserData(CodeGPTKeys.SELECTED_FILES))
-                    .flatMap(Collection::stream)
-                    .map(ReferencedFile::getFilePath)
-                    .toList());
-            toolWindowContentManager.sendMessage(message);
-          }
-        };
-        group.add(action);
-      });
+                var prompt =
+                    promptDetails.getInstructions() == null ? "" : promptDetails.getInstructions();
+                var message = new Message(prompt.replace(
+                    "{SELECTION}",
+                    format("%n```%s%n%s%n```", fileExtension, selectedText)));
+                message.setReferencedFilePaths(
+                    Stream.ofNullable(project.getUserData(CodeGPTKeys.SELECTED_FILES))
+                        .flatMap(Collection::stream)
+                        .map(ReferencedFile::getFilePath)
+                        .toList());
+                toolWindowContentManager.sendMessage(message);
+              }
+            };
+            group.add(action);
+          });
     }
   }
 

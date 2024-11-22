@@ -1,11 +1,15 @@
-package ee.carlrobert.codegpt.settings.configuration
+package ee.carlrobert.codegpt.settings.prompts
 
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.Service.Level.PROJECT
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
+import ee.carlrobert.codegpt.settings.configuration.BranchNamePlaceholderStrategy
+import ee.carlrobert.codegpt.settings.configuration.DatePlaceholderStrategy
+import ee.carlrobert.codegpt.settings.configuration.Placeholder
 import ee.carlrobert.codegpt.settings.configuration.Placeholder.BRANCH_NAME
 import ee.carlrobert.codegpt.settings.configuration.Placeholder.DATE_ISO_8601
+import ee.carlrobert.codegpt.settings.configuration.PlaceholderStrategy
 
 @Service(PROJECT)
 class CommitMessageTemplate private constructor(project: Project) {
@@ -17,12 +21,8 @@ class CommitMessageTemplate private constructor(project: Project) {
             }
 
             return buildString {
-                append("<html>\n")
-                append("<body>\n")
                 append("<p>Template for generating commit messages. Use the following placeholders to insert dynamic values:</p>\n")
                 append("<ul>$placeholderDescriptions</ul>\n")
-                append("</body>\n")
-                append("</html>")
             }
         }
     }
@@ -33,7 +33,7 @@ class CommitMessageTemplate private constructor(project: Project) {
     )
 
     fun getSystemPrompt(): String =
-        service<ConfigurationSettings>().state.commitMessagePrompt.let { template ->
+        service<PromptsSettings>().state.coreActions.generateCommitMessage.instructions.let { template ->
             placeholderStrategyMapping.entries.fold(
                 template ?: ""
             ) { acc, (placeholder, strategy) ->
