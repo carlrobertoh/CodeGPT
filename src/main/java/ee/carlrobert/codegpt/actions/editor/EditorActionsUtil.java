@@ -61,7 +61,7 @@ public class EditorActionsUtil {
                 toolWindowContentManager.getToolWindow().show();
 
                 var fileExtension = FileUtil.getFileExtension(
-                ((EditorImpl) editor).getVirtualFile().getName());
+                    ((EditorImpl) editor).getVirtualFile().getName());
                 var prompt =
                     promptDetails.getInstructions() == null ? "" : promptDetails.getInstructions();
                 var message = new Message(prompt.replace(

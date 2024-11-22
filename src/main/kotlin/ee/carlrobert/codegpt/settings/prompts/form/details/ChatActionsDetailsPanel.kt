@@ -4,6 +4,7 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.ui.CardLayoutPanel
+import com.intellij.ui.DocumentAdapter
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBTextField
 import com.intellij.ui.dsl.builder.Align
@@ -68,11 +69,23 @@ class ChatActionsDetailsPanel : PromptDetailsPanel {
         private val defaultInstructions: String? = "",
     ) : AbstractEditorPromptPanel(details, listOf("{SELECTION}")) {
 
-        private val nameField = JBTextField(details.name)
+        private val nameField = JBTextField(details.name).apply {
+            document.addDocumentListener(object : DocumentAdapter() {
+                override fun textChanged(e: javax.swing.event.DocumentEvent) {
+                    details.name = text
+                }
+            })
+        }
         private val startInNewChatCheckBox = JBCheckBox(
             "Start in a new chat window",
             service<PromptsSettings>().state.chatActions.startInNewWindow
-        )
+        ).apply {
+            addChangeListener {
+                service<PromptsSettings>().state
+                    .chatActions
+                    .startInNewWindow = isSelected
+            }
+        }
 
         fun getPanel(): JPanel = panel {
             row {
@@ -103,7 +116,6 @@ class ChatActionsDetailsPanel : PromptDetailsPanel {
                 cell(nameField)
                     .label("Action name:")
                     .align(Align.FILL)
-                    .onChanged { details.name = it.text }
             }
             row {
                 cell(startInNewChatCheckBox)
@@ -111,11 +123,6 @@ class ChatActionsDetailsPanel : PromptDetailsPanel {
                         "If not checked, the previous chat history will be sent along with each action",
                         60
                     )
-                    .onChanged {
-                        service<PromptsSettings>().state
-                            .chatActions
-                            .startInNewWindow = it.isSelected
-                    }
             }
         }
     }

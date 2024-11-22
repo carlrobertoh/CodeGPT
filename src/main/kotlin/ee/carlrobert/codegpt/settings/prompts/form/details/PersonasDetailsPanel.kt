@@ -5,6 +5,7 @@ import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.observable.util.not
 import com.intellij.ui.CardLayoutPanel
+import com.intellij.ui.DocumentAdapter
 import com.intellij.ui.components.JBTextField
 import com.intellij.ui.dsl.builder.Align
 import com.intellij.ui.dsl.builder.TopGap
@@ -58,6 +59,12 @@ class PersonasDetailsPanel(onSelected: (PersonaPromptDetails) -> Unit) : PromptD
 
         private val nameField = JBTextField(details.name).apply {
             isEnabled = details.id != 1L
+
+            document.addDocumentListener(object : DocumentAdapter() {
+                override fun textChanged(e: javax.swing.event.DocumentEvent) {
+                    details.name = text
+                }
+            })
         }
 
         fun getPanel(): JPanel = panel {
@@ -93,12 +100,11 @@ class PersonasDetailsPanel(onSelected: (PersonaPromptDetails) -> Unit) : PromptD
                 cell(nameField)
                     .label("Persona name:")
                     .align(Align.FILL)
-                    .onChanged { details.name = it.text }
             }
             row {
                 button("Set as Default") {
                     onSelected(details)
-                }.enabledIf(details.selected.not())
+                }
             }.topGap(TopGap.SMALL)
         }
     }
