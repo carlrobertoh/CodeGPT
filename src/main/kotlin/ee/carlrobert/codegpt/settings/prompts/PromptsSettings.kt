@@ -31,13 +31,13 @@ class PromptsSettingsState : BaseState() {
 class CoreActionsState : BaseState() {
 
     companion object {
-        val DEFAULT_EDIT_CODE_PROMPT = getResourceContent("/prompts/edit-code.txt")
+        val DEFAULT_EDIT_CODE_PROMPT = getResourceContent("/prompts/core/edit-code.txt")
         val DEFAULT_GENERATE_COMMIT_MESSAGE_PROMPT =
-            getResourceContent("/prompts/generate-commit-message.txt")
+            getResourceContent("/prompts/core/generate-commit-message.txt")
         val DEFAULT_GENERATE_NAME_LOOKUPS_PROMPT =
-            getResourceContent("/prompts/generate-name-lookups.txt")
+            getResourceContent("/prompts/core/generate-name-lookups.txt")
         val DEFAULT_FIX_COMPILE_ERRORS_PROMPT =
-            getResourceContent("/prompts/fix-compile-errors.txt")
+            getResourceContent("/prompts/core/fix-compile-errors.txt")
     }
 
     var editCode by property(CoreActionPromptDetailsState().apply {
@@ -65,7 +65,7 @@ class CoreActionsState : BaseState() {
 class PersonasState : BaseState() {
 
     companion object {
-        val DEFAULT_PERSONA_PROMPT = getResourceContent("/prompts/default-completion.txt")
+        val DEFAULT_PERSONA_PROMPT = getResourceContent("/prompts/persona/default-persona.txt")
         val DEFAULT_PERSONA = PersonaPromptDetailsState().apply {
             id = 1L
             name = "CodeGPT Default"
@@ -81,7 +81,7 @@ class PersonasState : BaseState() {
         prompts.add(PersonaPromptDetailsState().apply {
             id = 2L
             name = "Rubber Duck"
-            instructions = getResourceContent("/prompts/rubber-duck.txt")
+            instructions = getResourceContent("/prompts/persona/rubber-duck.txt")
         })
 
         // migrate old personas
@@ -101,15 +101,14 @@ class PersonasState : BaseState() {
 
 class ChatActionsState : BaseState() {
     var prompts by list<ChatActionPromptDetailsState>()
-    var startInNewWindow by property(true)
+    var startInNewWindow by property(false)
 
     companion object {
-        const val DEFAULT_FIND_BUGS_PROMPT =
-            "Find bugs and output code with bugs fixed in the following code: {SELECTION}"
-        const val DEFAULT_WRITE_TESTS_PROMPT = "Write Tests for the selected code {SELECTION}"
-        const val DEFAULT_EXPLAIN_PROMPT = "Explain the selected code {SELECTION}"
-        const val DEFAULT_REFACTOR_PROMPT = "Refactor the selected code {SELECTION}"
-        const val DEFAULT_OPTIMIZE_PROMPT = "Optimize the selected code {SELECTION}"
+        val DEFAULT_FIND_BUGS_PROMPT = getResourceContent("/prompts/chat/find-bugs.txt")
+        val DEFAULT_WRITE_TESTS_PROMPT = getResourceContent("/prompts/chat/write-tests.txt")
+        val DEFAULT_EXPLAIN_PROMPT = getResourceContent("/prompts/chat/explain.txt")
+        val DEFAULT_REFACTOR_PROMPT = getResourceContent("/prompts/chat/refactor.txt")
+        val DEFAULT_OPTIMIZE_PROMPT = getResourceContent("/prompts/chat/optimize.txt")
     }
 
     init {

@@ -1,0 +1,15 @@
+Your task is to find potential bugs in the given code snippet.
+
+Carefully examine the code for potential bugs, logical errors, or common programming mistakes. Consider issues such as:
+- Syntax errors
+- Off-by-one errors
+- Null pointer exceptions
+- Memory leaks
+- Infinite loops
+- Incorrect logic
+- Unhandled exceptions
+
+Provide a concise list of potential bugs you've identified. If you don't find any bugs, state that the code appears to be bug-free based on your analysis.
+
+Here's the code to analyze:
+{SELECTION}
