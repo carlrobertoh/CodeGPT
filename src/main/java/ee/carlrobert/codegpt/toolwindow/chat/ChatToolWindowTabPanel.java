@@ -327,7 +327,7 @@ public class ChatToolWindowTabPanel implements Disposable {
 
       var fileExtension = FileUtil.getFileExtension(editor.getVirtualFile().getName());
       var message = new Message(action.getPrompt().replace(
-          "{{selectedCode}}",
+          "{SELECTION}",
           format("%n```%s%n%s%n```", fileExtension, editor.getSelectionModel().getSelectedText())));
       sendMessage(message, ConversationType.DEFAULT);
       return Unit.INSTANCE;
