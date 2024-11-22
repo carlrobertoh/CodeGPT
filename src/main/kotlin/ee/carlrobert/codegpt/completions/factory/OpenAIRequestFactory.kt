@@ -3,13 +3,11 @@ package ee.carlrobert.codegpt.completions.factory
 import com.intellij.openapi.components.service
 import ee.carlrobert.codegpt.EncodingManager
 import ee.carlrobert.codegpt.completions.*
-import ee.carlrobert.codegpt.completions.CompletionRequestUtil.EDIT_CODE_SYSTEM_PROMPT
-import ee.carlrobert.codegpt.completions.CompletionRequestUtil.FIX_COMPILE_ERRORS_SYSTEM_PROMPT
-import ee.carlrobert.codegpt.completions.CompletionRequestUtil.GENERATE_METHOD_NAMES_SYSTEM_PROMPT
 import ee.carlrobert.codegpt.conversations.ConversationsState
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings.Companion.getState
-import ee.carlrobert.codegpt.settings.persona.PersonaSettings.Companion.getSystemPrompt
+import ee.carlrobert.codegpt.settings.prompts.CoreActionsState
+import ee.carlrobert.codegpt.settings.prompts.PromptsSettings
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings
 import ee.carlrobert.codegpt.util.file.FileUtil.getImageMediaType
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel
@@ -47,10 +45,12 @@ class OpenAIRequestFactory : CompletionRequestFactory {
     override fun createEditCodeRequest(params: EditCodeCompletionParameters): OpenAIChatCompletionRequest {
         val model = service<OpenAISettings>().state.model
         val prompt = "Code to modify:\n${params.selectedText}\n\nInstructions: ${params.prompt}"
+        val systemPrompt = service<PromptsSettings>().state.coreActions.editCode.instructions
+            ?: CoreActionsState.DEFAULT_EDIT_CODE_PROMPT
         if (model == "o1-mini" || model == "o1-preview") {
-            return buildBasicO1Request(model, prompt, EDIT_CODE_SYSTEM_PROMPT)
+            return buildBasicO1Request(model, prompt, systemPrompt)
         }
-        return createBasicCompletionRequest(EDIT_CODE_SYSTEM_PROMPT, prompt, model, true)
+        return createBasicCompletionRequest(systemPrompt, prompt, model, true)
     }
 
     override fun createCommitMessageRequest(params: CommitMessageCompletionParameters): OpenAIChatCompletionRequest {
@@ -66,9 +66,17 @@ class OpenAIRequestFactory : CompletionRequestFactory {
         val model = service<OpenAISettings>().state.model
         val (prompt) = params
         if (model == "o1-mini" || model == "o1-preview") {
-            return buildBasicO1Request(model, prompt, GENERATE_METHOD_NAMES_SYSTEM_PROMPT)
+            return buildBasicO1Request(
+                model,
+                prompt,
+                service<PromptsSettings>().state.coreActions.generateNameLookups.instructions
+                    ?: CoreActionsState.DEFAULT_GENERATE_NAME_LOOKUPS_PROMPT
+            )
         }
-        return createBasicCompletionRequest(GENERATE_METHOD_NAMES_SYSTEM_PROMPT, prompt, model)
+        return createBasicCompletionRequest(
+            service<PromptsSettings>().state.coreActions.generateNameLookups.instructions
+                ?: CoreActionsState.DEFAULT_GENERATE_NAME_LOOKUPS_PROMPT, prompt, model
+        )
     }
 
     companion object {
@@ -142,10 +150,13 @@ class OpenAIRequestFactory : CompletionRequestFactory {
             val role = if ("o1-mini" == model || "o1-preview" == model) "user" else "system"
 
             if (callParameters.conversationType == ConversationType.DEFAULT) {
-                val sessionPersonaDetails = callParameters.message.personaDetails
-                if (callParameters.message.personaDetails == null) {
+                val sessionPersonaDetails = callParameters.persona
+                if (sessionPersonaDetails == null) {
                     messages.add(
-                        OpenAIChatCompletionStandardMessage(role, getSystemPrompt())
+                        OpenAIChatCompletionStandardMessage(
+                            role,
+                            PromptsSettings.getSelectedPersonaSystemPrompt()
+                        )
                     )
                 } else {
                     messages.add(
@@ -158,7 +169,10 @@ class OpenAIRequestFactory : CompletionRequestFactory {
             }
             if (callParameters.conversationType == ConversationType.FIX_COMPILE_ERRORS) {
                 messages.add(
-                    OpenAIChatCompletionStandardMessage(role, FIX_COMPILE_ERRORS_SYSTEM_PROMPT)
+                    OpenAIChatCompletionStandardMessage(
+                        role,
+                        service<PromptsSettings>().state.coreActions.fixCompileErrors.instructions
+                    )
                 )
             }
 

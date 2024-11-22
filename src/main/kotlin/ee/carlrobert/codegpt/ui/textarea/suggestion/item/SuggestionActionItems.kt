@@ -12,8 +12,8 @@ import ee.carlrobert.codegpt.EncodingManager
 import ee.carlrobert.codegpt.settings.GeneralSettings
 import ee.carlrobert.codegpt.settings.documentation.DocumentationSettings
 import ee.carlrobert.codegpt.settings.documentation.DocumentationsConfigurable
-import ee.carlrobert.codegpt.settings.persona.PersonaDetails
-import ee.carlrobert.codegpt.settings.persona.PersonasConfigurable
+import ee.carlrobert.codegpt.settings.prompts.PersonaDetails
+import ee.carlrobert.codegpt.settings.prompts.PromptsConfigurable
 import ee.carlrobert.codegpt.settings.service.ServiceType
 import ee.carlrobert.codegpt.ui.AddDocumentationDialog
 import ee.carlrobert.codegpt.ui.DocumentationDetails
@@ -148,7 +148,7 @@ class CreatePersonaActionItem : SuggestionActionItem {
     override fun execute(project: Project, textPane: PromptTextField) {
         service<ShowSettingsUtil>().showSettingsDialog(
             project,
-            PersonasConfigurable::class.java
+            PromptsConfigurable::class.java
         )
     }
 }

@@ -20,7 +20,7 @@ import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.completions.CommitMessageCompletionParameters;
 import ee.carlrobert.codegpt.completions.CompletionRequestService;
-import ee.carlrobert.codegpt.settings.configuration.CommitMessageTemplate;
+import ee.carlrobert.codegpt.settings.prompts.CommitMessageTemplate;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.codegpt.util.CommitWorkflowChanges;
 import ee.carlrobert.codegpt.util.GitUtil;

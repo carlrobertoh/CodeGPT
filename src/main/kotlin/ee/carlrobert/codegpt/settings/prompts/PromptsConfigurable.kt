@@ -1,18 +1,19 @@
-package ee.carlrobert.codegpt.settings.persona
+package ee.carlrobert.codegpt.settings.prompts
 
 import com.intellij.openapi.options.Configurable
+import ee.carlrobert.codegpt.settings.prompts.form.PromptsForm
 import javax.swing.JComponent
 
-class PersonasConfigurable : Configurable {
+class PromptsConfigurable : Configurable {
 
-    private lateinit var component: PersonasSettingsForm
+    private lateinit var component: PromptsForm
 
     override fun getDisplayName(): String {
-        return "CodeGPT: Personas"
+        return "CodeGPT: Prompts"
     }
 
     override fun createComponent(): JComponent {
-        component = PersonasSettingsForm()
+        component = PromptsForm()
         return component.createPanel()
     }
 

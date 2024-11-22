@@ -28,8 +28,8 @@ import ee.carlrobert.codegpt.actions.toolwindow.OpenInEditorAction;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
-import ee.carlrobert.codegpt.settings.persona.PersonaSettings;
-import ee.carlrobert.codegpt.settings.persona.PersonasConfigurable;
+import ee.carlrobert.codegpt.settings.prompts.PromptsConfigurable;
+import ee.carlrobert.codegpt.settings.prompts.PromptsSettings;
 import ee.carlrobert.codegpt.settings.service.ProviderChangeNotifier;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.service.codegpt.CodeGPTUserDetailsNotifier;
@@ -213,7 +213,7 @@ public class ChatToolWindowPanel extends SimpleToolWindowPanel {
         @NotNull String place) {
       var link = new ActionLink(getSelectedPersonaName(), (e) -> {
         ShowSettingsUtil.getInstance()
-            .showSettingsDialog(project, PersonasConfigurable.class);
+            .showSettingsDialog(project, PromptsConfigurable.class);
       });
       link.setExternalLinkIcon();
       link.setFont(JBUI.Fonts.smallFont());
@@ -233,8 +233,9 @@ public class ChatToolWindowPanel extends SimpleToolWindowPanel {
     }
 
     private String getSelectedPersonaName() {
-      return ApplicationManager.getApplication().getService(PersonaSettings.class)
+      return ApplicationManager.getApplication().getService(PromptsSettings.class)
           .getState()
+          .getPersonas()
           .getSelectedPersona()
           .getName();
     }

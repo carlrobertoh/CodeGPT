@@ -2,6 +2,7 @@ package ee.carlrobert.codegpt.toolwindow.chat;
 
 import static java.util.Objects.requireNonNull;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComponentContainer;
@@ -16,7 +17,7 @@ import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.conversations.message.Message;
-import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
+import ee.carlrobert.codegpt.settings.prompts.PromptsSettings;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
@@ -38,8 +39,11 @@ public final class ChatToolWindowContentManager {
   public void sendMessage(Message message, ConversationType conversationType) {
     getToolWindow().show();
 
-    if (ConfigurationSettings.getState().getCreateNewChatOnEachAction()
-        || ConversationsState.getCurrentConversation() == null) {
+    var startInNewWindow = ApplicationManager.getApplication().getService(PromptsSettings.class)
+        .getState()
+        .getChatActions()
+        .getStartInNewWindow();
+    if (startInNewWindow || ConversationsState.getCurrentConversation() == null) {
       createNewTabPanel().sendMessage(message, conversationType);
       return;
     }

@@ -1,8 +1,9 @@
 package ee.carlrobert.codegpt.completions
 
-import ee.carlrobert.codegpt.completions.CompletionRequestUtil.EDIT_CODE_SYSTEM_PROMPT
-import ee.carlrobert.codegpt.completions.CompletionRequestUtil.GENERATE_METHOD_NAMES_SYSTEM_PROMPT
+import com.intellij.openapi.components.service
 import ee.carlrobert.codegpt.completions.factory.*
+import ee.carlrobert.codegpt.settings.prompts.CoreActionsState
+import ee.carlrobert.codegpt.settings.prompts.PromptsSettings
 import ee.carlrobert.codegpt.settings.service.ServiceType
 import ee.carlrobert.llm.completion.CompletionRequest
 
@@ -32,7 +33,9 @@ interface CompletionRequestFactory {
 abstract class BaseRequestFactory : CompletionRequestFactory {
     override fun createEditCodeRequest(params: EditCodeCompletionParameters): CompletionRequest {
         val prompt = "Code to modify:\n${params.selectedText}\n\nInstructions: ${params.prompt}"
-        return createBasicCompletionRequest(EDIT_CODE_SYSTEM_PROMPT, prompt, 8192, true)
+        return createBasicCompletionRequest(
+            service<PromptsSettings>().state.coreActions.editCode.instructions
+                ?: CoreActionsState.DEFAULT_EDIT_CODE_PROMPT, prompt, 8192, true)
     }
 
     override fun createCommitMessageRequest(params: CommitMessageCompletionParameters): CompletionRequest {
@@ -40,7 +43,12 @@ abstract class BaseRequestFactory : CompletionRequestFactory {
     }
 
     override fun createLookupRequest(params: LookupCompletionParameters): CompletionRequest {
-        return createBasicCompletionRequest(GENERATE_METHOD_NAMES_SYSTEM_PROMPT, params.prompt, 512)
+        return createBasicCompletionRequest(
+            service<PromptsSettings>().state.coreActions.generateNameLookups.instructions
+                ?: CoreActionsState.DEFAULT_GENERATE_NAME_LOOKUPS_PROMPT,
+            params.prompt,
+            512
+        )
     }
 
     abstract fun createBasicCompletionRequest(
