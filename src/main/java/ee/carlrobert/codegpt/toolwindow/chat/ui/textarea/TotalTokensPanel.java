@@ -21,7 +21,7 @@ import ee.carlrobert.codegpt.actions.IncludeFilesInContextNotifier;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
-import ee.carlrobert.codegpt.settings.persona.PersonaSettings;
+import ee.carlrobert.codegpt.settings.prompts.PromptsSettings;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import java.awt.FlowLayout;
 import java.awt.event.MouseAdapter;
@@ -141,7 +141,7 @@ public class TotalTokensPanel extends JPanel {
       List<ReferencedFile> includedFiles,
       @Nullable String highlightedText) {
     var tokenDetails = new TotalTokensDetails(
-        encodingManager.countTokens(PersonaSettings.getSystemPrompt()));
+        encodingManager.countTokens(PromptsSettings.getSelectedPersonaSystemPrompt()));
     tokenDetails.setConversationTokens(encodingManager.countConversationTokens(conversation));
     if (includedFiles != null) {
       tokenDetails.setReferencedFilesTokens(includedFiles.stream()

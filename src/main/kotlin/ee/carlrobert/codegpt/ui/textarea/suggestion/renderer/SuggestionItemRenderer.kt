@@ -8,8 +8,7 @@ import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.ui.dsl.gridLayout.UnscaledGaps
 import com.intellij.util.ui.JBUI
-import ee.carlrobert.codegpt.EncodingManager
-import ee.carlrobert.codegpt.settings.persona.PersonaSettings
+import ee.carlrobert.codegpt.settings.prompts.PromptsSettings
 import ee.carlrobert.codegpt.ui.textarea.PromptTextField
 import ee.carlrobert.codegpt.ui.textarea.suggestion.item.*
 import ee.carlrobert.codegpt.ui.textarea.suggestion.renderer.SuggestionItemRendererTextUtils.highlightSearchText
@@ -115,7 +114,7 @@ class DefaultItemRenderer(textPane: PromptTextField) : BaseItemRenderer(textPane
 
     private fun getDescription(item: SuggestionItem) =
         if (item is PersonaSuggestionGroupItem) {
-            service<PersonaSettings>().state.selectedPersona.name
+            service<PromptsSettings>().state.personas.selectedPersona.name
         } else {
             null
         }

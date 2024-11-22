@@ -13,7 +13,14 @@ import ee.carlrobert.codegpt.util.file.FileUtil.getResourceContent
     storages = [Storage("CodeGPT_PromptsSettings.xml")]
 )
 class PromptsSettings :
-    SimplePersistentStateComponent<PromptsSettingsState>(PromptsSettingsState())
+    SimplePersistentStateComponent<PromptsSettingsState>(PromptsSettingsState()) {
+    companion object {
+        @JvmStatic
+        fun getSelectedPersonaSystemPrompt(): String {
+            return service<PromptsSettings>().state.personas.selectedPersona.instructions ?: ""
+        }
+    }
+}
 
 class PromptsSettingsState : BaseState() {
     var coreActions by property(CoreActionsState())
@@ -172,3 +179,6 @@ class ChatActionPromptDetailsState : PromptDetailsState() {
 class PersonaPromptDetailsState : PromptDetailsState() {
     var id by property(1L)
 }
+
+@JvmRecord
+data class PersonaDetails(val id: Long, val name: String, val instructions: String)

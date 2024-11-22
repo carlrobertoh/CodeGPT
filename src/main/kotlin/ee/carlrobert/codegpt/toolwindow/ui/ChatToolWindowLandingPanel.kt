@@ -81,17 +81,17 @@ enum class LandingPanelAction(
     FIND_BUGS(
         "Find Bugs",
         "Find bugs in this code",
-        "Find bugs and output code with bugs fixed in the selected code: {{selectedCode}}"
+        "Find bugs and output code with bugs fixed in the selected code: {SELECTION}"
     ),
     WRITE_TESTS(
         "Write Tests",
         "Write unit tests for this code",
-        "Write unit tests for the selected code: {{selectedCode}}"
+        "Write unit tests for the selected code: {SELECTION}"
     ),
     EXPLAIN(
         "Explain",
         "Explain the selected code",
-        "Explain the selected code: {{selectedCode}}"
+        "Explain the selected code: {SELECTION}"
     )
 }
 

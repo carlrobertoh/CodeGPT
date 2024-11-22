@@ -2,7 +2,7 @@ package ee.carlrobert.codegpt.settings.configuration
 
 import com.intellij.openapi.components.*
 import ee.carlrobert.codegpt.actions.editor.EditorActionsUtil
-import ee.carlrobert.codegpt.completions.CompletionRequestUtil.GENERATE_COMMIT_MESSAGE_SYSTEM_PROMPT
+import ee.carlrobert.codegpt.settings.prompts.CoreActionsState
 import kotlin.math.max
 import kotlin.math.min
 
@@ -22,7 +22,7 @@ class ConfigurationSettings :
 }
 
 class ConfigurationSettingsState : BaseState() {
-    var commitMessagePrompt by string(GENERATE_COMMIT_MESSAGE_SYSTEM_PROMPT)
+    var commitMessagePrompt by string(CoreActionsState.DEFAULT_GENERATE_COMMIT_MESSAGE_PROMPT)
     var maxTokens by property(2048)
     var temperature by property(0.1f) { max(0f, min(1f, it)) }
     var checkForPluginUpdates by property(true)

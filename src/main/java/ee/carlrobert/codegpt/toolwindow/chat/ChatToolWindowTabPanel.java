@@ -155,8 +155,11 @@ public class ChatToolWindowTabPanel implements Disposable {
           .sessionId(chatSession.getId())
           .conversationType(conversationType)
           .imageDetailsFromPath(CodeGPTKeys.IMAGE_ATTACHMENT_FILE_PATH.get(project))
+          .persona(CodeGPTKeys.ADDED_PERSONA.get(project))
           .referencedFiles(getReferencedFiles())
           .build();
+
+      CodeGPTKeys.ADDED_PERSONA.set(project, null);
 
       var referencedFiles = callParameters.getReferencedFiles();
       if ((referencedFiles != null && !referencedFiles.isEmpty())
