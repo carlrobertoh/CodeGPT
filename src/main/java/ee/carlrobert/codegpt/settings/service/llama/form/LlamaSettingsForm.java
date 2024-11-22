@@ -20,7 +20,8 @@ public class LlamaSettingsForm extends JPanel {
   public LlamaSettingsForm(LlamaSettingsState settings) {
     llamaServerPreferencesForm = new LlamaServerPreferencesForm(settings);
     llamaRequestPreferencesForm = new LlamaRequestPreferencesForm(settings);
-    codeCompletionConfigurationForm = new CodeCompletionConfigurationForm(settings.isCodeCompletionsEnabled());
+    codeCompletionConfigurationForm =
+            new CodeCompletionConfigurationForm(settings.isCodeCompletionsEnabled());
     init();
   }
 
