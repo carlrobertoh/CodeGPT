@@ -23,7 +23,6 @@ public class ConfigurationComponent {
   private final JPanel mainPanel;
   private final JBCheckBox checkForPluginUpdatesCheckBox;
   private final JBCheckBox checkForNewScreenshotsCheckBox;
-  private final JBCheckBox openNewTabCheckBox;
   private final JBCheckBox methodNameGenerationCheckBox;
   private final JBCheckBox autoFormattingCheckBox;
   private final JBCheckBox autocompletionPostProcessingCheckBox;
@@ -67,9 +66,6 @@ public class ConfigurationComponent {
     checkForNewScreenshotsCheckBox = new JBCheckBox(
         CodeGPTBundle.get("configurationConfigurable.checkForNewScreenshots.label"),
         configuration.getCheckForNewScreenshots());
-    openNewTabCheckBox = new JBCheckBox(
-        CodeGPTBundle.get("configurationConfigurable.openNewTabCheckBox.label"),
-        configuration.getCreateNewChatOnEachAction());
     methodNameGenerationCheckBox = new JBCheckBox(
         CodeGPTBundle.get("configurationConfigurable.enableMethodNameGeneration.label"),
         configuration.getMethodNameGenerationEnabled());
@@ -92,7 +88,6 @@ public class ConfigurationComponent {
     mainPanel = FormBuilder.createFormBuilder()
         .addComponent(checkForPluginUpdatesCheckBox)
         .addComponent(checkForNewScreenshotsCheckBox)
-        .addComponent(openNewTabCheckBox)
         .addComponent(methodNameGenerationCheckBox)
         .addComponent(autoFormattingCheckBox)
         .addComponent(autocompletionPostProcessingCheckBox)
@@ -116,7 +111,6 @@ public class ConfigurationComponent {
     state.setTemperature(Float.parseFloat(temperatureField.getText()));
     state.setCheckForPluginUpdates(checkForPluginUpdatesCheckBox.isSelected());
     state.setCheckForNewScreenshots(checkForNewScreenshotsCheckBox.isSelected());
-    state.setCreateNewChatOnEachAction(openNewTabCheckBox.isSelected());
     state.setMethodNameGenerationEnabled(methodNameGenerationCheckBox.isSelected());
     state.setAutoFormattingEnabled(autoFormattingCheckBox.isSelected());
     state.setAutocompletionPostProcessingEnabled(autocompletionPostProcessingCheckBox.isSelected());
@@ -131,7 +125,6 @@ public class ConfigurationComponent {
     temperatureField.setText(String.valueOf(configuration.getTemperature()));
     checkForPluginUpdatesCheckBox.setSelected(configuration.getCheckForPluginUpdates());
     checkForNewScreenshotsCheckBox.setSelected(configuration.getCheckForNewScreenshots());
-    openNewTabCheckBox.setSelected(configuration.getCreateNewChatOnEachAction());
     methodNameGenerationCheckBox.setSelected(configuration.getMethodNameGenerationEnabled());
     autoFormattingCheckBox.setSelected(configuration.getAutoFormattingEnabled());
     autocompletionPostProcessingCheckBox.setSelected(

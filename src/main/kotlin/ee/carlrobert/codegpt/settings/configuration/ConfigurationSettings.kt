@@ -27,7 +27,6 @@ class ConfigurationSettingsState : BaseState() {
     var temperature by property(0.1f) { max(0f, min(1f, it)) }
     var checkForPluginUpdates by property(true)
     var checkForNewScreenshots by property(false)
-    var createNewChatOnEachAction by property(false)
     var ignoreGitCommitTokenLimit by property(false)
     var methodNameGenerationEnabled by property(true)
     var captureCompileErrors by property(true)
