@@ -8,7 +8,7 @@ import javax.swing.Icon
 object CodeGPTAvailableModels {
 
     val DEFAULT_CHAT_MODEL = CodeGPTModel("GPT-4o", "gpt-4o", Icons.OpenAI, INDIVIDUAL)
-    val DEFAULT_CODE_MODEL = CodeGPTModel("GPT-3.5 Turbo Instruct", "gpt-3.5-turbo-instruct", Icons.OpenAI, FREE)
+    val DEFAULT_CODE_MODEL = CodeGPTModel("Codestral", "codestral", Icons.Mistral, ANONYMOUS)
 
     @JvmStatic
     fun getToolWindowModels(pricingPlan: PricingPlan?): List<CodeGPTModel> {
@@ -59,9 +59,10 @@ object CodeGPTAvailableModels {
 
     @JvmStatic
     val ALL_CODE_MODELS: List<CodeGPTModel> = listOf(
-        CodeGPTModel("Qwen 2.5 Coder (32B)", "qwen-2.5-32b-code", Icons.Qwen, FREE),
         DEFAULT_CODE_MODEL,
-        CodeGPTModel("StarCoder (7B) - FREE", "starcoder-7b", Icons.CodeGPTModel, ANONYMOUS),
+        CodeGPTModel("Qwen 2.5 Coder", "qwen-2.5-32b-code", Icons.Qwen, FREE),
+        CodeGPTModel("GPT-3.5 Turbo Instruct", "gpt-3.5-turbo-instruct", Icons.OpenAI, FREE),
+        CodeGPTModel("StarCoder", "starcoder-7b", Icons.CodeGPTModel, ANONYMOUS),
     )
 
     @JvmStatic
