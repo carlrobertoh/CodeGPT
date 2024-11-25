@@ -146,13 +146,9 @@ class PromptsForm {
     }
 
     private fun expandAll() {
-        tree.expandPaths(
-            listOf(
-                TreePath(coreActionsNode.path),
-                TreePath(personasNode.path),
-                TreePath(chatActionsNode.path)
-            )
-        )
+        tree.expandPath(TreePath(coreActionsNode.path))
+        tree.expandPath(TreePath(personasNode.path))
+        tree.expandPath(TreePath(chatActionsNode.path))
     }
 
     private fun isCoreActionsModified(settingsState: CoreActionsState): Boolean {
