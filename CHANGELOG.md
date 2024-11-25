@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Single standalone view for prompt configuration
+- Codestral model for code completion (CodeGPT)
+
+### Fixed
+
+- Git diff logic for commit message generation
+
 ## [2.12.5-233] - 2024-11-18
 
 ### Added
