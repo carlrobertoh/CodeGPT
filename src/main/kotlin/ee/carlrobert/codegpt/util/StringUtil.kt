@@ -22,4 +22,12 @@ object StringUtil {
 
         return completionLine
     }
+
+    fun String.extractUntilNewline(): String {
+        val index = this.indexOf('\n')
+        if (index == -1) {
+            return this
+        }
+        return this.substring(0, index + 1)
+    }
 }
