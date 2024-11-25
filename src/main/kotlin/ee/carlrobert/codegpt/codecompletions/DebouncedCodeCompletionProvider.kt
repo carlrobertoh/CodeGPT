@@ -4,6 +4,7 @@ import com.intellij.codeInsight.inline.completion.*
 import com.intellij.codeInsight.inline.completion.elements.InlineCompletionElement
 import com.intellij.codeInsight.inline.completion.suggestion.InlineCompletionSingleSuggestion
 import com.intellij.codeInsight.inline.completion.suggestion.InlineCompletionSuggestion
+import com.intellij.codeInsight.lookup.LookupManager
 import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
@@ -18,6 +19,7 @@ import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
 import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings
+import ee.carlrobert.codegpt.util.StringUtil.extractUntilNewline
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.channelFlow
@@ -50,14 +52,6 @@ class DebouncedCodeCompletionProvider : DebouncedInlineCompletionProvider() {
     override val providerPresentation: InlineCompletionProviderPresentation
         get() = CodeCompletionProviderPresentation()
 
-    private fun String.extractUntilNewline(): String {
-        val index = this.indexOf('\n')
-        if (index == -1) {
-            return this
-        }
-        return this.substring(0, index + 1)
-    }
-
     override suspend fun getSuggestionDebounced(request: InlineCompletionRequest): InlineCompletionSuggestion {
         val editor = request.editor
         val remainingCompletion = REMAINING_EDITOR_COMPLETION.get(editor)
@@ -74,8 +68,12 @@ class DebouncedCodeCompletionProvider : DebouncedInlineCompletionProvider() {
             return InlineCompletionSingleSuggestion.build(elements = emptyFlow())
         }
 
+        if (LookupManager.getActiveLookup(editor) != null) {
+            return InlineCompletionSingleSuggestion.build(elements = emptyFlow())
+        }
+
         return InlineCompletionSingleSuggestion.build(elements = channelFlow {
-            REMAINING_EDITOR_COMPLETION.set(request, "")
+            REMAINING_EDITOR_COMPLETION.set(request.editor, "")
             IS_FETCHING_COMPLETION.set(request.editor, true)
 
             request.editor.project?.messageBus
@@ -83,8 +81,7 @@ class DebouncedCodeCompletionProvider : DebouncedInlineCompletionProvider() {
                 ?.loading(true)
 
             val infillRequest = InfillRequestUtil.buildInfillRequest(request)
-            val call = project
-                .service<CodeCompletionService>()
+            val call = project.service<CodeCompletionService>()
                 .getCodeCompletionAsync(
                     infillRequest,
                     getEventListener(request.editor, infillRequest)
@@ -113,6 +110,10 @@ class DebouncedCodeCompletionProvider : DebouncedInlineCompletionProvider() {
         }
 
         if (!codeCompletionsEnabled) {
+            return false
+        }
+
+        if (LookupManager.getActiveLookup(event.toRequest()?.editor) != null) {
             return false
         }
 
