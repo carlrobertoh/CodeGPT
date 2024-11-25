@@ -14,6 +14,7 @@ import com.intellij.openapi.editor.actionSystem.EditorAction
 import com.intellij.openapi.editor.actionSystem.EditorWriteActionHandler
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.util.concurrency.ThreadingAssertions
+import ee.carlrobert.codegpt.CodeGPTKeys
 import ee.carlrobert.codegpt.CodeGPTKeys.REMAINING_EDITOR_COMPLETION
 
 class CodeCompletionInsertAction :
@@ -31,6 +32,12 @@ class CodeCompletionInsertAction :
                 .map { it.element as CodeCompletionTextElement }
 
             if (elements.isEmpty()) {
+                val textToInsert = context.textToInsert()
+                val remainingCompletion = REMAINING_EDITOR_COMPLETION.get(editor)
+                if (remainingCompletion.isNotEmpty()) {
+                    REMAINING_EDITOR_COMPLETION.set(editor, remainingCompletion.removePrefix(textToInsert))
+                }
+
                 InlineCompletion.getHandlerOrNull(editor)?.insert()
                 return
             }
