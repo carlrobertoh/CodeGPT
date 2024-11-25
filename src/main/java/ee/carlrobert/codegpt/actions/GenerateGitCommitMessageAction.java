@@ -2,7 +2,6 @@ package ee.carlrobert.codegpt.actions;
 
 import static com.intellij.openapi.ui.Messages.OK;
 import static com.intellij.util.ObjectUtils.tryCast;
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 import com.intellij.notification.Notification;
@@ -13,6 +12,8 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.WriteCommandAction;
+import com.intellij.openapi.diff.impl.patch.IdeaTextPatchBuilder;
+import com.intellij.openapi.diff.impl.patch.UnifiedDiffWriter;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.ex.EditorEx;
@@ -35,12 +36,13 @@ import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.codegpt.util.GitUtil;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.completion.CompletionEventListener;
+import git4idea.repo.GitRepository;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.io.StringWriter;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -49,7 +51,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class GenerateGitCommitMessageAction extends AnAction {
 
-  public static final int MAX_TOKEN_COUNT_WARNING = 4096;
+  public static final int MAX_TOKEN_COUNT_WARNING = 8196;
   private final EncodingManager encodingManager;
 
   public GenerateGitCommitMessageAction() {
@@ -80,11 +82,7 @@ public class GenerateGitCommitMessageAction extends AnAction {
       return;
     }
 
-    var gitDiff = getDiff(
-        event,
-        project,
-        getIncludedChangesFilePaths(event),
-        getIncludedUnversionedFilePaths(event));
+    var gitDiff = getDiff(event, project);
 
     var tokenCount = encodingManager.countTokens(gitDiff);
     if (tokenCount > MAX_TOKEN_COUNT_WARNING
@@ -108,38 +106,33 @@ public class GenerateGitCommitMessageAction extends AnAction {
     return ActionUpdateThread.EDT;
   }
 
-  private String getDiff(
-      AnActionEvent event,
-      Project project,
-      List<String> includedChangesFilePaths,
-      List<String> includedUnversionedFilePaths) {
-    try {
-      return ApplicationManager.getApplication().executeOnPooledThread(() -> {
-        try {
-          var repository = GitUtil.getProjectRepository(project);
-          if (repository == null) {
-            return "";
-          }
+  private String getDiff(AnActionEvent event, Project project) {
+    var selectedChanges = Optional.ofNullable(event.getData(VcsDataKeys.SELECTED_CHANGES))
+        .orElseThrow(() -> new IllegalStateException("Could not retrieve VCS selected changes."));
 
-          var stagedGitDiff = String.join("\n", GitUtil.getStagedDiff(
-              project,
-              repository,
-              includedChangesFilePaths));
-          var unstagedGitDiff = String.join("\n", GitUtil.getUnstagedDiff(
-              project,
-              repository,
-              includedUnversionedFilePaths));
-          return Map.of(
-                  "Unstaged git diff", unstagedGitDiff,
-                  "Staged git diff", stagedGitDiff)
-              .entrySet().stream()
-              .filter(entry -> !entry.getValue().isEmpty())
-              .map(entry -> "%s:%n%s".formatted(entry.getKey(), entry.getValue()))
-              .collect(joining("\n\n"));
-        } catch (VcsException e) {
-          throw new RuntimeException("Unable to get staged diff", e);
-        }
-      }).get();
+    try {
+      GitRepository repository = ApplicationManager.getApplication()
+          .executeOnPooledThread(() -> GitUtil.getProjectRepository(project))
+          .get();
+
+      try {
+        var filePatches = IdeaTextPatchBuilder.buildPatch(
+            project, Arrays.stream(selectedChanges).toList(), repository.getRoot().toNioPath(),
+            false, true);
+        var diffWriter = new StringWriter();
+        UnifiedDiffWriter.write(
+            null,
+            repository.getRoot().toNioPath(),
+            filePatches,
+            diffWriter,
+            "\n",
+            null,
+            null
+        );
+        return diffWriter.toString();
+      } catch (VcsException | IOException e) {
+        throw new RuntimeException("Unable to create git diff", e);
+      }
     } catch (InterruptedException | ExecutionException e) {
       throw new RuntimeException(e);
     }
@@ -178,7 +171,7 @@ public class GenerateGitCommitMessageAction extends AnAction {
         application.invokeLater(() ->
             application.runWriteAction(() ->
                 WriteCommandAction.runWriteCommandAction(project, () ->
-                    document.setText(messageBuilder))));
+                    document.setText(message))));
       }
     };
   }
