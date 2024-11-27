@@ -14,7 +14,7 @@ class CodeCompletionInsertHandler : InlineCompletionInsertHandler {
         elements: List<InlineCompletionElement>
     ) {
         val editor = environment.editor
-        val remainingCompletion = REMAINING_EDITOR_COMPLETION.get(editor)
+        val remainingCompletion = REMAINING_EDITOR_COMPLETION.get(editor) ?: ""
         if (remainingCompletion.isNotEmpty()) {
             InlineCompletion.getHandlerOrNull(editor)?.invoke(
                 InlineCompletionEvent.DirectCall(editor, editor.caretModel.currentCaret)
