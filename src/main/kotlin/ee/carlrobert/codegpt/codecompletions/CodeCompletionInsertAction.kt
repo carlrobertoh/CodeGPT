@@ -14,7 +14,6 @@ import com.intellij.openapi.editor.actionSystem.EditorAction
 import com.intellij.openapi.editor.actionSystem.EditorWriteActionHandler
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.util.concurrency.ThreadingAssertions
-import ee.carlrobert.codegpt.CodeGPTKeys
 import ee.carlrobert.codegpt.CodeGPTKeys.REMAINING_EDITOR_COMPLETION
 
 class CodeCompletionInsertAction :
@@ -33,7 +32,7 @@ class CodeCompletionInsertAction :
 
             if (elements.isEmpty()) {
                 val textToInsert = context.textToInsert()
-                val remainingCompletion = REMAINING_EDITOR_COMPLETION.get(editor)
+                val remainingCompletion = REMAINING_EDITOR_COMPLETION.get(editor) ?: ""
                 if (remainingCompletion.isNotEmpty()) {
                     REMAINING_EDITOR_COMPLETION.set(editor, remainingCompletion.removePrefix(textToInsert))
                 }
@@ -87,7 +86,7 @@ class CodeCompletionInsertAction :
             val endOffset = element.textRange.endOffset
             editor.caretModel.moveToOffset(endOffset)
 
-            val remainingCompletionLine = REMAINING_EDITOR_COMPLETION.get(editor)
+            val remainingCompletionLine = (REMAINING_EDITOR_COMPLETION.get(editor) ?: "")
                 .removePrefix(element.text)
 
             processRemainingCompletion(remainingCompletionLine, editor, endOffset)
@@ -98,7 +97,7 @@ class CodeCompletionInsertAction :
             val lineEndOffset = editor.document.getLineEndOffset(lineNumber)
             editor.caretModel.moveToOffset(lineEndOffset)
 
-            val remainingText = REMAINING_EDITOR_COMPLETION.get(editor)
+            val remainingText = REMAINING_EDITOR_COMPLETION.get(editor) ?: ""
             val remainingCompletionLine = if (element.originalText.length > remainingText.length) {
                 remainingText.removePrefix(element.text)
             } else {

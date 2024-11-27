@@ -54,11 +54,8 @@ class DebouncedCodeCompletionProvider : DebouncedInlineCompletionProvider() {
 
     override suspend fun getSuggestionDebounced(request: InlineCompletionRequest): InlineCompletionSuggestion {
         val editor = request.editor
-        val remainingCompletion = REMAINING_EDITOR_COMPLETION.get(editor)
-        if (request.event is InlineCompletionEvent.DirectCall
-            && remainingCompletion != null
-            && remainingCompletion.isNotEmpty()
-        ) {
+        val remainingCompletion = REMAINING_EDITOR_COMPLETION.get(editor) ?: ""
+        if (request.event is InlineCompletionEvent.DirectCall && remainingCompletion.isNotEmpty()) {
             return sendNextSuggestion(remainingCompletion.extractUntilNewline(), request)
         }
 

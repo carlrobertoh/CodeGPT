@@ -44,7 +44,7 @@ class CodeCompletionSuggestionUpdateAdapter :
     }
 
     private fun updateRemainingCompletion(editor: Editor, textToInsert: String) {
-        val remainingCompletion = REMAINING_EDITOR_COMPLETION.get(editor)
+        val remainingCompletion = REMAINING_EDITOR_COMPLETION.get(editor) ?: ""
         if (remainingCompletion.isNotEmpty()) {
             REMAINING_EDITOR_COMPLETION.set(editor, remainingCompletion.removePrefix(textToInsert))
         }
