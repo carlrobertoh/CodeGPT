@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- NPE when using IDE internal completions [#777](https://github.com/carlrobertoh/CodeGPT/issues/777)
+- Inline completion triggering when editor has active lookup
+
 ## [2.13.0-233] - 2024-11-25
 
 ### Added
