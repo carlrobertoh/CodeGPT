@@ -62,7 +62,6 @@ object CodeGPTAvailableModels {
         DEFAULT_CODE_MODEL,
         CodeGPTModel("Qwen 2.5 Coder", "qwen-2.5-32b-code", Icons.Qwen, FREE),
         CodeGPTModel("GPT-3.5 Turbo Instruct", "gpt-3.5-turbo-instruct", Icons.OpenAI, FREE),
-        CodeGPTModel("StarCoder", "starcoder-7b", Icons.CodeGPTModel, ANONYMOUS),
     )
 
     @JvmStatic
