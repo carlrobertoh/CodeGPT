@@ -2,17 +2,18 @@ package ee.carlrobert.codegpt.codecompletions
 
 import com.intellij.codeInsight.inline.completion.*
 import com.intellij.codeInsight.inline.completion.elements.InlineCompletionElement
+import com.intellij.codeInsight.inline.completion.elements.InlineCompletionGrayTextElement
 import com.intellij.codeInsight.inline.completion.suggestion.InlineCompletionSingleSuggestion
 import com.intellij.codeInsight.inline.completion.suggestion.InlineCompletionSuggestion
 import com.intellij.codeInsight.lookup.LookupManager
-import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
-import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
 import ee.carlrobert.codegpt.CodeGPTKeys.IS_FETCHING_COMPLETION
 import ee.carlrobert.codegpt.CodeGPTKeys.REMAINING_EDITOR_COMPLETION
 import ee.carlrobert.codegpt.settings.GeneralSettings
+import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
 import ee.carlrobert.codegpt.settings.service.ServiceType
 import ee.carlrobert.codegpt.settings.service.codegpt.CodeGPTServiceSettings
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings
@@ -27,7 +28,6 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
 import okhttp3.sse.EventSource
 import java.util.concurrent.atomic.AtomicReference
-import kotlin.math.min
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
@@ -53,37 +53,77 @@ class DebouncedCodeCompletionProvider : DebouncedInlineCompletionProvider() {
         get() = CodeCompletionProviderPresentation()
 
     override suspend fun getSuggestionDebounced(request: InlineCompletionRequest): InlineCompletionSuggestion {
+        return if (service<ConfigurationSettings>().state.codeCompletionSettings.multiLineEnabled) {
+            getMultiLineSuggestionDebounced(request)
+        } else {
+            getSingleLineSuggestionDebounced(request)
+        }
+    }
+
+    private fun getSingleLineSuggestionDebounced(request: InlineCompletionRequest): InlineCompletionSuggestion {
         val editor = request.editor
         val remainingCompletion = REMAINING_EDITOR_COMPLETION.get(editor) ?: ""
-        if (request.event is InlineCompletionEvent.DirectCall && remainingCompletion.isNotEmpty()) {
+        if (request.event is InlineCompletionEvent.DirectCall && remainingCompletion.isNotEmpty()
+        ) {
             return sendNextSuggestion(remainingCompletion.extractUntilNewline(), request)
         }
 
-        val project = editor.project
+        return getSuggestionDebounced(
+            request,
+            CompletionType.SINGLE_LINE
+        ) { project, infillRequest ->
+            project.service<CodeCompletionService>()
+                .getCodeCompletionAsync(
+                    infillRequest,
+                    CodeCompletionSingleLineEventListener(request.editor, infillRequest) {
+                        trySend(it)
+                    }
+                )
+        }
+    }
+
+    private fun getMultiLineSuggestionDebounced(request: InlineCompletionRequest): InlineCompletionSuggestion {
+        return getSuggestionDebounced(
+            request,
+            CompletionType.MULTI_LINE
+        ) { project, infillRequest ->
+            project.service<CodeCompletionService>()
+                .getCodeCompletionAsync(
+                    infillRequest,
+                    CodeCompletionMultiLineEventListener(request) {
+                        trySend(InlineCompletionGrayTextElement(it))
+                    }
+                )
+        }
+    }
+
+    private fun getSuggestionDebounced(
+        request: InlineCompletionRequest,
+        completionType: CompletionType,
+        fetchCompletion: ProducerScope<InlineCompletionElement>.(Project, InfillRequest) -> EventSource
+    ): InlineCompletionSuggestion {
+        val project = request.editor.project
         if (project == null) {
             logger.error("Could not find project")
             return InlineCompletionSingleSuggestion.build(elements = emptyFlow())
         }
 
-        if (LookupManager.getActiveLookup(editor) != null) {
+        if (LookupManager.getActiveLookup(request.editor) != null) {
             return InlineCompletionSingleSuggestion.build(elements = emptyFlow())
         }
 
+        if (LookupManager.getActiveLookup(request.editor) != null) {
+            return InlineCompletionSingleSuggestion.build(elements = emptyFlow())
+        }
+
+        IS_FETCHING_COMPLETION.set(request.editor, true)
+        request.editor.project?.messageBus
+            ?.syncPublisher(CodeCompletionProgressNotifier.CODE_COMPLETION_PROGRESS_TOPIC)
+            ?.loading(true)
+
         return InlineCompletionSingleSuggestion.build(elements = channelFlow {
-            REMAINING_EDITOR_COMPLETION.set(request.editor, "")
-            IS_FETCHING_COMPLETION.set(request.editor, true)
-
-            request.editor.project?.messageBus
-                ?.syncPublisher(CodeCompletionProgressNotifier.CODE_COMPLETION_PROGRESS_TOPIC)
-                ?.loading(true)
-
-            val infillRequest = InfillRequestUtil.buildInfillRequest(request)
-            val call = project.service<CodeCompletionService>()
-                .getCodeCompletionAsync(
-                    infillRequest,
-                    getEventListener(request.editor, infillRequest)
-                )
-            currentCallRef.set(call)
+            val infillRequest = InfillRequestUtil.buildInfillRequest(request, completionType)
+            currentCallRef.set(fetchCompletion(project, infillRequest))
             awaitClose { currentCallRef.getAndSet(null)?.cancel() }
         })
     }
@@ -118,65 +158,6 @@ class DebouncedCodeCompletionProvider : DebouncedInlineCompletionProvider() {
             REMAINING_EDITOR_COMPLETION.get(event.toRequest()?.editor)?.isNotEmpty() ?: false
 
         return event is InlineCompletionEvent.DocumentChange || containsActiveCompletion
-    }
-
-    private fun ProducerScope<InlineCompletionElement>.getEventListener(
-        editor: Editor,
-        infillRequest: InfillRequest
-    ) = object : CodeCompletionEventListener(editor) {
-
-        override fun onLineReceived(completionLine: String) {
-            runInEdt {
-                var editorLineSuffix = editor.getLineSuffixAfterCaret()
-                if (editorLineSuffix.isBlank()) {
-                    trySend(
-                        CodeCompletionTextElement(
-                            completionLine,
-                            infillRequest.caretOffset,
-                            TextRange.from(infillRequest.caretOffset, completionLine.length),
-                        )
-                    )
-                } else {
-                    var caretShift = 0
-
-                    // TODO: Handle other scenarios
-                    val processedCompletion =
-                        if (completionLine.startsWith(editorLineSuffix.first())) {
-                            caretShift++
-                            editorLineSuffix = editorLineSuffix.substring(1)
-                            completionLine.substring(1)
-                        } else {
-                            completionLine
-                        }
-
-                    val completionWithRemovedSuffix =
-                        processedCompletion.removeSuffix(editorLineSuffix)
-
-                    trySend(
-                        CodeCompletionTextElement(
-                            completionWithRemovedSuffix,
-                            infillRequest.caretOffset + caretShift,
-                            TextRange.from(
-                                infillRequest.caretOffset + caretShift,
-                                completionWithRemovedSuffix.length
-                            ),
-                            caretShift,
-                            completionLine
-                        )
-                    )
-                }
-            }
-        }
-    }
-
-    private fun Editor.getLineSuffixAfterCaret(): String {
-        val lineEndOffset = document.getLineEndOffset(document.getLineNumber(caretModel.offset))
-        return document.getText(
-            TextRange(
-                caretModel.offset,
-                min(lineEndOffset + 1, document.textLength)
-            )
-        )
     }
 
     private fun sendNextSuggestion(

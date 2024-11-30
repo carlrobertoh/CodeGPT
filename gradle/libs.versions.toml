@@ -12,9 +12,9 @@ jsoup = "1.17.2"
 jtokkit = "1.1.0"
 junit = "5.11.0"
 kotlin = "2.0.0"
-llm-client = "0.8.28"
+llm-client = "0.8.29"
 okio = "3.9.0"
-tree-sitter = "0.22.6a"
+tree-sitter = "0.24.4"
 
 [libraries]
 analytics = { module = "com.rudderstack.sdk.java.analytics:analytics", version.ref = "analytics" }

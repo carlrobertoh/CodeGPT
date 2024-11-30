@@ -1,10 +1,13 @@
 package ee.carlrobert.codegpt.codecompletions
 
 import com.intellij.codeInsight.inline.completion.session.InlineCompletionSession.Companion.getOrNull
+import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.VisualPosition
 import com.intellij.openapi.util.TextRange
 import com.intellij.testFramework.PlatformTestUtil
 import ee.carlrobert.codegpt.CodeGPTKeys.REMAINING_EDITOR_COMPLETION
+import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
+import ee.carlrobert.codegpt.settings.service.codegpt.CodeGPTServiceSettings
 import ee.carlrobert.codegpt.util.file.FileUtil
 import ee.carlrobert.llm.client.http.RequestEntity
 import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange
@@ -16,21 +19,24 @@ class CodeCompletionServiceTest : IntegrationTest() {
 
     fun `test code completion with CodeGPT provider`() {
         useCodeGPTService()
+        service<ConfigurationSettings>().state.codeCompletionSettings.multiLineEnabled = false
         myFixture.configureByText(
             "CompletionTest.java",
             FileUtil.getResourceContent("/codecompletions/code-completion-file.txt")
         )
         myFixture.editor.caretModel.moveToVisualPosition(VisualPosition(3, 0))
         val prefix = """
-             ${"z".repeat(245)}
+             xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+             zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
              [INPUT]
              p
-             """.trimIndent() // 128 tokens
+             """.trimIndent()
         val suffix = """
              
              [\INPUT]
-             ${"z".repeat(247)}
-             """.trimIndent() // 128 tokens
+             zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
+             xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+             """.trimIndent()
         expectCodeGPT(StreamHttpExchange { request: RequestEntity ->
             assertThat(request.uri.path).isEqualTo("/v1/code/completions")
             assertThat(request.method).isEqualTo("POST")
@@ -53,27 +59,30 @@ class CodeCompletionServiceTest : IntegrationTest() {
 
     fun `test code completion with OpenAI provider`() {
         useOpenAIService()
+        service<ConfigurationSettings>().state.codeCompletionSettings.multiLineEnabled = false
         myFixture.configureByText(
             "CompletionTest.java",
             FileUtil.getResourceContent("/codecompletions/code-completion-file.txt")
         )
         myFixture.editor.caretModel.moveToVisualPosition(VisualPosition(3, 0))
         val prefix = """
-             ${"z".repeat(245)}
+             xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+             zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
              [INPUT]
              p
-             """.trimIndent() // 128 tokens
+             """.trimIndent()
         val suffix = """
              
              [\INPUT]
-             ${"z".repeat(247)}
-             """.trimIndent() // 128 tokens
+             zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
+             xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+             """.trimIndent()
         expectOpenAI(StreamHttpExchange { request: RequestEntity ->
             assertThat(request.uri.path).isEqualTo("/v1/completions")
             assertThat(request.method).isEqualTo("POST")
             assertThat(request.body)
                 .extracting("model", "prompt", "suffix", "max_tokens")
-                .containsExactly("gpt-3.5-turbo-instruct", prefix, suffix, 128)
+                .containsExactly("gpt-3.5-turbo-instruct", prefix, suffix, 80)
             listOf(
                 jsonMapResponse("choices", jsonArray(jsonMap("text", "ublic "))),
                 jsonMapResponse("choices", jsonArray(jsonMap("text", "void"))),
@@ -90,6 +99,7 @@ class CodeCompletionServiceTest : IntegrationTest() {
 
     fun `test apply next partial completion word`() {
         useLlamaService(true)
+        service<ConfigurationSettings>().state.codeCompletionSettings.multiLineEnabled = false
         myFixture.configureByText(
             "CompletionTest.java",
             FileUtil.getResourceContent("/codecompletions/code-completion-file.txt")
@@ -97,15 +107,17 @@ class CodeCompletionServiceTest : IntegrationTest() {
         myFixture.editor.caretModel.moveToVisualPosition(VisualPosition(3, 0))
         val expectedCompletion = "public void main"
         val prefix = """
-             ${"z".repeat(245)}
+             xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+             zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
              [INPUT]
              c
-             """.trimIndent() // 128 tokens
+             """.trimIndent()
         val suffix = """
              
              [\INPUT]
-             ${"z".repeat(247)}
-             """.trimIndent() // 128 tokens
+             zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
+             xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+             """.trimIndent()
         expectLlama(StreamHttpExchange { request: RequestEntity ->
             assertThat(request.uri.path).isEqualTo("/completion")
             assertThat(request.method).isEqualTo("POST")
@@ -142,6 +154,7 @@ class CodeCompletionServiceTest : IntegrationTest() {
 
     fun `test apply inline suggestions without initial following text`() {
         useCodeGPTService()
+        service<ConfigurationSettings>().state.codeCompletionSettings.multiLineEnabled = false
         myFixture.configureByText(
             "CompletionTest.java",
             "class Node {\n  "
@@ -258,6 +271,7 @@ class CodeCompletionServiceTest : IntegrationTest() {
 
     fun `test apply inline suggestions with initial following text`() {
         useCodeGPTService()
+        service<ConfigurationSettings>().state.codeCompletionSettings.multiLineEnabled = false
         myFixture.configureByText(
             "CompletionTest.java",
             "if () {\n   \n} else {\n}"
@@ -328,6 +342,7 @@ class CodeCompletionServiceTest : IntegrationTest() {
 
     fun `test adjust completion line whitespaces`() {
         useCodeGPTService()
+        service<ConfigurationSettings>().state.codeCompletionSettings.multiLineEnabled = false
         myFixture.configureByText(
             "CompletionTest.java",
             "class Node {\n" +

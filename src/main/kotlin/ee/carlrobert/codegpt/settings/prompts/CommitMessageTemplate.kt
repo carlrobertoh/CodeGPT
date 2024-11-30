@@ -4,12 +4,12 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.Service.Level.PROJECT
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
-import ee.carlrobert.codegpt.settings.configuration.BranchNamePlaceholderStrategy
-import ee.carlrobert.codegpt.settings.configuration.DatePlaceholderStrategy
-import ee.carlrobert.codegpt.settings.configuration.Placeholder
-import ee.carlrobert.codegpt.settings.configuration.Placeholder.BRANCH_NAME
-import ee.carlrobert.codegpt.settings.configuration.Placeholder.DATE_ISO_8601
-import ee.carlrobert.codegpt.settings.configuration.PlaceholderStrategy
+import ee.carlrobert.codegpt.settings.BranchNamePlaceholderStrategy
+import ee.carlrobert.codegpt.settings.DatePlaceholderStrategy
+import ee.carlrobert.codegpt.settings.Placeholder
+import ee.carlrobert.codegpt.settings.Placeholder.BRANCH_NAME
+import ee.carlrobert.codegpt.settings.Placeholder.DATE_ISO_8601
+import ee.carlrobert.codegpt.settings.PlaceholderStrategy
 
 @Service(PROJECT)
 class CommitMessageTemplate private constructor(project: Project) {

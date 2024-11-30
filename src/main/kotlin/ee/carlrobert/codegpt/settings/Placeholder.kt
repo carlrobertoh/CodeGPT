@@ -1,4 +1,4 @@
-package ee.carlrobert.codegpt.settings.configuration
+package ee.carlrobert.codegpt.settings
 
 import com.intellij.openapi.project.Project
 import git4idea.GitUtil
