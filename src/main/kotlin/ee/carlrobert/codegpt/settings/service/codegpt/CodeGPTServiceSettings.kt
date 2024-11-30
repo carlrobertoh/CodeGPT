@@ -21,5 +21,5 @@ class CodeGPTServiceChatCompletionSettingsState : BaseState() {
 
 class CodeGPTServiceCodeCompletionSettingsState : BaseState() {
     var codeCompletionsEnabled by property(false)
-    var model by string("starcoder-7b")
+    var model by string("codestral")
 }
