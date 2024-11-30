@@ -19,36 +19,15 @@ object GitUtil {
 
     @Throws(VcsException::class)
     @JvmStatic
-    fun getStagedDiff(
-        project: Project,
-        gitRepository: GitRepository,
-        includedVersionedFilePaths: List<String> = emptyList()
-    ): List<String> {
-        return getGitDiff(project, gitRepository, includedVersionedFilePaths, true)
-    }
-
-    @Throws(VcsException::class)
-    @JvmStatic
     fun getUnstagedDiff(
         project: Project,
         gitRepository: GitRepository,
-        includedUnversionedFilePaths: List<String> = emptyList()
-    ): List<String> {
-        return getGitDiff(project, gitRepository, includedUnversionedFilePaths, false)
-    }
-
-    private fun getGitDiff(
-        project: Project,
-        gitRepository: GitRepository,
-        filePaths: List<String>,
-        staged: Boolean
-    ): List<String> {
+        filePaths: List<String> = emptyList(),
+    ): List<GitDiffDetails> {
         val handler = GitLineHandler(project, gitRepository.root, GitCommand.DIFF)
-        if (staged) {
-            handler.addParameters("--cached")
-        }
         handler.addParameters(
-            "--unified=2",
+            "--cached",
+            "--unified=1",
             "--diff-filter=AM",
             "--no-prefix",
             "--no-color",
@@ -58,9 +37,21 @@ object GitUtil {
             handler.addParameters(path)
         }
 
-        val commandResult = Git.getInstance().runCommand(handler)
-        return filterDiffOutput(commandResult.output)
+        return Git.getInstance().runCommand(handler).outputAsJoinedString
+            .split("(?=(diff --git [^\n]+))".toRegex())
+            .filter { it.isNotEmpty() }
+            .map { diffLine ->
+                val lines = diffLine.lines()
+                val fileName = lines.first().split(" ").last().substringAfterLast("/")
+                val content = lines
+                    .filter { line -> line.isNotEmpty() && !line.startsWith("+++") && !line.startsWith("---") }
+                    .joinToString("\n")
+                GitDiffDetails(fileName, content)
+            }
+            .filter { it.content.isNotEmpty() }
     }
+
+    data class GitDiffDetails(val fileName: String, val content: String)
 
     @Throws(VcsException::class)
     @JvmStatic

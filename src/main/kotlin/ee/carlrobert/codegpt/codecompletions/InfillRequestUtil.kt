@@ -4,6 +4,7 @@ import com.intellij.codeInsight.inline.completion.InlineCompletionRequest
 import com.intellij.openapi.application.readAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
+import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.vcs.VcsException
 import com.intellij.refactoring.suggested.startOffset
 import ee.carlrobert.codegpt.EncodingManager
@@ -15,36 +16,42 @@ import ee.carlrobert.codegpt.util.GitUtil
 object InfillRequestUtil {
     private val logger = thisLogger()
 
-    suspend fun buildInfillRequest(request: InlineCompletionRequest): InfillRequest {
+    suspend fun buildInfillRequest(
+        request: InlineCompletionRequest,
+        type: CompletionType
+    ): InfillRequest {
         val caretOffset = readAction { request.editor.caretModel.offset }
-        val infillRequestBuilder = InfillRequest.Builder(request.document, caretOffset)
+        val infillRequestBuilder = InfillRequest.Builder(request.document, caretOffset, type)
             .fileDetails(
                 InfillRequest.FileDetails(
                     request.document.text,
                     request.file.virtualFile.extension
                 )
             )
-        val project = request.editor.project ?: return infillRequestBuilder.build()
 
+        val project = request.editor.project ?: return infillRequestBuilder.build()
         val repository = GitUtil.getProjectRepository(project)
-        if (service<ConfigurationSettings>().state.autocompletionGitContextEnabled && repository != null) {
+        if (repository != null) {
             try {
-                val stagedDiff = GitUtil.getStagedDiff(project, repository)
                 val unstagedDiff = GitUtil.getUnstagedDiff(project, repository)
-                if (stagedDiff.isNotEmpty() || unstagedDiff.isNotEmpty()) {
-                    infillRequestBuilder.vcsDetails(
-                        InfillRequest.VcsDetails(
-                            stagedDiff.joinToString("\n"),
-                            unstagedDiff.joinToString("\n")
-                        )
-                    )
+                if (unstagedDiff.isNotEmpty()) {
+                    val openedEditorFileNames =
+                        FileEditorManager.getInstance(project).openFiles.map { it.name }
+                    val additionalContext = unstagedDiff
+                        .filter {
+                            it.fileName != request.file.virtualFile.name && it.fileName in openedEditorFileNames
+                        }
+                        .joinToString("\n") { "${it.fileName}\n${it.content}" }
+                    infillRequestBuilder.additionalContext(additionalContext)
                 }
             } catch (e: VcsException) {
                 logger.error("Failed to get git context", e)
             }
         }
 
-        getInfillContext(request, caretOffset)?.let { infillRequestBuilder.context(it) }
+        if (service<ConfigurationSettings>().state.codeCompletionSettings.contextAwareEnabled) {
+            getInfillContext(request, caretOffset)?.let { infillRequestBuilder.context(it) }
+        }
 
         return infillRequestBuilder.build()
     }
@@ -54,14 +61,8 @@ object InfillRequestUtil {
         caretOffset: Int
     ): InfillContext? {
         val infillContext =
-            if (service<ConfigurationSettings>().state.autocompletionContextAwareEnabled)
-                service<CompletionContextService>().findContext(request.editor, caretOffset)
-            else null
-
-        if (infillContext == null) {
-            return null
-        }
-
+            service<CompletionContextService>().findContext(request.editor, caretOffset)
+                ?: return null
         val caretInEnclosingElement =
             caretOffset - infillContext.enclosingElement.psiElement.startOffset
         val entireText = infillContext.enclosingElement.psiElement.readText()

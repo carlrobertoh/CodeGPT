@@ -31,12 +31,17 @@ class ConfigurationSettingsState : BaseState() {
     var methodNameGenerationEnabled by property(true)
     var captureCompileErrors by property(true)
     var autoFormattingEnabled by property(true)
-    var autocompletionPostProcessingEnabled by property(false)
-    var autocompletionContextAwareEnabled by property(false)
-    var autocompletionGitContextEnabled by property(true)
     var tableData by map<String, String>()
+    var codeCompletionSettings by property(CodeCompletionSettingsState())
 
     init {
         tableData.putAll(EditorActionsUtil.DEFAULT_ACTIONS)
     }
+}
+
+class CodeCompletionSettingsState : BaseState() {
+    var multiLineEnabled by property(true)
+    var treeSitterProcessingEnabled by property(true)
+    var gitDiffEnabled by property(true)
+    var contextAwareEnabled by property(false)
 }

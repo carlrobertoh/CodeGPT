@@ -19,6 +19,6 @@ class CodeCompletionProviderPresentation : InlineCompletionProviderPresentation 
         } else {
             "CodeGPT"
         }
-        return JBLabel(text, Icons.Sparkle, SwingConstants.LEADING).withFont(JBFont.small())
+        return JBLabel(text, Icons.DefaultSmall, SwingConstants.LEADING).withFont(JBFont.small())
     }
 }

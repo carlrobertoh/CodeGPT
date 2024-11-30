@@ -53,20 +53,20 @@ class CodeCompletionService {
         }
 
     fun getCodeCompletionAsync(
-        requestDetails: InfillRequest,
+        infillRequest: InfillRequest,
         eventListener: CompletionEventListener<String>
     ): EventSource =
         when (val selectedService = GeneralSettings.getSelectedService()) {
             CODEGPT -> CompletionClientProvider.getCodeGPTClient()
-                .getCodeCompletionAsync(buildCodeGPTRequest(requestDetails), eventListener)
+                .getCodeCompletionAsync(buildCodeGPTRequest(infillRequest), eventListener)
 
             OPENAI -> CompletionClientProvider.getOpenAIClient()
-                .getCompletionAsync(buildOpenAIRequest(requestDetails), eventListener)
+                .getCompletionAsync(buildOpenAIRequest(infillRequest), eventListener)
 
             CUSTOM_OPENAI -> createFactory(
                 CompletionClientProvider.getDefaultClientBuilder().build()
             ).newEventSource(
-                buildCustomRequest(requestDetails),
+                buildCustomRequest(infillRequest),
                 if (service<CustomServiceSettings>().state.codeCompletionSettings.parseResponseAsChatCompletions) {
                     OpenAIChatCompletionEventSourceListener(eventListener)
                 } else {
@@ -75,10 +75,10 @@ class CodeCompletionService {
             )
 
             OLLAMA -> CompletionClientProvider.getOllamaClient()
-                .getCompletionAsync(buildOllamaRequest(requestDetails), eventListener)
+                .getCompletionAsync(buildOllamaRequest(infillRequest), eventListener)
 
             LLAMA_CPP -> CompletionClientProvider.getLlamaClient()
-                .getChatCompletionAsync(buildLlamaRequest(requestDetails), eventListener)
+                .getChatCompletionAsync(buildLlamaRequest(infillRequest), eventListener)
 
             else -> throw IllegalArgumentException("Code completion not supported for ${selectedService.name}")
         }

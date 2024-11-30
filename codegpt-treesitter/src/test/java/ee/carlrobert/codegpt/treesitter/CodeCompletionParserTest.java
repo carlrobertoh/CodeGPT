@@ -38,9 +38,7 @@ public class CodeCompletionParserTest {
             return 10;
           }
         }""";
-    var output = """
-        prevNumber) {
-            if() {""";
+    var output = "prevNumber);";
 
     var parsedResponse = CodeCompletionParserFactory
         .getParserForFileExtension("java")
