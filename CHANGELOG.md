@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Support for multi-line code completions
+- Recent Qwen 2.5 Coder models (llama.cpp)
+- Codestral as default code model (CodeGPT)
+
+### Removed
+
+- StarCoder 7B model (CodeGPT)
+
 ## [2.13.1-233] - 2024-11-27
 
 ### Fixed
