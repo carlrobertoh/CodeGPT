@@ -26,7 +26,6 @@ object GitUtil {
     ): List<GitDiffDetails> {
         val handler = GitLineHandler(project, gitRepository.root, GitCommand.DIFF)
         handler.addParameters(
-            "--cached",
             "--unified=1",
             "--diff-filter=AM",
             "--no-prefix",

@@ -31,7 +31,7 @@ object InfillRequestUtil {
 
         val project = request.editor.project ?: return infillRequestBuilder.build()
         val repository = GitUtil.getProjectRepository(project)
-        if (repository != null) {
+        if (repository != null && service<ConfigurationSettings>().state.codeCompletionSettings.gitDiffEnabled) {
             try {
                 val unstagedDiff = GitUtil.getUnstagedDiff(project, repository)
                 if (unstagedDiff.isNotEmpty()) {
