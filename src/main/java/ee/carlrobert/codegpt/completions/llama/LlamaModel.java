@@ -189,9 +189,18 @@ public enum LlamaModel {
       List.of(
           HuggingFaceModel.CODE_QWEN_2_5_1_5B_Q6_K,
           HuggingFaceModel.CODE_QWEN_2_5_1_5B_Q8_0,
+          HuggingFaceModel.CODE_QWEN_2_5_3B_Q4_K_M,
+          HuggingFaceModel.CODE_QWEN_2_5_3B_Q6_K,
+          HuggingFaceModel.CODE_QWEN_2_5_3B_Q8_0,
           HuggingFaceModel.CODE_QWEN_2_5_7B_Q4_K_M,
           HuggingFaceModel.CODE_QWEN_2_5_7B_Q6_K,
-          HuggingFaceModel.CODE_QWEN_2_5_7B_Q8_0)),
+          HuggingFaceModel.CODE_QWEN_2_5_7B_Q8_0,
+          HuggingFaceModel.CODE_QWEN_2_5_14B_Q4_K_M,
+          HuggingFaceModel.CODE_QWEN_2_5_14B_Q6_K,
+          HuggingFaceModel.CODE_QWEN_2_5_14B_Q8_0,
+          HuggingFaceModel.CODE_QWEN_2_5_32B_Q4_K_M,
+          HuggingFaceModel.CODE_QWEN_2_5_32B_Q6_K,
+          HuggingFaceModel.CODE_QWEN_2_5_32B_Q8_0)),
   STABLE_CODE(
       "Stable Code Instruct", """
       stable-code-instruct-3b is a 2.7B billion parameter decoder-only language model tuned from \
