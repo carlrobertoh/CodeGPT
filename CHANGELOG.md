@@ -6,6 +6,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.13.1-241.1] - 2024-11-27
+
+### Fixed
+
+- NPE when using IDE internal completions [#777](https://github.com/carlrobertoh/CodeGPT/issues/777)
+- Inline completion triggering when editor has active lookup
+
+## [2.13.0-241.1] - 2024-11-25
+
+### Added
+
+- Single standalone view for prompt configuration
+- Codestral model for code completion (CodeGPT)
+
+### Fixed
+
+- Git diff logic for commit message generation
+
 ## [2.12.5-241.1] - 2024-11-18
 
 ### Added
@@ -765,7 +783,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `OPENAI_API_KEY` persistence, key is saved in the OS password safe from now on
 
-[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.12.5-241.1...HEAD
+[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.13.1-241.1...HEAD
+[2.13.1-241.1]: https://github.com/carlrobertoh/CodeGPT/compare/v2.13.0-241.1...v2.13.1-241.1
+[2.13.0-241.1]: https://github.com/carlrobertoh/CodeGPT/compare/v2.12.5-241.1...v2.13.0-241.1
 [2.12.5-241.1]: https://github.com/carlrobertoh/CodeGPT/compare/v2.12.4-241.1...v2.12.5-241.1
 [2.12.4-241.1]: https://github.com/carlrobertoh/CodeGPT/compare/v2.12.3-241.1...v2.12.4-241.1
 [2.12.3-241.1]: https://github.com/carlrobertoh/CodeGPT/compare/v2.12.2-241.1...v2.12.3-241.1

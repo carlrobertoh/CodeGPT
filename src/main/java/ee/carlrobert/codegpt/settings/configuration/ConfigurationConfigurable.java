@@ -41,7 +41,6 @@ public class ConfigurationConfigurable implements Configurable {
   public void apply() {
     ApplicationManager.getApplication().getService(ConfigurationSettings.class)
         .loadState(component.getCurrentFormState());
-    EditorActionsUtil.refreshActions();
   }
 
   @Override

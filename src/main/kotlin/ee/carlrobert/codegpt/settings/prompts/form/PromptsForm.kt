@@ -17,6 +17,7 @@ import ee.carlrobert.codegpt.settings.prompts.form.PromptsFormUtil.getFormState
 import ee.carlrobert.codegpt.settings.prompts.form.PromptsFormUtil.toState
 import ee.carlrobert.codegpt.settings.prompts.form.details.*
 import java.awt.CardLayout
+import java.awt.Dimension
 import javax.swing.JComponent
 import javax.swing.JPanel
 import javax.swing.tree.DefaultMutableTreeNode
@@ -238,6 +239,7 @@ class PromptsForm {
 
     private fun createToolbarDecorator(): ToolbarDecorator =
         ToolbarDecorator.createDecorator(tree)
+            .setPreferredSize(Dimension(220, 0))
             .setAddAction { handleAddAction() }
             .setAddActionUpdater {
                 val selectedNode = tree.selectionPath?.lastPathComponent

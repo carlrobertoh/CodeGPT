@@ -1,7 +1,6 @@
 package ee.carlrobert.codegpt.actions;
 
 import static com.intellij.openapi.ui.Messages.OK;
-import static java.util.stream.Collectors.joining;
 
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
@@ -11,6 +10,8 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.WriteCommandAction;
+import com.intellij.openapi.diff.impl.patch.IdeaTextPatchBuilder;
+import com.intellij.openapi.diff.impl.patch.UnifiedDiffWriter;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vcs.VcsDataKeys;
 import com.intellij.openapi.vcs.VcsException;
@@ -26,12 +27,9 @@ import ee.carlrobert.codegpt.util.CommitWorkflowChanges;
 import ee.carlrobert.codegpt.util.GitUtil;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.completion.CompletionEventListener;
+import git4idea.repo.GitRepository;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.io.StringWriter;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import okhttp3.sse.EventSource;
@@ -39,7 +37,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class GenerateGitCommitMessageAction extends AnAction {
 
-  public static final int MAX_TOKEN_COUNT_WARNING = 4096;
+  public static final int MAX_TOKEN_COUNT_WARNING = 8196;
   private final EncodingManager encodingManager;
 
   public GenerateGitCommitMessageAction() {
@@ -100,57 +98,33 @@ public class GenerateGitCommitMessageAction extends AnAction {
   private String getDiff(AnActionEvent event, Project project) {
     var commitWorkflowUi = Optional.ofNullable(event.getData(VcsDataKeys.COMMIT_WORKFLOW_UI))
         .orElseThrow(() -> new IllegalStateException("Could not retrieve commit workflow ui."));
-    var changes = new CommitWorkflowChanges(commitWorkflowUi);
-    var projectBasePath = project.getBasePath();
 
     try {
-      return ApplicationManager.getApplication().executeOnPooledThread(() -> {
-        try {
-          var repository = GitUtil.getProjectRepository(project);
-          if (repository == null) {
-            return "";
-          }
+      GitRepository repository = ApplicationManager.getApplication()
+          .executeOnPooledThread(() -> GitUtil.getProjectRepository(project))
+          .get();
 
-          var stagedGitDiff = String.join("\n", GitUtil.getStagedDiff(
-              project,
-              repository,
-              changes.getIncludedVersionedFilePaths()));
-          var unstagedGitDiff = String.join("\n", GitUtil.getUnstagedDiff(
-              project,
-              repository,
-              changes.getIncludedUnversionedFilePaths()));
-          var newFilesContent =
-              getNewFilesDiff(projectBasePath, changes.getIncludedUnversionedFilePaths());
-          return Map.of(
-                  "Unstaged git diff", unstagedGitDiff,
-                  "Staged git diff", stagedGitDiff,
-                  "New files", newFilesContent)
-              .entrySet().stream()
-              .filter(entry -> !entry.getValue().isEmpty())
-              .map(entry -> "%s:%n%s".formatted(entry.getKey(), entry.getValue()))
-              .collect(joining("\n\n"));
-        } catch (VcsException e) {
-          throw new RuntimeException("Unable to get staged diff", e);
-        }
-      }).get();
+      try {
+        var includedChanges = commitWorkflowUi.getIncludedChanges();
+        var filePatches = IdeaTextPatchBuilder.buildPatch(
+            project, includedChanges, repository.getRoot().toNioPath(), false, true);
+        var diffWriter = new StringWriter();
+        UnifiedDiffWriter.write(
+            null,
+            repository.getRoot().toNioPath(),
+            filePatches,
+            diffWriter,
+            "\n",
+            null,
+            null
+        );
+        return diffWriter.toString();
+      } catch (VcsException | IOException e) {
+        throw new RuntimeException("Unable to create git diff", e);
+      }
     } catch (InterruptedException | ExecutionException e) {
       throw new RuntimeException(e);
     }
-  }
-
-  private static String getNewFilesDiff(String projectPath, List<String> filePaths) {
-    return filePaths.stream()
-        .map(pathString -> {
-          var filePath = Path.of(pathString);
-          var relativePath = Path.of(projectPath).relativize(filePath);
-          try {
-            return "New file '" + relativePath + "' content:\n" + Files.readString(filePath);
-          } catch (IOException ignored) {
-            return null;
-          }
-        })
-        .filter(Objects::nonNull)
-        .collect(joining("\n"));
   }
 
   private CompletionEventListener<String> getEventListener(
