@@ -56,6 +56,7 @@ enum class InfillPromptTemplate(val label: String, val stopTokens: List<String>?
     CODE_QWEN_2_5(
         "CodeQwen2.5",
         listOf(
+            "diff --git",
             "package ",
             "import ",
             "<|endoftext|>",
