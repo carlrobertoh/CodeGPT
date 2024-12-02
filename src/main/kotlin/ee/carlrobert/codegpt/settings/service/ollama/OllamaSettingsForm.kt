@@ -124,6 +124,7 @@ class OllamaSettingsForm {
             modelComboBox.item = model ?: ""
             codeCompletionConfigurationForm.isCodeCompletionsEnabled = codeCompletionsEnabled
             codeCompletionConfigurationForm.fimTemplate = fimTemplate
+            codeCompletionConfigurationForm.fimOverride != fimOverride
         }
         apiKeyField.text = getCredential(OLLAMA_API_KEY)
     }
@@ -134,6 +135,7 @@ class OllamaSettingsForm {
             model = modelComboBox.item
             codeCompletionsEnabled = codeCompletionConfigurationForm.isCodeCompletionsEnabled
             fimTemplate = codeCompletionConfigurationForm.fimTemplate!!
+            fimOverride = codeCompletionConfigurationForm.fimOverride ?: false
         }
         setCredential(OLLAMA_API_KEY, getApiKey())
     }
@@ -143,6 +145,7 @@ class OllamaSettingsForm {
                 || (modelComboBox.item != model && modelComboBox.isEnabled)
                 || codeCompletionConfigurationForm.isCodeCompletionsEnabled != codeCompletionsEnabled
                 || codeCompletionConfigurationForm.fimTemplate != fimTemplate
+                || codeCompletionConfigurationForm.fimOverride != fimOverride
                 || getApiKey() != getCredential(OLLAMA_API_KEY)
     }
 
