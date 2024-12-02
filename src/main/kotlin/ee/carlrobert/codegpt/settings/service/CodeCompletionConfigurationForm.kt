@@ -2,11 +2,11 @@ package ee.carlrobert.codegpt.settings.service
 
 import com.intellij.icons.AllIcons.General
 import com.intellij.ide.HelpTooltip
-import com.intellij.openapi.observable.util.whenItemSelected
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.EnumComboBoxModel
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBLabel
+import com.intellij.ui.dsl.builder.panel
 import com.intellij.util.ui.FormBuilder
 import ee.carlrobert.codegpt.CodeGPTBundle
 import ee.carlrobert.codegpt.codecompletions.InfillPromptTemplate
@@ -15,20 +15,12 @@ import org.apache.commons.text.StringEscapeUtils
 import java.awt.FlowLayout
 import javax.swing.Box
 import javax.swing.JPanel
-import javax.swing.event.ChangeEvent
 
 class CodeCompletionConfigurationForm(
     codeCompletionsEnabled: Boolean,
     fimOverride: Boolean?,
     fimTemplate: InfillPromptTemplate?
 ) {
-
-    private val fimOverrideCheckbox = fimOverride?.let {
-        JBCheckBox(
-            CodeGPTBundle.get("codeCompletionsForm.overrideFimTemplate"),
-            it
-        )
-    }
 
     private val codeCompletionsEnabledCheckBox = JBCheckBox(
         CodeGPTBundle.get("codeCompletionsForm.enableFeatureText"),
@@ -37,19 +29,29 @@ class CodeCompletionConfigurationForm(
     private val promptTemplateComboBox =
         ComboBox(EnumComboBoxModel(InfillPromptTemplate::class.java)).apply {
             item = fimTemplate
+            isEnabled = fimOverride == null || fimOverride == false
             addItemListener {
                 updatePromptTemplateHelpTooltip(it.item as InfillPromptTemplate)
             }
         }
     private val promptTemplateHelpText = JBLabel(General.ContextHelp)
+    private val fimOverrideCheckbox = JBCheckBox(
+        CodeGPTBundle.get("codeCompletionsForm.overrideFimTemplate.label"),
+        fimOverride ?: false
+    )
 
     fun getForm(): JPanel {
         val formBuilder = FormBuilder.createFormBuilder()
             .addComponent(codeCompletionsEnabledCheckBox)
         if (fimTemplate != null) {
-            fimOverrideCheckbox?.let {
-                formBuilder.addComponent(fimOverrideCheckbox)
-            }
+            formBuilder.addComponent(panel {
+                row {
+                    cell(fimOverrideCheckbox)
+                        .visible(fimOverride != null)
+                        .onChanged { promptTemplateComboBox.isEnabled = !it.isSelected }
+                        .comment(CodeGPTBundle.get("codeCompletionsForm.overrideFimTemplate.description"))
+                }
+            })
             formBuilder.addVerticalGap(4)
                 .addLabeledComponent(
                     CodeGPTBundle.get("codeCompletionsForm.selectFimTemplate"),
@@ -75,10 +77,10 @@ class CodeCompletionConfigurationForm(
         }
 
     var fimOverride: Boolean?
-        get() = fimOverrideCheckbox?.isSelected
+        get() = fimOverrideCheckbox.isSelected
         set(value) {
             if (value != null) {
-                fimOverrideCheckbox?.isSelected = value
+                fimOverrideCheckbox.isSelected = value
             }
         }
 
