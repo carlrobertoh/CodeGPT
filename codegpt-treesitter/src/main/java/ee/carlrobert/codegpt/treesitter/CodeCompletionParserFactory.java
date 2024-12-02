@@ -36,9 +36,13 @@ import org.treesitter.TreeSitterYaml;
 
 public class CodeCompletionParserFactory {
 
-  public static CodeCompletionParser getParserForFileExtension(String extension)
-      throws IllegalArgumentException {
-    return new CodeCompletionParser(getLanguageForExtension(extension));
+  public static CodeCompletionParser getParserForFileExtension(String extension) {
+    var language = getLanguageForExtension(extension);
+    if (language == null) {
+      return null;
+    }
+
+    return new CodeCompletionParser(language);
   }
 
   private static TSLanguage getLanguageForExtension(String extension) {
@@ -75,7 +79,7 @@ public class CodeCompletionParserFactory {
       case "svelte" -> new TreeSitterSvelte();
       case "swift" -> new TreeSitterSwift();
       case "yml", "yaml" -> new TreeSitterYaml();
-      default -> throw new IllegalArgumentException("Unsupported file extension: " + extension);
+      default -> null;
     };
   }
 }
