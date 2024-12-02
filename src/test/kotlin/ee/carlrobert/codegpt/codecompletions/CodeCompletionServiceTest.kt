@@ -81,7 +81,7 @@ class CodeCompletionServiceTest : IntegrationTest() {
             assertThat(request.method).isEqualTo("POST")
             assertThat(request.body)
                 .extracting("model", "prompt", "suffix", "max_tokens")
-                .containsExactly("gpt-3.5-turbo-instruct", prefix, suffix, 80)
+                .containsExactly("gpt-3.5-turbo-instruct", prefix, suffix, 128)
             listOf(
                 jsonMapResponse("choices", jsonArray(jsonMap("text", "ublic "))),
                 jsonMapResponse("choices", jsonArray(jsonMap("text", "void"))),

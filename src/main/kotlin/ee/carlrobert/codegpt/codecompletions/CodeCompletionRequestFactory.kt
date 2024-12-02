@@ -24,7 +24,7 @@ import java.nio.charset.StandardCharsets
 
 object CodeCompletionRequestFactory {
 
-    private const val MAX_TOKENS = 80
+    private const val MAX_TOKENS = 128
 
     @JvmStatic
     fun buildCodeGPTRequest(details: InfillRequest): CodeCompletionRequest {

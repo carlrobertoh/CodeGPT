@@ -4,14 +4,17 @@ import com.intellij.codeInsight.inline.completion.InlineCompletionRequest
 import com.intellij.openapi.application.readAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
-import com.intellij.openapi.fileEditor.FileEditorManager
+import com.intellij.openapi.diff.impl.patch.IdeaTextPatchBuilder
+import com.intellij.openapi.diff.impl.patch.UnifiedDiffWriter
 import com.intellij.openapi.vcs.VcsException
+import com.intellij.openapi.vcs.changes.ChangeListManager
 import com.intellij.refactoring.suggested.startOffset
 import ee.carlrobert.codegpt.EncodingManager
 import ee.carlrobert.codegpt.codecompletions.psi.CompletionContextService
 import ee.carlrobert.codegpt.codecompletions.psi.readText
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
 import ee.carlrobert.codegpt.util.GitUtil
+import java.io.StringWriter
 
 object InfillRequestUtil {
     private val logger = thisLogger()
@@ -30,22 +33,25 @@ object InfillRequestUtil {
             )
 
         val project = request.editor.project ?: return infillRequestBuilder.build()
-        val repository = GitUtil.getProjectRepository(project)
-        if (repository != null && service<ConfigurationSettings>().state.codeCompletionSettings.gitDiffEnabled) {
-            try {
-                val unstagedDiff = GitUtil.getUnstagedDiff(project, repository)
-                if (unstagedDiff.isNotEmpty()) {
-                    val openedEditorFileNames =
-                        FileEditorManager.getInstance(project).openFiles.map { it.name }
-                    val additionalContext = unstagedDiff
-                        .filter {
-                            it.fileName != request.file.virtualFile.name && it.fileName in openedEditorFileNames
-                        }
-                        .joinToString("\n") { "${it.fileName}\n${it.content}" }
+        if (service<ConfigurationSettings>().state.codeCompletionSettings.gitDiffEnabled) {
+            GitUtil.getProjectRepository(project)?.let { repository ->
+                try {
+                    val repoRootPath = repository.root.toNioPath()
+                    val changes = ChangeListManager.getInstance(project).allChanges
+                        .sortedBy { it.virtualFile?.timeStamp }
+                    val patches = IdeaTextPatchBuilder.buildPatch(
+                        project, changes, repoRootPath, false, true
+                    )
+                    val diffWriter = StringWriter()
+                    UnifiedDiffWriter.write(
+                        null, repoRootPath, patches, diffWriter, "\n\n", null, null
+                    )
+                    val additionalContext =
+                        diffWriter.toString().cleanDiff().truncateText(1024, false)
                     infillRequestBuilder.additionalContext(additionalContext)
+                } catch (e: VcsException) {
+                    logger.error("Failed to get git context", e)
                 }
-            } catch (e: VcsException) {
-                logger.error("Failed to get git context", e)
             }
         }
 
@@ -55,6 +61,18 @@ object InfillRequestUtil {
 
         return infillRequestBuilder.build()
     }
+
+    private fun String.cleanDiff(showContext: Boolean = false): String =
+        lineSequence()
+            .filterNot { line ->
+                line.startsWith("index ") ||
+                        line.startsWith("diff --git") ||
+                        line.startsWith("---") ||
+                        line.startsWith("+++") ||
+                        line.startsWith("===") ||
+                        (!showContext && line.startsWith(" "))
+            }
+            .joinToString("\n")
 
     private fun getInfillContext(
         request: InlineCompletionRequest,

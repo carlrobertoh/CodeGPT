@@ -19,41 +19,6 @@ object GitUtil {
 
     @Throws(VcsException::class)
     @JvmStatic
-    fun getUnstagedDiff(
-        project: Project,
-        gitRepository: GitRepository,
-        filePaths: List<String> = emptyList(),
-    ): List<GitDiffDetails> {
-        val handler = GitLineHandler(project, gitRepository.root, GitCommand.DIFF)
-        handler.addParameters(
-            "--unified=1",
-            "--diff-filter=AM",
-            "--no-prefix",
-            "--no-color",
-        )
-
-        filePaths.forEach { path ->
-            handler.addParameters(path)
-        }
-
-        return Git.getInstance().runCommand(handler).outputAsJoinedString
-            .split("(?=(diff --git [^\n]+))".toRegex())
-            .filter { it.isNotEmpty() }
-            .map { diffLine ->
-                val lines = diffLine.lines()
-                val fileName = lines.first().split(" ").last().substringAfterLast("/")
-                val content = lines
-                    .filter { line -> line.isNotEmpty() && !line.startsWith("+++") && !line.startsWith("---") }
-                    .joinToString("\n")
-                GitDiffDetails(fileName, content)
-            }
-            .filter { it.content.isNotEmpty() }
-    }
-
-    data class GitDiffDetails(val fileName: String, val content: String)
-
-    @Throws(VcsException::class)
-    @JvmStatic
     fun getProjectRepository(project: Project): GitRepository? {
         val repositoryManager = project.service<GitRepositoryManager>()
         return repositoryManager.getRepositoryForFile(project.guessProjectDir())
