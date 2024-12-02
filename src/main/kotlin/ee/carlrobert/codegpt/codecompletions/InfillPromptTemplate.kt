@@ -50,7 +50,24 @@ enum class InfillPromptTemplate(val label: String, val stopTokens: List<String>?
             }
         }
     },
-    CODE_QWEN_2_5("CodeQwen2.5", listOf()) {
+    CODE_QWEN_2_5(
+        "CodeQwen2.5",
+        listOf(
+            "diff --git",
+            "package ",
+            "import ",
+            "<|endoftext|>",
+            "<|fim_prefix|>",
+            "<|fim_middle|>",
+            "<|fim_suffix|>",
+            "<|fim_pad|>",
+            "<|cursor|>",
+            "<|repo_name|>",
+            "<|file_sep|>",
+            "<|im_start|>",
+            "<|im_end|>"
+        )
+    ) {
         override fun buildPrompt(infillDetails: InfillRequest): String {
             val infillPrompt =
                 "<|fim_prefix|> ${infillDetails.prefix} <|fim_suffix|>${infillDetails.suffix} <|fim_middle|>"
@@ -110,7 +127,8 @@ enum class InfillPromptTemplate(val label: String, val stopTokens: List<String>?
     CODESTRAL("Codestral", listOf("</s>")) {
         override fun buildPrompt(infillDetails: InfillRequest): String {
             // see https://github.com/mistralai/mistral-common/blob/master/src/mistral_common/tokens/tokenizers/base.py
-            val infillPrompt = "[SUFFIX]${infillDetails.suffix}[PREFIX]${infillDetails.prefix}[MIDDLE]"
+            val infillPrompt =
+                "[SUFFIX]${infillDetails.suffix}[PREFIX]${infillDetails.prefix}[MIDDLE]"
             return createDefaultMultiFilePrompt(infillDetails, infillPrompt)
         }
     };

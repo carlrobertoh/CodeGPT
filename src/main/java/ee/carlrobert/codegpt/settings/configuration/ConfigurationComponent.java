@@ -25,11 +25,9 @@ public class ConfigurationComponent {
   private final JBCheckBox checkForNewScreenshotsCheckBox;
   private final JBCheckBox methodNameGenerationCheckBox;
   private final JBCheckBox autoFormattingCheckBox;
-  private final JBCheckBox autocompletionPostProcessingCheckBox;
-  private final JBCheckBox autocompletionContextAwareCheckBox;
-  private final JBCheckBox autocompletionGitContextCheckBox;
   private final IntegerField maxTokensField;
   private final JBTextField temperatureField;
+  private final CodeCompletionConfigurationForm codeCompletionForm;
 
   public ConfigurationComponent(
       Disposable parentDisposable,
@@ -72,31 +70,21 @@ public class ConfigurationComponent {
     autoFormattingCheckBox = new JBCheckBox(
         CodeGPTBundle.get("configurationConfigurable.autoFormatting.label"),
         configuration.getAutoFormattingEnabled());
-    autocompletionPostProcessingCheckBox = new JBCheckBox(
-        CodeGPTBundle.get("configurationConfigurable.autocompletionPostProcessing.label"),
-        configuration.getAutocompletionPostProcessingEnabled()
-    );
-    autocompletionContextAwareCheckBox = new JBCheckBox(
-        CodeGPTBundle.get("configurationConfigurable.autocompletionContextAwareCheckBox.label"),
-        configuration.getAutocompletionContextAwareEnabled()
-    );
-    autocompletionGitContextCheckBox = new JBCheckBox(
-        CodeGPTBundle.get("configurationConfigurable.autocompletionGitContextCheckBox.label"),
-        configuration.getAutocompletionGitContextEnabled()
-    );
+
+    codeCompletionForm = new CodeCompletionConfigurationForm();
 
     mainPanel = FormBuilder.createFormBuilder()
         .addComponent(checkForPluginUpdatesCheckBox)
         .addComponent(checkForNewScreenshotsCheckBox)
         .addComponent(methodNameGenerationCheckBox)
         .addComponent(autoFormattingCheckBox)
-        .addComponent(autocompletionPostProcessingCheckBox)
-        .addComponent(autocompletionContextAwareCheckBox)
-        .addComponent(autocompletionGitContextCheckBox)
         .addVerticalGap(4)
         .addComponent(new TitledSeparator(
             CodeGPTBundle.get("configurationConfigurable.section.assistant.title")))
         .addComponent(createAssistantConfigurationForm())
+        .addComponent(new TitledSeparator(
+            CodeGPTBundle.get("configurationConfigurable.section.codeCompletion.title")))
+        .addComponent(codeCompletionForm.createPanel())
         .addComponentFillVertically(new JPanel(), 0)
         .getPanel();
   }
@@ -113,9 +101,7 @@ public class ConfigurationComponent {
     state.setCheckForNewScreenshots(checkForNewScreenshotsCheckBox.isSelected());
     state.setMethodNameGenerationEnabled(methodNameGenerationCheckBox.isSelected());
     state.setAutoFormattingEnabled(autoFormattingCheckBox.isSelected());
-    state.setAutocompletionPostProcessingEnabled(autocompletionPostProcessingCheckBox.isSelected());
-    state.setAutocompletionContextAwareEnabled(autocompletionContextAwareCheckBox.isSelected());
-    state.setAutocompletionGitContextEnabled(autocompletionGitContextCheckBox.isSelected());
+    state.setCodeCompletionSettings(codeCompletionForm.getFormState());
     return state;
   }
 
@@ -127,13 +113,7 @@ public class ConfigurationComponent {
     checkForNewScreenshotsCheckBox.setSelected(configuration.getCheckForNewScreenshots());
     methodNameGenerationCheckBox.setSelected(configuration.getMethodNameGenerationEnabled());
     autoFormattingCheckBox.setSelected(configuration.getAutoFormattingEnabled());
-    autocompletionPostProcessingCheckBox.setSelected(
-        configuration.getAutocompletionPostProcessingEnabled());
-    autocompletionContextAwareCheckBox.setSelected(
-        configuration.getAutocompletionContextAwareEnabled());
-    autocompletionGitContextCheckBox.setSelected(
-        configuration.getAutocompletionGitContextEnabled()
-    );
+    codeCompletionForm.resetForm(configuration.getCodeCompletionSettings());
   }
 
   // Formatted keys are not referenced in the messages bundle file

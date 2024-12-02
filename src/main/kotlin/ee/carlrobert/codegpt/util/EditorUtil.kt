@@ -2,6 +2,7 @@ package ee.carlrobert.codegpt.util
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.PathManager
+import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.application.runUndoTransparentWriteAction
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.components.service
@@ -13,6 +14,7 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.TextRange
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.codeStyle.CodeStyleManager
@@ -20,6 +22,7 @@ import com.intellij.testFramework.LightVirtualFile
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import kotlin.math.min
 
 object EditorUtil {
     @JvmStatic
@@ -106,6 +109,23 @@ object EditorUtil {
             editor.contentComponent.requestFocus()
             selectionModel.removeSelection()
         }
+    }
+
+    fun String.adjustWhitespaces(editor: Editor): String {
+        val document = editor.document
+        val adjustedLine = runReadAction {
+            val lineNumber = document.getLineNumber(editor.caretModel.offset)
+            val editorLine = document.getText(
+                TextRange(
+                    document.getLineStartOffset(lineNumber),
+                    document.getLineEndOffset(lineNumber)
+                )
+            )
+
+            ee.carlrobert.codegpt.util.StringUtil.adjustWhitespace(this, editorLine)
+        }
+
+        return if (adjustedLine.length != this.length) adjustedLine else this
     }
 
     @JvmStatic

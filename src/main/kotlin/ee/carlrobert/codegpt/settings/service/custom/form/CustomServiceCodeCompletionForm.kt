@@ -15,7 +15,7 @@ import ee.carlrobert.codegpt.codecompletions.CodeCompletionRequestFactory
 import ee.carlrobert.codegpt.codecompletions.InfillPromptTemplate
 import ee.carlrobert.codegpt.codecompletions.InfillRequest
 import ee.carlrobert.codegpt.completions.CompletionRequestService
-import ee.carlrobert.codegpt.settings.configuration.Placeholder
+import ee.carlrobert.codegpt.settings.Placeholder
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceCodeCompletionSettingsState
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceFormTabbedPane
 import ee.carlrobert.codegpt.ui.OverlayUtil
