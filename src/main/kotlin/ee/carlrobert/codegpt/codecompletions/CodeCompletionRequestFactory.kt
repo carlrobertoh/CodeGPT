@@ -114,21 +114,34 @@ object CodeCompletionRequestFactory {
 
     fun buildOllamaRequest(details: InfillRequest): OllamaCompletionRequest {
         val settings = service<OllamaSettings>().state
-        val prompt = if (details.context == null || details.context.contextElements.isEmpty()) {
-            details.prefix
+        val prompt = if (settings.fimOverride) {
+            settings.fimTemplate.buildPrompt(details)
         } else {
-            details.context.contextElements.joinToString("\n") { "#${it.filePath()}\n" + it.text() } +
-                    "#${details.context.enclosingElement.filePath()}\n" +
-                    details.prefix
+            if (details.context == null || details.context.contextElements.isEmpty()) {
+                details.prefix
+            } else {
+                details.context.contextElements.joinToString("\n") { "#${it.filePath()}\n" + it.text() } +
+                        "#${details.context.enclosingElement.filePath()}\n" +
+                        details.prefix
+            }
         }
         return OllamaCompletionRequest.Builder(
             settings.model,
             prompt
         )
-            .setSuffix(details.suffix)
+            .run {
+                if (!settings.fimOverride) {
+                    setSuffix(details.suffix)
+                } else this
+            }
             .setStream(true)
             .setOptions(
                 OllamaParameters.Builder()
+                    .run {
+                        if (settings.fimOverride) {
+                            stop(settings.fimTemplate.stopTokens)
+                        } else this
+                    }
                     .numPredict(MAX_TOKENS)
                     .temperature(0.4)
                     .build()
