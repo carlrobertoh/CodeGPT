@@ -1,6 +1,7 @@
-package ee.carlrobert.codegpt.completions
+package ee.carlrobert.codegpt.refactorings
 
 import com.intellij.codeInsight.completion.PrefixMatcher
+import com.intellij.codeInsight.completion.PrioritizedLookupElement
 import com.intellij.codeInsight.lookup.Lookup
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.codeInsight.lookup.LookupManagerListener
@@ -10,10 +11,10 @@ import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
-import com.intellij.psi.tree.IElementType
-import com.intellij.psi.util.PsiUtilCore
 import ee.carlrobert.codegpt.CodeGPTKeys.IS_PROMPT_TEXT_FIELD_DOCUMENT
 import ee.carlrobert.codegpt.Icons
+import ee.carlrobert.codegpt.completions.CompletionRequestService
+import ee.carlrobert.codegpt.completions.LookupCompletionParameters
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
 import ee.carlrobert.codegpt.ui.OverlayUtil
 import ee.carlrobert.llm.client.codegpt.response.CodeGPTException
@@ -22,7 +23,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
-class MethodNameCompletionLookupListener : LookupManagerListener {
+class RenameCompletionLookupListener : LookupManagerListener {
 
     companion object {
         private val logger = thisLogger()
@@ -43,8 +44,8 @@ class MethodNameCompletionLookupListener : LookupManagerListener {
         }
 
         newLookup.psiElement?.context?.let { context ->
-            val elementType = PsiUtilCore.getElementType(context)
-            if (PSIMethodMapping.contains(elementType)) {
+            val renamingEnabled = context.getUserData(DefaultNameSuggestionProvider.KEY) ?: false
+            if (renamingEnabled) {
                 val selection = runReadAction { context.text }
                 scope.launch {
                     try {
@@ -72,33 +73,21 @@ class MethodNameCompletionLookupListener : LookupManagerListener {
             .dropLastWhile { it.isEmpty() }
             .toTypedArray()
 
-        for (value in values) {
-            runInEdt {
-                lookup.addItem(
+        runInEdt {
+            for (value in values) {
+                val prioritizedLookupElement = PrioritizedLookupElement.withPriority(
                     LookupElementBuilder
                         .create(value)
-                        .withIcon(Icons.DefaultSmall),
-                    PrefixMatcher.ALWAYS_TRUE
+                        .withIcon(Icons.DefaultSmall)
+                        .withLookupString(value),
+                    1.0
                 )
-                lookup.refreshUi(true, true)
+                if (!lookup.isLookupDisposed) {
+                    lookup.addItem(prioritizedLookupElement, PrefixMatcher.ALWAYS_TRUE)
+                }
             }
-        }
-    }
-
-    private enum class PSIMethodMapping(val types: List<String>) {
-        GO(listOf("FILE", "METHOD_DECLARATION|FUNCTION_DECLARATION")),
-        JAVA(listOf("java.FILE", "METHOD")),
-        PY(listOf("FILE", "Py:FUNCTION_DECLARATION")),
-        JAVASCRIPT(listOf("JS:FUNCTION_DECLARATION", "JS:TYPESCRIPT_FUNCTION")),
-        CS(listOf("FILE", "DUMMY_TYPE_DECLARATION", "DUMMY_BLOCK")),
-        PHP(listOf("FILE", "Class method|function|Function")),
-        KOTLIN(listOf("FUN")),
-        DEFAULT(listOf("FILE", "METHOD_DECLARATION"));
-
-
-        companion object {
-            fun contains(type: IElementType): Boolean {
-                return entries.any { it.types.contains(type.toString()) }
+            if (!lookup.isLookupDisposed) {
+                lookup.refreshUi(true, true)
             }
         }
     }
