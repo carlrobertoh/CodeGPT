@@ -87,10 +87,7 @@ public final class CodeCompletionServiceOld implements Disposable {
       return;
     }
 
-    var prefix = document.getText(new TextRange(0, offset));
-    var suffix = document.getText(new TextRange(offset, document.getTextLength()));
-
-    var request = InfillRequest.Companion.builder(prefix, suffix).build();
+    var request = new InfillRequest.Builder(document, offset, CompletionType.SINGLE_LINE).build();
     if (Stream.of(request.getSuffix(), request.getPrefix()).anyMatch(String::isEmpty)) {
       return;
     }

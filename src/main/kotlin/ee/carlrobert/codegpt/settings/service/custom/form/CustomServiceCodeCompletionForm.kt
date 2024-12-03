@@ -163,7 +163,7 @@ class CustomServiceCodeCompletionForm(
     private fun testConnection() {
         CompletionRequestService.getInstance().getCustomOpenAICompletionAsync(
             CodeCompletionRequestFactory.buildCustomRequest(
-                InfillRequest.Builder("Hello", "!").build(),
+                InfillRequest.Builder("Hello", "!", 0).build(),
                 urlField.text,
                 tabbedPane.headers,
                 tabbedPane.body,
@@ -206,7 +206,7 @@ class CustomServiceCodeCompletionForm(
 
         val description = StringEscapeUtils.escapeHtml4(
             template.buildPrompt(
-                InfillRequest.Builder("PREFIX", "SUFFIX").build(),
+                InfillRequest.Builder("PREFIX", "SUFFIX", 0).build(),
             )
         )
         HelpTooltip()

@@ -28,15 +28,13 @@ object CodeCompletionRequestFactory {
 
     @JvmStatic
     fun buildCodeGPTRequest(details: InfillRequest): CodeCompletionRequest {
-        val settings = service<CodeGPTServiceSettings>().state.codeCompletionSettings
         return CodeCompletionRequest.Builder()
-            .setModel(settings.model)
+            .setModel(service<CodeGPTServiceSettings>().state.codeCompletionSettings.model)
             .setPrefix(details.prefix)
             .setSuffix(details.suffix)
             .setFileExtension(details.fileDetails?.fileExtension)
             .setFileContent(details.fileDetails?.fileContent)
-            .setStagedDiff(details.vcsDetails?.stagedDiff)
-            .setUnstagedDiff(details.vcsDetails?.unstagedDiff)
+            .setStop(details.stopTokens.ifEmpty { null })
             .build()
     }
 
@@ -46,7 +44,9 @@ object CodeCompletionRequestFactory {
             .setSuffix(details.suffix)
             .setStream(true)
             .setMaxTokens(MAX_TOKENS)
-            .setTemperature(0.4)
+            .setTemperature(0.0)
+            .setPresencePenalty(0.0)
+            .setStop(details.stopTokens.ifEmpty { null })
             .build()
     }
 
@@ -102,23 +102,40 @@ object CodeCompletionRequestFactory {
         val settings = LlamaSettings.getCurrentState()
         val promptTemplate = getLlamaInfillPromptTemplate(settings)
         val prompt = promptTemplate.buildPrompt(details)
+        val stopTokens = buildList {
+            if (promptTemplate.stopTokens != null) addAll(promptTemplate.stopTokens)
+            if (details.stopTokens.isNotEmpty()) addAll(details.stopTokens)
+        }.ifEmpty { null }
+
         return LlamaCompletionRequest.Builder(prompt)
             .setN_predict(MAX_TOKENS)
             .setStream(true)
-            .setTemperature(0.4)
-            .setStop(promptTemplate.stopTokens)
+            .setTemperature(0.0)
+            .setStop(stopTokens)
             .build()
     }
 
     fun buildOllamaRequest(details: InfillRequest): OllamaCompletionRequest {
         val settings = service<OllamaSettings>().state
+        val stopTokens = buildList {
+            if (details.stopTokens.isNotEmpty()) addAll(details.stopTokens)
+        }.toMutableList()
+        val prompt = if (settings.fimOverride) {
+            settings.fimTemplate.stopTokens?.let { stopTokens.addAll(it) }
+            settings.fimTemplate.buildPrompt(details)
+        } else {
+            details.prefix
+        }
+
         return OllamaCompletionRequest.Builder(
             settings.model,
-            settings.fimTemplate.buildPrompt(details)
+            prompt
         )
+            .setSuffix(if (settings.fimOverride) null else details.suffix)
+            .setStream(true)
             .setOptions(
                 OllamaParameters.Builder()
-                    .stop(settings.fimTemplate.stopTokens)
+                    .stop(stopTokens.ifEmpty { null })
                     .numPredict(MAX_TOKENS)
                     .temperature(0.4)
                     .build()
