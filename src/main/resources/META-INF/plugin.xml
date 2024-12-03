@@ -10,7 +10,7 @@
 
     <projectListeners>
         <listener topic="com.intellij.codeInsight.lookup.LookupManagerListener"
-                  class="ee.carlrobert.codegpt.completions.MethodNameCompletionLookupListener"/>
+                  class="ee.carlrobert.codegpt.refactorings.RenameCompletionLookupListener"/>
         <listener topic="com.intellij.openapi.wm.ex.ToolWindowManagerListener"
                   class="ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowListener"/>
     </projectListeners>
@@ -73,6 +73,7 @@
         <notificationGroup id="CodeGPT Notification Group Sticky" displayType="STICKY_BALLOON" key="notification.group.sticky.name"/>
         <statusBarWidgetFactory order="first" id="ee.carlrobert.codegpt.statusbar.widget"
           implementation="ee.carlrobert.codegpt.statusbar.CodeGPTStatusBarWidgetFactory"/>
+        <nameSuggestionProvider implementation="ee.carlrobert.codegpt.refactorings.DefaultNameSuggestionProvider"/>
     </extensions>
 
     <resource-bundle>messages.codegpt</resource-bundle>
