@@ -57,7 +57,10 @@ object CompletionUtil {
                 getFormattedCompletion(adjustedText, tempFile, document, editor)
 
             return if (service<ConfigurationSettings>().state.codeCompletionSettings.treeSitterProcessingEnabled) {
-                CodeCompletionParserFactory.getParserForFileExtension(originalFile.extension)
+                val parser =
+                    CodeCompletionParserFactory.getParserForFileExtension(originalFile.extension)
+                        ?: return formattedCompletion
+                parser
                     .parse(textBeforeCompletion, textAfterCompletion, formattedCompletion)
                     .trimEnd()
             } else {
