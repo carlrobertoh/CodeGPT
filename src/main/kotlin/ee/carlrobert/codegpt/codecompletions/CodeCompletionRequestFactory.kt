@@ -118,18 +118,24 @@ object CodeCompletionRequestFactory {
     fun buildOllamaRequest(details: InfillRequest): OllamaCompletionRequest {
         val settings = service<OllamaSettings>().state
         val stopTokens = buildList {
-            if (settings.fimTemplate.stopTokens != null) addAll(settings.fimTemplate.stopTokens!!)
             if (details.stopTokens.isNotEmpty()) addAll(details.stopTokens)
-        }.ifEmpty { null }
+        }.toMutableList()
+        val prompt = if (settings.fimOverride) {
+            settings.fimTemplate.stopTokens?.let { stopTokens.addAll(it) }
+            settings.fimTemplate.buildPrompt(details)
+        } else {
+            details.prefix
+        }
 
         return OllamaCompletionRequest.Builder(
             settings.model,
-            settings.fimTemplate.buildPrompt(details)
+            prompt
         )
+            .setSuffix(if (settings.fimOverride) null else details.suffix)
             .setStream(true)
             .setOptions(
                 OllamaParameters.Builder()
-                    .stop(stopTokens)
+                    .stop(stopTokens.ifEmpty { null })
                     .numPredict(MAX_TOKENS)
                     .temperature(0.4)
                     .build()
