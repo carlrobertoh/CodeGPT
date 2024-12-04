@@ -12,7 +12,9 @@ import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.codeStyle.CodeStyleManager
+import ee.carlrobert.codegpt.settings.GeneralSettings
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
+import ee.carlrobert.codegpt.settings.service.ServiceType
 import ee.carlrobert.codegpt.treesitter.CodeCompletionParserFactory
 import kotlin.math.min
 
@@ -56,7 +58,10 @@ object CompletionUtil {
             val formattedCompletion =
                 getFormattedCompletion(adjustedText, tempFile, document, editor)
 
-            return if (service<ConfigurationSettings>().state.codeCompletionSettings.treeSitterProcessingEnabled) {
+            val postProcessingEnabled =
+                service<GeneralSettings>().state.selectedService != ServiceType.CODEGPT
+                        && service<ConfigurationSettings>().state.codeCompletionSettings.treeSitterProcessingEnabled
+            return if (postProcessingEnabled) {
                 val parser =
                     CodeCompletionParserFactory.getParserForFileExtension(originalFile.extension)
                         ?: return formattedCompletion
