@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.14.0-233] - 2024-12-04
+
 ### Added
 
 - Support for multi-line code completions
@@ -797,7 +799,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `OPENAI_API_KEY` persistence, key is saved in the OS password safe from now on
 
-[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.13.1-233...HEAD
+[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.14.0-233...HEAD
+[2.14.0-233]: https://github.com/carlrobertoh/CodeGPT/compare/v2.13.1-233...v2.14.0-233
 [2.13.1-233]: https://github.com/carlrobertoh/CodeGPT/compare/v2.13.0-233...v2.13.1-233
 [2.13.0-233]: https://github.com/carlrobertoh/CodeGPT/compare/v2.12.5-233...v2.13.0-233
 [2.12.5-233]: https://github.com/carlrobertoh/CodeGPT/compare/v2.12.4-233...v2.12.5-233
