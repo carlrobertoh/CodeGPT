@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Recent Qwen 2.5 Coder models (llama.cpp)
 - Codestral as default code model (CodeGPT)
 
+### Fixed
+
+- NPE caused by lookup element sorter
+
 ### Removed
 
 - StarCoder 7B model (CodeGPT)
