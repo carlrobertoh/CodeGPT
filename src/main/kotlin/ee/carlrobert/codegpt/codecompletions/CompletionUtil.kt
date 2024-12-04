@@ -7,9 +7,9 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.util.TextRange
-import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.codeStyle.CodeStyleManager
 import ee.carlrobert.codegpt.settings.GeneralSettings
@@ -42,21 +42,22 @@ object CompletionUtil {
             }
 
             val originalFile = service<FileDocumentManager>().getFile(document) ?: return ""
+            val tempFileDocument = EditorFactory.getInstance().createDocument(buildString {
+                append(textBeforeCompletion)
+                append(adjustedText)
+                append(textAfterCompletion)
+            })
             val tempFile = project.service<PsiFileFactory>().createFileFromText(
                 "temp.${originalFile.extension}",
                 originalFile.fileType,
-                buildString {
-                    append(textBeforeCompletion)
-                    append(adjustedText)
-                    append(textAfterCompletion)
-                }
+                tempFileDocument.text
             )
 
             project.service<CodeStyleManager>()
                 .adjustLineIndent(tempFile, TextRange.from(caretOffset, adjustedText.length))
 
             val formattedCompletion =
-                getFormattedCompletion(adjustedText, tempFile, document, editor)
+                getFormattedCompletion(adjustedText, tempFileDocument, document, editor)
 
             val postProcessingEnabled =
                 service<GeneralSettings>().state.selectedService != ServiceType.CODEGPT
@@ -79,14 +80,11 @@ object CompletionUtil {
 
     private fun getFormattedCompletion(
         completionText: String,
-        tempFile: PsiFile,
+        tempFileDocument: Document,
         document: Document,
         editor: Editor,
     ): String {
         val formattedText = StringBuilder()
-        val tempFileDocument =
-            FileDocumentManager.getInstance().getDocument(tempFile.virtualFile)
-                ?: return completionText
         val currentCaretLine = editor.caretModel.logicalPosition.line
         var linePosition = currentCaretLine
         for (i in completionText.lines().indices) {
