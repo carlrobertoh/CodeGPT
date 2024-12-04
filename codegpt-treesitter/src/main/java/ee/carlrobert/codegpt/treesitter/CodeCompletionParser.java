@@ -58,7 +58,7 @@ public class CodeCompletionParser {
 
     if (output.contains("\n")) {
       var finalResult = output.substring(0, output.indexOf("\n"));
-      if (finalResult.charAt(finalResult.length() - 1) == '{') {
+      if (finalResult.length() > 1 && finalResult.charAt(finalResult.length() - 1) == '{') {
         return finalResult + "}";
       }
       return finalResult;

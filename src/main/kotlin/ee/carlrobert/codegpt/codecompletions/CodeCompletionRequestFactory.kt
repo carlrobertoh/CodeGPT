@@ -34,6 +34,7 @@ object CodeCompletionRequestFactory {
             .setSuffix(details.suffix)
             .setFileExtension(details.fileDetails?.fileExtension)
             .setFileContent(details.fileDetails?.fileContent)
+            .setCursorOffset(details.caretOffset)
             .setStop(details.stopTokens.ifEmpty { null })
             .build()
     }
