@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 import okhttp3.Request;
 import okhttp3.sse.EventSource;
@@ -185,10 +186,16 @@ public final class CompletionRequestService {
   }
 
   public static boolean isRequestAllowed() {
-    return isRequestAllowed(GeneralSettings.getSelectedService());
+    try {
+      return ApplicationManager.getApplication()
+          .executeOnPooledThread(() -> isRequestAllowed(GeneralSettings.getSelectedService()))
+          .get();
+    } catch (InterruptedException | ExecutionException e) {
+      throw new RuntimeException(e);
+    }
   }
 
-  public static boolean isRequestAllowed(ServiceType serviceType) {
+  private static boolean isRequestAllowed(ServiceType serviceType) {
     return switch (serviceType) {
       case OPENAI -> CredentialsStore.INSTANCE.isCredentialSet(CredentialKey.OPENAI_API_KEY);
       case AZURE -> CredentialsStore.INSTANCE.isCredentialSet(
