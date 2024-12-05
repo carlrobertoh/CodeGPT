@@ -3,9 +3,6 @@ package ee.carlrobert.codegpt.completions;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.progress.ProgressIndicator;
-import com.intellij.openapi.progress.ProgressManager;
-import com.intellij.openapi.progress.Task;
 import ee.carlrobert.codegpt.completions.factory.CustomOpenAIRequest;
 import ee.carlrobert.codegpt.credentials.CredentialsStore;
 import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey;
@@ -16,10 +13,8 @@ import ee.carlrobert.codegpt.settings.service.google.GoogleSettings;
 import ee.carlrobert.llm.client.DeserializationUtil;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionRequest;
 import ee.carlrobert.llm.client.codegpt.request.chat.ChatCompletionRequest;
-import ee.carlrobert.llm.client.codegpt.response.CodeGPTException;
 import ee.carlrobert.llm.client.google.completion.GoogleCompletionRequest;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
-import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionEventSourceListener;
 import ee.carlrobert.llm.client.openai.completion.OpenAITextCompletionEventSourceListener;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
@@ -30,15 +25,12 @@ import ee.carlrobert.llm.completion.CompletionEventListener;
 import ee.carlrobert.llm.completion.CompletionRequest;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
-import javax.swing.SwingUtilities;
 import okhttp3.Request;
 import okhttp3.sse.EventSource;
 import okhttp3.sse.EventSources;
-import org.jetbrains.annotations.NotNull;
 
 @Service
 public final class CompletionRequestService {
@@ -100,13 +92,8 @@ public final class CompletionRequestService {
       CompletionEventListener<String> eventListener) {
     if (request instanceof OpenAIChatCompletionRequest completionRequest) {
       return switch (GeneralSettings.getSelectedService()) {
-        case OPENAI -> {
-          if (List.of("o1-mini", "o1-preview").contains(completionRequest.getModel())) {
-            yield getO1ChatCompletionAsync(completionRequest, eventListener);
-          }
-          yield CompletionClientProvider.getOpenAIClient()
-              .getChatCompletionAsync(completionRequest, eventListener);
-        }
+        case OPENAI -> CompletionClientProvider.getOpenAIClient()
+            .getChatCompletionAsync(completionRequest, eventListener);
         case AZURE -> CompletionClientProvider.getAzureClient()
             .getChatCompletionAsync(completionRequest, eventListener);
         case OLLAMA -> CompletionClientProvider.getOllamaClient()
@@ -115,9 +102,6 @@ public final class CompletionRequestService {
       };
     }
     if (request instanceof ChatCompletionRequest completionRequest) {
-      if (List.of("o1-mini", "o1-preview").contains(completionRequest.getModel())) {
-        return getO1ChatCompletionAsync(completionRequest, eventListener);
-      }
       return CompletionClientProvider.getCodeGPTClient()
           .getChatCompletionAsync(completionRequest, eventListener);
     }
@@ -144,38 +128,6 @@ public final class CompletionRequestService {
     }
 
     throw new IllegalStateException("Unknown request type: " + request.getClass());
-  }
-
-  private EventSource getO1ChatCompletionAsync(
-      CompletionRequest request,
-      CompletionEventListener<String> eventListener) {
-    ProgressManager.getInstance()
-        .run(new Task.Backgroundable(null, "CodeGPT: Processing o1 request") {
-          @Override
-          public void run(@NotNull ProgressIndicator indicator) {
-            indicator.setIndeterminate(true);
-            try {
-              var response = CompletionRequestService.getInstance().getChatCompletion(request);
-              SwingUtilities.invokeLater(
-                  () -> eventListener.onComplete(new StringBuilder(response)));
-            } catch (CodeGPTException e) {
-              SwingUtilities.invokeLater(
-                  () -> eventListener.onError(new ErrorDetails(e.getDetail()), e));
-            }
-          }
-        });
-
-    return new EventSource() {
-      @Override
-      public @NotNull Request request() {
-        return new Request.Builder().build(); // dummy
-      }
-
-      @Override
-      public void cancel() {
-        eventListener.onCancelled(new StringBuilder("Cancelled"));
-      }
-    };
   }
 
   public String getChatCompletion(CompletionRequest request) {

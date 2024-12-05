@@ -20,6 +20,7 @@ class CodeGPTRequestFactory : BaseRequestFactory() {
             ChatCompletionRequest.Builder(buildOpenAIMessages(model, params))
                 .setModel(model)
                 .setSessionId(params.sessionId)
+                .setStream(true)
                 .setMetadata(
                     Metadata(
                         CodeGPTPlugin.getVersion(),
@@ -29,12 +30,10 @@ class CodeGPTRequestFactory : BaseRequestFactory() {
 
         if ("o1-mini" == model || "o1-preview" == model) {
             requestBuilder
-                .setStream(false)
                 .setMaxTokens(null)
                 .setTemperature(null)
         } else {
             requestBuilder
-                .setStream(true)
                 .setMaxTokens(configuration.maxTokens)
                 .setTemperature(configuration.temperature.toDouble())
         }
@@ -66,7 +65,7 @@ class CodeGPTRequestFactory : BaseRequestFactory() {
     ): ChatCompletionRequest {
         val model = service<CodeGPTServiceSettings>().state.chatCompletionSettings.model
         if (model == "o1-mini" || model == "o1-preview") {
-            return buildBasicO1Request(model, userPrompt, systemPrompt, maxTokens)
+            return buildBasicO1Request(model, userPrompt, systemPrompt, maxTokens, stream = stream)
         }
 
         return ChatCompletionRequest.Builder(
@@ -84,7 +83,8 @@ class CodeGPTRequestFactory : BaseRequestFactory() {
         model: String,
         prompt: String,
         systemPrompt: String = "",
-        maxCompletionTokens: Int = 4096
+        maxCompletionTokens: Int = 4096,
+        stream: Boolean = false
     ): ChatCompletionRequest {
         val messages = if (systemPrompt.isEmpty()) {
             listOf(OpenAIChatCompletionStandardMessage("user", prompt))
@@ -97,7 +97,7 @@ class CodeGPTRequestFactory : BaseRequestFactory() {
         return ChatCompletionRequest.Builder(messages)
             .setModel(model)
             .setMaxTokens(maxCompletionTokens)
-            .setStream(false)
+            .setStream(stream)
             .setTemperature(null)
             .build()
     }
