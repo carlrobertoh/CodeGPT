@@ -24,19 +24,16 @@ class OpenAIRequestFactory : CompletionRequestFactory {
         val requestBuilder: OpenAIChatCompletionRequest.Builder =
             OpenAIChatCompletionRequest.Builder(buildOpenAIMessages(model, params))
                 .setModel(model)
+                .setStream(true)
+                .setMaxTokens(null)
+                .setMaxCompletionTokens(configuration.maxTokens)
         if ("o1-mini" == model || "o1-preview" == model) {
             requestBuilder
-                .setMaxCompletionTokens(configuration.maxTokens)
-                .setStream(false)
-                .setMaxTokens(null)
                 .setTemperature(null)
                 .setPresencePenalty(null)
                 .setFrequencyPenalty(null)
         } else {
-            requestBuilder
-                .setStream(true)
-                .setMaxTokens(configuration.maxTokens)
-                .setTemperature(configuration.temperature.toDouble())
+            requestBuilder.setTemperature(configuration.temperature.toDouble())
         }
 
         return requestBuilder.build()
@@ -48,7 +45,7 @@ class OpenAIRequestFactory : CompletionRequestFactory {
         val systemPrompt = service<PromptsSettings>().state.coreActions.editCode.instructions
             ?: CoreActionsState.DEFAULT_EDIT_CODE_PROMPT
         if (model == "o1-mini" || model == "o1-preview") {
-            return buildBasicO1Request(model, prompt, systemPrompt)
+            return buildBasicO1Request(model, prompt, systemPrompt, stream = true)
         }
         return createBasicCompletionRequest(systemPrompt, prompt, model, true)
     }
@@ -57,7 +54,7 @@ class OpenAIRequestFactory : CompletionRequestFactory {
         val model = service<OpenAISettings>().state.model
         val (gitDiff, systemPrompt) = params
         if (model == "o1-mini" || model == "o1-preview") {
-            return buildBasicO1Request(model, gitDiff, systemPrompt)
+            return buildBasicO1Request(model, gitDiff, systemPrompt, stream = true)
         }
         return createBasicCompletionRequest(systemPrompt, gitDiff, model, true)
     }
@@ -84,7 +81,8 @@ class OpenAIRequestFactory : CompletionRequestFactory {
             model: String,
             prompt: String,
             systemPrompt: String = "",
-            maxCompletionTokens: Int = 4096
+            maxCompletionTokens: Int = 4096,
+            stream: Boolean = false,
         ): OpenAIChatCompletionRequest {
             val messages = if (systemPrompt.isEmpty()) {
                 listOf(OpenAIChatCompletionStandardMessage("user", prompt))
@@ -97,11 +95,11 @@ class OpenAIRequestFactory : CompletionRequestFactory {
             return OpenAIChatCompletionRequest.Builder(messages)
                 .setModel(model)
                 .setMaxCompletionTokens(maxCompletionTokens)
-                .setStream(false)
+                .setMaxTokens(null)
+                .setStream(stream)
                 .setTemperature(null)
                 .setFrequencyPenalty(null)
                 .setPresencePenalty(null)
-                .setMaxTokens(null)
                 .build()
         }
 
