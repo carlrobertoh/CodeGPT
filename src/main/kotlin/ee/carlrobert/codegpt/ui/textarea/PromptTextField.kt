@@ -65,10 +65,16 @@ class PromptTextField(
         IdeEventQueue.getInstance().addDispatcher(
             PromptTextFieldEventDispatcher(this, suggestionsPopupManager, appliedInlays) {
                 onSubmit(text, appliedInlays)
-                clear()
             },
             this
         )
+    }
+
+    fun clear() {
+        runInEdt {
+            text = ""
+            clearInlays()
+        }
     }
 
     fun addInlayElement(actionPrefix: String, text: String?, actionItem: SuggestionActionItem?) {
@@ -148,13 +154,6 @@ class PromptTextField(
 
     override fun dispose() {
         clear()
-    }
-
-    private fun clear() {
-        runInEdt {
-            text = ""
-            clearInlays()
-        }
     }
 
     private fun clearInlays() {
