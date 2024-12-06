@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.14.1-223] - 2024-12-06
+
 ### Fixed
 
 - Response streaming for o1 models
@@ -789,7 +791,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `OPENAI_API_KEY` persistence, key is saved in the OS password safe from now on
 
-[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.14.0-223...HEAD
+[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.14.1-223...HEAD
+[2.14.1-223]: https://github.com/carlrobertoh/CodeGPT/compare/v2.14.0-223...v2.14.1-223
 [2.14.0-223]: https://github.com/carlrobertoh/CodeGPT/compare/v2.13.0-223...v2.14.0-223
 [2.13.0-223]: https://github.com/carlrobertoh/CodeGPT/compare/v2.12.5-223...v2.13.0-223
 [2.12.5-223]: https://github.com/carlrobertoh/CodeGPT/compare/v2.12.4-223...v2.12.5-223
