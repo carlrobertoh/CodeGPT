@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Response streaming for o1 models
+- IDE error caused by credential validation in EDT
+- Submission handling when current response is ongoing
+
 ## [2.14.0-241.1] - 2024-12-04
 
 ### Added
