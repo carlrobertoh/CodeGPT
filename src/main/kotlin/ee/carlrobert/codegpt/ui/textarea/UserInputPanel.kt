@@ -62,6 +62,7 @@ class UserInputPanel(
         ) {
             override fun actionPerformed(e: AnActionEvent) {
                 handleSubmit(promptTextField.text)
+                promptTextField.clear()
             }
         }
     )
@@ -138,8 +139,9 @@ class UserInputPanel(
     override fun getInsets(): Insets = JBUI.insets(4)
 
     private fun handleSubmit(text: String, appliedInlays: List<AppliedActionInlay>? = emptyList()) {
-        if (text.isNotEmpty()) {
+        if (text.isNotEmpty() && submitButton.isEnabled) {
             onSubmit(text, appliedInlays)
+            promptTextField.clear()
         }
     }
 
