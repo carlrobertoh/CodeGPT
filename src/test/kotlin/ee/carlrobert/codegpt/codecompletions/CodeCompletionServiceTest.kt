@@ -141,7 +141,7 @@ class CodeCompletionServiceTest : IntegrationTest() {
         }
         val offsetBeforeApply = myFixture.editor.caretModel.offset
 
-        myFixture.performEditorAction("codegpt.applyInlaysNextWord")
+        myFixture.performEditorAction(AcceptNextWordInlayAction.ID)
 
         assertInlineSuggestion("Failed to display next partial inline suggestion.") {
             myFixture.run {
