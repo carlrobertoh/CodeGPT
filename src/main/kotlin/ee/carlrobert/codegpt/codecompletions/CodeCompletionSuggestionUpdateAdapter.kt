@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.codecompletions
 
+import ai.grazie.nlp.utils.takeWhitespaces
 import com.intellij.codeInsight.inline.completion.InlineCompletionEvent
 import com.intellij.codeInsight.inline.completion.elements.InlineCompletionGrayTextElement
 import com.intellij.codeInsight.inline.completion.suggestion.InlineCompletionSuggestionUpdateManager
@@ -25,17 +26,50 @@ class CodeCompletionSuggestionUpdateAdapter :
         event: InlineCompletionEvent,
         variant: InlineCompletionVariant.Snapshot
     ): UpdateResult {
-        if (event !is ApplyNextWordInlaySuggestionEvent || variant.elements.isEmpty()) {
-            return Invalidated
-        }
+        if (variant.elements.isEmpty()) return Invalidated
 
         val completionText = variant.elements.joinToString("") { it.text }
-        val textToInsert = event.toRequest().run {
-            CompletionSplitter.split(completionText)
+        return when (event) {
+            is ApplyNextWordInlaySuggestionEvent -> handleNextWordEvent(event, variant, completionText)
+            is ApplyNextLineInlaySuggestionEvent -> handleNextLineEvent(event, variant, completionText)
+            else -> Invalidated
         }
+    }
 
-        updateRemainingCompletion(event.toRequest().editor, textToInsert)
+    private fun handleNextWordEvent(
+        event: ApplyNextWordInlaySuggestionEvent,
+        variant: InlineCompletionVariant.Snapshot,
+        completionText: String
+    ): UpdateResult {
+        val textToInsert = CompletionSplitter.split(completionText)
+        return createUpdatedVariant(event.toRequest().editor, variant, completionText, textToInsert)
+    }
 
+    private fun handleNextLineEvent(
+        event: ApplyNextLineInlaySuggestionEvent,
+        variant: InlineCompletionVariant.Snapshot,
+        completionText: String
+    ): UpdateResult {
+        val lineBreakIndex = completionText.indexOf('\n')
+        if (lineBreakIndex == -1) return Invalidated
+
+        val nextLineStart = lineBreakIndex + 1
+        val whitespacesLength = completionText
+            .substring(nextLineStart)
+            .takeWhitespaces()
+            .length
+        val textToInsert = completionText.substring(0, nextLineStart + whitespacesLength)
+
+        return createUpdatedVariant(event.toRequest().editor, variant, completionText, textToInsert)
+    }
+
+    private fun createUpdatedVariant(
+        editor: Editor,
+        variant: InlineCompletionVariant.Snapshot,
+        completionText: String,
+        textToInsert: String
+    ): UpdateResult {
+        updateRemainingCompletion(editor, textToInsert)
         return Changed(
             variant.copy(
                 listOf(InlineCompletionGrayTextElement(completionText.removePrefix(textToInsert)))
