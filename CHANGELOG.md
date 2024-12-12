@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.14.2-241.1] - 2024-12-12
+
 ### Added
 
 - Partial code completion acceptance
@@ -811,7 +813,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `OPENAI_API_KEY` persistence, key is saved in the OS password safe from now on
 
-[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.14.1-241.1...HEAD
+[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.14.2-241.1...HEAD
+[2.14.2-241.1]: https://github.com/carlrobertoh/CodeGPT/compare/v2.14.1-241.1...v2.14.2-241.1
 [2.14.1-241.1]: https://github.com/carlrobertoh/CodeGPT/compare/v2.14.0-241.1...v2.14.1-241.1
 [2.14.0-241.1]: https://github.com/carlrobertoh/CodeGPT/compare/v2.13.1-241.1...v2.14.0-241.1
 [2.13.1-241.1]: https://github.com/carlrobertoh/CodeGPT/compare/v2.13.0-241.1...v2.13.1-241.1
