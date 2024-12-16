@@ -235,10 +235,10 @@ public class ChatMessageResponseBody extends JPanel {
     var child = document.getChildOfType(FencedCodeBlock.class);
     if (child != null) {
       var codeBlock = ((FencedCodeBlock) child);
-      var code = codeBlock.getContentChars().unescape();
+      var code = codeBlock.getContentChars().toString();
       if (!code.isEmpty()) {
         if (currentlyProcessedEditorPanel == null) {
-          prepareProcessingCode(code, codeBlock.getInfo().unescape());
+          prepareProcessingCode(code, codeBlock.getInfo().toString());
         }
         EditorUtil.updateEditorDocument(currentlyProcessedEditorPanel.getEditor(), code);
       }
