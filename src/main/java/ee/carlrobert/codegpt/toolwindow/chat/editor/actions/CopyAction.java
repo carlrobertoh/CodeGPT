@@ -19,7 +19,7 @@ public class CopyAction extends TrackableAction {
 
   public CopyAction(@NotNull Editor toolwindowEditor) {
     super(
-        CodeGPTBundle.get("toolwindow.chat.editor.action.copy.title"),
+        CodeGPTBundle.get("shared.copy"),
         CodeGPTBundle.get("toolwindow.chat.editor.action.copy.description"),
         Actions.Copy,
         ActionType.COPY_CODE);
