@@ -5,8 +5,13 @@ import static ee.carlrobert.codegpt.util.MarkdownUtil.convertMdToHtml;
 import static java.lang.String.format;
 import static javax.swing.event.HyperlinkEvent.EventType.ACTIVATED;
 
+import com.intellij.icons.AllIcons;
 import com.intellij.icons.AllIcons.General;
 import com.intellij.openapi.Disposable;
+import com.intellij.openapi.actionSystem.ActionPlaces;
+import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditorManager;
@@ -15,6 +20,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.ui.PopupHandler;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.JBUI;
 import com.vladsch.flexmark.ast.FencedCodeBlock;
@@ -313,7 +319,29 @@ public class ChatMessageResponseBody extends JPanel {
       textPane.setCaretPosition(textPane.getDocument().getLength());
     }
     textPane.setBorder(JBUI.Borders.empty());
+
+    installPopupMenu(textPane);
+
     return textPane;
+  }
+
+  private void installPopupMenu(JTextPane textPane) {
+    PopupHandler.installPopupMenu(textPane, new DefaultActionGroup(
+        new AnAction(
+            CodeGPTBundle.get("shared.copy"),
+            CodeGPTBundle.get("shared.copyToClipboard"),
+            AllIcons.Actions.Copy) {
+          @Override
+          public void actionPerformed(@NotNull AnActionEvent e) {
+            textPane.copy();
+          }
+
+          @Override
+          public void update(@NotNull AnActionEvent e) {
+            e.getPresentation().setEnabled(textPane.getSelectedText() != null);
+          }
+        }
+    ), ActionPlaces.EDITOR_POPUP);
   }
 
   private static JPanel createWebpageListPanel(WebpageList webpageList) {
