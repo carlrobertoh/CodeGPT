@@ -9,6 +9,7 @@ import com.intellij.icons.AllIcons;
 import com.intellij.icons.AllIcons.General;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.ActionPlaces;
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
@@ -37,12 +38,15 @@ import ee.carlrobert.codegpt.settings.GeneralSettingsConfigurable;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.toolwindow.chat.StreamParser;
 import ee.carlrobert.codegpt.toolwindow.chat.editor.ResponseEditorPanel;
+import ee.carlrobert.codegpt.toolwindow.chat.editor.actions.CopyAction;
 import ee.carlrobert.codegpt.toolwindow.ui.ResponseBodyProgressPanel;
 import ee.carlrobert.codegpt.toolwindow.ui.WebpageList;
+import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import ee.carlrobert.codegpt.util.EditorUtil;
 import ee.carlrobert.codegpt.util.MarkdownUtil;
 import java.awt.BorderLayout;
+import java.awt.event.MouseEvent;
 import java.util.Objects;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
@@ -331,9 +335,16 @@ public class ChatMessageResponseBody extends JPanel {
             CodeGPTBundle.get("shared.copy"),
             CodeGPTBundle.get("shared.copyToClipboard"),
             AllIcons.Actions.Copy) {
+
           @Override
-          public void actionPerformed(@NotNull AnActionEvent e) {
+          public @NotNull ActionUpdateThread getActionUpdateThread() {
+            return ActionUpdateThread.EDT;
+          }
+
+          @Override
+          public void actionPerformed(@NotNull AnActionEvent event) {
             textPane.copy();
+            CopyAction.showCopyBalloon(event);
           }
 
           @Override

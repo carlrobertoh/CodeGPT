@@ -87,7 +87,7 @@ class ConversationPanel extends JPanel {
 
     gbc.gridx = 1;
     gbc.weightx = 0;
-    headerPanel.add(new IconActionButton(new DeleteConversationAction(onDelete)), gbc);
+    headerPanel.add(new IconActionButton(new DeleteConversationAction(onDelete), "DELETE"), gbc);
 
     var bottomPanel = new JPanel(new BorderLayout());
     bottomPanel.add(new JLabel(conversation.getUpdatedOn()

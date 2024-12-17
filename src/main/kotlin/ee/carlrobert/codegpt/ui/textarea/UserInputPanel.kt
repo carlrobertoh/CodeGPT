@@ -64,7 +64,8 @@ class UserInputPanel(
                 handleSubmit(promptTextField.text)
                 promptTextField.clear()
             }
-        }
+        },
+        "SUBMIT"
     )
     private val stopButton = IconActionButton(
         object : AnAction(
@@ -75,7 +76,8 @@ class UserInputPanel(
             override fun actionPerformed(e: AnActionEvent) {
                 onStop()
             }
-        }
+        },
+        "STOP"
     ).apply { isEnabled = false }
     private val attachImageLink = AnActionLink(CodeGPTBundle.get("shared.image"), AttachImageAction())
         .apply {

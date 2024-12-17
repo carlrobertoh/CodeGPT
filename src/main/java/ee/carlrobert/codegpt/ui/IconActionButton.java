@@ -8,11 +8,12 @@ import com.intellij.openapi.actionSystem.impl.ActionButton;
 
 public class IconActionButton extends ActionButton {
 
-  public IconActionButton(AnAction action) {
+  public IconActionButton(AnAction action, String actionCode) {
     super(action,
         getPresentation(action),
         ActionPlaces.TOOLWINDOW_CONTENT,
         ActionToolbar.DEFAULT_MINIMUM_BUTTON_SIZE);
+    putClientProperty("actionCode", actionCode);
   }
 
   private static Presentation getPresentation(AnAction action) {
