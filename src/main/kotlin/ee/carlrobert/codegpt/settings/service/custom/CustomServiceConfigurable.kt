@@ -29,9 +29,9 @@ class CustomServiceConfigurable : Configurable {
     }
 
     override fun apply() {
+        component.applyChanges()
         setCredential(CUSTOM_SERVICE_API_KEY, component.getApiKey())
         service<GeneralSettings>().state.selectedService = ServiceType.CUSTOM_OPENAI
-        component.applyChanges()
     }
 
     override fun reset() {
