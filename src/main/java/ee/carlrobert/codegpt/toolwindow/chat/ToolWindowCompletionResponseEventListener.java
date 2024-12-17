@@ -13,8 +13,9 @@ import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.events.CodeGPTEvent;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ChatMessageResponseBody;
-import ee.carlrobert.codegpt.toolwindow.chat.ui.ResponsePanel;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.TotalTokensPanel;
+import ee.carlrobert.codegpt.toolwindow.ui.ResponseMessagePanel;
+import ee.carlrobert.codegpt.toolwindow.ui.UserMessagePanel;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.codegpt.ui.textarea.UserInputPanel;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
@@ -31,7 +32,8 @@ abstract class ToolWindowCompletionResponseEventListener implements
   private final StringBuilder messageBuilder = new StringBuilder();
   private final EncodingManager encodingManager;
   private final ConversationService conversationService;
-  private final ResponsePanel responsePanel;
+  private final ResponseMessagePanel responsePanel;
+  private final UserMessagePanel userMessagePanel;
   private final ChatMessageResponseBody responseContainer;
   private final TotalTokensPanel totalTokensPanel;
   private final UserInputPanel textArea;
@@ -43,11 +45,13 @@ abstract class ToolWindowCompletionResponseEventListener implements
 
   public ToolWindowCompletionResponseEventListener(
       ConversationService conversationService,
-      ResponsePanel responsePanel,
+      UserMessagePanel userMessagePanel,
+      ResponseMessagePanel responsePanel,
       TotalTokensPanel totalTokensPanel,
       UserInputPanel textArea) {
     this.encodingManager = EncodingManager.getInstance();
     this.conversationService = conversationService;
+    this.userMessagePanel = userMessagePanel;
     this.responsePanel = responsePanel;
     this.responseContainer = (ChatMessageResponseBody) responsePanel.getContent();
     this.totalTokensPanel = totalTokensPanel;
@@ -89,7 +93,7 @@ abstract class ToolWindowCompletionResponseEventListener implements
         }
       } finally {
         LOG.error(error.getMessage(), ex);
-        responsePanel.enableActions();
+        responsePanel.enableAllActions(true);
         stopStreaming(responseContainer);
       }
     });
@@ -119,7 +123,7 @@ abstract class ToolWindowCompletionResponseEventListener implements
 
     ApplicationManager.getApplication().invokeLater(() -> {
       try {
-        responsePanel.enableActions();
+        responsePanel.enableAllActions(true);
         if (!streamResponseReceived && !fullMessage.isEmpty()) {
           responseContainer.withResponse(fullMessage);
         }
@@ -156,6 +160,8 @@ abstract class ToolWindowCompletionResponseEventListener implements
   private void stopStreaming(ChatMessageResponseBody responseContainer) {
     stopped = true;
     textArea.setSubmitEnabled(true);
+    userMessagePanel.enableAllActions(true);
+    responsePanel.enableAllActions(true);
     responseContainer.hideCaret();
   }
 }

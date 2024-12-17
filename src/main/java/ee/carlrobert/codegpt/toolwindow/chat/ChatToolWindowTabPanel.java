@@ -22,13 +22,14 @@ import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
+import ee.carlrobert.codegpt.toolwindow.chat.editor.actions.CopyAction;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ChatMessageResponseBody;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ChatToolWindowScrollablePanel;
-import ee.carlrobert.codegpt.toolwindow.chat.ui.ResponsePanel;
-import ee.carlrobert.codegpt.toolwindow.chat.ui.UserMessagePanel;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.TotalTokensDetails;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.TotalTokensPanel;
 import ee.carlrobert.codegpt.toolwindow.ui.ChatToolWindowLandingPanel;
+import ee.carlrobert.codegpt.toolwindow.ui.ResponseMessagePanel;
+import ee.carlrobert.codegpt.toolwindow.ui.UserMessagePanel;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.codegpt.ui.textarea.AppliedActionInlay;
 import ee.carlrobert.codegpt.ui.textarea.UserInputPanel;
@@ -174,12 +175,14 @@ public class ChatToolWindowTabPanel implements Disposable {
         totalTokensPanel.updateReferencedFilesTokens(callParameters.getReferencedFiles());
       }
 
-      var responsePanel = createResponsePanel(callParameters);
-      var messagePanel = toolWindowScrollablePanel.addMessage(message.getId());
-      messagePanel.add(new UserMessagePanel(project, message, this));
-      messagePanel.add(responsePanel);
+      var userMessagePanel = createUserMessagePanel(message, callParameters);
+      var responseMessagePanel = createResponseMessagePanel(callParameters);
 
-      call(callParameters, responsePanel);
+      var messagePanel = toolWindowScrollablePanel.addMessage(message.getId());
+      messagePanel.add(userMessagePanel);
+      messagePanel.add(responseMessagePanel);
+
+      call(callParameters, responseMessagePanel, userMessagePanel);
     });
   }
 
@@ -193,29 +196,39 @@ public class ChatToolWindowTabPanel implements Disposable {
             it -> it.getReferencedFilePaths() != null && !it.getReferencedFilePaths().isEmpty());
   }
 
-  private ResponsePanel createResponsePanel(ChatCompletionParameters callParameters) {
+  private UserMessagePanel createUserMessagePanel(
+      Message message,
+      ChatCompletionParameters callParameters) {
+    var panel = new UserMessagePanel(project, message, this);
+    panel.addCopyAction(() -> CopyAction.copyToClipboard(message.getPrompt()));
+    panel.addReloadAction(() -> reloadMessage(callParameters, panel));
+    panel.addDeleteAction(() -> removeMessage(message.getId(), conversation));
+    return panel;
+  }
+
+  private ResponseMessagePanel createResponseMessagePanel(ChatCompletionParameters callParameters) {
     var message = callParameters.getMessage();
     var fileContextIncluded =
         hasReferencedFilePaths(message) || hasReferencedFilePaths(conversation);
 
-    return new ResponsePanel()
-        .withReloadAction(() -> reloadMessage(callParameters))
-        .withDeleteAction(() -> removeMessage(message.getId(), conversation))
-        .addContent(
-            new ChatMessageResponseBody(
-                project,
-                true,
-                false,
-                message.isWebSearchIncluded(),
-                fileContextIncluded || message.getDocumentationDetails() != null,
-                this));
+    var panel = new ResponseMessagePanel();
+    panel.addCopyAction(() -> CopyAction.copyToClipboard(message.getResponse()));
+    panel.addContent(new ChatMessageResponseBody(
+        project,
+        true,
+        false,
+        message.isWebSearchIncluded(),
+        fileContextIncluded || message.getDocumentationDetails() != null,
+        this));
+    return panel;
   }
 
-  private void reloadMessage(ChatCompletionParameters prevParameters) {
+  private void reloadMessage(ChatCompletionParameters prevParameters,
+      UserMessagePanel userMessagePanel) {
     var prevMessage = prevParameters.getMessage();
-    ResponsePanel responsePanel = null;
+    ResponseMessagePanel responsePanel = null;
     try {
-      responsePanel = toolWindowScrollablePanel.getMessageResponsePanel(prevMessage.getId());
+      responsePanel = toolWindowScrollablePanel.getResponseMessagePanel(prevMessage.getId());
       ((ChatMessageResponseBody) responsePanel.getContent()).clear();
       toolWindowScrollablePanel.update();
     } catch (Exception e) {
@@ -226,7 +239,7 @@ public class ChatToolWindowTabPanel implements Disposable {
       if (responsePanel != null) {
         prevMessage.setResponse("");
         conversationService.saveMessage(conversation, prevMessage);
-        call(prevParameters.toBuilder().retry(true).build(), responsePanel);
+        call(prevParameters.toBuilder().retry(true).build(), responsePanel, userMessagePanel);
       }
 
       totalTokensPanel.updateConversationTokens(conversation);
@@ -253,8 +266,11 @@ public class ChatToolWindowTabPanel implements Disposable {
     totalTokensPanel.updateConversationTokens(conversation);
   }
 
-  private void call(ChatCompletionParameters callParameters, ResponsePanel responsePanel) {
-    var responseContainer = (ChatMessageResponseBody) responsePanel.getContent();
+  private void call(
+      ChatCompletionParameters callParameters,
+      ResponseMessagePanel responseMessagePanel,
+      UserMessagePanel userMessagePanel) {
+    var responseContainer = (ChatMessageResponseBody) responseMessagePanel.getContent();
 
     if (!CompletionRequestService.isRequestAllowed()) {
       responseContainer.displayMissingCredential();
@@ -264,15 +280,18 @@ public class ChatToolWindowTabPanel implements Disposable {
     requestHandler = new ToolwindowChatCompletionRequestHandler(
         new ToolWindowCompletionResponseEventListener(
             conversationService,
-            responsePanel,
+            userMessagePanel,
+            responseMessagePanel,
             totalTokensPanel,
             userInputPanel) {
           @Override
           public void handleTokensExceededPolicyAccepted() {
-            call(callParameters, responsePanel);
+            call(callParameters, responseMessagePanel, userMessagePanel);
           }
         });
     userInputPanel.setSubmitEnabled(false);
+    userMessagePanel.disableActions(List.of("RELOAD", "DELETE"));
+    responseMessagePanel.disableActions(List.of("COPY"));
 
     requestHandler.call(callParameters);
   }
@@ -337,28 +356,39 @@ public class ChatToolWindowTabPanel implements Disposable {
   private void displayConversation() {
     clearWindow();
     conversation.getMessages().forEach(message -> {
-      var response = message.getResponse() == null ? "" : message.getResponse();
-      var messageResponseBody =
-          new ChatMessageResponseBody(project, this).withResponse(response);
-
-      messageResponseBody.hideCaret();
-
-      var userMessagePanel = new UserMessagePanel(project, message, this);
-      var imageFilePath = message.getImageFilePath();
-      if (imageFilePath != null && !imageFilePath.isEmpty()) {
-        userMessagePanel.displayImage(imageFilePath);
-      }
-
       var messagePanel = toolWindowScrollablePanel.addMessage(message.getId());
-      messagePanel.add(userMessagePanel);
-      messagePanel.add(new ResponsePanel()
-          .withReloadAction(() -> reloadMessage(
-              ChatCompletionParameters.builder(conversation, message)
-                  .conversationType(ConversationType.DEFAULT)
-                  .build()))
-          .withDeleteAction(() -> removeMessage(message.getId(), conversation))
-          .addContent(messageResponseBody));
+      messagePanel.add(getUserMessagePanel(message));
+      messagePanel.add(getResponseMessagePanel(message));
     });
+  }
+
+  private UserMessagePanel getUserMessagePanel(Message message) {
+    var userMessagePanel = new UserMessagePanel(project, message, this);
+    userMessagePanel.addCopyAction(() -> CopyAction.copyToClipboard(message.getPrompt()));
+    userMessagePanel.addReloadAction(() -> reloadMessage(
+        ChatCompletionParameters.builder(conversation, message)
+            .conversationType(ConversationType.DEFAULT)
+            .build(),
+        userMessagePanel));
+    userMessagePanel.addDeleteAction(() -> removeMessage(message.getId(), conversation));
+    var imageFilePath = message.getImageFilePath();
+    if (imageFilePath != null && !imageFilePath.isEmpty()) {
+      userMessagePanel.displayImage(imageFilePath);
+    }
+    return userMessagePanel;
+  }
+
+  private ResponseMessagePanel getResponseMessagePanel(Message message) {
+    var response = message.getResponse() == null ? "" : message.getResponse();
+    var messageResponseBody =
+        new ChatMessageResponseBody(project, this).withResponse(response);
+
+    messageResponseBody.hideCaret();
+
+    var responseMessagePanel = new ResponseMessagePanel();
+    responseMessagePanel.addContent(messageResponseBody);
+    responseMessagePanel.addCopyAction(() -> CopyAction.copyToClipboard(message.getResponse()));
+    return responseMessagePanel;
   }
 
   private JPanel createRootPanel() {
