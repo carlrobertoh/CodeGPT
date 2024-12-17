@@ -6,6 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Support for copying user and response messages in their original format [#791](https://github.com/carlrobertoh/CodeGPT/issues/791)
+- Right-click popup menu for response messages
+
+### Fixed
+
+- Escaped code response characters [#169](https://github.com/carlrobertoh/CodeGPT/issues/169), [#437](https://github.com/carlrobertoh/CodeGPT/issues/437)
+- Model value change for empty conversations
+- Order of Custom OpenAI applied settings [#797](https://github.com/carlrobertoh/CodeGPT/issues/797)
+
 ## [2.14.2-241.1] - 2024-12-12
 
 ### Added
