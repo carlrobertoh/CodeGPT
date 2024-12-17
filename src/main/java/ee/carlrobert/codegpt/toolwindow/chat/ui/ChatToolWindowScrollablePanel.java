@@ -12,6 +12,7 @@ import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.settings.service.codegpt.CodeGPTServiceConfigurable;
+import ee.carlrobert.codegpt.toolwindow.ui.ResponseMessagePanel;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import ee.carlrobert.codegpt.util.ApplicationUtil;
 import java.util.Arrays;
@@ -36,35 +37,35 @@ public class ChatToolWindowScrollablePanel extends ScrollablePanel {
     if (GeneralSettings.isSelected(ServiceType.CODEGPT)
         && !CredentialsStore.INSTANCE.isCredentialSet(CredentialKey.CODEGPT_API_KEY)) {
 
-      var panel = new ResponsePanel()
-          .addContent(UIUtil.createTextPane("""
-                  <html>
-                  <p style="margin-top: 4px; margin-bottom: 4px;">
-                    It looks like you haven't configured your API key yet. Visit <a href="#OPEN_SETTINGS">CodeGPT settings</a> to do so.
-                  </p>
-                  <p style="margin-top: 4px; margin-bottom: 4px;">
-                    Don't have an account? <a href="https://codegpt.ee">Sign up</a> to get the most out of CodeGPT.
-                  </p>
-                  </html>""",
-              false,
-              event -> {
-                if (ACTIVATED.equals(event.getEventType())
-                    && "#OPEN_SETTINGS".equals(event.getDescription())) {
-                  ShowSettingsUtil.getInstance().showSettingsDialog(
-                      ApplicationUtil.findCurrentProject(),
-                      CodeGPTServiceConfigurable.class);
-                } else {
-                  UIUtil.handleHyperlinkClicked(event);
-                }
-              }));
+      var panel = new ResponseMessagePanel();
+      panel.addContent(UIUtil.createTextPane("""
+              <html>
+              <p style="margin-top: 4px; margin-bottom: 4px;">
+                It looks like you haven't configured your API key yet. Visit <a href="#OPEN_SETTINGS">CodeGPT settings</a> to do so.
+              </p>
+              <p style="margin-top: 4px; margin-bottom: 4px;">
+                Don't have an account? <a href="https://codegpt.ee">Sign up</a> to get the most out of CodeGPT.
+              </p>
+              </html>""",
+          false,
+          event -> {
+            if (ACTIVATED.equals(event.getEventType())
+                && "#OPEN_SETTINGS".equals(event.getDescription())) {
+              ShowSettingsUtil.getInstance().showSettingsDialog(
+                  ApplicationUtil.findCurrentProject(),
+                  CodeGPTServiceConfigurable.class);
+            } else {
+              UIUtil.handleHyperlinkClicked(event);
+            }
+          }));
       panel.setBorder(JBUI.Borders.customLine(JBColor.border(), 1, 0, 0, 0));
       add(panel);
     }
   }
 
-  public ResponsePanel getMessageResponsePanel(UUID messageId) {
-    return (ResponsePanel) Arrays.stream(visibleMessagePanels.get(messageId).getComponents())
-        .filter(ResponsePanel.class::isInstance)
+  public ResponseMessagePanel getResponseMessagePanel(UUID messageId) {
+    return (ResponseMessagePanel) Arrays.stream(visibleMessagePanels.get(messageId).getComponents())
+        .filter(ResponseMessagePanel.class::isInstance)
         .findFirst().orElseThrow();
   }
 

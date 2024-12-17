@@ -37,9 +37,7 @@ public class ResponseNodeRenderer implements NodeRenderer {
   }
 
   private void renderHeading(Heading node, NodeRendererContext context, HtmlWriter html) {
-    if (node.getLevel() == 3) {
-      html.attr("style", "margin-top: 4px; margin-bottom: 4px;");
-    }
+    html.attr("style", "margin-top: 8px; margin-bottom: 4px;");
     context.delegateRender();
   }
 
