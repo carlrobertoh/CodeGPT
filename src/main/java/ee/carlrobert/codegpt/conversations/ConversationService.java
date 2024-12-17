@@ -187,7 +187,7 @@ public final class ConversationService {
     return Optional.empty();
   }
 
-  private static String getModelForSelectedService(ServiceType serviceType) {
+  public String getModelForSelectedService(ServiceType serviceType) {
     var application = ApplicationManager.getApplication();
     return switch (serviceType) {
       case CODEGPT -> application.getService(CodeGPTServiceSettings.class)

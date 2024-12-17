@@ -79,6 +79,7 @@ public class ChatToolWindowTabPanel implements Disposable {
         this);
     userInputPanel = new UserInputPanel(
         project,
+        conversation,
         totalTokensPanel,
         this::handleSubmit,
         this::handleCancel);
