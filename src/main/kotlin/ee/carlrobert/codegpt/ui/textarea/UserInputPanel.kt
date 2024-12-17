@@ -20,8 +20,8 @@ import com.intellij.util.ui.UIUtil
 import ee.carlrobert.codegpt.CodeGPTBundle
 import ee.carlrobert.codegpt.Icons
 import ee.carlrobert.codegpt.actions.AttachImageAction
+import ee.carlrobert.codegpt.conversations.Conversation
 import ee.carlrobert.codegpt.conversations.ConversationService
-import ee.carlrobert.codegpt.conversations.ConversationsState
 import ee.carlrobert.codegpt.settings.GeneralSettings
 import ee.carlrobert.codegpt.settings.service.ServiceType
 import ee.carlrobert.codegpt.settings.service.codegpt.CodeGPTServiceSettings
@@ -41,6 +41,7 @@ import javax.swing.JPanel
 
 class UserInputPanel(
     private val project: Project,
+    private val conversation: Conversation,
     private val totalTokensPanel: TotalTokensPanel,
     private val onSubmit: (String, List<AppliedActionInlay>?) -> Unit,
     private val onStop: () -> Unit
@@ -158,9 +159,12 @@ class UserInputPanel(
             {
                 imageActionSupported.set(isImageActionSupported())
                 // TODO: Implement a proper session management
-                if (service<ConversationsState>().state?.currentConversation?.messages?.isNotEmpty() == true) {
-                    service<ConversationService>().startConversation()
+                val conversationService = service<ConversationService>()
+                if (conversation.messages.isNotEmpty()) {
+                    conversationService.startConversation()
                     project.service<ChatToolWindowContentManager>().createNewTabPanel()
+                } else {
+                    conversation.model = conversationService.getModelForSelectedService(it)
                 }
             },
             service<GeneralSettings>().state.selectedService
