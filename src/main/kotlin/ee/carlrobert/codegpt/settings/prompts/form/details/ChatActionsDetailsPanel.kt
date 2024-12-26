@@ -74,7 +74,7 @@ class ChatActionsDetailsPanel : PromptDetailsPanel {
             service<PromptsSettings>().state.chatActions.startInNewWindow
         )
 
-        fun getPanel(): JPanel = panel {
+        override fun getPanel(): JPanel = panel {
             row {
                 cell(BorderLayoutPanel().addToTop(editor.component)).align(Align.FILL)
                     .resizableColumn()

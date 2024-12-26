@@ -8,12 +8,14 @@ import com.intellij.ui.dsl.builder.Align
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.ui.layout.ComponentPredicate
 import com.intellij.util.ui.components.BorderLayoutPanel
+import ee.carlrobert.codegpt.settings.Placeholder
 import ee.carlrobert.codegpt.settings.prompts.CommitMessageTemplate
-import ee.carlrobert.codegpt.settings.prompts.*
+import ee.carlrobert.codegpt.settings.prompts.CoreActionsState.Companion.DEFAULT_CODE_ASSISTANT_PROMPT
 import ee.carlrobert.codegpt.settings.prompts.CoreActionsState.Companion.DEFAULT_EDIT_CODE_PROMPT
 import ee.carlrobert.codegpt.settings.prompts.CoreActionsState.Companion.DEFAULT_FIX_COMPILE_ERRORS_PROMPT
 import ee.carlrobert.codegpt.settings.prompts.CoreActionsState.Companion.DEFAULT_GENERATE_COMMIT_MESSAGE_PROMPT
 import ee.carlrobert.codegpt.settings.prompts.CoreActionsState.Companion.DEFAULT_GENERATE_NAME_LOOKUPS_PROMPT
+import ee.carlrobert.codegpt.settings.prompts.PromptsSettings
 import javax.swing.JComponent
 import javax.swing.JPanel
 
@@ -25,6 +27,27 @@ class CoreActionsDetailsPanel : PromptDetailsPanel {
 
             override fun create(details: CoreActionPromptDetails): JComponent {
                 val editorPanel = when (details.code) {
+
+                    "CODE_ASSISTANT" -> CoreActionEditorPanel(
+                        details,
+                        DEFAULT_CODE_ASSISTANT_PROMPT,
+                        buildString {
+                            append("<p>Template for generating code assistant messages. Use the following placeholders to insert dynamic values:</p>\n")
+                            append(
+                                "<ul>${
+                                    listOf(
+                                        Placeholder.GIT_DIFF,
+                                        Placeholder.OPEN_FILES,
+                                        Placeholder.ACTIVE_CONVERSATION,
+                                    ).joinToString("\n") {
+                                        "<li><strong>${it.name}</strong>: ${it.description}</li>"
+                                    }
+                                }</ul>\n"
+                            )
+                        },
+                        listOf("{GIT_DIFF}", "{OPEN_FILES}", "{ACTIVE_CONVERSATION}")
+                    )
+
                     "EDIT_CODE" -> CoreActionEditorPanel(
                         details,
                         DEFAULT_EDIT_CODE_PROMPT,
@@ -90,7 +113,7 @@ class CoreActionsDetailsPanel : PromptDetailsPanel {
         highlightedPlaceholders: List<String> = emptyList()
     ) : AbstractEditorPromptPanel(details, highlightedPlaceholders) {
 
-        fun getPanel(): JPanel = panel {
+        override fun getPanel(): JPanel = panel {
             row {
                 cell(BorderLayoutPanel().addToTop(editor.component))
                     .align(Align.FILL)
@@ -112,7 +135,7 @@ class CoreActionsDetailsPanel : PromptDetailsPanel {
                 override fun invoke(): Boolean = defaultInstructions != editor.document.text
             })
             row {
-                comment(description, 60)
+                comment(description, 96)
             }
         }
     }

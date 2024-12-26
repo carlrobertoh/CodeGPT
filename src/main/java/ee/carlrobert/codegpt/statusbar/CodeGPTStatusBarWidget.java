@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt.statusbar;
 
 import static ee.carlrobert.codegpt.CodeGPTKeys.IS_FETCHING_COMPLETION;
+import static ee.carlrobert.codegpt.CodeGPTKeys.PENDING_PREDICTION_CALL;
 
 import com.intellij.openapi.actionSystem.ActionGroup;
 import com.intellij.openapi.actionSystem.ActionManager;
@@ -44,7 +45,9 @@ public class CodeGPTStatusBarWidget extends EditorBasedStatusBarPopup {
   protected @NotNull WidgetState getWidgetState(@Nullable VirtualFile file) {
     var state = new WidgetState(CodeGPTBundle.get("statusBar.widget.tooltip"), "", true);
     var fetchingCompletion = IS_FETCHING_COMPLETION.get(getEditor());
-    var loading = fetchingCompletion != null && fetchingCompletion;
+    var pendingPredicationCall = PENDING_PREDICTION_CALL.get(getEditor());
+    var loading =
+        (fetchingCompletion != null && fetchingCompletion) || pendingPredicationCall != null;
 
     state.setIcon(loading ? Icons.StatusBarCompletionInProgress : Icons.DefaultSmall);
     return state;
