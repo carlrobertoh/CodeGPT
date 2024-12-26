@@ -10,6 +10,8 @@ import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.editor.EditorKind
+import com.intellij.openapi.fileEditor.FileDocumentManager
+import com.intellij.openapi.fileEditor.FileEditor
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl
@@ -20,9 +22,9 @@ import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.codeStyle.CodeStyleManager
 import com.intellij.testFramework.LightVirtualFile
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
+import ee.carlrobert.llm.client.codegpt.request.prediction.FileDetails
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import kotlin.math.min
 
 object EditorUtil {
     @JvmStatic
@@ -72,6 +74,29 @@ object EditorUtil {
     @JvmStatic
     fun getSelectedEditor(project: Project): Editor? {
         return FileEditorManager.getInstance(project)?.selectedTextEditor
+    }
+
+    @JvmStatic
+    fun getOpenFiles(project: Project): List<FileDetails> {
+        val fileDocumentManager = FileDocumentManager.getInstance()
+        return FileEditorManager.getInstance(project).openFiles
+            .mapNotNull {
+                runReadAction {
+                    FileDetails().apply {
+                        name = ""
+                        content = fileDocumentManager.getDocument(it)?.text ?: ""
+                        modificationStamp = it.modificationStamp
+                    }
+                }
+            }
+            .filter { !it.content.isNullOrEmpty() }
+            .sortedBy { it.modificationStamp }
+            .toList()
+    }
+
+    @JvmStatic
+    fun getAllEditors(project: Project): List<FileEditor> {
+        return FileEditorManager.getInstance(project).allEditors.toList()
     }
 
     @JvmStatic

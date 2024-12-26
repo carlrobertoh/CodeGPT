@@ -112,9 +112,10 @@ class DebouncedCodeCompletionProvider : DebouncedInlineCompletionProvider() {
         }
 
         IS_FETCHING_COMPLETION.set(request.editor, true)
-        request.editor.project?.messageBus
-            ?.syncPublisher(CodeCompletionProgressNotifier.CODE_COMPLETION_PROGRESS_TOPIC)
-            ?.loading(true)
+
+        request.editor.project?.let {
+            CodeCompletionProgressNotifier.startLoading(it)
+        }
 
         return InlineCompletionSuggestion.Default(channelFlow {
             val infillRequest = InfillRequestUtil.buildInfillRequest(request, completionType)

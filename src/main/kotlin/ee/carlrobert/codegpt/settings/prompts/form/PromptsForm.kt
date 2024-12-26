@@ -104,10 +104,11 @@ class PromptsForm {
 
         val coreActionsFormState = getFormState<CoreActionPromptDetails>(coreActionsNode)
         settings.coreActions.apply {
-            editCode = coreActionsFormState[0].toState()
-            fixCompileErrors = coreActionsFormState[1].toState()
-            generateCommitMessage = coreActionsFormState[2].toState()
-            generateNameLookups = coreActionsFormState[3].toState()
+            codeAssistant = coreActionsFormState[0].toState()
+            editCode = coreActionsFormState[1].toState()
+            fixCompileErrors = coreActionsFormState[2].toState()
+            generateCommitMessage = coreActionsFormState[3].toState()
+            generateNameLookups = coreActionsFormState[4].toState()
         }
         settings.chatActions.prompts = getFormState<ChatActionPromptDetails>(chatActionsNode)
             .map { it.toState() }
@@ -155,6 +156,7 @@ class PromptsForm {
         val formState = getFormState<CoreActionPromptDetails>(coreActionsNode)
 
         val stateActions = listOf(
+            settingsState.codeAssistant,
             settingsState.editCode,
             settingsState.fixCompileErrors,
             settingsState.generateCommitMessage,
@@ -208,6 +210,7 @@ class PromptsForm {
         val settings = service<PromptsSettings>().state
 
         listOf(
+            settings.coreActions.codeAssistant,
             settings.coreActions.editCode,
             settings.coreActions.fixCompileErrors,
             settings.coreActions.generateCommitMessage,

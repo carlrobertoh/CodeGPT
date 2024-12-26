@@ -139,8 +139,14 @@ public class UIUtil {
   }
 
   public static JLabel createComment(String messageKey) {
+    return createComment(messageKey, ComponentPanelBuilder.MAX_COMMENT_WIDTH);
+  }
+
+  public static JLabel createComment(String messageKey, int maxLineLength) {
     var comment = ComponentPanelBuilder.createCommentComponent(
-        CodeGPTBundle.get(messageKey), true);
+        CodeGPTBundle.get(messageKey),
+        true,
+        maxLineLength);
     comment.setBorder(JBUI.Borders.empty(0, 4));
     return comment;
   }

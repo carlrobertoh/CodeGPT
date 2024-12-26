@@ -8,6 +8,8 @@ import com.intellij.codeInsight.inline.completion.session.InlineCompletionContex
 import com.intellij.codeInsight.inline.completion.session.InlineCompletionSession
 import com.intellij.codeInsight.lookup.LookupManager
 import com.intellij.openapi.actionSystem.DataContext
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.actionSystem.EditorAction
@@ -15,6 +17,11 @@ import com.intellij.openapi.editor.actionSystem.EditorWriteActionHandler
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.util.concurrency.ThreadingAssertions
 import ee.carlrobert.codegpt.CodeGPTKeys.REMAINING_EDITOR_COMPLETION
+import ee.carlrobert.codegpt.EncodingManager
+import ee.carlrobert.codegpt.predictions.PredictionService
+import ee.carlrobert.codegpt.settings.GeneralSettings
+import ee.carlrobert.codegpt.settings.service.ServiceType
+import ee.carlrobert.codegpt.settings.service.codegpt.CodeGPTServiceSettings
 
 class CodeCompletionInsertAction :
     EditorAction(InsertInlineCompletionHandler()), HintManagerImpl.ActionToIgnore {
@@ -31,8 +38,30 @@ class CodeCompletionInsertAction :
                 .map { it.element as CodeCompletionTextElement }
 
             if (elements.isEmpty()) {
+                val textToInsert = context.textToInsert()
+                val remainingCompletion = REMAINING_EDITOR_COMPLETION.get(editor) ?: ""
+                if (remainingCompletion.isNotEmpty()) {
+                    REMAINING_EDITOR_COMPLETION.set(
+                        editor,
+                        remainingCompletion.removePrefix(textToInsert)
+                    )
+                }
+
+                val beforeApply = editor.document.text
                 InlineCompletion.getHandlerOrNull(editor)?.insert()
-                return
+
+                if (GeneralSettings.getSelectedService() == ServiceType.CODEGPT
+                    && service<CodeGPTServiceSettings>().state.codeAssistantEnabled
+                    && service<EncodingManager>().countTokens(editor.document.text) <= 4098) {
+                    ApplicationManager.getApplication().executeOnPooledThread {
+                        service<PredictionService>().displayAutocompletePrediction(
+                            editor,
+                            textToInsert,
+                            beforeApply
+                        )
+                    }
+                    return
+                }
             }
 
             for (element in elements) {
@@ -86,7 +115,10 @@ class CodeCompletionInsertAction :
             processRemainingCompletion(remainingCompletionLine, editor, endOffset)
         }
 
-        private fun processPartialCompletionElement(element: CodeCompletionTextElement, editor: Editor) {
+        private fun processPartialCompletionElement(
+            element: CodeCompletionTextElement,
+            editor: Editor
+        ) {
             val lineNumber = editor.document.getLineNumber(editor.caretModel.offset)
             val lineEndOffset = editor.document.getLineEndOffset(lineNumber)
             editor.caretModel.moveToOffset(lineEndOffset)

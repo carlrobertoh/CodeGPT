@@ -60,7 +60,7 @@ class PersonasDetailsPanel(onSelected: (PersonaPromptDetails) -> Unit) : PromptD
             isEnabled = details.id != 1L
         }
 
-        fun getPanel(): JPanel = panel {
+        override fun getPanel(): JPanel = panel {
             row {
                 cell(BorderLayoutPanel().addToTop(editor.component))
                     .align(Align.FILL)

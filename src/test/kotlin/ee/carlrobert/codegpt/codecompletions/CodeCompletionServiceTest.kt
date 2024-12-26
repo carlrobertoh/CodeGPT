@@ -215,6 +215,7 @@ class CodeCompletionServiceTest : IntegrationTest() {
 
     fun `_test apply inline suggestions with initial following text`() {
         useCodeGPTService()
+        service<CodeGPTServiceSettings>().state.codeAssistantEnabled = false
         service<ConfigurationSettings>().state.codeCompletionSettings.multiLineEnabled = false
         myFixture.configureByText(
             "CompletionTest.java",
