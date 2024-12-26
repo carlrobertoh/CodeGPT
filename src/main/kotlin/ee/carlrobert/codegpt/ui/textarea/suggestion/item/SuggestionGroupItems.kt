@@ -39,7 +39,7 @@ class FileSuggestionGroupItem(private val project: Project) : SuggestionGroupIte
         return FileUtil.searchProjectFiles(project, searchText).toFileSuggestions()
     }
 
-    private fun Iterable<VirtualFile>.toFileSuggestions() = take(10).map { FileActionItem(it) }
+    private fun Iterable<VirtualFile>.toFileSuggestions() = take(10).map { FileActionItem(it) } + IncludeOpenFilesActionItem()
 }
 
 class FolderSuggestionGroupItem(private val project: Project) : SuggestionGroupItem {

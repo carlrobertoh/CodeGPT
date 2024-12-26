@@ -2,13 +2,16 @@ package ee.carlrobert.codegpt.ui.textarea.suggestion.item
 
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.components.service
+import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.openapi.vfs.isFile
 import ee.carlrobert.codegpt.CodeGPTBundle
 import ee.carlrobert.codegpt.CodeGPTKeys
 import ee.carlrobert.codegpt.EncodingManager
+import ee.carlrobert.codegpt.Icons
 import ee.carlrobert.codegpt.settings.GeneralSettings
 import ee.carlrobert.codegpt.settings.documentation.DocumentationSettings
 import ee.carlrobert.codegpt.settings.documentation.DocumentationsConfigurable
@@ -21,6 +24,7 @@ import ee.carlrobert.codegpt.ui.textarea.FileSearchService
 import ee.carlrobert.codegpt.ui.textarea.PromptTextField
 import ee.carlrobert.codegpt.util.GitUtil
 import git4idea.GitCommit
+import javax.swing.Icon
 
 class FileActionItem(val file: VirtualFile) : SuggestionActionItem {
     override val displayName = file.name
@@ -29,6 +33,18 @@ class FileActionItem(val file: VirtualFile) : SuggestionActionItem {
     override fun execute(project: Project, textPane: PromptTextField) {
         project.getService(FileSearchService::class.java).addFileToSession(file)
         textPane.addInlayElement("file", file.name, this)
+    }
+}
+
+class IncludeOpenFilesActionItem : SuggestionActionItem {
+    override val displayName: String =
+        CodeGPTBundle.get("suggestionActionItem.includeOpenFiles.displayName")
+    override val icon: Icon = Icons.ListFiles
+
+    override fun execute(project: Project, textPane: PromptTextField) {
+        val openFiles = project.service<FileEditorManager>().openFiles.toList()
+        project.service<FileSearchService>().addFilesToSession(openFiles)
+        textPane.addInlayElement("files", "Open Files", this)
     }
 }
 
