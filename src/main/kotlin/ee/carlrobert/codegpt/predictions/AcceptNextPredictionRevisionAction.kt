@@ -1,7 +1,6 @@
 package ee.carlrobert.codegpt.predictions
 
 import com.intellij.codeInsight.hint.HintManagerImpl
-import com.intellij.codeInsight.inline.completion.session.InlineCompletionContext
 import com.intellij.openapi.actionSystem.DataContext
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Editor

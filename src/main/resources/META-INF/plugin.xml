@@ -97,14 +97,6 @@
             <keyboard-shortcut first-keystroke="TAB" keymap="$default"/>
         </action>
 
-        <action id="codegpt.navigateToNextPrediction" class="ee.carlrobert.codegpt.predictions.NavigateToNextPredictionAction">
-            <keyboard-shortcut first-keystroke="ctrl DOWN" keymap="$default"/>
-        </action>
-
-        <action id="codegpt.navigateToPreviousPrediction" class="ee.carlrobert.codegpt.predictions.NavigateToPreviousPredictionAction">
-            <keyboard-shortcut first-keystroke="ctrl UP" keymap="$default"/>
-        </action>
-
         <action id="codegpt.triggerCustomPrediction" class="ee.carlrobert.codegpt.predictions.TriggerCustomPredictionAction">
             <keyboard-shortcut first-keystroke="ctrl ENTER" keymap="$default"/>
         </action>
@@ -250,7 +242,6 @@
         </action>
         <action
           id="statusbar.enableCodeAssistant"
-          text="Enable Code Assistant"
           class="ee.carlrobert.codegpt.actions.EnableCodeAssistantAction">
             <keyboard-shortcut first-keystroke="ctrl shift alt a" keymap="$default"/>
 
@@ -259,7 +250,6 @@
         </action>
         <action
           id="statusbar.disableCodeAssistant"
-          text="Disable Code Assistant"
           class="ee.carlrobert.codegpt.actions.DisableCodeAssistantAction">
             <keyboard-shortcut first-keystroke="ctrl shift alt a" keymap="$default"/>
 

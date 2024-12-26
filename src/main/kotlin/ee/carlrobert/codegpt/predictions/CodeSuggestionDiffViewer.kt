@@ -55,36 +55,11 @@ class CodeSuggestionDiffViewer(
     private val initialDocumentText: String = mainEditor.document.text
 
     init {
-        keyListener = object : KeyAdapter() {
-            override fun keyReleased(e: KeyEvent) {
-                if (mainEditor.document.text != initialDocumentText) {
-                    popup.setUiVisible(false)
-                    onDispose()
-                }
-            }
-        }
-        visibleAreaListener = object : VisibleAreaListener {
-            override fun visibleAreaChanged(event: VisibleAreaEvent) {
-                val change = diffChanges?.firstOrNull() ?: return
-                val adjustedLocation = getAdjustedPopupLocation(
-                    popup,
-                    mainEditor,
-                    change.lineFragment.startOffset1
-                )
-
-                if (popup.isVisible && !popup.isDisposed) {
-                    adjustPopupSize(popup, editor)
-                    popup.setLocation(adjustedLocation)
-                }
-            }
-        }
+        keyListener = getKeyListener()
+        visibleAreaListener = getVisibleAreaListener()
         setupDiffEditor()
         mainEditor.contentComponent.addKeyListener(keyListener)
         mainEditor.scrollingModel.addVisibleAreaListener(visibleAreaListener)
-    }
-
-    fun isVisible(): Boolean {
-        return popup.isVisible
     }
 
     override fun onDispose() {
@@ -120,6 +95,31 @@ class CodeSuggestionDiffViewer(
         }
 
         doScrollToFirstChange()
+    }
+
+    fun applyChanges() {
+        val changes = diffChanges ?: emptyList()
+        val change = changes.firstOrNull() ?: return
+
+        if (isStateIsOutOfDate) return
+        if (!isEditable(Side.LEFT, true)) return
+
+        val document: Document = getDocument(Side.LEFT)
+
+        DiffUtil.executeWriteCommand(document, project, null) {
+            replaceChange(change, Side.RIGHT)
+            moveCaretToChange(change, document)
+            scheduleRediff()
+        }
+        rediff(true)
+
+        if (changes.size == 1) {
+            popup.dispose()
+        }
+    }
+
+    fun isVisible(): Boolean {
+        return popup.isVisible
     }
 
     private fun setupDiffEditor() {
@@ -169,24 +169,32 @@ class CodeSuggestionDiffViewer(
             .addToRight(getTagPanel())
     }
 
-    fun applyChanges() {
-        val changes = diffChanges ?: emptyList()
-        val change = changes.firstOrNull() ?: return
-
-        if (isStateIsOutOfDate) return
-        if (!isEditable(Side.LEFT, true)) return
-
-        val document: Document = getDocument(Side.LEFT)
-
-        DiffUtil.executeWriteCommand(document, project, null) {
-            replaceChange(change, Side.RIGHT)
-            moveCaretToChange(change, document)
-            scheduleRediff()
+    private fun getKeyListener(): KeyAdapter {
+        return object : KeyAdapter() {
+            override fun keyReleased(e: KeyEvent) {
+                if (mainEditor.document.text != initialDocumentText) {
+                    popup.setUiVisible(false)
+                    onDispose()
+                }
+            }
         }
-        rediff(true)
+    }
 
-        if (changes.size == 1) {
-            popup.dispose()
+    private fun getVisibleAreaListener(): VisibleAreaListener {
+        return object : VisibleAreaListener {
+            override fun visibleAreaChanged(event: VisibleAreaEvent) {
+                val change = diffChanges?.firstOrNull() ?: return
+                val adjustedLocation = getAdjustedPopupLocation(
+                    popup,
+                    mainEditor,
+                    change.lineFragment.startOffset1
+                )
+
+                if (popup.isVisible && !popup.isDisposed) {
+                    adjustPopupSize(popup, editor)
+                    popup.setLocation(adjustedLocation)
+                }
+            }
         }
     }
 
