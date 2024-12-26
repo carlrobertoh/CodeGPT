@@ -43,5 +43,7 @@ public final class Icons {
       IconLoader.getIcon("/icons/vcs.svg", Icons.class);
   public static final Icon QuestionMark =
       IconLoader.getIcon("/icons/questionMark.svg", Icons.class);
+  public static final Icon ListFiles =
+      IconLoader.getIcon("/icons/listFiles.svg", Icons.class);
   public static final Icon StatusBarCompletionInProgress = new AnimatedIcon.Default();
 }

@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt.ui.textarea
 
 import com.intellij.openapi.components.Service
+import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import ee.carlrobert.codegpt.CodeGPTKeys
@@ -11,10 +12,24 @@ import java.io.File
 @Service
 class FileSearchService private constructor(val project: Project) {
 
+    companion object {
+        private val logger = thisLogger()
+    }
+
     fun addFileToSession(file: VirtualFile) {
+        addFilesToSession(listOf(file))
+    }
+
+    fun addFilesToSession(files: List<VirtualFile>) {
         val filesIncluded =
             project.getUserData(CodeGPTKeys.SELECTED_FILES).orEmpty().toMutableList()
-        filesIncluded.add(ReferencedFile(File(file.path)))
+        files.forEach { file ->
+            try {
+                filesIncluded.add(ReferencedFile(File(file.path)))
+            } catch (e: Exception) {
+                logger.error("Failed to add file to session", e)
+            }
+        }
         updateFilesInSession(filesIncluded)
     }
 
