@@ -67,7 +67,7 @@ class PersonasDetailsPanel(onSelected: (PersonaPromptDetails) -> Unit) : PromptD
             })
         }
 
-        fun getPanel(): JPanel = panel {
+        override fun getPanel(): JPanel = panel {
             row {
                 cell(BorderLayoutPanel().addToTop(editor.component))
                     .align(Align.FILL)

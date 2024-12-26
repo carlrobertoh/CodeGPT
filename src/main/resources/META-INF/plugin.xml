@@ -11,6 +11,8 @@
     <projectListeners>
         <listener topic="com.intellij.codeInsight.lookup.LookupManagerListener"
                   class="ee.carlrobert.codegpt.refactorings.RenameCompletionLookupListener"/>
+        <listener topic="com.intellij.codeInsight.lookup.LookupManagerListener"
+                  class="ee.carlrobert.codegpt.CodeGPTLookupListener"/>
         <listener topic="com.intellij.openapi.wm.ex.ToolWindowManagerListener"
                   class="ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowListener"/>
     </projectListeners>
@@ -51,6 +53,7 @@
           instance="ee.carlrobert.codegpt.telemetry.ui.preferences.TelemetryConfigurable"
           id="tools.preferences.codegpt.telemetry"
           displayName="Telemetry"/>
+        <actionPromoter implementation="ee.carlrobert.codegpt.actions.InlayActionPromoter"/>
         <applicationService
           serviceImplementation="ee.carlrobert.codegpt.telemetry.core.service.TelemetryServiceFactory"/>
         <applicationService serviceImplementation="ee.carlrobert.codegpt.settings.GeneralSettings"/>
@@ -79,6 +82,14 @@
     <resource-bundle>messages.codegpt</resource-bundle>
 
     <actions>
+      <action id="codegpt.acceptNextPrediction" class="ee.carlrobert.codegpt.predictions.AcceptNextPredictionRevisionAction">
+        <keyboard-shortcut first-keystroke="TAB" keymap="$default"/>
+      </action>
+
+      <action id="codegpt.triggerCustomPrediction" class="ee.carlrobert.codegpt.predictions.TriggerCustomPredictionAction">
+        <keyboard-shortcut first-keystroke="ctrl ENTER" keymap="$default"/>
+      </action>
+
         <group id="CodeGPTEditorPopup">
             <group id="action.editor.group.EditorActionGroup"
                 text="CodeGPT"
@@ -186,6 +197,22 @@
             <override-text place="popup" use-text-of-place="MainMenu"/>
         </action>
         <action
+          id="statusbar.enableCodeAssistant"
+          class="ee.carlrobert.codegpt.actions.EnableCodeAssistantAction">
+            <keyboard-shortcut first-keystroke="ctrl shift alt a" keymap="$default"/>
+
+            <override-text place="MainMenu"/>
+            <override-text place="popup" use-text-of-place="MainMenu"/>
+        </action>
+        <action
+          id="statusbar.disableCodeAssistant"
+          class="ee.carlrobert.codegpt.actions.DisableCodeAssistantAction">
+            <keyboard-shortcut first-keystroke="ctrl shift alt a" keymap="$default"/>
+
+            <override-text place="MainMenu"/>
+            <override-text place="popup" use-text-of-place="MainMenu"/>
+        </action>
+        <action
           id="statusbar.startServer"
           class="ee.carlrobert.codegpt.actions.StartServerAction">
             <keyboard-shortcut first-keystroke="ctrl shift alt s" keymap="$default"/>
@@ -207,6 +234,8 @@
             <separator/>
             <reference id="statusbar.stopServer" />
             <reference id="statusbar.startServer" />
+            <reference id="statusbar.disableCodeAssistant" />
+            <reference id="statusbar.enableCodeAssistant" />
             <reference id="statusbar.disableCompletions" />
             <reference id="statusbar.enableCompletions" />
         </group>
