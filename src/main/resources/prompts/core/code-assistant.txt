@@ -1,0 +1,14 @@
+Recent changes made to the project:
+<git_diff>
+{GIT_DIFF}
+</git_diff>
+
+Currently open files:
+<open_files>
+{OPEN_FILES}
+</open_files>
+
+Previous chat history between the AI and user:
+<active_conversation_history>
+{ACTIVE_CONVERSATION}
+</active_conversation_history>

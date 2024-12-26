@@ -2,9 +2,13 @@ package ee.carlrobert.codegpt.util
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
+import com.intellij.openapi.diff.impl.patch.IdeaTextPatchBuilder
+import com.intellij.openapi.diff.impl.patch.UnifiedDiffWriter
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.vcs.VcsException
+import com.intellij.openapi.vcs.changes.ChangeListManager
+import ee.carlrobert.codegpt.codecompletions.truncateText
 import git4idea.GitCommit
 import git4idea.commands.Git
 import git4idea.commands.GitCommand
@@ -12,6 +16,7 @@ import git4idea.commands.GitLineHandler
 import git4idea.history.GitHistoryUtils
 import git4idea.repo.GitRepository
 import git4idea.repo.GitRepositoryManager
+import java.io.StringWriter
 
 object GitUtil {
 
@@ -23,6 +28,28 @@ object GitUtil {
         val repositoryManager = project.service<GitRepositoryManager>()
         return repositoryManager.getRepositoryForFile(project.guessProjectDir())
             ?: repositoryManager.repositories.firstOrNull()
+    }
+
+    @JvmStatic
+    fun getCurrentChanges(project: Project): String? {
+        return getProjectRepository(project)?.let { repository ->
+            try {
+                val repoRootPath = repository.root.toNioPath()
+                val changes = ChangeListManager.getInstance(project).allChanges
+                    .sortedBy { it.virtualFile?.timeStamp }
+                val patches = IdeaTextPatchBuilder.buildPatch(
+                    project, changes, repoRootPath, false, true
+                )
+                val diffWriter = StringWriter()
+                UnifiedDiffWriter.write(
+                    null, repoRootPath, patches, diffWriter, "\n\n", null, null
+                )
+                diffWriter.toString().cleanDiff().truncateText(1024, false)
+            } catch (e: VcsException) {
+                logger.error("Failed to get git context", e)
+                null
+            }
+        }
     }
 
     @Throws(VcsException::class)
@@ -100,4 +127,16 @@ object GitUtil {
                     !it.startsWith("commit ")
         }
     }
+
+    private fun String.cleanDiff(showContext: Boolean = false): String =
+        lineSequence()
+            .filterNot { line ->
+                line.startsWith("index ") ||
+                        line.startsWith("diff --git") ||
+                        line.startsWith("---") ||
+                        line.startsWith("+++") ||
+                        line.startsWith("===") ||
+                        (!showContext && line.startsWith(" "))
+            }
+            .joinToString("\n")
 }

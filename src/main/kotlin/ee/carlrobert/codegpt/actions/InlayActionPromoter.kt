@@ -7,10 +7,13 @@ import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.actionSystem.DataContext
 import ee.carlrobert.codegpt.codecompletions.AcceptNextLineInlayAction
 import ee.carlrobert.codegpt.codecompletions.AcceptNextWordInlayAction
+import ee.carlrobert.codegpt.predictions.TriggerCustomPredictionAction
 
 class InlayActionPromoter : ActionPromoter {
     override fun promote(actions: List<AnAction>, context: DataContext): List<AnAction> {
         val editor = CommonDataKeys.EDITOR.getData(context) ?: return emptyList()
+
+        actions.filterIsInstance<TriggerCustomPredictionAction>().takeIf { it.isNotEmpty() }?.let { return it }
 
         if (InlineCompletionContext.getOrNull(editor) == null) {
             return emptyList()

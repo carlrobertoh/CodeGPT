@@ -32,6 +32,11 @@ class CodeGPTServiceForm {
             renderer = CustomComboBoxRenderer()
         }
 
+    private val codeAssistantEnabledCheckBox = JBCheckBox(
+        CodeGPTBundle.get("shared.enableCodeAssistant"),
+        service<CodeGPTServiceSettings>().state.codeAssistantEnabled
+    )
+
     private val codeCompletionsEnabledCheckBox = JBCheckBox(
         CodeGPTBundle.get("codeCompletionsForm.enableFeatureText"),
         service<CodeGPTServiceSettings>().state.codeCompletionSettings.codeCompletionsEnabled
@@ -68,6 +73,11 @@ class CodeGPTServiceForm {
             UIUtil.createComment("settingsConfigurable.service.codegpt.codeCompletionModel.comment")
         )
         .addVerticalGap(4)
+        .addComponent(codeAssistantEnabledCheckBox)
+        .addComponent(
+            UIUtil.createComment("settingsConfigurable.service.codegpt.enableCodeAssistant.comment", 90)
+        )
+        .addVerticalGap(4)
         .addComponent(codeCompletionsEnabledCheckBox)
         .addComponentFillVertically(JPanel(), 0)
         .panel
@@ -77,12 +87,14 @@ class CodeGPTServiceForm {
     fun isModified() = service<CodeGPTServiceSettings>().state.run {
         (chatCompletionModelComboBox.selectedItem as CodeGPTModel).code != chatCompletionSettings.model
                 || (codeCompletionModelComboBox.selectedItem as CodeGPTModel).code != codeCompletionSettings.model
+                || codeAssistantEnabledCheckBox.isSelected != codeAssistantEnabled
                 || codeCompletionsEnabledCheckBox.isSelected != codeCompletionSettings.codeCompletionsEnabled
                 || getApiKey() != getCredential(CODEGPT_API_KEY)
     }
 
     fun applyChanges() {
         service<CodeGPTServiceSettings>().state.run {
+            codeAssistantEnabled = codeAssistantEnabledCheckBox.isSelected
             chatCompletionSettings.model =
                 (chatCompletionModelComboBox.selectedItem as CodeGPTModel).code
             codeCompletionSettings.codeCompletionsEnabled =
@@ -95,6 +107,7 @@ class CodeGPTServiceForm {
 
     fun resetForm() {
         service<CodeGPTServiceSettings>().state.run {
+            codeAssistantEnabledCheckBox.isSelected = codeAssistantEnabled
             chatCompletionModelComboBox.selectedItem = chatCompletionSettings.model
             codeCompletionModelComboBox.selectedItem = codeCompletionSettings.model
             codeCompletionsEnabledCheckBox.isSelected =

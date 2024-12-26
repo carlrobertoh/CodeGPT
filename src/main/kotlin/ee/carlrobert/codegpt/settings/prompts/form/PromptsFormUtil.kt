@@ -1,15 +1,21 @@
 package ee.carlrobert.codegpt.settings.prompts.form
 
 import ee.carlrobert.codegpt.settings.prompts.ChatActionPromptDetailsState
+import ee.carlrobert.codegpt.settings.prompts.CodeAssistantPromptDetailsState
 import ee.carlrobert.codegpt.settings.prompts.CoreActionPromptDetailsState
 import ee.carlrobert.codegpt.settings.prompts.PersonaPromptDetailsState
-import ee.carlrobert.codegpt.settings.prompts.form.details.ChatActionPromptDetails
-import ee.carlrobert.codegpt.settings.prompts.form.details.CoreActionPromptDetails
-import ee.carlrobert.codegpt.settings.prompts.form.details.FormPromptDetails
-import ee.carlrobert.codegpt.settings.prompts.form.details.PersonaPromptDetails
+import ee.carlrobert.codegpt.settings.prompts.form.details.*
 import javax.swing.tree.DefaultMutableTreeNode
 
 object PromptsFormUtil {
+
+    fun CodeAssistantPromptDetails.toState(): CodeAssistantPromptDetailsState {
+        val state = CodeAssistantPromptDetailsState()
+        state.code = this.code
+        state.name = this.name
+        state.instructions = this.instructions
+        return state
+    }
 
     fun CoreActionPromptDetails.toState(): CoreActionPromptDetailsState {
         val state = CoreActionPromptDetailsState()

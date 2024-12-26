@@ -31,6 +31,8 @@ class PromptsSettingsState : BaseState() {
 class CoreActionsState : BaseState() {
 
     companion object {
+        val DEFAULT_CODE_ASSISTANT_PROMPT =
+            getResourceContent("/prompts/core/code-assistant.txt")
         val DEFAULT_EDIT_CODE_PROMPT = getResourceContent("/prompts/core/edit-code.txt")
         val DEFAULT_GENERATE_COMMIT_MESSAGE_PROMPT =
             getResourceContent("/prompts/core/generate-commit-message.txt")
@@ -39,7 +41,11 @@ class CoreActionsState : BaseState() {
         val DEFAULT_FIX_COMPILE_ERRORS_PROMPT =
             getResourceContent("/prompts/core/fix-compile-errors.txt")
     }
-
+    var codeAssistant by property(CoreActionPromptDetailsState().apply {
+        name = "Code Assistant"
+        code = "CODE_ASSISTANT"
+        instructions = DEFAULT_CODE_ASSISTANT_PROMPT
+    })
     var editCode by property(CoreActionPromptDetailsState().apply {
         name = "Edit Code"
         code = "EDIT_CODE"
@@ -164,6 +170,10 @@ class ChatActionsState : BaseState() {
 abstract class PromptDetailsState : BaseState() {
     var name by string()
     var instructions by string()
+}
+
+class CodeAssistantPromptDetailsState : PromptDetailsState() {
+    var code by string()
 }
 
 class CoreActionPromptDetailsState : PromptDetailsState() {

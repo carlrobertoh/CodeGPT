@@ -14,6 +14,7 @@ import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.util.TextRange
 import com.intellij.ui.JBColor
 import java.awt.Dimension
+import javax.swing.JPanel
 
 abstract class AbstractEditorPromptPanel(
     private val details: FormPromptDetails,
@@ -27,6 +28,8 @@ abstract class AbstractEditorPromptPanel(
             highlightPlaceholder(it)
         }
     }
+
+    abstract fun getPanel(): JPanel
 
     private fun createEditor(): Editor {
         return service<EditorFactory>()
