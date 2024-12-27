@@ -42,6 +42,7 @@ import java.awt.event.KeyEvent
 import javax.swing.Box
 import javax.swing.JComponent
 import javax.swing.JPanel
+import javax.swing.SwingUtilities
 
 class CodeSuggestionDiffViewer(
     request: DiffRequest,
@@ -294,6 +295,12 @@ fun UnifiedDiffChange.getChangedLinesCount(): Int {
 
 fun getAdjustedPopupLocation(popup: JBPopup, editor: Editor, changeOffset: Int): Point {
     val pointInEditor = editor.offsetToXY(changeOffset)
+    if (!editor.component.isShowing) {
+        val point = Point(pointInEditor)
+        SwingUtilities.convertPointToScreen(point, editor.component)
+        return point
+    }
+
     val visibleArea = editor.scrollingModel.visibleArea
     val editorLocationOnScreen = editor.component.locationOnScreen
     val isOffsetVisible = visibleArea.contains(pointInEditor)
