@@ -70,7 +70,7 @@ public class EditorActionsUtil {
                 message.setReferencedFilePaths(
                     Stream.ofNullable(project.getUserData(CodeGPTKeys.SELECTED_FILES))
                         .flatMap(Collection::stream)
-                        .map(ReferencedFile::getFilePath)
+                        .map(ReferencedFile::filePath)
                         .toList());
                 toolWindowContentManager.sendMessage(message);
               }

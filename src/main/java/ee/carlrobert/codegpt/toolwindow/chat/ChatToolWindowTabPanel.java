@@ -138,7 +138,7 @@ public class ChatToolWindowTabPanel implements Disposable {
         })
         .forEach(filePath -> {
           try {
-            referencedFiles.put(filePath, new ReferencedFile(new File(filePath)));
+            referencedFiles.put(filePath, ReferencedFile.from(new File(filePath)));
           } catch (Exception ex) {
             LOG.error("Failed to create referenced file for path: " + filePath, ex);
           }
@@ -146,7 +146,7 @@ public class ChatToolWindowTabPanel implements Disposable {
 
     List<ReferencedFile> selectedFiles = project.getUserData(CodeGPTKeys.SELECTED_FILES);
     if (selectedFiles != null) {
-      selectedFiles.forEach(file -> referencedFiles.put(file.getFilePath(), file));
+      selectedFiles.forEach(file -> referencedFiles.put(file.filePath(), file));
     }
 
     return new ArrayList<>(referencedFiles.values());

@@ -32,8 +32,7 @@ public class PsiElementCheckboxTree extends FileCheckboxTree {
     }
 
     return Arrays.stream(checkedNodes)
-        .map(item -> new ReferencedFile(
-            new File(item.getContainingFile().getVirtualFile().getPath())))
+        .map(item -> ReferencedFile.from(item.getContainingFile().getVirtualFile()))
         .toList();
   }
 

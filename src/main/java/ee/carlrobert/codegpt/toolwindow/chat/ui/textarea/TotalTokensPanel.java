@@ -131,7 +131,7 @@ public class TotalTokensPanel extends JPanel {
 
   public void updateReferencedFilesTokens(List<ReferencedFile> includedFiles) {
     totalTokensDetails.setReferencedFilesTokens(includedFiles.stream()
-        .mapToInt(file -> encodingManager.countTokens(file.getFileContent()))
+        .mapToInt(file -> encodingManager.countTokens(file.fileContent()))
         .sum());
     update();
   }
@@ -145,7 +145,7 @@ public class TotalTokensPanel extends JPanel {
     tokenDetails.setConversationTokens(encodingManager.countConversationTokens(conversation));
     if (includedFiles != null) {
       tokenDetails.setReferencedFilesTokens(includedFiles.stream()
-          .mapToInt(file -> encodingManager.countTokens(file.getFileContent()))
+          .mapToInt(file -> encodingManager.countTokens(file.fileContent()))
           .sum());
     }
     if (highlightedText != null) {

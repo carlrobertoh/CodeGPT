@@ -167,7 +167,7 @@ public class IncludeFilesInContextAction extends AnAction {
 
     private int calculateTotalTokens(List<ReferencedFile> referencedFiles) {
       return referencedFiles.stream()
-          .mapToInt(file -> encodingManager.countTokens(file.getFileContent()))
+          .mapToInt(file -> encodingManager.countTokens(file.fileContent()))
           .sum();
     }
   }

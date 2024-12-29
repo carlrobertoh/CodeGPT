@@ -15,12 +15,12 @@ object CompletionRequestUtil {
         val repeatableContext = referencedFiles.stream()
             .map { item: ReferencedFile ->
                 includedFilesSettings.repeatableContext
-                    .replace("{FILE_PATH}", item.filePath)
+                    .replace("{FILE_PATH}", item.filePath())
                     .replace(
                         "{FILE_CONTENT}", String.format(
                             "```%s%n%s%n```",
                             item.fileExtension,
-                            item.fileContent.trim { it <= ' ' })
+                            item.fileContent().trim { it <= ' ' })
                     )
             }
             .collect(Collectors.joining("\n\n"))

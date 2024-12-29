@@ -30,7 +30,7 @@ public class VirtualFileCheckboxTree extends FileCheckboxTree {
         .map(item -> {
           var file = new File(item.getPath());
           if (file.isFile()) {
-            return new ReferencedFile(file);
+            return ReferencedFile.from(item);
           }
           return null;
         })

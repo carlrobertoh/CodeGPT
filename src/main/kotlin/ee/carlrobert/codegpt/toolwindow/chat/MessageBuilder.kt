@@ -30,7 +30,7 @@ class MessageBuilder(private val project: Project, private val text: String) {
 
     fun withReferencedFiles(referencedFiles: List<ReferencedFile>): MessageBuilder {
         if (referencedFiles.isNotEmpty()) {
-            message.referencedFilePaths = referencedFiles.map { it.filePath }
+            message.referencedFilePaths = referencedFiles.map { it.filePath() }
         }
         return this
     }

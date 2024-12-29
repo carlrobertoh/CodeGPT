@@ -7,6 +7,7 @@ import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
+import ee.carlrobert.codegpt.CodeGPTKeys
 import ee.carlrobert.codegpt.CodeGPTKeys.IS_FETCHING_COMPLETION
 import ee.carlrobert.codegpt.CodeGPTKeys.PENDING_PREDICTION_CALL
 import ee.carlrobert.codegpt.codecompletions.CodeCompletionProgressNotifier
@@ -53,6 +54,14 @@ class PredictionService {
                 )
             )
         displayInlineDiff(editor, request)
+    }
+
+    fun acceptPrediction(editor: Editor) {
+        val diffViewer = editor.getUserData(CodeGPTKeys.EDITOR_PREDICTION_DIFF_VIEWER)
+        if (diffViewer != null && diffViewer.isVisible()) {
+            diffViewer.applyChanges()
+            return
+        }
     }
 
     private fun displayInlineDiff(editor: Editor, request: Request) {

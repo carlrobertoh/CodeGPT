@@ -17,7 +17,7 @@ class CodeGPTRequestFactory : BaseRequestFactory() {
         val model = service<CodeGPTServiceSettings>().state.chatCompletionSettings.model
         val configuration = service<ConfigurationSettings>().state
         val requestBuilder: ChatCompletionRequest.Builder =
-            ChatCompletionRequest.Builder(buildOpenAIMessages(model, params))
+            ChatCompletionRequest.Builder(buildOpenAIMessages(model, params, emptyList()))
                 .setModel(model)
                 .setSessionId(params.sessionId)
                 .setStream(true)
@@ -49,7 +49,7 @@ class CodeGPTRequestFactory : BaseRequestFactory() {
         }
         params.referencedFiles?.let {
             val fileContexts = it.map { file ->
-                ContextFile(file.fileName, file.fileContent)
+                ContextFile(file.fileName(), file.fileContent())
             }
             requestBuilder.setContext(AdditionalRequestContext(fileContexts))
         }
