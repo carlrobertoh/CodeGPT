@@ -44,7 +44,8 @@ class CodeGPTLookupListener : LookupManagerListener {
                         service<PredictionService>().displayLookupPrediction(
                             editor,
                             event,
-                            beforeApply
+                            beforeApply,
+                            cursorOffset
                         )
                     }
                 }

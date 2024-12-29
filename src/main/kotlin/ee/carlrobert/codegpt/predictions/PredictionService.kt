@@ -42,10 +42,15 @@ class PredictionService {
         displayInlineDiff(editor, request)
     }
 
-    fun displayLookupPrediction(editor: Editor, event: LookupEvent, beforeApply: String) {
+    fun displayLookupPrediction(editor: Editor, event: LookupEvent, beforeApply: String, cursorOffset: Int) {
         val request = CompletionClientProvider.getCodeGPTClient()
             .buildLookupPredictionRequest(
-                createAutocompletePredictionRequest(editor, event.item?.lookupString ?: "", beforeApply)
+                createAutocompletePredictionRequest(
+                    editor,
+                    event.item?.lookupString ?: "",
+                    beforeApply,
+                    cursorOffset
+                )
             )
         displayInlineDiff(editor, request)
     }
@@ -97,11 +102,12 @@ class PredictionService {
         editor: Editor,
         textToInsert: String,
         beforeApply: String,
+        cursorOffset: Int? = null,
     ): AutocompletionPredictionRequest {
         val predictionRequest = AutocompletionPredictionRequest()
         predictionRequest.appliedCompletion = textToInsert
         predictionRequest.previousRevision = beforeApply
-        setDefaultParams(editor, predictionRequest)
+        setDefaultParams(editor, predictionRequest, cursorOffset)
         return predictionRequest
     }
 
@@ -111,9 +117,9 @@ class PredictionService {
         return predictionRequest
     }
 
-    private fun setDefaultParams(editor: Editor, request: PredictionRequest) {
+    private fun setDefaultParams(editor: Editor, request: PredictionRequest, offset: Int? = null) {
         val messages: MutableList<OpenAIChatCompletionStandardMessage> = mutableListOf()
-        ConversationsState.getInstance().currentConversation.messages.forEach {
+        ConversationsState.getInstance().currentConversation?.messages?.forEach {
             messages.add(OpenAIChatCompletionStandardMessage("user", it.prompt))
             messages.add(OpenAIChatCompletionStandardMessage("assistant", it.response))
         }
@@ -121,7 +127,7 @@ class PredictionService {
             currentRevision = runReadAction { editor.document.text }
             customPrompt =
                 service<PromptsSettings>().state.coreActions.codeAssistant.instructions
-            cursorOffset = runReadAction { editor.caretModel.offset }
+            cursorOffset = offset ?: runReadAction { editor.caretModel.offset }
             gitChanges = GitUtil.getCurrentChanges(editor.project!!)
             openFiles = EditorUtil.getOpenFiles(editor.project!!)
             conversationMessages = messages.toList()
