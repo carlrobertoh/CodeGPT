@@ -159,8 +159,8 @@ class OllamaSettingsForm {
                     .build()
                     .modelTags
                     .models
-                    .map { it.name }
-                    .sortedWith(compareBy({ it.split(":").first() }, {
+                    ?.map { it.name }
+                    ?.sortedWith(compareBy({ it.split(":").first() }, {
                         if (it.contains("latest")) 1 else 0
                     }))
             } catch (t: Throwable) {
