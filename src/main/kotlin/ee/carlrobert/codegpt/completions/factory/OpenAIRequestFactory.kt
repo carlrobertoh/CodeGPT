@@ -2,6 +2,7 @@ package ee.carlrobert.codegpt.completions.factory
 
 import com.intellij.openapi.components.service
 import ee.carlrobert.codegpt.EncodingManager
+import ee.carlrobert.codegpt.ReferencedFile
 import ee.carlrobert.codegpt.completions.*
 import ee.carlrobert.codegpt.conversations.ConversationsState
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
@@ -106,8 +107,9 @@ class OpenAIRequestFactory : CompletionRequestFactory {
         fun buildOpenAIMessages(
             model: String?,
             callParameters: ChatCompletionParameters,
+            referencedFiles: List<ReferencedFile>? = null
         ): List<OpenAIChatCompletionMessage> {
-            val messages = buildOpenAIChatMessages(model, callParameters)
+            val messages = buildOpenAIChatMessages(model, callParameters, referencedFiles ?: callParameters.referencedFiles)
 
             if (model == null) {
                 return messages
@@ -142,6 +144,7 @@ class OpenAIRequestFactory : CompletionRequestFactory {
         private fun buildOpenAIChatMessages(
             model: String?,
             callParameters: ChatCompletionParameters,
+            referencedFiles: List<ReferencedFile>? = null
         ): MutableList<OpenAIChatCompletionMessage> {
             val message = callParameters.message
             val messages = mutableListOf<OpenAIChatCompletionMessage>()
@@ -225,11 +228,11 @@ class OpenAIRequestFactory : CompletionRequestFactory {
                     )
                 )
             } else {
-                val prompt = if (callParameters.referencedFiles.isNullOrEmpty()) {
+                val prompt = if (referencedFiles.isNullOrEmpty()) {
                     message.prompt
                 } else {
                     CompletionRequestUtil.getPromptWithContext(
-                        callParameters.referencedFiles!!,
+                        referencedFiles,
                         message.prompt
                     )
                 }

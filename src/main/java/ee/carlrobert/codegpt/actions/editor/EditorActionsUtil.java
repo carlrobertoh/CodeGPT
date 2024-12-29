@@ -12,7 +12,6 @@ import com.intellij.openapi.project.Project;
 import ee.carlrobert.codegpt.CodeGPTKeys;
 import ee.carlrobert.codegpt.ReferencedFile;
 import ee.carlrobert.codegpt.conversations.message.Message;
-import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings;
 import ee.carlrobert.codegpt.settings.prompts.PromptsSettings;
 import ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowContentManager;
 import ee.carlrobert.codegpt.util.file.FileUtil;
@@ -69,7 +68,7 @@ public class EditorActionsUtil {
                 message.setReferencedFilePaths(
                     Stream.ofNullable(project.getUserData(CodeGPTKeys.SELECTED_FILES))
                         .flatMap(Collection::stream)
-                        .map(ReferencedFile::getFilePath)
+                        .map(ReferencedFile::filePath)
                         .toList());
                 toolWindowContentManager.sendMessage(message);
               }
