@@ -22,15 +22,6 @@
   <ol>
     <li><a href="#about-the-project">About The Project</a></li>
     <li><a href="#core-features">Core Features</a></li>
-    <li>
-      <a href="#getting-started">Getting Started</a>
-      <ul>
-        <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation">Installation</a></li>
-        <li><a href="#api-key-configuration">API Key Configuration</a></li>
-      </ul>
-    </li>
-    <li><a href="#features">Features</a></li>
     <li><a href="#running-locally">Running Locally</a></li>
     <li><a href="#privacy">Privacy</a></li>
     <li><a href="#feedback">Feedback</a></li>
@@ -69,6 +60,9 @@ CodeGPT offers a wide range of features to enhance your development experience:
 - **Customize your assistant:** Choose between multiple different personas for your specific needs, whether you're looking to learn, write or proofread.
 
 ### Code
+
+
+- **Code Assistant <sup><small>(new)</small></sup>:** Get multi-line edits based on your recent activity, open files and previous chat interactions.
 
 - **Autocomplete your code:** Receive single-line or whole-function autocomplete suggestions as you type.
 

@@ -1,6 +1,16 @@
 <!-- Plugin description -->
 
-CodeGPT is an AI-powered code assistant designed to help you with various programming activities. It's a powerful alternative to GitHub Copilot, AI Assistant, Codiumate, and other JetBrains plugins.
+CodeGPT is an AI-powered code assistant designed to help you with various programming activities.
+It's a powerful alternative to GitHub Copilot, AI Assistant, Codiumate, and other JetBrains plugins.
+
+## Code Assistant <sup><small>(new)</small></sup>
+
+Get multi-line edits based on your recent activity, open files and previous chat interactions.
+
+CodeGPT is the first JetBrains extension capable of suggesting modifications beyond the
+current cursor location.
+
+Learn more in our recent [blog post](https://codegpt.ee/blog/introducing-code-assistant).
 
 ## Highly Configurable
 
@@ -28,7 +38,10 @@ Get instant coding advice through a ChatGPT-like interface that accepts image in
 
 **Auto Apply**
 
-Stream AI-suggested code changes directly into your editor. Preview modifications in diff view and approve or reject them with a single click.
+Stream AI-suggested code changes directly into your editor. Preview modifications in diff view and
+approve or reject them with a single click.
+
+![Auto apply](https://www.codegpt.ee/images/features/auto-apply-w800.png)
 
 **Use images**
 
@@ -64,11 +77,19 @@ Choose between multiple different personas for your specific needs, whether you'
 
 ### Code
 
-Get helpful code completions as you type, edit your code using natural language, create clear and concise commit messages automatically, and more. CodeGPT equips you with cutting-edge tools to streamline your workflow.
+Get helpful code completions as you type, edit your code using natural language, create clear and
+concise commit messages automatically, and more. CodeGPT equips you with cutting-edge tools to
+streamline your workflow.
+
+**Code Assistant <sup><small>(new)</small></sup>**
+
+Get multi-line edits based on your recent activity, open files and previous chat interactions.
+
+![Code assistant](https://www.codegpt.ee/images/features/code-assistant-w800.png)
 
 **Autocomplete your code**
 
-Generate meaningful Receive single-line or whole-function autocomplete suggestions as you type.
+Receive single-line or whole-function autocomplete suggestions as you type.
 
 ![Autocomplete your code](https://www.codegpt.ee/images/features/inline-completion-w800.png)
 

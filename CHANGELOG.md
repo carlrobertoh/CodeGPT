@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Code Assistant: A new feature that suggests edits throughout the file [[Read More](https://www.codegpt.ee/blog/introducing-code-assistant)]
+- 'Include Open Files' chat action item [#796](https://github.com/carlrobertoh/CodeGPT/issues/796)
+
 ## [2.14.3-223] - 2024-12-17
 
 ### Added
