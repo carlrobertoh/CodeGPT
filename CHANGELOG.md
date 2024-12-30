@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.15.0-223] - 2024-12-30
+
 ### Added
 
 - Code Assistant: A new feature that suggests edits throughout the file [[Read More](https://www.codegpt.ee/blog/introducing-code-assistant)]
@@ -809,7 +811,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `OPENAI_API_KEY` persistence, key is saved in the OS password safe from now on
 
-[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.14.3-223...HEAD
+[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.15.0-223...HEAD
+[2.15.0-223]: https://github.com/carlrobertoh/CodeGPT/compare/v2.14.3-223...v2.15.0-223
 [2.14.3-223]: https://github.com/carlrobertoh/CodeGPT/compare/v2.14.1-223...v2.14.3-223
 [2.14.1-223]: https://github.com/carlrobertoh/CodeGPT/compare/v2.14.0-223...v2.14.1-223
 [2.14.0-223]: https://github.com/carlrobertoh/CodeGPT/compare/v2.13.0-223...v2.14.0-223
