@@ -44,7 +44,7 @@ class IncludeOpenFilesActionItem : SuggestionActionItem {
         CodeGPTBundle.get("suggestionActionItem.includeOpenFiles.displayName")
     override val icon: Icon = Icons.ListFiles
 
-    override fun execute(project: Project, textPane: PromptTextField) {
+    override suspend fun execute(project: Project, textPane: PromptTextField) {
         val openFiles = project.service<FileEditorManager>().openFiles.toList()
         project.service<FileSearchService>().addFilesToSession(openFiles)
         textPane.addInlayElement("files", "Open Files", this)

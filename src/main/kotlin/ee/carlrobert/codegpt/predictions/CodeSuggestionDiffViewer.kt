@@ -1,7 +1,6 @@
 package ee.carlrobert.codegpt.predictions
 
 import com.intellij.codeInsight.inline.completion.session.InlineCompletionContext
-import com.intellij.codeInsight.inline.completion.session.InlineCompletionSession
 import com.intellij.diff.DiffContentFactory
 import com.intellij.diff.DiffContext
 import com.intellij.diff.requests.DiffRequest
@@ -259,8 +258,8 @@ class CodeSuggestionDiffViewer(
         ) {
             editor.getUserData(CodeGPTKeys.EDITOR_PREDICTION_DIFF_VIEWER)?.dispose()
             editor.putUserData(CodeGPTKeys.REMAINING_EDITOR_COMPLETION, null)
-            InlineCompletionSession.getOrNull(editor)?.let {
-                if (it.isActive()) {
+            InlineCompletionContext.getOrNull(editor)?.let {
+                if (it.isCurrentlyDisplaying()) {
                     InlineCompletionContext.getOrNull(editor)?.clear()
                 }
             }
