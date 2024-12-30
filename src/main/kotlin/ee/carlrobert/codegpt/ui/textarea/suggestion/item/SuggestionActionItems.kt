@@ -10,7 +10,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.vcs.changes.VcsIgnoreManager
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.openapi.vfs.isFile
 import ee.carlrobert.codegpt.CodeGPTBundle
 import ee.carlrobert.codegpt.CodeGPTKeys
 import ee.carlrobert.codegpt.EncodingManager
@@ -44,7 +43,7 @@ class IncludeOpenFilesActionItem : SuggestionActionItem {
         CodeGPTBundle.get("suggestionActionItem.includeOpenFiles.displayName")
     override val icon: Icon = Icons.ListFiles
 
-    override fun execute(project: Project, textPane: PromptTextField) {
+    override suspend fun execute(project: Project, textPane: PromptTextField) {
         val openFiles = project.service<FileEditorManager>().openFiles.toList()
         project.service<FileSearchService>().addFilesToSession(openFiles)
         textPane.addInlayElement("files", "Open Files", this)

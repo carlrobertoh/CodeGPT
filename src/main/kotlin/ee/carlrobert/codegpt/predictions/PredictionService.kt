@@ -8,9 +8,7 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
 import ee.carlrobert.codegpt.CodeGPTKeys
-import ee.carlrobert.codegpt.CodeGPTKeys.IS_FETCHING_COMPLETION
 import ee.carlrobert.codegpt.CodeGPTKeys.PENDING_PREDICTION_CALL
-import ee.carlrobert.codegpt.codecompletions.CodeCompletionProgressNotifier
 import ee.carlrobert.codegpt.completions.CompletionClientProvider
 import ee.carlrobert.codegpt.conversations.ConversationsState
 import ee.carlrobert.codegpt.settings.prompts.PromptsSettings
@@ -43,7 +41,12 @@ class PredictionService {
         displayInlineDiff(editor, request)
     }
 
-    fun displayLookupPrediction(editor: Editor, event: LookupEvent, beforeApply: String, cursorOffset: Int) {
+    fun displayLookupPrediction(
+        editor: Editor,
+        event: LookupEvent,
+        beforeApply: String,
+        cursorOffset: Int
+    ) {
         val request = CompletionClientProvider.getCodeGPTClient()
             .buildLookupPredictionRequest(
                 createAutocompletePredictionRequest(
@@ -74,10 +77,6 @@ class PredictionService {
     }
 
     private fun getPrediction(editor: Editor, request: Request): PredictionResponse? {
-        editor.project?.let {
-            CodeCompletionProgressNotifier.startLoading(it)
-        }
-
         val pendingCall = PENDING_PREDICTION_CALL.get(editor)
         if (pendingCall != null) {
             pendingCall.cancel()
@@ -99,11 +98,7 @@ class PredictionService {
             }
             return null
         } finally {
-            IS_FETCHING_COMPLETION.set(editor, false)
             PENDING_PREDICTION_CALL.set(editor, null)
-            editor.project?.let {
-                CodeCompletionProgressNotifier.stopLoading(it)
-            }
         }
     }
 

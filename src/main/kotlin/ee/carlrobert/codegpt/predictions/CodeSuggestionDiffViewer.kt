@@ -1,7 +1,5 @@
 package ee.carlrobert.codegpt.predictions
 
-import com.intellij.codeInsight.inline.completion.session.InlineCompletionContext
-import com.intellij.codeInsight.inline.completion.session.InlineCompletionSession
 import com.intellij.diff.DiffContentFactory
 import com.intellij.diff.DiffContext
 import com.intellij.diff.requests.DiffRequest
@@ -19,6 +17,7 @@ import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.event.VisibleAreaEvent
 import com.intellij.openapi.editor.event.VisibleAreaListener
+import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.keymap.KeymapUtil
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopup
@@ -200,7 +199,7 @@ class CodeSuggestionDiffViewer(
     }
 
     private fun doScrollToFirstChange() {
-        val changes = myModel.diffChanges ?: return
+        val changes = diffChanges ?: return
 
         var targetChange = ScrollToPolicy.FIRST_CHANGE.select(
             ContainerUtil.filter(
@@ -258,12 +257,6 @@ class CodeSuggestionDiffViewer(
             isManuallyOpened: Boolean = false
         ) {
             editor.getUserData(CodeGPTKeys.EDITOR_PREDICTION_DIFF_VIEWER)?.dispose()
-            editor.putUserData(CodeGPTKeys.REMAINING_EDITOR_COMPLETION, null)
-            InlineCompletionSession.getOrNull(editor)?.let {
-                if (it.isActive()) {
-                    InlineCompletionContext.getOrNull(editor)?.clear()
-                }
-            }
 
             val diffRequest = createSimpleDiffRequest(editor, nextRevision)
             val diffViewer = CodeSuggestionDiffViewer(diffRequest, editor, isManuallyOpened)
@@ -275,7 +268,7 @@ class CodeSuggestionDiffViewer(
 
 fun createSimpleDiffRequest(editor: Editor, nextRevision: String): SimpleDiffRequest {
     val project = editor.project
-    val virtualFile = editor.virtualFile
+    val virtualFile = (editor as EditorEx).virtualFile
     val tempDiffFile = LightVirtualFile(virtualFile.name, nextRevision)
     val diffContentFactory = DiffContentFactory.getInstance()
     return SimpleDiffRequest(
