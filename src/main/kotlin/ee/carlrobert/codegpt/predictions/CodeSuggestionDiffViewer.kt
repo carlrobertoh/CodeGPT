@@ -16,6 +16,8 @@ import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.editor.event.DocumentEvent
+import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.editor.event.VisibleAreaEvent
 import com.intellij.openapi.editor.event.VisibleAreaListener
 import com.intellij.openapi.keymap.KeymapUtil
@@ -37,8 +39,6 @@ import ee.carlrobert.codegpt.CodeGPTKeys
 import java.awt.Dimension
 import java.awt.FlowLayout
 import java.awt.Point
-import java.awt.event.KeyAdapter
-import java.awt.event.KeyEvent
 import javax.swing.Box
 import javax.swing.JComponent
 import javax.swing.JPanel
@@ -51,16 +51,17 @@ class CodeSuggestionDiffViewer(
 ) : UnifiedDiffViewer(MyDiffContext(mainEditor.project), request), Disposable {
 
     private val popup: JBPopup = createSuggestionDiffPopup(component)
-    private val keyListener: KeyAdapter
     private val visibleAreaListener: VisibleAreaListener
-    private val initialDocumentText: String = mainEditor.document.text
+    private val documentListener: DocumentListener
+
+    private var applyInProgress = false
 
     init {
-        keyListener = getKeyListener()
         visibleAreaListener = getVisibleAreaListener()
+        documentListener = getDocumentListener()
         setupDiffEditor()
-        mainEditor.contentComponent.addKeyListener(keyListener)
         mainEditor.scrollingModel.addVisibleAreaListener(visibleAreaListener)
+        mainEditor.document.addDocumentListener(documentListener, this)
         popup.whenDisposed {
             clearListeners()
         }
@@ -68,8 +69,8 @@ class CodeSuggestionDiffViewer(
 
     private fun clearListeners() {
         mainEditor.putUserData(CodeGPTKeys.EDITOR_PREDICTION_DIFF_VIEWER, null)
-        mainEditor.contentComponent.removeKeyListener(keyListener)
         mainEditor.scrollingModel.removeVisibleAreaListener(visibleAreaListener)
+        mainEditor.document.removeDocumentListener(documentListener)
     }
 
     override fun onDispose() {
@@ -110,7 +111,12 @@ class CodeSuggestionDiffViewer(
         val document: Document = getDocument(masterSide)
 
         DiffUtil.executeWriteCommand(document, project, null) {
-            replaceChange(change, masterSide)
+            applyInProgress = true
+            try {
+                replaceChange(change, masterSide)
+            } finally {
+                applyInProgress = false
+            }
             moveCaretToChange(change, document)
             scheduleRediff()
         }
@@ -172,17 +178,6 @@ class CodeSuggestionDiffViewer(
             .addToRight(getTagPanel())
     }
 
-    private fun getKeyListener(): KeyAdapter {
-        return object : KeyAdapter() {
-            override fun keyReleased(e: KeyEvent) {
-                if (mainEditor.document.text != initialDocumentText) {
-                    popup.setUiVisible(false)
-                    onDispose()
-                }
-            }
-        }
-    }
-
     private fun getVisibleAreaListener(): VisibleAreaListener {
         return object : VisibleAreaListener {
             override fun visibleAreaChanged(event: VisibleAreaEvent) {
@@ -197,6 +192,17 @@ class CodeSuggestionDiffViewer(
                     adjustPopupSize(popup, myEditor)
                     popup.setLocation(adjustedLocation)
                 }
+            }
+        }
+    }
+
+    private fun getDocumentListener(): DocumentListener {
+        return object : DocumentListener {
+            override fun documentChanged(event: DocumentEvent) {
+                if (applyInProgress) return
+
+                popup.setUiVisible(false)
+                onDispose()
             }
         }
     }
