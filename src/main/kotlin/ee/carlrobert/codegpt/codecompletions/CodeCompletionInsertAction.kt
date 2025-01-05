@@ -52,7 +52,7 @@ class CodeCompletionInsertAction :
 
                 if (GeneralSettings.getSelectedService() == ServiceType.CODEGPT
                     && service<CodeGPTServiceSettings>().state.codeAssistantEnabled
-                    && service<EncodingManager>().countTokens(editor.document.text) <= 4098) {
+                    && service<EncodingManager>().countTokens(editor.document.text) <= 4096) {
                     ApplicationManager.getApplication().executeOnPooledThread {
                         service<PredictionService>().displayAutocompletePrediction(
                             editor,
