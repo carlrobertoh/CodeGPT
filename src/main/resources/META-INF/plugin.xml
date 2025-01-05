@@ -82,11 +82,17 @@
     <resource-bundle>messages.codegpt</resource-bundle>
 
     <actions>
-      <action id="codegpt.acceptNextPrediction" class="ee.carlrobert.codegpt.predictions.AcceptNextPredictionRevisionAction">
+      <action
+        id="codegpt.acceptNextPrediction"
+        text="Accept Prediction"
+        class="ee.carlrobert.codegpt.predictions.AcceptNextPredictionRevisionAction">
         <keyboard-shortcut first-keystroke="TAB" keymap="$default"/>
       </action>
 
-      <action id="codegpt.triggerCustomPrediction" class="ee.carlrobert.codegpt.predictions.TriggerCustomPredictionAction">
+      <action
+        id="codegpt.triggerCustomPrediction"
+        text="Trigger Prediction Manually"
+        class="ee.carlrobert.codegpt.predictions.TriggerCustomPredictionAction">
         <keyboard-shortcut first-keystroke="ctrl ENTER" keymap="$default"/>
       </action>
 
