@@ -93,11 +93,17 @@
           <keyboard-shortcut first-keystroke="TAB" keymap="$default"/>
         </action>
 
-        <action id="codegpt.acceptNextPrediction" class="ee.carlrobert.codegpt.predictions.AcceptNextPredictionRevisionAction">
+        <action
+          id="codegpt.acceptNextPrediction"
+          text="Accept Prediction"
+          class="ee.carlrobert.codegpt.predictions.AcceptNextPredictionRevisionAction">
             <keyboard-shortcut first-keystroke="TAB" keymap="$default"/>
         </action>
 
-        <action id="codegpt.triggerCustomPrediction" class="ee.carlrobert.codegpt.predictions.TriggerCustomPredictionAction">
+        <action
+          id="codegpt.triggerCustomPrediction"
+          text="Trigger Prediction Manually"
+          class="ee.carlrobert.codegpt.predictions.TriggerCustomPredictionAction">
             <keyboard-shortcut first-keystroke="ctrl ENTER" keymap="$default"/>
         </action>
 
@@ -187,14 +193,14 @@
         <group id="CodeGPT.FloatingCodeToolbarMenuRootGroup">
             <action
               id="CodeGPT.FloatingMenuEditCodeAction"
-              text="CodeGPT: Edit Code"
+              text="Edit Code"
               description="Edit code in natural language"
               class="ee.carlrobert.codegpt.actions.editor.EditCodeFloatingMenuAction">
                 <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift K" replace-all="true"/>
             </action>
             <action
               id="CodeGPT.AddSelectionToContextAction"
-              text="CodeGPT: Include Selection in Prompt"
+              text="Include Selection in Prompt"
               class="ee.carlrobert.codegpt.actions.editor.AddSelectionToContextAction">
                 <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift I" replace-all="true"/>
             </action>
