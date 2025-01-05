@@ -9,7 +9,6 @@ import com.intellij.diff.tools.fragmented.UnifiedDiffChange
 import com.intellij.diff.tools.fragmented.UnifiedDiffViewer
 import com.intellij.diff.util.DiffUserDataKeysEx.ScrollToPolicy
 import com.intellij.diff.util.DiffUtil
-import com.intellij.diff.util.Side
 import com.intellij.ide.plugins.newui.TagComponent
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.ActionManager
@@ -19,6 +18,7 @@ import com.intellij.openapi.editor.event.VisibleAreaEvent
 import com.intellij.openapi.editor.event.VisibleAreaListener
 import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.keymap.KeymapUtil
+import com.intellij.openapi.observable.util.whenDisposed
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupFactory
@@ -60,35 +60,37 @@ class CodeSuggestionDiffViewer(
         setupDiffEditor()
         mainEditor.contentComponent.addKeyListener(keyListener)
         mainEditor.scrollingModel.addVisibleAreaListener(visibleAreaListener)
+        popup.whenDisposed {
+            clearListeners()
+        }
+    }
+
+    private fun clearListeners() {
+        mainEditor.putUserData(CodeGPTKeys.EDITOR_PREDICTION_DIFF_VIEWER, null)
+        mainEditor.contentComponent.removeKeyListener(keyListener)
+        mainEditor.scrollingModel.removeVisibleAreaListener(visibleAreaListener)
     }
 
     override fun onDispose() {
         popup.dispose()
-        mainEditor.putUserData(CodeGPTKeys.EDITOR_PREDICTION_DIFF_VIEWER, null)
-        mainEditor.contentComponent.removeKeyListener(keyListener)
-        mainEditor.scrollingModel.removeVisibleAreaListener(visibleAreaListener)
         super.onDispose()
     }
 
     override fun onAfterRediff() {
         val change = diffChanges?.firstOrNull() ?: return
 
-        editor.component.preferredSize =
+        myEditor.component.preferredSize =
             Dimension(
                 mainEditor.component.width / 2,
-                (editor.lineHeight * change.getChangedLinesCount())
+                (myEditor.lineHeight * change.getChangedLinesCount())
             )
-        adjustPopupSize(popup, editor)
+        adjustPopupSize(popup, myEditor)
 
+        val changeOffset = change.lineFragment.startOffset1
         val adjustedLocation =
-            getAdjustedPopupLocation(
-                popup,
-                mainEditor,
-                change.lineFragment.startOffset1
-            )
+            getAdjustedPopupLocation(popup, mainEditor, changeOffset)
 
         if (popup.isVisible) {
-            adjustPopupSize(popup, editor)
             popup.setLocation(adjustedLocation)
         } else {
             popup.showInScreenCoordinates(mainEditor.component, adjustedLocation)
@@ -102,12 +104,12 @@ class CodeSuggestionDiffViewer(
         val change = changes.firstOrNull() ?: return
 
         if (isStateIsOutOfDate) return
-        if (!isEditable(Side.LEFT, true)) return
+        if (!isEditable(masterSide, true)) return
 
-        val document: Document = getDocument(Side.LEFT)
+        val document: Document = getDocument(masterSide)
 
         DiffUtil.executeWriteCommand(document, project, null) {
-            replaceChange(change, Side.RIGHT)
+            replaceChange(change, masterSide)
             moveCaretToChange(change, document)
             scheduleRediff()
         }
@@ -123,7 +125,7 @@ class CodeSuggestionDiffViewer(
     }
 
     private fun setupDiffEditor() {
-        editor.apply {
+        myEditor.apply {
             settings.apply {
                 additionalLinesCount = 0
                 isFoldingOutlineShown = false
@@ -163,7 +165,7 @@ class CodeSuggestionDiffViewer(
     }
 
     private fun setupStatusLabel() {
-        (editor.scrollPane as JBScrollPane).statusComponent = BorderLayoutPanel()
+        (myEditor.scrollPane as JBScrollPane).statusComponent = BorderLayoutPanel()
             .andTransparent()
             .withBorder(JBUI.Borders.empty(4))
             .addToRight(getTagPanel())
@@ -191,7 +193,7 @@ class CodeSuggestionDiffViewer(
                 )
 
                 if (popup.isVisible && !popup.isDisposed) {
-                    adjustPopupSize(popup, editor)
+                    adjustPopupSize(popup, myEditor)
                     popup.setLocation(adjustedLocation)
                 }
             }
@@ -221,8 +223,8 @@ class CodeSuggestionDiffViewer(
         mainEditor.caretModel.moveToOffset(offset)
 
         val offsetPosition = mainEditor.offsetToXY(offset)
-        val isOffsetVisible = mainEditor.scrollingModel.visibleArea.contains(offsetPosition)
-        if (!isOffsetVisible) {
+        val offsetVisible = mainEditor.scrollingModel.visibleArea.contains(offsetPosition)
+        if (!offsetVisible) {
             DiffUtil.scrollToCaret(mainEditor, false)
         }
     }
@@ -256,6 +258,10 @@ class CodeSuggestionDiffViewer(
             nextRevision: String,
             isManuallyOpened: Boolean = false
         ) {
+            if (editor.virtualFile == null || editor.isViewer) {
+                return
+            }
+
             editor.getUserData(CodeGPTKeys.EDITOR_PREDICTION_DIFF_VIEWER)?.dispose()
 
             val diffRequest = createSimpleDiffRequest(editor, nextRevision)
