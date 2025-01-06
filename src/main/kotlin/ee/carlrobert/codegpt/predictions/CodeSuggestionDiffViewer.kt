@@ -260,7 +260,7 @@ class CodeSuggestionDiffViewer(
             nextRevision: String,
             isManuallyOpened: Boolean = false
         ) {
-            if (editor.virtualFile == null || editor.isViewer) {
+            if ((editor is EditorEx && editor.virtualFile == null) || editor.isViewer) {
                 return
             }
 
