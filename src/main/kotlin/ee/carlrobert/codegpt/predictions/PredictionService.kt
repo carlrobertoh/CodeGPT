@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt.predictions
 
 import com.intellij.codeInsight.lookup.LookupEvent
+import com.intellij.notification.NotificationListener
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.application.runReadAction
@@ -14,10 +15,12 @@ import ee.carlrobert.codegpt.conversations.ConversationsState
 import ee.carlrobert.codegpt.settings.prompts.PromptsSettings
 import ee.carlrobert.codegpt.settings.service.codegpt.CodeGPTServiceSettings
 import ee.carlrobert.codegpt.ui.OverlayUtil
+import ee.carlrobert.codegpt.ui.OverlayUtil.getDefaultNotification
 import ee.carlrobert.codegpt.util.EditorUtil
 import ee.carlrobert.codegpt.util.GitUtil
 import ee.carlrobert.llm.client.codegpt.request.prediction.AutocompletionPredictionRequest
 import ee.carlrobert.llm.client.codegpt.request.prediction.DirectPredictionRequest
+import ee.carlrobert.llm.client.codegpt.request.prediction.PastePredictionRequest
 import ee.carlrobert.llm.client.codegpt.request.prediction.PredictionRequest
 import ee.carlrobert.llm.client.codegpt.response.CodeGPTException
 import ee.carlrobert.llm.client.codegpt.response.PredictionResponse
@@ -59,6 +62,12 @@ class PredictionService {
         displayInlineDiff(editor, request)
     }
 
+    fun displayPastePrediction(editor: Editor, pastedText: String) {
+        val request = CompletionClientProvider.getCodeGPTClient()
+            .buildPastePredictionRequest(createPastePredictionRequest(editor, pastedText))
+        displayInlineDiff(editor, request)
+    }
+
     fun acceptPrediction(editor: Editor) {
         val diffViewer = editor.getUserData(CodeGPTKeys.EDITOR_PREDICTION_DIFF_VIEWER)
         if (diffViewer != null && diffViewer.isVisible()) {
@@ -89,7 +98,11 @@ class PredictionService {
             PENDING_PREDICTION_CALL.set(editor, call)
             return client.getPrediction(call)
         } catch (e: CodeGPTException) {
-            OverlayUtil.showNotification(e.detail, NotificationType.ERROR)
+            OverlayUtil.notify(
+                getDefaultNotification(e.detail, NotificationType.ERROR).apply {
+                    setListener(NotificationListener.UrlOpeningListener(true))
+                })
+
             service<CodeGPTServiceSettings>().state.codeAssistantEnabled = false
             return null
         } catch (e: Exception) {
@@ -112,6 +125,15 @@ class PredictionService {
         predictionRequest.appliedCompletion = textToInsert
         predictionRequest.previousRevision = beforeApply
         setDefaultParams(editor, predictionRequest, cursorOffset)
+        return predictionRequest
+    }
+
+    private fun createPastePredictionRequest(
+        editor: Editor,
+        pastedCode: String
+    ): PastePredictionRequest {
+        val predictionRequest = PastePredictionRequest(pastedCode)
+        setDefaultParams(editor, predictionRequest)
         return predictionRequest
     }
 

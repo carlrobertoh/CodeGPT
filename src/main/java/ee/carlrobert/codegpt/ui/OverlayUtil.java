@@ -9,6 +9,8 @@ import static java.util.Objects.requireNonNull;
 
 import com.intellij.execution.ExecutionBundle;
 import com.intellij.notification.Notification;
+import com.intellij.notification.NotificationGroup;
+import com.intellij.notification.NotificationListener;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnAction;
@@ -48,6 +50,7 @@ public class OverlayUtil {
   public static Notification getDefaultNotification(
       @NotNull String content, @NotNull NotificationType type, @NotNull AnAction... actions) {
     var notification = new Notification(NOTIFICATION_GROUP_ID, "CodeGPT", content, type);
+    notification.setListener(new NotificationListener.UrlOpeningListener(true));
     Arrays.asList(actions).forEach(notification::addAction);
     return notification;
   }
