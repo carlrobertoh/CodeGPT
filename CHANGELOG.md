@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Code Assistant predictions for Paste action
+- Prioritization and ordering of predictions closest to cursor position
+
+### Fixed
+
+- Code Assistant custom accept shortcut and missing keymap labels
+
 ## [2.15.0-241.1] - 2024-12-30
 
 ### Added
