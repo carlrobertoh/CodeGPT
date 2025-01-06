@@ -23,10 +23,7 @@ import com.intellij.openapi.observable.util.whenDisposed
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupFactory
-import com.intellij.openapi.util.Key
-import com.intellij.openapi.util.TextRange
-import com.intellij.openapi.util.UserDataHolder
-import com.intellij.openapi.util.UserDataHolderBase
+import com.intellij.openapi.util.*
 import com.intellij.testFramework.LightVirtualFile
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.concurrency.annotations.RequiresEdt
@@ -61,9 +58,8 @@ class CodeSuggestionDiffViewer(
         setupDiffEditor()
         mainEditor.scrollingModel.addVisibleAreaListener(visibleAreaListener)
         mainEditor.document.addDocumentListener(documentListener, this)
-        popup.whenDisposed {
-            clearListeners()
-        }
+
+        Disposer.register(popup) { clearListeners() }
     }
 
     override fun onDispose() {
