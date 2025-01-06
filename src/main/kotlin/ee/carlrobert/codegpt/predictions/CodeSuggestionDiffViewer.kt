@@ -14,6 +14,7 @@ import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.editor.LogicalPosition
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.editor.event.VisibleAreaEvent
@@ -213,7 +214,7 @@ class CodeSuggestionDiffViewer(
     }
 
     private fun scrollToChange(change: UnifiedDiffChange) {
-        val pointToScroll = myEditor.offsetToXY(change.lineFragment.startOffset2)
+        val pointToScroll = myEditor.logicalPositionToXY(LogicalPosition(change.line1, 0))
         pointToScroll.y -= myEditor.lineHeight
         DiffUtil.scrollToPoint(myEditor, pointToScroll, false)
     }
