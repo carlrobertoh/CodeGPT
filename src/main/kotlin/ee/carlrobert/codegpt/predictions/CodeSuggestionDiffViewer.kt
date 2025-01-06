@@ -7,7 +7,6 @@ import com.intellij.diff.requests.SimpleDiffRequest
 import com.intellij.diff.tools.combined.COMBINED_DIFF_MAIN_UI
 import com.intellij.diff.tools.fragmented.UnifiedDiffChange
 import com.intellij.diff.tools.fragmented.UnifiedDiffViewer
-import com.intellij.diff.util.DiffUserDataKeysEx.ScrollToPolicy
 import com.intellij.diff.util.DiffUtil
 import com.intellij.ide.plugins.newui.TagComponent
 import com.intellij.openapi.Disposable
@@ -31,7 +30,6 @@ import com.intellij.openapi.util.UserDataHolderBase
 import com.intellij.testFramework.LightVirtualFile
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.concurrency.annotations.RequiresEdt
-import com.intellij.util.containers.ContainerUtil
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.components.BorderLayoutPanel
 import ee.carlrobert.codegpt.CodeGPTKeys
@@ -42,6 +40,7 @@ import javax.swing.Box
 import javax.swing.JComponent
 import javax.swing.JPanel
 import javax.swing.SwingUtilities
+import kotlin.math.abs
 
 class CodeSuggestionDiffViewer(
     request: DiffRequest,
@@ -66,19 +65,13 @@ class CodeSuggestionDiffViewer(
         }
     }
 
-    private fun clearListeners() {
-        mainEditor.putUserData(CodeGPTKeys.EDITOR_PREDICTION_DIFF_VIEWER, null)
-        mainEditor.scrollingModel.removeVisibleAreaListener(visibleAreaListener)
-        mainEditor.document.removeDocumentListener(documentListener)
-    }
-
     override fun onDispose() {
         popup.dispose()
         super.onDispose()
     }
 
     override fun onAfterRediff() {
-        val change = diffChanges?.firstOrNull() ?: return
+        val change = getClosestChange() ?: return
 
         myEditor.component.preferredSize =
             Dimension(
@@ -97,12 +90,12 @@ class CodeSuggestionDiffViewer(
             popup.showInScreenCoordinates(mainEditor.component, adjustedLocation)
         }
 
-        doScrollToFirstChange()
+        scrollToChange(change)
     }
 
     fun applyChanges() {
         val changes = diffChanges ?: emptyList()
-        val change = changes.firstOrNull() ?: return
+        val change = getClosestChange() ?: return
 
         if (isStateIsOutOfDate) return
         if (!isEditable(masterSide, true)) return
@@ -148,6 +141,18 @@ class CodeSuggestionDiffViewer(
         setupStatusLabel()
     }
 
+    private fun clearListeners() {
+        mainEditor.putUserData(CodeGPTKeys.EDITOR_PREDICTION_DIFF_VIEWER, null)
+        mainEditor.scrollingModel.removeVisibleAreaListener(visibleAreaListener)
+        mainEditor.document.removeDocumentListener(documentListener)
+    }
+
+    private fun getClosestChange(): UnifiedDiffChange? {
+        val changes = diffChanges ?: emptyList()
+        val cursorOffset = mainEditor.caretModel.offset
+        return changes.minByOrNull { abs(it.lineFragment.startOffset1 - cursorOffset) }
+    }
+
     private fun getTagPanel(): JComponent {
         val tagPanel = JPanel(FlowLayout(FlowLayout.LEADING, 0, 0))
         if (!isManuallyOpened) {
@@ -180,7 +185,7 @@ class CodeSuggestionDiffViewer(
     private fun getVisibleAreaListener(): VisibleAreaListener {
         return object : VisibleAreaListener {
             override fun visibleAreaChanged(event: VisibleAreaEvent) {
-                val change = diffChanges?.firstOrNull() ?: return
+                val change = getClosestChange() ?: return
                 val adjustedLocation = getAdjustedPopupLocation(
                     popup,
                     mainEditor,
@@ -206,17 +211,8 @@ class CodeSuggestionDiffViewer(
         }
     }
 
-    private fun doScrollToFirstChange() {
-        val changes = diffChanges ?: return
-
-        var targetChange = ScrollToPolicy.FIRST_CHANGE.select(
-            ContainerUtil.filter(
-                changes
-            ) { it: UnifiedDiffChange -> !it.isSkipped })
-        if (targetChange == null) targetChange = ScrollToPolicy.FIRST_CHANGE.select(changes)
-        if (targetChange == null) return
-
-        val pointToScroll = myEditor.offsetToXY(targetChange.lineFragment.startOffset1)
+    private fun scrollToChange(change: UnifiedDiffChange) {
+        val pointToScroll = myEditor.offsetToXY(change.lineFragment.startOffset2)
         pointToScroll.y -= myEditor.lineHeight
         DiffUtil.scrollToPoint(myEditor, pointToScroll, false)
     }
