@@ -42,6 +42,7 @@ import javax.swing.JComponent
 import javax.swing.JPanel
 import javax.swing.SwingUtilities
 import kotlin.math.abs
+import kotlin.math.max
 
 class CodeSuggestionDiffViewer(
     request: DiffRequest,
@@ -223,7 +224,7 @@ class CodeSuggestionDiffViewer(
         val previousChar = document.getText(TextRange(changeEndOffset - 1, changeEndOffset))
         val offset = if (previousChar == "\n") changeEndOffset - 1 else changeEndOffset
 
-        mainEditor.caretModel.moveToOffset(offset)
+        mainEditor.caretModel.moveToOffset(max(offset, 0))
 
         val offsetPosition = mainEditor.offsetToXY(offset)
         val offsetVisible = mainEditor.scrollingModel.visibleArea.contains(offsetPosition)
