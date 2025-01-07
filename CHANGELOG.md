@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.15.1-241.1] - 2025-01-07
+
 ### Added
 
 - Code Assistant predictions for Paste action
@@ -842,7 +844,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `OPENAI_API_KEY` persistence, key is saved in the OS password safe from now on
 
-[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.15.0-241.1...HEAD
+[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.15.1-241.1...HEAD
+[2.15.1-241.1]: https://github.com/carlrobertoh/CodeGPT/compare/v2.15.0-241.1...v2.15.1-241.1
 [2.15.0-241.1]: https://github.com/carlrobertoh/CodeGPT/compare/v2.14.3-241.1...v2.15.0-241.1
 [2.14.3-241.1]: https://github.com/carlrobertoh/CodeGPT/compare/v2.14.2-241.1...v2.14.3-241.1
 [2.14.2-241.1]: https://github.com/carlrobertoh/CodeGPT/compare/v2.14.1-241.1...v2.14.2-241.1
