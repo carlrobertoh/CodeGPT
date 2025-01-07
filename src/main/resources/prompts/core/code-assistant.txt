@@ -12,3 +12,7 @@ Previous chat history between the AI and user:
 <active_conversation_history>
 {ACTIVE_CONVERSATION}
 </active_conversation_history>
+
+Important Guidelines:
+
+- Carefully follow the instructions marked with the @AI keyword and act accordingly. Then, delete the instruction.
