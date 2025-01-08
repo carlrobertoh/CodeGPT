@@ -7,6 +7,7 @@ import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.actionSystem.DataContext
 import ee.carlrobert.codegpt.codecompletions.AcceptNextLineInlayAction
 import ee.carlrobert.codegpt.codecompletions.AcceptNextWordInlayAction
+import ee.carlrobert.codegpt.predictions.OpenPredictionAction
 import ee.carlrobert.codegpt.predictions.TriggerCustomPredictionAction
 
 class InlayActionPromoter : ActionPromoter {
@@ -14,6 +15,7 @@ class InlayActionPromoter : ActionPromoter {
         val editor = CommonDataKeys.EDITOR.getData(context) ?: return emptyList()
 
         actions.filterIsInstance<TriggerCustomPredictionAction>().takeIf { it.isNotEmpty() }?.let { return it }
+        actions.filterIsInstance<OpenPredictionAction>().takeIf { it.isNotEmpty() }?.let { return it }
 
         if (InlineCompletionContext.getOrNull(editor) == null) {
             return emptyList()

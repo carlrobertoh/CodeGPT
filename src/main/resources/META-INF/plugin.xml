@@ -109,6 +109,13 @@
         </action>
 
         <action
+          id="codegpt.openPrediction"
+          text="Open Prediction"
+          class="ee.carlrobert.codegpt.predictions.OpenPredictionAction">
+            <keyboard-shortcut first-keystroke="ctrl O" keymap="$default"/>
+        </action>
+
+        <action
           id="codegpt.acceptNextInlayWord"
           text="Apply next word"
           use-shortcut-of="EditorNextWord"
