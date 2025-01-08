@@ -9,6 +9,7 @@ import ee.carlrobert.codegpt.predictions.TriggerCustomPredictionAction
 class InlayActionPromoter : ActionPromoter {
     override fun promote(actions: List<AnAction>, context: DataContext): List<AnAction> {
         actions.filterIsInstance<TriggerCustomPredictionAction>().takeIf { it.isNotEmpty() }?.let { return it }
+        actions.filterIsInstance<OpenPredictionAction>().takeIf { it.isNotEmpty() }?.let { return it }
         return emptyList()
     }
 }
