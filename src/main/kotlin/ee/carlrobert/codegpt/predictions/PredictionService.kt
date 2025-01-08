@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt.predictions
 
 import com.intellij.codeInsight.lookup.LookupEvent
+import com.intellij.diff.DiffManager
 import com.intellij.notification.NotificationListener
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.runInEdt
@@ -8,6 +9,8 @@ import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.project.Project
+import com.intellij.testFramework.LightVirtualFile
 import ee.carlrobert.codegpt.CodeGPTKeys
 import ee.carlrobert.codegpt.CodeGPTKeys.PENDING_PREDICTION_CALL
 import ee.carlrobert.codegpt.completions.CompletionClientProvider
@@ -16,6 +19,7 @@ import ee.carlrobert.codegpt.settings.prompts.PromptsSettings
 import ee.carlrobert.codegpt.settings.service.codegpt.CodeGPTServiceSettings
 import ee.carlrobert.codegpt.ui.OverlayUtil
 import ee.carlrobert.codegpt.ui.OverlayUtil.getDefaultNotification
+import ee.carlrobert.codegpt.util.EditorDiffUtil.createDiffRequest
 import ee.carlrobert.codegpt.util.EditorUtil
 import ee.carlrobert.codegpt.util.GitUtil
 import ee.carlrobert.llm.client.codegpt.request.prediction.AutocompletionPredictionRequest
@@ -33,7 +37,7 @@ class PredictionService {
     fun displayDirectPrediction(editor: Editor) {
         val request = CompletionClientProvider.getCodeGPTClient()
             .buildDirectPredictionRequest(createDirectPredictionRequest(editor))
-        displayInlineDiff(editor, request)
+        displayInlineDiff(editor, request, true)
     }
 
     fun displayAutocompletePrediction(editor: Editor, textToInsert: String, beforeApply: String) {
@@ -76,11 +80,19 @@ class PredictionService {
         }
     }
 
-    private fun displayInlineDiff(editor: Editor, request: Request) {
+    private fun displayInlineDiff(
+        editor: Editor,
+        request: Request,
+        isManuallyOpened: Boolean = false
+    ) {
         val prediction = getPrediction(editor, request)
         if (prediction != null && !prediction.nextRevision.isNullOrEmpty()) {
             runInEdt {
-                CodeSuggestionDiffViewer.displayInlineDiff(editor, prediction.nextRevision)
+                CodeSuggestionDiffViewer.displayInlineDiff(
+                    editor,
+                    prediction.nextRevision,
+                    isManuallyOpened
+                )
             }
         }
     }
@@ -157,6 +169,15 @@ class PredictionService {
             gitChanges = GitUtil.getCurrentChanges(editor.project!!)
             openFiles = EditorUtil.getOpenFiles(editor.project!!)
             conversationMessages = messages.toList()
+        }
+    }
+
+    fun openDirectPrediction(editor: Editor, nextRevision: String) {
+        val project: Project = editor.project ?: return
+        val tempDiffFile = LightVirtualFile(editor.virtualFile.name, nextRevision)
+        val diffRequest = createDiffRequest(project, tempDiffFile, editor)
+        runInEdt {
+            service<DiffManager>().showDiff(project, diffRequest)
         }
     }
 }

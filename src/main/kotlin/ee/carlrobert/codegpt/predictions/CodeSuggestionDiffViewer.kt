@@ -11,6 +11,7 @@ import com.intellij.diff.util.DiffUtil
 import com.intellij.ide.plugins.newui.TagComponent
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.ActionManager
+import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.LogicalPosition
@@ -25,11 +26,14 @@ import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.util.*
 import com.intellij.testFramework.LightVirtualFile
+import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.concurrency.annotations.RequiresEdt
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.components.BorderLayoutPanel
+import ee.carlrobert.codegpt.CodeGPTBundle
 import ee.carlrobert.codegpt.CodeGPTKeys
+import java.awt.BorderLayout
 import java.awt.Dimension
 import java.awt.FlowLayout
 import java.awt.Point
@@ -151,17 +155,24 @@ class CodeSuggestionDiffViewer(
     }
 
     private fun getTagPanel(): JComponent {
-        val tagPanel = JPanel(FlowLayout(FlowLayout.LEADING, 0, 0))
-        if (!isManuallyOpened) {
-            tagPanel.add(
-                TagComponent(
-                    "Trigger manually: ${getShortcutText(TriggerCustomPredictionAction.ID)}"
-                ).apply {
-                    font = JBUI.Fonts.smallFont()
-                }
-            )
-            tagPanel.add(Box.createHorizontalStrut(6))
+        val tagPanel = JPanel(FlowLayout(FlowLayout.LEADING, 0, 0)).apply {
+            isOpaque = false
         }
+        tagPanel.add(
+            TagComponent(
+                "Open: ${getShortcutText(OpenPredictionAction.ID)}"
+            ).apply {
+                setListener({ _, _ ->
+                    service<PredictionService>().openDirectPrediction(
+                        mainEditor,
+                        content2.document.text
+                    )
+                    popup.dispose()
+                }, component)
+                font = JBUI.Fonts.smallFont()
+            }
+        )
+        tagPanel.add(Box.createHorizontalStrut(6))
         tagPanel.add(TagComponent("Accept: ${getShortcutText(AcceptNextPredictionRevisionAction.ID)}").apply {
             setListener({ _, _ ->
                 applyChanges()
@@ -177,6 +188,25 @@ class CodeSuggestionDiffViewer(
             .andTransparent()
             .withBorder(JBUI.Borders.empty(4))
             .addToRight(getTagPanel())
+
+        val footerText = if (isManuallyOpened) {
+            CodeGPTBundle.get("shared.escToCancel")
+        } else {
+            "Trigger manually: ${getShortcutText(OpenPredictionAction.ID)} · ${CodeGPTBundle.get("shared.escToCancel")}"
+        }
+
+        myEditor.component.add(
+            BorderLayoutPanel()
+                .addToRight(JBLabel(footerText)
+                    .apply {
+                        font = JBUI.Fonts.miniFont()
+                    })
+                .apply {
+                    background = editor.backgroundColor
+                    border = JBUI.Borders.empty(4)
+                },
+            BorderLayout.SOUTH
+        )
     }
 
     private fun getVisibleAreaListener(): VisibleAreaListener {
