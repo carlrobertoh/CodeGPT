@@ -199,7 +199,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
         break;
       case CUSTOM_OPENAI:
         templatePresentation.setIcon(Icons.OpenAI);
-        templatePresentation.setText(application.getService(CustomServiceSettings.class)
+        templatePresentation.setText("Custom: "  + application.getService(CustomServiceSettings.class)
             .getState()
             .getTemplate()
             .getProviderName());
