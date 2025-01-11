@@ -83,7 +83,7 @@ object EditorUtil {
             .mapNotNull {
                 runReadAction {
                     FileDetails().apply {
-                        name = ""
+                        name = it.name
                         content = fileDocumentManager.getDocument(it)?.text ?: ""
                         modificationStamp = it.modificationStamp
                     }

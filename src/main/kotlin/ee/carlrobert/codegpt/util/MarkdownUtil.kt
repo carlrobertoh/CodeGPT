@@ -18,7 +18,10 @@ object MarkdownUtil {
   @JvmStatic
   fun splitCodeBlocks(inputMarkdown: String): List<String> {
     val result: MutableList<String> = ArrayList()
-    val pattern = Pattern.compile("(?s)```.*?```")
+    val pattern = Pattern.compile(
+      """(?m)^```[a-zA-Z0-9]*\r?\n.*?\r?\n```""",
+      Pattern.DOTALL
+    )
     val matcher = pattern.matcher(inputMarkdown)
     var start = 0
     while (matcher.find()) {
