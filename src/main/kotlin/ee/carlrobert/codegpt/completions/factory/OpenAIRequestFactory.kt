@@ -109,7 +109,11 @@ class OpenAIRequestFactory : CompletionRequestFactory {
             callParameters: ChatCompletionParameters,
             referencedFiles: List<ReferencedFile>? = null
         ): List<OpenAIChatCompletionMessage> {
-            val messages = buildOpenAIChatMessages(model, callParameters, referencedFiles ?: callParameters.referencedFiles)
+            val messages = buildOpenAIChatMessages(
+                model,
+                callParameters,
+                referencedFiles ?: callParameters.referencedFiles
+            )
 
             if (model == null) {
                 return messages
@@ -167,6 +171,14 @@ class OpenAIRequestFactory : CompletionRequestFactory {
                         )
                     )
                 }
+            }
+            if (callParameters.conversationType == ConversationType.REVIEW_CHANGES) {
+                messages.add(
+                    OpenAIChatCompletionStandardMessage(
+                        role,
+                        service<PromptsSettings>().state.coreActions.reviewChanges.instructions
+                    )
+                )
             }
             if (callParameters.conversationType == ConversationType.FIX_COMPILE_ERRORS) {
                 messages.add(

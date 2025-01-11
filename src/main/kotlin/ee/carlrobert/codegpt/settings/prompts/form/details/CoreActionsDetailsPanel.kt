@@ -9,12 +9,15 @@ import com.intellij.ui.dsl.builder.panel
 import com.intellij.ui.layout.ComponentPredicate
 import com.intellij.util.ui.components.BorderLayoutPanel
 import ee.carlrobert.codegpt.settings.configuration.Placeholder
+import ee.carlrobert.codegpt.settings.Placeholder
+import ee.carlrobert.codegpt.settings.Placeholder.GIT_DIFF
 import ee.carlrobert.codegpt.settings.prompts.CommitMessageTemplate
 import ee.carlrobert.codegpt.settings.prompts.CoreActionsState.Companion.DEFAULT_CODE_ASSISTANT_PROMPT
 import ee.carlrobert.codegpt.settings.prompts.CoreActionsState.Companion.DEFAULT_EDIT_CODE_PROMPT
 import ee.carlrobert.codegpt.settings.prompts.CoreActionsState.Companion.DEFAULT_FIX_COMPILE_ERRORS_PROMPT
 import ee.carlrobert.codegpt.settings.prompts.CoreActionsState.Companion.DEFAULT_GENERATE_COMMIT_MESSAGE_PROMPT
 import ee.carlrobert.codegpt.settings.prompts.CoreActionsState.Companion.DEFAULT_GENERATE_NAME_LOOKUPS_PROMPT
+import ee.carlrobert.codegpt.settings.prompts.CoreActionsState.Companion.DEFAULT_REVIEW_CHANGES_PROMPT
 import ee.carlrobert.codegpt.settings.prompts.PromptsSettings
 import javax.swing.JComponent
 import javax.swing.JPanel
@@ -36,7 +39,7 @@ class CoreActionsDetailsPanel : PromptDetailsPanel {
                             append(
                                 "<ul>${
                                     listOf(
-                                        Placeholder.GIT_DIFF,
+                                        GIT_DIFF,
                                         Placeholder.OPEN_FILES,
                                         Placeholder.ACTIVE_CONVERSATION,
                                     ).joinToString("\n") {
@@ -52,6 +55,12 @@ class CoreActionsDetailsPanel : PromptDetailsPanel {
                         details,
                         DEFAULT_EDIT_CODE_PROMPT,
                         "Template used for the 'Edit Code' feature in the main editor."
+                    )
+
+                    "REVIEW_CHANGES" -> CoreActionEditorPanel(
+                        details,
+                        DEFAULT_REVIEW_CHANGES_PROMPT,
+                        "Template used for reviewing changes in the commit dialog."
                     )
 
                     "FIX_COMPILE_ERRORS" -> CoreActionEditorPanel(
@@ -83,10 +92,12 @@ class CoreActionsDetailsPanel : PromptDetailsPanel {
     init {
         val settings = service<PromptsSettings>().state.coreActions
         listOf(
+            settings.codeAssistant,
             settings.editCode,
             settings.fixCompileErrors,
             settings.generateCommitMessage,
-            settings.generateNameLookups
+            settings.generateNameLookups,
+            settings.reviewChanges,
         ).forEach {
             cardLayoutPanel.select(CoreActionPromptDetails(it), true)
         }

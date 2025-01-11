@@ -32,6 +32,10 @@ public final class ChatToolWindowContentManager {
     this.project = project;
   }
 
+  public void sendMessageInNewTab(Message message, ConversationType conversationType) {
+    createNewTabPanel().sendMessage(message, conversationType);
+  }
+
   public void sendMessage(Message message) {
     sendMessage(message, ConversationType.DEFAULT);
   }

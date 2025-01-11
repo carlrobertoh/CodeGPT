@@ -109,6 +109,7 @@ class PromptsForm {
             fixCompileErrors = coreActionsFormState[2].toState()
             generateCommitMessage = coreActionsFormState[3].toState()
             generateNameLookups = coreActionsFormState[4].toState()
+            reviewChanges = coreActionsFormState[5].toState()
         }
         settings.chatActions.prompts = getFormState<ChatActionPromptDetails>(chatActionsNode)
             .map { it.toState() }
@@ -162,7 +163,8 @@ class PromptsForm {
             settingsState.editCode,
             settingsState.fixCompileErrors,
             settingsState.generateCommitMessage,
-            settingsState.generateNameLookups
+            settingsState.generateNameLookups,
+            settingsState.reviewChanges,
         )
 
         return !stateActions.all { action ->
@@ -216,7 +218,8 @@ class PromptsForm {
             settings.coreActions.editCode,
             settings.coreActions.fixCompileErrors,
             settings.coreActions.generateCommitMessage,
-            settings.coreActions.generateNameLookups
+            settings.coreActions.generateNameLookups,
+            settings.coreActions.reviewChanges,
         ).forEach {
             coreActionsNode.add(
                 PromptDetailsTreeNode(CoreActionPromptDetails(it), PromptCategory.CORE_ACTIONS)

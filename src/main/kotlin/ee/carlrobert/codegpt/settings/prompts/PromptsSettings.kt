@@ -6,7 +6,6 @@ import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
 import ee.carlrobert.codegpt.settings.persona.PersonaSettings
 import ee.carlrobert.codegpt.util.file.FileUtil.getResourceContent
 
-
 @Service
 @State(
     name = "CodeGPT_PromptsSettings",
@@ -40,7 +39,10 @@ class CoreActionsState : BaseState() {
             getResourceContent("/prompts/core/generate-name-lookups.txt")
         val DEFAULT_FIX_COMPILE_ERRORS_PROMPT =
             getResourceContent("/prompts/core/fix-compile-errors.txt")
+        val DEFAULT_REVIEW_CHANGES_PROMPT =
+            getResourceContent("/prompts/core/review-changes.txt")
     }
+
     var codeAssistant by property(CoreActionPromptDetailsState().apply {
         name = "Code Assistant"
         code = "CODE_ASSISTANT"
@@ -65,6 +67,11 @@ class CoreActionsState : BaseState() {
         name = "Generate Name Lookups"
         code = "GENERATE_NAME_LOOKUPS"
         instructions = DEFAULT_GENERATE_NAME_LOOKUPS_PROMPT
+    })
+    var reviewChanges by property(CoreActionPromptDetailsState().apply {
+        name = "Review Changes"
+        code = "REVIEW_CHANGES"
+        instructions = DEFAULT_REVIEW_CHANGES_PROMPT
     })
 }
 
@@ -92,16 +99,17 @@ class PersonasState : BaseState() {
 
         // migrate old personas
         var nextPersonaIndex = 3L
-        prompts.addAll(service<PersonaSettings>().state.userCreatedPersonas
-            .map {
-                val newState = PersonaPromptDetailsState().apply {
-                    id = nextPersonaIndex
-                    name = it.name
-                    instructions = it.instructions
-                }
-                nextPersonaIndex++
-                newState
-            })
+        prompts.addAll(
+            service<PersonaSettings>().state.userCreatedPersonas
+                .map {
+                    val newState = PersonaPromptDetailsState().apply {
+                        id = nextPersonaIndex
+                        name = it.name
+                        instructions = it.instructions
+                    }
+                    nextPersonaIndex++
+                    newState
+                })
     }
 }
 
@@ -151,19 +159,20 @@ class ChatActionsState : BaseState() {
 
         // migrate old chat actions
         var nextChatActionIndex = 6L
-        prompts.addAll(service<ConfigurationSettings>().state.tableData
-            .filterNot { entry ->
-                EditorActionsUtil.DEFAULT_ACTIONS.any { it.key == entry.key && it.value == entry.value }
-            }
-            .map {
-                val newState = ChatActionPromptDetailsState().apply {
-                    id = nextChatActionIndex
-                    name = it.key
-                    instructions = it.value
+        prompts.addAll(
+            service<ConfigurationSettings>().state.tableData
+                .filterNot { entry ->
+                    EditorActionsUtil.DEFAULT_ACTIONS.any { it.key == entry.key && it.value == entry.value }
                 }
-                nextChatActionIndex++
-                newState
-            })
+                .map {
+                    val newState = ChatActionPromptDetailsState().apply {
+                        id = nextChatActionIndex
+                        name = it.key
+                        instructions = it.value
+                    }
+                    nextChatActionIndex++
+                    newState
+                })
     }
 }
 
