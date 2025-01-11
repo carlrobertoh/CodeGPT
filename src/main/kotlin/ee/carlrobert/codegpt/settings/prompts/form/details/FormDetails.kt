@@ -46,13 +46,14 @@ data class ChatActionPromptDetails(
     override var name: String?,
     override var instructions: String?,
     val id: Long,
-    val code: String?
+    val code: String?,
+    var requiresAdditionalInput: Boolean = false
 ) : FormPromptDetails() {
     constructor(state: ChatActionPromptDetailsState) : this(
         name = state.name,
         instructions = state.instructions,
         id = state.id,
-        code = state.code
+        code = state.code,
     )
 }
 

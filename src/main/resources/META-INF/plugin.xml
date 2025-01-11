@@ -298,11 +298,21 @@
             <reference id="statusbar.enableCompletions" />
         </group>
 
-        <group id="CodeGPT.GenerateGitCommitMessageGroup">
+        <group id="CodeGPT.GenerateGitCommitMessageGroup"
+               text="CodeGPT"
+               popup="true"
+               icon="ee.carlrobert.codegpt.Icons.DefaultSmall">
             <add-to-group group-id="Vcs.MessageActionGroup" anchor="first"/>
             <action
-              id="CodeGPT.GenerateGitCommitMessage"
-              class="ee.carlrobert.codegpt.actions.GenerateGitCommitMessageAction" />
+                id="CodeGPT.GenerateGitCommitMessage"
+                class="ee.carlrobert.codegpt.actions.GenerateCommitMessageAction"/>
+            <action
+                id="CodeGPT.GenerateGitCommitMessageWithAdditionalInput"
+                class="ee.carlrobert.codegpt.actions.GenerateCommitMessageWithAdditionalInputAction"/>
+            <separator/>
+            <action
+              id="CodeGPT.ReviewChanges"
+              class="ee.carlrobert.codegpt.actions.ReviewChangesAction"/>
         </group>
     </actions>
 </idea-plugin>
