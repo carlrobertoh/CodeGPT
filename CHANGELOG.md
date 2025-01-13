@@ -6,6 +6,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Example code assistant guideline in the prompt.
+- Support for opening all code assistant changes in full mode.
+- Additional commit dialog actions:
+    - Generate Message (no functional changes).
+    - Generate Message with Additional Input: Adds support for additional input in the prompt.
+    - Review Changes: Creates a new chat session and asks CodeGPT to review your changes and suggest improvements.
+
+### Fixed
+
+- Inconsistencies in the model combobox title when changing between tabs [#814](https://github.com/carlrobertoh/CodeGPT/issues/814).
+
 ## [2.15.1-233] - 2025-01-07
 
 ### Added
