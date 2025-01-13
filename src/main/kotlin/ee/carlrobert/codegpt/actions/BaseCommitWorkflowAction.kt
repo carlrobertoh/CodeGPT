@@ -11,16 +11,15 @@ import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diff.impl.patch.IdeaTextPatchBuilder
 import com.intellij.openapi.diff.impl.patch.UnifiedDiffWriter
+import com.intellij.openapi.editor.Document
 import com.intellij.openapi.project.DumbAwareAction
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vcs.VcsDataKeys
 import com.intellij.openapi.vcs.changes.Change
-import com.intellij.vcs.commit.CommitWorkflowUi
 import ee.carlrobert.codegpt.EncodingManager
 import ee.carlrobert.codegpt.completions.CompletionRequestService
 import ee.carlrobert.codegpt.ui.OverlayUtil
-import ee.carlrobert.codegpt.util.CommitWorkflowChanges
 import ee.carlrobert.codegpt.util.GitUtil.getProjectRepository
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails
 import ee.carlrobert.llm.completion.CompletionEventListener
@@ -35,21 +34,21 @@ abstract class BaseCommitWorkflowAction : DumbAwareAction() {
         const val MAX_TOKEN_COUNT_WARNING: Int = 16392
     }
 
-    abstract fun getTitle(commitWorkflowUi: CommitWorkflowUi): String
+    abstract fun getTitle(changes: Array<Change>): String
 
     abstract fun performAction(
         project: Project,
-        commitWorkflowUi: CommitWorkflowUi,
+        event: AnActionEvent,
         gitDiff: String
     )
 
     override fun update(event: AnActionEvent) {
-        val commitWorkflowUi = event.getData(VcsDataKeys.COMMIT_WORKFLOW_UI) ?: return
+        val selectedChanges = event.getData(VcsDataKeys.SELECTED_CHANGES) ?: return
         val requestAllowed = CompletionRequestService.isRequestAllowed()
         runInEdt {
             event.presentation.isEnabled =
-                requestAllowed && CommitWorkflowChanges(commitWorkflowUi).isFilesSelected
-            event.presentation.text = getTitle(commitWorkflowUi)
+                requestAllowed && selectedChanges.isNotEmpty()
+            event.presentation.text = getTitle(selectedChanges)
         }
     }
 
@@ -63,8 +62,7 @@ abstract class BaseCommitWorkflowAction : DumbAwareAction() {
         ) {
             return
         }
-        val commitWorkflowUi = event.getData(VcsDataKeys.COMMIT_WORKFLOW_UI) ?: return
-        performAction(project, commitWorkflowUi, gitDiff)
+        performAction(project, event, gitDiff)
     }
 
     override fun getActionUpdateThread(): ActionUpdateThread {
@@ -73,12 +71,12 @@ abstract class BaseCommitWorkflowAction : DumbAwareAction() {
 
 
     private fun getDiff(event: AnActionEvent, project: Project): String {
-        val commitWorkflowUi = event.getData(VcsDataKeys.COMMIT_WORKFLOW_UI)
+        val selectedChanges = event.getData(VcsDataKeys.SELECTED_CHANGES)
             ?: throw IllegalStateException("Could not retrieve commit workflow ui.")
 
         return generateDiff(
             project,
-            commitWorkflowUi.getIncludedChanges(),
+            selectedChanges.toCollection(mutableListOf()),
             getRepository(project).root.toNioPath()
         )
     }
@@ -93,7 +91,7 @@ abstract class BaseCommitWorkflowAction : DumbAwareAction() {
 
     private fun generateDiff(
         project: Project,
-        includedChanges: List<Change>,
+        includedChanges: Collection<Change>,
         repositoryPath: Path
     ): String = runCatching {
         val filePatches = IdeaTextPatchBuilder.buildPatch(
@@ -122,7 +120,7 @@ abstract class BaseCommitWorkflowAction : DumbAwareAction() {
 
 class CommitMessageEventListener(
     private val project: Project,
-    private val commitWorkflowUi: CommitWorkflowUi
+    private val document: Document,
 ) : CompletionEventListener<String?> {
     private val messageBuilder = StringBuilder()
 
@@ -140,7 +138,7 @@ class CommitMessageEventListener(
     private fun updateCommitMessage(message: String?) {
         ApplicationManager.getApplication().invokeLater {
             WriteCommandAction.runWriteCommandAction(project) {
-                commitWorkflowUi.commitMessageUi.setText(message)
+                document.setText(message ?: "")
             }
         }
     }

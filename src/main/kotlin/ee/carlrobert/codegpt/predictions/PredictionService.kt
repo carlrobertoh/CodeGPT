@@ -9,6 +9,7 @@ import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.project.Project
 import com.intellij.testFramework.LightVirtualFile
 import ee.carlrobert.codegpt.CodeGPTKeys
@@ -174,7 +175,7 @@ class PredictionService {
 
     fun openDirectPrediction(editor: Editor, nextRevision: String) {
         val project: Project = editor.project ?: return
-        val tempDiffFile = LightVirtualFile(editor.virtualFile.name, nextRevision)
+        val tempDiffFile = LightVirtualFile((editor as EditorEx).virtualFile.name, nextRevision)
         val diffRequest = createDiffRequest(project, tempDiffFile, editor)
         runInEdt {
             service<DiffManager>().showDiff(project, diffRequest)

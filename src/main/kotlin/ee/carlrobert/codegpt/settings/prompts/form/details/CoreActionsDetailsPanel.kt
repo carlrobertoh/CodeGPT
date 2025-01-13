@@ -9,8 +9,6 @@ import com.intellij.ui.dsl.builder.panel
 import com.intellij.ui.layout.ComponentPredicate
 import com.intellij.util.ui.components.BorderLayoutPanel
 import ee.carlrobert.codegpt.settings.configuration.Placeholder
-import ee.carlrobert.codegpt.settings.Placeholder
-import ee.carlrobert.codegpt.settings.Placeholder.GIT_DIFF
 import ee.carlrobert.codegpt.settings.prompts.CommitMessageTemplate
 import ee.carlrobert.codegpt.settings.prompts.CoreActionsState.Companion.DEFAULT_CODE_ASSISTANT_PROMPT
 import ee.carlrobert.codegpt.settings.prompts.CoreActionsState.Companion.DEFAULT_EDIT_CODE_PROMPT
@@ -39,7 +37,7 @@ class CoreActionsDetailsPanel : PromptDetailsPanel {
                             append(
                                 "<ul>${
                                     listOf(
-                                        GIT_DIFF,
+                                        Placeholder.GIT_DIFF,
                                         Placeholder.OPEN_FILES,
                                         Placeholder.ACTIVE_CONVERSATION,
                                     ).joinToString("\n") {
