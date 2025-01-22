@@ -23,6 +23,7 @@ object TagProcessorFactory {
             is FolderTagDetails -> FolderTagProcessor()
             is WebTagDetails -> WebTagProcessor()
             is GitCommitTagDetails -> GitCommitTagProcessor(project)
+            is CurrentGitChangesTagDetails -> CurrentGitChangesTagProcessor(project)
             else -> throw IllegalArgumentException("Unknown tag type: ${tagDetails::class.simpleName}")
         }
     }
@@ -158,6 +159,32 @@ class GitCommitTagProcessor(private val project: Project) : TagProcessor {
                 service<EncodingManager>().truncateText(diff, 8192, true)
             },
             "Getting Commit Diff",
+            true,
+            project
+        )
+    }
+}
+
+class CurrentGitChangesTagProcessor(private val project: Project) : TagProcessor {
+    override fun process(
+        message: Message,
+        tagDetails: HeaderTagDetails,
+        promptBuilder: StringBuilder
+    ) {
+        if (tagDetails !is CurrentGitChangesTagDetails) {
+            return
+        }
+
+        ProgressManager.getInstance().runProcessWithProgressSynchronously<Unit, Exception>(
+            {
+                GitUtil.getCurrentChanges(project)?.let {
+                    promptBuilder
+                        .append("\n```shell\n")
+                        .append(it)
+                        .append("\n```\n")
+                }
+            },
+            "Getting Current Changes",
             true,
             project
         )

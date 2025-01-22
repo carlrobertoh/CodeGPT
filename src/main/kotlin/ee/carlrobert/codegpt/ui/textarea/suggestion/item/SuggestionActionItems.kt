@@ -111,6 +111,16 @@ class GitCommitActionItem(
     }
 }
 
+class IncludeCurrentGitChangesActionItem : SuggestionActionItem {
+    override val displayName: String =
+        CodeGPTBundle.get("suggestionActionItem.includeCurrentChanges.displayName")
+    override val icon: Icon? = null
+
+    override fun execute(project: Project, userInputPanel: UserInputPanel) {
+        userInputPanel.addTag(CurrentGitChangesTagDetails())
+    }
+}
+
 class ViewAllDocumentationsActionItem : SuggestionActionItem {
     override val displayName: String =
         "${CodeGPTBundle.get("suggestionActionItem.viewDocumentations.displayName")} →"
@@ -154,5 +164,6 @@ class WebSearchActionItem(private val project: Project) : SuggestionActionItem {
 
     override suspend fun execute(project: Project, userInputPanel: UserInputPanel) {
         userInputPanel.addTag(WebTagDetails())
+
     }
 }
