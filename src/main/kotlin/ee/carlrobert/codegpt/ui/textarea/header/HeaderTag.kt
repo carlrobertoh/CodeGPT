@@ -66,6 +66,9 @@ data class PersonaTagDetails(var personaDetails: PersonaDetails) :
 data class GitCommitTagDetails(var gitCommit: Git4IdeaGitCommit) :
     HeaderTagDetails(gitCommit.id.asString().take(6), AllIcons.Vcs.CommitNode)
 
+class CurrentGitChangesTagDetails :
+    HeaderTagDetails("Current Git Changes", AllIcons.Vcs.CommitNode)
+
 data class FolderTagDetails(var folder: VirtualFile) :
     HeaderTagDetails(folder.name, AllIcons.Nodes.Folder)
 

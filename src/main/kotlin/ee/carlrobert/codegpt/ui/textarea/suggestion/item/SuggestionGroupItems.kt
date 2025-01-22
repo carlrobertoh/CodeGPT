@@ -154,7 +154,7 @@ class GitSuggestionGroupItem(private val project: Project) : SuggestionGroupItem
             GitUtil.getProjectRepository(project)?.let {
                 GitUtil.getAllRecentCommits(project, it, searchText)
                     .take(10)
-                    .map { commit -> GitCommitActionItem(commit) }
+                    .map { commit -> GitCommitActionItem(commit) } + IncludeCurrentGitChangesActionItem()
             } ?: emptyList()
         }
     }
