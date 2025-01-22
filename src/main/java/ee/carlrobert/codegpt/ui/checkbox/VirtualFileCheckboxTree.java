@@ -19,7 +19,7 @@ public class VirtualFileCheckboxTree extends FileCheckboxTree {
     super(createFileTypesRenderer(), createRootNode(rootFiles));
   }
 
-  public List<ReferencedFile> getReferencedFiles() {
+  public List<VirtualFile> getReferencedFiles() {
     var checkedNodes = getCheckedNodes(VirtualFile.class, Objects::nonNull);
     if (checkedNodes.length > 1024) {
       OverlayUtil.showNotification("Too many files selected.", NotificationType.ERROR);
@@ -27,13 +27,6 @@ public class VirtualFileCheckboxTree extends FileCheckboxTree {
     }
 
     return Arrays.stream(checkedNodes)
-        .map(item -> {
-          var file = new File(item.getPath());
-          if (file.isFile()) {
-            return ReferencedFile.from(item);
-          }
-          return null;
-        })
         .filter(Objects::nonNull)
         .toList();
   }

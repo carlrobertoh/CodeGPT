@@ -5,8 +5,8 @@ import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.project.Project
 import ee.carlrobert.codegpt.ReferencedFile
 import ee.carlrobert.codegpt.conversations.message.Message
-import ee.carlrobert.codegpt.toolwindow.chat.actionprocessor.ActionProcessorFactory
-import ee.carlrobert.codegpt.ui.textarea.AppliedActionInlay
+import ee.carlrobert.codegpt.ui.textarea.TagProcessorFactory
+import ee.carlrobert.codegpt.ui.textarea.header.HeaderTagDetails
 import ee.carlrobert.codegpt.util.EditorUtil.getSelectedEditor
 
 class MessageBuilder(private val project: Project, private val text: String) {
@@ -21,9 +21,9 @@ class MessageBuilder(private val project: Project, private val text: String) {
         return this
     }
 
-    fun withInlays(inlays: List<AppliedActionInlay>): MessageBuilder {
-        if (inlays.isNotEmpty()) {
-            inlayContent = processInlays(message, inlays)
+    fun withInlays(appliedTags: List<HeaderTagDetails>): MessageBuilder {
+        if (appliedTags.isNotEmpty()) {
+            inlayContent = processTags(message, appliedTags)
         }
         return this
     }
@@ -66,15 +66,12 @@ class MessageBuilder(private val project: Project, private val text: String) {
         } ?: ""
     }
 
-    private fun processInlays(
+    private fun processTags(
         message: Message,
-        inlays: List<AppliedActionInlay>
+        tags: List<HeaderTagDetails>
     ): String = buildString {
-        inlays
-            .sortedBy { it.inlay.offset }
-            .forEach { actionInlay ->
-                ActionProcessorFactory.getProcessor(project, actionInlay)
-                    .process(message, actionInlay, this)
-            }
+        tags.forEach {
+            TagProcessorFactory.getProcessor(project, it).process(message, it, this)
+        }
     }
 }

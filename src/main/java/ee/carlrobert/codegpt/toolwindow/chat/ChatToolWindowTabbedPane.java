@@ -23,7 +23,6 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.SwingUtilities;
 
 public class ChatToolWindowTabbedPane extends JBTabbedPane {
 
@@ -65,7 +64,7 @@ public class ChatToolWindowTabbedPane extends JBTabbedPane {
 
     if (nextIndex > 0) {
       setTabComponentAt(nextIndex, createCloseableTabButtonPanel(title));
-      SwingUtilities.invokeLater(toolWindowPanel::requestFocusForTextArea);
+      toolWindowPanel.requestFocusForTextArea();
     }
 
     Disposer.register(parentDisposable, toolWindowPanel);

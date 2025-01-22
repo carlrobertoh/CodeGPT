@@ -9,7 +9,7 @@ import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.util.ui.JBUI
 import ee.carlrobert.codegpt.settings.prompts.PromptsSettings
-import ee.carlrobert.codegpt.ui.textarea.PromptTextField
+import ee.carlrobert.codegpt.ui.textarea.UserInputPanel
 import ee.carlrobert.codegpt.ui.textarea.suggestion.item.*
 import ee.carlrobert.codegpt.ui.textarea.suggestion.renderer.SuggestionItemRendererTextUtils.highlightSearchText
 import ee.carlrobert.codegpt.ui.textarea.suggestion.renderer.SuggestionItemRendererTextUtils.searchText
@@ -24,7 +24,7 @@ interface ItemRenderer {
     fun render(component: JLabel, value: SuggestionItem): JPanel
 }
 
-abstract class BaseItemRenderer(private val textField: PromptTextField) : ItemRenderer {
+abstract class BaseItemRenderer(private val userInputPanel: UserInputPanel) : ItemRenderer {
     protected fun createPanel(
         label: JLabel,
         icon: Icon,
@@ -33,7 +33,7 @@ abstract class BaseItemRenderer(private val textField: PromptTextField) : ItemRe
         toolTipText: String?,
         truncateFromStart: Boolean = false
     ): JPanel {
-        val searchText = textField.text.searchText()
+        val searchText = userInputPanel.text.searchText()
         label.apply {
             this.icon = icon
             disabledIcon = icon
@@ -60,7 +60,7 @@ abstract class BaseItemRenderer(private val textField: PromptTextField) : ItemRe
     }
 }
 
-class FileItemRenderer(textPane: PromptTextField) : BaseItemRenderer(textPane) {
+class FileItemRenderer(userInputPanel: UserInputPanel) : BaseItemRenderer(userInputPanel) {
     override fun render(component: JLabel, value: SuggestionItem): JPanel {
         val item = value as FileActionItem
         val icon =
@@ -71,7 +71,7 @@ class FileItemRenderer(textPane: PromptTextField) : BaseItemRenderer(textPane) {
     }
 }
 
-class FolderItemRenderer(textPane: PromptTextField) : BaseItemRenderer(textPane) {
+class FolderItemRenderer(userInputPanel: UserInputPanel) : BaseItemRenderer(userInputPanel) {
     override fun render(component: JLabel, value: SuggestionItem): JPanel {
         val item = value as FolderActionItem
         return createPanel(
@@ -85,7 +85,7 @@ class FolderItemRenderer(textPane: PromptTextField) : BaseItemRenderer(textPane)
     }
 }
 
-class DefaultItemRenderer(textPane: PromptTextField) : BaseItemRenderer(textPane) {
+class DefaultItemRenderer(userInputPanel: UserInputPanel) : BaseItemRenderer(userInputPanel) {
     companion object {
         private val EMPTY_ICON = ImageIcon(BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB))
     }
@@ -120,7 +120,7 @@ class DefaultItemRenderer(textPane: PromptTextField) : BaseItemRenderer(textPane
         }
 }
 
-class PersonaItemRenderer(textPane: PromptTextField) : BaseItemRenderer(textPane) {
+class PersonaItemRenderer(userInputPanel: UserInputPanel) : BaseItemRenderer(userInputPanel) {
     override fun render(component: JLabel, value: SuggestionItem): JPanel {
         val item = value as PersonaActionItem
         return createPanel(
@@ -133,7 +133,7 @@ class PersonaItemRenderer(textPane: PromptTextField) : BaseItemRenderer(textPane
     }
 }
 
-class GitCommitItemRenderer(textPane: PromptTextField) : BaseItemRenderer(textPane) {
+class GitCommitItemRenderer(userInputPanel: UserInputPanel) : BaseItemRenderer(userInputPanel) {
     override fun render(component: JLabel, value: SuggestionItem): JPanel {
         val item = value as GitCommitActionItem
         val author = item.gitCommit.author.name
@@ -148,7 +148,7 @@ class GitCommitItemRenderer(textPane: PromptTextField) : BaseItemRenderer(textPa
     }
 }
 
-class DocumentationItemRenderer(textPane: PromptTextField) : BaseItemRenderer(textPane) {
+class DocumentationItemRenderer(userInputPanel: UserInputPanel) : BaseItemRenderer(userInputPanel) {
     override fun render(component: JLabel, value: SuggestionItem): JPanel {
         val item = value as DocumentationActionItem
         return createPanel(
@@ -161,15 +161,15 @@ class DocumentationItemRenderer(textPane: PromptTextField) : BaseItemRenderer(te
     }
 }
 
-class RendererFactory(private val textPane: PromptTextField) {
+class RendererFactory(private val userInputPanel: UserInputPanel) {
     fun getRenderer(item: SuggestionItem): ItemRenderer {
         return when (item) {
-            is FileActionItem -> FileItemRenderer(textPane)
-            is FolderActionItem -> FolderItemRenderer(textPane)
-            is PersonaActionItem -> PersonaItemRenderer(textPane)
-            is GitCommitActionItem -> GitCommitItemRenderer(textPane)
-            is DocumentationActionItem -> DocumentationItemRenderer(textPane)
-            else -> DefaultItemRenderer(textPane)
+            is FileActionItem -> FileItemRenderer(userInputPanel)
+            is FolderActionItem -> FolderItemRenderer(userInputPanel)
+            is PersonaActionItem -> PersonaItemRenderer(userInputPanel)
+            is GitCommitActionItem -> GitCommitItemRenderer(userInputPanel)
+            is DocumentationActionItem -> DocumentationItemRenderer(userInputPanel)
+            else -> DefaultItemRenderer(userInputPanel)
         }
     }
 }

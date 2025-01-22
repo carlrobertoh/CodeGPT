@@ -5,7 +5,7 @@ import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupListener
 import com.intellij.openapi.ui.popup.LightweightWindowEvent
 import com.intellij.ui.awt.RelativePoint
-import ee.carlrobert.codegpt.ui.textarea.PromptTextField
+import ee.carlrobert.codegpt.ui.textarea.UserInputPanel
 import ee.carlrobert.codegpt.ui.textarea.suggestion.item.*
 import kotlinx.coroutines.*
 import java.awt.Dimension
@@ -17,7 +17,7 @@ import javax.swing.event.ListDataListener
 
 class SuggestionsPopupManager(
     private val project: Project,
-    private val textField: PromptTextField,
+    private val userInputPanel: UserInputPanel,
 ) {
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private var selectedActionGroup: SuggestionGroupItem? = null
@@ -30,16 +30,16 @@ class SuggestionsPopupManager(
             override fun contentsChanged(e: ListDataEvent) {}
         })
     }
-    private val list = SuggestionList(listModel, textField) {
+    private val list = SuggestionList(listModel, userInputPanel) {
         handleSuggestionItemSelection(it)
     }
     private val defaultActions: MutableList<SuggestionItem> = mutableListOf(
         FileSuggestionGroupItem(project),
         FolderSuggestionGroupItem(project),
         GitSuggestionGroupItem(project),
-        PersonaSuggestionGroupItem(),
-        DocumentationSuggestionGroupItem(),
-        WebSearchActionItem(),
+        PersonaSuggestionGroupItem(project),
+        DocumentationSuggestionGroupItem(project),
+        WebSearchActionItem(project),
     )
 
     fun showPopup(component: JComponent? = null) {
@@ -50,8 +50,8 @@ class SuggestionsPopupManager(
                 true
             }
             .build(list)
-        popup?.showAbove(textField)
-        originalLocation = textField.locationOnScreen
+        popup?.showAbove(userInputPanel)
+        originalLocation = userInputPanel.locationOnScreen
         reset(true)
         selectNext()
     }
@@ -102,7 +102,7 @@ class SuggestionsPopupManager(
                 hidePopup()
                 scope.launch {
                     withContext(Dispatchers.Main) {
-                        item.execute(project, textField)
+                        item.execute(project, userInputPanel)
                     }
                 }
             }
@@ -110,7 +110,7 @@ class SuggestionsPopupManager(
             is SuggestionGroupItem -> {
                 selectedActionGroup = item
                 updateSuggestions()
-                textField.requestFocus()
+                userInputPanel.requestFocus()
             }
         }
     }

@@ -1,8 +1,5 @@
 package ee.carlrobert.codegpt.toolwindow.chat;
 
-import static java.lang.String.format;
-import static java.util.Collections.emptyList;
-
 import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.ActionManager;
@@ -20,8 +17,6 @@ import com.intellij.openapi.util.Disposer;
 import com.intellij.ui.components.ActionLink;
 import com.intellij.util.ui.JBUI;
 import ee.carlrobert.codegpt.CodeGPTKeys;
-import ee.carlrobert.codegpt.ReferencedFile;
-import ee.carlrobert.codegpt.actions.IncludeFilesInContextNotifier;
 import ee.carlrobert.codegpt.actions.toolwindow.ClearChatWindowAction;
 import ee.carlrobert.codegpt.actions.toolwindow.CreateNewConversationAction;
 import ee.carlrobert.codegpt.actions.toolwindow.OpenInEditorAction;
@@ -38,9 +33,6 @@ import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.AttachImageNotifier;
 import ee.carlrobert.llm.client.codegpt.PricingPlan;
 import java.awt.BorderLayout;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.stream.Collectors;
 import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -48,7 +40,6 @@ import org.jetbrains.annotations.NotNull;
 
 public class ChatToolWindowPanel extends SimpleToolWindowPanel {
 
-  private final ToolWindowFooterNotification selectedFilesNotification;
   private final ToolWindowFooterNotification imageFileAttachmentNotification;
   private final ActionLink upgradePlanLink;
   private ChatToolWindowTabbedPane tabbedPane;
@@ -57,8 +48,6 @@ public class ChatToolWindowPanel extends SimpleToolWindowPanel {
       @NotNull Project project,
       @NotNull Disposable parentDisposable) {
     super(true);
-    selectedFilesNotification = new ToolWindowFooterNotification(
-        () -> clearSelectedFilesNotification(project));
     imageFileAttachmentNotification = new ToolWindowFooterNotification(() ->
         project.putUserData(CodeGPTKeys.IMAGE_ATTACHMENT_FILE_PATH, ""));
     upgradePlanLink = new ActionLink("Upgrade your plan", event -> {
@@ -71,8 +60,6 @@ public class ChatToolWindowPanel extends SimpleToolWindowPanel {
     init(project, parentDisposable);
 
     var messageBusConnection = project.getMessageBus().connect();
-    messageBusConnection.subscribe(IncludeFilesInContextNotifier.FILES_INCLUDED_IN_CONTEXT_TOPIC,
-        (IncludeFilesInContextNotifier) this::updateSelectedFilesNotification);
     messageBusConnection.subscribe(AttachImageNotifier.IMAGE_ATTACHMENT_FILE_PATH_TOPIC,
         (AttachImageNotifier) filePath -> imageFileAttachmentNotification.show(
             Path.of(filePath).getFileName().toString(),
@@ -103,33 +90,10 @@ public class ChatToolWindowPanel extends SimpleToolWindowPanel {
     return tabbedPane;
   }
 
-  public void updateSelectedFilesNotification(List<ReferencedFile> referencedFiles) {
-    if (referencedFiles.isEmpty()) {
-      selectedFilesNotification.hideNotification();
-      return;
-    }
-
-    var referencedFilePaths = referencedFiles.stream()
-        .map(ReferencedFile::filePath)
-        .toList();
-    selectedFilesNotification.show(
-        referencedFiles.size() + " files selected",
-        selectedFilesNotificationDescription(referencedFilePaths));
-  }
-
-  private String selectedFilesNotificationDescription(List<String> referencedFilePaths) {
-    var html = referencedFilePaths.stream()
-        .map(filePath -> format("<li>%s</li>", Paths.get(filePath).getFileName().toString()))
-        .collect(Collectors.joining());
-    return format("<ul style=\"margin: 4px 12px;\">%s</ul>", html);
-  }
-
-  public void clearNotifications(Project project) {
-    selectedFilesNotification.hideNotification();
+  public void clearImageNotifications(Project project) {
     imageFileAttachmentNotification.hideNotification();
 
     project.putUserData(CodeGPTKeys.IMAGE_ATTACHMENT_FILE_PATH, "");
-    project.putUserData(CodeGPTKeys.SELECTED_FILES, emptyList());
   }
 
   private void init(Project project, Disposable parentDisposable) {
@@ -156,7 +120,6 @@ public class ChatToolWindowPanel extends SimpleToolWindowPanel {
     setToolbar(actionToolbarPanel);
     var notificationContainer = new JPanel(new BorderLayout());
     notificationContainer.setLayout(new BoxLayout(notificationContainer, BoxLayout.PAGE_AXIS));
-    notificationContainer.add(selectedFilesNotification);
     notificationContainer.add(imageFileAttachmentNotification);
     setContent(JBUI.Panels.simplePanel(tabbedPane).addToBottom(notificationContainer));
 
@@ -188,13 +151,6 @@ public class ChatToolWindowPanel extends SimpleToolWindowPanel {
     var tabbedPane = new ChatToolWindowTabbedPane(parentDisposable);
     tabbedPane.addNewTab(tabPanel);
     return tabbedPane;
-  }
-
-  public void clearSelectedFilesNotification(Project project) {
-    project.putUserData(CodeGPTKeys.SELECTED_FILES, emptyList());
-    project.getMessageBus()
-        .syncPublisher(IncludeFilesInContextNotifier.FILES_INCLUDED_IN_CONTEXT_TOPIC)
-        .filesIncluded(emptyList());
   }
 
   private static class SelectedPersonaActionLink extends DumbAwareAction implements

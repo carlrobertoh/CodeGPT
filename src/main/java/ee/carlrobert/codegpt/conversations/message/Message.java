@@ -16,9 +16,10 @@ public class Message {
   private String prompt;
   private String response;
   private List<String> referencedFilePaths;
-  private @Nullable String imageFilePath;
+  private String imageFilePath;
   private boolean webSearchIncluded;
   private DocumentationDetails documentationDetails;
+  private String personaName;
 
   public Message(String prompt, String response) {
     this(prompt);
@@ -51,7 +52,7 @@ public class Message {
     this.response = response;
   }
 
-  public List<String> getReferencedFilePaths() {
+  public @Nullable List<String> getReferencedFilePaths() {
     return referencedFilePaths;
   }
 
@@ -75,12 +76,20 @@ public class Message {
     this.webSearchIncluded = webSearchIncluded;
   }
 
-  public DocumentationDetails getDocumentationDetails() {
+  public @Nullable DocumentationDetails getDocumentationDetails() {
     return documentationDetails;
   }
 
   public void setDocumentationDetails(DocumentationDetails documentationDetails) {
     this.documentationDetails = documentationDetails;
+  }
+
+  public @Nullable String getPersonaName() {
+    return personaName;
+  }
+
+  public void setPersonaName(String personaName) {
+    this.personaName = personaName;
   }
 
   @Override

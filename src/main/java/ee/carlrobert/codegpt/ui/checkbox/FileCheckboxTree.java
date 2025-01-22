@@ -16,7 +16,7 @@ public abstract class FileCheckboxTree extends CheckboxTree {
     super(cellRenderer, node);
   }
 
-  public abstract List<ReferencedFile> getReferencedFiles();
+  public abstract List<VirtualFile> getReferencedFiles();
 
   protected static void updateFilePresentation(
       ColoredTreeCellRenderer textRenderer,

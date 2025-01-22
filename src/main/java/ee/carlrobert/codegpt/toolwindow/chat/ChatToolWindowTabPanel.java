@@ -22,6 +22,8 @@ import ee.carlrobert.codegpt.completions.ToolwindowChatCompletionRequestHandler;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
+import ee.carlrobert.codegpt.settings.GeneralSettings;
+import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.toolwindow.chat.editor.actions.CopyAction;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ChatMessageResponseBody;
@@ -32,18 +34,18 @@ import ee.carlrobert.codegpt.toolwindow.ui.ChatToolWindowLandingPanel;
 import ee.carlrobert.codegpt.toolwindow.ui.ResponseMessagePanel;
 import ee.carlrobert.codegpt.toolwindow.ui.UserMessagePanel;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
-import ee.carlrobert.codegpt.ui.textarea.AppliedActionInlay;
 import ee.carlrobert.codegpt.ui.textarea.UserInputPanel;
+import ee.carlrobert.codegpt.ui.textarea.header.FileTagDetails;
+import ee.carlrobert.codegpt.ui.textarea.header.GitCommitTagDetails;
+import ee.carlrobert.codegpt.ui.textarea.header.HeaderTagDetails;
+import ee.carlrobert.codegpt.ui.textarea.header.PersonaTagDetails;
 import ee.carlrobert.codegpt.util.EditorUtil;
 import ee.carlrobert.codegpt.util.file.FileUtil;
 import git4idea.GitCommit;
 import java.awt.BorderLayout;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Stream;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import kotlin.Unit;
@@ -81,6 +83,7 @@ public class ChatToolWindowTabPanel implements Disposable {
         project,
         conversation,
         totalTokensPanel,
+        this,
         this::handleSubmit,
         this::handleCancel);
     userInputPanel.requestFocus();
@@ -126,50 +129,56 @@ public class ChatToolWindowTabPanel implements Disposable {
     userInputPanel.addCommitReferences(gitCommits);
   }
 
-  public List<ReferencedFile> getReferencedFiles() {
-    var referencedFiles = new LinkedHashMap<String, ReferencedFile>();
+  public List<HeaderTagDetails> getSelectedTags() {
+    return userInputPanel.getSelectedTags();
+  }
 
-    conversation.getMessages().stream()
-        .flatMap(prevMessage -> {
-          if (prevMessage.getReferencedFilePaths() != null) {
-            return prevMessage.getReferencedFilePaths().stream();
-          }
-          return Stream.empty();
-        })
-        .forEach(filePath -> {
-          try {
-            referencedFiles.put(filePath, ReferencedFile.from(new File(filePath)));
-          } catch (Exception ex) {
-            LOG.error("Failed to create referenced file for path: " + filePath, ex);
-          }
-        });
+  private ChatCompletionParameters getCallParameters(
+      Message message,
+      ConversationType conversationType) {
+    var selectedTags = userInputPanel.getSelectedTags();
+    var builder = ChatCompletionParameters.builder(conversation, message)
+        .sessionId(chatSession.getId())
+        .conversationType(conversationType)
+        .imageDetailsFromPath(CodeGPTKeys.IMAGE_ATTACHMENT_FILE_PATH.get(project))
+        .referencedFiles(getReferencedFiles(selectedTags));
 
-    List<ReferencedFile> selectedFiles = project.getUserData(CodeGPTKeys.SELECTED_FILES);
-    if (selectedFiles != null) {
-      selectedFiles.forEach(file -> referencedFiles.put(file.filePath(), file));
-    }
+    findTagOfType(selectedTags, PersonaTagDetails.class)
+        .ifPresent(tag -> builder.personaDetails(tag.getPersonaDetails()));
 
-    return new ArrayList<>(referencedFiles.values());
+    findTagOfType(selectedTags, GitCommitTagDetails.class)
+        .ifPresent(tag -> builder.gitDiff(tag.getGitCommit().getFullMessage()));
+
+    return builder.build();
+  }
+
+  private List<ReferencedFile> getReferencedFiles() {
+    return getReferencedFiles(userInputPanel.getSelectedTags());
+  }
+
+  private List<ReferencedFile> getReferencedFiles(List<? extends HeaderTagDetails> tags) {
+    return tags.stream()
+        .filter(FileTagDetails.class::isInstance)
+        .map(it -> ReferencedFile.from(((FileTagDetails) it).getVirtualFile()))
+        .toList();
+  }
+
+  private <T extends HeaderTagDetails> Optional<T> findTagOfType(
+      List<? extends HeaderTagDetails> tags,
+      Class<T> tagClass) {
+    return tags.stream()
+        .filter(tagClass::isInstance)
+        .map(tagClass::cast)
+        .findFirst();
   }
 
   public void sendMessage(Message message, ConversationType conversationType) {
     ApplicationManager.getApplication().invokeLater(() -> {
-      var callParameters = ChatCompletionParameters.builder(conversation, message)
-          .sessionId(chatSession.getId())
-          .conversationType(conversationType)
-          .imageDetailsFromPath(CodeGPTKeys.IMAGE_ATTACHMENT_FILE_PATH.get(project))
-          .persona(CodeGPTKeys.ADDED_PERSONA.get(project))
-          .referencedFiles(getReferencedFiles())
-          .build();
-
-      CodeGPTKeys.ADDED_PERSONA.set(project, null);
-
-      var referencedFiles = callParameters.getReferencedFiles();
-      if ((referencedFiles != null && !referencedFiles.isEmpty())
-          || callParameters.getImageDetails() != null) {
+      var callParameters = getCallParameters(message, conversationType);
+      if (callParameters.getImageDetails() != null) {
         project.getService(ChatToolWindowContentManager.class)
             .tryFindChatToolWindowPanel()
-            .ifPresent(panel -> panel.clearNotifications(project));
+            .ifPresent(panel -> panel.clearImageNotifications(project));
       }
 
       totalTokensPanel.updateConversationTokens(conversation);
@@ -295,13 +304,14 @@ public class ChatToolWindowTabPanel implements Disposable {
     userMessagePanel.disableActions(List.of("RELOAD", "DELETE"));
     responseMessagePanel.disableActions(List.of("COPY"));
 
-    requestHandler.call(callParameters);
+    ApplicationManager.getApplication()
+        .executeOnPooledThread(() -> requestHandler.call(callParameters));
   }
 
-  private Unit handleSubmit(String text, List<? extends AppliedActionInlay> appliedInlayActions) {
+  private Unit handleSubmit(String text, List<? extends HeaderTagDetails> appliedTags) {
     var messageBuilder = new MessageBuilder(project, text)
         .withSelectedEditorContent()
-        .withInlays(appliedInlayActions);
+        .withInlays(appliedTags);
 
     List<ReferencedFile> referencedFiles = getReferencedFiles();
     if (!referencedFiles.isEmpty()) {
@@ -329,9 +339,11 @@ public class ChatToolWindowTabPanel implements Disposable {
     panel.setBorder(JBUI.Borders.compound(
         JBUI.Borders.customLine(JBColor.border(), 1, 0, 0, 0),
         JBUI.Borders.empty(8)));
-    panel.add(JBUI.Panels.simplePanel(totalTokensPanel)
-        .withBorder(JBUI.Borders.emptyBottom(8)), BorderLayout.NORTH);
-    panel.add(JBUI.Panels.simplePanel(userInputPanel), BorderLayout.CENTER);
+    if (GeneralSettings.getSelectedService() != ServiceType.CODEGPT) {
+      panel.add(JBUI.Panels.simplePanel(totalTokensPanel)
+          .withBorder(JBUI.Borders.emptyBottom(8)), BorderLayout.NORTH);
+    }
+    panel.add(userInputPanel, BorderLayout.CENTER);
     return panel;
   }
 
