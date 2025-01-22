@@ -1,14 +1,14 @@
 package ee.carlrobert.codegpt.ui.textarea.suggestion.renderer
 
 import com.intellij.util.ui.JBUI
-import ee.carlrobert.codegpt.ui.textarea.PromptTextField
+import ee.carlrobert.codegpt.ui.textarea.UserInputPanel
 import ee.carlrobert.codegpt.ui.textarea.suggestion.item.SuggestionItem
 import java.awt.Component
 import java.awt.Dimension
 import javax.swing.*
 
-class SuggestionListCellRenderer(textPane: PromptTextField) : DefaultListCellRenderer() {
-    private val rendererFactory = RendererFactory(textPane)
+class SuggestionListCellRenderer(userInputPanel: UserInputPanel) : DefaultListCellRenderer() {
+    private val rendererFactory = RendererFactory(userInputPanel)
 
     override fun getListCellRendererComponent(
         list: JList<*>?,

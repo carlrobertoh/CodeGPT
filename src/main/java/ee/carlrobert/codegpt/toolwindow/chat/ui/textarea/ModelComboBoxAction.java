@@ -18,6 +18,7 @@ import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.actionSystem.ex.ComboBoxAction;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.popup.JBPopup;
@@ -87,6 +88,8 @@ public class ModelComboBoxAction extends ComboBoxAction {
       @NotNull Presentation presentation,
       @NotNull String place) {
     ComboBoxButton button = createComboBoxButton(presentation);
+    button.setForeground(
+        EditorColorsManager.getInstance().getGlobalScheme().getDefaultForeground());
     button.setBorder(null);
     button.putClientProperty("JButton.backgroundColor", new Color(0, 0, 0, 0));
     return button;

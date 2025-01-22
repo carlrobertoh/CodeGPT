@@ -5,8 +5,6 @@ import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
-import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectFileIndex
@@ -14,6 +12,8 @@ import com.intellij.openapi.util.io.FileUtil.createDirectory
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileFilter
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings.getLlamaModelsPath
+import ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowContentManager
+import ee.carlrobert.codegpt.ui.textarea.header.FileTagDetails
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -246,7 +246,8 @@ object FileUtil {
             }
         })
 
-        return results.sortedByDescending { it.score }
+        return results
+            .sortedByDescending { it.score }
             .take(maxResults)
             .map { it.file }
     }

@@ -14,12 +14,10 @@ import com.intellij.openapi.editor.event.SelectionListener;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.JBUI;
-import ee.carlrobert.codegpt.CodeGPTKeys;
 import ee.carlrobert.codegpt.EncodingManager;
 import ee.carlrobert.codegpt.ReferencedFile;
 import ee.carlrobert.codegpt.actions.IncludeFilesInContextNotifier;
 import ee.carlrobert.codegpt.conversations.Conversation;
-import ee.carlrobert.codegpt.conversations.message.Message;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.prompts.PromptsSettings;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
@@ -47,10 +45,7 @@ public class TotalTokensPanel extends JPanel {
       @Nullable String highlightedText,
       Disposable parentDisposable) {
     super(new FlowLayout(FlowLayout.LEADING, 0, 0));
-    this.totalTokensDetails = createTokenDetails(
-        conversation,
-        project.getUserData(CodeGPTKeys.SELECTED_FILES),
-        highlightedText);
+    this.totalTokensDetails = createTokenDetails(conversation, highlightedText);
     this.label = getLabel(totalTokensDetails);
 
     setBorder(JBUI.Borders.empty(4));
@@ -63,7 +58,9 @@ public class TotalTokensPanel extends JPanel {
     project.getMessageBus()
         .connect()
         .subscribe(IncludeFilesInContextNotifier.FILES_INCLUDED_IN_CONTEXT_TOPIC,
-            (IncludeFilesInContextNotifier) this::updateReferencedFilesTokens);
+            (IncludeFilesInContextNotifier) includedFiles ->
+                updateReferencedFilesTokens(
+                    includedFiles.stream().map(ReferencedFile::from).toList()));
   }
 
   private void addSelectionListeners(Disposable parentDisposable) {
@@ -107,13 +104,6 @@ public class TotalTokensPanel extends JPanel {
     label.setText(getLabelHtml(total));
   }
 
-  public void updateConversationTokens(Conversation conversation, Message message) {
-    totalTokensDetails.setConversationTokens(
-        encodingManager.countConversationTokens(conversation)
-            + encodingManager.countMessageTokens("user", message.getPrompt()));
-    update();
-  }
-
   public void updateConversationTokens(Conversation conversation) {
     totalTokensDetails.setConversationTokens(encodingManager.countConversationTokens(conversation));
     update();
@@ -138,16 +128,10 @@ public class TotalTokensPanel extends JPanel {
 
   private TotalTokensDetails createTokenDetails(
       Conversation conversation,
-      List<ReferencedFile> includedFiles,
       @Nullable String highlightedText) {
     var tokenDetails = new TotalTokensDetails(
         encodingManager.countTokens(PromptsSettings.getSelectedPersonaSystemPrompt()));
     tokenDetails.setConversationTokens(encodingManager.countConversationTokens(conversation));
-    if (includedFiles != null) {
-      tokenDetails.setReferencedFilesTokens(includedFiles.stream()
-          .mapToInt(file -> encodingManager.countTokens(file.fileContent()))
-          .sum());
-    }
     if (highlightedText != null) {
       tokenDetails.setHighlightedTokens(encodingManager.countTokens(highlightedText));
     }

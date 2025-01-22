@@ -155,7 +155,7 @@ class OpenAIRequestFactory : CompletionRequestFactory {
             val role = if ("o1-mini" == model || "o1-preview" == model) "user" else "system"
 
             if (callParameters.conversationType == ConversationType.DEFAULT) {
-                val sessionPersonaDetails = callParameters.persona
+                val sessionPersonaDetails = callParameters.personaDetails
                 if (sessionPersonaDetails == null) {
                     messages.add(
                         OpenAIChatCompletionStandardMessage(

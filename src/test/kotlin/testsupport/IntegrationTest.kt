@@ -8,26 +8,25 @@ import testsupport.mixin.ShortcutsTestMixin
 
 open class IntegrationTest : BasePlatformTestCase(), ExternalServiceTestMixin, ShortcutsTestMixin {
 
-  @Throws(Exception::class)
-  override fun tearDown() {
-    ExternalServiceTestMixin.clearAll()
-    clearKeys()
-    super.tearDown()
-  }
-
-  private fun clearKeys() {
-    putUserData(CodeGPTKeys.SELECTED_FILES, emptyList())
-    putUserData(CodeGPTKeys.PREVIOUS_INLAY_TEXT, "")
-    putUserData(CodeGPTKeys.IMAGE_ATTACHMENT_FILE_PATH, "")
-  }
-
-  private fun <T> putUserData(key: Key<T>, value: T) {
-    project.putUserData(key, value)
-  }
-
-  companion object {
-    init {
-      ExternalServiceTestMixin.init()
+    @Throws(Exception::class)
+    override fun tearDown() {
+        ExternalServiceTestMixin.clearAll()
+        clearKeys()
+        super.tearDown()
     }
-  }
+
+    private fun clearKeys() {
+        putUserData(CodeGPTKeys.PREVIOUS_INLAY_TEXT, "")
+        putUserData(CodeGPTKeys.IMAGE_ATTACHMENT_FILE_PATH, "")
+    }
+
+    private fun <T> putUserData(key: Key<T>, value: T) {
+        project.putUserData(key, value)
+    }
+
+    companion object {
+        init {
+            ExternalServiceTestMixin.init()
+        }
+    }
 }

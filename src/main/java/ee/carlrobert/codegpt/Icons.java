@@ -13,7 +13,6 @@ public final class Icons {
       IconLoader.getIcon("/icons/codegpt-model.svg", Icons.class);
   public static final Icon Anthropic = IconLoader.getIcon("/icons/anthropic.svg", Icons.class);
   public static final Icon Azure = IconLoader.getIcon("/icons/azure.svg", Icons.class);
-  public static final Icon Databricks = IconLoader.getIcon("/icons/dbrx.svg", Icons.class);
   public static final Icon DeepSeek = IconLoader.getIcon("/icons/deepseek.png", Icons.class);
   public static final Icon Qwen = IconLoader.getIcon("/icons/qwen.png", Icons.class);
   public static final Icon Google = IconLoader.getIcon("/icons/google.svg", Icons.class);
@@ -24,10 +23,8 @@ public final class Icons {
   public static final Icon Send = IconLoader.getIcon("/icons/send.svg", Icons.class);
   public static final Icon Sparkle = IconLoader.getIcon("/icons/sparkle.svg", Icons.class);
   public static final Icon You = IconLoader.getIcon("/icons/you.svg", Icons.class);
-  public static final Icon YouSmall = IconLoader.getIcon("/icons/you_small.png", Icons.class);
   public static final Icon Ollama = IconLoader.getIcon("/icons/ollama.svg", Icons.class);
   public static final Icon User = IconLoader.getIcon("/icons/user.svg", Icons.class);
-  public static final Icon Upload = IconLoader.getIcon("/icons/upload.svg", Icons.class);
   public static final Icon Lightning = IconLoader.getIcon("/icons/lightning.svg", Icons.class);
   public static final Icon LightningDisabled =
       IconLoader.getIcon("/icons/lightning.svg", Icons.class);
@@ -45,5 +42,7 @@ public final class Icons {
       IconLoader.getIcon("/icons/questionMark.svg", Icons.class);
   public static final Icon ListFiles =
       IconLoader.getIcon("/icons/listFiles.svg", Icons.class);
+  public static final Icon InSelection =
+      IconLoader.getIcon("/icons/inSelection.svg", Icons.class);
   public static final Icon StatusBarCompletionInProgress = new AnimatedIcon.Default();
 }
