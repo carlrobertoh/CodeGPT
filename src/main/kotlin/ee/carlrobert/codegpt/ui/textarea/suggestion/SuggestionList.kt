@@ -2,7 +2,7 @@ package ee.carlrobert.codegpt.ui.textarea.suggestion
 
 import com.intellij.ui.components.JBList
 import com.intellij.util.ui.JBUI
-import ee.carlrobert.codegpt.ui.textarea.PromptTextField
+import ee.carlrobert.codegpt.ui.textarea.UserInputPanel
 import ee.carlrobert.codegpt.ui.textarea.suggestion.item.SuggestionItem
 import ee.carlrobert.codegpt.ui.textarea.suggestion.renderer.SuggestionListCellRenderer
 import java.awt.KeyboardFocusManager
@@ -15,7 +15,7 @@ import javax.swing.ListSelectionModel
 
 class SuggestionList(
     listModel: DefaultListModel<SuggestionItem>,
-    private val textPane: PromptTextField,
+    private val userInputPanel: UserInputPanel,
     private val onSelected: (SuggestionItem) -> Unit
 ) : JBList<SuggestionItem>(listModel) {
 
@@ -43,7 +43,7 @@ class SuggestionList(
     private fun setupUI() {
         border = JBUI.Borders.empty()
         selectionMode = ListSelectionModel.SINGLE_SELECTION
-        cellRenderer = SuggestionListCellRenderer(textPane)
+        cellRenderer = SuggestionListCellRenderer(userInputPanel)
     }
 
     private fun setupKeyboardFocusManager() {

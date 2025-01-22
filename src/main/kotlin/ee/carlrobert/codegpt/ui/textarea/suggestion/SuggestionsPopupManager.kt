@@ -3,7 +3,7 @@ package ee.carlrobert.codegpt.ui.textarea.suggestion
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.vcsUtil.showAbove
-import ee.carlrobert.codegpt.ui.textarea.PromptTextField
+import ee.carlrobert.codegpt.ui.textarea.UserInputPanel
 import ee.carlrobert.codegpt.ui.textarea.suggestion.item.*
 import kotlinx.coroutines.*
 import java.awt.Dimension
@@ -15,7 +15,7 @@ import javax.swing.event.ListDataListener
 
 class SuggestionsPopupManager(
     private val project: Project,
-    private val textField: PromptTextField,
+    private val userInputPanel: UserInputPanel,
 ) {
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private var selectedActionGroup: SuggestionGroupItem? = null
@@ -28,16 +28,16 @@ class SuggestionsPopupManager(
             override fun contentsChanged(e: ListDataEvent) {}
         })
     }
-    private val list = SuggestionList(listModel, textField) {
+    private val list = SuggestionList(listModel, userInputPanel) {
         handleSuggestionItemSelection(it)
     }
     private val defaultActions: MutableList<SuggestionItem> = mutableListOf(
         FileSuggestionGroupItem(project),
         FolderSuggestionGroupItem(project),
         GitSuggestionGroupItem(project),
-        PersonaSuggestionGroupItem(),
-        DocumentationSuggestionGroupItem(),
-        WebSearchActionItem(),
+        PersonaSuggestionGroupItem(project),
+        DocumentationSuggestionGroupItem(project),
+        WebSearchActionItem(project),
     )
 
     fun showPopup(component: JComponent? = null) {
@@ -48,8 +48,8 @@ class SuggestionsPopupManager(
                 true
             }
             .build(list)
-        popup?.showAbove(textField)
-        originalLocation = textField.locationOnScreen
+        popup?.showAbove(userInputPanel)
+        originalLocation = userInputPanel.locationOnScreen
         reset(true)
         selectNext()
     }
@@ -98,13 +98,13 @@ class SuggestionsPopupManager(
         when (item) {
             is SuggestionActionItem -> {
                 hidePopup()
-                item.execute(project, textField)
+                item.execute(project, userInputPanel)
             }
 
             is SuggestionGroupItem -> {
                 selectedActionGroup = item
                 updateSuggestions()
-                textField.requestFocus()
+                userInputPanel.requestFocus()
             }
         }
     }

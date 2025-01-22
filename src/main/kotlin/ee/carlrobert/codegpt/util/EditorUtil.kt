@@ -10,6 +10,8 @@ import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.editor.EditorKind
+import com.intellij.openapi.editor.colors.EditorColorsManager
+import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditor
 import com.intellij.openapi.fileEditor.FileEditorManager
@@ -18,6 +20,7 @@ import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
 import com.intellij.openapi.util.text.StringUtil
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.codeStyle.CodeStyleManager
 import com.intellij.testFramework.LightVirtualFile
@@ -37,8 +40,10 @@ object EditorUtil {
         )
         val editorFactory = EditorFactory.getInstance()
         val document = editorFactory.createDocument(code)
-        return editorFactory
+        val editor= editorFactory
             .createEditor(document, project, lightVirtualFile, true, EditorKind.MAIN_EDITOR)
+        (editor as EditorEx).backgroundColor = service<EditorColorsManager>().globalScheme.defaultBackground
+        return editor
     }
 
     @JvmStatic
@@ -74,6 +79,18 @@ object EditorUtil {
     @JvmStatic
     fun getSelectedEditor(project: Project): Editor? {
         return FileEditorManager.getInstance(project)?.selectedTextEditor
+    }
+
+    fun getSelectedEditorFile(project: Project): VirtualFile? {
+        return getSelectedEditor(project)?.virtualFile
+    }
+
+    @JvmStatic
+    fun getOpenLocalFiles(project: Project): List<VirtualFile> {
+        return FileEditorManager.getInstance(project).openFiles
+            .filter { it.isValid && it.isInLocalFileSystem }
+            .sortedBy { it.modificationStamp }
+            .toList()
     }
 
     @JvmStatic

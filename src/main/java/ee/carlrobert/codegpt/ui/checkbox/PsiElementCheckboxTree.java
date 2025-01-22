@@ -2,13 +2,12 @@ package ee.carlrobert.codegpt.ui.checkbox;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.util.Iconable;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.impl.file.PsiDirectoryImpl;
 import com.intellij.ui.CheckedTreeNode;
-import ee.carlrobert.codegpt.ReferencedFile;
-import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -21,7 +20,7 @@ public class PsiElementCheckboxTree extends FileCheckboxTree {
     setRootVisible(true);
   }
 
-  public List<ReferencedFile> getReferencedFiles() {
+  public List<VirtualFile> getReferencedFiles() {
     var checkedNodes = getCheckedNodes(
         PsiElement.class,
         node -> Optional.ofNullable(node.getContainingFile())
@@ -32,7 +31,7 @@ public class PsiElementCheckboxTree extends FileCheckboxTree {
     }
 
     return Arrays.stream(checkedNodes)
-        .map(item -> ReferencedFile.from(item.getContainingFile().getVirtualFile()))
+        .map(item -> item.getContainingFile().getVirtualFile())
         .toList();
   }
 

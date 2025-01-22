@@ -1,6 +1,5 @@
 package ee.carlrobert.codegpt.completions;
 
-import com.intellij.openapi.application.ApplicationManager;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
@@ -17,17 +16,15 @@ public class ToolwindowChatCompletionRequestHandler {
   }
 
   public void call(ChatCompletionParameters callParameters) {
-    ApplicationManager.getApplication().executeOnPooledThread(() -> {
-      try {
-        eventSource = startCall(callParameters);
-      } catch (TotalUsageExceededException e) {
-        completionResponseEventListener.handleTokensExceeded(
-            callParameters.getConversation(),
-            callParameters.getMessage());
-      } finally {
-        sendInfo(callParameters);
-      }
-    });
+    try {
+      eventSource = startCall(callParameters);
+    } catch (TotalUsageExceededException e) {
+      completionResponseEventListener.handleTokensExceeded(
+          callParameters.getConversation(),
+          callParameters.getMessage());
+    } finally {
+      sendInfo(callParameters);
+    }
   }
 
   public void cancel() {

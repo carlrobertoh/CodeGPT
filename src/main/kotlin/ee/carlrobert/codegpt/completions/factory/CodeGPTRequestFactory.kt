@@ -41,17 +41,15 @@ class CodeGPTRequestFactory : BaseRequestFactory() {
         if (params.message.isWebSearchIncluded) {
             requestBuilder.setWebSearchIncluded(true)
         }
-        val documentationDetails = params.message.documentationDetails
-        if (documentationDetails != null) {
+        params.message.documentationDetails?.let {
             requestBuilder.setDocumentationDetails(
-                DocumentationDetails(documentationDetails.name, documentationDetails.url)
+                DocumentationDetails(it.name, it.url)
             )
         }
         params.referencedFiles?.let {
-            val fileContexts = it.map { file ->
+            requestBuilder.setContext(AdditionalRequestContext(it.map { file ->
                 ContextFile(file.fileName(), file.fileContent())
-            }
-            requestBuilder.setContext(AdditionalRequestContext(fileContexts))
+            }))
         }
 
         return requestBuilder.build()

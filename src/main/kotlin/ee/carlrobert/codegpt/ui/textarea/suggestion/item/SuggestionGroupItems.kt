@@ -15,6 +15,10 @@ import ee.carlrobert.codegpt.settings.prompts.PersonaDetails
 import ee.carlrobert.codegpt.settings.prompts.PromptsSettings
 import ee.carlrobert.codegpt.settings.service.ServiceType
 import ee.carlrobert.codegpt.ui.DocumentationDetails
+import ee.carlrobert.codegpt.ui.textarea.header.DocumentationTagDetails
+import ee.carlrobert.codegpt.ui.textarea.header.FileTagDetails
+import ee.carlrobert.codegpt.ui.textarea.header.PersonaTagDetails
+import ee.carlrobert.codegpt.ui.textarea.header.TagUtil
 import ee.carlrobert.codegpt.util.GitUtil
 import ee.carlrobert.codegpt.util.file.FileUtil
 import kotlinx.coroutines.Dispatchers
@@ -39,7 +43,12 @@ class FileSuggestionGroupItem(private val project: Project) : SuggestionGroupIte
         return FileUtil.searchProjectFiles(project, searchText).toFileSuggestions()
     }
 
-    private fun Iterable<VirtualFile>.toFileSuggestions() = take(10).map { FileActionItem(it) } + IncludeOpenFilesActionItem()
+    private fun Iterable<VirtualFile>.toFileSuggestions(): List<SuggestionActionItem> {
+        val selectedFileTags = TagUtil.getExistingTags(project, FileTagDetails::class.java)
+        return filter { file -> selectedFileTags.none { it.virtualFile == file } }
+            .take(10)
+            .map { FileActionItem(it) } + IncludeOpenFilesActionItem()
+    }
 }
 
 class FolderSuggestionGroupItem(private val project: Project) : SuggestionGroupItem {
@@ -78,9 +87,11 @@ class FolderSuggestionGroupItem(private val project: Project) : SuggestionGroupI
     }
 }
 
-class PersonaSuggestionGroupItem : SuggestionGroupItem {
+class PersonaSuggestionGroupItem(private val project: Project) : SuggestionGroupItem {
     override val displayName: String = CodeGPTBundle.get("suggestionGroupItem.personas.displayName")
     override val icon = AllIcons.General.User
+    override val enabled: Boolean
+        get() = !TagUtil.isTagTypePresent(project, PersonaTagDetails::class.java)
 
     override suspend fun getSuggestions(searchText: String?): List<SuggestionActionItem> {
         return service<PromptsSettings>().state.personas.prompts
@@ -95,10 +106,18 @@ class PersonaSuggestionGroupItem : SuggestionGroupItem {
     }
 }
 
-class DocumentationSuggestionGroupItem : SuggestionGroupItem {
+class DocumentationSuggestionGroupItem(private val project: Project) : SuggestionGroupItem {
     override val displayName: String = CodeGPTBundle.get("suggestionGroupItem.docs.displayName")
     override val icon = AllIcons.Toolwindows.Documentation
-    override val enabled = GeneralSettings.getSelectedService() == ServiceType.CODEGPT
+    override val enabled: Boolean
+        get() = enabled()
+
+    fun enabled(): Boolean {
+        if (GeneralSettings.getSelectedService() != ServiceType.CODEGPT) {
+            return false
+        }
+        return !TagUtil.isTagTypePresent(project, DocumentationTagDetails::class.java)
+    }
 
     override suspend fun getSuggestions(searchText: String?): List<SuggestionActionItem> =
         service<DocumentationSettings>().state.documentations
@@ -135,9 +154,7 @@ class GitSuggestionGroupItem(private val project: Project) : SuggestionGroupItem
             GitUtil.getProjectRepository(project)?.let {
                 GitUtil.getAllRecentCommits(project, it, searchText)
                     .take(10)
-                    .map { commit ->
-                        GitCommitActionItem(project, commit)
-                    }
+                    .map { commit -> GitCommitActionItem(commit) }
             } ?: emptyList()
         }
     }

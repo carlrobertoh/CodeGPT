@@ -11,12 +11,11 @@ import com.intellij.ui.dsl.builder.LabelPosition
 import com.intellij.ui.dsl.builder.TopGap
 import com.intellij.ui.dsl.builder.panel
 import ee.carlrobert.codegpt.CodeGPTBundle
-import ee.carlrobert.codegpt.CodeGPTKeys
 import ee.carlrobert.codegpt.settings.documentation.DocumentationDetailsState
 import ee.carlrobert.codegpt.settings.documentation.DocumentationSettings
 import javax.swing.JComponent
 
-class AddDocumentationDialog(private val project: Project) : DialogWrapper(project) {
+class AddDocumentationDialog(project: Project) : DialogWrapper(project) {
 
     private var nameField = JBTextField("", 40).apply {
         emptyText.text = "CodeGPT docs"
@@ -55,15 +54,11 @@ class AddDocumentationDialog(private val project: Project) : DialogWrapper(proje
     }
 
     override fun doOKAction() {
-        val documentationDetails = DocumentationDetails(nameField.text, urlField.text)
-        project.putUserData(CodeGPTKeys.ADDED_DOCUMENTATION, documentationDetails)
-
         if (saveCheckbox.isSelected) {
-            val newState = DocumentationDetailsState()
-            newState.url = documentationDetails.url
-            newState.name = documentationDetails.name
-
-            service<DocumentationSettings>().state.documentations.add(newState)
+            service<DocumentationSettings>().state.documentations.add(DocumentationDetailsState().apply {
+                url = urlField.text
+                name = nameField.text
+            })
         }
 
         super.doOKAction()

@@ -5,14 +5,13 @@ import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.application.runUndoTransparentWriteAction
 import com.intellij.openapi.components.service
-import com.intellij.openapi.editor.Inlay
+import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.fileTypes.FileTypes
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
-import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.ComponentUtil.findParentByCondition
 import com.intellij.ui.EditorTextField
@@ -20,8 +19,6 @@ import com.intellij.util.ui.JBUI
 import ee.carlrobert.codegpt.CodeGPTBundle
 import ee.carlrobert.codegpt.CodeGPTKeys.IS_PROMPT_TEXT_FIELD_DOCUMENT
 import ee.carlrobert.codegpt.ui.textarea.suggestion.SuggestionsPopupManager
-import ee.carlrobert.codegpt.ui.textarea.suggestion.item.SuggestionActionItem
-import ee.carlrobert.codegpt.ui.textarea.suggestion.item.SuggestionItem
 import java.awt.AWTEvent
 import java.awt.Dimension
 import java.awt.KeyboardFocusManager
@@ -30,41 +27,24 @@ import java.awt.event.KeyEvent
 import java.awt.event.MouseEvent
 import java.util.*
 
-interface AppliedActionInlay {
-    val inlay: Inlay<PromptTextFieldInlayRenderer?>
-}
-
-data class AppliedSuggestionActionInlay(
-    override val inlay: Inlay<PromptTextFieldInlayRenderer?>,
-    val suggestion: SuggestionItem?,
-) : AppliedActionInlay
-
-data class AppliedCodeActionInlay(
-    override val inlay: Inlay<PromptTextFieldInlayRenderer?>,
-    val code: String,
-    val editorFile: VirtualFile
-) : AppliedActionInlay
-
 const val AT_CHAR = '@'
 
 class PromptTextField(
     private val project: Project,
+    private val suggestionsPopupManager: SuggestionsPopupManager,
     private val onTextChanged: (String) -> Unit,
-    private val onSubmit: (String, List<AppliedActionInlay>) -> Unit
+    private val onSubmit: (String) -> Unit
 ) : EditorTextField(project, FileTypes.PLAIN_TEXT), Disposable {
 
     val dispatcherId: UUID = UUID.randomUUID()
-
-    private val appliedInlays: MutableList<AppliedActionInlay> = mutableListOf()
-    private val suggestionsPopupManager = SuggestionsPopupManager(project, this)
 
     init {
         isOneLineMode = false
         IS_PROMPT_TEXT_FIELD_DOCUMENT.set(document, true)
         setPlaceholder(CodeGPTBundle.get("toolwindow.chat.textArea.emptyText"))
         IdeEventQueue.getInstance().addDispatcher(
-            PromptTextFieldEventDispatcher(this, suggestionsPopupManager, appliedInlays) {
-                onSubmit(text, appliedInlays)
+            PromptTextFieldEventDispatcher(this, suggestionsPopupManager) {
+                onSubmit(text)
             },
             this
         )
@@ -73,77 +53,13 @@ class PromptTextField(
     fun clear() {
         runInEdt {
             text = ""
-            clearInlays()
-        }
-    }
-
-    fun addInlayElement(actionPrefix: String, text: String?, actionItem: SuggestionActionItem?) {
-        editor?.let {
-            var startOffset = it.document.text.lastIndexOf(AT_CHAR)
-            if (startOffset == -1) {
-                startOffset = it.document.textLength
-            }
-
-            addInlayElement(startOffset, actionPrefix, text, actionItem)
-        }
-    }
-
-    fun addInlayElement(
-        actionPrefix: String,
-        text: String,
-        editorFile: VirtualFile? = null,
-        tooltipText: String? = null
-    ) {
-        editor?.let {
-            addInlayElement(
-                it.caretModel.offset,
-                actionPrefix,
-                text,
-                editorFile = editorFile,
-                tooltipText = tooltipText
-            )
-        }
-    }
-
-    private fun addInlayElement(
-        startOffset: Int,
-        actionPrefix: String,
-        text: String?,
-        actionItem: SuggestionActionItem? = null,
-        editorFile: VirtualFile? = null,
-        tooltipText: String? = null
-    ) {
-        runUndoTransparentWriteAction {
-            document.deleteString(startOffset, document.textLength)
-            document.setText(document.text + " ")
-            val inlay = editor?.inlayModel?.addInlineElement(
-                startOffset,
-                true,
-                PromptTextFieldInlayRenderer(
-                    project,
-                    actionPrefix,
-                    text,
-                    editorFile?.name ?: "",
-                    tooltipText
-                ) { inlay ->
-                    appliedInlays.removeIf { appliedInlay -> appliedInlay.inlay == inlay }
-                    inlay.dispose()
-                })
-            if (inlay != null) {
-                // TODO
-                if (tooltipText != null && editorFile != null) {
-                    appliedInlays.add(AppliedCodeActionInlay(inlay, tooltipText, editorFile))
-                } else {
-                    appliedInlays.add(AppliedSuggestionActionInlay(inlay, actionItem))
-                }
-                editor?.caretModel?.moveToOffset(document.textLength)
-            }
         }
     }
 
     override fun createEditor(): EditorEx {
         val editorEx = super.createEditor()
         editorEx.settings.isUseSoftWraps = true
+        editorEx.backgroundColor = service<EditorColorsManager>().globalScheme.defaultBackground
         setupDocumentListener(editorEx)
         return editorEx
     }
@@ -154,13 +70,7 @@ class PromptTextField(
 
     override fun dispose() {
         clear()
-    }
-
-    private fun clearInlays() {
-        runUndoTransparentWriteAction {
-            appliedInlays.forEach { it.inlay.dispose() }
-            appliedInlays.clear()
-        }
+        suggestionsPopupManager.hidePopup()
     }
 
     private fun setupDocumentListener(editor: EditorEx) {
@@ -171,7 +81,6 @@ class PromptTextField(
 
                 if (event.document.text.isEmpty()) {
                     suggestionsPopupManager.hidePopup()
-                    clearInlays()
                     return
                 }
             }
@@ -199,7 +108,6 @@ class PromptTextField(
 class PromptTextFieldEventDispatcher(
     private val textField: PromptTextField,
     private val suggestionsPopupManager: SuggestionsPopupManager,
-    private val appliedInlays: MutableList<AppliedActionInlay>,
     private val onSubmit: () -> Unit
 ) : IdeEventQueue.EventDispatcher {
 
@@ -219,14 +127,6 @@ class PromptTextFieldEventDispatcher(
                         KeyEvent.VK_BACK_SPACE -> {
                             if (textField.text.let { it.isNotEmpty() && it.last() == AT_CHAR }) {
                                 suggestionsPopupManager.reset()
-                            }
-
-                            val appliedInlay = appliedInlays.find {
-                                it.inlay.offset == owner.caretModel.offset - 1
-                            }
-                            if (appliedInlay != null) {
-                                appliedInlay.inlay.dispose()
-                                appliedInlays.remove(appliedInlay)
                             }
                         }
 

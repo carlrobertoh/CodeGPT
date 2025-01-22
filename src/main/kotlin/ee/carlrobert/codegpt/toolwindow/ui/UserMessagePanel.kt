@@ -13,7 +13,6 @@ import com.intellij.util.ui.JBFont
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.components.BorderLayoutPanel
 import ee.carlrobert.codegpt.CodeGPTBundle
-import ee.carlrobert.codegpt.CodeGPTKeys
 import ee.carlrobert.codegpt.Icons
 import ee.carlrobert.codegpt.conversations.message.Message
 import ee.carlrobert.codegpt.events.WebSearchEventDetails
@@ -26,10 +25,7 @@ import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
-import javax.swing.DefaultListModel
-import javax.swing.JPanel
-import javax.swing.SwingConstants
-
+import javax.swing.*
 
 class UserMessagePanel(
     private val project: Project,
@@ -128,46 +124,62 @@ class UserMessagePanel(
     }
 
     private fun getAdditionalContextPanel(project: Project?, message: Message): JPanel? {
-        val addedDocumentation = CodeGPTKeys.ADDED_DOCUMENTATION[project]
+        val documentationDetails = message.documentationDetails
         val referencedFilePaths = message.referencedFilePaths ?: emptyList()
-        if (addedDocumentation == null && referencedFilePaths.isEmpty()) {
+        if (documentationDetails == null && referencedFilePaths.isEmpty() && message.personaName.isNullOrEmpty()) {
             return null
         }
 
         return BorderLayoutPanel().apply {
             isOpaque = false
 
-            if (addedDocumentation != null) {
-                val listModel = DefaultListModel<WebSearchEventDetails>()
-                listModel.addElement(
-                    WebSearchEventDetails(
-                        UUID.randomUUID(), addedDocumentation.name,
-                        addedDocumentation.url, addedDocumentation.url
+            val additionalContextPanel = JPanel().apply {
+                layout = BoxLayout(this, BoxLayout.Y_AXIS)
+                isOpaque = false
+            }
+            addToTop(additionalContextPanel)
+
+            message.personaName?.let {
+                additionalContextPanel.add(
+                    createAdditionalContextPanel(
+                        CodeGPTBundle.get("userMessagePanel.persona.title"),
+                        BorderLayoutPanel()
+                            .addToTop(JBLabel(it, AllIcons.General.User, SwingUtilities.LEADING))
+                            .withBorder(JBUI.Borders.emptyBottom(8))
+                            .andTransparent()
                     )
                 )
-                addToTop(createWebpageListPanel(WebpageList(listModel)))
+            }
+
+            documentationDetails?.let {
+                val listModel = DefaultListModel<WebSearchEventDetails>().apply {
+                    addElement(WebSearchEventDetails(UUID.randomUUID(), it.name, it.url, it.url))
+                }
+                additionalContextPanel.add(
+                    createAdditionalContextPanel(
+                        CodeGPTBundle.get("userMessagePanel.documentation.title"),
+                        WebpageList(listModel)
+                    )
+                )
             }
 
             if (referencedFilePaths.isNotEmpty()) {
-                addToTop(SelectedFilesAccordion(project!!, referencedFilePaths))
+                additionalContextPanel.add(SelectedFilesAccordion(project!!, referencedFilePaths))
             }
         }
     }
 
-    private fun createWebpageListPanel(webpageList: WebpageList): JPanel {
+    private fun createAdditionalContextPanel(title: String, component: JComponent): JPanel {
         return BorderLayoutPanel().apply {
             isOpaque = false
             addToTop(BorderLayoutPanel().apply {
                 isOpaque = false
                 border = JBUI.Borders.empty(8, 0)
-                addToLeft(
-                    JBLabel(CodeGPTBundle.get("userMessagePanel.documentation.title"))
-                        .withFont(JBUI.Fonts.miniFont())
-                )
+                addToLeft(JBLabel(title).withFont(JBUI.Fonts.miniFont()))
             })
             addToCenter(BorderLayoutPanel().apply {
                 isOpaque = false
-                addToLeft(webpageList)
+                addToLeft(component)
             })
         }
     }

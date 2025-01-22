@@ -36,6 +36,7 @@ class DocumentationDetailsState : BaseState() {
 }
 
 private val DEFAULT_DOCUMENTATIONS = mutableListOf(
+    getDocState("Spring Framework API", "https://docs.spring.io/spring-framework/docs/current/javadoc-api/"),
     getDocState("Astro Runtime API", "https://docs.astro.build/en/reference/api-reference/"),
     getDocState("Flask API", "https://flask.palletsprojects.com/en/3.0.x/api/"),
     getDocState("Flutter API", "https://api.flutter.dev/"),

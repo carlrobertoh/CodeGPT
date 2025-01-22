@@ -1,7 +1,7 @@
 package ee.carlrobert.codegpt.ui.textarea.suggestion.item
 
 import com.intellij.openapi.project.Project
-import ee.carlrobert.codegpt.ui.textarea.PromptTextField
+import ee.carlrobert.codegpt.ui.textarea.UserInputPanel
 import javax.swing.Icon
 
 interface SuggestionItem {
@@ -12,7 +12,7 @@ interface SuggestionItem {
 }
 
 interface SuggestionActionItem : SuggestionItem {
-    fun execute(project: Project, textPane: PromptTextField)
+    fun execute(project: Project, userInputPanel: UserInputPanel)
 }
 
 interface SuggestionGroupItem : SuggestionItem {

@@ -19,7 +19,7 @@ class ChatCompletionParameters private constructor(
     var retry: Boolean,
     var imageDetails: ImageDetails?,
     var referencedFiles: List<ReferencedFile>?,
-    var persona: PersonaDetails?,
+    var personaDetails: PersonaDetails?,
 ) : CompletionParameters {
 
     fun toBuilder(): Builder {
@@ -29,7 +29,7 @@ class ChatCompletionParameters private constructor(
             retry(this@ChatCompletionParameters.retry)
             imageDetails(this@ChatCompletionParameters.imageDetails)
             referencedFiles(this@ChatCompletionParameters.referencedFiles)
-            persona(this@ChatCompletionParameters.persona)
+            personaDetails(this@ChatCompletionParameters.personaDetails)
         }
     }
 
@@ -39,7 +39,8 @@ class ChatCompletionParameters private constructor(
         private var retry: Boolean = false
         private var imageDetails: ImageDetails? = null
         private var referencedFiles: List<ReferencedFile>? = null
-        private var persona: PersonaDetails? = null
+        private var personaDetails: PersonaDetails? = null
+        private var gitDiff: String = ""
 
         fun sessionId(sessionId: UUID?) = apply { this.sessionId = sessionId }
         fun conversationType(conversationType: ConversationType) =
@@ -56,10 +57,12 @@ class ChatCompletionParameters private constructor(
             }
         }
 
+        fun gitDiff(gitDiff: String) = apply { this.gitDiff = gitDiff }
+
         fun referencedFiles(referencedFiles: List<ReferencedFile>?) =
             apply { this.referencedFiles = referencedFiles }
 
-        fun persona(persona: PersonaDetails?) = apply { this.persona = persona }
+        fun personaDetails(personaDetails: PersonaDetails?) = apply { this.personaDetails = personaDetails }
 
         fun build(): ChatCompletionParameters {
             return ChatCompletionParameters(
@@ -70,7 +73,7 @@ class ChatCompletionParameters private constructor(
                 retry,
                 imageDetails,
                 referencedFiles,
-                persona
+                personaDetails
             )
         }
     }

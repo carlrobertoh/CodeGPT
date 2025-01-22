@@ -4,7 +4,6 @@ import static java.lang.String.format;
 
 import com.intellij.icons.AllIcons.General;
 import com.intellij.openapi.fileEditor.FileEditorManager;
-import com.intellij.openapi.fileTypes.FileTypeManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.ui.components.ActionLink;
@@ -50,8 +49,7 @@ public class SelectedFilesAccordion extends JPanel {
                 FileEditorManager.getInstance(project)
                     .openFile(Objects.requireNonNull(virtualFile), true);
               });
-          actionLink.setIcon(
-              FileTypeManager.getInstance().getFileTypeByFile(virtualFile).getIcon());
+          actionLink.setIcon(virtualFile.getFileType().getIcon());
           return actionLink;
         })
         .forEach(link -> {
@@ -63,14 +61,16 @@ public class SelectedFilesAccordion extends JPanel {
 
   private JToggleButton createToggleButton(JPanel contentPane, int fileCount) {
     var accordionToggle = new JToggleButton(
-        format("Referenced files (+%d)", fileCount), General.ArrowDown);
+        format("Referenced files (+%d)", fileCount), General.ArrowUp);
     accordionToggle.setFocusPainted(false);
     accordionToggle.setContentAreaFilled(false);
     accordionToggle.setBackground(getBackground());
-    accordionToggle.setSelectedIcon(General.ArrowUp);
+    accordionToggle.setSelectedIcon(General.ArrowDown);
     accordionToggle.setBorder(null);
-    accordionToggle.setHorizontalAlignment(SwingConstants.LEADING);
-    accordionToggle.setHorizontalTextPosition(SwingConstants.LEADING);
+    accordionToggle.setSelected(true);
+    accordionToggle.setHorizontalAlignment(SwingConstants.LEFT);
+    accordionToggle.setHorizontalTextPosition(SwingConstants.RIGHT);
+    accordionToggle.setIconTextGap(4);
     accordionToggle.addItemListener(e ->
         contentPane.setVisible(e.getStateChange() == ItemEvent.SELECTED));
     return accordionToggle;

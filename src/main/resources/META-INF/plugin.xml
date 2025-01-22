@@ -26,6 +26,7 @@
     <extensions defaultExtensionNs="com.intellij">
         <postStartupActivity implementation="ee.carlrobert.codegpt.CodeGPTProjectActivity"/>
         <postStartupActivity implementation="ee.carlrobert.codegpt.CodeGPTUpdateActivity"/>
+        <editorFactoryListener implementation="ee.carlrobert.codegpt.CodeGPTEditorFactoryListener"/>
         <applicationConfigurable id="settings.codegpt" parentId="tools" displayName="CodeGPT"
             instance="ee.carlrobert.codegpt.settings.GeneralSettingsConfigurable"/>
         <applicationConfigurable id="settings.codegpt.services" parentId="settings.codegpt" displayName="Providers"
@@ -152,12 +153,6 @@
                   description="Edit code in natural language"
                   class="ee.carlrobert.codegpt.actions.editor.EditCodeContextMenuAction">
                     <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift K" replace-all="true"/>
-                </action>
-                <action
-                  id="CodeGPT.IncludeFileInContext"
-                  text="Include File In Prompt"
-                  class="ee.carlrobert.codegpt.actions.IncludeFilesInContextAction">
-                    <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt shift F" replace-all="true"/>
                 </action>
                 <action
                   id="CodeGPT.AskQuestion"
