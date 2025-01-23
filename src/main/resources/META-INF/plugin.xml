@@ -141,16 +141,9 @@
                     <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt shift N" replace-all="true"/>
                 </action>
                 <action
-                  id="CodeGPT.AddSelectionToContext"
-                  class="ee.carlrobert.codegpt.actions.editor.AddSelectionToContextAction"
-                  text="Include Selection in Prompt"
-                  description="Adds the selected text to the CodeGPT context">
-                    <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift I" replace-all="true"/>
-                </action>
-                <action
                   id="CodeGPT.ContextMenuEditCodeAction"
                   text="Edit Code"
-                  description="Edit code in natural language"
+                  description="Edit code from editor's context menu"
                   class="ee.carlrobert.codegpt.actions.editor.EditCodeContextMenuAction">
                     <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift K" replace-all="true"/>
                 </action>
@@ -208,15 +201,9 @@
             <action
               id="CodeGPT.FloatingMenuEditCodeAction"
               text="Edit Code"
-              description="Edit code in natural language"
+              description="Edit code from editor's floating menu"
               class="ee.carlrobert.codegpt.actions.editor.EditCodeFloatingMenuAction">
                 <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift K" replace-all="true"/>
-            </action>
-            <action
-              id="CodeGPT.AddSelectionToContextAction"
-              text="Include Selection in Prompt"
-              class="ee.carlrobert.codegpt.actions.editor.AddSelectionToContextAction">
-                <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift I" replace-all="true"/>
             </action>
             <add-to-group
               group-id="Floating.CodeToolbar"
@@ -224,6 +211,17 @@
               anchor="before"/>
             <separator/>
         </group>
+
+        <action
+          id="CodeGPT.AddSelectionToContext"
+          class="ee.carlrobert.codegpt.actions.editor.AddSelectionToContextAction"
+          text="Include Selection in Prompt"
+          description="Adds the selected text to the CodeGPT context">
+            <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift I" replace-all="true"/>
+
+            <add-to-group group-id="action.editor.group.EditorActionGroup" anchor="after" relative-to-action="CodeGPT.NewChat"/>
+            <add-to-group group-id="CodeGPT.FloatingCodeToolbarMenuRootGroup" anchor="after" relative-to-action="CodeGPT.FloatingMenuEditCodeAction"/>
+        </action>
 
         <action
           id="codegpt.openSettings"
@@ -299,13 +297,16 @@
             <add-to-group group-id="Vcs.MessageActionGroup" anchor="first"/>
             <action
                 id="CodeGPT.GenerateGitCommitMessage"
+                text="Generate Commit Message"
                 class="ee.carlrobert.codegpt.actions.GenerateCommitMessageAction"/>
             <action
                 id="CodeGPT.GenerateGitCommitMessageWithAdditionalInput"
+                text="Generate Commit Message with Additional Input"
                 class="ee.carlrobert.codegpt.actions.GenerateCommitMessageWithAdditionalInputAction"/>
             <separator/>
             <action
               id="CodeGPT.ReviewChanges"
+              text="Review Changes"
               class="ee.carlrobert.codegpt.actions.ReviewChangesAction"/>
         </group>
     </actions>

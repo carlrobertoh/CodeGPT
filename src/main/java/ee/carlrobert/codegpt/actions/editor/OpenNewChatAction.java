@@ -12,7 +12,6 @@ public class OpenNewChatAction extends AnAction {
 
   public OpenNewChatAction() {
     super(Icons.OpenNewTab);
-    EditorActionsUtil.registerAction(this);
   }
 
   @Override
