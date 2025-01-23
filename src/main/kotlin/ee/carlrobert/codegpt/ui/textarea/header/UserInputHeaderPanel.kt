@@ -1,8 +1,8 @@
 package ee.carlrobert.codegpt.ui.textarea.header
 
-import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.editor.EditorKind
 import com.intellij.openapi.editor.SelectionModel
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.FileEditorManagerEvent
@@ -17,6 +17,7 @@ import ee.carlrobert.codegpt.actions.IncludeFilesInContextNotifier
 import ee.carlrobert.codegpt.ui.textarea.WrapLayout
 import ee.carlrobert.codegpt.ui.textarea.suggestion.SuggestionsPopupManager
 import ee.carlrobert.codegpt.util.EditorUtil
+import ee.carlrobert.codegpt.util.EditorUtil.getSelectedEditor
 import ee.carlrobert.codegpt.util.EditorUtil.getSelectedEditorFile
 import java.awt.FlowLayout
 import javax.swing.JPanel
@@ -47,7 +48,7 @@ class UserInputHeaderPanel(
         foreground = JBUI.CurrentTheme.Label.disabledForeground()
         font = JBUI.Fonts.smallFont()
         border = JBUI.Borders.emptyLeft(2)
-        isVisible = project.getSelectedEditor() == null
+        isVisible = getSelectedEditor(project) == null
     }
     private val selectionHeaderTag = SelectionHeaderTag(project)
 
@@ -60,24 +61,13 @@ class UserInputHeaderPanel(
         val selectedTags: MutableList<HeaderTagDetails> =
             tags.filter { it.selected }.toMutableList()
 
-        val selectedFile = selectedFileHeaderTag.virtualFile
-        if (selectedFileHeaderTag.isVisible && selectedFile != null) {
+        val selectedFile = (selectedFileHeaderTag.tagDetails as? FileTagDetails)?.virtualFile
+        if (selectedFileHeaderTag.isVisible && selectedFileHeaderTag.tagDetails.selected && selectedFile != null) {
             selectedTags.add(FileTagDetails(selectedFile))
         }
 
-        selectionHeaderTag.selectedEditor?.let { editor ->
-            val selectionFile = editor.virtualFile
-            if (!editor.isDisposed && selectionHeaderTag.isVisible && selectionFile != null) {
-                selectedTags.add(
-                    runReadAction {
-                        SelectionTagDetails(
-                            selectionFile,
-                            editor.selectionModel,
-                            editor.selectionModel.selectedText
-                        )
-                    }
-                )
-            }
+        (selectionHeaderTag.tagDetails as? SelectionTagDetails)?.let {
+            selectedTags.add(it)
         }
 
         return selectedTags
@@ -86,33 +76,9 @@ class UserInputHeaderPanel(
     fun addTag(tagDetails: HeaderTagDetails) {
         if (selectedFileHeaderTag.isVisible
             && tagDetails is FileTagDetails
-            && selectedFileHeaderTag.virtualFile == tagDetails.virtualFile
+            && (selectedFileHeaderTag.tagDetails as? FileTagDetails)?.virtualFile == tagDetails.virtualFile
         ) {
             return
-        }
-
-        val tag = object : HeaderTag(tagDetails, tagDetails is FileTagDetails) {
-            override fun onSelect(tagDetails: HeaderTagDetails) {
-                if (tagDetails is FileTagDetails) {
-                    if (tagDetails.selected) {
-                        project.service<FileEditorManager>().openFile(tagDetails.virtualFile)
-                    } else {
-                        selectedFileTags.add(tagDetails)
-                    }
-                }
-            }
-
-            override fun onClose() {
-                removeTag(tagDetails.id)
-            }
-
-            override fun select() {
-                updateTagPosition(this)
-                super.select()
-                if (tags.filterIsInstance<FileTagDetails>().filter { !it.selected }.size <= 2) {
-                    addNextOpenFile()
-                }
-            }
         }
 
         if (tags.add(tagDetails)) {
@@ -122,6 +88,7 @@ class UserInputHeaderPanel(
                 selectedFileTags.add(tagDetails)
             }
 
+            val tag = createTag(tagDetails)
             val lastSelectionTagIndex = getLastSelectedTagIndex()
             if (lastSelectionTagIndex != -1) {
                 add(tag, lastSelectionTagIndex + TAG_INSERTION_OFFSET + 1)
@@ -142,6 +109,34 @@ class UserInputHeaderPanel(
         }
     }
 
+    private fun createTag(tagDetails: HeaderTagDetails) =
+        object : HeaderTag(tagDetails, tagDetails is FileTagDetails) {
+            override fun onSelect(tagDetails: HeaderTagDetails) {
+                tagDetails.selected = !tagDetails.selected
+                update(tagDetails.name, tagDetails.icon)
+
+                if (tagDetails is FileTagDetails) {
+                    if (tagDetails.selected) {
+                        selectedFileTags.add(tagDetails)
+                        updateTagPosition(this)
+
+                        val canAddNewTag = tags
+                            .filter { it is FileTagDetails && !it.selected }.size <= 2
+                        if (canAddNewTag) {
+                            addNextOpenFile()
+                        }
+                    } else {
+                        project.service<FileEditorManager>().openFile(tagDetails.virtualFile)
+                    }
+                }
+            }
+
+            override fun onClose() {
+                selectedFileTags.removeIf { it.id == tagDetails.id }
+                removeTag(tagDetails.id)
+            }
+        }
+
     private fun updateTagPosition(tag: HeaderTag) {
         remove(tag)
         val lastSelectionTagIndex = getLastSelectedTagIndex()
@@ -150,6 +145,8 @@ class UserInputHeaderPanel(
         } else {
             add(tag, max(getFirstUnselectedTagIndex(), TAG_INSERTION_OFFSET))
         }
+        repaint()
+        revalidate()
     }
 
     private fun getFilteredHeaderTags(): List<HeaderTag> = components
@@ -168,18 +165,22 @@ class UserInputHeaderPanel(
     private fun getFileTag(file: VirtualFile): FileTagDetails? =
         tags.filterIsInstance<FileTagDetails>().find { it.virtualFile == file }
 
+    private fun isFileTagExists(file: VirtualFile): Boolean {
+        return getFileTag(file) != null || selectedFileHeaderTag.virtualFile == file
+    }
+
     private fun getSortedOpenFiles(project: Project): MutableList<FileTagDetails> =
         EditorUtil.getOpenLocalFiles(project)
-            .filterNot { it == selectedFileHeaderTag.virtualFile }
+            .filterNot { isFileTagExists(it) }
             .map { FileTagDetails(it) }
             .toMutableList()
 
     private fun addNextOpenFile() {
-        val file = EditorUtil.getOpenLocalFiles(project).firstOrNull {
-            !tags.filterIsInstance<FileTagDetails>().any { tag -> tag.virtualFile == it }
-                    && it != selectedFileHeaderTag.virtualFile
-        } ?: return
-        addTag(FileTagDetails(file, false))
+        EditorUtil.getOpenLocalFiles(project)
+            .firstOrNull { !isFileTagExists(it) }
+            ?.let {
+                addTag(FileTagDetails(it, false))
+            }
     }
 
     private fun removeFileTag(virtualFile: VirtualFile) {
@@ -220,7 +221,7 @@ class UserInputHeaderPanel(
         add(selectedFileHeaderTag)
 
         if (tags.size <= 2) {
-            val selectedFile = EditorUtil.getSelectedEditor(project)?.virtualFile
+            val selectedFile = getSelectedEditor(project)?.virtualFile
             getSortedOpenFiles(project)
                 .take(INITIAL_VISIBLE_FILES)
                 .forEach {
@@ -258,7 +259,7 @@ class UserInputHeaderPanel(
     private inner class EditorCreatedListener : EditorNotifier.Created {
         override fun editorCreated(editor: Editor) {
             editor.virtualFile?.let { editorFile ->
-                if (selectedFileHeaderTag.isVisible && selectedFileHeaderTag.virtualFile == editorFile) {
+                if (selectedFileHeaderTag.isVisible && (selectedFileHeaderTag.tagDetails as? FileTagDetails)?.virtualFile == editorFile) {
                     return
                 }
 
@@ -269,11 +270,13 @@ class UserInputHeaderPanel(
 
     private inner class EditorReleasedListener : EditorNotifier.Released {
         override fun editorReleased(editor: Editor) {
-            removeFileTag(editor.virtualFile)
+            if (editor.editorKind == EditorKind.MAIN_EDITOR && !editor.isDisposed && editor.virtualFile != null) {
+                removeFileTag(editor.virtualFile)
 
-            if (tags.isEmpty() && project.getSelectedEditorFile() == null) {
-                selectedFileHeaderTag.isVisible = false
-                emptyText.isVisible = true
+                if (tags.isEmpty() && getSelectedEditorFile(project) == null) {
+                    selectedFileHeaderTag.isVisible = false
+                    emptyText.isVisible = true
+                }
             }
         }
     }
@@ -299,12 +302,11 @@ class UserInputHeaderPanel(
 
     private inner class IncludedFilesListener : IncludeFilesInContextNotifier {
         override fun filesIncluded(includedFiles: MutableList<VirtualFile>) {
-            val selectedEditorFile = getSelectedEditorFile(project)
-            includedFiles.forEach {
-                if (getFileTag(it) == null && selectedEditorFile != it) {
+            includedFiles
+                .filterNot { isFileTagExists(it) }
+                .forEach {
                     addTag(FileTagDetails(it))
                 }
-            }
         }
     }
 }
