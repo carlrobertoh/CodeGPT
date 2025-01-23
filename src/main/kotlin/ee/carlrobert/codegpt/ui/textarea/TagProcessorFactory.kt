@@ -1,16 +1,13 @@
 package ee.carlrobert.codegpt.ui.textarea
 
 import com.intellij.openapi.components.service
-import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import ee.carlrobert.codegpt.EncodingManager
 import ee.carlrobert.codegpt.conversations.message.Message
 import ee.carlrobert.codegpt.ui.textarea.header.*
-import ee.carlrobert.codegpt.util.EditorUtil
 import ee.carlrobert.codegpt.util.GitUtil
-import ee.carlrobert.codegpt.util.file.FileUtil.getFileExtension
 import git4idea.GitCommit
 
 object TagProcessorFactory {
@@ -18,7 +15,7 @@ object TagProcessorFactory {
     fun getProcessor(project: Project, tagDetails: HeaderTagDetails): TagProcessor {
         return when (tagDetails) {
             is FileTagDetails -> FileTagProcessor()
-            is SelectionTagDetails -> SelectionTagProcessor(project)
+            is SelectionTagDetails -> SelectionTagProcessor()
             is DocumentationTagDetails -> DocumentationTagProcessor()
             is PersonaTagDetails -> PersonaTagProcessor()
             is FolderTagDetails -> FolderTagProcessor()
@@ -46,23 +43,25 @@ class FileTagProcessor : TagProcessor {
     }
 }
 
-class SelectionTagProcessor(private val project: Project) : TagProcessor {
+class SelectionTagProcessor : TagProcessor {
     override fun process(
         message: Message,
         tagDetails: HeaderTagDetails,
         promptBuilder: StringBuilder
     ) {
-        if (tagDetails !is SelectionTagDetails) {
+        val selectionModel = (tagDetails as? SelectionTagDetails)?.selectionModel ?: return
+        if (!selectionModel.hasSelection() || tagDetails.virtualFile == null) {
             return
         }
 
-        EditorUtil.getSelectedEditor(project)?.let { selectedEditor ->
-            val fileExtension = getFileExtension((selectedEditor as EditorEx).virtualFile.name)
-            promptBuilder
-                .append("\n```$fileExtension\n")
-                .append(tagDetails.selectedText)
-                .append("\n```\n")
-        }
+        promptBuilder
+            .append("\n```${tagDetails.virtualFile?.extension}\n")
+            .append(selectionModel.selectedText)
+            .append("\n```\n")
+
+        tagDetails.virtualFile = null
+        tagDetails.selectionModel = null
+        selectionModel.removeSelection()
     }
 }
 
