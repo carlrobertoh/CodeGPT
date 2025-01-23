@@ -1,8 +1,8 @@
 package ee.carlrobert.codegpt.ui.textarea.header
 
 import com.intellij.icons.AllIcons
+import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.components.service
-import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.SelectionModel
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.fileEditor.FileEditorManager
@@ -15,7 +15,8 @@ import com.jetbrains.rd.util.UUID
 import ee.carlrobert.codegpt.Icons
 import ee.carlrobert.codegpt.settings.prompts.PersonaDetails
 import ee.carlrobert.codegpt.ui.DocumentationDetails
-import ee.carlrobert.codegpt.util.EditorUtil
+import ee.carlrobert.codegpt.util.EditorUtil.getSelectedEditor
+import ee.carlrobert.codegpt.util.EditorUtil.getSelectedEditorFile
 import java.awt.Cursor
 import java.awt.FlowLayout
 import java.awt.Graphics
@@ -50,7 +51,6 @@ data class FileTagDetails(var virtualFile: VirtualFile, override var selected: B
 data class SelectionTagDetails(
     var virtualFile: VirtualFile?,
     var selectionModel: SelectionModel?,
-    var selectedText: String?
 ) :
     HeaderTagDetails(
         "${virtualFile?.name} (${selectionModel?.selectionStartPosition?.line}:${selectionModel?.selectionEndPosition?.line})",
@@ -74,7 +74,9 @@ data class FolderTagDetails(var folder: VirtualFile) :
 
 class WebTagDetails : HeaderTagDetails("Web", AllIcons.General.Web)
 
-abstract class HeaderTag(val tagDetails: HeaderTagDetails, private val selectable: Boolean = true) :
+class EmptyTagDetails : HeaderTagDetails("")
+
+abstract class HeaderTag(var tagDetails: HeaderTagDetails, private val selectable: Boolean = true) :
     JPanel() {
 
     val id: UUID = tagDetails.id
@@ -91,23 +93,22 @@ abstract class HeaderTag(val tagDetails: HeaderTagDetails, private val selectabl
         setupUI()
     }
 
-    abstract fun onClose()
-
     abstract fun onSelect(tagDetails: HeaderTagDetails)
 
-    fun updateLabel(text: String, icon: Icon) {
+    abstract fun onClose()
+
+    fun update(text: String, icon: Icon? = null) {
         label.text = text
-        label.icon = IconUtil.scale(icon, null, 0.65f)
-    }
-
-    open fun select() {
-        onSelect(tagDetails)
-
-        if (!tagDetails.selected) {
-            tagDetails.selected = true
-            closeButton.isVisible = true
-            label.foreground = service<EditorColorsManager>().globalScheme.defaultForeground
+        icon?.let {
+            label.icon = IconUtil.scale(it, null, 0.65f)
         }
+        closeButton.isVisible = tagDetails.selected
+        label.foreground = if (tagDetails.selected) {
+            service<EditorColorsManager>().globalScheme.defaultForeground
+        } else {
+            JBUI.CurrentTheme.Label.disabledForeground(false)
+        }
+        repaint()
     }
 
     override fun paintComponent(g: Graphics) {
@@ -138,70 +139,81 @@ abstract class HeaderTag(val tagDetails: HeaderTagDetails, private val selectabl
 
         add(label)
         add(closeButton)
-        if (selectable) {
-            addMouseListener(object : MouseAdapter() {
-                override fun mousePressed(e: MouseEvent) {
-                    select()
-                    repaint()
+        addMouseListener(object : MouseAdapter() {
+            override fun mousePressed(e: MouseEvent) {
+                if (!selectable) {
+                    return
                 }
-            })
-        }
+
+                onSelect(tagDetails)
+            }
+        })
     }
 }
 
 abstract class SelectedFileHeaderTag(
     private val project: Project,
-    var virtualFile: VirtualFile? = project.getSelectedEditorFile()
+    var virtualFile: VirtualFile? = getSelectedEditorFile(project)
 ) : HeaderTag(
-    HeaderTagDetails(
-        virtualFile?.name ?: "",
-        virtualFile?.fileType?.icon
-    )
+    if (virtualFile == null) HeaderTagDetails("")
+    else FileTagDetails(virtualFile)
 ) {
 
     init {
-        isVisible = project.getSelectedEditorFile() != null
+        isVisible = getSelectedEditorFile(project) != null
     }
 
     override fun onSelect(tagDetails: HeaderTagDetails) {
         if (tagDetails is FileTagDetails) {
-            project.service<FileEditorManager>().openFile(tagDetails.virtualFile)
+            if (tagDetails.selected) {
+                project.service<FileEditorManager>().openFile(tagDetails.virtualFile)
+            }
+            tagDetails.selected = !tagDetails.selected
+
+            update(tagDetails.virtualFile.name, tagDetails.virtualFile.fileType.icon)
         }
     }
 
     fun update(virtualFile: VirtualFile) {
-        this.virtualFile = virtualFile
-        isVisible = true
-        updateLabel(virtualFile.name, virtualFile.fileType.icon)
+        tagDetails = FileTagDetails(virtualFile)
+
+        runInEdt {
+            isVisible = true
+            update(virtualFile.name, virtualFile.fileType.icon)
+        }
     }
 }
 
-class SelectionHeaderTag(
-    private val project: Project,
-    var selectedEditor: Editor? = project.getSelectedEditor()
-) : HeaderTag(
-    SelectionTagDetails(
-        selectedEditor?.virtualFile,
-        selectedEditor?.selectionModel,
-        selectedEditor?.selectionModel?.selectedText
-    ),
+fun getDefaultSelectionTagDetails(project: Project): HeaderTagDetails {
+    val editor = getSelectedEditor(project)
+    val selectionModel = editor?.selectionModel
+    return if (selectionModel?.hasSelection() == true) {
+        SelectionTagDetails(editor.virtualFile, selectionModel)
+    } else {
+        EmptyTagDetails()
+    }
+}
+
+class SelectionHeaderTag(project: Project) : HeaderTag(
+    getDefaultSelectionTagDetails(project),
     false
 ) {
 
     init {
-        isVisible = selectedEditor?.selectionModel?.hasSelection() ?: false
+        isVisible = tagDetails !is EmptyTagDetails
     }
 
     override fun onSelect(tagDetails: HeaderTagDetails) {
     }
 
     override fun onClose() {
-        selectedEditor?.selectionModel?.removeSelection()
+        (tagDetails as? SelectionTagDetails)?.selectionModel?.removeSelection()
     }
 
     fun update(virtualFile: VirtualFile, selectionModel: SelectionModel) {
+        tagDetails = SelectionTagDetails(virtualFile, selectionModel)
         isVisible = selectionModel.hasSelection()
-        updateLabel(
+        update(
             "${virtualFile.name}:${selectionModel.selectionStart}-${selectionModel.selectionEnd}",
             virtualFile.fileType.icon
         )
@@ -209,11 +221,3 @@ class SelectionHeaderTag(
 }
 
 fun Icon.scale() = IconUtil.scale(this, null, 0.65f)
-
-fun Project.getSelectedEditorFile(): VirtualFile? {
-    return this.getSelectedEditor()?.virtualFile
-}
-
-fun Project.getSelectedEditor(): Editor? {
-    return EditorUtil.getSelectedEditor(this)
-}

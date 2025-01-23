@@ -308,9 +308,7 @@ public class ChatToolWindowTabPanel implements Disposable {
   }
 
   private Unit handleSubmit(String text, List<? extends HeaderTagDetails> appliedTags) {
-    var messageBuilder = new MessageBuilder(project, text)
-        .withSelectedEditorContent()
-        .withInlays(appliedTags);
+    var messageBuilder = new MessageBuilder(project, text).withInlays(appliedTags);
 
     List<ReferencedFile> referencedFiles = getReferencedFiles();
     if (!referencedFiles.isEmpty()) {

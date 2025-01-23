@@ -116,7 +116,7 @@ class UserInputPanel(
     }
 
     fun addSelection(editorFile: VirtualFile, selectionModel: SelectionModel) {
-        addTag(SelectionTagDetails(editorFile, selectionModel, selectionModel.selectedText))
+        addTag(SelectionTagDetails(editorFile, selectionModel))
         promptTextField.requestFocusInWindow()
         selectionModel.removeSelection()
     }

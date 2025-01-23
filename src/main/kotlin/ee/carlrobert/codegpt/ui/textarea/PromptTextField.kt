@@ -69,7 +69,6 @@ class PromptTextField(
     }
 
     override fun dispose() {
-        clear()
         suggestionsPopupManager.hidePopup()
     }
 
