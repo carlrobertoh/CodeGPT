@@ -20,7 +20,7 @@ import ee.carlrobert.codegpt.settings.service.ServiceType
 import ee.carlrobert.codegpt.ui.AddDocumentationDialog
 import ee.carlrobert.codegpt.ui.DocumentationDetails
 import ee.carlrobert.codegpt.ui.textarea.UserInputPanel
-import ee.carlrobert.codegpt.ui.textarea.header.*
+import ee.carlrobert.codegpt.ui.textarea.header.tag.*
 import git4idea.GitCommit
 import javax.swing.Icon
 

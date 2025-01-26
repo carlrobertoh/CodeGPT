@@ -12,8 +12,6 @@ import com.intellij.openapi.util.io.FileUtil.createDirectory
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileFilter
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings.getLlamaModelsPath
-import ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowContentManager
-import ee.carlrobert.codegpt.ui.textarea.header.FileTagDetails
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
