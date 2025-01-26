@@ -35,10 +35,10 @@ import ee.carlrobert.codegpt.toolwindow.ui.ResponseMessagePanel;
 import ee.carlrobert.codegpt.toolwindow.ui.UserMessagePanel;
 import ee.carlrobert.codegpt.ui.OverlayUtil;
 import ee.carlrobert.codegpt.ui.textarea.UserInputPanel;
-import ee.carlrobert.codegpt.ui.textarea.header.FileTagDetails;
-import ee.carlrobert.codegpt.ui.textarea.header.GitCommitTagDetails;
-import ee.carlrobert.codegpt.ui.textarea.header.HeaderTagDetails;
-import ee.carlrobert.codegpt.ui.textarea.header.PersonaTagDetails;
+import ee.carlrobert.codegpt.ui.textarea.header.tag.FileTagDetails;
+import ee.carlrobert.codegpt.ui.textarea.header.tag.GitCommitTagDetails;
+import ee.carlrobert.codegpt.ui.textarea.header.tag.PersonaTagDetails;
+import ee.carlrobert.codegpt.ui.textarea.header.tag.TagDetails;
 import ee.carlrobert.codegpt.util.EditorUtil;
 import ee.carlrobert.codegpt.util.file.FileUtil;
 import git4idea.GitCommit;
@@ -129,7 +129,7 @@ public class ChatToolWindowTabPanel implements Disposable {
     userInputPanel.addCommitReferences(gitCommits);
   }
 
-  public List<HeaderTagDetails> getSelectedTags() {
+  public List<TagDetails> getSelectedTags() {
     return userInputPanel.getSelectedTags();
   }
 
@@ -156,15 +156,15 @@ public class ChatToolWindowTabPanel implements Disposable {
     return getReferencedFiles(userInputPanel.getSelectedTags());
   }
 
-  private List<ReferencedFile> getReferencedFiles(List<? extends HeaderTagDetails> tags) {
+  private List<ReferencedFile> getReferencedFiles(List<? extends TagDetails> tags) {
     return tags.stream()
         .filter(FileTagDetails.class::isInstance)
         .map(it -> ReferencedFile.from(((FileTagDetails) it).getVirtualFile()))
         .toList();
   }
 
-  private <T extends HeaderTagDetails> Optional<T> findTagOfType(
-      List<? extends HeaderTagDetails> tags,
+  private <T extends TagDetails> Optional<T> findTagOfType(
+      List<? extends TagDetails> tags,
       Class<T> tagClass) {
     return tags.stream()
         .filter(tagClass::isInstance)
@@ -308,7 +308,7 @@ public class ChatToolWindowTabPanel implements Disposable {
         .executeOnPooledThread(() -> requestHandler.call(callParameters));
   }
 
-  private Unit handleSubmit(String text, List<? extends HeaderTagDetails> appliedTags) {
+  private Unit handleSubmit(String text, List<? extends TagDetails> appliedTags) {
     var messageBuilder = new MessageBuilder(project, text).withInlays(appliedTags);
 
     List<ReferencedFile> referencedFiles = getReferencedFiles();

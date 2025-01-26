@@ -15,10 +15,10 @@ import ee.carlrobert.codegpt.settings.prompts.PersonaDetails
 import ee.carlrobert.codegpt.settings.prompts.PromptsSettings
 import ee.carlrobert.codegpt.settings.service.ServiceType
 import ee.carlrobert.codegpt.ui.DocumentationDetails
-import ee.carlrobert.codegpt.ui.textarea.header.DocumentationTagDetails
-import ee.carlrobert.codegpt.ui.textarea.header.FileTagDetails
-import ee.carlrobert.codegpt.ui.textarea.header.PersonaTagDetails
-import ee.carlrobert.codegpt.ui.textarea.header.TagUtil
+import ee.carlrobert.codegpt.ui.textarea.header.tag.DocumentationTagDetails
+import ee.carlrobert.codegpt.ui.textarea.header.tag.FileTagDetails
+import ee.carlrobert.codegpt.ui.textarea.header.tag.PersonaTagDetails
+import ee.carlrobert.codegpt.ui.textarea.header.tag.TagUtil
 import ee.carlrobert.codegpt.util.GitUtil
 import ee.carlrobert.codegpt.util.file.FileUtil
 import kotlinx.coroutines.Dispatchers

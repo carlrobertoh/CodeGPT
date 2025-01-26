@@ -1,11 +1,11 @@
-package ee.carlrobert.codegpt.ui.textarea.header
+package ee.carlrobert.codegpt.ui.textarea.header.tag
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowContentManager
 
 object TagUtil {
-    fun <T : HeaderTagDetails> isTagTypePresent(
+    fun <T : TagDetails> isTagTypePresent(
         project: Project,
         tagClass: Class<T>
     ): Boolean {
@@ -16,7 +16,7 @@ object TagUtil {
             .any { tagClass.isInstance(it) }
     }
 
-    fun <T : HeaderTagDetails> getExistingTags(
+    fun <T : TagDetails> getExistingTags(
         project: Project,
         tagClass: Class<T>
     ): List<T> {

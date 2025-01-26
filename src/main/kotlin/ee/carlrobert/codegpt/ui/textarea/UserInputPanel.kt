@@ -33,10 +33,10 @@ import ee.carlrobert.codegpt.toolwindow.chat.ChatToolWindowContentManager
 import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.ModelComboBoxAction
 import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.TotalTokensPanel
 import ee.carlrobert.codegpt.ui.IconActionButton
-import ee.carlrobert.codegpt.ui.textarea.header.GitCommitTagDetails
-import ee.carlrobert.codegpt.ui.textarea.header.HeaderTagDetails
-import ee.carlrobert.codegpt.ui.textarea.header.SelectionTagDetails
 import ee.carlrobert.codegpt.ui.textarea.header.UserInputHeaderPanel
+import ee.carlrobert.codegpt.ui.textarea.header.tag.GitCommitTagDetails
+import ee.carlrobert.codegpt.ui.textarea.header.tag.TagDetails
+import ee.carlrobert.codegpt.ui.textarea.header.tag.SelectionTagDetails
 import ee.carlrobert.codegpt.ui.textarea.suggestion.SuggestionsPopupManager
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel
 import git4idea.GitCommit
@@ -51,7 +51,7 @@ class UserInputPanel(
     private val conversation: Conversation,
     private val totalTokensPanel: TotalTokensPanel,
     parentDisposable: Disposable,
-    private val onSubmit: (String, List<HeaderTagDetails>) -> Unit,
+    private val onSubmit: (String, List<TagDetails>) -> Unit,
     private val onStop: () -> Unit
 ) : JPanel(BorderLayout()) {
 
@@ -60,10 +60,7 @@ class UserInputPanel(
     }
 
     private val suggestionsPopupManager = SuggestionsPopupManager(project, this)
-    private val userInputHeaderPanel = UserInputHeaderPanel(
-        project,
-        suggestionsPopupManager
-    )
+    private val userInputHeaderPanel = UserInputHeaderPanel(project, suggestionsPopupManager)
     private val promptTextField =
         PromptTextField(project, suggestionsPopupManager, ::updateUserTokens) {
             handleSubmit(it, userInputHeaderPanel.getSelectedTags())
@@ -110,7 +107,7 @@ class UserInputPanel(
         Disposer.register(parentDisposable, promptTextField)
     }
 
-    fun getSelectedTags(): List<HeaderTagDetails> {
+    fun getSelectedTags(): List<TagDetails> {
         return userInputHeaderPanel.getSelectedTags()
     }
 
@@ -143,7 +140,7 @@ class UserInputPanel(
         }
     }
 
-    fun addTag(tagDetails: HeaderTagDetails) {
+    fun addTag(tagDetails: TagDetails) {
         userInputHeaderPanel.addTag(tagDetails)
         val text = promptTextField.text
         if (text.isNotEmpty() && text.last() == '@') {
@@ -194,7 +191,7 @@ class UserInputPanel(
 
     override fun getInsets(): Insets = JBUI.insets(4)
 
-    private fun handleSubmit(text: String, appliedTags: List<HeaderTagDetails> = emptyList()) {
+    private fun handleSubmit(text: String, appliedTags: List<TagDetails> = emptyList()) {
         if (text.isNotEmpty() && submitButton.isEnabled) {
             onSubmit(text, appliedTags)
             promptTextField.clear()
@@ -269,65 +266,5 @@ class UserInputPanel(
 
             else -> false
         }
-    }
-}
-
-class WrapLayout(align: Int, hgap: Int, vgap: Int) : FlowLayout(align, hgap, vgap) {
-
-    override fun preferredLayoutSize(target: Container): Dimension {
-        return layoutSize(target, true)
-    }
-
-    override fun minimumLayoutSize(target: Container): Dimension {
-        return layoutSize(target, false)
-    }
-
-    private fun layoutSize(target: Container, preferred: Boolean): Dimension {
-        synchronized(target.treeLock) {
-            val targetWidth = target.width
-            var width = targetWidth
-            if (targetWidth == 0) {
-                width = Int.MAX_VALUE
-            }
-
-            val insets = target.insets
-            val horizontalInsetsAndGap = insets.left + insets.right + (hgap * 2)
-            val maxWidth = width - horizontalInsetsAndGap
-
-            val dim = Dimension(0, 0)
-            var rowWidth = 0
-            var rowHeight = 0
-
-            for (i in 0 until target.componentCount) {
-                val m = target.getComponent(i)
-                if (m.isVisible) {
-                    val d = if (preferred) m.preferredSize else m.minimumSize
-                    if (rowWidth + d.width > maxWidth) {
-                        addRow(dim, rowWidth, rowHeight)
-                        rowWidth = 0
-                        rowHeight = 0
-                    }
-                    if (rowWidth != 0) {
-                        rowWidth += hgap
-                    }
-                    rowWidth += d.width
-                    rowHeight = maxOf(rowHeight, d.height)
-                }
-            }
-            addRow(dim, rowWidth, rowHeight)
-
-            dim.width += horizontalInsetsAndGap
-            dim.height += insets.top + insets.bottom + vgap * 2
-
-            return dim
-        }
-    }
-
-    private fun addRow(dim: Dimension, rowWidth: Int, rowHeight: Int) {
-        dim.width = maxOf(dim.width, rowWidth)
-        if (dim.height > 0) {
-            dim.height += vgap
-        }
-        dim.height += rowHeight
     }
 }
