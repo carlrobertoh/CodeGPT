@@ -64,6 +64,20 @@ public enum LlamaModel {
           HuggingFaceModel.DEEPSEEK_CODER_33B_Q3,
           HuggingFaceModel.DEEPSEEK_CODER_33B_Q4,
           HuggingFaceModel.DEEPSEEK_CODER_33B_Q5)),
+  DEEPSEEK_R1(
+      "Deepseek R1",
+      "DeepSeek-R1-Zero, a model trained via large-scale reinforcement learning (RL) "
+          + "without supervised fine-tuning (SFT) as a preliminary step, demonstrated remarkable "
+          + "performance on reasoning. DeepSeek-R1 achieves performance comparable to OpenAI-o1 "
+          + "across math, code, and reasoning tasks.",
+      PromptTemplate.DEEPSEEK_R1,
+      InfillPromptTemplate.DEEPSEEK_CODER,
+      List.of(
+          HuggingFaceModel.DEEPSEEK_R1_1_5B_Q6,
+          HuggingFaceModel.DEEPSEEK_R1_7B_Q4,
+          HuggingFaceModel.DEEPSEEK_R1_7B_Q6,
+          HuggingFaceModel.DEEPSEEK_R1_14B_Q4,
+          HuggingFaceModel.DEEPSEEK_R1_14B_Q6)),
   PHIND_CODE_LLAMA(
       "Phind Code Llama",
       "This model is fine-tuned from Phind-CodeLlama-34B-v1 on an additional 1.5B tokens "
