@@ -226,7 +226,6 @@ public class ChatToolWindowTabPanel implements Disposable {
     panel.addCopyAction(() -> CopyAction.copyToClipboard(message.getResponse()));
     panel.addContent(new ChatMessageResponseBody(
         project,
-        true,
         false,
         message.isWebSearchIncluded(),
         fileContextIncluded || message.getDocumentationDetails() != null,

@@ -219,8 +219,16 @@ class OpenAIRequestFactory : CompletionRequestFactory {
                 } else {
                     messages.add(OpenAIChatCompletionStandardMessage("user", prevMessage.prompt))
                 }
+
+                var response = prevMessage.response ?: ""
+                if (response.startsWith("<think>")) {
+                    response = response
+                        .replace("(?s)<think>.*?</think>".toRegex(), "")
+                        .trim { it <= ' ' }
+                }
+
                 messages.add(
-                    OpenAIChatCompletionStandardMessage("assistant", prevMessage.response)
+                    OpenAIChatCompletionStandardMessage("assistant", response)
                 )
             }
 
