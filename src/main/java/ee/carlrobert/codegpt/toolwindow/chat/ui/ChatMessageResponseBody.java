@@ -37,17 +37,18 @@ import ee.carlrobert.codegpt.events.WebSearchEventDetails;
 import ee.carlrobert.codegpt.settings.GeneralSettingsConfigurable;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.toolwindow.chat.StreamParser;
+import ee.carlrobert.codegpt.toolwindow.chat.ThinkingOutputParser;
 import ee.carlrobert.codegpt.toolwindow.chat.editor.ResponseEditorPanel;
 import ee.carlrobert.codegpt.toolwindow.chat.editor.actions.CopyAction;
 import ee.carlrobert.codegpt.toolwindow.ui.ResponseBodyProgressPanel;
 import ee.carlrobert.codegpt.toolwindow.ui.WebpageList;
-import ee.carlrobert.codegpt.ui.OverlayUtil;
+import ee.carlrobert.codegpt.ui.ThoughtProcessPanel;
 import ee.carlrobert.codegpt.ui.UIUtil;
 import ee.carlrobert.codegpt.util.EditorUtil;
 import ee.carlrobert.codegpt.util.MarkdownUtil;
 import java.awt.BorderLayout;
-import java.awt.event.MouseEvent;
 import java.util.Objects;
+import java.util.stream.Stream;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JEditorPane;
@@ -62,6 +63,7 @@ public class ChatMessageResponseBody extends JPanel {
   private final Project project;
   private final Disposable parentDisposable;
   private final StreamParser streamParser;
+  private final ThinkingOutputParser thinkingOutputParser;
   private final boolean readOnly;
   private final DefaultListModel<WebSearchEventDetails> webpageListModel = new DefaultListModel<>();
   private final WebpageList webpageList = new WebpageList(webpageListModel);
@@ -71,12 +73,11 @@ public class ChatMessageResponseBody extends JPanel {
   private JPanel webpageListPanel;
 
   public ChatMessageResponseBody(Project project, Disposable parentDisposable) {
-    this(project, false, false, false, false, parentDisposable);
+    this(project, false, false, false, parentDisposable);
   }
 
   public ChatMessageResponseBody(
       Project project,
-      boolean withGhostText,
       boolean readOnly,
       boolean webSearchIncluded,
       boolean withProgress,
@@ -84,6 +85,7 @@ public class ChatMessageResponseBody extends JPanel {
     this.project = project;
     this.parentDisposable = parentDisposable;
     this.streamParser = new StreamParser();
+    this.thinkingOutputParser = new ThinkingOutputParser();
     this.readOnly = readOnly;
     setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
     setOpaque(false);
@@ -95,12 +97,6 @@ public class ChatMessageResponseBody extends JPanel {
     if (webSearchIncluded) {
       webpageListPanel = createWebpageListPanel(webpageList);
       add(webpageListPanel);
-    }
-
-    if (withGhostText) {
-      prepareProcessingText(!readOnly);
-      currentlyProcessedTextPane.setText(
-          "<html><p style=\"margin-top: 4px; margin-bottom: 8px;\">&#8205;</p></html>");
     }
   }
 
@@ -119,6 +115,29 @@ public class ChatMessageResponseBody extends JPanel {
   }
 
   public void updateMessage(String partialMessage) {
+    thinkingOutputParser.processChunk(partialMessage);
+
+    var thoughtProcessPanel = (ThoughtProcessPanel) Stream.of(getComponents())
+        .filter(it -> it instanceof ThoughtProcessPanel)
+        .findFirst()
+        .orElse(null);
+
+    if (thinkingOutputParser.isThinking()) {
+      progressPanel.setVisible(false);
+
+      if (thoughtProcessPanel == null) {
+        thoughtProcessPanel = new ThoughtProcessPanel();
+        add(thoughtProcessPanel);
+      } else {
+        thoughtProcessPanel.updateText(thinkingOutputParser.getThoughtProcess());
+      }
+      return;
+    }
+
+    if (thoughtProcessPanel != null && !thoughtProcessPanel.getFinished()) {
+      thoughtProcessPanel.setFinished();
+    }
+
     for (var item : streamParser.parse(partialMessage)) {
       processResponse(item.response(), CODE.equals(item.type()), true);
     }
@@ -238,6 +257,19 @@ public class ChatMessageResponseBody extends JPanel {
     } else {
       processText(markdownInput, caretVisible);
     }
+  }
+
+  private void processThinkingOutput(String thoughtProcess) {
+    Stream.of(getComponents())
+        .filter(it -> it instanceof ThoughtProcessPanel)
+        .findFirst()
+        .ifPresentOrElse(thoughtProcessPanel -> {
+          ((ThoughtProcessPanel) thoughtProcessPanel).updateText(thoughtProcess);
+        }, () -> {
+          add(new ThoughtProcessPanel());
+          revalidate();
+          repaint();
+        });
   }
 
   private void processCode(String markdownCode) {

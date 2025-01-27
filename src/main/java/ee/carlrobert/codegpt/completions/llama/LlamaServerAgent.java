@@ -33,7 +33,8 @@ public final class LlamaServerAgent implements Disposable {
 
   private static final Logger LOG = Logger.getInstance(LlamaServerAgent.class);
 
-  private @Nullable OSProcessHandler makeProcessHandler;
+  private @Nullable OSProcessHandler makeSetupProcessHandler;
+  private @Nullable OSProcessHandler makeBuildProcessHandler;
   private @Nullable OSProcessHandler startServerProcessHandler;
   private ServerProgressPanel activeServerProgressPanel;
   private boolean stoppedByUser;
@@ -49,11 +50,44 @@ public final class LlamaServerAgent implements Disposable {
         stoppedByUser = false;
         serverProgressPanel.displayText(
             CodeGPTBundle.get("llamaServerAgent.buildingProject.description"));
-        makeProcessHandler = new OSProcessHandler(
-            getMakeCommandLine(params));
-        makeProcessHandler.addProcessListener(
-            getMakeProcessListener(params, onSuccess, onServerStopped));
-        makeProcessHandler.startNotify();
+
+        makeSetupProcessHandler = new OSProcessHandler(getCMakeSetupCommandLine(params));
+        makeSetupProcessHandler.addProcessListener(new ProcessAdapter() {
+          private final List<String> errorLines = new CopyOnWriteArrayList<>();
+
+          @Override
+          public void onTextAvailable(@NotNull ProcessEvent event, @NotNull Key outputType) {
+            if (ProcessOutputType.isStderr(outputType)) {
+              errorLines.add(event.getText());
+              return;
+            }
+            LOG.info(event.getText());
+          }
+
+          @Override
+          public void processTerminated(@NotNull ProcessEvent event) {
+            int exitCode = event.getExitCode();
+            LOG.info(format("CMake setup exited with code %d", exitCode));
+            if (stoppedByUser) {
+              onServerStopped.accept(activeServerProgressPanel);
+              return;
+            }
+            if (exitCode != 0) {
+              showServerError(String.join(",", errorLines), onServerStopped);
+              return;
+            }
+
+            try {
+              makeBuildProcessHandler = new OSProcessHandler(getCMakeBuildCommandLine(params));
+              makeBuildProcessHandler.addProcessListener(
+                  getMakeProcessListener(params, onSuccess, onServerStopped));
+              makeBuildProcessHandler.startNotify();
+            } catch (ExecutionException e) {
+              showServerError(e.getMessage(), onServerStopped);
+            }
+          }
+        });
+        makeSetupProcessHandler.startNotify();
       } catch (ExecutionException e) {
         showServerError(e.getMessage(), onServerStopped);
       }
@@ -62,8 +96,8 @@ public final class LlamaServerAgent implements Disposable {
 
   public void stopAgent() {
     stoppedByUser = true;
-    if (makeProcessHandler != null) {
-      makeProcessHandler.destroyProcess();
+    if (makeSetupProcessHandler != null) {
+      makeSetupProcessHandler.destroyProcess();
     }
     if (startServerProcessHandler != null) {
       startServerProcessHandler.destroyProcess();
@@ -71,9 +105,9 @@ public final class LlamaServerAgent implements Disposable {
   }
 
   public boolean isServerRunning() {
-    return (makeProcessHandler != null
-        && makeProcessHandler.isStartNotified()
-        && !makeProcessHandler.isProcessTerminated())
+    return (makeSetupProcessHandler != null
+        && makeSetupProcessHandler.isStartNotified()
+        && !makeSetupProcessHandler.isProcessTerminated())
         || (startServerProcessHandler != null
         && startServerProcessHandler.isStartNotified()
         && !startServerProcessHandler.isProcessTerminated());
@@ -147,25 +181,14 @@ public final class LlamaServerAgent implements Disposable {
 
       @Override
       public void onTextAvailable(@NotNull ProcessEvent event, @NotNull Key outputType) {
-        if (ProcessOutputType.isStderr(outputType)) {
-          errorLines.add(event.getText());
-        }
+        LOG.info(event.getText());
 
-        if (ProcessOutputType.isStdout(outputType)) {
-          LOG.info(event.getText());
+        // TODO: Use proper successful boot up validation
+        if (event.getText().contains("server is listening")) {
+          LOG.info("Server up and running!");
 
-          try {
-            var serverMessage = objectMapper.readValue(event.getText(), LlamaServerMessage.class);
-            // hack
-            if ("HTTP server listening".equals(serverMessage.msg())) {
-              LOG.info("Server up and running!");
-
-              LlamaSettings.getCurrentState().setServerPort(port);
-              onSuccess.run();
-            }
-          } catch (Exception ignore) {
-            // ignore
-          }
+          LlamaSettings.getCurrentState().setServerPort(port);
+          onSuccess.run();
         }
       }
     };
@@ -177,20 +200,32 @@ public final class LlamaServerAgent implements Disposable {
     OverlayUtil.showClosableBalloon(errorText, MessageType.ERROR, activeServerProgressPanel);
   }
 
-  private static GeneralCommandLine getMakeCommandLine(LlamaServerStartupParams params) {
-    GeneralCommandLine commandLine = new GeneralCommandLine().withCharset(StandardCharsets.UTF_8);
-    commandLine.setExePath("make");
-    commandLine.withWorkDirectory(CodeGPTPlugin.getLlamaSourcePath());
-    commandLine.addParameters("-j");
-    commandLine.addParameters(params.additionalBuildParameters());
-    commandLine.withEnvironment(params.additionalEnvironmentVariables());
-    commandLine.setRedirectErrorStream(false);
-    return commandLine;
+  private static GeneralCommandLine getCMakeSetupCommandLine(LlamaServerStartupParams params) {
+    GeneralCommandLine cmakeSetupCommand = new GeneralCommandLine().withCharset(
+        StandardCharsets.UTF_8);
+    cmakeSetupCommand.setExePath("cmake");
+    cmakeSetupCommand.withWorkDirectory(CodeGPTPlugin.getLlamaSourcePath());
+    cmakeSetupCommand.addParameters("-B", "build");
+    cmakeSetupCommand.withEnvironment(params.additionalEnvironmentVariables());
+    cmakeSetupCommand.setRedirectErrorStream(false);
+    return cmakeSetupCommand;
+  }
+
+  private static GeneralCommandLine getCMakeBuildCommandLine(LlamaServerStartupParams params) {
+    GeneralCommandLine cmakeBuildCommand = new GeneralCommandLine().withCharset(
+        StandardCharsets.UTF_8);
+    cmakeBuildCommand.setExePath("cmake");
+    cmakeBuildCommand.withWorkDirectory(CodeGPTPlugin.getLlamaSourcePath());
+    cmakeBuildCommand.addParameters("--build", "build", "--config", "Release", "-t", "llama-server",
+        "-j", "4");
+    cmakeBuildCommand.withEnvironment(params.additionalEnvironmentVariables());
+    cmakeBuildCommand.setRedirectErrorStream(false);
+    return cmakeBuildCommand;
   }
 
   private GeneralCommandLine getServerCommandLine(LlamaServerStartupParams params) {
     GeneralCommandLine commandLine = new GeneralCommandLine().withCharset(StandardCharsets.UTF_8);
-    commandLine.setExePath("./server");
+    commandLine.setExePath("./build/bin/llama-server");
     commandLine.withWorkDirectory(CodeGPTPlugin.getLlamaSourcePath());
     commandLine.addParameters(
         "-m", params.modelPath(),
@@ -210,8 +245,8 @@ public final class LlamaServerAgent implements Disposable {
 
   @Override
   public void dispose() {
-    if (makeProcessHandler != null && !makeProcessHandler.isProcessTerminated()) {
-      makeProcessHandler.destroyProcess();
+    if (makeSetupProcessHandler != null && !makeSetupProcessHandler.isProcessTerminated()) {
+      makeSetupProcessHandler.destroyProcess();
     }
     if (startServerProcessHandler != null && !startServerProcessHandler.isProcessTerminated()) {
       startServerProcessHandler.destroyProcess();

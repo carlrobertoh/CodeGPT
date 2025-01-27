@@ -46,6 +46,17 @@ public enum HuggingFaceModel {
   DEEPSEEK_CODER_33B_Q5(33, 5, "deepseek-coder-33b-instruct-GGUF",
           "deepseek-coder-33b-instruct.Q5_K_M.gguf", 23.5),
 
+  DEEPSEEK_R1_1_5B_Q6(1, 6, "DeepSeek-R1-Distill-Qwen-1.5B-GGUF",
+      "DeepSeek-R1-Distill-Qwen-1.5B-Q6_K.gguf", "bartowski", 1.89),
+  DEEPSEEK_R1_7B_Q4(7, 4, "DeepSeek-R1-Distill-Qwen-7B-GGUF",
+      "DeepSeek-R1-Distill-Qwen-7B-Q4_K_M.gguf", "bartowski", 4.68),
+  DEEPSEEK_R1_7B_Q6(7, 6, "DeepSeek-R1-Distill-Qwen-7B-GGUF",
+      "DeepSeek-R1-Distill-Qwen-7B-Q6_K.gguf", "bartowski", 6.25),
+  DEEPSEEK_R1_14B_Q4(14, 4, "DeepSeek-R1-Distill-Qwen-14B-GGUF",
+      "DeepSeek-R1-Distill-Qwen-14B-Q4_K_M.gguf", "bartowski", 8.99),
+  DEEPSEEK_R1_14B_Q6(14, 6, "DeepSeek-R1-Distill-Qwen-14B-GGUF",
+      "DeepSeek-R1-Distill-Qwen-14B-Q6_K.gguf", "bartowski", 12.12),
+
   PHIND_CODE_LLAMA_34B_Q3(34, 3, "Phind-CodeLlama-34B-v2-GGUF",
           "phind-codellama-34b-v2.Q3_K_M.gguf"),
   PHIND_CODE_LLAMA_34B_Q4(34, 4, "Phind-CodeLlama-34B-v2-GGUF",
