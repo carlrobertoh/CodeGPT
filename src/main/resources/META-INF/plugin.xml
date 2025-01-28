@@ -182,7 +182,6 @@
             <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift I" replace-all="true"/>
 
             <add-to-group group-id="action.editor.group.EditorActionGroup" anchor="after" relative-to-action="CodeGPT.NewChat"/>
-            <add-to-group group-id="CodeGPT.FloatingCodeToolbarMenuRootGroup" anchor="after" relative-to-action="CodeGPT.FloatingMenuEditCodeAction"/>
         </action>
 
         <action
