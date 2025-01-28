@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- DeepSeek V3 and R1 models (CodeGPT, Ollama and llama.cpp)
+- New 'Include Current Changes' chat action
+
+### Improved
+
+- Chat text input actions UI/UX
+
 ## [2.15.2-241.1] - 2025-01-13
 
 ### Added
