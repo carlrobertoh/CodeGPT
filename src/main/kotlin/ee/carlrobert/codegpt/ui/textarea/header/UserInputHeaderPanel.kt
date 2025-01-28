@@ -52,7 +52,7 @@ class UserInputHeaderPanel(
     private val emptyText = JBLabel("No context included").apply {
         foreground = JBUI.CurrentTheme.Label.disabledForeground()
         font = JBUI.Fonts.smallFont()
-        border = JBUI.Borders.empty(4, 4, 4, 0)
+        border = JBUI.Borders.empty(3, 4)
         isVisible = getSelectedEditor(project) == null
     }
     private val selectionTagPanel = SelectionTagPanel(project)
