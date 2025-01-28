@@ -34,7 +34,9 @@ import ee.carlrobert.codegpt.events.AnalysisFailedEventDetails;
 import ee.carlrobert.codegpt.events.CodeGPTEvent;
 import ee.carlrobert.codegpt.events.EventDetails;
 import ee.carlrobert.codegpt.events.WebSearchEventDetails;
+import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.GeneralSettingsConfigurable;
+import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.toolwindow.chat.StreamParser;
 import ee.carlrobert.codegpt.toolwindow.chat.ThinkingOutputParser;
@@ -90,13 +92,15 @@ public class ChatMessageResponseBody extends JPanel {
     setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
     setOpaque(false);
 
-    if (withProgress) {
-      add(progressPanel);
-    }
+    if (GeneralSettings.getSelectedService() == ServiceType.CODEGPT) {
+      if (withProgress) {
+        add(progressPanel);
+      }
 
-    if (webSearchIncluded) {
-      webpageListPanel = createWebpageListPanel(webpageList);
-      add(webpageListPanel);
+      if (webSearchIncluded) {
+        webpageListPanel = createWebpageListPanel(webpageList);
+        add(webpageListPanel);
+      }
     }
   }
 
@@ -115,27 +119,12 @@ public class ChatMessageResponseBody extends JPanel {
   }
 
   public void updateMessage(String partialMessage) {
-    thinkingOutputParser.processChunk(partialMessage);
-
-    var thoughtProcessPanel = (ThoughtProcessPanel) Stream.of(getComponents())
-        .filter(it -> it instanceof ThoughtProcessPanel)
-        .findFirst()
-        .orElse(null);
-
-    if (thinkingOutputParser.isThinking()) {
-      progressPanel.setVisible(false);
-
-      if (thoughtProcessPanel == null) {
-        thoughtProcessPanel = new ThoughtProcessPanel();
-        add(thoughtProcessPanel);
-      } else {
-        thoughtProcessPanel.updateText(thinkingOutputParser.getThoughtProcess());
-      }
+    if (partialMessage.isEmpty()) {
       return;
     }
 
-    if (thoughtProcessPanel != null && !thoughtProcessPanel.getFinished()) {
-      thoughtProcessPanel.setFinished();
+    if (handleThinking(partialMessage)) {
+      return;
     }
 
     for (var item : streamParser.parse(partialMessage)) {
@@ -251,25 +240,43 @@ public class ChatMessageResponseBody extends JPanel {
     revalidate();
   }
 
+  private boolean handleThinking(String partialMessage) {
+    thinkingOutputParser.processChunk(partialMessage);
+
+    var thoughtProcessPanel = getExistingThoughtProcessPanel();
+
+    if (thinkingOutputParser.isThinking()) {
+      progressPanel.setVisible(false);
+
+      if (thoughtProcessPanel == null) {
+        thoughtProcessPanel = new ThoughtProcessPanel();
+        add(thoughtProcessPanel);
+      } else {
+        thoughtProcessPanel.updateText(thinkingOutputParser.getThoughtProcess());
+      }
+      return true;
+    }
+
+    if (thoughtProcessPanel != null && !thoughtProcessPanel.getFinished()) {
+      thoughtProcessPanel.setFinished();
+    }
+
+    return false;
+  }
+
+  private ThoughtProcessPanel getExistingThoughtProcessPanel() {
+    return (ThoughtProcessPanel) Stream.of(getComponents())
+        .filter(it -> it instanceof ThoughtProcessPanel)
+        .findFirst()
+        .orElse(null);
+  }
+
   private void processResponse(String markdownInput, boolean codeResponse, boolean caretVisible) {
     if (codeResponse) {
       processCode(markdownInput);
     } else {
       processText(markdownInput, caretVisible);
     }
-  }
-
-  private void processThinkingOutput(String thoughtProcess) {
-    Stream.of(getComponents())
-        .filter(it -> it instanceof ThoughtProcessPanel)
-        .findFirst()
-        .ifPresentOrElse(thoughtProcessPanel -> {
-          ((ThoughtProcessPanel) thoughtProcessPanel).updateText(thoughtProcess);
-        }, () -> {
-          add(new ThoughtProcessPanel());
-          revalidate();
-          repaint();
-        });
   }
 
   private void processCode(String markdownCode) {
