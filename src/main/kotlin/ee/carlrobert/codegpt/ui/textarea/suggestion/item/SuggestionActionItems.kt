@@ -1,13 +1,10 @@
 package ee.carlrobert.codegpt.ui.textarea.suggestion.item
 
 import com.intellij.icons.AllIcons
-import com.intellij.openapi.application.readAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.roots.ProjectFileIndex
-import com.intellij.openapi.vcs.changes.VcsIgnoreManager
 import com.intellij.openapi.vfs.VirtualFile
 import ee.carlrobert.codegpt.CodeGPTBundle
 import ee.carlrobert.codegpt.Icons
@@ -54,7 +51,7 @@ class FolderActionItem(val folder: VirtualFile) : SuggestionActionItem {
     override val displayName = folder.name
     override val icon = AllIcons.Nodes.Folder
 
-    override fun execute(project: Project, userInputPanel: UserInputPanel) {
+    override suspend fun execute(project: Project, userInputPanel: UserInputPanel) {
         userInputPanel.addTag(FolderTagDetails(folder))
     }
 }
@@ -116,7 +113,7 @@ class IncludeCurrentGitChangesActionItem : SuggestionActionItem {
         CodeGPTBundle.get("suggestionActionItem.includeCurrentChanges.displayName")
     override val icon: Icon? = null
 
-    override fun execute(project: Project, userInputPanel: UserInputPanel) {
+    override suspend fun execute(project: Project, userInputPanel: UserInputPanel) {
         userInputPanel.addTag(CurrentGitChangesTagDetails())
     }
 }
