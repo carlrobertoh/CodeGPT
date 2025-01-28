@@ -32,7 +32,7 @@ abstract class TagPanel(
 
     val id: UUID = tagDetails.id
 
-    private val label = createLabel(tagDetails)
+    private val label = TagLabel(tagDetails)
     private val closeButton = CloseButton {
         isVisible = true
         onClose()
@@ -59,30 +59,18 @@ abstract class TagPanel(
         } else {
             JBUI.CurrentTheme.Label.disabledForeground(false)
         }
+        revalidate()
+        repaint()
+    }
+
+    override fun getPreferredSize(): Dimension {
+        val size = super.getPreferredSize()
+        return Dimension(size.width, 20)
     }
 
     override fun paintComponent(g: Graphics) {
         super.paintComponent(g)
         PaintUtil.drawRoundedBackground(g, this, tagDetails.selected)
-    }
-
-    private fun createLabel(tagDetails: TagDetails): JBLabel {
-        return (if (tagDetails.icon == null) {
-            JBLabel(tagDetails.name)
-        } else {
-            JBLabel(
-                tagDetails.name,
-                IconUtil.scale(tagDetails.icon, null, 0.65f),
-                SwingUtilities.LEADING
-            )
-        }).apply {
-            foreground = if (tagDetails.selected) {
-                service<EditorColorsManager>().globalScheme.defaultForeground
-            } else {
-                JBUI.CurrentTheme.Label.disabledForeground(false)
-            }
-            font = JBUI.Fonts.miniFont()
-        }
     }
 
     private fun setupUI() {
@@ -101,6 +89,27 @@ abstract class TagPanel(
                 onSelect(tagDetails)
             }
         })
+    }
+
+    private class TagLabel(tagDetails: TagDetails) : JBLabel(tagDetails.name) {
+
+        init {
+            if (tagDetails.icon != null) {
+                icon = IconUtil.scale(tagDetails.icon, null, 0.65f)
+                horizontalAlignment = SwingUtilities.LEADING
+                foreground = if (tagDetails.selected) {
+                    service<EditorColorsManager>().globalScheme.defaultForeground
+                } else {
+                    JBUI.CurrentTheme.Label.disabledForeground(false)
+                }
+                font = JBUI.Fonts.miniFont()
+            }
+        }
+
+        override fun getPreferredSize(): Dimension {
+            val size = super.getPreferredSize()
+            return Dimension(size.width, 16)
+        }
     }
 
     private class CloseButton(onClose: () -> Unit) : JButton(Close) {
