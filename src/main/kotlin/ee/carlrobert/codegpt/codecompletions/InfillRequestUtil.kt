@@ -7,8 +7,10 @@ import com.intellij.refactoring.suggested.startOffset
 import ee.carlrobert.codegpt.EncodingManager
 import ee.carlrobert.codegpt.codecompletions.psi.CompletionContextService
 import ee.carlrobert.codegpt.codecompletions.psi.readText
+import ee.carlrobert.codegpt.codecompletions.psi.structure.PsiStructureProvider
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
 import ee.carlrobert.codegpt.util.GitUtil
+
 
 object InfillRequestUtil {
 
@@ -34,7 +36,18 @@ object InfillRequestUtil {
         }
 
         if (service<ConfigurationSettings>().state.codeCompletionSettings.contextAwareEnabled) {
-            getInfillContext(request, caretOffset)?.let { infillRequestBuilder.context(it) }
+            getInfillContext(request, caretOffset)?.let {
+                infillRequestBuilder.context(it)
+                infillRequestBuilder.addRepositoryName(it.getRepoName())
+            }
+        }
+
+        if (service<ConfigurationSettings>().state.codeCompletionSettings.collectDependencyStructure) {
+            val psiStructure = PsiStructureProvider().get(listOf(request.file))
+            if (psiStructure.isNotEmpty()) {
+                infillRequestBuilder.addDependenciesStructure(psiStructure)
+                infillRequestBuilder.addRepositoryName(psiStructure.first().repositoryName)
+            }
         }
 
         return infillRequestBuilder.build()

@@ -43,5 +43,6 @@ class CodeCompletionSettingsState : BaseState() {
     var multiLineEnabled by property(true)
     var treeSitterProcessingEnabled by property(true)
     var gitDiffEnabled by property(true)
+    var collectDependencyStructure by property(true)
     var contextAwareEnabled by property(false)
 }

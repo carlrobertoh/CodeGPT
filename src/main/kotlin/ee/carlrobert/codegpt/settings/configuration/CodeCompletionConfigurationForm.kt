@@ -21,6 +21,11 @@ class CodeCompletionConfigurationForm {
         service<ConfigurationSettings>().state.codeCompletionSettings.gitDiffEnabled
     )
 
+    private val collectDependencyStructureBox = JBCheckBox(
+        CodeGPTBundle.get("configurationConfigurable.section.codeCompletion.collectDependencyStructure.title"),
+        service<ConfigurationSettings>().state.codeCompletionSettings.collectDependencyStructure
+    )
+
     fun createPanel(): DialogPanel {
         return panel {
             row {
@@ -34,6 +39,10 @@ class CodeCompletionConfigurationForm {
             row {
                 cell(gitDiffCheckBox)
                     .comment(CodeGPTBundle.get("configurationConfigurable.section.codeCompletion.gitDiff.description"))
+            }
+            row {
+                cell(collectDependencyStructureBox)
+                    .comment(CodeGPTBundle.get("configurationConfigurable.section.codeCompletion.collectDependencyStructure.description"))
             }
         }
     }
@@ -49,6 +58,7 @@ class CodeCompletionConfigurationForm {
             this.multiLineEnabled = multiLineCompletionsCheckBox.isSelected
             this.treeSitterProcessingEnabled = treeSitterProcessingCheckBox.isSelected
             this.gitDiffEnabled = gitDiffCheckBox.isSelected
+            this.collectDependencyStructure = collectDependencyStructureBox.isSelected
         }
     }
 }
