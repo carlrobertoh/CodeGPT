@@ -42,7 +42,7 @@ intellij {
   pluginName.set(properties("pluginName"))
   version.set(properties("platformVersion"))
   type.set(properties("platformType"))
-  plugins.set(listOf("java", "PythonCore:241.14494.240", "Git4Idea"))
+  plugins.set(listOf("java", "PythonCore:241.14494.240", "Git4Idea", "org.jetbrains.kotlin"))
 }
 
 changelog {
@@ -62,6 +62,8 @@ dependencies {
     // vulnerable transitive dependency
     exclude(group = "org.jsoup", module = "jsoup")
   }
+  implementation(kotlin("stdlib"))
+  implementation(kotlin("reflect"))
   implementation(libs.jsoup)
   implementation(libs.commons.text)
   implementation(libs.jtokkit)
