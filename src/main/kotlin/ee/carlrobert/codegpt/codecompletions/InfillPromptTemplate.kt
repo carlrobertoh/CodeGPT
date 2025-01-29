@@ -1,5 +1,8 @@
 package ee.carlrobert.codegpt.codecompletions
 
+import ee.carlrobert.codegpt.codecompletions.psi.structure.ClassStructureSerializer
+import org.jetbrains.kotlin.utils.addToStdlib.ifNotEmpty
+
 enum class InfillPromptTemplate(val label: String, val stopTokens: List<String>?) {
 
     OPENAI("OpenAI", null) {
@@ -74,16 +77,37 @@ enum class InfillPromptTemplate(val label: String, val stopTokens: List<String>?
         override fun buildPrompt(infillDetails: InfillRequest): String {
             val infillPrompt =
                 "<|fim_prefix|> ${infillDetails.prefix} <|fim_suffix|>${infillDetails.suffix} <|fim_middle|>"
-            return if (infillDetails.context == null || infillDetails.context.contextElements.isEmpty()) {
-                infillPrompt
-            } else {
-                "<|repo_name|>${infillDetails.context.getRepoName()}\n" +
-                        infillDetails.context.contextElements.map {
-                            "<|file_sep|>${it.filePath()} \n" +
-                                    it.text()
-                        }.joinToString("") { it + "\n" } +
-                        "<|file_sep|>${infillDetails.context.enclosingElement.filePath()} \n" +
-                        infillPrompt
+
+            return when {
+                infillDetails.dependenciesStructure != null -> {
+                    "<|repo_name|>${infillDetails.repositoryName}\n" +
+                            infillDetails.dependenciesStructure.joinToString(separator = "\n", prefix = "\n") {
+                                "<|file_sep|>${it.name.value}\n${ClassStructureSerializer.serialize(it)}\n"
+                            } +
+                            infillDetails.context?.contextElements?.ifNotEmpty {
+                                map {
+                                    "<|file_sep|>${it.filePath()} \n" +
+                                            it.text()
+                                }.joinToString("") { it + "\n" } +
+                                        "<|file_sep|>${infillDetails.context.enclosingElement.filePath()} \n"
+                            } +
+                            infillPrompt
+
+                }
+
+                infillDetails.context != null && infillDetails.context.contextElements.isNotEmpty() -> {
+                    "<|repo_name|>${infillDetails.context.getRepoName()}\n" +
+                            infillDetails.context.contextElements.map {
+                                "<|file_sep|>${it.filePath()} \n" +
+                                        it.text()
+                            }.joinToString("") { it + "\n" } +
+                            "<|file_sep|>${infillDetails.context.enclosingElement.filePath()} \n" +
+                            infillPrompt
+                }
+
+                else -> {
+                    infillPrompt
+                }
             }
         }
     },

@@ -7,6 +7,7 @@ import com.intellij.psi.PsiElement
 import ee.carlrobert.codegpt.EncodingManager
 import ee.carlrobert.codegpt.codecompletions.psi.filePath
 import ee.carlrobert.codegpt.codecompletions.psi.readText
+import ee.carlrobert.codegpt.codecompletions.psi.structure.models.ClassStructure
 
 const val MAX_PROMPT_TOKENS = 256
 
@@ -15,6 +16,8 @@ class InfillRequest private constructor(
     val suffix: String,
     val caretOffset: Int,
     val fileDetails: FileDetails?,
+    val repositoryName: String?,
+    val dependenciesStructure: Set<ClassStructure>?,
     val context: InfillContext?,
     val stopTokens: List<String>,
 ) {
@@ -27,6 +30,8 @@ class InfillRequest private constructor(
         private val caretOffset: Int
         private var fileDetails: FileDetails? = null
         private var additionalContext: String? = null
+        private var repositoryName: String? = null
+        private var dependenciesStructure: Set<ClassStructure>? = null
         private var context: InfillContext? = null
         private var stopTokens: List<String>
 
@@ -61,6 +66,12 @@ class InfillRequest private constructor(
         fun additionalContext(additionalContext: String) =
             apply { this.additionalContext = additionalContext }
 
+        fun addRepositoryName(repositoryName: String) =
+            apply { this.repositoryName = repositoryName }
+
+        fun addDependenciesStructure(dependenciesStructure: Set<ClassStructure>) =
+            apply { this.dependenciesStructure = dependenciesStructure }
+
         fun context(context: InfillContext) = apply { this.context = context }
 
         private fun getStopTokens(type: CompletionType): List<String> {
@@ -94,6 +105,8 @@ class InfillRequest private constructor(
                 suffix,
                 caretOffset,
                 fileDetails,
+                repositoryName,
+                dependenciesStructure,
                 context,
                 stopTokens,
             )
