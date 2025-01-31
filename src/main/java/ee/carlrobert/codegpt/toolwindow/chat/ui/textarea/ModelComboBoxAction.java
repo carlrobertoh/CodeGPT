@@ -301,6 +301,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
   }
 
   private AnAction createCodeGPTModelAction(CodeGPTModel model, Presentation comboBoxPresentation) {
+
     return createModelAction(CODEGPT, model.getName(), model.getIcon(), comboBoxPresentation,
         () -> ApplicationManager.getApplication()
             .getService(CodeGPTServiceSettings.class)

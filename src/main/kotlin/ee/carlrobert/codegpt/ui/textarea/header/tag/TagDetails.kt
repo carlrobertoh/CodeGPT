@@ -28,7 +28,7 @@ open class TagDetails(
     }
 }
 
-data class FileTagDetails(var virtualFile: VirtualFile, override var selected: Boolean = true) :
+data class FileTagDetails(var virtualFile: VirtualFile) :
     TagDetails(virtualFile.name, virtualFile.fileType.icon)
 
 data class SelectionTagDetails(
