@@ -28,12 +28,12 @@ object PaintUtil {
 
             val rect = createRoundedRectangle(component)
 
+            g2.color = service<EditorColorsManager>().globalScheme.defaultBackground
+            g2.fill(rect)
+
             if (!selected) {
                 g2.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f)
             }
-
-            g2.color = service<EditorColorsManager>().globalScheme.defaultBackground
-            g2.fill(rect)
 
             drawBorder(g2, rect, selected)
         } finally {

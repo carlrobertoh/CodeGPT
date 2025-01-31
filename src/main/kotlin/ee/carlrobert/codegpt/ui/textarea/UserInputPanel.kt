@@ -35,8 +35,8 @@ import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.TotalTokensPanel
 import ee.carlrobert.codegpt.ui.IconActionButton
 import ee.carlrobert.codegpt.ui.textarea.header.UserInputHeaderPanel
 import ee.carlrobert.codegpt.ui.textarea.header.tag.GitCommitTagDetails
-import ee.carlrobert.codegpt.ui.textarea.header.tag.TagDetails
 import ee.carlrobert.codegpt.ui.textarea.header.tag.SelectionTagDetails
+import ee.carlrobert.codegpt.ui.textarea.header.tag.TagDetails
 import ee.carlrobert.codegpt.ui.textarea.suggestion.SuggestionsPopupManager
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel
 import git4idea.GitCommit
@@ -60,11 +60,10 @@ class UserInputPanel(
     }
 
     private val suggestionsPopupManager = SuggestionsPopupManager(project, this)
-    private val userInputHeaderPanel = UserInputHeaderPanel(project, suggestionsPopupManager)
     private val promptTextField =
-        PromptTextField(project, suggestionsPopupManager, ::updateUserTokens) {
-            handleSubmit(it, userInputHeaderPanel.getSelectedTags())
-        }
+        PromptTextField(project, suggestionsPopupManager, ::updateUserTokens, ::handleSubmit)
+    private val userInputHeaderPanel =
+        UserInputHeaderPanel(project, suggestionsPopupManager, promptTextField)
     private val submitButton = IconActionButton(
         object : AnAction(
             CodeGPTBundle.get("smartTextPane.submitButton.title"),
@@ -186,6 +185,10 @@ class UserInputPanel(
     }
 
     override fun getInsets(): Insets = JBUI.insets(4)
+
+    private fun handleSubmit(text: String) {
+        handleSubmit(text, userInputHeaderPanel.getSelectedTags())
+    }
 
     private fun handleSubmit(text: String, appliedTags: List<TagDetails> = emptyList()) {
         if (text.isNotEmpty() && submitButton.isEnabled) {

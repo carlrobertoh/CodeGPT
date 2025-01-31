@@ -23,6 +23,7 @@ import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.popup.JBPopup;
 import com.intellij.openapi.ui.popup.ListPopup;
+import com.intellij.util.IconUtil;
 import ee.carlrobert.codegpt.CodeGPTKeys;
 import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
@@ -313,6 +314,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
   }
 
   private AnAction createCodeGPTModelAction(CodeGPTModel model, Presentation comboBoxPresentation) {
+
     return createModelAction(CODEGPT, model.getName(), model.getIcon(), comboBoxPresentation,
         () -> ApplicationManager.getApplication()
             .getService(CodeGPTServiceSettings.class)

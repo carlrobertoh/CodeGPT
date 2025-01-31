@@ -57,7 +57,9 @@ public class ChatToolWindowPanel extends SimpleToolWindowPanel {
     upgradePlanLink.setExternalLinkIcon();
     upgradePlanLink.setVisible(false);
 
-    init(project, parentDisposable);
+    ApplicationManager.getApplication().invokeLater(() -> {
+      init(project, parentDisposable);
+    });
 
     var messageBusConnection = project.getMessageBus().connect();
     messageBusConnection.subscribe(AttachImageNotifier.IMAGE_ATTACHMENT_FILE_PATH_TOPIC,
