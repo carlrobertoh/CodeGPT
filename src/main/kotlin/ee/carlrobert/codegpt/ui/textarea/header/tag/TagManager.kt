@@ -14,8 +14,6 @@ class TagManager {
 
     fun getTags(): Set<TagDetails> = tags.toSet()
 
-    fun getSelectedTags(): List<TagDetails> = tags.filter { it.selected }
-
     fun addTag(tagDetails: TagDetails) {
         if (tags.add(tagDetails)) {
             listeners.forEach { it.onTagAdded(tagDetails) }
@@ -36,6 +34,8 @@ class TagManager {
                 }
             }
     }
+
+    fun getTag(id: UUID): TagDetails? = tags.find { it.id == id }
 
     fun getFileTag(file: VirtualFile): FileTagDetails? =
         tags.filterIsInstance<FileTagDetails>().find { it.virtualFile == file }
