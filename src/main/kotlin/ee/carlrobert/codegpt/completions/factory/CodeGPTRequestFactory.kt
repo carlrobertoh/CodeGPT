@@ -28,7 +28,7 @@ class CodeGPTRequestFactory : BaseRequestFactory() {
                     )
                 )
 
-        if ("o1-mini" == model || "o1-preview" == model) {
+        if ("o3-mini" == model) {
             requestBuilder
                 .setMaxTokens(null)
                 .setTemperature(null)
@@ -62,7 +62,7 @@ class CodeGPTRequestFactory : BaseRequestFactory() {
         stream: Boolean
     ): ChatCompletionRequest {
         val model = service<CodeGPTServiceSettings>().state.chatCompletionSettings.model
-        if (model == "o1-mini" || model == "o1-preview") {
+        if (model == "o3-mini") {
             return buildBasicO1Request(model, userPrompt, systemPrompt, maxTokens, stream = stream)
         }
 
