@@ -12,6 +12,7 @@ import ee.carlrobert.codegpt.settings.prompts.PromptsSettings
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings
 import ee.carlrobert.codegpt.util.file.FileUtil.getImageMediaType
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel
+import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel.*
 import ee.carlrobert.llm.client.openai.completion.request.*
 import java.io.IOException
 import java.nio.file.Files
@@ -28,7 +29,7 @@ class OpenAIRequestFactory : CompletionRequestFactory {
                 .setStream(true)
                 .setMaxTokens(null)
                 .setMaxCompletionTokens(configuration.maxTokens)
-        if ("o1-mini" == model || "o1-preview" == model) {
+        if (isReasoningModel(model)) {
             requestBuilder
                 .setTemperature(null)
                 .setPresencePenalty(null)
@@ -45,7 +46,7 @@ class OpenAIRequestFactory : CompletionRequestFactory {
         val prompt = "Code to modify:\n${params.selectedText}\n\nInstructions: ${params.prompt}"
         val systemPrompt = service<PromptsSettings>().state.coreActions.editCode.instructions
             ?: CoreActionsState.DEFAULT_EDIT_CODE_PROMPT
-        if (model == "o1-mini" || model == "o1-preview") {
+        if (isReasoningModel(model)) {
             return buildBasicO1Request(model, prompt, systemPrompt, stream = true)
         }
         return createBasicCompletionRequest(systemPrompt, prompt, model, true)
@@ -54,7 +55,7 @@ class OpenAIRequestFactory : CompletionRequestFactory {
     override fun createCommitMessageRequest(params: CommitMessageCompletionParameters): OpenAIChatCompletionRequest {
         val model = service<OpenAISettings>().state.model
         val (gitDiff, systemPrompt) = params
-        if (model == "o1-mini" || model == "o1-preview") {
+        if (isReasoningModel(model)) {
             return buildBasicO1Request(model, gitDiff, systemPrompt, stream = true)
         }
         return createBasicCompletionRequest(systemPrompt, gitDiff, model, true)
@@ -63,7 +64,7 @@ class OpenAIRequestFactory : CompletionRequestFactory {
     override fun createLookupRequest(params: LookupCompletionParameters): OpenAIChatCompletionRequest {
         val model = service<OpenAISettings>().state.model
         val (prompt) = params
-        if (model == "o1-mini" || model == "o1-preview") {
+        if (isReasoningModel(model)) {
             return buildBasicO1Request(
                 model,
                 prompt,
@@ -78,6 +79,9 @@ class OpenAIRequestFactory : CompletionRequestFactory {
     }
 
     companion object {
+        fun isReasoningModel(model: String?) =
+            listOf(O_3_MINI.code, O_1_MINI.code, O_1_PREVIEW.code).contains(model)
+
         fun buildBasicO1Request(
             model: String,
             prompt: String,
@@ -152,7 +156,7 @@ class OpenAIRequestFactory : CompletionRequestFactory {
         ): MutableList<OpenAIChatCompletionMessage> {
             val message = callParameters.message
             val messages = mutableListOf<OpenAIChatCompletionMessage>()
-            val role = if ("o1-mini" == model || "o1-preview" == model) "user" else "system"
+            val role = if (isReasoningModel(model)) "user" else "system"
 
             if (callParameters.conversationType == ConversationType.DEFAULT) {
                 val sessionPersonaDetails = callParameters.personaDetails

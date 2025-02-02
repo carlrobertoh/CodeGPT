@@ -14,7 +14,7 @@ object CodeGPTAvailableModels {
     fun getToolWindowModels(pricingPlan: PricingPlan?): List<CodeGPTModel> {
         return when (pricingPlan) {
             null, ANONYMOUS -> listOf(
-                CodeGPTModel("o1-mini", "o1-mini", Icons.OpenAI, INDIVIDUAL),
+                CodeGPTModel("o3-mini", "o3-mini", Icons.OpenAI, INDIVIDUAL),
                 CodeGPTModel("GPT-4o", "gpt-4o", Icons.OpenAI, INDIVIDUAL),
                 CodeGPTModel("Claude 3.5 Sonnet", "claude-3.5-sonnet", Icons.Anthropic, INDIVIDUAL),
                 CodeGPTModel("DeepSeek R1", "deepseek-r1", Icons.DeepSeek, INDIVIDUAL),
@@ -24,7 +24,7 @@ object CodeGPTAvailableModels {
             )
 
             FREE -> listOf(
-                CodeGPTModel("o1-mini", "o1-mini", Icons.OpenAI, INDIVIDUAL),
+                CodeGPTModel("o3-mini", "o3-mini", Icons.OpenAI, INDIVIDUAL),
                 CodeGPTModel("GPT-4o", "gpt-4o", Icons.OpenAI, INDIVIDUAL),
                 CodeGPTModel("Claude 3.5 Sonnet", "claude-3.5-sonnet", Icons.Anthropic, INDIVIDUAL),
                 CodeGPTModel("DeepSeek R1", "deepseek-r1", Icons.DeepSeek, INDIVIDUAL),
@@ -35,7 +35,7 @@ object CodeGPTAvailableModels {
             )
 
             INDIVIDUAL -> listOf(
-                CodeGPTModel("o1-mini", "o1-mini", Icons.OpenAI, INDIVIDUAL),
+                CodeGPTModel("o3-mini", "o3-mini", Icons.OpenAI, INDIVIDUAL),
                 CodeGPTModel("GPT-4o", "gpt-4o", Icons.OpenAI, INDIVIDUAL),
                 CodeGPTModel("Claude 3.5 Sonnet", "claude-3.5-sonnet", Icons.Anthropic, INDIVIDUAL),
                 CodeGPTModel("DeepSeek R1", "deepseek-r1", Icons.DeepSeek, INDIVIDUAL),
@@ -47,7 +47,7 @@ object CodeGPTAvailableModels {
 
     @JvmStatic
     val ALL_CHAT_MODELS: List<CodeGPTModel> = listOf(
-        CodeGPTModel("o1-mini", "o1-mini", Icons.OpenAI, INDIVIDUAL),
+        CodeGPTModel("o3-mini", "o3-mini", Icons.OpenAI, INDIVIDUAL),
         CodeGPTModel("GPT-4o", "gpt-4o", Icons.OpenAI, INDIVIDUAL),
         CodeGPTModel("GPT-4o mini", "gpt-4o-mini", Icons.OpenAI, ANONYMOUS),
         CodeGPTModel("Claude 3.5 Sonnet", "claude-3.5-sonnet", Icons.Anthropic, INDIVIDUAL),
