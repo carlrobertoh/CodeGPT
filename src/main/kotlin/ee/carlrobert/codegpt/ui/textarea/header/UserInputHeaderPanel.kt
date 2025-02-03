@@ -22,7 +22,10 @@ import ee.carlrobert.codegpt.ui.textarea.suggestion.SuggestionsPopupManager
 import ee.carlrobert.codegpt.util.EditorUtil
 import ee.carlrobert.codegpt.util.EditorUtil.getSelectedEditor
 import ee.carlrobert.codegpt.util.EditorUtil.getSelectedEditorFile
-import java.awt.*
+import java.awt.Cursor
+import java.awt.Dimension
+import java.awt.FlowLayout
+import java.awt.Graphics
 import javax.swing.JButton
 import javax.swing.JPanel
 import kotlin.math.min
@@ -95,7 +98,15 @@ class UserInputHeaderPanel(
     override fun onTagAdded(tag: TagDetails) {
         emptyText.isVisible = false
         add(createTag(tag), getInsertionIndex())
+
+        if (tagManager.getTags().filter { !it.selected }.size > 2) {
+            components
+                .lastOrNull { it is TagPanel && it.tagDetails is FileTagDetails && !it.isSelected }
+                ?.let { tagManager.removeTag((it as TagPanel).tagDetails.id) }
+        }
+
         promptTextField.requestFocus()
+
         revalidate()
         repaint()
     }
@@ -214,7 +225,6 @@ class UserInputHeaderPanel(
     private fun initializeEventListeners() {
         project.messageBus.connect().apply {
             subscribe(EditorNotifier.SelectionChange.TOPIC, EditorSelectionChangeListener())
-            subscribe(EditorNotifier.Created.TOPIC, EditorCreatedListener())
             subscribe(EditorNotifier.Released.TOPIC, EditorReleasedListener())
             subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER, FileSelectionListener())
             subscribe(
@@ -260,24 +270,6 @@ class UserInputHeaderPanel(
         }
     }
 
-    private inner class EditorCreatedListener : EditorNotifier.Created {
-        override fun editorCreated(editor: Editor) {
-            val unselectedTagsCount =
-                tagManager.getTags().stream().filter { !it.selected }.count() >= 3
-            if (unselectedTagsCount) {
-                return
-            }
-
-            editor.virtualFile?.let { editorFile ->
-                if (selectedFileTagPanel.isVisible && getSelectedFile() == editorFile) {
-                    return
-                }
-
-                tagManager.addTag(FileTagDetails(editorFile).apply { selected = false })
-            }
-        }
-    }
-
     private inner class EditorReleasedListener : EditorNotifier.Released {
         override fun editorReleased(editor: Editor) {
             if (editor.editorKind == EditorKind.MAIN_EDITOR && !editor.isDisposed && editor.virtualFile != null) {
@@ -297,12 +289,11 @@ class UserInputHeaderPanel(
                 if (existingFileTag != null) {
                     tagManager.removeTag(existingFileTag.id)
                 } else {
-                    existingFileTag = FileTagDetails(newFile)
+                    existingFileTag = FileTagDetails(newFile).apply { selected = false }
                 }
 
-                val prevSelectedTag = selectedFileTagPanel.tagDetails as? FileTagDetails
-                if (prevSelectedTag != null && event.oldFile == prevSelectedTag.virtualFile) {
-                    tagManager.addTag(prevSelectedTag)
+                if (selectedFileTagPanel.tagDetails !is EmptyTagDetails) {
+                    tagManager.addTag(selectedFileTagPanel.tagDetails)
                 }
 
                 selectedFileTagPanel.update(existingFileTag)
