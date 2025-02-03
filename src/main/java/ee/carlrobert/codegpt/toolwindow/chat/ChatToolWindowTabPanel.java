@@ -287,6 +287,7 @@ public class ChatToolWindowTabPanel implements Disposable {
     }
 
     requestHandler = new ToolwindowChatCompletionRequestHandler(
+        project,
         new ToolWindowCompletionResponseEventListener(
             conversationService,
             userMessagePanel,
