@@ -61,11 +61,13 @@ data class PersonaPromptDetails(
     override var name: String?,
     override var instructions: String?,
     val id: Long,
-    var selected: AtomicBooleanProperty = AtomicBooleanProperty(false)
+    var selected: AtomicBooleanProperty = AtomicBooleanProperty(false),
+    var disabled: Boolean = false
 ) : FormPromptDetails() {
     constructor(state: PersonaPromptDetailsState) : this(
         name = state.name,
         instructions = state.instructions,
-        id = state.id
+        id = state.id,
+        disabled = state.disabled
     )
 }
