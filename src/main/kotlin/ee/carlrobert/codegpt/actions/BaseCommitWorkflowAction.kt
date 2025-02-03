@@ -19,6 +19,7 @@ import com.intellij.openapi.vcs.changes.Change
 import com.intellij.vcs.commit.CommitWorkflowUi
 import ee.carlrobert.codegpt.EncodingManager
 import ee.carlrobert.codegpt.completions.CompletionRequestService
+import ee.carlrobert.codegpt.toolwindow.chat.ThinkingOutputParser
 import ee.carlrobert.codegpt.ui.OverlayUtil
 import ee.carlrobert.codegpt.util.CommitWorkflowChanges
 import ee.carlrobert.codegpt.util.GitUtil.getProjectRepository
@@ -123,12 +124,17 @@ abstract class BaseCommitWorkflowAction : DumbAwareAction() {
 class CommitMessageEventListener(
     private val project: Project,
     private val commitWorkflowUi: CommitWorkflowUi
-) : CompletionEventListener<String?> {
-    private val messageBuilder = StringBuilder()
+) : CompletionEventListener<String> {
 
-    override fun onMessage(message: String?, eventSource: EventSource) {
-        messageBuilder.append(message)
-        updateCommitMessage(messageBuilder.toString())
+    private val messageBuilder = StringBuilder()
+    private val thinkingOutputParser = ThinkingOutputParser()
+
+    override fun onMessage(message: String, eventSource: EventSource) {
+        val processedChunk = thinkingOutputParser.processChunk(message)
+        if (processedChunk.isNotEmpty() && thinkingOutputParser.isFinished) {
+            messageBuilder.append(message)
+            updateCommitMessage(messageBuilder.toString())
+        }
     }
 
     override fun onComplete(result: StringBuilder) {

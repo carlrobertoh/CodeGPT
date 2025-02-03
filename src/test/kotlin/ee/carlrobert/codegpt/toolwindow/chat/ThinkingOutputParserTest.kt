@@ -8,7 +8,7 @@ class ThinkingOutputParserTest {
     @Test
     fun `when not processing then return empty string`() {
         val parser = ThinkingOutputParser()
-        assertThat(parser.processChunk("Some text")).isEmpty()
+        assertThat(parser.processChunk("Some text")).isEqualTo("Some text")
         assertThat(parser.thoughtProcess).isEmpty()
     }
 
@@ -27,7 +27,7 @@ class ThinkingOutputParserTest {
     @Test
     fun `when thinking finished then return everything after the last closing think tag`() {
         val parser = ThinkingOutputParser()
-        parser.processChunk("<think>the internal thought</think>")
+        parser.processChunk("<think>the internal thought</think>\n\n")
         assertThat(parser.thoughtProcess).isEqualTo("the internal thought")
 
         val finalOutput = parser.processChunk("Here is the user response.")
@@ -46,7 +46,7 @@ class ThinkingOutputParserTest {
         assertThat(parser.processChunk(" with even more details... ")).isEmpty()
         assertThat(parser.thoughtProcess).isEqualTo("some internal processing with even more details... ")
 
-        val finalOutput = parser.processChunk("</think>The final answer.")
+        val finalOutput = parser.processChunk("</think>\n\nThe final answer.")
 
         assertThat(finalOutput).isEqualTo("The final answer.")
         assertThat(parser.thoughtProcess).isEqualTo("some internal processing with even more details...")

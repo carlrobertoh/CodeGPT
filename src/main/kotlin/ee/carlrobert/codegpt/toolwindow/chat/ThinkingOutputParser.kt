@@ -4,7 +4,7 @@ class ThinkingOutputParser {
 
     companion object {
         private const val OPEN_TAG = "<think>"
-        private const val CLOSE_TAG = "</think>"
+        private const val CLOSE_TAG = "</think>\n\n"
     }
 
     var thoughtProcess: String = ""
@@ -28,7 +28,6 @@ class ThinkingOutputParser {
 
         buffer.append(chunk)
         val current = buffer.toString()
-
 
         val indexOpen = current.indexOf(OPEN_TAG)
         if (indexOpen == -1) {
