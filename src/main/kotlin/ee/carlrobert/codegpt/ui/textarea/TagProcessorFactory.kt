@@ -49,19 +49,21 @@ class SelectionTagProcessor : TagProcessor {
         tagDetails: TagDetails,
         promptBuilder: StringBuilder
     ) {
-        val selectionModel = (tagDetails as? SelectionTagDetails)?.selectionModel ?: return
-        if (!selectionModel.hasSelection() || tagDetails.virtualFile == null) {
+        val selectionTagDetails = tagDetails as? SelectionTagDetails ?: return
+        if (selectionTagDetails.selectedText.isNullOrEmpty()) {
             return
         }
 
         promptBuilder
-            .append("\n```${tagDetails.virtualFile?.extension}\n")
-            .append(selectionModel.selectedText)
+            .append("\n```${tagDetails.virtualFile.extension}\n")
+            .append(selectionTagDetails.selectedText)
             .append("\n```\n")
 
-        tagDetails.virtualFile = null
-        tagDetails.selectionModel = null
-        selectionModel.removeSelection()
+        selectionTagDetails.selectionModel.let {
+            if (it.hasSelection()) {
+                it.removeSelection()
+            }
+        }
     }
 }
 

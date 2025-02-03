@@ -32,13 +32,15 @@ data class FileTagDetails(var virtualFile: VirtualFile) :
     TagDetails(virtualFile.name, virtualFile.fileType.icon)
 
 data class SelectionTagDetails(
-    var virtualFile: VirtualFile?,
-    var selectionModel: SelectionModel?,
-) :
-    TagDetails(
-        "${virtualFile?.name} (${selectionModel?.selectionStartPosition?.line}:${selectionModel?.selectionEndPosition?.line})",
-        Icons.InSelection
-    )
+    var virtualFile: VirtualFile,
+    var selectionModel: SelectionModel
+) : TagDetails(
+    "${virtualFile.name} (${selectionModel.selectionStartPosition?.line}:${selectionModel.selectionEndPosition?.line})",
+    Icons.InSelection
+) {
+    var selectedText: String? = selectionModel.selectedText
+        private set
+}
 
 data class DocumentationTagDetails(var documentationDetails: DocumentationDetails) :
     TagDetails(documentationDetails.name, AllIcons.Toolwindows.Documentation)
