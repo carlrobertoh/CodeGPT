@@ -1,39 +1,54 @@
 package ee.carlrobert.codegpt.toolwindow.chat
 
-import java.util.regex.Pattern
-
 class ThinkingOutputParser {
 
-    private val buffer = StringBuilder()
-
-    var isThinking: Boolean = false
-        private set
-
-    var isFinished: Boolean = false
-        private set
+    companion object {
+        private const val OPEN_TAG = "<think>"
+        private const val CLOSE_TAG = "</think>"
+    }
 
     var thoughtProcess: String = ""
         private set
+    var isThinking: Boolean = false
+        private set
+    var isFinished: Boolean = false
+        private set
 
-    fun processChunk(chunk: String) {
+    private val buffer = StringBuilder()
+
+    fun processChunk(chunk: String): String {
         if (isFinished) {
-            return
+            return chunk
+        }
+
+        if (buffer.isEmpty() && chunk.isNotEmpty() && !OPEN_TAG.contains(chunk.take(OPEN_TAG.length))) {
+            isFinished = true
+            return chunk
         }
 
         buffer.append(chunk)
+        val current = buffer.toString()
 
-        val thinkPattern = Pattern.compile("<think>(.*?)</think>", Pattern.DOTALL)
-        val matcher = thinkPattern.matcher(buffer.toString())
-        if (matcher.find()) {
+
+        val indexOpen = current.indexOf(OPEN_TAG)
+        if (indexOpen == -1) {
+            return ""
+        }
+
+        isThinking = true
+        val startContent = indexOpen + OPEN_TAG.length
+
+        val indexClose = current.indexOf(CLOSE_TAG, startContent)
+        if (indexClose != -1) {
+            thoughtProcess = current.substring(startContent, indexClose).trim()
             isFinished = true
             isThinking = false
-            thoughtProcess = matcher.group(1).trim { it <= ' ' }
-        } else if (buffer.isNotBlank() && "<think>".contains(buffer)) {
-            thoughtProcess = ""
-            isThinking = true
-        } else if (buffer.toString().startsWith("<think>")) {
-            thoughtProcess = buffer.toString().replaceFirst("<think>".toRegex(), "")
-            isThinking = true
+
+            val responseStart = indexClose + CLOSE_TAG.length
+            return current.substring(responseStart)
+        } else {
+            thoughtProcess = current.substring(startContent)
+            return ""
         }
     }
 }

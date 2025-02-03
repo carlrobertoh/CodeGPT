@@ -123,11 +123,12 @@ public class ChatMessageResponseBody extends JPanel {
       return;
     }
 
-    if (handleThinking(partialMessage)) {
+    var processedPartialMessage = processThinkingOutput(partialMessage);
+    if (processedPartialMessage.isEmpty()) {
       return;
     }
 
-    for (var item : streamParser.parse(partialMessage)) {
+    for (var item : streamParser.parse(processedPartialMessage)) {
       processResponse(item.response(), CODE.equals(item.type()), true);
     }
   }
@@ -240,9 +241,8 @@ public class ChatMessageResponseBody extends JPanel {
     revalidate();
   }
 
-  private boolean handleThinking(String partialMessage) {
-    thinkingOutputParser.processChunk(partialMessage);
-
+  private String processThinkingOutput(String partialMessage) {
+    var processedChunk = thinkingOutputParser.processChunk(partialMessage);
     var thoughtProcessPanel = getExistingThoughtProcessPanel();
 
     if (thinkingOutputParser.isThinking()) {
@@ -254,14 +254,13 @@ public class ChatMessageResponseBody extends JPanel {
       } else {
         thoughtProcessPanel.updateText(thinkingOutputParser.getThoughtProcess());
       }
-      return true;
     }
 
-    if (thoughtProcessPanel != null && !thoughtProcessPanel.getFinished()) {
+    if (thoughtProcessPanel != null && thinkingOutputParser.isFinished()) {
       thoughtProcessPanel.setFinished();
     }
 
-    return false;
+    return processedChunk;
   }
 
   private ThoughtProcessPanel getExistingThoughtProcessPanel() {

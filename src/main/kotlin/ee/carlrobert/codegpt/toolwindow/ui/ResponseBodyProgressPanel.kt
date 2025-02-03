@@ -23,11 +23,14 @@ class ResponseBodyProgressPanel : JPanel() {
 
     init {
         layout = BoxLayout(this, BoxLayout.Y_AXIS)
-        border = JBUI.Borders.empty(4, 0, 8, 0)
+        border = JBUI.Borders.empty(4, 0)
+        isVisible = false
     }
 
     fun updateProgressContainer(text: String, icon: Icon?) {
         runInEdt {
+            isVisible = true
+
             removeAll()
             val wrapper = if (icon != null) {
                 JBLabel(
