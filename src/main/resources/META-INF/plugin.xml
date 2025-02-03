@@ -113,7 +113,7 @@
           id="codegpt.openPrediction"
           text="Open Prediction"
           class="ee.carlrobert.codegpt.predictions.OpenPredictionAction">
-            <keyboard-shortcut first-keystroke="ctrl O" keymap="$default"/>
+            <keyboard-shortcut first-keystroke="ctrl shift ENTER" keymap="$default"/>
         </action>
 
         <action
