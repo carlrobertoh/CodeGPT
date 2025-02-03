@@ -149,7 +149,7 @@ abstract class SelectedFileTagPanel(
     private val promptTextField: PromptTextField,
     virtualFile: VirtualFile? = getSelectedEditorFile(project)
 ) : TagPanel(
-    (if (virtualFile == null) TagDetails("")
+    (if (virtualFile == null) EmptyTagDetails()
     else FileTagDetails(virtualFile)).apply { selected = true },
     false
 ) {
