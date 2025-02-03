@@ -99,7 +99,7 @@ public final class ChatToolWindowContentManager {
     var chatTabContent = tryFindFirstChatTabContent();
     if (chatTabContent.isPresent()) {
       var chatToolWindowPanel = (ChatToolWindowPanel) chatTabContent.get().getComponent();
-      return Optional.of(chatToolWindowPanel.getChatTabbedPane());
+      return Optional.ofNullable(chatToolWindowPanel.getChatTabbedPane());
     }
     return Optional.empty();
   }
