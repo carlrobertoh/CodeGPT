@@ -187,8 +187,9 @@ class SelectionTagPanel(
         fun getDefaultSelectionTagDetails(project: Project): TagDetails {
             val editor = getSelectedEditor(project)
             val selectionModel = editor?.selectionModel
-            return if (selectionModel?.hasSelection() == true) {
-                SelectionTagDetails((editor as? EditorEx)?.virtualFile, selectionModel)
+            val file = (editor as? EditorEx)?.virtualFile
+            return if (selectionModel?.hasSelection() == true && file != null) {
+                SelectionTagDetails(file, selectionModel)
             } else {
                 EmptyTagDetails()
             }
