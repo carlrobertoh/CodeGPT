@@ -14,6 +14,7 @@ import com.intellij.openapi.util.text.StringUtil
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.codeStyle.CodeStyleManager
 import com.intellij.ui.JBColor
+import ee.carlrobert.codegpt.toolwindow.chat.ThinkingOutputParser
 import ee.carlrobert.codegpt.ui.ObservableProperties
 import ee.carlrobert.codegpt.ui.OverlayUtil
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails
@@ -28,9 +29,13 @@ class EditCodeCompletionListener(
 
     private var replacedLength = 0
     private var currentHighlighter: RangeHighlighter? = null
+    private val thinkingOutputParser = ThinkingOutputParser()
 
     override fun onMessage(message: String, eventSource: EventSource) {
-        runInEdt { handleDiff(message) }
+        val processedChunk = thinkingOutputParser.processChunk(message)
+        if (processedChunk.isNotEmpty() && thinkingOutputParser.isFinished) {
+            runInEdt { handleDiff(processedChunk) }
+        }
     }
 
     override fun onComplete(messageBuilder: StringBuilder) {
