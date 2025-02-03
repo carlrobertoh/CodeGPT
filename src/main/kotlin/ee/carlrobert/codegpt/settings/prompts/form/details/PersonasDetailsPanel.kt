@@ -5,10 +5,12 @@ import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.observable.util.not
 import com.intellij.ui.CardLayoutPanel
+import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBTextField
 import com.intellij.ui.dsl.builder.Align
 import com.intellij.ui.dsl.builder.TopGap
 import com.intellij.ui.dsl.builder.panel
+import com.intellij.ui.dsl.builder.selected
 import com.intellij.ui.layout.ComponentPredicate
 import com.intellij.util.ui.components.BorderLayoutPanel
 import ee.carlrobert.codegpt.settings.prompts.PersonasState.Companion.DEFAULT_PERSONA_PROMPT
@@ -94,6 +96,12 @@ class PersonasDetailsPanel(onSelected: (PersonaPromptDetails) -> Unit) : PromptD
                     .label("Persona name:")
                     .align(Align.FILL)
                     .onChanged { details.name = it.text }
+            }
+            row {
+                checkBox("Disable persona")
+                    .selected(details.disabled)
+                    .comment("If checked, the selected persona will not be used when making chat queries. This is particularly useful when the model does not support system prompt.")
+                    .onChanged { details.disabled = it.isSelected }
             }
             row {
                 button("Set as Default") {

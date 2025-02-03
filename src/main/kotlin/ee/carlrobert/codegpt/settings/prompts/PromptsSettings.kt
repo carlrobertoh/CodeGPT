@@ -196,6 +196,7 @@ class ChatActionPromptDetailsState : PromptDetailsState() {
 
 class PersonaPromptDetailsState : PromptDetailsState() {
     var id by property(1L)
+    var disabled by property(false)
 }
 
 @JvmRecord

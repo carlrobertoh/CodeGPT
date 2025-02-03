@@ -39,6 +39,7 @@ object PromptsFormUtil {
         state.id = this.id
         state.name = this.name
         state.instructions = this.instructions
+        state.disabled = this.disabled
         return state
     }
 

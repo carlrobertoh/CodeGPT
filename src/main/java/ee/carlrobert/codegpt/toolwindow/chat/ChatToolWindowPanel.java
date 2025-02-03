@@ -16,6 +16,7 @@ import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.ui.components.ActionLink;
 import com.intellij.util.ui.JBUI;
+import com.intellij.util.ui.JBUI.CurrentTheme.Link;
 import ee.carlrobert.codegpt.CodeGPTKeys;
 import ee.carlrobert.codegpt.actions.toolwindow.ClearChatWindowAction;
 import ee.carlrobert.codegpt.actions.toolwindow.CreateNewConversationAction;
@@ -23,6 +24,7 @@ import ee.carlrobert.codegpt.actions.toolwindow.OpenInEditorAction;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.ConversationsState;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
+import ee.carlrobert.codegpt.settings.prompts.PersonaPromptDetailsState;
 import ee.carlrobert.codegpt.settings.prompts.PromptsConfigurable;
 import ee.carlrobert.codegpt.settings.prompts.PromptsSettings;
 import ee.carlrobert.codegpt.settings.service.ProviderChangeNotifier;
@@ -164,16 +166,30 @@ public class ChatToolWindowPanel extends SimpleToolWindowPanel {
       this.project = project;
     }
 
+    private void showPromptsSettingsDialog() {
+      ShowSettingsUtil.getInstance()
+          .showSettingsDialog(project, PromptsConfigurable.class);
+    }
+
     @Override
     @NotNull
     public JComponent createCustomComponent(
         @NotNull Presentation presentation,
         @NotNull String place) {
-      var link = new ActionLink(getSelectedPersonaName(), (e) -> {
-        ShowSettingsUtil.getInstance()
-            .showSettingsDialog(project, PromptsConfigurable.class);
+      var selectedPersona = getSelectedPersona();
+      var personaName = selectedPersona.getName();
+      if (personaName == null) {
+        personaName = "No persona selected";
+      }
+
+      var link = new ActionLink(personaName, (e) -> {
+        showPromptsSettingsDialog();
       });
       link.setExternalLinkIcon();
+      if (selectedPersona.getDisabled()) {
+        link.setToolTipText("Persona is disabled");
+        link.setForeground(JBUI.CurrentTheme.Label.disabledForeground());
+      }
       link.setFont(JBUI.Fonts.smallFont());
       link.setBorder(JBUI.Borders.empty(0, 4));
       return link;
@@ -183,19 +199,32 @@ public class ChatToolWindowPanel extends SimpleToolWindowPanel {
     public void updateCustomComponent(
         @NotNull JComponent component,
         @NotNull Presentation presentation) {
-      ((ActionLink) component).setText(getSelectedPersonaName());
+      if (component instanceof ActionLink actionLink) {
+        var selectedPersona = getSelectedPersona();
+        var personaName = selectedPersona.getName();
+        if (personaName == null) {
+          personaName = "No persona selected";
+        }
+
+        if (selectedPersona.getDisabled()) {
+          actionLink.setText(personaName + " (disabled)");
+          actionLink.setForeground(Link.Foreground.DISABLED);
+        } else {
+          actionLink.setText(personaName);
+          actionLink.setForeground(Link.Foreground.ENABLED);
+        }
+      }
     }
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
     }
 
-    private String getSelectedPersonaName() {
+    private PersonaPromptDetailsState getSelectedPersona() {
       return ApplicationManager.getApplication().getService(PromptsSettings.class)
           .getState()
           .getPersonas()
-          .getSelectedPersona()
-          .getName();
+          .getSelectedPersona();
     }
   }
 }

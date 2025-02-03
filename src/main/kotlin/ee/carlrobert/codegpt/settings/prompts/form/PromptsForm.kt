@@ -208,7 +208,8 @@ class PromptsForm {
             .all { (details, prompt) ->
                 details.id == prompt.id &&
                         details.name == prompt.name &&
-                        details.instructions == prompt.instructions
+                        details.instructions == prompt.instructions &&
+                        details.disabled == prompt.disabled
             }
     }
 

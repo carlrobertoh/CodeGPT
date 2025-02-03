@@ -4,7 +4,6 @@ import com.intellij.openapi.components.service
 import ee.carlrobert.codegpt.completions.BaseRequestFactory
 import ee.carlrobert.codegpt.completions.ChatCompletionParameters
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
-import ee.carlrobert.codegpt.settings.persona.PersonaSettings
 import ee.carlrobert.codegpt.settings.prompts.PromptsSettings
 import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettings
 import ee.carlrobert.llm.client.anthropic.completion.*
@@ -17,7 +16,11 @@ class ClaudeRequestFactory : BaseRequestFactory() {
             model = service<AnthropicSettings>().state.model
             maxTokens = service<ConfigurationSettings>().state.maxTokens
             isStream = true
-            system = PromptsSettings.getSelectedPersonaSystemPrompt()
+
+            val selectedPersona = service<PromptsSettings>().state.personas.selectedPersona
+            if (!selectedPersona.disabled) {
+                system = PromptsSettings.getSelectedPersonaSystemPrompt()
+            }
 
             messages = params.conversation.messages
                 .filter { it.response != null && it.response.isNotEmpty() }
