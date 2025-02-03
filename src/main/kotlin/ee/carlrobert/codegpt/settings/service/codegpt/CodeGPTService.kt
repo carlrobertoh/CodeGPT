@@ -29,7 +29,10 @@ class CodeGPTService private constructor(val project: Project) {
             if (userDetails != null && userDetails.pricingPlan != null) {
                 CODEGPT_USER_DETAILS.set(project, userDetails)
                 if (!userDetails.fullName.isNullOrEmpty()) {
-                    service<GeneralSettings>().state.displayName = userDetails.fullName
+                    service<GeneralSettings>().state.run {
+                        displayName = userDetails.fullName
+                        avatarBase64 = userDetails.avatarBase64 ?: ""
+                    }
                 }
             }
             project.messageBus
