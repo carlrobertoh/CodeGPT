@@ -11,7 +11,6 @@ import ee.carlrobert.codegpt.settings.prompts.CoreActionsState
 import ee.carlrobert.codegpt.settings.prompts.PromptsSettings
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings
 import ee.carlrobert.codegpt.util.file.FileUtil.getImageMediaType
-import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel.*
 import ee.carlrobert.llm.client.openai.completion.request.*
 import java.io.IOException
@@ -133,7 +132,7 @@ class OpenAIRequestFactory : CompletionRequestFactory {
                 .sum() + getState().maxTokens
             val modelMaxTokens: Int
             try {
-                modelMaxTokens = OpenAIChatCompletionModel.findByCode(model).maxTokens
+                modelMaxTokens = findByCode(model).maxTokens
 
                 if (totalUsage <= modelMaxTokens) {
                     return messages
@@ -158,14 +157,12 @@ class OpenAIRequestFactory : CompletionRequestFactory {
             val messages = mutableListOf<OpenAIChatCompletionMessage>()
             val role = if (isReasoningModel(model)) "user" else "system"
 
-            if (callParameters.conversationType == ConversationType.DEFAULT) {
+            val selectedPersona = service<PromptsSettings>().state.personas.selectedPersona
+            if (callParameters.conversationType == ConversationType.DEFAULT && !selectedPersona.disabled) {
                 val sessionPersonaDetails = callParameters.personaDetails
                 if (sessionPersonaDetails == null) {
                     messages.add(
-                        OpenAIChatCompletionStandardMessage(
-                            role,
-                            PromptsSettings.getSelectedPersonaSystemPrompt()
-                        )
+                        OpenAIChatCompletionStandardMessage(role, selectedPersona.instructions)
                     )
                 } else {
                     messages.add(

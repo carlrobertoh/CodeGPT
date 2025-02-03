@@ -16,10 +16,14 @@ class LlamaRequestFactory : BaseRequestFactory() {
     override fun createChatRequest(params: ChatCompletionParameters): LlamaCompletionRequest {
         val promptTemplate = getPromptTemplate()
         val systemPrompt =
-            if (params.conversationType == ConversationType.FIX_COMPILE_ERRORS)
+            if (params.conversationType == ConversationType.FIX_COMPILE_ERRORS) {
                 service<PromptsSettings>().state.coreActions.fixCompileErrors.instructions
-            else
-                PromptsSettings.getSelectedPersonaSystemPrompt()
+            } else {
+                service<PromptsSettings>().state.personas.selectedPersona.let {
+                    if (it.disabled) null else it.instructions
+                }
+            }
+
         val prompt = promptTemplate.buildPrompt(
             systemPrompt,
             getPromptWithFilesContext(params),

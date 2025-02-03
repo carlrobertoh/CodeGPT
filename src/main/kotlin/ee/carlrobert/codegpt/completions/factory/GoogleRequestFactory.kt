@@ -96,13 +96,16 @@ class GoogleRequestFactory : BaseRequestFactory() {
 
         when (params.conversationType) {
             ConversationType.DEFAULT -> {
-                messages.add(
-                    GoogleCompletionContent(
-                        "user",
-                        listOf(PromptsSettings.getSelectedPersonaSystemPrompt())
+                val selectedPersona = service<PromptsSettings>().state.personas.selectedPersona
+                if (!selectedPersona.disabled) {
+                    messages.add(
+                        GoogleCompletionContent(
+                            "user",
+                            listOf(PromptsSettings.getSelectedPersonaSystemPrompt())
+                        )
                     )
-                )
-                messages.add(GoogleCompletionContent("model", listOf("Understood.")))
+                    messages.add(GoogleCompletionContent("model", listOf("Understood.")))
+                }
             }
 
             ConversationType.FIX_COMPILE_ERRORS -> {

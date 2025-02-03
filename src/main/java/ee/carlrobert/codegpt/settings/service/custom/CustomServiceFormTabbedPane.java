@@ -26,6 +26,7 @@ public class CustomServiceFormTabbedPane extends JBTabbedPane {
     bodyTable = new JBTable(
         new DefaultTableModel(toArray(body),
             new Object[]{"Key", "Value"}));
+    bodyTable.setVisibleRowCount(6);
 
     setTabComponentInsets(JBUI.insetsTop(8));
     addTab("Headers", createTablePanel(headersTable));
