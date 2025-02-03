@@ -16,5 +16,8 @@ open class ResponseMessagePanel : BaseMessagePanel() {
         )
             .setAllowAutoWrapping(true)
             .withFont(JBFont.label().asBold())
+            .apply {
+                iconTextGap = 6
+            }
     }
 }

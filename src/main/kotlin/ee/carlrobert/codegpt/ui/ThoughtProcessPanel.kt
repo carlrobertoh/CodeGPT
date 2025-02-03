@@ -11,10 +11,10 @@ import javax.swing.*
 
 class ThoughtProcessPanel : JPanel(BorderLayout()) {
 
-    var finished: Boolean = false
-        private set
-
-    private val responseBodyContent = UIUtil.createTextPane("", false)
+    private var finished: Boolean = false
+    private val responseBodyContent = UIUtil.createTextPane("", false).apply {
+        foreground = JBUI.CurrentTheme.Label.disabledForeground()
+    }
     private val contentPanel = createContentPanel()
     private val toggleButton: JToggleButton = createToggleButton()
 
@@ -26,6 +26,8 @@ class ThoughtProcessPanel : JPanel(BorderLayout()) {
     }
 
     fun setFinished() {
+        if (finished) return
+
         toggleButton.text = "Thought Process"
         toggleButton.isSelected = false
         finished = true
@@ -58,21 +60,18 @@ class ThoughtProcessPanel : JPanel(BorderLayout()) {
         return panel
     }
 
-    private fun createToggleButton(): JToggleButton {
-        return JToggleButton("Thinking...", AllIcons.General.ArrowUp)
-            .apply {
-                isFocusPainted = false
-                isContentAreaFilled = false
-                background = background
-                selectedIcon = AllIcons.General.ArrowDown
-                border = null
-                isSelected = true
-                horizontalAlignment = SwingConstants.LEFT
-                horizontalTextPosition = SwingConstants.RIGHT
-                iconTextGap = 4
-                addItemListener { e: ItemEvent ->
-                    contentPanel.isVisible = e.stateChange == ItemEvent.SELECTED
-                }
+    private fun createToggleButton() =
+        JToggleButton("Thinking...", AllIcons.General.ArrowUp, true).apply {
+            isFocusPainted = false
+            isContentAreaFilled = false
+            background = background
+            selectedIcon = AllIcons.General.ArrowDown
+            border = null
+            horizontalAlignment = SwingConstants.LEFT
+            horizontalTextPosition = SwingConstants.RIGHT
+            iconTextGap = 4
+            addItemListener { e: ItemEvent ->
+                contentPanel.isVisible = e.stateChange == ItemEvent.SELECTED
             }
-    }
+        }
 }

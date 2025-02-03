@@ -51,7 +51,7 @@ class UserMessagePanel(
                 Icons.User
             } else {
                 val originalIcon = ImageIcon(Base64.getDecoder().decode(avatarBase64))
-                val resizedImage = originalIcon.image.getScaledInstance(20, 20, Image.SCALE_SMOOTH)
+                val resizedImage = originalIcon.image.getScaledInstance(24, 24, Image.SCALE_SMOOTH)
                 RoundedIcon(resizedImage, 1.0)
             }
         } catch (ex: Exception) {
@@ -67,6 +67,9 @@ class UserMessagePanel(
         )
             .setAllowAutoWrapping(true)
             .withFont(JBFont.label().asBold())
+            .apply {
+                iconTextGap = 6
+            }
     }
 
     fun addReloadAction(onReload: Runnable) {
