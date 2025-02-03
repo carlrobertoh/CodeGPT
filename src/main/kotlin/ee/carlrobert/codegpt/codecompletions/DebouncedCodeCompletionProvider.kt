@@ -8,7 +8,6 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
-import ee.carlrobert.codegpt.CodeGPTKeys.IS_FETCHING_COMPLETION
 import ee.carlrobert.codegpt.CodeGPTKeys.REMAINING_EDITOR_COMPLETION
 import ee.carlrobert.codegpt.settings.GeneralSettings
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
@@ -111,10 +110,8 @@ class DebouncedCodeCompletionProvider : DebouncedInlineCompletionProvider() {
             return InlineCompletionSuggestion.Default(emptyFlow())
         }
 
-        IS_FETCHING_COMPLETION.set(request.editor, true)
-
         request.editor.project?.let {
-            CodeCompletionProgressNotifier.startLoading(it)
+            CompletionProgressNotifier.update(it, true)
         }
 
         return InlineCompletionSuggestion.Default(channelFlow {

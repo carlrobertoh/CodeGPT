@@ -8,11 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Support for code editing and commit message generation with Deepseek R1 model [#835](https://github.com/carlrobertoh/CodeGPT/issues/835)
-- Avatar images for registered CodeGPT users
-- Support for disabling system prompts
 - `o3-mini` model (CodeGPT, OpenAI)
+- Support for code editing and commit message generation with Deepseek R1 model [#835](https://github.com/carlrobertoh/CodeGPT/issues/835)
 - Kotlin dependency analyzer for code completions [#829](https://github.com/carlrobertoh/CodeGPT/pull/829)
+- Status toolbar completion progress for all core actions
+- Support for disabling system prompts
+- Avatar images for registered CodeGPT users
 
 ### Fixed
 

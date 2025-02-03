@@ -12,9 +12,8 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.testFramework.LightVirtualFile
 import ee.carlrobert.codegpt.CodeGPTKeys
-import ee.carlrobert.codegpt.CodeGPTKeys.IS_FETCHING_COMPLETION
 import ee.carlrobert.codegpt.CodeGPTKeys.PENDING_PREDICTION_CALL
-import ee.carlrobert.codegpt.codecompletions.CodeCompletionProgressNotifier
+import ee.carlrobert.codegpt.codecompletions.CompletionProgressNotifier
 import ee.carlrobert.codegpt.completions.CompletionClientProvider
 import ee.carlrobert.codegpt.conversations.ConversationsState
 import ee.carlrobert.codegpt.settings.prompts.PromptsSettings
@@ -101,7 +100,7 @@ class PredictionService {
 
     private fun getPrediction(editor: Editor, request: Request): PredictionResponse? {
         editor.project?.let {
-            CodeCompletionProgressNotifier.startLoading(it)
+            CompletionProgressNotifier.update(it, true)
         }
 
         val pendingCall = PENDING_PREDICTION_CALL.get(editor)
@@ -129,10 +128,9 @@ class PredictionService {
             }
             return null
         } finally {
-            IS_FETCHING_COMPLETION.set(editor, false)
             PENDING_PREDICTION_CALL.set(editor, null)
             editor.project?.let {
-                CodeCompletionProgressNotifier.stopLoading(it)
+                CompletionProgressNotifier.update(it, false)
             }
         }
     }

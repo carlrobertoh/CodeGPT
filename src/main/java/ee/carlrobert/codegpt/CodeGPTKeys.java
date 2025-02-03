@@ -15,12 +15,13 @@ public class CodeGPTKeys {
       Key.create("codegpt.userDetails");
   public static final Key<String> REMAINING_EDITOR_COMPLETION =
       Key.create("codegpt.editorCompletionLines");
-  public static final Key<Boolean> IS_FETCHING_COMPLETION =
-      Key.create("codegpt.isFetchingCompletion");
+  public static final Key<Call> PENDING_PREDICTION_CALL =
+      Key.create("codegpt.editorPendingPredictionCall");
+  public static final Key<Boolean> COMPLETION_IN_PROGRESS =
+      Key.create("codegpt.completionInProgress");
   public static final Key<Boolean> IS_PROMPT_TEXT_FIELD_DOCUMENT =
       Key.create("codegpt.isPromptTextFieldDocument");
   public static final Key<CodeSuggestionDiffViewer> EDITOR_PREDICTION_DIFF_VIEWER =
       Key.create("codegpt.editorPredictionDiffViewer");
-  public static final Key<Call> PENDING_PREDICTION_CALL =
-      Key.create("codegpt.editorPendingPredictionCall");
+
 }

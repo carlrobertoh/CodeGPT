@@ -18,6 +18,7 @@ import com.intellij.openapi.vcs.VcsDataKeys
 import com.intellij.openapi.vcs.changes.Change
 import com.intellij.vcs.commit.CommitWorkflowUi
 import ee.carlrobert.codegpt.EncodingManager
+import ee.carlrobert.codegpt.codecompletions.CompletionProgressNotifier
 import ee.carlrobert.codegpt.completions.CompletionRequestService
 import ee.carlrobert.codegpt.toolwindow.chat.ThinkingOutputParser
 import ee.carlrobert.codegpt.ui.OverlayUtil
@@ -71,7 +72,6 @@ abstract class BaseCommitWorkflowAction : DumbAwareAction() {
     override fun getActionUpdateThread(): ActionUpdateThread {
         return ActionUpdateThread.EDT
     }
-
 
     private fun getDiff(event: AnActionEvent, project: Project): String {
         val commitWorkflowUi = event.getData(VcsDataKeys.COMMIT_WORKFLOW_UI)
@@ -141,14 +141,7 @@ class CommitMessageEventListener(
         if (messageBuilder.isEmpty()) {
             updateCommitMessage(result.toString())
         }
-    }
-
-    private fun updateCommitMessage(message: String?) {
-        ApplicationManager.getApplication().invokeLater {
-            WriteCommandAction.runWriteCommandAction(project) {
-                commitWorkflowUi.commitMessageUi.setText(message)
-            }
-        }
+        stopLoading()
     }
 
     override fun onError(error: ErrorDetails, ex: Throwable) {
@@ -160,5 +153,18 @@ class CommitMessageEventListener(
                 NotificationType.ERROR
             )
         )
+        stopLoading()
+    }
+
+    private fun stopLoading() {
+        CompletionProgressNotifier.update(project, false)
+    }
+
+    private fun updateCommitMessage(message: String?) {
+        ApplicationManager.getApplication().invokeLater {
+            WriteCommandAction.runWriteCommandAction(project) {
+                commitWorkflowUi.commitMessageUi.setText(message)
+            }
+        }
     }
 }
