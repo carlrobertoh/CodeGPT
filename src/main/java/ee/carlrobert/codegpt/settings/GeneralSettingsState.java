@@ -7,6 +7,7 @@ import ee.carlrobert.codegpt.settings.service.ServiceType;
 public class GeneralSettingsState {
 
   private String displayName = "";
+  private String avatarBase64 = "";
   private ServiceType selectedService = ServiceType.CODEGPT;
 
   public String getDisplayName() {
@@ -22,6 +23,14 @@ public class GeneralSettingsState {
 
   public void setDisplayName(String displayName) {
     this.displayName = displayName;
+  }
+
+  public String getAvatarBase64() {
+    return avatarBase64;
+  }
+
+  public void setAvatarBase64(String avatarBase64) {
+    this.avatarBase64 = avatarBase64;
   }
 
   public ServiceType getSelectedService() {
