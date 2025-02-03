@@ -40,7 +40,7 @@ object EditorUtil {
         val editorFactory = EditorFactory.getInstance()
         val document = editorFactory.createDocument(code)
         val editor = editorFactory
-            .createEditor(document, project, lightVirtualFile, true, EditorKind.MAIN_EDITOR)
+            .createEditor(document, project, lightVirtualFile, true, EditorKind.UNTYPED)
         (editor as EditorEx).backgroundColor =
             service<EditorColorsManager>().globalScheme.defaultBackground
         return editor
