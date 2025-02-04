@@ -7,25 +7,29 @@ import ee.carlrobert.codegpt.credentials.CredentialsStore.getCredential
 import ee.carlrobert.codegpt.credentials.CredentialsStore.setCredential
 import ee.carlrobert.codegpt.settings.GeneralSettings
 import ee.carlrobert.codegpt.settings.service.ServiceType
-import ee.carlrobert.codegpt.settings.service.custom.form.CustomServiceForm
+import ee.carlrobert.codegpt.settings.service.custom.form.CustomServiceListForm
+import kotlinx.coroutines.*
+import kotlinx.coroutines.swing.Swing
 import javax.swing.JComponent
 
 class CustomServiceConfigurable : Configurable {
 
-    private lateinit var component: CustomServiceForm
+    private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Swing.immediate)
+    private lateinit var component: CustomServiceListForm
+
 
     override fun getDisplayName(): String {
         return "CodeGPT: Custom Service"
     }
 
     override fun createComponent(): JComponent {
-        component = CustomServiceForm()
+        component = CustomServiceListForm(service<CustomServicesSettings>().state, coroutineScope)
         return component.getForm()
     }
 
     override fun isModified(): Boolean {
-        return component.isModified()
-                || component.getApiKey() != getCredential(CUSTOM_SERVICE_API_KEY)
+        return component.getApiKey() != getCredential(CUSTOM_SERVICE_API_KEY) || component.isModified()
+
     }
 
     override fun apply() {
@@ -36,5 +40,9 @@ class CustomServiceConfigurable : Configurable {
 
     override fun reset() {
         component.resetForm()
+    }
+
+    override fun disposeUIResources() {
+        coroutineScope.cancel()
     }
 }

@@ -33,7 +33,7 @@ object CredentialsStore {
 
     fun isCredentialSet(key: CredentialKey): Boolean = !getCredential(key).isNullOrEmpty()
 
-    enum class CredentialKey {
+    enum class CredentialKey(val value: String = "") {
         CODEGPT_API_KEY,
         OPENAI_API_KEY,
         CUSTOM_SERVICE_API_KEY,

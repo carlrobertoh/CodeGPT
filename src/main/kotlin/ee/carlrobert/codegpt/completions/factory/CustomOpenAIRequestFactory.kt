@@ -7,7 +7,7 @@ import ee.carlrobert.codegpt.completions.ChatCompletionParameters
 import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey
 import ee.carlrobert.codegpt.credentials.CredentialsStore.getCredential
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceChatCompletionSettingsState
-import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings
+import ee.carlrobert.codegpt.settings.service.custom.CustomServicesSettings
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionStandardMessage
 import ee.carlrobert.llm.completion.CompletionRequest
@@ -21,8 +21,9 @@ class CustomOpenAIRequestFactory : BaseRequestFactory() {
 
     override fun createChatRequest(params: ChatCompletionParameters): CustomOpenAIRequest {
         val request = buildCustomOpenAIChatCompletionRequest(
-            service<CustomServiceSettings>()
+            service<CustomServicesSettings>()
                 .state
+                .active
                 .chatCompletionSettings,
             OpenAIRequestFactory.buildOpenAIMessages(null, params),
             true,
@@ -38,7 +39,7 @@ class CustomOpenAIRequestFactory : BaseRequestFactory() {
         stream: Boolean
     ): CompletionRequest {
         val request = buildCustomOpenAIChatCompletionRequest(
-            service<CustomServiceSettings>().state.chatCompletionSettings,
+            service<CustomServicesSettings>().state.active.chatCompletionSettings,
             listOf(
                 OpenAIChatCompletionStandardMessage("system", systemPrompt),
                 OpenAIChatCompletionStandardMessage("user", userPrompt)

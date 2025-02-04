@@ -6,17 +6,21 @@ import ee.carlrobert.codegpt.codecompletions.InfillPromptTemplate
 import ee.carlrobert.codegpt.settings.service.custom.template.CustomServiceChatCompletionTemplate
 import ee.carlrobert.codegpt.settings.service.custom.template.CustomServiceCodeCompletionTemplate
 import ee.carlrobert.codegpt.settings.service.custom.template.CustomServiceTemplate
+import ee.carlrobert.codegpt.util.ListConverter
 import ee.carlrobert.codegpt.util.MapConverter
+
+private const val DEFAULT_SERVICE_SETTINGS_NANE = "Default"
 
 @Service
 @State(
     name = "CodeGPT_CustomServiceSettings",
     storages = [Storage("CodeGPT_CustomServiceSettings.xml")]
 )
+@Deprecated("Migrate to CustomServicesSettings")
 class CustomServiceSettings :
-    SimplePersistentStateComponent<CustomServiceState>(CustomServiceState()) {
+    SimplePersistentStateComponent<CustomServiceSettingsState>(CustomServiceSettingsState()) {
 
-    override fun loadState(state: CustomServiceState) {
+    override fun loadState(state: CustomServiceSettingsState) {
         if (state.url != null || state.body.isNotEmpty() || state.headers.isNotEmpty()) {
             super.loadState(this.state.apply {
                 // Migrate old settings
@@ -34,7 +38,51 @@ class CustomServiceSettings :
     }
 }
 
-class CustomServiceState : BaseState() {
+@Service
+@State(
+    name = "CodeGPT_CustomServicesSettings",
+    storages = [Storage("CodeGPT_CustomServicesSettings.xml")]
+)
+class CustomServicesSettings :
+    SimplePersistentStateComponent<CustomServicesState>(CustomServicesState()) {
+
+    override fun initializeComponent() {
+        super.initializeComponent()
+        val oldSettingsService = serviceOrNull<CustomServiceSettings>()
+        if (oldSettingsService != null && !oldSettingsService.state.isEqualToDefault()) {
+            val migrated = CustomServiceSettingsState().apply { copyFrom(oldSettingsService.state) }
+            state.services.clear()
+            state.services.add(migrated)
+            state.active = migrated
+
+            oldSettingsService.state.apply {
+                val default = CustomServiceSettingsState()
+                template = default.template
+                chatCompletionSettings = default.chatCompletionSettings
+                codeCompletionSettings = default.codeCompletionSettings
+                url = null
+                body = mutableMapOf()
+                headers = mutableMapOf()
+            }
+        }
+    }
+}
+
+class CustomServicesState(
+    initialState: CustomServiceSettingsState = CustomServiceSettingsState()
+) : BaseState() {
+    @get:OptionTag(converter = ListConverter::class)
+    var services by list<CustomServiceSettingsState>()
+
+    var active by property<CustomServiceSettingsState>(initialState)
+
+    init {
+        services.add(initialState)
+    }
+}
+
+class CustomServiceSettingsState : BaseState() {
+    var name by string(DEFAULT_SERVICE_SETTINGS_NANE)
     var template by enum(CustomServiceTemplate.OPENAI)
     var chatCompletionSettings by property(CustomServiceChatCompletionSettingsState())
     var codeCompletionSettings by property(CustomServiceCodeCompletionSettingsState())
