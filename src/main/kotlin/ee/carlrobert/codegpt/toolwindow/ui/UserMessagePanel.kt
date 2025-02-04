@@ -51,7 +51,11 @@ class UserMessagePanel(
                 Icons.User
             } else {
                 val originalIcon = ImageIcon(Base64.getDecoder().decode(avatarBase64))
-                val resizedImage = originalIcon.image.getScaledInstance(24, 24, Image.SCALE_SMOOTH)
+                val resizedImage = originalIcon.image.getScaledInstance(
+                    Icons.Default.iconWidth,
+                    Icons.Default.iconHeight,
+                    Image.SCALE_SMOOTH
+                )
                 RoundedIcon(resizedImage, 1.0)
             }
         } catch (ex: Exception) {
