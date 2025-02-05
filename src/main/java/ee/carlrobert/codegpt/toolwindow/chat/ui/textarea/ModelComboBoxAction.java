@@ -18,12 +18,12 @@ import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.actionSystem.ex.ComboBoxAction;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.popup.JBPopup;
 import com.intellij.openapi.ui.popup.ListPopup;
-import com.intellij.util.IconUtil;
 import ee.carlrobert.codegpt.CodeGPTKeys;
 import ee.carlrobert.codegpt.Icons;
 import ee.carlrobert.codegpt.completions.llama.LlamaModel;
@@ -50,6 +50,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class ModelComboBoxAction extends ComboBoxAction {
+
+  private static final Logger LOG = Logger.getInstance(ModelComboBoxAction.class);
 
   private final Consumer<ServiceType> onModelChange;
   private final Project project;
@@ -210,9 +212,17 @@ public class ModelComboBoxAction extends ComboBoxAction {
         break;
       case OPENAI:
         templatePresentation.setIcon(Icons.OpenAI);
-        templatePresentation.setText(
-            OpenAIChatCompletionModel.findByCode(OpenAISettings.getCurrentState().getModel())
-                .getDescription());
+
+        var selectedModel = OpenAISettings.getCurrentState().getModel();
+        try {
+          templatePresentation.setText(
+              OpenAIChatCompletionModel.findByCode(selectedModel).getDescription());
+        } catch (Exception e) {
+          LOG.error("Could find OpenAI model for code {}", e, selectedModel);
+          // TODO: Find out why another provider's model was stored in the first place
+          templatePresentation.setText(OpenAIChatCompletionModel.GPT_4_O.getDescription());
+        }
+
         break;
       case CUSTOM_OPENAI:
         templatePresentation.setIcon(Icons.OpenAI);
