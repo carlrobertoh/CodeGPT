@@ -53,8 +53,9 @@ object CodeCompletionRequestFactory {
 
     @JvmStatic
     fun buildCustomRequest(details: InfillRequest): Request {
-        val settings = service<CustomServicesSettings>().state.active.codeCompletionSettings
-        val credential = getCredential(CredentialKey.CustomServiceApiKey)
+        val activeService = service<CustomServicesSettings>().state.active
+        val settings = activeService.codeCompletionSettings
+        val credential = getCredential(CredentialKey.CustomServiceApiKey(activeService.name.orEmpty()))
         return buildCustomRequest(
             details,
             settings.url!!,

@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.settings.service.custom.form.model
 
+import ee.carlrobert.codegpt.credentials.CredentialsStore
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceChatCompletionSettingsState
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceCodeCompletionSettingsState
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettingsState
@@ -15,6 +16,7 @@ fun CustomServiceSettingsState.mapToData(): CustomServiceSettingsData =
     CustomServiceSettingsData(
         name = name,
         template = template,
+        apiKey = CredentialsStore.getCredential(CredentialsStore.CredentialKey.CustomServiceApiKey(name.orEmpty())),
         chatCompletionSettings = chatCompletionSettings.mapToData(),
         codeCompletionSettings = codeCompletionSettings.mapToData()
     )

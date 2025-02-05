@@ -20,14 +20,14 @@ class CustomOpenAIRequest(val request: Request) : CompletionRequest
 class CustomOpenAIRequestFactory : BaseRequestFactory() {
 
     override fun createChatRequest(params: ChatCompletionParameters): CustomOpenAIRequest {
+        val activeService = service<CustomServicesSettings>()
+            .state
+            .active
         val request = buildCustomOpenAIChatCompletionRequest(
-            service<CustomServicesSettings>()
-                .state
-                .active
-                .chatCompletionSettings,
+            activeService.chatCompletionSettings,
             OpenAIRequestFactory.buildOpenAIMessages(null, params),
             true,
-            getCredential(CredentialKey.CustomServiceApiKey)
+            getCredential(CredentialKey.CustomServiceApiKey(activeService.name.orEmpty()))
         )
         return CustomOpenAIRequest(request)
     }
@@ -38,14 +38,17 @@ class CustomOpenAIRequestFactory : BaseRequestFactory() {
         maxTokens: Int,
         stream: Boolean
     ): CompletionRequest {
+        val activeService = service<CustomServicesSettings>()
+            .state
+            .active
         val request = buildCustomOpenAIChatCompletionRequest(
-            service<CustomServicesSettings>().state.active.chatCompletionSettings,
+            activeService.chatCompletionSettings,
             listOf(
                 OpenAIChatCompletionStandardMessage("system", systemPrompt),
                 OpenAIChatCompletionStandardMessage("user", userPrompt)
             ),
             stream,
-            getCredential(CredentialKey.CustomServiceApiKey)
+            getCredential(CredentialKey.CustomServiceApiKey(activeService.name.orEmpty()))
         )
         return CustomOpenAIRequest(request)
     }
