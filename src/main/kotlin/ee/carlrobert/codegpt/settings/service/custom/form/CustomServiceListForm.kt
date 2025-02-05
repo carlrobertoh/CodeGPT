@@ -86,7 +86,7 @@ class CustomServiceListForm(
 
     init {
         apiKeyField.text = runBlocking(Dispatchers.IO) {
-            getCredential(CredentialKey.CUSTOM_SERVICE_API_KEY)
+            getCredential(CredentialKey.CustomServiceApiKey)
         }
 
         val selectedItem = formState.value.services.first()
@@ -270,7 +270,7 @@ class CustomServiceListForm(
     fun resetForm() {
         service<CustomServiceSettings>().state.run {
             templateComboBox.item = template
-            apiKeyField.text = getCredential(CredentialKey.CUSTOM_SERVICE_API_KEY)
+            apiKeyField.text = getCredential(CredentialKey.CustomServiceApiKey)
             chatCompletionsForm.resetForm(chatCompletionSettings)
             codeCompletionsForm.resetForm(codeCompletionSettings)
         }

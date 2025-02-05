@@ -13,8 +13,7 @@ import com.intellij.openapi.editor.actionSystem.EditorAction
 import com.intellij.openapi.editor.actionSystem.EditorWriteActionHandler
 import ee.carlrobert.codegpt.CodeGPTKeys
 import ee.carlrobert.codegpt.EncodingManager
-import ee.carlrobert.codegpt.credentials.CredentialsStore
-import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.CODEGPT_API_KEY
+import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.CodeGptApiKey
 import ee.carlrobert.codegpt.credentials.CredentialsStore.isCredentialSet
 import ee.carlrobert.codegpt.settings.GeneralSettings
 import ee.carlrobert.codegpt.settings.service.ServiceType
@@ -51,7 +50,7 @@ class TriggerCustomPredictionAction : EditorAction(Handler()), HintManagerImpl.A
             }
 
             val encodingManager = service<EncodingManager>()
-            if (!isCredentialSet(CODEGPT_API_KEY) && encodingManager.countTokens(editor.document.text) > 2048) {
+            if (!isCredentialSet(CodeGptApiKey) && encodingManager.countTokens(editor.document.text) > 2048) {
                 OverlayUtil.showNotification("The file exceeds the token limit of 2,048. Please upgrade your plan to access higher limits.")
                 return
             }

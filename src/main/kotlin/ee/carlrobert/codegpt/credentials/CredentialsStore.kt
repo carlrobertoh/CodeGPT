@@ -4,44 +4,73 @@ import com.intellij.credentialStore.CredentialAttributes
 import com.intellij.credentialStore.generateServiceName
 import com.intellij.ide.passwordSafe.PasswordSafe
 import com.intellij.util.concurrency.annotations.RequiresBackgroundThread
+import java.util.concurrent.ConcurrentHashMap
 
 object CredentialsStore {
 
-    private val credentialsMap = mutableMapOf<CredentialKey, String?>()
+    private val credentialsMap = ConcurrentHashMap<String, String>()
 
     @JvmStatic
     @RequiresBackgroundThread
-    fun getCredential(key: CredentialKey): String? =
-        credentialsMap.getOrPut(key) {
+    fun getCredential(keyModel: CredentialKey): String? =
+        credentialsMap.getOrPut(keyModel.value) {
             PasswordSafe.instance.getPassword(
                 CredentialAttributes(
-                    generateServiceName("CodeGPT", key.name)
+                    generateServiceName("CodeGPT", keyModel.value)
                 )
             ) ?: ""
         }.takeIf { !it.isNullOrEmpty() }
 
-    fun setCredential(key: CredentialKey, password: String?) {
-        val prevPassword = credentialsMap[key]
-        credentialsMap[key] = password
+    fun setCredential(keyModel: CredentialKey, password: String?) {
+        val prevPassword = credentialsMap[keyModel.value]
+        credentialsMap[keyModel.value] = password.orEmpty()
 
         if (prevPassword != password) {
             val credentialAttributes =
-                CredentialAttributes(generateServiceName("CodeGPT", key.name))
+                CredentialAttributes(generateServiceName("CodeGPT", keyModel.value))
             PasswordSafe.instance.setPassword(credentialAttributes, password)
         }
     }
 
-    fun isCredentialSet(key: CredentialKey): Boolean = !getCredential(key).isNullOrEmpty()
+    fun isCredentialSet(keyModel: CredentialKey): Boolean = !getCredential(keyModel).isNullOrEmpty()
 
-    enum class CredentialKey(val value: String = "") {
-        CODEGPT_API_KEY,
-        OPENAI_API_KEY,
-        CUSTOM_SERVICE_API_KEY,
-        ANTHROPIC_API_KEY,
-        AZURE_OPENAI_API_KEY,
-        AZURE_ACTIVE_DIRECTORY_TOKEN,
-        LLAMA_API_KEY,
-        GOOGLE_API_KEY,
-        OLLAMA_API_KEY,
+    sealed class CredentialKey {
+        abstract val value: String
+
+        data object CodeGptApiKey : CredentialKey() {
+            override val value: String = "CODEGPT_API_KEY"
+        }
+
+        data object OpenaiApiKey : CredentialKey() {
+            override val value: String = "OPENAI_API_KEY"
+        }
+
+        data class CustomServiceApiKey(val name: String) : CredentialKey() {
+            override val value: String = "CUSTOM_SERVICE_API_KEY:$name"
+        }
+
+        data object AnthropicApiKey : CredentialKey() {
+            override val value: String = "ANTHROPIC_API_KEY"
+        }
+
+        data object AzureOpenaiApiKey : CredentialKey() {
+            override val value: String = "AZURE_OPENAI_API_KEY"
+        }
+
+        data object AzureActiveDirectoryToken : CredentialKey() {
+            override val value: String = "AZURE_ACTIVE_DIRECTORY_TOKEN"
+        }
+
+        data object LlamaApiKey : CredentialKey() {
+            override val value: String = "LLAMA_API_KEY"
+        }
+
+        data object GoogleApiKey : CredentialKey() {
+            override val value: String = "GOOGLE_API_KEY"
+        }
+
+        data object OllamaApikey : CredentialKey() {
+            override val value: String = "OLLAMA_API_KEY"
+        }
     }
 }

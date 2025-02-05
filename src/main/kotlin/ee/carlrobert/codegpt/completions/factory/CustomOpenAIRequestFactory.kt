@@ -27,7 +27,7 @@ class CustomOpenAIRequestFactory : BaseRequestFactory() {
                 .chatCompletionSettings,
             OpenAIRequestFactory.buildOpenAIMessages(null, params),
             true,
-            getCredential(CredentialKey.CUSTOM_SERVICE_API_KEY)
+            getCredential(CredentialKey.CustomServiceApiKey)
         )
         return CustomOpenAIRequest(request)
     }
@@ -45,7 +45,7 @@ class CustomOpenAIRequestFactory : BaseRequestFactory() {
                 OpenAIChatCompletionStandardMessage("user", userPrompt)
             ),
             stream,
-            getCredential(CredentialKey.CUSTOM_SERVICE_API_KEY)
+            getCredential(CredentialKey.CustomServiceApiKey)
         )
         return CustomOpenAIRequest(request)
     }

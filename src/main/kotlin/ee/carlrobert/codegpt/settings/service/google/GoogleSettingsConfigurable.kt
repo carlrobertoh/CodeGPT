@@ -2,7 +2,7 @@ package ee.carlrobert.codegpt.settings.service.google;
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.options.Configurable
-import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.GOOGLE_API_KEY
+import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.GoogleApiKey
 import ee.carlrobert.codegpt.credentials.CredentialsStore.getCredential
 import ee.carlrobert.codegpt.credentials.CredentialsStore.setCredential
 import ee.carlrobert.codegpt.settings.GeneralSettings
@@ -23,11 +23,11 @@ class GoogleSettingsConfigurable : Configurable {
     }
 
     override fun isModified(): Boolean {
-        return component.isModified() || component.getApiKey() != getCredential(GOOGLE_API_KEY)
+        return component.isModified() || component.getApiKey() != getCredential(GoogleApiKey)
     }
 
     override fun apply() {
-        setCredential(GOOGLE_API_KEY, component.getApiKey())
+        setCredential(GoogleApiKey, component.getApiKey())
         service<GeneralSettings>().state.selectedService = ServiceType.GOOGLE
         component.applyChanges()
     }

@@ -2,7 +2,7 @@ package ee.carlrobert.codegpt.settings.service.custom
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.options.Configurable
-import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.CUSTOM_SERVICE_API_KEY
+import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.CustomServiceApiKey
 import ee.carlrobert.codegpt.credentials.CredentialsStore.getCredential
 import ee.carlrobert.codegpt.credentials.CredentialsStore.setCredential
 import ee.carlrobert.codegpt.settings.GeneralSettings
@@ -28,13 +28,13 @@ class CustomServiceConfigurable : Configurable {
     }
 
     override fun isModified(): Boolean {
-        return component.getApiKey() != getCredential(CUSTOM_SERVICE_API_KEY) || component.isModified()
+        return component.getApiKey() != getCredential(CustomServiceApiKey) || component.isModified()
 
     }
 
     override fun apply() {
         component.applyChanges()
-        setCredential(CUSTOM_SERVICE_API_KEY, component.getApiKey())
+        setCredential(CustomServiceApiKey, component.getApiKey())
         service<GeneralSettings>().state.selectedService = ServiceType.CUSTOM_OPENAI
     }
 
