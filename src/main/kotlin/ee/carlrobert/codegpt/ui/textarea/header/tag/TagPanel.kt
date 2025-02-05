@@ -17,11 +17,13 @@ import ee.carlrobert.codegpt.util.EditorUtil.getSelectedEditor
 import ee.carlrobert.codegpt.util.EditorUtil.getSelectedEditorFile
 import java.awt.Cursor
 import java.awt.Dimension
-import java.awt.FlowLayout
+import java.awt.GridBagConstraints
+import java.awt.GridBagLayout
 import java.awt.Graphics
 import javax.swing.Icon
 import javax.swing.JButton
 import javax.swing.JToggleButton
+import javax.swing.JPanel
 
 abstract class TagPanel(
     var tagDetails: TagDetails,
@@ -67,14 +69,22 @@ abstract class TagPanel(
 
     private fun setupUI() {
         isOpaque = false
-        layout = FlowLayout(FlowLayout.LEFT, 0, 0)
-        border = JBUI.Borders.empty(2, 8)
+        layout = GridBagLayout()
+        border = JBUI.Borders.empty(2, 6)
         cursor = Cursor(Cursor.HAND_CURSOR)
         isSelected = tagDetails.selected
         closeButton.isVisible = isSelected
 
-        add(label)
-        add(closeButton)
+        val gbc = GridBagConstraints().apply {
+            gridx = 0
+            gridy = 0
+            anchor = GridBagConstraints.CENTER
+            fill = GridBagConstraints.NONE
+        }
+
+        add(label, gbc)
+        gbc.gridx = 1
+        add(closeButton, gbc)
 
         addActionListener {
             if (isRevertingSelection) return@addActionListener

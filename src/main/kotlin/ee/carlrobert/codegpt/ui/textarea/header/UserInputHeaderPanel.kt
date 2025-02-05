@@ -53,8 +53,9 @@ class UserInputHeaderPanel(
     private val emptyText = JBLabel("No context included").apply {
         foreground = JBUI.CurrentTheme.Label.disabledForeground()
         font = JBUI.Fonts.smallFont()
-        border = JBUI.Borders.empty(3, 4)
         isVisible = getSelectedEditor(project) == null
+        preferredSize = Dimension(preferredSize.width, 20)
+        verticalAlignment = JBLabel.CENTER
     }
     private val selectionTagPanel = SelectionTagPanel(project, promptTextField)
     private val defaultHeaderTagsPanel = CustomFlowPanel().apply {
