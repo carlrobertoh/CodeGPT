@@ -315,7 +315,7 @@ class CustomServiceListForm(
     }
 
     private fun validateServiceNames(): Boolean {
-        val serviceNames = formState.value.services.map { it.name }.filterNotNull()
+        val serviceNames = formState.value.services.mapNotNull { it.name }
         val uniqueNames = serviceNames.toSet()
         return serviceNames.size == uniqueNames.size
     }

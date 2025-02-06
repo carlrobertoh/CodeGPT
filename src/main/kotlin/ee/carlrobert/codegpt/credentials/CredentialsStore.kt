@@ -49,6 +49,11 @@ object CredentialsStore {
             override val value: String = "CUSTOM_SERVICE_API_KEY:$name"
         }
 
+        @Deprecated("Only for migration")
+        data object CustomServiceApiKeyLegacy : CredentialKey() {
+            override val value: String = "CUSTOM_SERVICE_API_KEY"
+        }
+
         data object AnthropicApiKey : CredentialKey() {
             override val value: String = "ANTHROPIC_API_KEY"
         }

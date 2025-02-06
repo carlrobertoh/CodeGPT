@@ -1,12 +1,15 @@
 package ee.carlrobert.codegpt.settings.service.custom
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.core.type.TypeReference
 import com.intellij.openapi.components.*
 import com.intellij.util.xmlb.annotations.OptionTag
 import ee.carlrobert.codegpt.codecompletions.InfillPromptTemplate
+import ee.carlrobert.codegpt.credentials.CredentialsStore
 import ee.carlrobert.codegpt.settings.service.custom.template.CustomServiceChatCompletionTemplate
 import ee.carlrobert.codegpt.settings.service.custom.template.CustomServiceCodeCompletionTemplate
 import ee.carlrobert.codegpt.settings.service.custom.template.CustomServiceTemplate
-import ee.carlrobert.codegpt.util.ListConverter
+import ee.carlrobert.codegpt.util.BaseConverter
 import ee.carlrobert.codegpt.util.MapConverter
 
 private const val DEFAULT_SERVICE_SETTINGS_NANE = "Default"
@@ -49,17 +52,37 @@ class CustomServicesSettings :
     override fun initializeComponent() {
         super.initializeComponent()
         val oldSettingsService = serviceOrNull<CustomServiceSettings>()
-        if (oldSettingsService != null && !oldSettingsService.state.isEqualToDefault()) {
+
+        // This line checks if the legacy API key exists to determine if migration of old settings is needed
+        val oldApiKey = CredentialsStore.getCredential(CredentialsStore.CredentialKey.CustomServiceApiKeyLegacy)
+
+        if (oldSettingsService != null && oldApiKey != null) {
             val migrated = CustomServiceSettingsState().apply { copyFrom(oldSettingsService.state) }
             state.services.clear()
             state.services.add(migrated)
             state.active = migrated
 
+            CredentialsStore.setCredential(CredentialsStore.CredentialKey.CustomServiceApiKeyLegacy, null)
+            CredentialsStore.setCredential(
+                CredentialsStore.CredentialKey.CustomServiceApiKey(state.active.name.orEmpty()),
+                oldApiKey
+            )
+
             oldSettingsService.state.apply {
-                val default = CustomServiceSettingsState()
-                template = default.template
-                chatCompletionSettings = default.chatCompletionSettings
-                codeCompletionSettings = default.codeCompletionSettings
+                template = CustomServiceTemplate.OPENAI
+                chatCompletionSettings = chatCompletionSettings.apply {
+                    url = ""
+                    headers = mutableMapOf()
+                    body = mutableMapOf()
+                }
+                codeCompletionSettings = codeCompletionSettings.apply {
+                    codeCompletionsEnabled = false
+                    parseResponseAsChatCompletions = false
+                    infillTemplate = InfillPromptTemplate.OPENAI
+                    url = ""
+                    headers = mutableMapOf()
+                    body = mutableMapOf()
+                }
                 url = null
                 body = mutableMapOf()
                 headers = mutableMapOf()
@@ -68,10 +91,15 @@ class CustomServicesSettings :
     }
 }
 
+private class CustomServiceSettingsListConverter : BaseConverter<List<CustomServiceSettingsState>>(
+    object : TypeReference<List<CustomServiceSettingsState>>() {}
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 class CustomServicesState(
     initialState: CustomServiceSettingsState = CustomServiceSettingsState()
 ) : BaseState() {
-    @get:OptionTag(converter = ListConverter::class)
+    @get:OptionTag(converter = CustomServiceSettingsListConverter::class)
     var services by list<CustomServiceSettingsState>()
 
     var active by property<CustomServiceSettingsState>(initialState)
@@ -81,6 +109,7 @@ class CustomServicesState(
     }
 }
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 class CustomServiceSettingsState : BaseState() {
     var name by string(DEFAULT_SERVICE_SETTINGS_NANE)
     var template by enum(CustomServiceTemplate.OPENAI)
@@ -98,6 +127,7 @@ class CustomServiceSettingsState : BaseState() {
     var body by map<String, Any>()
 }
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 class CustomServiceChatCompletionSettingsState : BaseState() {
     var url by string(CustomServiceChatCompletionTemplate.OPENAI.url)
     var headers by map<String, String>()
@@ -111,6 +141,7 @@ class CustomServiceChatCompletionSettingsState : BaseState() {
     }
 }
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 class CustomServiceCodeCompletionSettingsState : BaseState() {
     var codeCompletionsEnabled by property(true)
     var parseResponseAsChatCompletions by property(false)
