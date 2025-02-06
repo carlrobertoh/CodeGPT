@@ -301,6 +301,13 @@ class CustomServiceListForm(
         val newActualService = formStateValue.services.firstOrNull { it.name == formStateValue.active.name }
             ?: formStateValue.services.first()
 
+
+        // Cleanup saved api keys
+        val savedServicesName = service.state.services.mapNotNull { it.name }
+        val deletedServices = savedServicesName.subtract(formStateValue.services.mapNotNull { it.name }.toSet())
+        deletedServices.forEach { deletedServiceName ->
+            CredentialsStore.setCredential(CredentialKey.CustomServiceApiKey(deletedServiceName), null)
+        }
         // Save apiKeys
         formStateValue.services.forEach {
             CredentialsStore.setCredential(CredentialKey.CustomServiceApiKey(it.name.orEmpty()), it.apiKey)

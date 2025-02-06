@@ -3,7 +3,8 @@ package ee.carlrobert.codegpt.credentials
 import com.intellij.credentialStore.CredentialAttributes
 import com.intellij.credentialStore.generateServiceName
 import com.intellij.ide.passwordSafe.PasswordSafe
-import com.intellij.util.concurrency.annotations.RequiresBackgroundThread
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import java.util.concurrent.ConcurrentHashMap
 
 object CredentialsStore {
@@ -11,14 +12,16 @@ object CredentialsStore {
     private val credentialsMap = ConcurrentHashMap<String, String>()
 
     @JvmStatic
-    @RequiresBackgroundThread
+    // TODO Refactoring is needed, because it is often called from the form refactoring and @RequiresBackgroundThread
     fun getCredential(keyModel: CredentialKey): String? =
         credentialsMap.getOrPut(keyModel.value) {
-            PasswordSafe.instance.getPassword(
-                CredentialAttributes(
-                    generateServiceName("CodeGPT", keyModel.value)
-                )
-            ) ?: ""
+            runBlocking(Dispatchers.IO) {
+                PasswordSafe.instance.getPassword(
+                    CredentialAttributes(
+                        generateServiceName("CodeGPT", keyModel.value)
+                    )
+                ) ?: ""
+            }
         }.takeIf { !it.isNullOrEmpty() }
 
     fun setCredential(keyModel: CredentialKey, password: String?) {
