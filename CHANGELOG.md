@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.16.2-223] - 2025-02-06
+
 ### Fixed
 
 - Tool window initialization race condition [#856](https://github.com/carlrobertoh/CodeGPT/issues/856)
@@ -870,7 +872,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `OPENAI_API_KEY` persistence, key is saved in the OS password safe from now on
 
-[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.16.1-223...HEAD
+[Unreleased]: https://github.com/carlrobertoh/CodeGPT/compare/v2.16.2-223...HEAD
+[2.16.2-223]: https://github.com/carlrobertoh/CodeGPT/compare/v2.16.1-223...v2.16.2-223
 [2.16.1-223]: https://github.com/carlrobertoh/CodeGPT/compare/v2.16.0-223...v2.16.1-223
 [2.16.0-223]: https://github.com/carlrobertoh/CodeGPT/compare/v2.15.2-223...v2.16.0-223
 [2.15.2-223]: https://github.com/carlrobertoh/CodeGPT/compare/v2.15.1-223...v2.15.2-223
