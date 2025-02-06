@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Tool window initialization race condition [#856](https://github.com/carlrobertoh/CodeGPT/issues/856)
+- Invalid OpenAI model state [#842](https://github.com/carlrobertoh/CodeGPT/issues/842)
+- Tag panel vertical alignment using GridBagLayout [#857](https://github.com/carlrobertoh/CodeGPT/issues/857)
+
 ## [2.16.1-233] - 2025-02-04
 
 ### Added
