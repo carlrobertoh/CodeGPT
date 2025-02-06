@@ -1,7 +1,11 @@
 package ee.carlrobert.codegpt.settings.service.custom.form
 
+import com.intellij.icons.AllIcons
 import com.intellij.icons.AllIcons.General
 import com.intellij.ide.HelpTooltip
+import com.intellij.openapi.actionSystem.ActionUpdateThread
+import com.intellij.openapi.actionSystem.AnAction
+import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.ui.MessageType
 import com.intellij.ui.EnumComboBoxModel
@@ -195,6 +199,22 @@ class CustomServiceListForm(
             .setRemoveActionUpdater {
                 formState.value.services.size > 1
             }
+            .addExtraAction(object : AnAction("Duplicate", "Duplicate service", AllIcons.Actions.Copy) {
+
+                override fun getActionUpdateThread(): ActionUpdateThread {
+                    return ActionUpdateThread.EDT
+                }
+
+                override fun update(e: AnActionEvent) {
+                    val selected = customProvidersJBList.selectedIndex
+
+                    e.presentation.isEnabled = selected != -1
+                }
+
+                override fun actionPerformed(e: AnActionEvent) {
+                    handleDuplicateAction()
+                }
+            })
             .disableUpDownActions()
 
     private fun handleRemoveAction() {
@@ -212,6 +232,17 @@ class CustomServiceListForm(
         lastSelectedIndex = -1
         updateFormData(newSelectedIndex)
         customProvidersJBList.selectedIndex = newSelectedIndex
+    }
+
+    private fun handleDuplicateAction() {
+        formState.update {
+            val selectedIndex = customProvidersJBList.selectedIndex
+            val copiedService = it.services[selectedIndex].copy(name = it.services[selectedIndex].name + "Copied")
+            it.copy(
+                services = it.services + copiedService
+            )
+        }
+        customProvidersJBList.selectedIndex = formState.value.services.lastIndex
     }
 
     private fun handleAddAction() {
