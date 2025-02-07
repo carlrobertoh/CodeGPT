@@ -22,7 +22,9 @@ public class AnthropicSettingsForm {
     apiKeyField = new JBPasswordField();
     apiKeyField.setColumns(30);
     ApplicationManager.getApplication().executeOnPooledThread(() -> {
-      var apiKey = CredentialsStore.getCredential(CredentialsStore.CredentialKey.AnthropicApiKey.INSTANCE);
+      var apiKey = CredentialsStore.getCredential(
+          CredentialsStore.CredentialKey.AnthropicApiKey.INSTANCE
+      );
       SwingUtilities.invokeLater(() -> apiKeyField.setText(apiKey));
     });
     apiVersionField = new JBTextField(settings.getApiVersion(), 35);
@@ -63,7 +65,9 @@ public class AnthropicSettingsForm {
 
   public void resetForm() {
     var state = AnthropicSettings.getCurrentState();
-    apiKeyField.setText(CredentialsStore.getCredential(CredentialsStore.CredentialKey.AnthropicApiKey.INSTANCE));
+    apiKeyField.setText(
+        CredentialsStore.getCredential(CredentialsStore.CredentialKey.AnthropicApiKey.INSTANCE)
+    );
     apiVersionField.setText(state.getApiVersion());
     modelField.setText(state.getModel());
   }

@@ -125,7 +125,9 @@ public class AzureSettingsForm {
 
   public void resetForm() {
     var state = AzureSettings.getCurrentState();
-    azureApiKeyField.setText(CredentialsStore.getCredential(CredentialKey.AzureOpenaiApiKey.INSTANCE));
+    azureApiKeyField.setText(
+        CredentialsStore.getCredential(CredentialKey.AzureOpenaiApiKey.INSTANCE)
+    );
     azureActiveDirectoryTokenField.setText(
         CredentialsStore.getCredential(CredentialKey.AzureActiveDirectoryToken.INSTANCE));
     useAzureApiKeyAuthenticationRadioButton.setSelected(state.isUseAzureApiKeyAuthentication());

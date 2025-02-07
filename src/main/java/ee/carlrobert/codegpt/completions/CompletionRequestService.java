@@ -202,7 +202,9 @@ public final class CompletionRequestService {
           AzureSettings.getCurrentState().isUseAzureApiKeyAuthentication()
               ? CredentialKey.AzureOpenaiApiKey.INSTANCE
               : CredentialKey.AzureActiveDirectoryToken.INSTANCE);
-      case ANTHROPIC -> CredentialsStore.INSTANCE.isCredentialSet(CredentialKey.AnthropicApiKey.INSTANCE);
+      case ANTHROPIC -> CredentialsStore.INSTANCE.isCredentialSet(
+          CredentialKey.AnthropicApiKey.INSTANCE
+      );
       case GOOGLE -> CredentialsStore.INSTANCE.isCredentialSet(CredentialKey.GoogleApiKey.INSTANCE);
       case CODEGPT, CUSTOM_OPENAI, LLAMA_CPP, OLLAMA -> true;
     };

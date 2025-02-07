@@ -41,17 +41,14 @@ import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
 import ee.carlrobert.llm.client.google.models.GoogleModel;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
-
-import static ee.carlrobert.codegpt.settings.service.ServiceType.*;
-import static java.lang.String.format;
+import javax.swing.Icon;
+import javax.swing.JComponent;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class ModelComboBoxAction extends ComboBoxAction {
 
@@ -62,27 +59,27 @@ public class ModelComboBoxAction extends ComboBoxAction {
   private final List<ServiceType> availableProviders;
 
   public ModelComboBoxAction(
-          Project project,
-          Consumer<ServiceType> onModelChange,
-          ServiceType selectedService) {
+      Project project,
+      Consumer<ServiceType> onModelChange,
+      ServiceType selectedService) {
     this(project, onModelChange, selectedService, Arrays.asList(ServiceType.values()));
   }
 
   public ModelComboBoxAction(
-          Project project,
-          Consumer<ServiceType> onModelChange,
-          ServiceType selectedProvider,
-          List<ServiceType> availableProviders) {
+      Project project,
+      Consumer<ServiceType> onModelChange,
+      ServiceType selectedProvider,
+      List<ServiceType> availableProviders) {
     this.project = project;
     this.onModelChange = onModelChange;
     this.availableProviders = availableProviders;
     setSmallVariant(true);
     updateTemplatePresentation(selectedProvider);
     ApplicationManager.getApplication().getMessageBus()
-            .connect()
-            .subscribe(
-                    ProviderChangeNotifier.getTOPIC(),
-                    (ProviderChangeNotifier) this::updateTemplatePresentation);
+        .connect()
+        .subscribe(
+            ProviderChangeNotifier.getTOPIC(),
+            (ProviderChangeNotifier) this::updateTemplatePresentation);
   }
 
   public JComponent createCustomComponent(@NotNull String place) {
@@ -92,11 +89,11 @@ public class ModelComboBoxAction extends ComboBoxAction {
   @NotNull
   @Override
   public JComponent createCustomComponent(
-          @NotNull Presentation presentation,
-          @NotNull String place) {
+      @NotNull Presentation presentation,
+      @NotNull String place) {
     ComboBoxButton button = createComboBoxButton(presentation);
     button.setForeground(
-            EditorColorsManager.getInstance().getGlobalScheme().getDefaultForeground());
+        EditorColorsManager.getInstance().getGlobalScheme().getDefaultForeground());
     button.setBorder(null);
     button.putClientProperty("JButton.backgroundColor", new Color(0, 0, 0, 0));
     return button;
@@ -113,9 +110,9 @@ public class ModelComboBoxAction extends ComboBoxAction {
   private AnAction[] getCodeGPTModelActions(Project project, Presentation presentation) {
     var userDetails = CodeGPTKeys.CODEGPT_USER_DETAILS.get(project);
     return CodeGPTAvailableModels.getToolWindowModels(
-                    userDetails == null ? null : userDetails.getPricingPlan()).stream()
-            .map(model -> createCodeGPTModelAction(model, presentation))
-            .toArray(AnAction[]::new);
+            userDetails == null ? null : userDetails.getPricingPlan()).stream()
+        .map(model -> createCodeGPTModelAction(model, presentation))
+        .toArray(AnAction[]::new);
   }
 
   @Override
@@ -133,61 +130,63 @@ public class ModelComboBoxAction extends ComboBoxAction {
       var openaiGroup = DefaultActionGroup.createPopupGroup(() -> "OpenAI");
       openaiGroup.getTemplatePresentation().setIcon(Icons.OpenAI);
       List.of(
-                      OpenAIChatCompletionModel.O_3_MINI,OpenAIChatCompletionModel.O_1_PREVIEW,
-                      OpenAIChatCompletionModel.O_1_MINI,
-                      OpenAIChatCompletionModel.GPT_4_O,
-                      OpenAIChatCompletionModel.GPT_4_O_MINI,
-                      OpenAIChatCompletionModel.GPT_4_0125_128k)
-              .forEach(model -> openaiGroup.add(createOpenAIModelAction(model, presentation)));
+              OpenAIChatCompletionModel.O_3_MINI, OpenAIChatCompletionModel.O_1_PREVIEW,
+              OpenAIChatCompletionModel.O_1_MINI,
+              OpenAIChatCompletionModel.GPT_4_O,
+              OpenAIChatCompletionModel.GPT_4_O_MINI,
+              OpenAIChatCompletionModel.GPT_4_0125_128k)
+          .forEach(model -> openaiGroup.add(createOpenAIModelAction(model, presentation)));
       actionGroup.add(openaiGroup);
     }
     if (availableProviders.contains(CUSTOM_OPENAI)) {
       List<CustomServiceSettingsState> services = ApplicationManager.getApplication()
-              .getService(CustomServicesSettings.class)
-              .getState()
-              .getServices();
+          .getService(CustomServicesSettings.class)
+          .getState()
+          .getServices();
 
       var customGroup = DefaultActionGroup.createPopupGroup(() -> "Custom OpenAI");
       customGroup.getTemplatePresentation().setIcon(Icons.OpenAI);
-      services.forEach(model -> customGroup.add(createCustomOpenAIModelAction(model, presentation)));
+      services.forEach(model ->
+          customGroup.add(createCustomOpenAIModelAction(model, presentation))
+      );
       actionGroup.add(customGroup);
     }
     if (availableProviders.contains(ANTHROPIC)) {
       actionGroup.add(createModelAction(
-              ANTHROPIC,
-              "Anthropic (Claude)",
-              Icons.Anthropic,
-              presentation));
+          ANTHROPIC,
+          "Anthropic (Claude)",
+          Icons.Anthropic,
+          presentation));
     }
     if (availableProviders.contains(AZURE)) {
       actionGroup.add(
-              createModelAction(AZURE, "Azure OpenAI", Icons.Azure, presentation));
+          createModelAction(AZURE, "Azure OpenAI", Icons.Azure, presentation));
     }
     if (availableProviders.contains(GOOGLE)) {
       var googleGroup = DefaultActionGroup.createPopupGroup(() -> "Google (Gemini)");
       googleGroup.getTemplatePresentation().setIcon(Icons.Google);
       Arrays.stream(GoogleModel.values())
-              .forEach(model ->
-                      googleGroup.add(createGoogleModelAction(model, presentation)));
+          .forEach(model ->
+              googleGroup.add(createGoogleModelAction(model, presentation)));
       actionGroup.add(googleGroup);
     }
     if (availableProviders.contains(LLAMA_CPP)) {
       actionGroup.addSeparator("Local Providers");
       actionGroup.add(createModelAction(
-              LLAMA_CPP,
-              getLlamaCppPresentationText(),
-              Icons.Llama,
-              presentation));
+          LLAMA_CPP,
+          getLlamaCppPresentationText(),
+          Icons.Llama,
+          presentation));
     }
     if (availableProviders.contains(OLLAMA)) {
       var ollamaGroup = DefaultActionGroup.createPopupGroup(() -> "Ollama");
       ollamaGroup.getTemplatePresentation().setIcon(Icons.Ollama);
       ApplicationManager.getApplication()
-              .getService(OllamaSettings.class)
-              .getState()
-              .getAvailableModels()
-              .forEach(model ->
-                      ollamaGroup.add(createOllamaModelAction(model, presentation)));
+          .getService(OllamaSettings.class)
+          .getState()
+          .getAvailableModels()
+          .forEach(model ->
+              ollamaGroup.add(createOllamaModelAction(model, presentation)));
       actionGroup.add(ollamaGroup);
     }
 
@@ -205,12 +204,12 @@ public class ModelComboBoxAction extends ComboBoxAction {
     switch (selectedService) {
       case CODEGPT:
         var modelCode = application.getService(CodeGPTServiceSettings.class)
-                .getState()
-                .getChatCompletionSettings()
-                .getModel();
+            .getState()
+            .getChatCompletionSettings()
+            .getModel();
         var model = CodeGPTAvailableModels.getALL_CHAT_MODELS().stream()
-                .filter(it -> it.getCode().equals(modelCode))
-                .findFirst();
+            .filter(it -> it.getCode().equals(modelCode))
+            .findFirst();
         templatePresentation.setIcon(model.map(CodeGPTModel::getIcon).orElse(Icons.CodeGPTModel));
         templatePresentation.setText(model.map(CodeGPTModel::getName).orElse("Unknown"));
         break;
@@ -218,9 +217,10 @@ public class ModelComboBoxAction extends ComboBoxAction {
         templatePresentation.setIcon(Icons.OpenAI);
 
         var selectedModel = OpenAISettings.getCurrentState().getModel();
-        try {        templatePresentation.setText(
-                OpenAIChatCompletionModel.findByCode(selectedModel).getDescription());
-                        } catch (Exception e) {
+        try {
+          templatePresentation.setText(
+              OpenAIChatCompletionModel.findByCode(selectedModel).getDescription());
+        } catch (Exception e) {
           LOG.error("Could find OpenAI model for code {}", e, selectedModel);
           // TODO: Find out why another provider's model was stored in the first place
           templatePresentation.setText(OpenAIChatCompletionModel.GPT_4_O.getDescription());
@@ -229,10 +229,10 @@ public class ModelComboBoxAction extends ComboBoxAction {
       case CUSTOM_OPENAI:
         templatePresentation.setIcon(Icons.OpenAI);
         templatePresentation.setText(
-                application.getService(CustomServicesSettings.class)
-                        .getState()
-                        .getActive()
-                        .getName());
+            application.getService(CustomServicesSettings.class)
+                .getState()
+                .getActive()
+                .getName());
         break;
       case ANTHROPIC:
         templatePresentation.setIcon(Icons.Anthropic);
@@ -249,8 +249,8 @@ public class ModelComboBoxAction extends ComboBoxAction {
       case OLLAMA:
         templatePresentation.setIcon(Icons.Ollama);
         templatePresentation.setText(application.getService(OllamaSettings.class)
-                .getState()
-                .getModel());
+            .getState()
+            .getModel());
         break;
       case GOOGLE:
         templatePresentation.setText("Google (Gemini)");
@@ -273,26 +273,26 @@ public class ModelComboBoxAction extends ComboBoxAction {
     var huggingFaceModel = LlamaSettings.getCurrentState().getHuggingFaceModel();
     var llamaModel = LlamaModel.findByHuggingFaceModel(huggingFaceModel);
     return format(
-            "%s %dB (Q%d)",
-            llamaModel.getLabel(),
-            huggingFaceModel.getParameterSize(),
-            huggingFaceModel.getQuantization());
+        "%s %dB (Q%d)",
+        llamaModel.getLabel(),
+        huggingFaceModel.getParameterSize(),
+        huggingFaceModel.getQuantization());
   }
 
   private AnAction createModelAction(
-          ServiceType serviceType,
-          String label,
-          Icon icon,
-          Presentation comboBoxPresentation) {
+      ServiceType serviceType,
+      String label,
+      Icon icon,
+      Presentation comboBoxPresentation) {
     return createModelAction(serviceType, label, icon, comboBoxPresentation, null);
   }
 
   private AnAction createModelAction(
-          ServiceType serviceType,
-          String label,
-          Icon icon,
-          Presentation comboBoxPresentation,
-          Runnable onModelChanged) {
+      ServiceType serviceType,
+      String label,
+      Icon icon,
+      Presentation comboBoxPresentation,
+      Runnable onModelChanged) {
     return new DumbAwareAction(label, "", icon) {
       @Override
       public void update(@NotNull AnActionEvent event) {
@@ -316,7 +316,7 @@ public class ModelComboBoxAction extends ComboBoxAction {
   }
 
   private void handleModelChange(
-          ServiceType serviceType) {
+      ServiceType serviceType) {
     GeneralSettings.getCurrentState().setSelectedService(serviceType);
     updateTemplatePresentation(serviceType);
     onModelChange.accept(serviceType);
@@ -325,43 +325,43 @@ public class ModelComboBoxAction extends ComboBoxAction {
   private AnAction createCodeGPTModelAction(CodeGPTModel model, Presentation comboBoxPresentation) {
 
     return createModelAction(CODEGPT, model.getName(), model.getIcon(), comboBoxPresentation,
-            () -> ApplicationManager.getApplication()
-                    .getService(CodeGPTServiceSettings.class)
-                    .getState()
-                    .getChatCompletionSettings()
-                    .setModel(model.getCode()));
+        () -> ApplicationManager.getApplication()
+            .getService(CodeGPTServiceSettings.class)
+            .getState()
+            .getChatCompletionSettings()
+            .setModel(model.getCode()));
   }
 
   private AnAction createOllamaModelAction(String model, Presentation comboBoxPresentation) {
     return createModelAction(OLLAMA, model, Icons.Ollama, comboBoxPresentation,
-            () -> ApplicationManager.getApplication()
-                    .getService(OllamaSettings.class)
-                    .getState()
-                    .setModel(model));
+        () -> ApplicationManager.getApplication()
+            .getService(OllamaSettings.class)
+            .getState()
+            .setModel(model));
   }
 
   private AnAction createOpenAIModelAction(
-          OpenAIChatCompletionModel model,
-          Presentation comboBoxPresentation) {
+      OpenAIChatCompletionModel model,
+      Presentation comboBoxPresentation) {
     return createModelAction(OPENAI, model.getDescription(), Icons.OpenAI, comboBoxPresentation,
-            () -> OpenAISettings.getCurrentState().setModel(model.getCode()));
+        () -> OpenAISettings.getCurrentState().setModel(model.getCode()));
   }
 
   private AnAction createCustomOpenAIModelAction(
-          CustomServiceSettingsState model,
-          Presentation comboBoxPresentation) {
+      CustomServiceSettingsState model,
+      Presentation comboBoxPresentation) {
     return createModelAction(CUSTOM_OPENAI, model.getName(), Icons.OpenAI, comboBoxPresentation,
-            () -> ApplicationManager.getApplication()
-                    .getService(CustomServicesSettings.class)
-                    .getState()
-                    .setActive(model));
+        () -> ApplicationManager.getApplication()
+            .getService(CustomServicesSettings.class)
+            .getState()
+            .setActive(model));
   }
 
   private AnAction createGoogleModelAction(GoogleModel model, Presentation comboBoxPresentation) {
     return createModelAction(GOOGLE, model.getDescription(), Icons.Google, comboBoxPresentation,
-            () -> ApplicationManager.getApplication()
-                    .getService(GoogleSettings.class)
-                    .getState()
-                    .setModel(model.getCode()));
+        () -> ApplicationManager.getApplication()
+            .getService(GoogleSettings.class)
+            .getState()
+            .setModel(model.getCode()));
   }
 }
