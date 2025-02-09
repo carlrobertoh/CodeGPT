@@ -8,7 +8,7 @@ import com.intellij.codeInsight.lookup.impl.LookupImpl
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.components.service
-import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.CODEGPT_API_KEY
+import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.CodeGptApiKey
 import ee.carlrobert.codegpt.credentials.CredentialsStore.isCredentialSet
 import ee.carlrobert.codegpt.predictions.PredictionService
 import ee.carlrobert.codegpt.settings.GeneralSettings
@@ -38,7 +38,7 @@ class CodeGPTLookupListener : LookupManagerListener {
                     if (GeneralSettings.getSelectedService() != ServiceType.CODEGPT
                         || !service<CodeGPTServiceSettings>().state.codeAssistantEnabled
                         || encodingManager.countTokens(editor.document.text) > 4096
-                        || !isCredentialSet(CODEGPT_API_KEY) && encodingManager.countTokens(editor.document.text) > 2048
+                        || !isCredentialSet(CodeGptApiKey) && encodingManager.countTokens(editor.document.text) > 2048
                     ) {
                         return
                     }
