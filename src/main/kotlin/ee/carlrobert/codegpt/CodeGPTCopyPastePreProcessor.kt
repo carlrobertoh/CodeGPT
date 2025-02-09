@@ -7,7 +7,7 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.RawText
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
-import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.CODEGPT_API_KEY
+import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.CodeGptApiKey
 import ee.carlrobert.codegpt.credentials.CredentialsStore.isCredentialSet
 import ee.carlrobert.codegpt.predictions.PredictionService
 import ee.carlrobert.codegpt.settings.GeneralSettings
@@ -60,7 +60,7 @@ class CodeGPTCopyPastePreProcessor : CopyPastePreProcessor {
         val currentTokens = getDocumentTokenCount(documentText)
         if (currentTokens > MAX_TOKEN_LIMIT) return
 
-        if (!isCredentialSet(CODEGPT_API_KEY) && currentTokens > FREE_TIER_TOKEN_LIMIT) return
+        if (!isCredentialSet(CodeGptApiKey) && currentTokens > FREE_TIER_TOKEN_LIMIT) return
 
         CoroutineScope(Dispatchers.IO).launch {
             handleDisplay()

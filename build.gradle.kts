@@ -65,6 +65,8 @@ dependencies {
   implementation(kotlin("stdlib"))
   implementation(kotlin("reflect"))
   implementation(libs.jsoup)
+  implementation(libs.kotlinx.coroutines.swing)
+  implementation(libs.kotlinx.coroutines.core)
   implementation(libs.commons.text)
   implementation(libs.jtokkit)
   testImplementation(kotlin("test"))
