@@ -6,7 +6,7 @@ import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBPasswordField
 import com.intellij.util.ui.FormBuilder
 import ee.carlrobert.codegpt.CodeGPTBundle
-import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.CODEGPT_API_KEY
+import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.CodeGptApiKey
 import ee.carlrobert.codegpt.credentials.CredentialsStore.getCredential
 import ee.carlrobert.codegpt.credentials.CredentialsStore.setCredential
 import ee.carlrobert.codegpt.ui.UIUtil
@@ -52,7 +52,7 @@ class CodeGPTServiceForm {
 
     init {
         apiKeyField.text = runBlocking(Dispatchers.IO) {
-            getCredential(CODEGPT_API_KEY)
+            getCredential(CodeGptApiKey)
         }
     }
 
@@ -89,7 +89,7 @@ class CodeGPTServiceForm {
                 || (codeCompletionModelComboBox.selectedItem as CodeGPTModel).code != codeCompletionSettings.model
                 || codeAssistantEnabledCheckBox.isSelected != codeAssistantEnabled
                 || codeCompletionsEnabledCheckBox.isSelected != codeCompletionSettings.codeCompletionsEnabled
-                || getApiKey() != getCredential(CODEGPT_API_KEY)
+                || getApiKey() != getCredential(CodeGptApiKey)
     }
 
     fun applyChanges() {
@@ -102,7 +102,7 @@ class CodeGPTServiceForm {
             codeCompletionSettings.model =
                 (codeCompletionModelComboBox.selectedItem as CodeGPTModel).code
         }
-        setCredential(CODEGPT_API_KEY, getApiKey())
+        setCredential(CodeGptApiKey, getApiKey())
     }
 
     fun resetForm() {
@@ -113,7 +113,7 @@ class CodeGPTServiceForm {
             codeCompletionsEnabledCheckBox.isSelected =
                 codeCompletionSettings.codeCompletionsEnabled
         }
-        apiKeyField.text = getCredential(CODEGPT_API_KEY)
+        apiKeyField.text = getCredential(CodeGptApiKey)
     }
 
     private class CustomComboBoxRenderer : DefaultListCellRenderer() {

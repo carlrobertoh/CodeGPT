@@ -6,7 +6,7 @@ import com.intellij.ui.EnumComboBoxModel
 import com.intellij.ui.components.JBPasswordField
 import com.intellij.util.ui.FormBuilder
 import ee.carlrobert.codegpt.CodeGPTBundle
-import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.GOOGLE_API_KEY
+import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.GoogleApiKey
 import ee.carlrobert.codegpt.credentials.CredentialsStore.getCredential
 import ee.carlrobert.codegpt.ui.UIUtil
 import ee.carlrobert.llm.client.google.models.GoogleModel
@@ -23,7 +23,7 @@ class GoogleSettingsForm {
         val state = service<GoogleSettings>().state
         apiKeyField.columns = 30
         apiKeyField.text = runBlocking(Dispatchers.IO) {
-            getCredential(GOOGLE_API_KEY)
+            getCredential(GoogleApiKey)
         }
         completionModelComboBox = ComboBox(
             EnumComboBoxModel(GoogleModel::class.java)
@@ -60,12 +60,12 @@ class GoogleSettingsForm {
 
     fun resetForm() {
         val state = service<GoogleSettings>().state
-        apiKeyField.text = getCredential(GOOGLE_API_KEY)
+        apiKeyField.text = getCredential(GoogleApiKey)
         completionModelComboBox.selectedItem = GoogleModel.findByCode(state.model)
     }
 
     fun isModified(): Boolean = service<GoogleSettings>().state.run {
-        model != getModel() || getApiKey() != getCredential(GOOGLE_API_KEY)
+        model != getModel() || getApiKey() != getCredential(GoogleApiKey)
     }
 
     fun applyChanges() {

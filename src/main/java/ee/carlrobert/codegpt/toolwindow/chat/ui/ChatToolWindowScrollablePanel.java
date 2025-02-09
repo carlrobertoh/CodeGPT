@@ -35,7 +35,7 @@ public class ChatToolWindowScrollablePanel extends ScrollablePanel {
     clearAll();
     add(landingView);
     if (GeneralSettings.isSelected(ServiceType.CODEGPT)
-        && !CredentialsStore.INSTANCE.isCredentialSet(CredentialKey.CODEGPT_API_KEY)) {
+        && !CredentialsStore.INSTANCE.isCredentialSet(CredentialKey.CodeGptApiKey.INSTANCE)) {
 
       var panel = new ResponseMessagePanel();
       panel.addContent(UIUtil.createTextPane("""
