@@ -309,10 +309,8 @@ class UserInputHeaderPanel(
     private inner class IncludedFilesListener : IncludeFilesInContextNotifier {
         override fun filesIncluded(includedFiles: MutableList<VirtualFile>) {
             includedFiles
-                .filterNot { tagManager.isFileTagExists(it) }
-                .forEach {
-                    tagManager.addTag(FileTagDetails(it))
-                }
+                .filterNot { tagManager.isFileTagExists(it) || getSelectedFile() == it }
+                .forEach { tagManager.addTag(FileTagDetails(it)) }
         }
     }
 }
