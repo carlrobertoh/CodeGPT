@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt;
 
+import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import java.io.File;
@@ -24,8 +25,17 @@ public record ReferencedFile(String fileName, String filePath, String fileConten
     return new ReferencedFile(
         virtualFile.getName(),
         virtualFile.getPath(),
-        readContent(virtualFile)
+        getVirtualFileContent(virtualFile)
     );
+  }
+
+  private static String getVirtualFileContent(VirtualFile virtualFile) {
+    var documentManager = FileDocumentManager.getInstance();
+    var document = documentManager.getDocument(virtualFile);
+    if (document != null && documentManager.isDocumentUnsaved(document)) {
+      return document.getText();
+    }
+    return readContent(virtualFile);
   }
 
   private static String readContent(File file) {
