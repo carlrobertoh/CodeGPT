@@ -82,12 +82,14 @@ class UserInputHeaderPanel(
         val selectedTags = tagManager.getTags().filter { it.selected }.toMutableList()
 
         val selectedFile = getSelectedFile()
-        if (selectedFileTagPanel.isVisible && selectedFileTagPanel.tagDetails.selected && selectedFile != null) {
+        if (selectedFileTagPanel.isVisible && selectedFileTagPanel.isSelected && selectedFile != null) {
             selectedTags.add(FileTagDetails(selectedFile))
         }
 
         (selectionTagPanel.tagDetails as? SelectionTagDetails)?.let {
-            selectedTags.add(it)
+            if (!it.selectedText.isNullOrEmpty()) {
+                selectedTags.add(it)
+            }
         }
 
         return selectedTags
