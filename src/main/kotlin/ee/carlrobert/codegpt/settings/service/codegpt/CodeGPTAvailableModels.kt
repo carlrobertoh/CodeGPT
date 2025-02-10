@@ -7,7 +7,8 @@ import javax.swing.Icon
 
 object CodeGPTAvailableModels {
 
-    val DEFAULT_CHAT_MODEL = CodeGPTModel("GPT-4o", "gpt-4o", Icons.OpenAI, INDIVIDUAL)
+    val DEFAULT_CHAT_MODEL =
+        CodeGPTModel("Gemini 2.0 Flash", "gemini-flash-2.0", Icons.Google, ANONYMOUS)
     val DEFAULT_CODE_MODEL = CodeGPTModel("Codestral", "codestral", Icons.Mistral, ANONYMOUS)
 
     @JvmStatic
@@ -18,9 +19,8 @@ object CodeGPTAvailableModels {
                 CodeGPTModel("GPT-4o", "gpt-4o", Icons.OpenAI, INDIVIDUAL),
                 CodeGPTModel("Claude 3.5 Sonnet", "claude-3.5-sonnet", Icons.Anthropic, INDIVIDUAL),
                 CodeGPTModel("DeepSeek R1", "deepseek-r1", Icons.DeepSeek, INDIVIDUAL),
-                CodeGPTModel("Gemini 1.5 Pro", "gemini-pro-1.5", Icons.Google, INDIVIDUAL),
-                CodeGPTModel("DeepSeek Coder V2 - FREE", "deepseek-coder-v2", Icons.DeepSeek, ANONYMOUS),
-                CodeGPTModel("GPT-4o mini - FREE", "gpt-4o-mini", Icons.OpenAI, ANONYMOUS),
+                CodeGPTModel("Gemini 2.0 Flash", "gemini-flash-2.0", Icons.Google, ANONYMOUS),
+                CodeGPTModel("GPT-4o mini", "gpt-4o-mini", Icons.OpenAI, ANONYMOUS),
             )
 
             FREE -> listOf(
@@ -31,7 +31,7 @@ object CodeGPTAvailableModels {
                 CodeGPTModel("DeepSeek V3", "deepseek-v3", Icons.DeepSeek, FREE),
                 CodeGPTModel("Qwen 2.5 Coder (32B)", "qwen-2.5-32b-chat", Icons.Qwen, FREE),
                 CodeGPTModel("Llama 3.1 (405B)", "llama-3.1-405b", Icons.Meta, FREE),
-                CodeGPTModel("DeepSeek Coder V2", "deepseek-coder-v2", Icons.DeepSeek, ANONYMOUS),
+                CodeGPTModel("Gemini 2.0 Flash", "gemini-flash-2.0", Icons.Google, ANONYMOUS),
             )
 
             INDIVIDUAL -> listOf(
@@ -40,7 +40,7 @@ object CodeGPTAvailableModels {
                 CodeGPTModel("Claude 3.5 Sonnet", "claude-3.5-sonnet", Icons.Anthropic, INDIVIDUAL),
                 CodeGPTModel("DeepSeek R1", "deepseek-r1", Icons.DeepSeek, INDIVIDUAL),
                 CodeGPTModel("DeepSeek V3", "deepseek-v3", Icons.DeepSeek, FREE),
-                CodeGPTModel("Gemini 1.5 Pro", "gemini-pro-1.5", Icons.Google, INDIVIDUAL),
+                CodeGPTModel("Gemini 2.0 Flash", "gemini-flash-2.0", Icons.Google, ANONYMOUS),
             )
         }
     }
@@ -52,11 +52,11 @@ object CodeGPTAvailableModels {
         CodeGPTModel("GPT-4o mini", "gpt-4o-mini", Icons.OpenAI, ANONYMOUS),
         CodeGPTModel("Claude 3.5 Sonnet", "claude-3.5-sonnet", Icons.Anthropic, INDIVIDUAL),
         CodeGPTModel("Gemini 1.5 Pro", "gemini-pro-1.5", Icons.Google, INDIVIDUAL),
+        CodeGPTModel("Gemini 2.0 Flash", "gemini-flash-2.0", Icons.Google, ANONYMOUS),
         CodeGPTModel("Qwen 2.5 Coder (32B)", "qwen-2.5-32b-chat", Icons.Qwen, FREE),
         CodeGPTModel("Llama 3.1 (405B)", "llama-3.1-405b", Icons.Meta, FREE),
         CodeGPTModel("DeepSeek R1", "deepseek-r1", Icons.DeepSeek, INDIVIDUAL),
         CodeGPTModel("DeepSeek V3", "deepseek-v3", Icons.DeepSeek, FREE),
-        CodeGPTModel("DeepSeek Coder V2", "deepseek-coder-v2", Icons.DeepSeek, FREE),
     )
 
     @JvmStatic
@@ -76,5 +76,5 @@ data class CodeGPTModel(
     val name: String,
     val code: String,
     val icon: Icon,
-    val individual: PricingPlan
+    val pricingPlan: PricingPlan
 )
