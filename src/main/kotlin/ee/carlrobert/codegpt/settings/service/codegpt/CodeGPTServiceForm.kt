@@ -79,6 +79,9 @@ class CodeGPTServiceForm {
         )
         .addVerticalGap(4)
         .addComponent(codeCompletionsEnabledCheckBox)
+        .addComponent(
+            UIUtil.createComment("settingsConfigurable.service.codegpt.enableCodeCompletion.comment", 90)
+        )
         .addComponentFillVertically(JPanel(), 0)
         .panel
 
