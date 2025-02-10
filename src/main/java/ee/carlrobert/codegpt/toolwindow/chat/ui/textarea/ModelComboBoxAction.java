@@ -36,6 +36,7 @@ import ee.carlrobert.codegpt.settings.service.google.GoogleSettings;
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings;
 import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings;
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings;
+import ee.carlrobert.codegpt.toolwindow.ui.CodeGPTModelsListPopupAction;
 import ee.carlrobert.llm.client.google.models.GoogleModel;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import java.awt.Color;
@@ -311,13 +312,14 @@ public class ModelComboBoxAction extends ComboBoxAction {
   }
 
   private AnAction createCodeGPTModelAction(CodeGPTModel model, Presentation comboBoxPresentation) {
-
-    return createModelAction(CODEGPT, model.getName(), model.getIcon(), comboBoxPresentation,
-        () -> ApplicationManager.getApplication()
-            .getService(CodeGPTServiceSettings.class)
-            .getState()
-            .getChatCompletionSettings()
-            .setModel(model.getCode()));
+    return new CodeGPTModelsListPopupAction(model, comboBoxPresentation, () -> {
+      ApplicationManager.getApplication()
+          .getService(CodeGPTServiceSettings.class)
+          .getState()
+          .getChatCompletionSettings()
+          .setModel(model.getCode());
+      handleModelChange(CODEGPT);
+    });
   }
 
   private AnAction createOllamaModelAction(String model, Presentation comboBoxPresentation) {
