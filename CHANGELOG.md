@@ -6,6 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Support for latest gemini models [#860](https://github.com/carlrobertoh/CodeGPT/issues/860)
+- Option to configure multiple Custom OpenAI providers [#859](https://github.com/carlrobertoh/CodeGPT/issues/859)
+
+### Fixed
+
+- Statusbar spinner when request fails
+- Do not include duplicate context files
+- Send editor's content when files are unsaved [#871](https://github.com/carlrobertoh/CodeGPT/issues/871)
+
 ## [2.16.2-241.1] - 2025-02-06
 
 ### Fixed
