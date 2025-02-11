@@ -13,6 +13,7 @@ interface CompletionProgressNotifier {
         val COMPLETION_PROGRESS_TOPIC =
             Topic.create("completionProgressTopic", CompletionProgressNotifier::class.java)
 
+        @JvmStatic
         fun update(project: Project, loading: Boolean) {
             if (project.isDisposed) return
 
