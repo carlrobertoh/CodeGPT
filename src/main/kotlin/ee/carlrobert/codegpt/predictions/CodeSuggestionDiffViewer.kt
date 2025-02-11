@@ -4,7 +4,6 @@ import com.intellij.diff.DiffContentFactory
 import com.intellij.diff.DiffContext
 import com.intellij.diff.requests.DiffRequest
 import com.intellij.diff.requests.SimpleDiffRequest
-import com.intellij.diff.tools.combined.COMBINED_DIFF_MAIN_UI
 import com.intellij.diff.tools.fragmented.UnifiedDiffChange
 import com.intellij.diff.tools.fragmented.UnifiedDiffViewer
 import com.intellij.diff.util.DiffUtil
@@ -197,10 +196,11 @@ class CodeSuggestionDiffViewer(
 
         myEditor.component.add(
             BorderLayoutPanel()
-                .addToRight(JBLabel(footerText)
-                    .apply {
-                        font = JBUI.Fonts.miniFont()
-                    })
+                .addToRight(
+                    JBLabel(footerText)
+                        .apply {
+                            font = JBUI.Fonts.miniFont()
+                        })
                 .apply {
                     background = editor.backgroundColor
                     border = JBUI.Borders.empty(4)
@@ -259,15 +259,19 @@ class CodeSuggestionDiffViewer(
     }
 
     private class MyDiffContext(private val project: Project?) : DiffContext() {
-        private val mainUi get() = getUserData(COMBINED_DIFF_MAIN_UI)
-
         private val ownContext: UserDataHolder = UserDataHolderBase()
 
         override fun getProject() = project
-        override fun isFocusedInWindow(): Boolean = mainUi?.isFocusedInWindow() ?: false
-        override fun isWindowFocused(): Boolean = mainUi?.isWindowFocused() ?: false
+
+        override fun isFocusedInWindow(): Boolean {
+            return false
+        }
+
+        override fun isWindowFocused(): Boolean {
+            return false
+        }
+
         override fun requestFocusInWindow() {
-            mainUi?.requestFocusInWindow()
         }
 
         override fun <T> getUserData(key: Key<T>): T? {
