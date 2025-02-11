@@ -2,7 +2,6 @@ package ee.carlrobert.codegpt.settings.service.google
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.ui.ComboBox
-import com.intellij.ui.EnumComboBoxModel
 import com.intellij.ui.components.JBPasswordField
 import com.intellij.util.ui.FormBuilder
 import ee.carlrobert.codegpt.CodeGPTBundle
@@ -12,6 +11,7 @@ import ee.carlrobert.codegpt.ui.UIUtil
 import ee.carlrobert.llm.client.google.models.GoogleModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import javax.swing.DefaultComboBoxModel
 import javax.swing.JPanel
 
 class GoogleSettingsForm {
@@ -26,11 +26,17 @@ class GoogleSettingsForm {
             getCredential(GoogleApiKey)
         }
         completionModelComboBox = ComboBox(
-            EnumComboBoxModel(GoogleModel::class.java)
+            DefaultComboBoxModel(
+                arrayOf(
+                    GoogleModel.GEMINI_2_0_PRO_EXP,
+                    GoogleModel.GEMINI_2_0_FLASH_THINKING_EXP,
+                    GoogleModel.GEMINI_2_0_FLASH,
+                    GoogleModel.GEMINI_1_5_PRO
+                )
+            )
         )
         completionModelComboBox.selectedItem = GoogleModel.findByCode(state.model)
     }
-
 
     fun getForm(): JPanel = FormBuilder.createFormBuilder()
         .addLabeledComponent(
