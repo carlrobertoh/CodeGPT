@@ -154,9 +154,12 @@ public class ModelComboBoxAction extends ComboBoxAction {
     if (availableProviders.contains(GOOGLE)) {
       var googleGroup = DefaultActionGroup.createPopupGroup(() -> "Google (Gemini)");
       googleGroup.getTemplatePresentation().setIcon(Icons.Google);
-      Arrays.stream(GoogleModel.values())
-          .forEach(model ->
-              googleGroup.add(createGoogleModelAction(model, presentation)));
+      List.of(
+              GoogleModel.GEMINI_2_0_PRO_EXP,
+              GoogleModel.GEMINI_2_0_FLASH_THINKING_EXP,
+              GoogleModel.GEMINI_2_0_FLASH,
+              GoogleModel.GEMINI_1_5_PRO)
+          .forEach(model -> googleGroup.add(createGoogleModelAction(model, presentation)));
       actionGroup.add(googleGroup);
     }
     if (availableProviders.contains(LLAMA_CPP)) {
@@ -242,12 +245,23 @@ public class ModelComboBoxAction extends ComboBoxAction {
             .getModel());
         break;
       case GOOGLE:
-        templatePresentation.setText("Google (Gemini)");
+        templatePresentation.setText(getGooglePresentationText());
         templatePresentation.setIcon(Icons.Google);
         break;
       default:
         break;
     }
+  }
+
+  private String getGooglePresentationText() {
+    var model = ApplicationManager.getApplication().getService(GoogleSettings.class)
+        .getState()
+        .getModel();
+    var predefinedModel = GoogleModel.findByCode(model);
+    if (predefinedModel == null) {
+      return model;
+    }
+    return predefinedModel.getDescription();
   }
 
   private String getLlamaCppPresentationText() {
