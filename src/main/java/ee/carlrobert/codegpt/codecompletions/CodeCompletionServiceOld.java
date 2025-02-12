@@ -74,7 +74,6 @@ public final class CodeCompletionServiceOld implements Disposable {
 
     if (project.isDisposed()
         || TypeOverHandler.getPendingTypeOverAndReset(editor)
-        || !EditorUtil.isSelectedEditor(editor)
         || LookupManager.getActiveLookup(editor) != null
         || editor.isViewer()
         || editor.isOneLineMode()) {
