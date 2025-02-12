@@ -1,13 +1,13 @@
 <!-- Plugin description -->
 
-CodeGPT is an AI-powered code assistant designed to help you with various programming activities.
+ProxyAI is an AI-powered code assistant designed to help you with various programming activities.
 It's a powerful alternative to GitHub Copilot, AI Assistant, Codiumate, and other JetBrains plugins.
 
 ## Code Assistant <sup><small>(new)</small></sup>
 
 Get multi-line edits based on your recent activity, open files and previous chat interactions.
 
-CodeGPT is the first JetBrains extension capable of suggesting modifications beyond the
+ProxyAI is the first JetBrains extension capable of suggesting modifications beyond the
 current cursor location.
 
 Learn more in our recent [blog post](https://codegpt.ee/blog/introducing-code-assistant).
@@ -22,7 +22,7 @@ Access top-tier language models (LLMs) with your own API key or use privately ho
 
 ## Build Your Own Local AI Assistant
 
-CodeGPT is the leading open-source extension for connecting your locally running LLM with JetBrains IDEs. Enjoy full AI assistance without sending data externally or needing an internet connection.
+ProxyAI is the leading open-source extension for connecting your locally running LLM with JetBrains IDEs. Enjoy full AI assistance without sending data externally or needing an internet connection.
 
 - **Ollama Integration:** Automatically detect and utilize Ollama-managed models.
 - **GGUF Support:** Easily connect custom models.
@@ -30,7 +30,7 @@ CodeGPT is the leading open-source extension for connecting your locally running
 
 ## Core Features
 
-CodeGPT offers a wide range of features to enhance your development experience:
+ProxyAI offers a wide range of features to enhance your development experience:
 
 ### Chat
 
@@ -45,7 +45,7 @@ approve or reject them with a single click.
 
 **Use images**
 
-Chat with your images. Upload manually or let CodeGPT auto-detect your screenshots.
+Chat with your images. Upload manually or let ProxyAI auto-detect your screenshots.
 
 ![Use images](https://www.codegpt.ee/images/features/use-images-w800.png)
 
@@ -65,7 +65,7 @@ Easily pull in relevant web documentation into your chat for quick reference—w
 
 **Search the web**
 
-Connect your favourite LLM to the web. CodeGPT will search for the most relevant information to answer your questions.
+Connect your favourite LLM to the web. ProxyAI will search for the most relevant information to answer your questions.
 
 ![Web search](https://www.codegpt.ee/images/features/web-search-w800.png)
 
@@ -78,7 +78,7 @@ Choose between multiple different personas for your specific needs, whether you'
 ### Code
 
 Get helpful code completions as you type, edit your code using natural language, create clear and
-concise commit messages automatically, and more. CodeGPT equips you with cutting-edge tools to
+concise commit messages automatically, and more. ProxyAI equips you with cutting-edge tools to
 streamline your workflow.
 
 **Code Assistant <sup><small>(new)</small></sup>**
@@ -95,7 +95,7 @@ Receive single-line or whole-function autocomplete suggestions as you type.
 
 **Edit code in natural language**
 
-Highlight the code you want to modify, describe the desired changes, and watch CodeGPT work its magic.
+Highlight the code you want to modify, describe the desired changes, and watch ProxyAI work its magic.
 
 ![Edit code](https://www.codegpt.ee/images/features/edit-code-w800.png)
 
@@ -119,7 +119,7 @@ Integrate local open-source language models into your coding environment and enj
 
 ## Privacy
 
-**Your data stays yours.** CodeGPT **does not** collect or store any sensitive information. With users' consent, we collect anonymous usage data to understand how users interact with the extension, including the most-used features and preferred providers.
+**Your data stays yours.** ProxyAI **does not** collect or store any sensitive information. With users' consent, we collect anonymous usage data to understand how users interact with the extension, including the most-used features and preferred providers.
 
 ## License
 
@@ -129,7 +129,7 @@ CodeGPT's code is open source under the Apache License 2.0.
 
 Your input helps us grow. Reach out through:
 
-- [Homepage](https://codegpt.ee)
+- [Homepage](https://proxyai.ee)
 - [Issue Tracker](https://github.com/carlrobertoh/CodeGPT/issues)
 - [Discord](https://discord.gg/8dTGGrwcnR)
 - [Email](mailto:carlrobertoh@gmail.com)
