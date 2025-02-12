@@ -1,6 +1,6 @@
 <idea-plugin>
     <id>ee.carlrobert.chatgpt</id>
-    <name>CodeGPT</name>
+    <name>Proxy AI</name>
     <vendor email="carlrobertoh@gmail.com" url="https://carlrobert.ee">Carl-Robert Linnupuu</vendor>
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.lang</depends>
