@@ -6,7 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [2.16.3-223] - 2025-02-11
+### Added
+
+- Claude 3.7 Sonnet model (CodeGPT)
+
+## [2.17.0-241.1] - 2025-02-12
+
+### Renamed
+
+- Plugin name
+
+## [2.16.3-241.1] - 2025-02-11
 
 ### Added
 
