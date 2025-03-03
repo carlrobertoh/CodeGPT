@@ -21,11 +21,14 @@ import ee.carlrobert.codegpt.completions.ToolwindowChatCompletionRequestHandler;
 import ee.carlrobert.codegpt.conversations.Conversation;
 import ee.carlrobert.codegpt.conversations.ConversationService;
 import ee.carlrobert.codegpt.conversations.message.Message;
+import ee.carlrobert.codegpt.psistructure.PsiStructureProvider;
 import ee.carlrobert.codegpt.settings.GeneralSettings;
 import ee.carlrobert.codegpt.settings.service.ServiceType;
 import ee.carlrobert.codegpt.telemetry.TelemetryAction;
 import ee.carlrobert.codegpt.toolwindow.chat.editor.actions.CopyAction;
+import ee.carlrobert.codegpt.toolwindow.chat.structure.data.PsiStructureRepository;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ChatMessageResponseBody;
+import ee.carlrobert.codegpt.toolwindow.chat.ui.ChatSettingsPanel;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.ChatToolWindowScrollablePanel;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.TotalTokensDetails;
 import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.TotalTokensPanel;
@@ -38,13 +41,16 @@ import ee.carlrobert.codegpt.ui.textarea.header.tag.FileTagDetails;
 import ee.carlrobert.codegpt.ui.textarea.header.tag.GitCommitTagDetails;
 import ee.carlrobert.codegpt.ui.textarea.header.tag.PersonaTagDetails;
 import ee.carlrobert.codegpt.ui.textarea.header.tag.TagDetails;
+import ee.carlrobert.codegpt.ui.textarea.header.tag.TagManager;
 import ee.carlrobert.codegpt.util.EditorUtil;
+import ee.carlrobert.codegpt.util.coroutines.CoroutineDispatchers;
 import ee.carlrobert.codegpt.util.file.FileUtil;
 import git4idea.GitCommit;
 import java.awt.BorderLayout;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import javax.swing.Box;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import kotlin.Unit;
@@ -64,6 +70,8 @@ public class ChatToolWindowTabPanel implements Disposable {
   private final ConversationService conversationService;
   private final TotalTokensPanel totalTokensPanel;
   private final ChatToolWindowScrollablePanel toolWindowScrollablePanel;
+  private final PsiStructureRepository psiStructureRepository;
+  private final TagManager tagManager;
 
   private @Nullable ToolwindowChatCompletionRequestHandler requestHandler;
 
@@ -73,6 +81,12 @@ public class ChatToolWindowTabPanel implements Disposable {
     this.chatSession = new ChatSession();
     conversationService = ConversationService.getInstance();
     toolWindowScrollablePanel = new ChatToolWindowScrollablePanel();
+    this.psiStructureRepository = new PsiStructureRepository(
+        new PsiStructureProvider(),
+        new CoroutineDispatchers()
+    );
+    tagManager = new TagManager();
+
     totalTokensPanel = new TotalTokensPanel(
         project,
         conversation,
@@ -83,6 +97,8 @@ public class ChatToolWindowTabPanel implements Disposable {
         conversation,
         totalTokensPanel,
         this,
+        psiStructureRepository,
+        tagManager,
         this::handleSubmit,
         this::handleCancel);
     userInputPanel.requestFocus();
@@ -233,7 +249,7 @@ public class ChatToolWindowTabPanel implements Disposable {
   }
 
   private void reloadMessage(ChatCompletionParameters prevParameters,
-      UserMessagePanel userMessagePanel) {
+                             UserMessagePanel userMessagePanel) {
     var prevMessage = prevParameters.getMessage();
     ResponseMessagePanel responsePanel = null;
     try {
@@ -336,12 +352,26 @@ public class ChatToolWindowTabPanel implements Disposable {
     panel.setBorder(JBUI.Borders.compound(
         JBUI.Borders.customLine(JBColor.border(), 1, 0, 0, 0),
         JBUI.Borders.empty(8)));
-    if (GeneralSettings.getSelectedService() != ServiceType.CODEGPT) {
-      panel.add(JBUI.Panels.simplePanel(totalTokensPanel)
-          .withBorder(JBUI.Borders.emptyBottom(8)), BorderLayout.NORTH);
-    }
+
+    panel.add(JBUI.Panels.simplePanel(createTopPanel())
+        .withBorder(JBUI.Borders.emptyBottom(8)), BorderLayout.NORTH);
     panel.add(userInputPanel, BorderLayout.CENTER);
     return panel;
+  }
+
+  private JPanel createTopPanel() {
+    JPanel topPanel = new JPanel(new BorderLayout());
+    if (GeneralSettings.getSelectedService() != ServiceType.CODEGPT) {
+      topPanel.add(JBUI.Panels.simplePanel(totalTokensPanel), BorderLayout.WEST);
+      topPanel.add(Box.createHorizontalStrut(100));
+    }
+    JPanel settingsPanel = new ChatSettingsPanel(
+        this,
+        psiStructureRepository,
+        tagManager);
+    topPanel.add(settingsPanel, BorderLayout.EAST);
+
+    return topPanel;
   }
 
   private JComponent getLandingView() {
