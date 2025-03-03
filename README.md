@@ -2,7 +2,7 @@
 
 <br />
 <div align="center">
-  <a href="https://github.com/carlrobertoh/CodeGPT">
+  <a href="https://github.com/carlrobertoh/ProxyAI">
     <img alt="plugin-icon" src="https://github.com/carlrobertoh/CodeGPT-docs/blob/main/images/icon.png?raw=true">
   </a>
   <h1 style="margin: 0;" align="center">CodeGPT</h1>
