@@ -2,7 +2,6 @@ package ee.carlrobert.codegpt.settings.models
 
 import ai.koog.prompt.executor.clients.LLMClient
 import ai.koog.prompt.executor.clients.anthropic.AnthropicClientSettings
-import ai.koog.prompt.executor.clients.anthropic.AnthropicLLMClient
 import ai.koog.prompt.executor.clients.anthropic.AnthropicModels.Haiku_4_5
 import ai.koog.prompt.executor.clients.anthropic.AnthropicModels.Opus_4_5
 import ai.koog.prompt.executor.clients.anthropic.AnthropicModels.Sonnet_4_5
@@ -14,6 +13,7 @@ import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey
 import ee.carlrobert.codegpt.credentials.CredentialsStore.getCredential
 import ee.carlrobert.codegpt.settings.service.FeatureType
 import ee.carlrobert.codegpt.settings.service.ServiceType
+import ee.carlrobert.codegpt.settings.service.anthropic.AnthropicSettings
 import ee.carlrobert.codegpt.settings.service.custom.CustomServicesSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
 import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings
@@ -65,6 +65,10 @@ object LLMClientFactory {
                 val baseUrl = System.getProperty("anthropic.baseUrl")
                     ?: "https://api.anthropic.com"
                 val modelVersionsMap = mapOf(
+                    Fable_5_1 to Fable_5_1.id,
+                    Opus_5_5 to Opus_5_5.id,
+                    Sonnet_5_5 to Sonnet_5_5.id,
+                    Haiku_5_5 to Haiku_5_5.id,
                     Opus_4_6 to "claude-opus-4-6",
                     Opus_4_5 to "claude-opus-4-5-20251101",
                     Sonnet_4_6 to "claude-sonnet-4-6",
@@ -72,13 +76,19 @@ object LLMClientFactory {
                     Haiku_4_5 to "claude-haiku-4-5-20251001",
                 )
 
-                AnthropicLLMClient(
+                CodeGPTAnthropicLLMClient(
                     apiKey = apiKey,
                     settings = AnthropicClientSettings(
                         modelVersionsMap = modelVersionsMap,
                         baseUrl = baseUrl
                     ),
-                    httpClientFactory = HttpClientProvider.resolveKoogHttpClientFactory()
+                    httpClientFactory = HttpClientProvider.resolveKoogHttpClientFactory(),
+                    reasoningEffort = {
+                        service<AnthropicSettings>().state.getEffectiveReasoningEffort(featureType)
+                    },
+                    showReasoningSummary = {
+                        service<AnthropicSettings>().state.isShowReasoningSummary
+                    },
                 )
             }
 

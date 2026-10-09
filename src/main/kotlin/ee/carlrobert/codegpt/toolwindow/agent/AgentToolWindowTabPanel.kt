@@ -137,6 +137,7 @@ class AgentToolWindowTabPanel(
         modelSelectorComponentFactory = ::createAgentModelSelector,
         secondaryFooterComponentFactory = ::createAgentRuntimeOptionsSelector,
         secondaryFooterComponentVisibilityProvider = { !agentSession.externalAgentId.isNullOrBlank() },
+        reasoningEffortVisibilityProvider = { agentSession.externalAgentId.isNullOrBlank() },
         promptEnhancerVisibilityProvider = { agentSession.externalAgentId.isNullOrBlank() },
         sessionTimelineVisibilityProvider = { agentSession.externalAgentId.isNullOrBlank() }
     )

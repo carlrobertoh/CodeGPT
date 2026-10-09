@@ -38,6 +38,7 @@ import ai.koog.prompt.params.LLMParams
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import ee.carlrobert.codegpt.EncodingManager
+import ee.carlrobert.codegpt.agent.clients.CodeGPTAnthropicLLMClient
 import ee.carlrobert.codegpt.agent.clients.CustomOpenAILLMClient
 import ee.carlrobert.codegpt.agent.clients.RetryingPromptExecutor
 import ee.carlrobert.codegpt.agent.credits.extractCreditsSnapshot
@@ -240,7 +241,13 @@ object AgentFactory {
                 }
             }
 
-            LLMProvider.Anthropic -> params.withAnthropicReasoning()
+            LLMProvider.Anthropic -> {
+                if (CodeGPTAnthropicLLMClient.usesAdaptiveThinking(model)) {
+                    params
+                } else {
+                    params.withAnthropicReasoning()
+                }
+            }
             else -> params
         }
         return withParams(params)

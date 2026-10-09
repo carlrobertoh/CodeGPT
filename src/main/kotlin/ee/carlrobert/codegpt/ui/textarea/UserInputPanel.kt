@@ -32,6 +32,8 @@ import ee.carlrobert.codegpt.settings.ProxyAISettingsService
 import ee.carlrobert.codegpt.settings.configuration.ChatMode
 import ee.carlrobert.codegpt.settings.configuration.ConfigurationSettings
 import ee.carlrobert.codegpt.settings.service.FeatureType
+import ee.carlrobert.codegpt.settings.service.ModelChangeNotifier
+import ee.carlrobert.codegpt.settings.service.ModelChangeNotifierAdapter
 import ee.carlrobert.codegpt.settings.models.ModelSettings
 import ee.carlrobert.codegpt.settings.service.ServiceType
 import ee.carlrobert.codegpt.toolwindow.chat.ui.textarea.ModelComboBoxAction
@@ -81,6 +83,7 @@ class UserInputPanel @JvmOverloads constructor(
     private val secondaryFooterComponentVisibilityProvider: (() -> Boolean)? = null,
     private val promptEnhancerVisibilityProvider: (() -> Boolean)? = null,
     private val sessionTimelineVisibilityProvider: (() -> Boolean)? = null,
+    private val reasoningEffortVisibilityProvider: (() -> Boolean)? = null,
 ) : BorderLayoutPanel() {
 
     companion object {
@@ -129,6 +132,8 @@ class UserInputPanel @JvmOverloads constructor(
     private var modelSelectorComponentRef: JComponent? = null
     private var secondaryFooterComponentRef: JComponent? = null
     private var secondaryFooterSeparatorRef: JComponent? = null
+    private var reasoningEffortComponentRef: JComponent? = null
+    private var reasoningEffortSeparatorRef: JComponent? = null
     private val tokenUsageCounterPanel = agentTokenCounterPanel as? TokenUsageCounterPanel
 
     private val applyChip =
@@ -275,6 +280,7 @@ class UserInputPanel @JvmOverloads constructor(
             )
         }
         bindTokenCounterToInputTokens()
+        subscribeToModelChanges(parentDisposable)
         addSelectedEditorContent()
         if (featureType == FeatureType.INLINE_EDIT) {
             setupTextChangeListener()
@@ -282,6 +288,23 @@ class UserInputPanel @JvmOverloads constructor(
         FileDragAndDrop.install(this) { files ->
             includeFiles(files.toMutableList())
         }
+    }
+
+    private fun subscribeToModelChanges(parentDisposable: Disposable) {
+        ApplicationManager.getApplication().messageBus.connect(parentDisposable).subscribe(
+            ModelChangeNotifier.getTopic(),
+            object : ModelChangeNotifierAdapter() {
+                override fun modelChanged(
+                    featureType: FeatureType,
+                    newModel: String,
+                    serviceType: ServiceType
+                ) {
+                    if (featureType == this@UserInputPanel.featureType) {
+                        invokeLater { refreshModelDependentState() }
+                    }
+                }
+            }
+        )
     }
 
     private fun setupDisposables(parentDisposable: Disposable) {
@@ -617,6 +640,18 @@ class UserInputPanel @JvmOverloads constructor(
             cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
         }
         modelSelectorComponentRef = modelComboBox
+        val reasoningEffortComponent =
+            if (featureType == FeatureType.CHAT || featureType == FeatureType.AGENT) {
+                ReasoningEffortComboBoxAction(featureType)
+                    .createCustomComponent(ActionPlaces.UNKNOWN)
+                    .apply { cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR) }
+            } else {
+                null
+            }
+        val reasoningEffortSeparator = reasoningEffortComponent?.let { createActionSeparator() }
+        reasoningEffortComponentRef = reasoningEffortComponent
+        reasoningEffortSeparatorRef = reasoningEffortSeparator
+        updateReasoningEffortVisibility()
         val secondaryFooterComponent = secondaryFooterComponentFactory?.invoke(this)?.apply {
             cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
         }
@@ -643,6 +678,10 @@ class UserInputPanel @JvmOverloads constructor(
                     panel {
                         row {
                             cell(modelComboBox).gap(RightGap.SMALL)
+                            if (reasoningEffortComponent != null && reasoningEffortSeparator != null) {
+                                cell(reasoningEffortSeparator).gap(RightGap.SMALL)
+                                cell(reasoningEffortComponent).gap(RightGap.SMALL)
+                            }
                             if (secondaryFooterComponent != null) {
                                 if (secondaryFooterSeparator != null) {
                                     cell(secondaryFooterSeparator).gap(RightGap.SMALL)
@@ -744,9 +783,18 @@ class UserInputPanel @JvmOverloads constructor(
         sessionTimelineSeparator?.isVisible = isSessionTimelineVisible
         (modelSelectorComponentRef?.getClientProperty("proxyai.refreshPresentation") as? Runnable)?.run()
         (secondaryFooterComponentRef?.getClientProperty("proxyai.refreshPresentation") as? Runnable)?.run()
+        updateReasoningEffortVisibility()
+        (reasoningEffortComponentRef?.getClientProperty("proxyai.refreshPresentation") as? Runnable)?.run()
         footerPanelRef?.revalidate()
         footerPanelRef?.repaint()
         updatePreferredSizeFromChildren()
+    }
+
+    private fun updateReasoningEffortVisibility() {
+        val visible = ReasoningEffortComboBoxAction.isApplicable(featureType) &&
+                (reasoningEffortVisibilityProvider?.invoke() ?: true)
+        reasoningEffortComponentRef?.isVisible = visible
+        reasoningEffortSeparatorRef?.isVisible = visible
     }
 
     private fun updatePreferredSizeFromChildren() {
