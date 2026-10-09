@@ -59,11 +59,29 @@ changelog {
 
 dependencies {
     intellijPlatform {
-        intellijIdea(properties("platformVersion"))
+        val type = properties("platformType").get()
+        val version = properties("platformVersion")
+        if (type == "IC") {
+            intellijIdea(version)
+        } else {
+            create(type, version)
+        }
 
-        bundledPlugin("com.intellij.java")
-        bundledPlugin("org.jetbrains.kotlin")
+        val platformType = properties("platformType").get()
+        if (platformType == "IC" || platformType == "IU") {
+            bundledPlugin("com.intellij.java")
+            bundledPlugin("org.jetbrains.kotlin")
+        }
         bundledPlugin("Git4Idea")
+
+        // VCS modules extracted in 2026.2+
+        bundledModule("intellij.platform.vcs.dvcs")
+        bundledModule("intellij.platform.vcs.dvcs.impl")
+        bundledModule("intellij.platform.vcs.log.impl")
+
+        // JCEF module extracted in 2026.2+
+        bundledModule("intellij.platform.ui.jcef")
+        bundledModule("intellij.libraries.jcef")
 
         testFramework(TestFrameworkType.Platform)
         testFramework(TestFrameworkType.JUnit5)
@@ -98,7 +116,14 @@ dependencies {
         exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-coroutines-core")
         exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-coroutines-jdk8")
     }
+    implementation(libs.koog.llms.all) {
+        exclude(group = "org.jetbrains.kotlin", module = "kotlin-stdlib")
+        exclude(group = "org.jetbrains.kotlin", module = "kotlin-reflect")
+        exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-coroutines-core")
+        exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-coroutines-jdk8")
+    }
     implementation(libs.koog.serialization.jackson)
+    implementation(libs.koog.http.client.ktor)
     implementation(libs.jsoup)
     implementation(libs.commons.text)
     implementation(libs.jtokkit)

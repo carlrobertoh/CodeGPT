@@ -1,7 +1,7 @@
 package ee.carlrobert.codegpt.agent
 
 import ai.koog.agents.core.agent.config.AIAgentConfig
-import ai.koog.agents.core.agent.context.AgentContextData
+import ai.koog.agents.core.agent.context.GraphAgentContextData
 import ai.koog.agents.core.agent.context.RollbackStrategy
 import ai.koog.agents.core.agent.context.store
 import ai.koog.agents.core.agent.entity.AIAgentStorageKey
@@ -11,6 +11,7 @@ import ai.koog.agents.core.feature.config.FeatureConfig
 import ai.koog.agents.core.feature.pipeline.AIAgentGraphPipeline
 import ai.koog.prompt.message.Message
 import ai.koog.serialization.JSONElement
+import ai.koog.serialization.JSONObject
 import ai.koog.serialization.typeToken
 import ee.carlrobert.codegpt.agent.strategy.SINGLE_RUN_NODE_CALL_LLM
 import java.util.concurrent.ConcurrentHashMap
@@ -29,7 +30,7 @@ internal class PendingRunContinuationConfig : FeatureConfig() {
 internal object PendingRunContinuationFeature :
     AIAgentGraphFeature<PendingRunContinuationConfig, Unit> {
 
-    override val key = AIAgentStorageKey<Unit>("proxyai-pending-run-continuation")
+    override val key: AIAgentStorageKey<Unit> = AIAgentStorageKey<Unit>("proxyai-pending-run-continuation", typeToken<Unit>())
 
     override fun createInitialConfig(agentConfig: AIAgentConfig): PendingRunContinuationConfig {
         return PendingRunContinuationConfig()
@@ -39,11 +40,19 @@ internal object PendingRunContinuationFeature :
         pipeline.interceptStrategyStarting(this) { event ->
             val continuation = config.pendingContinuations.remove(config.sessionId) ?: return@interceptStrategyStarting
             val serializedInput = serializeInput(event.context.config, continuation.input)
+            val (params, model, toolNames) = event.context.llm.readSession { session ->
+                Triple(session.prompt.params, session.model, session.tools.map { tool -> tool.name })
+            }
             event.context.store(
-                AgentContextData(
+                GraphAgentContextData(
                     messageHistory = continuation.messageHistory,
+                    llmParams = params,
+                    llmModel = model,
+                    tools = toolNames,
+                    storage = JSONObject(emptyMap()),
+                    agentIterations = 0,
                     nodePath = "${event.context.agentId}/single_run/$SINGLE_RUN_NODE_CALL_LLM",
-                    lastInput = serializedInput,
+                    lastOutput = serializedInput,
                     rollbackStrategy = RollbackStrategy.MessageHistoryOnly
                 )
             )

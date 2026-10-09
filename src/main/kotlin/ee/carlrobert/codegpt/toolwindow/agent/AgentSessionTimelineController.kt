@@ -312,15 +312,20 @@ internal class AgentSessionTimelineController(
             val nonSystemIndex = index + 1
             if (nonSystemIndex !in includeIndexes) return@forEachIndexed
 
-            val toolCall = message as? PromptMessage.Tool.Call ?: return@forEachIndexed
-            val callId = toolCall.id?.takeIf { it.isNotBlank() }
-            if (callId != null) selectedToolCallIds += callId
+            if (message !is PromptMessage.Assistant) return@forEachIndexed
+            val toolCalls = message.parts.filterIsInstance<ai.koog.prompt.message.MessagePart.Tool.Call>()
+            if (toolCalls.isEmpty()) return@forEachIndexed
+            
+            toolCalls.forEach { toolCall ->
+                val callId = toolCall.id?.takeIf { it.isNotBlank() }
+                if (callId != null) selectedToolCallIds.add(callId)
+            }
 
             var cursor = index + 1
             while (cursor < nonSystemMessages.size) {
-                val nextResult = nonSystemMessages[cursor] as? PromptMessage.Tool.Result ?: break
-                val nextResultId = nextResult.id?.takeIf { it.isNotBlank() }
-                if (callId != null && nextResultId != null && nextResultId != callId) break
+                val nextMsg = nonSystemMessages[cursor] as? PromptMessage.User ?: break
+                val results = nextMsg.parts.filterIsInstance<ai.koog.prompt.message.MessagePart.Tool.Result>()
+                if (results.isEmpty()) break
                 includeIndexes += cursor + 1
                 cursor += 1
             }
@@ -328,9 +333,12 @@ internal class AgentSessionTimelineController(
 
         if (selectedToolCallIds.isNotEmpty()) {
             nonSystemMessages.forEachIndexed { index, message ->
-                val result = message as? PromptMessage.Tool.Result ?: return@forEachIndexed
-                val resultId = result.id?.takeIf { it.isNotBlank() } ?: return@forEachIndexed
-                if (resultId in selectedToolCallIds) includeIndexes += index + 1
+                if (message is PromptMessage.User) {
+                    val results = message.parts.filterIsInstance<ai.koog.prompt.message.MessagePart.Tool.Result>()
+                    if (results.any { it.id?.takeIf { id -> id.isNotBlank() } in selectedToolCallIds }) {
+                        includeIndexes += index + 1
+                    }
+                }
             }
         }
 
@@ -360,7 +368,7 @@ internal class AgentSessionTimelineController(
         return nonSystemMessages.mapIndexedNotNull { index, message ->
             val nonSystemMessageCount = index + 1
             if (nonSystemMessageCount in selectableNonSystemMessageCounts) return@mapIndexedNotNull null
-            if (message is PromptMessage.Tool.Result) {
+            if (message is PromptMessage.User && message.parts.any { it is ai.koog.prompt.message.MessagePart.Tool.Result }) {
                 return@mapIndexedNotNull null
             }
             nonSystemMessageCount
@@ -370,14 +378,7 @@ internal class AgentSessionTimelineController(
     private fun estimatePromptHistoryTokenCount(history: List<PromptMessage>): Int {
         val encodingManager = EncodingManager.getInstance()
         return history.sumOf { message ->
-            val text = when (message) {
-                is PromptMessage.System -> message.content
-                is PromptMessage.User -> message.content
-                is PromptMessage.Assistant -> message.content
-                is PromptMessage.Reasoning -> message.content
-                is PromptMessage.Tool.Call -> message.content
-                is PromptMessage.Tool.Result -> message.content
-            }
+            val text = message.textContent()
             if (text.isBlank()) 0 else encodingManager.countTokens(text)
         }
     }
@@ -460,9 +461,11 @@ internal class AgentSessionTimelineController(
             val message = nonSystemMessages[cursor]
             if (message is PromptMessage.User) break
 
-            val call = message as? PromptMessage.Tool.Call
-            if (call != null && isTodoWriteTool(call.tool)) {
-                extractTodoWriteRunLabel(call.content)?.let { return it }
+            if (message is PromptMessage.Assistant) {
+                val call = message.parts.filterIsInstance<ai.koog.prompt.message.MessagePart.Tool.Call>().firstOrNull()
+                if (call != null && isTodoWriteTool(call.tool)) {
+                    extractTodoWriteRunLabel(call.args)?.let { return it }
+                }
             }
             cursor += 1
         }
@@ -1178,29 +1181,28 @@ internal class AgentSessionTimelineController(
             val history = checkpoint.messageHistory.filterNot { it is PromptMessage.System }
             if (index !in history.indices) return null
 
-            val selected = history[index] as? PromptMessage.Tool.Call ?: return null
+            val assistantMessage = history[index] as? PromptMessage.Assistant ?: return null
+            val selected = assistantMessage.parts.filterIsInstance<ai.koog.prompt.message.MessagePart.Tool.Call>().firstOrNull() ?: return null
             val selectedId = selected.id?.takeIf { it.isNotBlank() }
 
             val outputs = mutableListOf<String>()
             for (nextIndex in index + 1 until history.size) {
                 when (val next = history[nextIndex]) {
-                    is PromptMessage.Tool.Result -> {
-                        val resultId = next.id?.takeIf { it.isNotBlank() }
-                        if (selectedId != null) {
-                            if (resultId == selectedId) {
-                                val output = next.content.trim()
-                                if (output.isNotBlank()) outputs.add(output)
+                    is PromptMessage.User -> {
+                        next.parts.filterIsInstance<ai.koog.prompt.message.MessagePart.Tool.Result>().forEach { result ->
+                            val resultId = result.id?.takeIf { it.isNotBlank() }
+                            val resultText = result.parts.filterIsInstance<ai.koog.prompt.message.MessagePart.Text>().joinToString("\n") { it.text }.trim()
+                            if (selectedId != null) {
+                                if (resultId == selectedId) {
+                                    if (resultText.isNotBlank()) outputs.add(resultText)
+                                }
+                            } else {
+                                if (resultText.isNotBlank()) return resultText
                             }
-                        } else {
-                            val output = next.content.trim()
-                            if (output.isNotBlank()) return output
                         }
                     }
 
-                    is PromptMessage.User,
-                    is PromptMessage.Assistant,
-                    is PromptMessage.Reasoning -> break
-
+                    is PromptMessage.Assistant -> break
                     else -> Unit
                 }
             }

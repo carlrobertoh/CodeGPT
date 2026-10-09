@@ -3,9 +3,8 @@ package ee.carlrobert.codegpt.agent.clients
 import ai.koog.agents.core.tools.ToolDescriptor
 import ai.koog.http.client.KoogHttpClientException
 import ai.koog.prompt.dsl.ModerationResult
-import ai.koog.prompt.dsl.Prompt
+import ai.koog.prompt.Prompt
 import ai.koog.prompt.executor.clients.LLMClient
-import ai.koog.prompt.executor.llms.SingleLLMPromptExecutor
 import ai.koog.prompt.executor.model.PromptExecutor
 import ai.koog.prompt.llm.LLModel
 import ai.koog.prompt.message.Message
@@ -45,7 +44,7 @@ class RetryingPromptExecutor(
             events: AgentEvents?
         ): PromptExecutor {
             return RetryingPromptExecutor(
-                delegate = SingleLLMPromptExecutor(client),
+                delegate = PromptExecutor.builder().addClient(client).build(),
                 retryPolicy = retryPolicy,
                 events = events
             )
@@ -187,7 +186,7 @@ class RetryingPromptExecutor(
         prompt: Prompt,
         model: LLModel,
         tools: List<ToolDescriptor>
-    ): List<Message.Response> {
+    ): Message.Assistant {
         var attempt = 1
         var delay = retryPolicy.initialDelay
         var lastError: Throwable? = null

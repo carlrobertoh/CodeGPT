@@ -1,7 +1,8 @@
 package ee.carlrobert.codegpt.agent.clients
 
 import ai.koog.prompt.dsl.ModerationResult
-import ai.koog.prompt.dsl.Prompt
+import ai.koog.prompt.Prompt
+import ai.koog.http.client.KoogHttpClient
 import ai.koog.prompt.executor.clients.ConnectionTimeoutConfig
 import ai.koog.prompt.executor.clients.LLMClient
 import ai.koog.prompt.executor.clients.LLMClientException
@@ -13,6 +14,7 @@ import ai.koog.prompt.executor.clients.openai.base.models.OpenAITool
 import ai.koog.prompt.executor.clients.openai.base.models.OpenAIToolChoice
 import ai.koog.prompt.llm.LLMProvider
 import ai.koog.prompt.llm.LLModel
+import ai.koog.utils.time.KoogClock
 import ai.koog.prompt.message.LLMChoice
 import ai.koog.prompt.message.Message
 import ai.koog.prompt.message.ResponseMetaInfo
@@ -63,11 +65,13 @@ class ProxyAILLMClient(
     private val apiKey: String,
     private val settings: ProxyAIClientSettings = ProxyAIClientSettings(),
     private val baseClient: HttpClient = HttpClientProvider.createHttpClient(),
-    clock: Clock = Clock.System
+    httpClientFactory: KoogHttpClient.Factory = HttpClientProvider.resolveKoogHttpClientFactory(baseClient),
+    clock: KoogClock = KoogClock.System
 ) : AbstractOpenAILLMClient<ProxyAIChatCompletionResponse, ProxyAIChatCompletionStreamResponse>(
     apiKey = apiKey,
     settings = settings,
-    baseClient = baseClient,
+    httpClientFactory = httpClientFactory,
+    clientName = "ProxyAI",
     clock = clock,
     logger = staticLogger,
     toolsConverter = OpenAICompatibleToolDescriptorSchemaGenerator()
@@ -140,7 +144,7 @@ class ProxyAILLMClient(
         return json.encodeToString(ProxyAIChatCompletionRequestSerializer, request)
     }
 
-    override fun processProviderChatResponse(response: ProxyAIChatCompletionResponse): List<LLMChoice> {
+    override fun processProviderChatResponse(response: ProxyAIChatCompletionResponse): List<Message.Assistant> {
         if (response.choices.isEmpty()) {
             val errorMsg = "Empty choices in response. Response may contain an error."
             logger.error { errorMsg }
@@ -156,7 +160,7 @@ class ProxyAILLMClient(
         }
 
         return response.choices.map {
-            it.message.toResponses(it.finishReason, createProxyMetaInfo(response.usage))
+            it.message.toMessageResponse(it.finishReason, createProxyMetaInfo(response.usage))
         }
     }
 
@@ -197,69 +201,7 @@ class ProxyAILLMClient(
         throw UnsupportedOperationException("Moderation not supported.")
     }
 
-    @OptIn(ExperimentalEncodingApi::class)
-    private fun OpenAIMessage.toResponses(
-        finishReason: String?,
-        metaInfo: ResponseMetaInfo
-    ): List<Message.Response> {
-        return when {
-            this is OpenAIMessage.Assistant && !this.toolCalls.isNullOrEmpty() -> {
-                val result = mutableListOf<Message.Response>()
-                if (this.content != null) {
-                    result.add(
-                        Message.Assistant(
-                            content = this.content!!.text(),
-                            finishReason = finishReason,
-                            metaInfo = metaInfo
-                        )
-                    )
-                }
 
-                this.toolCalls!!.forEach { toolCall ->
-                    result.add(
-                        Message.Tool.Call(
-                            id = toolCall.id,
-                            tool = toolCall.function.name,
-                            content = toolCall.function.arguments
-                                .takeIf { it.isNotEmpty() }
-                                ?: "{}",
-                            metaInfo = metaInfo
-                        )
-                    )
-                }
-                result
-            }
-
-            this is OpenAIMessage.Assistant && this.reasoningContent != null && this.content != null -> listOf(
-                Message.Reasoning(
-                    content = this.reasoningContent!!,
-                    metaInfo = metaInfo
-                ),
-                Message.Assistant(
-                    content = this.content!!.text(),
-                    finishReason = finishReason,
-                    metaInfo = metaInfo
-                )
-            )
-
-            this.content != null -> listOf(
-                Message.Assistant(
-                    content = this.content!!.text(),
-                    finishReason = finishReason,
-                    metaInfo = metaInfo
-                )
-            )
-
-            else -> {
-                val exception = LLMClientException(
-                    clientName,
-                    "Unexpected response: no tool calls and no content"
-                )
-                logger.error(exception) { exception.message }
-                throw exception
-            }
-        }
-    }
 
     private fun createProxyMetaInfo(usage: ProxyAIUsage?): ResponseMetaInfo {
         val metadata = usage?.credits?.toMetadata()

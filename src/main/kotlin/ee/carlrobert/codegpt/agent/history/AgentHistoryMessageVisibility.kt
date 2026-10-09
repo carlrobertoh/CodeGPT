@@ -12,7 +12,7 @@ internal fun shouldHideInAgentToolWindow(
     projectInstructions: String? = null
 ): Boolean {
     return isCacheableInstructionMessage(message) ||
-            isProjectInstructionsMessage(message.content, projectInstructions)
+            isProjectInstructionsMessage(message.textContent(), projectInstructions)
 }
 
 private fun isCacheableInstructionMessage(message: PromptMessage.User): Boolean {

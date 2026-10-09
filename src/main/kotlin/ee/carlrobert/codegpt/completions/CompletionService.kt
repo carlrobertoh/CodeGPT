@@ -1,6 +1,6 @@
 package ee.carlrobert.codegpt.completions
 
-import ai.koog.prompt.dsl.Prompt
+import ai.koog.prompt.Prompt
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service

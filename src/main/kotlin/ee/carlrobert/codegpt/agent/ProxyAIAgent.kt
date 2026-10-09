@@ -14,6 +14,7 @@ import ai.koog.agents.snapshot.providers.file.JVMFilePersistenceStorageProvider
 import ai.koog.prompt.dsl.prompt
 import ai.koog.prompt.llm.LLModel
 import ai.koog.prompt.message.Message
+import ai.koog.prompt.message.MessagePart
 import ai.koog.prompt.message.RequestMetaInfo
 import ai.koog.prompt.tokenizer.Tokenizer
 import com.intellij.openapi.components.service
@@ -147,7 +148,6 @@ object ProxyAIAgent {
             install(Persistence) {
                 storage = checkpointStorage
                 enableAutomaticPersistence = true
-                rollbackStrategy = RollbackStrategy.MessageHistoryOnly
             }
             install(PendingRunContinuationFeature) {
                 this.sessionId = sessionId
@@ -189,10 +189,11 @@ object ProxyAIAgent {
                     val output = (ctx.output as? List<*>) ?: emptyList<Any?>()
                     if (stream) {
                         if (!streamedReasoningForCurrentNode) {
-                            output.forEach { msg ->
-                                (msg as? Message.Reasoning)?.let {
-                                    if (it.content.isNotBlank()) {
-                                        events.onThinkingReceived(it.content)
+                            output.filterIsInstance<Message.Assistant>().forEach { msg ->
+                                msg.parts.filterIsInstance<MessagePart.Reasoning>().forEach { reasoning ->
+                                    val reasoningText = reasoning.content.joinToString("")
+                                    if (reasoningText.isNotBlank()) {
+                                        events.onThinkingReceived(reasoningText)
                                     }
                                 }
                             }
@@ -201,20 +202,22 @@ object ProxyAIAgent {
                         return@onNodeExecutionCompleted
                     }
 
-                    output.forEach { msg ->
-                        (msg as? Message.Assistant)?.let {
-                            events.onTextReceived(it.content)
+                    output.filterIsInstance<Message.Assistant>().forEach { msg ->
+                        val text = msg.textContent()
+                        if (text.isNotBlank()) {
+                            events.onTextReceived(text)
                         }
-                        (msg as? Message.Reasoning)?.let {
-                            if (it.content.isNotBlank()) {
-                                events.onThinkingReceived(it.content)
+                        msg.parts.filterIsInstance<MessagePart.Reasoning>().forEach { reasoning ->
+                            val reasoningText = reasoning.content.joinToString("")
+                            if (reasoningText.isNotBlank()) {
+                                events.onThinkingReceived(reasoningText)
                             }
                         }
                     }
                 }
 
                 onNodeExecutionFailed { ctx ->
-                    logger.error(ctx.throwable) { "Node execution failed: $ctx" }
+                    logger.error(ctx.error) { "Node execution failed: $ctx" }
                 }
 
                 onToolCallStarting { ctx ->
@@ -275,16 +278,16 @@ object ProxyAIAgent {
                         HookEventType.STOP,
                         mapOf(
                             "status" to "completed",
-                            "agent_id" to context.agentId
+                            "agent_id" to context.agent.id
                         ),
                         sessionId = sessionId
                     )
-                    events.onAgentCompleted(context.agentId)
+                    events.onAgentCompleted(context.agent.id)
                 }
 
                 onAgentExecutionFailed {
                     val isCancellationError =
-                        generateSequence(it.throwable as Throwable?) { cause -> cause.cause }
+                        generateSequence(it.error as Throwable?) { cause -> cause.cause }
                             .take(10)
                             .any { cause ->
                                 cause is CancellationException && cause !is TimeoutCancellationException
@@ -294,17 +297,17 @@ object ProxyAIAgent {
                         return@onAgentExecutionFailed
                     }
 
-                    logger.error(it.throwable) { "Agent execution failed: $it" }
+                    logger.error(it.error) { "Agent execution failed: $it" }
                     hookManager.executeHooksForEvent(
                         HookEventType.STOP,
                         mapOf(
                             "status" to "error",
-                            "agent_id" to it.agentId,
-                            "error" to (it.throwable.message ?: "Unknown error")
+                            "agent_id" to it.agent.id,
+                            "error" to (it.error.message ?: "Unknown error")
                         ),
                         sessionId = sessionId
                     )
-                    events.onAgentException(provider, it.throwable)
+                    events.onAgentException(provider, it.error)
                 }
             }
         }
@@ -321,7 +324,6 @@ object ProxyAIAgent {
                 selectedService?.chatCompletionSettings?.shouldStream() == true
             }
 
-            ServiceType.OLLAMA,
             ServiceType.GOOGLE -> false
 
             else -> true

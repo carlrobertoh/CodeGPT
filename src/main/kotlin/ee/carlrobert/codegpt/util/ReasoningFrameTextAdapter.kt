@@ -81,7 +81,7 @@ internal class ReasoningFrameTextAdapter {
             return closeThinking()
         }
 
-        val reasoningText = frame.text.joinToString("\n").trim()
+        val reasoningText = frame.content.joinToString("\n").trim()
         val summaryText = frame.summary?.joinToString("\n")?.trim().orEmpty()
 
         val parts = mutableListOf<String>()

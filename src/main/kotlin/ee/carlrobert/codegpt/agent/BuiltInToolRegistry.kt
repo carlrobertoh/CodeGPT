@@ -2,8 +2,6 @@ package ee.carlrobert.codegpt.agent
 
 import ai.koog.agents.core.tools.Tool
 import ai.koog.agents.core.tools.ToolRegistry
-import ai.koog.agents.ext.tool.ExitTool
-import ai.koog.agents.ext.tool.shell.ShellCommandConfirmation
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import ee.carlrobert.codegpt.agent.tools.*
@@ -26,7 +24,7 @@ internal object BuiltInToolRegistry {
         writeApproval: suspend (String, String) -> Boolean,
         genericApproval: suspend (String, String) -> Boolean,
     ): ToolRegistry {
-        return ToolRegistry {
+        return ToolRegistry.builder().tools(
             createTools(
                 ToolName.entries,
                 RegistrationContext(
@@ -55,8 +53,8 @@ internal object BuiltInToolRegistry {
                     askUserEvents = events,
                     parentModelSelection = parentModelSelection
                 )
-            ).forEach(::tool)
-        }
+            )
+        ).build()
     }
 
     fun createSubagentRegistry(
@@ -71,7 +69,7 @@ internal object BuiltInToolRegistry {
             addAll(selected)
             addAll(ToolName.entries.filter { it.alwaysIncludeInSubagent })
         }.distinct()
-        return ToolRegistry.Companion {
+        return ToolRegistry.builder().tools(
             createTools(
                 selectedTools,
                 RegistrationContext(
@@ -83,8 +81,8 @@ internal object BuiltInToolRegistry {
                     genericApproval = approveToolCall,
                     bashConfirmationHandler = bashConfirmationHandler
                 )
-            ).forEach(::tool)
-        }
+            )
+        ).build()
     }
 
     private fun createTools(

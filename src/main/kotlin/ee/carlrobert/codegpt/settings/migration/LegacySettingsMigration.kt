@@ -15,7 +15,7 @@ import ee.carlrobert.codegpt.settings.service.custom.CustomServicesSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
 import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings
-import ai.koog.prompt.executor.clients.google.GoogleModels
+// // import ai.koog.prompt.executor.clients.google.GoogleModels
 
 object LegacySettingsMigration {
 
@@ -107,7 +107,7 @@ object LegacySettingsMigration {
                     resolveAvailableModel(
                         serviceType = serviceType,
                         featureType = FeatureType.CHAT,
-                        fallbackModel = GoogleModels.Gemini2_5Pro.id
+//                         fallbackModel = GoogleModels.Gemini2_5Pro.id
                     )
                 }
 

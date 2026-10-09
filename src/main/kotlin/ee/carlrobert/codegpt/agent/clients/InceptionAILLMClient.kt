@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.agent.clients
 
+import ai.koog.http.client.KoogHttpClient
 import ai.koog.prompt.executor.clients.openai.OpenAIClientSettings
 import ai.koog.prompt.executor.clients.openai.OpenAILLMClient
 import ai.koog.prompt.llm.LLMProvider
@@ -23,11 +24,12 @@ class InceptionAILLMClient(
         baseUrl = System.getProperty(INCEPTION_BASE_URL_PROPERTY) ?: DEFAULT_BASE_URL,
         chatCompletionsPath = DEFAULT_CHAT_COMPLETIONS_PATH
     ),
-    private val baseClient: HttpClient = HttpClient()
+    private val baseClient: HttpClient = HttpClient(),
+    httpClientFactory: KoogHttpClient.Factory = HttpClientProvider.resolveKoogHttpClientFactory(baseClient)
 ) : OpenAILLMClient(
     apiKey = apiKey,
     settings = settings,
-    baseClient = baseClient
+    httpClientFactory = httpClientFactory
 ),
     CodeCompletionCapable {
     data object Inception : LLMProvider("inception", "Inception")

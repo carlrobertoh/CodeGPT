@@ -31,7 +31,7 @@ internal class AgentSessionTimelineHistoricalRollbackSupport(
         val history = latestCheckpoint.messageHistory.filterNot { it is PromptMessage.System }
         if (history.isEmpty() || cutoff >= history.size) return emptyList()
 
-        data class PendingCall(val index: Int, val call: PromptMessage.Tool.Call)
+        data class PendingCall(val index: Int, val call: ai.koog.prompt.message.MessagePart.Tool.Call)
 
         val pendingById = mutableMapOf<String, PendingCall>()
         val pendingWithoutId = ArrayDeque<PendingCall>()
@@ -39,33 +39,36 @@ internal class AgentSessionTimelineHistoricalRollbackSupport(
         val operations = mutableListOf<HistoricalRollbackOperation>()
 
         history.forEachIndexed { index, message ->
-            when (message) {
-                is PromptMessage.Tool.Call -> {
-                    val callId = message.id?.takeIf { it.isNotBlank() }
+            if (message is PromptMessage.Assistant) {
+                message.parts.filterIsInstance<ai.koog.prompt.message.MessagePart.Tool.Call>().forEach { call ->
+                    val callId = call.id?.takeIf { it.isNotBlank() }
                     if (callId != null) {
-                        pendingById[callId] = PendingCall(index, message)
+                        pendingById[callId] = PendingCall(index, call)
                     } else {
-                        pendingWithoutId.addLast(PendingCall(index, message))
+                        pendingWithoutId.addLast(PendingCall(index, call))
                     }
                 }
-
-                is PromptMessage.Tool.Result -> {
-                    val pendingCall = message.id
+            } else if (message is PromptMessage.User) {
+                message.parts.filterIsInstance<ai.koog.prompt.message.MessagePart.Tool.Result>().forEach { result ->
+                    val pendingCall = result.id
                         ?.takeIf { it.isNotBlank() }
                         ?.let { pendingById.remove(it) }
                         ?: pendingWithoutId.pollFirst()
-                        ?: return@forEachIndexed
+                        ?: return@forEach
                     val call = pendingCall.call
 
                     val tool = HistoricalRollbackCompatibility.resolveSupportedTool(call.tool)
-                        ?: return@forEachIndexed
+                        ?: return@forEach
+                        
+                    val resultText = result.parts.filterIsInstance<ai.koog.prompt.message.MessagePart.Text>().joinToString("\n") { it.text }
+                        
                     if (!HistoricalRollbackCompatibility.isSuccessfulResult(
                             tool,
-                            message.content,
+                            resultText,
                             replayJson
                         )
                     ) {
-                        return@forEachIndexed
+                        return@forEach
                     }
 
                     when (tool) {
@@ -73,36 +76,36 @@ internal class AgentSessionTimelineHistoricalRollbackSupport(
                             val args = HistoricalRollbackCompatibility.decodeReadArgs(
                                 replayJson = replayJson,
                                 rawToolName = call.tool,
-                                rawArgs = call.content
-                            ) ?: return@forEachIndexed
+                                rawArgs = call.args
+                            ) ?: return@forEach
                             val filePath = HistoricalRollbackCompatibility.normalizeToolFilePath(
                                 project.basePath,
                                 args.filePath
                             )
-                                ?: return@forEachIndexed
+                                ?: return@forEach
                             val content =
                                 HistoricalRollbackCompatibility.decodeReadToolResultContent(
-                                    message.content
-                                ) ?: return@forEachIndexed
+                                    resultText
+                                ) ?: return@forEach
                             latestKnownContentByFile[filePath] = content
-                            return@forEachIndexed
+                            return@forEach
                         }
 
                         ToolName.EDIT -> {
                             val args = HistoricalRollbackCompatibility.decodeEditArgs(
                                 replayJson = replayJson,
                                 rawToolName = call.tool,
-                                rawArgs = call.content
-                            ) ?: return@forEachIndexed
+                                rawArgs = call.args
+                            ) ?: return@forEach
                             val filePath = HistoricalRollbackCompatibility.normalizeToolFilePath(
                                 project.basePath,
                                 args.filePath
                             )
-                                ?: return@forEachIndexed
+                                ?: return@forEach
                             val oldString = args.oldString
                             val newString = args.newString
                             val replaceAll = args.replaceAll
-                            if (oldString.isEmpty() || newString.isEmpty() || oldString == newString) return@forEachIndexed
+                            if (oldString.isEmpty() || newString.isEmpty() || oldString == newString) return@forEach
 
                             if (pendingCall.index >= cutoff) {
                                 operations.add(
@@ -123,20 +126,20 @@ internal class AgentSessionTimelineHistoricalRollbackSupport(
                                         else known.replaceFirst(oldString, newString)
                                 }
                             }
-                            return@forEachIndexed
+                            return@forEach
                         }
 
                         ToolName.WRITE -> {
                             val args = HistoricalRollbackCompatibility.decodeWriteArgs(
                                 replayJson = replayJson,
                                 rawToolName = call.tool,
-                                rawArgs = call.content
-                            ) ?: return@forEachIndexed
+                                rawArgs = call.args
+                            ) ?: return@forEach
                             val filePath = HistoricalRollbackCompatibility.normalizeToolFilePath(
                                 project.basePath,
                                 args.filePath
                             )
-                                ?: return@forEachIndexed
+                                ?: return@forEach
                             val newContent = args.content
                             val previousContent = latestKnownContentByFile[filePath]
                             if (pendingCall.index >= cutoff && previousContent != null && previousContent != newContent) {
@@ -156,8 +159,6 @@ internal class AgentSessionTimelineHistoricalRollbackSupport(
                         else -> Unit
                     }
                 }
-
-                else -> Unit
             }
         }
 

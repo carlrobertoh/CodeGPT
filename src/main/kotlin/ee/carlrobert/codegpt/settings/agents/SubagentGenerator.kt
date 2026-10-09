@@ -55,9 +55,8 @@ object SubagentGenerator {
                 user(query)
             }
 
-            val responses = executor.execute(p, model, emptyList())
-            val text = responses.filterIsInstance<Message.Assistant>()
-                .joinToString("\n") { it.content.trim() }
+            val response = executor.execute(p, model, emptyList()) as? Message.Assistant
+            val text = response?.textContent()?.trim() ?: ""
 
             parseJson(text) ?: fallback(query)
         } catch (_: Exception) {

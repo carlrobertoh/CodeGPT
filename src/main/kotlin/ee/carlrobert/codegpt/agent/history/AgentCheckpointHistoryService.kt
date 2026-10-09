@@ -112,7 +112,7 @@ class AgentCheckpointHistoryService(project: Project) {
         }
 
         val latest = checkpoints.maxBy { it.createdAt }
-        val status = when (latest.nodePath.substringAfterLast('/')) {
+        val status = when (latest.graphProperties?.nodePath?.substringAfterLast('/')) {
             "__finish__" -> ThreadStatus.COMPLETED
             "__start__" -> ThreadStatus.UNKNOWN
             else -> ThreadStatus.PARTIAL
@@ -124,8 +124,7 @@ class AgentCheckpointHistoryService(project: Project) {
             .asReversed()
             .firstNotNullOfOrNull { msg ->
                 when (msg) {
-                    is PromptMessage.Assistant -> toSingleLine(msg.content).takeIf { it.isNotBlank() }
-                    is PromptMessage.Reasoning -> toSingleLine(msg.content).takeIf { it.isNotBlank() }
+                    is PromptMessage.Assistant -> toSingleLine(msg.textContent()).takeIf { it.isNotBlank() }
                     else -> null
                 }
             } ?: ""
@@ -144,11 +143,10 @@ class AgentCheckpointHistoryService(project: Project) {
     private fun extractThreadTitle(history: List<PromptMessage>): String {
         val todoWriteTitle = history
             .asReversed()
-            .firstNotNullOfOrNull { message ->
-                if (message !is PromptMessage.Tool.Call || !isTodoWriteTool(message.tool)) {
-                    return@firstNotNullOfOrNull null
-                }
-                extractTodoWriteTitle(message.content)
+            .filterIsInstance<PromptMessage.Assistant>()
+            .flatMap { it.parts.filterIsInstance<ai.koog.prompt.message.MessagePart.Tool.Call>() }
+            .firstNotNullOfOrNull { call ->
+                if (!isTodoWriteTool(call.tool)) null else extractTodoWriteTitle(call.args)
             }
 
         if (!todoWriteTitle.isNullOrBlank()) {
@@ -162,9 +160,7 @@ class AgentCheckpointHistoryService(project: Project) {
                 if (shouldHideInAgentToolWindow(user)) {
                     return@firstNotNullOfOrNull null
                 }
-                user.content
-                    .let(::toSingleLine)
-                    .takeIf { it.isNotBlank() }
+                toSingleLine(user.textContent()).takeIf { it.isNotBlank() }
             } ?: "Recovered conversation"
     }
 
@@ -186,7 +182,7 @@ class AgentCheckpointHistoryService(project: Project) {
     }
 
     private fun AgentCheckpointData.isResumableNode(): Boolean {
-        return nodePath.substringAfterLast('/') != "__finish__"
+        return graphProperties?.nodePath?.substringAfterLast('/') != "__finish__"
     }
 
     private fun AgentCheckpointData.isSafeResumeCheckpoint(): Boolean {

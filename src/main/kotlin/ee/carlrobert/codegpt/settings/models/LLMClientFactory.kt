@@ -74,11 +74,11 @@ object LLMClientFactory {
 
                 AnthropicLLMClient(
                     apiKey = apiKey,
-                    baseClient = HttpClientProvider.createHttpClient(),
                     settings = AnthropicClientSettings(
                         modelVersionsMap = modelVersionsMap,
                         baseUrl = baseUrl
-                    )
+                    ),
+                    httpClientFactory = HttpClientProvider.resolveKoogHttpClientFactory()
                 )
             }
 
@@ -90,7 +90,7 @@ object LLMClientFactory {
                 GoogleLLMClient(
                     apiKey = apiKey,
                     settings = GoogleClientSettings(baseUrl = baseUrl),
-                    baseClient = HttpClientProvider.createHttpClient()
+                    httpClientFactory = HttpClientProvider.resolveKoogHttpClientFactory()
                 )
             }
 

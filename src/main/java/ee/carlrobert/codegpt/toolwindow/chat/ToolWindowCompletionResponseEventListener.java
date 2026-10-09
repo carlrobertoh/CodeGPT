@@ -26,6 +26,10 @@ import javax.swing.Timer;
 abstract class ToolWindowCompletionResponseEventListener implements
     CompletionResponseEventListener {
 
+  private static final com.intellij.openapi.diagnostic.Logger LOG =
+      com.intellij.openapi.diagnostic.Logger.getInstance(
+          ToolWindowCompletionResponseEventListener.class);
+
   private static final int UPDATE_INTERVAL_MS = 20;
 
   private final Project project;
@@ -90,6 +94,11 @@ abstract class ToolWindowCompletionResponseEventListener implements
 
   @Override
   public void handleError(ChatError error, Throwable ex) {
+    if (ex != null) {
+      LOG.error("Chat completion error: " + error.getMessage(), ex);
+    } else {
+      LOG.error("Chat completion error: " + error.getMessage());
+    }
     ApplicationManager.getApplication().invokeLater(() -> {
       try {
         if ("insufficient_quota".equals(error.getCode())) {

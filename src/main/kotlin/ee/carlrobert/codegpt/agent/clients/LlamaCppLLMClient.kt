@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.agent.clients
 
+import ai.koog.http.client.KoogHttpClient
 import ai.koog.prompt.executor.clients.openai.OpenAIClientSettings
 import ai.koog.prompt.executor.clients.openai.OpenAILLMClient
 import ai.koog.prompt.llm.LLMProvider
@@ -12,14 +13,15 @@ import io.ktor.client.*
 class LlamaCppLLMClient(
     private val baseUrl: String,
     private val state: LlamaSettingsState,
-    private val baseClient: HttpClient = HttpClient()
+    private val baseClient: HttpClient = HttpClient(),
+    httpClientFactory: KoogHttpClient.Factory = HttpClientProvider.resolveKoogHttpClientFactory(baseClient)
 ) : OpenAILLMClient(
     apiKey = "",
     settings = OpenAIClientSettings(
         baseUrl = baseUrl,
         chatCompletionsPath = "v1/chat/completions"
     ),
-    baseClient = baseClient
+    httpClientFactory = httpClientFactory
 ) ,
     CodeCompletionCapable {
     data object LlamaCpp : LLMProvider("llama_cpp", "llama.cpp")

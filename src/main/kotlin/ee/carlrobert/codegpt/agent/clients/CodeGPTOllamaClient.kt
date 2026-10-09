@@ -3,10 +3,13 @@ package ee.carlrobert.codegpt.agent.clients
 import ai.koog.agents.core.tools.ToolDescriptor
 import ai.koog.prompt.dsl.ModerationResult
 import ai.koog.prompt.executor.clients.LLMClient
+import ai.koog.prompt.executor.ollama.client.ContextWindowStrategy
 import ai.koog.prompt.executor.ollama.client.OllamaClient
+import ai.koog.prompt.executor.ollama.client.OllamaParams
+import ai.koog.prompt.llm.LLMProvider
 import ai.koog.prompt.llm.LLModel
 import ai.koog.prompt.message.Message
-import ai.koog.prompt.dsl.Prompt
+import ai.koog.prompt.Prompt
 import com.intellij.openapi.components.service
 import ee.carlrobert.codegpt.codecompletions.InfillRequest
 import ee.carlrobert.codegpt.settings.models.ModelSettings
@@ -33,7 +36,18 @@ class CodeGPTOllamaClient private constructor(
         apiKey: String?,
         baseClient: HttpClient = HttpClientProvider.createHttpClient()
     ) : this(
-        delegate = OllamaClient(baseUrl = baseUrl, baseClient = baseClient),
+        delegate = OllamaClient(
+            httpClientFactory = HttpClientProvider.resolveKoogHttpClientFactory(baseClient),
+            baseUrl = baseUrl.trim().trimEnd('/'),
+            headers = apiKey?.takeIf { it.isNotBlank() }?.let {
+                mapOf(HttpHeaders.Authorization to "Bearer $it")
+            } ?: emptyMap(),
+            contextWindowStrategy = if (settings.contextSize > 0) {
+                ContextWindowStrategy.Companion.Fixed(settings.contextSize.toLong())
+            } else {
+                ContextWindowStrategy.Companion.None
+            }
+        ),
         settings = settings,
         baseUrl = baseUrl,
         apiKey = apiKey,
@@ -46,24 +60,49 @@ class CodeGPTOllamaClient private constructor(
         prompt: Prompt,
         model: LLModel,
         tools: List<ToolDescriptor>
-    ): List<Message.Response> = delegate.execute(prompt, model, tools)
+    ): Message.Assistant = delegate.execute(applyOllamaParams(prompt), ensureOllamaModel(model), tools)
 
     override fun executeStreaming(
         prompt: Prompt,
         model: LLModel,
         tools: List<ToolDescriptor>
-    ): Flow<StreamFrame> = delegate.executeStreaming(prompt, model, tools)
+    ): Flow<StreamFrame> = delegate.executeStreaming(applyOllamaParams(prompt), ensureOllamaModel(model), tools)
 
     override suspend fun moderate(prompt: Prompt, model: LLModel): ModerationResult =
-        delegate.moderate(prompt, model)
+        delegate.moderate(applyOllamaParams(prompt), ensureOllamaModel(model))
 
     override suspend fun models(): List<LLModel> = delegate.models()
 
     override suspend fun embed(text: String, model: LLModel): List<Double> =
-        delegate.embed(text, model)
+        delegate.embed(text, ensureOllamaModel(model))
 
     override suspend fun embed(inputs: List<String>, model: LLModel): List<List<Double>> =
-        delegate.embed(inputs, model)
+        delegate.embed(inputs, ensureOllamaModel(model))
+
+    private fun ensureOllamaModel(model: LLModel): LLModel {
+        return if (model.provider == LLMProvider.Ollama) {
+            model
+        } else {
+            model.copy(provider = LLMProvider.Ollama)
+        }
+    }
+
+    private fun applyOllamaParams(prompt: Prompt): Prompt {
+        val currentParams = prompt.params
+        val think = if (settings.thinkingEnabled) true else null
+        val ollamaParams = OllamaParams(
+            temperature = currentParams.temperature,
+            maxTokens = currentParams.maxTokens,
+            numberOfChoices = currentParams.numberOfChoices,
+            speculation = currentParams.speculation,
+            schema = currentParams.schema,
+            toolChoice = currentParams.toolChoice,
+            user = currentParams.user,
+            additionalProperties = currentParams.additionalProperties,
+            think = think
+        )
+        return prompt.withParams(ollamaParams)
+    }
 
     override suspend fun getCodeCompletion(infillRequest: InfillRequest): String {
         val model = service<ModelSettings>().getModelSelectionForFeature(FeatureType.CODE_COMPLETION).modelId

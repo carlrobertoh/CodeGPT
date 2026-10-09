@@ -1,10 +1,10 @@
 package ee.carlrobert.codegpt.completions
 
-import ai.koog.prompt.dsl.Prompt
+import ai.koog.prompt.Prompt
 import ai.koog.prompt.dsl.PromptBuilder
 import ai.koog.prompt.dsl.prompt
 import ai.koog.prompt.message.AttachmentContent
-import ai.koog.prompt.message.ContentPart
+// import ai.koog.prompt.message.ContentPart
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.LocalFileSystem
@@ -103,7 +103,7 @@ abstract class BaseRequestFactory : CompletionRequestFactory {
                             ?.function
                             ?.name
                             ?: "unknown-function"
-                        tool { result(callId, toolName, result) }
+                        toolResult(callId, toolName, result)
                     }
                     if (!callParameters.retry && !currentMessage.response.isNullOrBlank()) {
                         assistant(currentMessage.response)
@@ -123,15 +123,17 @@ abstract class BaseRequestFactory : CompletionRequestFactory {
                 .substringAfter('/')
                 .substringBefore(';')
                 .ifBlank { "png" }
-            val imagePart = ContentPart.Image(
-                content = AttachmentContent.Binary.Bytes(imageDetails.data),
-                format = format,
-                mimeType = imageDetails.mediaType
+            val imagePart = ai.koog.prompt.message.MessagePart.Attachment(
+                ai.koog.prompt.message.AttachmentSource.Image(
+                    content = ai.koog.prompt.message.AttachmentContent.Binary.Bytes(imageDetails.data),
+                    format = format,
+                    mimeType = imageDetails.mediaType
+                )
             )
             val parts = buildList {
                 add(imagePart)
                 if (promptWithContext.isNotBlank()) {
-                    add(ContentPart.Text(promptWithContext))
+                    add(ai.koog.prompt.message.MessagePart.Text(promptWithContext))
                 }
             }
             user(parts)
@@ -156,15 +158,13 @@ abstract class BaseRequestFactory : CompletionRequestFactory {
                 assistant(message.response)
             }
             message.toolCalls?.forEach { toolCall ->
-                tool {
-                    call(
-                        toolCall.id,
-                        toolCall.function.name ?: "unknown-function",
-                        toolCall.function.arguments
-                            ?.takeIf { it.isNotBlank() }
-                            ?: "{}"
-                    )
-                }
+                toolCall(
+                    toolCall.id,
+                    toolCall.function.name ?: "unknown-function",
+                    toolCall.function.arguments
+                        ?.takeIf { it.isNotBlank() }
+                        ?: "{}"
+                )
             }
             if (includeToolResults) {
                 message.toolCallResults?.forEach { (callId, result) ->
@@ -173,7 +173,7 @@ abstract class BaseRequestFactory : CompletionRequestFactory {
                         ?.function
                         ?.name
                         ?: "unknown-function"
-                    tool { result(callId, toolName, result) }
+                    toolResult(callId, toolName, result)
                 }
             }
         } else if (!message.response.isNullOrBlank()) {
