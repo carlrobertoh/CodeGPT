@@ -57,6 +57,14 @@ changelog {
     repositoryUrl.set(properties("pluginRepositoryUrl"))
 }
 
+// The IDE ships kotlinx-coroutines. A bundled copy clashes with it ("CoroutineExceptionHandlerImpl
+// not a subtype"), and Koog 1.2 pulls it in transitively through many artifacts.
+configurations.runtimeClasspath {
+    exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-coroutines-core")
+    exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-coroutines-core-jvm")
+    exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-coroutines-jdk8")
+}
+
 dependencies {
     intellijPlatform {
         val type = properties("platformType").get()
