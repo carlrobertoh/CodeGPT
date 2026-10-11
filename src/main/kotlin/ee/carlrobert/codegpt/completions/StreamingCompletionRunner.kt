@@ -1,9 +1,12 @@
 package ee.carlrobert.codegpt.completions
 
 import ee.carlrobert.codegpt.util.ReasoningFrameTextAdapter
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+
+private val logger = KotlinLogging.logger {}
 
 internal object StreamingCompletionRunner : CompletionRunner {
 
@@ -39,8 +42,8 @@ internal object StreamingCompletionRunner : CompletionRunner {
                     }
 
                     StreamingMode.SINGLE_RESPONSE -> {
-                        val responses = request.executor.execute(request.prompt, request.model, request.tools)
-                        val text = CompletionTextExtractor.extract(responses)
+                        val response = request.executor.execute(request.prompt, request.model, request.tools) as? ai.koog.prompt.message.Message.Assistant
+                        val text = response?.let { CompletionTextExtractor.extract(listOf(it)) } ?: ""
                         if (text.isNotBlank()) {
                             messageBuilder.append(text)
                             request.eventListener.onMessage(text)
@@ -57,6 +60,7 @@ internal object StreamingCompletionRunner : CompletionRunner {
             } catch (_: CancellationException) {
                 request.eventListener.onCancelled(request.cancellationResultBuilder(messageBuilder))
             } catch (exception: Throwable) {
+                logger.error(exception) { "Streaming completion failed" }
                 request.eventListener.onError(
                     CompletionError(exception.message ?: "Failed to complete request"),
                     exception

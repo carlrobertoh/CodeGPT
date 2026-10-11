@@ -1,9 +1,9 @@
 package ee.carlrobert.codegpt.agent.strategy
 
-import ai.koog.agents.memory.feature.history.RetrieveFactsFromHistory
-import ai.koog.agents.memory.model.Concept
-import ai.koog.agents.memory.model.FactType
-import ai.koog.prompt.dsl.Prompt
+import ai.koog.agents.core.dsl.extension.Concept
+import ai.koog.agents.core.dsl.extension.FactType
+import ai.koog.agents.core.dsl.extension.HistoryCompressionStrategy
+import ai.koog.prompt.Prompt
 import ai.koog.prompt.tokenizer.PromptTokenizer
 
 fun buildHistoryTooBigPredicate(maxPromptTokens: Long): (Prompt, PromptTokenizer) -> Boolean =
@@ -16,7 +16,7 @@ fun buildHistoryTooBigPredicate(maxPromptTokens: Long): (Prompt, PromptTokenizer
         tokenCount.toLong() >= maxPromptTokens
     }
 
-val CODE_AGENT_COMPRESSION = RetrieveFactsFromHistory(
+val CODE_AGENT_COMPRESSION = HistoryCompressionStrategy.FactRetrieval(
     Concept(
         "project-structure",
         "What is the structure of this project?",

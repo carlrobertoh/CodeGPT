@@ -1,6 +1,6 @@
 package ee.carlrobert.codegpt.codecompletions
 
-import ai.koog.prompt.dsl.Prompt
+import ai.koog.prompt.Prompt
 import ai.koog.prompt.dsl.prompt
 import ai.koog.prompt.params.LLMParams
 

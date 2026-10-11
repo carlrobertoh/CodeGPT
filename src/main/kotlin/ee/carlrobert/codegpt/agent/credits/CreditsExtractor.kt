@@ -12,9 +12,9 @@ data class CreditsSnapshot(
     val total: Long,
 )
 
-fun extractCreditsSnapshot(responses: List<Message.Response>): CreditsSnapshot? {
+fun extractCreditsSnapshot(responses: List<Message.Assistant>): CreditsSnapshot? {
     val creditsObject = responses.asReversed().firstNotNullOfOrNull { response ->
-        response.metaInfo.metadata?.get("credits")?.jsonObject
+        response.metaInfo.metadata?.get("credits") as? JsonObject
     } ?: return null
     val remaining = creditsObject.longOrNull("remaining") ?: return null
     val monthlyRemaining = creditsObject.longOrNull("monthly_remaining") ?: remaining

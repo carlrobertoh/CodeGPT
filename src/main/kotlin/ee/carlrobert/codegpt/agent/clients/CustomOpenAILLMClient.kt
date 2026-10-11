@@ -1,7 +1,7 @@
 package ee.carlrobert.codegpt.agent.clients
 
 import ai.koog.agents.core.tools.ToolDescriptor
-import ai.koog.prompt.dsl.Prompt
+import ai.koog.prompt.Prompt
 import ai.koog.prompt.executor.clients.ConnectionTimeoutConfig
 import ai.koog.prompt.executor.clients.LLMClient
 import ai.koog.prompt.executor.clients.openai.OpenAIClientSettings
@@ -40,7 +40,8 @@ import kotlinx.serialization.descriptors.elementNames
 import kotlinx.serialization.json.*
 import org.apache.commons.text.StringEscapeUtils
 import java.net.URI
-import kotlin.time.Clock
+import ai.koog.http.client.KoogHttpClient
+import ai.koog.utils.time.KoogClock
 
 /**
  * Implementation of [LLMClient] for OpenAI-compatible custom providers.
@@ -54,11 +55,12 @@ class CustomOpenAILLMClient(
     private val chatState: CustomServiceChatCompletionSettingsState? = null,
     private val codeCompletionState: CustomServiceCodeCompletionSettingsState? = null,
     private val baseClient: HttpClient = HttpClient(),
-    clock: Clock = Clock.System
+    httpClientFactory: KoogHttpClient.Factory = HttpClientProvider.resolveKoogHttpClientFactory(baseClient),
+    clock: KoogClock = KoogClock.System
 ) : OpenAILLMClient(
     apiKey = apiKey,
     settings = settings,
-    baseClient = baseClient,
+    httpClientFactory = httpClientFactory,
     clock = clock,
 ), CodeCompletionCapable {
 
@@ -97,7 +99,8 @@ class CustomOpenAILLMClient(
                 apiKey = apiKey,
                 settings = settings,
                 chatState = state,
-                baseClient = clientWithCustomHeaders
+                baseClient = clientWithCustomHeaders,
+                httpClientFactory = HttpClientProvider.resolveKoogHttpClientFactory(clientWithCustomHeaders)
             )
         }
 
@@ -114,7 +117,8 @@ class CustomOpenAILLMClient(
                     timeoutConfig = timeoutConfig
                 ),
                 codeCompletionState = state,
-                baseClient = baseClient
+                baseClient = baseClient,
+                httpClientFactory = HttpClientProvider.resolveKoogHttpClientFactory(baseClient)
             )
         }
 
@@ -158,7 +162,7 @@ class CustomOpenAILLMClient(
         prompt: Prompt,
         model: LLModel,
         tools: List<ToolDescriptor>
-    ): List<Message.Response> {
+    ): Message.Assistant {
         val state = requireChatState()
         val finalPrompt = prompt.prepareForModel(model, state)
         return super.execute(finalPrompt, model, tools)
@@ -178,7 +182,7 @@ class CustomOpenAILLMClient(
         prompt: Prompt,
         model: LLModel,
         tools: List<ToolDescriptor>
-    ): List<LLMChoice> {
+    ): List<Message.Assistant> {
         val state = requireChatState()
         return super.executeMultipleChoices(prompt.prepareForModel(model, state), model, tools)
     }

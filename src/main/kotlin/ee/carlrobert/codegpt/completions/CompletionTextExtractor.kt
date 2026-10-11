@@ -3,17 +3,19 @@ package ee.carlrobert.codegpt.completions
 import ai.koog.prompt.message.Message
 
 internal object CompletionTextExtractor {
-    fun extract(responses: List<Message.Response>): String {
-        val reasoningText = responses
-            .filterIsInstance<Message.Reasoning>()
-            .map { it.content.trim() }
+    fun extract(responses: List<Message.Assistant>): String {
+        val parts = responses.flatMap { it.parts }
+
+        val reasoningText = parts
+            .filterIsInstance<ai.koog.prompt.message.MessagePart.Reasoning>()
+            .map { it.content.joinToString("").trim() }
             .filter { it.isNotEmpty() }
             .joinToString("\n")
             .trim()
 
-        val assistantText = responses
-            .filterIsInstance<Message.Assistant>()
-            .joinToString("\n") { it.content.trim() }
+        val assistantText = parts
+            .filterIsInstance<ai.koog.prompt.message.MessagePart.Text>()
+            .joinToString("\n") { it.text.trim() }
             .trim()
 
         if (reasoningText.isNotEmpty() && assistantText.isNotEmpty()) {
@@ -28,6 +30,6 @@ internal object CompletionTextExtractor {
             return "<think>$reasoningText</think>"
         }
 
-        return responses.joinToString("\n") { it.content.trim() }.trim()
+        return responses.joinToString("\n") { it.textContent().trim() }.trim()
     }
 }

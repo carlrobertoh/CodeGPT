@@ -25,11 +25,14 @@ import ee.carlrobert.codegpt.settings.models.ModelSettings
 import ee.carlrobert.codegpt.settings.service.ServiceType
 import ee.carlrobert.codegpt.settings.service.custom.CustomServicesSettings
 import ee.carlrobert.codegpt.util.ReasoningFrameTextAdapter
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import java.util.*
 import javax.swing.JPanel
+
+private val logger = KotlinLogging.logger {}
 
 internal object AgentCompletionRunner : CompletionRunner {
 
@@ -129,12 +132,13 @@ internal object AgentCompletionRunner : CompletionRunner {
                             if (stream) return@onNodeExecutionCompleted
 
                             (ctx.output as? List<*>)?.forEach { msg ->
-                                (msg as? Message.Assistant)?.let {
-                                    events.onTextReceived(it.content)
-                                }
-                                (msg as? Message.Reasoning)?.let {
-                                    if (it.content.isNotBlank()) {
-                                        events.onThinkingReceived(it.content)
+                                (msg as? ai.koog.prompt.message.Message.Assistant)?.let { assistantMsg ->
+                                    events.onTextReceived(assistantMsg.textContent())
+                                    assistantMsg.parts.filterIsInstance<ai.koog.prompt.message.MessagePart.Reasoning>().forEach { reasoning ->
+                                        val content = reasoning.content.joinToString("").trim()
+                                        if (content.isNotBlank()) {
+                                            events.onThinkingReceived(content)
+                                        }
                                     }
                                 }
                             }
@@ -154,6 +158,7 @@ internal object AgentCompletionRunner : CompletionRunner {
             } catch (_: CancellationException) {
                 request.eventListener.onCancelled(StringBuilder(messageBuilder))
             } catch (exception: Throwable) {
+                logger.error(exception) { "Agent completion failed" }
                 request.eventListener.onError(
                     ChatError(exception.message ?: "Failed to complete request"),
                     exception

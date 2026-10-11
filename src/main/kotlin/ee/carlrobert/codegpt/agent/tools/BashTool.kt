@@ -1,7 +1,6 @@
 package ee.carlrobert.codegpt.agent.tools
 
 import ai.koog.agents.core.tools.annotations.LLMDescription
-import ai.koog.agents.ext.tool.shell.ShellCommandConfirmation
 import ai.koog.serialization.JSONSerializer
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ModalityState
@@ -12,6 +11,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFileManager
+
 import ee.carlrobert.codegpt.agent.AgentToolOutputNotifier
 import ee.carlrobert.codegpt.agent.ToolRunContext
 import ee.carlrobert.codegpt.settings.ProxyAISettingsService
@@ -30,6 +30,11 @@ import java.nio.file.Paths
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.cancellation.CancellationException
+
+sealed class ShellCommandConfirmation {
+    object Approved : ShellCommandConfirmation()
+    data class Denied(val userResponse: String = "") : ShellCommandConfirmation()
+}
 
 fun interface BashCommandConfirmationHandler {
     suspend fun requestConfirmation(args: BashTool.Args): ShellCommandConfirmation

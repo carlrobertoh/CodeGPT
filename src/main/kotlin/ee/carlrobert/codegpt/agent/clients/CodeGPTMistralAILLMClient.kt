@@ -14,7 +14,7 @@ class CodeGPTMistralAILLMClient(
 ) : MistralAILLMClient(
     apiKey = apiKey,
     settings = MistralAIClientSettings(baseUrl = baseUrl),
-    baseClient = baseClient
+    httpClientFactory = HttpClientProvider.resolveKoogHttpClientFactory(baseClient)
 ),
     CodeCompletionCapable {
 

@@ -6,7 +6,7 @@ changelog = "2.2.1"
 checkstyle = "10.15.0"
 commons-text = "1.13.1"
 flexmark = "0.64.8"
-gradle-intellij-plugin-version = "2.10.4"
+gradle-intellij-plugin-version = "2.16.0"
 gson = "2.13.1"
 jackson = "2.18.3"
 mcp = "0.8.0"
@@ -15,7 +15,7 @@ jtokkit = "1.1.0"
 junit = "5.13.4"
 kotlin = "2.3.10"
 kotlinx-serialization = "1.6.3"
-koog = "0.8.0"
+koog = "1.2.0"
 slf4j = "2.0.17"
 tree-sitter = "0.24.5"
 grpc = "1.73.0"
@@ -43,6 +43,8 @@ junit4 = { module = "junit:junit", version = "4.13.2" }
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
 koog-agents = { module = "ai.koog:koog-agents", version.ref = "koog" }
+koog-llms-all = { module = "ai.koog:prompt-executor-llms-all-jvm", version = "1.2.0-beta" }
+koog-http-client-ktor = { module = "ai.koog:http-client-ktor", version.ref = "koog" }
 koog-serialization-jackson = { module = "ai.koog:serialization-jackson", version.ref = "koog" }
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }

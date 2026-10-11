@@ -1,5 +1,8 @@
 package ee.carlrobert.codegpt.agent.clients
 
+import ai.koog.http.client.HttpClientFactoryResolver
+import ai.koog.http.client.KoogHttpClient
+import ai.koog.http.client.ktor.KtorKoogHttpClient
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.util.net.ssl.CertificateManager
 import ee.carlrobert.codegpt.settings.advanced.AdvancedSettings
@@ -23,6 +26,27 @@ import java.net.Proxy
 object HttpClientProvider {
 
     private val logger = Logger.getInstance(HttpClientProvider::class.java)
+
+    init {
+        try {
+            val prev = Thread.currentThread().contextClassLoader
+            try {
+                Thread.currentThread().contextClassLoader = KoogHttpClient.Factory::class.java.classLoader
+                HttpClientFactoryResolver.resolve()
+            } finally {
+                Thread.currentThread().contextClassLoader = prev
+            }
+        } catch (t: Throwable) {
+            logger.warn("Failed to warm up HttpClientFactoryResolver", t)
+        }
+    }
+
+    /**
+     * Resolves a [KoogHttpClient.Factory] directly avoiding ServiceLoader classpath issues in IntelliJ plugins.
+     */
+    fun resolveKoogHttpClientFactory(baseClient: HttpClient = createHttpClient()): KoogHttpClient.Factory {
+        return KtorKoogHttpClient.Factory(baseClient = baseClient)
+    }
 
     /**
      * Creates a Ktor HttpClient configured with proxy settings from AdvancedSettings.

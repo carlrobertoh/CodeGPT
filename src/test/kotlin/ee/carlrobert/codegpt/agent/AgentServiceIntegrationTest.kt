@@ -13,7 +13,7 @@ import ai.koog.agents.snapshot.feature.isTombstone
 import ai.koog.agents.snapshot.feature.tombstoneCheckpoint
 import ai.koog.agents.snapshot.providers.file.JVMFilePersistenceStorageProvider
 import ai.koog.prompt.dsl.ModerationResult
-import ai.koog.prompt.dsl.Prompt
+import ai.koog.prompt.Prompt
 import ai.koog.prompt.dsl.prompt
 import ai.koog.prompt.executor.model.PromptExecutor
 import ai.koog.prompt.llm.LLModel

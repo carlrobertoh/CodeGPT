@@ -3,9 +3,9 @@ package ee.carlrobert.codegpt.settings.models
 import ai.koog.prompt.executor.clients.anthropic.AnthropicModels.Haiku_4_5
 import ai.koog.prompt.executor.clients.anthropic.AnthropicModels.Opus_4_5
 import ai.koog.prompt.executor.clients.anthropic.AnthropicModels.Sonnet_4_5
-import ai.koog.prompt.executor.clients.google.GoogleModels
-import ai.koog.prompt.executor.clients.google.GoogleModels.Gemini3_Pro_Preview
-import ai.koog.prompt.executor.clients.mistralai.MistralAIModels
+// //import ai.koog.prompt.executor.clients.google.GoogleModels
+// // //import ai.koog.prompt.executor.clients.google.GoogleModels.Gemini3_Pro_Preview
+// //import ai.koog.prompt.executor.clients.mistralai.MistralAIModels
 import ai.koog.prompt.executor.clients.openai.OpenAIModels
 import ai.koog.prompt.executor.clients.openai.OpenAIModels.Chat.GPT5Mini
 import ai.koog.prompt.executor.clients.openai.OpenAIModels.Chat.GPT5_2
@@ -168,6 +168,10 @@ private fun defaultModelDisplayName(modelId: String): String {
         ModelCatalog.GPT_3_5_TURBO_INSTRUCT -> "GPT-3.5 Turbo Instruct"
 
         // Anthropic
+        Fable_5_1.id -> "Claude Fable 5.1"
+        Opus_5_5.id -> "Claude Opus 5.5"
+        Sonnet_5_5.id -> "Claude Sonnet 5.5"
+        Haiku_5_5.id -> "Claude Haiku 5.5"
         Opus_4_6.id -> "Claude Opus 4.6"
         Opus_4_5.id -> "Claude Opus 4.5"
         Sonnet_4_6.id -> "Claude Sonnet 4.6"
@@ -175,17 +179,17 @@ private fun defaultModelDisplayName(modelId: String): String {
         Haiku_4_5.id -> "Claude Haiku 4.5"
 
         // Google
-        Gemini3_1_Pro_Preview.id -> "Gemini 3.1 Pro Preview"
-        Gemini3_Pro_Preview.id -> "Gemini 3 Pro Preview"
-        Gemini3_Flash_Preview.id -> "Gemini 3 Flash Preview"
-        GoogleModels.Gemini2_5Pro.id -> "Gemini 2.5 Pro"
-        GoogleModels.Gemini2_5Flash.id -> "Gemini 2.5 Flash"
-        GoogleModels.Gemini2_5FlashLite.id -> "Gemini 2.5 Flash Lite"
+//        Gemini3_1_Pro_Preview.id -> "Gemini 3.1 Pro Preview"
+// //        Gemini3_Pro_Preview.id -> "Gemini 3 Pro Preview"
+//        Gemini3_Flash_Preview.id -> "Gemini 3 Flash Preview"
+// //        GoogleModels.Gemini2_5Pro.id -> "Gemini 2.5 Pro"
+// //        GoogleModels.Gemini2_5Flash.id -> "Gemini 2.5 Flash"
+// //        GoogleModels.Gemini2_5FlashLite.id -> "Gemini 2.5 Flash Lite"
 
         // Mistral
-        Devstral2.id -> "Devstral 2"
-        MistralAIModels.Chat.DevstralMedium.id -> "Devstral Medium"
-        MistralAIModels.Chat.Codestral.id -> "Codestral"
+//        Devstral2.id -> "Devstral 2"
+// //        MistralAIModels.Chat.DevstralMedium.id -> "Devstral Medium"
+// //        MistralAIModels.Chat.Codestral.id -> "Codestral"
 
         // Inception
         Mercury2.id, MERCURY2 -> "Mercury 2"
@@ -261,6 +265,49 @@ val Opus_4_6: LLModel = LLModel(
     ),
     contextLength = 200_000,
     maxOutputTokens = 64_000,
+)
+
+// Claude 5.5 generation: no sampling params, thinking is always adaptive, so they declare
+// Thinking (Koog refuses to replay thinking blocks otherwise) and no Temperature.
+private val CLAUDE_5_5_CAPABILITIES = listOf(
+    LLMCapability.Thinking,
+    LLMCapability.Tools,
+    LLMCapability.ToolChoice,
+    LLMCapability.Vision.Image,
+    LLMCapability.Document,
+    LLMCapability.Completion
+)
+
+val Fable_5_1: LLModel = LLModel(
+    provider = LLMProvider.Anthropic,
+    id = "claude-fable-5-1",
+    capabilities = CLAUDE_5_5_CAPABILITIES,
+    contextLength = 1_000_000,
+    maxOutputTokens = 128_000,
+)
+
+val Opus_5_5: LLModel = LLModel(
+    provider = LLMProvider.Anthropic,
+    id = "claude-opus-5-5",
+    capabilities = CLAUDE_5_5_CAPABILITIES,
+    contextLength = 1_000_000,
+    maxOutputTokens = 128_000,
+)
+
+val Sonnet_5_5: LLModel = LLModel(
+    provider = LLMProvider.Anthropic,
+    id = "claude-sonnet-5-5",
+    capabilities = CLAUDE_5_5_CAPABILITIES,
+    contextLength = 1_000_000,
+    maxOutputTokens = 128_000,
+)
+
+val Haiku_5_5: LLModel = LLModel(
+    provider = LLMProvider.Anthropic,
+    id = "claude-haiku-5-5",
+    capabilities = CLAUDE_5_5_CAPABILITIES,
+    contextLength = 1_000_000,
+    maxOutputTokens = 128_000,
 )
 
 private val GPT5_4: LLModel = LLModel(
@@ -477,6 +524,10 @@ private class AnthropicModelProvider : ModelProvider {
     )
 
     private val models = listOf(
+        Fable_5_1,
+        Opus_5_5,
+        Sonnet_5_5,
+        Haiku_5_5,
         Opus_4_6,
         Opus_4_5,
         Sonnet_4_6,
@@ -512,7 +563,7 @@ private class GoogleModelProvider : ModelProvider {
 
     private val chatModels = listOf(
         Gemini3_1_Pro_Preview,
-        Gemini3_Pro_Preview,
+//         Gemini3_Pro_Preview,
         Gemini3_Flash_Preview,
     )
 
@@ -520,7 +571,7 @@ private class GoogleModelProvider : ModelProvider {
         return when (featureType) {
             FeatureType.AGENT -> listOf(
                 defaultModel(Gemini3_1_Pro_Preview),
-                defaultModel(Gemini3_Pro_Preview),
+//                 defaultModel(Gemini3_Pro_Preview),
                 defaultModel(Gemini3_Flash_Preview),
             )
 
@@ -559,20 +610,20 @@ private class MistralModelProvider : ModelProvider {
 
     private val chatModels = listOf(
         Devstral2,
-        MistralAIModels.Chat.DevstralMedium,
-        MistralAIModels.Chat.Codestral,
+// //        MistralAIModels.Chat.DevstralMedium,
+// //        MistralAIModels.Chat.Codestral,
     )
 
     override fun modelsForFeature(featureType: FeatureType): List<ModelSelection> {
         return when (featureType) {
             FeatureType.AGENT -> listOf(
                 defaultModel(Devstral2),
-                defaultModel(MistralAIModels.Chat.DevstralMedium),
+//                 defaultModel(MistralAIModels.Chat.DevstralMedium),
             )
 
             in CHAT_FEATURES, FeatureType.AUTO_APPLY -> chatModels.map { defaultModel(it) }
 
-            FeatureType.CODE_COMPLETION -> listOf(defaultModel(MistralAIModels.Chat.Codestral))
+//             FeatureType.CODE_COMPLETION -> listOf(defaultModel(MistralAIModels.Chat.Codestral))
 
             else -> emptyList()
         }

@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt.agent.history
 
 import ai.koog.prompt.message.Message
+import ai.koog.prompt.message.MessagePart
 
 internal object AgentMessageHistorySanitizer {
 
@@ -21,33 +22,47 @@ internal object AgentMessageHistorySanitizer {
 
         history.forEach { message ->
             when (message) {
-                is Message.Tool.Call -> {
-                    if (firstPendingToolCallIndex == null) {
-                        firstPendingToolCallIndex = sanitized.size
+                is Message.Assistant -> {
+                    val calls = message.parts.filterIsInstance<MessagePart.Tool.Call>()
+                    if (calls.isNotEmpty()) {
+                        if (firstPendingToolCallIndex == null) {
+                            firstPendingToolCallIndex = sanitized.size
+                        }
+                        calls.forEach { call ->
+                            pendingToolCallIds.add(call.id?.takeIf { it.isNotBlank() }
+                                ?: "__anonymous_tool_call_${++anonymousToolCallIndex}")
+                        }
+                        sanitized.add(message)
+                    } else {
+                        if (pendingToolCallIds.isNotEmpty()) {
+                            discardPendingToolCalls()
+                        }
+                        sanitized.add(message)
                     }
-                    pendingToolCallIds.add(message.id?.takeIf { it.isNotBlank() }
-                        ?: "__anonymous_tool_call_${++anonymousToolCallIndex}")
-                    sanitized.add(message)
                 }
 
-                is Message.Tool.Result -> {
-                    if (pendingToolCallIds.isEmpty()) {
-                        return@forEach
-                    }
-
-                    val matched = if (message.id.isNullOrBlank()) {
-                        pendingToolCallIds.removeAt(0)
-                        true
+                is Message.User -> {
+                    val results = message.parts.filterIsInstance<MessagePart.Tool.Result>()
+                    if (results.isNotEmpty()) {
+                        if (pendingToolCallIds.isEmpty()) {
+                            return@forEach
+                        }
+                        results.forEach { res ->
+                            if (res.id.isNullOrBlank()) {
+                                if (pendingToolCallIds.isNotEmpty()) pendingToolCallIds.removeAt(0)
+                            } else {
+                                pendingToolCallIds.remove(res.id)
+                            }
+                        }
+                        sanitized.add(message)
+                        if (pendingToolCallIds.isEmpty()) {
+                            firstPendingToolCallIndex = null
+                        }
                     } else {
-                        pendingToolCallIds.remove(message.id)
-                    }
-                    if (!matched) {
-                        return@forEach
-                    }
-
-                    sanitized.add(message)
-                    if (pendingToolCallIds.isEmpty()) {
-                        firstPendingToolCallIndex = null
+                        if (pendingToolCallIds.isNotEmpty()) {
+                            discardPendingToolCalls()
+                        }
+                        sanitized.add(message)
                     }
                 }
 

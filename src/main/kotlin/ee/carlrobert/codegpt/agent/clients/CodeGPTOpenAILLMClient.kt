@@ -1,5 +1,6 @@
 package ee.carlrobert.codegpt.agent.clients
 
+import ai.koog.http.client.KoogHttpClient
 import ai.koog.prompt.executor.clients.openai.OpenAIClientSettings
 import ai.koog.prompt.executor.clients.openai.OpenAILLMClient
 import ee.carlrobert.codegpt.codecompletions.InfillRequest
@@ -11,11 +12,12 @@ class CodeGPTOpenAILLMClient(
     private val organization: String?,
     private val baseUrl: String,
     private val model: String,
-    private val baseClient: HttpClient = HttpClientProvider.createHttpClient()
+    private val baseClient: HttpClient = HttpClientProvider.createHttpClient(),
+    httpClientFactory: KoogHttpClient.Factory = HttpClientProvider.resolveKoogHttpClientFactory(baseClient)
 ) : OpenAILLMClient(
     apiKey = apiKey,
     settings = OpenAIClientSettings(baseUrl = baseUrl),
-    baseClient = baseClient
+    httpClientFactory = httpClientFactory
 ),
     CodeCompletionCapable {
 

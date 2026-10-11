@@ -11,6 +11,7 @@ import ee.carlrobert.codegpt.util.GitUtil
 import ee.carlrobert.codegpt.util.ThinkingOutputParser
 import ee.carlrobert.codegpt.util.file.FileUtil
 import kotlinx.coroutines.runBlocking
+import ai.koog.prompt.message.MessagePart
 import ai.koog.prompt.message.Message as KoogMessage
 import ai.koog.prompt.message.Message as PromptMessage
 import ee.carlrobert.codegpt.conversations.message.Message as ChatMessage
@@ -47,9 +48,8 @@ class PromptEnhancer(private val project: Project) {
                 system(PromptEnhancerPrompts.DEFAULT_PROMPT)
                 user(buildUserPrompt(trimmedPrompt, gitDiff, tagsContext, historyContext))
             }
-            val responses = executor.execute(p, model, emptyList())
-            responses.filterIsInstance<KoogMessage.Assistant>()
-                .joinToString("\n") { it.content.trim() }
+            val response = executor.execute(p, model, emptyList())
+            response.textContent().trim()
         }.getOrDefault("")
 
         val enhanced = extractEnhancedPrompt(responseText.ifBlank { trimmedPrompt })
@@ -156,23 +156,19 @@ class PromptEnhancer(private val project: Project) {
         messages.filterNot { it is PromptMessage.System }.forEach { msg ->
             when (msg) {
                 is PromptMessage.User -> {
-                    appendHistoryLine(builder, "User", msg.content)
+                    appendHistoryLine(builder, "User", msg.textContent())
                 }
 
                 is PromptMessage.Assistant -> {
-                    appendHistoryLine(builder, "Assistant", msg.content)
-                }
-
-                is PromptMessage.Reasoning -> {
-                    appendHistoryLine(builder, "Assistant", msg.content)
-                }
-
-                is PromptMessage.Tool.Call -> {
-                    appendHistoryLine(builder, "Tool Call (${msg.tool})", msg.content)
-                }
-
-                is PromptMessage.Tool.Result -> {
-                    appendHistoryLine(builder, "Tool Result (${msg.tool})", msg.content)
+                    msg.parts.forEach { part ->
+                        when (part) {
+                            is MessagePart.Text -> appendHistoryLine(builder, "Assistant", part.text)
+                            is MessagePart.Reasoning -> appendHistoryLine(builder, "Assistant", part.content.joinToString(""))
+                            is MessagePart.Tool.Call -> appendHistoryLine(builder, "Tool Call (${part.tool})", part.args)
+                            is MessagePart.Tool.Result -> appendHistoryLine(builder, "Tool Result (${part.tool})", part.output)
+                            else -> appendHistoryLine(builder, "Assistant", part.toString())
+                        }
+                    }
                 }
 
                 else -> {

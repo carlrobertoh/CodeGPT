@@ -1,7 +1,7 @@
 package ee.carlrobert.codegpt.completions
 
 import ai.koog.agents.core.tools.ToolDescriptor
-import ai.koog.prompt.dsl.Prompt
+import ai.koog.prompt.Prompt
 import ai.koog.prompt.dsl.prompt
 import ai.koog.prompt.llm.LLMCapability
 import ai.koog.prompt.llm.LLModel
@@ -35,8 +35,8 @@ object CompletionRequestService {
         val executor = AgentFactory.createExecutor(serviceType, featureType = featureType)
         return try {
             runBlocking {
-                val responses = executor.execute(prompt, modelSelection.llmModel, tools)
-                CompletionTextExtractor.extract(responses)
+                val response = executor.execute(prompt, modelSelection.llmModel, tools) as? ai.koog.prompt.message.Message.Assistant
+                response?.let { CompletionTextExtractor.extract(listOf(it)) } ?: ""
             }
         } finally {
             runCatching { executor.close() }
@@ -120,8 +120,8 @@ object CompletionRequestService {
             val messageBuilder = StringBuilder()
             eventListener.onOpen()
             try {
-                val responses = client.execute(testPrompt, model, emptyList())
-                val text = CompletionTextExtractor.extract(responses)
+                val response = client.execute(testPrompt, model, emptyList()) as? ai.koog.prompt.message.Message.Assistant
+                val text = response?.let { CompletionTextExtractor.extract(listOf(it)) } ?: ""
                 if (text.isNotBlank()) {
                     messageBuilder.append(text)
                     eventListener.onMessage(text)

@@ -13,6 +13,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ToolwindowChatCompletionRequestHandler {
 
+  private static final com.intellij.openapi.diagnostic.Logger LOG =
+      com.intellij.openapi.diagnostic.Logger.getInstance(
+          ToolwindowChatCompletionRequestHandler.class);
+
   private final Project project;
   private final CompletionResponseEventListener completionResponseEventListener;
   private final ChatToolWindowTabPanel tabPanel;
@@ -105,11 +109,14 @@ public class ToolwindowChatCompletionRequestHandler {
   }
 
   private void handleCallException(Throwable ex) {
+    LOG.error("Failed to start chat completion", ex);
     var errorMessage = "Something went wrong";
     if (ex instanceof TotalUsageExceededException) {
       errorMessage =
           "The length of the context exceeds the maximum limit that the model can handle. "
               + "Try reducing the input message or maximum completion token size.";
+    } else if (ex.getMessage() != null && !ex.getMessage().isBlank()) {
+      errorMessage = ex.getMessage();
     }
     completionResponseEventListener.handleError(new ChatError(errorMessage), ex);
   }

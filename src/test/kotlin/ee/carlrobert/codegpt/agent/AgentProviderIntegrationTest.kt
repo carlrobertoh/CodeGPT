@@ -287,6 +287,34 @@ class AgentProviderIntegrationTest : IntegrationTest() {
         assertThat(result.events.text.toString()).isEqualTo("Anthropic read: ${fixture.contents}")
     }
 
+    fun testAnthropicAdaptiveThinkingModelSendsOnlySupportedParams() {
+        setCredential(AnthropicApiKey, "TEST_API_KEY")
+        service<ModelSettings>().setModel(
+            FeatureType.AGENT,
+            "claude-opus-5-5",
+            ServiceType.ANTHROPIC
+        )
+        val fixture = createReadFixture("Anthropic adaptive fixture")
+        expectAnthropic { request ->
+            assertThat(request.body["model"]).isEqualTo("claude-opus-5-5")
+            assertThat(request.body).doesNotContainKeys("thinking", "temperature", "top_p", "top_k")
+            assertThat(request.body["max_tokens"]).isEqualTo(128_000)
+            anthropicThinkingChunks() + anthropicToolUseChunks(
+                """{"file_path":"${fixture.path}"}""",
+                index = 1
+            )
+        }
+        expectAnthropic { request ->
+            assertThat(request.body).doesNotContainKeys("thinking", "temperature", "top_p", "top_k")
+            assertThat(request.body.toString()).contains(fixture.renderedResult)
+            anthropicTextChunks("Anthropic read: ${fixture.contents}")
+        }
+
+        val result = runAgent(ServiceType.ANTHROPIC, "Read the fixture and repeat its contents")
+
+        assertThat(result.output).isEqualTo("Anthropic read: ${fixture.contents}")
+    }
+
     fun testGoogleAgentUsesMockHarnessThroughRealExecutor() {
         setCredential(GoogleApiKey, "TEST_API_KEY")
         service<ModelSettings>().setModel(
@@ -920,13 +948,46 @@ class AgentProviderIntegrationTest : IntegrationTest() {
         )
     }
 
-    private fun anthropicToolUseChunks(arguments: String): List<String> {
+    // Adaptive-thinking models stream an empty thinking block that carries only a signature.
+    private fun anthropicThinkingChunks(): List<String> {
+        return listOf(
+            jsonMapResponse(
+                e("type", "content_block_start"),
+                e("index", 0),
+                e(
+                    "content_block",
+                    jsonMap(
+                        e("type", "thinking"),
+                        e("thinking", ""),
+                        e("signature", "")
+                    )
+                )
+            ),
+            jsonMapResponse(
+                e("type", "content_block_delta"),
+                e("index", 0),
+                e(
+                    "delta",
+                    jsonMap(
+                        e("type", "signature_delta"),
+                        e("signature", "sig_test")
+                    )
+                )
+            ),
+            jsonMapResponse(
+                e("type", "content_block_stop"),
+                e("index", 0)
+            )
+        )
+    }
+
+    private fun anthropicToolUseChunks(arguments: String, index: Int = 0): List<String> {
         val toolId = "toolu_anthropic_read"
         val toolName = "Read"
         return listOf(
             jsonMapResponse(
                 e("type", "content_block_start"),
-                e("index", 0),
+                e("index", index),
                 e(
                     "content_block",
                     jsonMap(
@@ -939,7 +1000,7 @@ class AgentProviderIntegrationTest : IntegrationTest() {
             ),
             jsonMapResponse(
                 e("type", "content_block_delta"),
-                e("index", 0),
+                e("index", index),
                 e(
                     "delta",
                     jsonMap(
@@ -950,7 +1011,7 @@ class AgentProviderIntegrationTest : IntegrationTest() {
             ),
             jsonMapResponse(
                 e("type", "content_block_stop"),
-                e("index", 0),
+                e("index", index),
                 e(
                     "delta",
                     jsonMap(

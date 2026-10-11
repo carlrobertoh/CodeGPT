@@ -10,6 +10,7 @@ import com.intellij.openapi.observable.util.whenTextChangedFromUi
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.ui.MessageType
 import com.intellij.ui.TitledSeparator
+import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBPasswordField
 import com.intellij.ui.components.JBTextField
 import com.intellij.util.concurrency.AppExecutorUtil
@@ -44,6 +45,8 @@ class OllamaSettingsForm {
     private val refreshModelsButton =
         JButton(CodeGPTBundle.get("settingsConfigurable.service.ollama.models.refresh"))
     private val hostField: JBTextField
+    private val contextSizeField: JBTextField
+    private val thinkingCheckBox: JBCheckBox
     private val modelComboBoxes: Map<FeatureType, ComboBox<String>>
     private val codeCompletionConfigurationForm: CodeCompletionConfigurationForm
     private val apiKeyField: JBPasswordField
@@ -74,6 +77,13 @@ class OllamaSettingsForm {
                 }
             }
         }
+        contextSizeField = JBTextField(30).apply {
+            text = settings.contextSize.takeIf { it > 0 }?.toString() ?: ""
+        }
+        thinkingCheckBox = JBCheckBox(
+            "Enable thinking / reasoning mode (think parameter for DeepSeek-R1, etc.)",
+            settings.thinkingEnabled
+        )
         refreshModelsButton.addActionListener {
             refreshModels(
                 mapOf(
@@ -103,6 +113,12 @@ class OllamaSettingsForm {
                     modelComboBoxes[FeatureType.CHAT]!!
                 )
                 .addComponent(refreshModelsButton)
+                .addLabeledComponent(
+                    "Context size (num_ctx):",
+                    contextSizeField
+                )
+                .addComponentToRightColumn(UIUtil.createComment("Context window size override in tokens (e.g. 8192, 32768, 65536). Leave blank or 0 for model default."))
+                .addComponent(thinkingCheckBox)
                 .addComponent(TitledSeparator(CodeGPTBundle.get("settingsConfigurable.shared.authentication.title")))
                 .setFormLeftIndent(32)
                 .addLabeledComponent(
@@ -126,6 +142,8 @@ class OllamaSettingsForm {
         service<OllamaSettings>().state.run {
             hostField.text = host
             modelComboBoxes[FeatureType.CHAT]!!.item = model ?: ""
+            contextSizeField.text = contextSize.takeIf { it > 0 }?.toString() ?: ""
+            thinkingCheckBox.isSelected = thinkingEnabled
             codeCompletionConfigurationForm.isCodeCompletionsEnabled = codeCompletionsEnabled
             codeCompletionConfigurationForm.fimTemplate = fimTemplate
             codeCompletionConfigurationForm.fimOverride != fimOverride
@@ -138,6 +156,8 @@ class OllamaSettingsForm {
             host = hostField.text
             if (modelComboBoxes[FeatureType.CHAT]?.isEnabled == true)
                 model = modelComboBoxes[FeatureType.CHAT]?.item
+            contextSize = contextSizeField.text.trim().toIntOrNull()?.takeIf { it > 0 } ?: 0
+            thinkingEnabled = thinkingCheckBox.isSelected
             codeCompletionsEnabled = codeCompletionConfigurationForm.isCodeCompletionsEnabled
             fimTemplate = codeCompletionConfigurationForm.fimTemplate ?: fimTemplate
             fimOverride = codeCompletionConfigurationForm.fimOverride == true
@@ -148,6 +168,8 @@ class OllamaSettingsForm {
     fun isModified() = service<OllamaSettings>().state.run {
         hostField.text != host
                 || (modelComboBoxes[FeatureType.CHAT]!!.item != model && modelComboBoxes[FeatureType.CHAT]!!.isEnabled)
+                || (contextSizeField.text.trim().toIntOrNull()?.takeIf { it > 0 } ?: 0) != contextSize
+                || thinkingCheckBox.isSelected != thinkingEnabled
                 || codeCompletionConfigurationForm.isCodeCompletionsEnabled != codeCompletionsEnabled
                 || codeCompletionConfigurationForm.fimTemplate != fimTemplate
                 || codeCompletionConfigurationForm.fimOverride != fimOverride

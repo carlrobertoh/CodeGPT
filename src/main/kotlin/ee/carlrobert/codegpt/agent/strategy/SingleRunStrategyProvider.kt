@@ -9,14 +9,13 @@ import ai.koog.agents.core.dsl.builder.node
 import ai.koog.agents.core.dsl.builder.strategy
 import ai.koog.agents.core.dsl.extension.*
 import ai.koog.agents.core.environment.ReceivedToolResult
-import ai.koog.agents.core.environment.result
 import ai.koog.agents.features.tokenizer.feature.tokenizer
-import ai.koog.prompt.dsl.Prompt
+import ai.koog.prompt.Prompt
 import ai.koog.prompt.executor.model.PromptExecutor
 import ai.koog.prompt.llm.LLMProvider
 import ai.koog.prompt.message.Message
 import ai.koog.prompt.streaming.StreamFrame
-import ai.koog.prompt.streaming.toMessageResponses
+import ai.koog.prompt.streaming.toMessageResponse
 import ai.koog.prompt.tokenizer.PromptTokenizer
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.LocalFileSystem
@@ -69,7 +68,7 @@ internal class SingleRunStrategyProvider : AgentRunStrategyProvider {
     ): AIAgentGraphStrategy<MessageWithContext, String> =
         strategy<MessageWithContext, String>("single_run") {
             val planCreated = AtomicBoolean(false)
-            val nodeCallLLM by node<MessageWithContext, List<Message.Response>>(
+            val nodeCallLLM by node<MessageWithContext, ai.koog.prompt.message.Message.Assistant>(
                 SINGLE_RUN_NODE_CALL_LLM
             ) { message ->
                 llm.writeSession {
@@ -94,19 +93,21 @@ internal class SingleRunStrategyProvider : AgentRunStrategyProvider {
                 }
             }
 
-            val nodeExecuteTool by nodeExecuteMultipleTools(parallelTools = true)
+            val nodeExecuteTool by nodeExecuteTools(parallel = true)
 
-            val nodeSendToolResult by node<List<ReceivedToolResult>, List<Message.Response>>("send_tool_results") { results ->
+            val nodeSendToolResult by node<ReceivedToolResults, ai.koog.prompt.message.Message.Assistant>("send_tool_results") { toolResultsWrapper ->
+                val results = toolResultsWrapper.toolResults
                 llm.writeSession {
                     appendPrompt {
-                        results.forEach { tool { result(it) } }
+                        results.forEach { toolResult(it.toMessagePart()) }
                     }
 
                     val messages = prompt.messages
-                    val toolCallMessages = messages.count { it is Message.Tool.Call }
-                    val todoWriteToolUsed = messages.any { msg ->
-                        msg is Message.Tool.Call && msg.tool == "TodoWrite"
-                    }
+                    val toolCalls = messages.filterIsInstance<ai.koog.prompt.message.Message.Assistant>()
+                        .flatMap { it.parts }
+                        .filterIsInstance<ai.koog.prompt.message.MessagePart.Tool.Call>()
+                    val toolCallMessages = toolCalls.size
+                    val todoWriteToolUsed = toolCalls.any { it.tool == "TodoWrite" }
 
                     if (!planCreated.load() && toolCallMessages >= 3 && !todoWriteToolUsed) {
                         appendPrompt {
@@ -134,20 +135,20 @@ internal class SingleRunStrategyProvider : AgentRunStrategyProvider {
                     )
                 }
             }
-            val nodeShowCompressionLoading by node<List<ReceivedToolResult>, List<ReceivedToolResult>>(
+            val nodeShowCompressionLoading by node<ReceivedToolResults, ReceivedToolResults>(
                 "show_compression_loading"
             ) {
                 events.onHistoryCompressionStateChanged(true)
                 it
             }
-            val nodeCompressHistory by nodeLLMCompressHistory<List<ReceivedToolResult>>(strategy = historyCompressionConfig.compressionStrategy)
-            val nodeResetCompressionLoading by node<List<ReceivedToolResult>, List<ReceivedToolResult>>(
+            val nodeCompressHistory by nodeLLMCompressHistory<ReceivedToolResults>(strategy = historyCompressionConfig.compressionStrategy)
+            val nodeResetCompressionLoading by node<ReceivedToolResults, ReceivedToolResults>(
                 "reset_compression_loading"
             ) {
                 events.onHistoryCompressionStateChanged(false)
                 it
             }
-            val nodeSendCompressedHistory by node<List<ReceivedToolResult>, List<Message.Response>>(
+            val nodeSendCompressedHistory by node<ReceivedToolResults, ai.koog.prompt.message.Message.Assistant>(
                 "send_compressed_history"
             ) {
                 llm.writeSession {
@@ -164,7 +165,7 @@ internal class SingleRunStrategyProvider : AgentRunStrategyProvider {
             }
 
             edge(nodeStart forwardTo nodeCallLLM)
-            edge(nodeCallLLM forwardTo nodeExecuteTool onMultipleToolCalls { true })
+            edge(nodeCallLLM forwardTo nodeExecuteTool onToolCalls { true })
             edge(nodeCallLLM forwardTo nodeFinish onSingleAssistantResponse { true })
             edge(nodeExecuteTool forwardTo nodeSendToolResult onCondition {
                 llm.readSession {
@@ -180,9 +181,9 @@ internal class SingleRunStrategyProvider : AgentRunStrategyProvider {
             edge(nodeCompressHistory forwardTo nodeResetCompressionLoading)
             edge(nodeResetCompressionLoading forwardTo nodeSendCompressedHistory)
             edge(nodeSendToolResult forwardTo nodeFinish onSingleAssistantResponse { true })
-            edge(nodeSendToolResult forwardTo nodeExecuteTool onMultipleToolCalls { true })
+            edge(nodeSendToolResult forwardTo nodeExecuteTool onToolCalls { true })
             edge(nodeSendCompressedHistory forwardTo nodeFinish onSingleAssistantResponse { true })
-            edge(nodeSendCompressedHistory forwardTo nodeExecuteTool onMultipleToolCalls { true })
+            edge(nodeSendCompressedHistory forwardTo nodeExecuteTool onToolCalls { true })
         }
 }
 
@@ -190,31 +191,18 @@ private suspend fun AIAgentLLMWriteSession.requestResponses(
     stream: Boolean,
     executor: PromptExecutor,
     config: AIAgentConfig,
-    appendResponse: (Message.Response) -> Unit
-): List<Message.Response> {
-    val responses = if (stream) {
+    appendResponse: (ai.koog.prompt.message.Message.Assistant) -> Unit
+): ai.koog.prompt.message.Message.Assistant {
+    val response = if (stream) {
         val streamFrames = mutableListOf<StreamFrame>()
         requestLLMStreaming().collect { streamFrames.add(it) }
-        streamFrames
-            .toMessageResponses()
-            .map {
-                if (it is Message.Tool.Call) {
-                    val normalizedArgs = normalizeToolArgumentsJson(it.content) ?: "{}"
-                    if (normalizedArgs == it.content) {
-                        it
-                    } else {
-                        it.copy(parts = listOf(it.parts[0].copy(text = normalizedArgs)))
-                    }
-                } else {
-                    it
-                }
-            }
+        streamFrames.toMessageResponse()
     } else {
         val preparedPrompt = config.missingToolsConversionStrategy.convertPrompt(prompt, tools)
-        executor.execute(preparedPrompt, model, tools)
+        executor.execute(preparedPrompt, model, tools) as ai.koog.prompt.message.Message.Assistant
     }
-    appendableResponses(responses, model.provider).forEach(appendResponse)
-    return responses
+    appendResponse(response)
+    return response
 }
 
 private suspend fun AIAgentLLMWriteSession.requestAndPublish(
@@ -225,62 +213,21 @@ private suspend fun AIAgentLLMWriteSession.requestAndPublish(
     sessionId: String,
     provider: ServiceType,
     stream: Boolean
-): List<Message.Response> {
+): ai.koog.prompt.message.Message.Assistant {
     val response = requestResponses(stream, executor, config) { appendPrompt { message(it) } }
-    publishUsageAndCredits(prompt, tokenizer, events, sessionId, provider, response)
+    publishUsageAndCredits(prompt, tokenizer, events, sessionId, provider, listOf(response))
     return response
 }
 
 internal fun appendableResponses(
-    responses: List<Message.Response>,
+    responses: List<ai.koog.prompt.message.Message.Assistant>,
     provider: LLMProvider
-): List<Message.Response> {
-    val sortedResponses = responses
-        .sortedBy { if (it is Message.Assistant) 0 else 1 }
-        .filterNot { response ->
-            response is Message.Assistant &&
-                    response.hasOnlyTextContent() &&
-                    response.content.isBlank()
-        }
-
-    if (provider == LLMProvider.Google) {
-        return if (sortedResponses.any { it is Message.Tool.Call }) {
-            sortedResponses.filterNot { it is Message.Assistant }
-        } else {
-            sortedResponses
-        }
-    }
-
-    val nonReasoningResponses = sortedResponses.filterNot { it is Message.Reasoning }
-    if (nonReasoningResponses.isNotEmpty()) {
-        return nonReasoningResponses
-    }
-
-    // Keep reasoning when it is the only non-empty model output.
-    return sortedResponses
-        .filterIsInstance<Message.Reasoning>()
-        .filter { it.content.isNotBlank() }
-        .ifEmpty { nonReasoningResponses }
+): List<ai.koog.prompt.message.Message.Assistant> {
+    return responses
 }
 
-internal fun extractAssistantOutput(responses: List<Message.Response>): String {
-    val assistantText = responses
-        .filterIsInstance<Message.Assistant>()
-        .map { it.content.trim() }
-        .filter { it.isNotEmpty() }
-        .joinToString("\n")
-        .trim()
-    if (assistantText.isNotEmpty()) {
-        return assistantText
-    }
-
-    val reasoningText = responses
-        .filterIsInstance<Message.Reasoning>()
-        .map { it.content.trim() }
-        .filter { it.isNotEmpty() }
-        .joinToString("\n")
-        .trim()
-    return if (reasoningText.isNotEmpty()) "<think>$reasoningText</think>" else ""
+internal fun extractAssistantOutput(response: ai.koog.prompt.message.Message.Assistant): String {
+    return ee.carlrobert.codegpt.completions.CompletionTextExtractor.extract(listOf(response))
 }
 
 private fun publishUsageAndCredits(
@@ -289,7 +236,7 @@ private fun publishUsageAndCredits(
     events: AgentEvents,
     sessionId: String,
     provider: ServiceType,
-    responses: List<Message.Response>,
+    responses: List<ai.koog.prompt.message.Message.Assistant>,
 ) {
     events.onTokenUsageAvailable(promptTokenCount(prompt, tokenizer, responses).toLong())
     publishCreditsIfAvailable(sessionId, provider, responses, events)
@@ -298,15 +245,8 @@ private fun publishUsageAndCredits(
 private fun promptTokenCount(
     prompt: Prompt,
     tokenizer: PromptTokenizer,
-    responses: List<Message.Response>
+    responses: List<ai.koog.prompt.message.Message.Assistant>
 ): Int {
-    val reportedInputCount = responses.firstNotNullOfOrNull { response ->
-        response.metaInfo.inputTokensCount?.takeIf { it > 0 }
-            ?: response.metaInfo.totalTokensCount?.takeIf { it > 0 }
-    }
-    if (reportedInputCount != null) {
-        return reportedInputCount
-    }
     return if (prompt.latestTokenUsage == 0) {
         tokenizer.tokenCountFor(prompt)
     } else {
@@ -355,7 +295,7 @@ private fun buildReferencedFilesContext(referencedFilePaths: List<String>): Stri
 private fun publishCreditsIfAvailable(
     sessionId: String,
     provider: ServiceType,
-    responses: List<Message.Response>,
+    responses: List<ai.koog.prompt.message.Message.Assistant>,
     events: AgentEvents,
 ) {
     if (provider != ServiceType.PROXYAI) return
@@ -370,15 +310,15 @@ private fun publishCreditsIfAvailable(
 }
 
 @EdgeTransformationDslMarker
-private infix fun <IncomingOutput, OutgoingInput> AIAgentEdgeBuilderIntermediate<IncomingOutput, List<Message.Response>, OutgoingInput>.onSingleAssistantResponse(
+private infix fun <IncomingOutput, OutgoingInput> AIAgentEdgeBuilderIntermediate<IncomingOutput, ai.koog.prompt.message.Message.Assistant, OutgoingInput>.onSingleAssistantResponse(
     block: suspend (String) -> Boolean
 ): AIAgentEdgeBuilderIntermediate<IncomingOutput, String, OutgoingInput> {
-    return onIsInstance(List::class)
+    return onIsInstance(ai.koog.prompt.message.Message.Assistant::class)
         .transformed { response ->
-            val modelResponses = response.filterIsInstance<Message.Response>()
-            when {
-                modelResponses.any { it is Message.Tool.Call } -> null
-                else -> extractAssistantOutput(modelResponses)
+            if (response.parts.any { it is ai.koog.prompt.message.MessagePart.Tool.Call }) {
+                null
+            } else {
+                extractAssistantOutput(response)
             }
         }
         .onCondition { it != null }

@@ -74,6 +74,25 @@ object AgentCheckpointTurnSequencer {
                 val nonSystemMessageCount = index + 1
                 when (message) {
                     is PromptMessage.User -> {
+                        val toolResults = message.parts.filterIsInstance<ai.koog.prompt.message.MessagePart.Tool.Result>()
+                        if (toolResults.isNotEmpty()) {
+                            if (currentPrompt != null) {
+                                toolResults.forEach { result ->
+                                    if (!isTodoWriteTool(result.tool)) {
+                                        currentEvents.add(
+                                            TurnEvent.ToolResult(
+                                                id = result.id,
+                                                tool = result.tool,
+                                                content = result.output,
+                                                nonSystemMessageCount = nonSystemMessageCount
+                                            )
+                                        )
+                                    }
+                                }
+                            }
+                            return@forEachIndexed
+                        }
+
                         if (isSyntheticTimelineUserMessage(message)) {
                             if (
                                 preserveSyntheticContinuation &&
@@ -98,55 +117,44 @@ object AgentCheckpointTurnSequencer {
                             currentUserNonSystemMessageCount = 0
                             return@forEachIndexed
                         }
-                        currentPrompt = message.content.trim()
+                        currentPrompt = message.textContent().trim()
                         currentUserNonSystemMessageCount = nonSystemMessageCount
                     }
 
                     is PromptMessage.Assistant -> {
                         if (currentPrompt != null) {
-                            currentEvents.add(
-                                TurnEvent.Assistant(
-                                    content = message.content,
-                                    nonSystemMessageCount = nonSystemMessageCount
+                            val text = message.textContent()
+                            if (text.isNotBlank()) {
+                                currentEvents.add(
+                                    TurnEvent.Assistant(
+                                        content = text,
+                                        nonSystemMessageCount = nonSystemMessageCount
+                                    )
                                 )
-                            )
-                        }
-                    }
-
-                    is PromptMessage.Reasoning -> {
-                        if (currentPrompt != null) {
-                            currentEvents.add(
-                                TurnEvent.Reasoning(
-                                    content = message.content,
-                                    nonSystemMessageCount = nonSystemMessageCount
-                                )
-                            )
-                        }
-                    }
-
-                    is PromptMessage.Tool.Call -> {
-                        if (currentPrompt != null && !isTodoWriteTool(message.tool)) {
-                            currentEvents.add(
-                                TurnEvent.ToolCall(
-                                    id = message.id,
-                                    tool = message.tool,
-                                    content = message.content,
-                                    nonSystemMessageCount = nonSystemMessageCount
-                                )
-                            )
-                        }
-                    }
-
-                    is PromptMessage.Tool.Result -> {
-                        if (currentPrompt != null && !isTodoWriteTool(message.tool)) {
-                            currentEvents.add(
-                                TurnEvent.ToolResult(
-                                    id = message.id,
-                                    tool = message.tool,
-                                    content = message.content,
-                                    nonSystemMessageCount = nonSystemMessageCount
-                                )
-                            )
+                            }
+                            message.parts.filterIsInstance<ai.koog.prompt.message.MessagePart.Reasoning>().forEach { reasoning ->
+                                val reasoningText = reasoning.content.joinToString("")
+                                if (reasoningText.isNotBlank()) {
+                                    currentEvents.add(
+                                        TurnEvent.Reasoning(
+                                            content = reasoningText,
+                                            nonSystemMessageCount = nonSystemMessageCount
+                                        )
+                                    )
+                                }
+                            }
+                            message.parts.filterIsInstance<ai.koog.prompt.message.MessagePart.Tool.Call>().forEach { call ->
+                                if (!isTodoWriteTool(call.tool)) {
+                                    currentEvents.add(
+                                        TurnEvent.ToolCall(
+                                            id = call.id,
+                                            tool = call.tool,
+                                            content = call.args,
+                                            nonSystemMessageCount = nonSystemMessageCount
+                                        )
+                                    )
+                                }
+                            }
                         }
                     }
 
@@ -163,7 +171,7 @@ object AgentCheckpointTurnSequencer {
     }
 
     fun isSyntheticTimelineUserMessage(message: PromptMessage.User): Boolean {
-        val normalized = message.content.lowercase()
+        val normalized = message.textContent().lowercase()
         return normalized.contains("haven't created a todo list yet")
     }
 
@@ -172,7 +180,7 @@ object AgentCheckpointTurnSequencer {
         projectInstructions: String?
     ): Boolean {
         return isCacheableInstructionMessage(message) ||
-                isProjectInstructionsMessage(message.content, projectInstructions)
+                isProjectInstructionsMessage(message.textContent(), projectInstructions)
     }
 
     private fun isCacheableInstructionMessage(message: PromptMessage.User): Boolean {
