@@ -1,6 +1,7 @@
 package ee.carlrobert.codegpt.settings.mcp
 
 import com.intellij.openapi.components.*
+import com.intellij.util.xmlb.annotations.Property
 import ee.carlrobert.codegpt.util.ApplicationUtil
 
 @Service
@@ -11,6 +12,7 @@ import ee.carlrobert.codegpt.util.ApplicationUtil
 class McpSettings : SimplePersistentStateComponent<McpSettingsState>(McpSettingsState())
 
 class McpSettingsState : BaseState() {
+    @get:Property(alwaysWrite = true)
     var servers by list<McpServerDetailsState>()
 
     init {

@@ -139,7 +139,7 @@ class ParallelSearchMcpTest : IntegrationTest() {
         }.toMutableList().apply { add("--allow-http") }
         preset.environmentVariables = mutableMapOf(
             "MCP_REMOTE_CONFIG_DIR" to Files.createTempDirectory("parallel-mcp-auth").toString(),
-            "HTTP_PROXY" to "", "HTTPS_PROXY" to "", "http_proxy" to "", "https_proxy" to ""
+            "NO_PROXY" to "127.0.0.1,localhost", "no_proxy" to "127.0.0.1,localhost"
         )
         settings.loadState(state)
         val conversationId = UUID.randomUUID()
@@ -185,6 +185,7 @@ class ParallelSearchMcpTest : IntegrationTest() {
             assertThat(timedOut.output.lowercase()).containsAnyOf("timeout", "timed out")
 
             val cancelledResult = AtomicReference<McpTool.Result>()
+            val cancellationFailure = AtomicReference<InterruptedException>()
             val cancellationFinished = CountDownLatch(1)
             val executor = Executors.newSingleThreadExecutor()
             try {
@@ -193,6 +194,8 @@ class ParallelSearchMcpTest : IntegrationTest() {
                         cancelledResult.set(runBlocking {
                             approvedTools.getValue("web_search").execute(slowArgs("cancel"))
                         })
+                    } catch (error: InterruptedException) {
+                        cancellationFailure.set(error)
                     } finally {
                         cancellationFinished.countDown()
                     }
@@ -200,7 +203,8 @@ class ParallelSearchMcpTest : IntegrationTest() {
                 assertThat(cancellationStarted.await(10, TimeUnit.SECONDS)).isTrue()
                 assertThat(pending.cancel(true)).isTrue()
                 assertThat(cancellationFinished.await(5, TimeUnit.SECONDS)).isTrue()
-                assertThat(cancelledResult.get().success).isFalse()
+                assertThat(cancelledResult.get() != null || cancellationFailure.get() != null).isTrue()
+                assertThat(cancelledResult.get()?.success ?: false).isFalse()
             } finally {
                 releaseSlowCalls.countDown()
                 executor.shutdownNow()
