@@ -18,7 +18,10 @@ import java.net.InetSocketAddress
 import java.nio.file.Files
 import java.util.UUID
 import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicReference
 
 /** Opt-in transport integration test: requires Node.js 22+ and npm access to mcp-remote. */
 class ParallelSearchMcpTest : IntegrationTest() {
@@ -64,6 +67,8 @@ class ParallelSearchMcpTest : IntegrationTest() {
     fun testSelectedPresetSearchFetchAndApprovalThroughAgentTools() {
         assumeTrue(System.getenv("PROXYAI_TEST_MCP_REMOTE") == "1")
         val requests = CopyOnWriteArrayList<Pair<String?, JsonObject>>()
+        val cancellationStarted = CountDownLatch(1)
+        val releaseSlowCalls = CountDownLatch(1)
         val server = HttpServer.create(InetSocketAddress("127.0.0.1", 0), 0)
         server.executor = Executors.newCachedThreadPool { task ->
             Thread(task, "parallel-mcp-fixture").apply { isDaemon = true }
@@ -98,7 +103,12 @@ class ParallelSearchMcpTest : IntegrationTest() {
                 "resources/list" -> buildJsonObject { put("resources", buildJsonArray {}) }
                 "tools/call" -> {
                     val params = request["params"]!!.jsonObject
-                    val failed = params["arguments"]?.jsonObject?.get("objective")?.jsonPrimitive?.content == "error"
+                    val objective = params["arguments"]?.jsonObject?.get("objective")?.jsonPrimitive?.content
+                    if (objective == "cancel") cancellationStarted.countDown()
+                    if (objective == "timeout" || objective == "cancel") {
+                        releaseSlowCalls.await(40, TimeUnit.SECONDS)
+                    }
+                    val failed = objective == "error"
                     buildJsonObject {
                         put("isError", failed)
                         put("content", buildJsonArray {
@@ -164,10 +174,42 @@ class ParallelSearchMcpTest : IntegrationTest() {
             }
             assertThat(failed.success).isFalse()
             assertThat(failed.output).contains("Fixture search failed")
+            fun slowArgs(objective: String) = buildJsonObject {
+                put("objective", objective)
+                put("search_queries", buildJsonArray { add("example docs") })
+            }
+            val timedOut = runBlocking {
+                approvedTools.getValue("web_search").execute(slowArgs("timeout"))
+            }
+            assertThat(timedOut.success).isFalse()
+            assertThat(timedOut.output.lowercase()).containsAnyOf("timeout", "timed out")
+
+            val cancelledResult = AtomicReference<McpTool.Result>()
+            val cancellationFinished = CountDownLatch(1)
+            val executor = Executors.newSingleThreadExecutor()
+            try {
+                val pending = executor.submit {
+                    try {
+                        cancelledResult.set(runBlocking {
+                            approvedTools.getValue("web_search").execute(slowArgs("cancel"))
+                        })
+                    } finally {
+                        cancellationFinished.countDown()
+                    }
+                }
+                assertThat(cancellationStarted.await(10, TimeUnit.SECONDS)).isTrue()
+                assertThat(pending.cancel(true)).isTrue()
+                assertThat(cancellationFinished.await(5, TimeUnit.SECONDS)).isTrue()
+                assertThat(cancelledResult.get().success).isFalse()
+            } finally {
+                releaseSlowCalls.countDown()
+                executor.shutdownNow()
+            }
             assertThat(requests.map { it.first }).allMatch { it == "ProxyAI/1.0 (+https://tryproxy.io)" }
             assertThat(requests.map { it.second["method"]?.jsonPrimitive?.content })
                 .contains("initialize", "tools/list", "tools/call")
         } finally {
+            releaseSlowCalls.countDown()
             service<McpSessionManager>().ensureClientConnected("$conversationId:${preset.id}").get()?.close()
             settings.loadState(savedState)
             server.stop(0)
