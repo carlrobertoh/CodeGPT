@@ -8,10 +8,11 @@ import ee.carlrobert.codegpt.agent.tools.McpDynamicToolRegistry
 import ee.carlrobert.codegpt.agent.tools.McpTool
 import ee.carlrobert.codegpt.settings.mcp.McpSettings
 import ee.carlrobert.codegpt.ui.textarea.header.tag.McpTagDetails
+import junit.framework.Test
+import junit.framework.TestSuite
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.*
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Assume.assumeTrue
 import testsupport.IntegrationTest
 import java.net.InetSocketAddress
 import java.nio.file.Files
@@ -22,11 +23,28 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
 
-/** Opt-in transport integration test: requires Node.js 22+ and npm access to mcp-remote. */
+/**
+ * Requires Node.js 22+ and npm access to mcp-remote. Enable the fixture with
+ * PROXYAI_TEST_MCP_REMOTE=1 and live calls with PROXYAI_TEST_PARALLEL_LIVE=1.
+ */
 class ParallelSearchMcpTest : IntegrationTest() {
+    companion object {
+        @JvmStatic
+        fun suite(): Test = TestSuite(ParallelSearchMcpTest::class.java.name).apply {
+            if (System.getenv("PROXYAI_TEST_PARALLEL_LIVE") == "1") {
+                addTest(ParallelSearchMcpTest().apply {
+                    name = "testAnonymousLiveSearchAndFetchThroughAgentTools"
+                })
+            }
+            if (System.getenv("PROXYAI_TEST_MCP_REMOTE") == "1") {
+                addTest(ParallelSearchMcpTest().apply {
+                    name = "testSelectedPresetSearchFetchAndApprovalThroughAgentTools"
+                })
+            }
+        }
+    }
 
     fun testAnonymousLiveSearchAndFetchThroughAgentTools() {
-        assumeTrue(System.getenv("PROXYAI_TEST_PARALLEL_LIVE") == "1")
         val settings = service<McpSettings>()
         val savedState = settings.state
         val state = McpSettings().state
@@ -64,7 +82,6 @@ class ParallelSearchMcpTest : IntegrationTest() {
     }
 
     fun testSelectedPresetSearchFetchAndApprovalThroughAgentTools() {
-        assumeTrue(System.getenv("PROXYAI_TEST_MCP_REMOTE") == "1")
         val requests = CopyOnWriteArrayList<Pair<String?, JsonObject>>()
         val cancellationStarted = CountDownLatch(1)
         val releaseSlowCalls = CountDownLatch(1)
