@@ -52,6 +52,19 @@ class McpSettingsState : BaseState() {
             command = "npx"
             arguments = mutableListOf("-y", "mcp-ripgrep@latest")
         })
+        servers.add(McpServerDetailsState().apply {
+            id = 6L
+            name = "Parallel Search"
+            command = "npx"
+            arguments = mutableListOf(
+                "-y",
+                "mcp-remote@0.15.1",
+                "https://search.parallel.ai/mcp",
+                "--transport", "http-only",
+                "--enable-proxy",
+                "--header", "User-Agent:ProxyAI/1.0 (+https://tryproxy.io)"
+            )
+        })
     }
 }
 

@@ -28,6 +28,45 @@ For path-level restrictions, see [Ignore Rules](/agent/security/ignore-rules). F
 
 ## Tool reference
 
+### Parallel Search MCP
+
+For free web search and page excerpts without a Parallel account or API key, select
+**Parallel Search** from the MCP servers in the chat input. The agent can then call
+`web_search` (powered by Fast mode) and `web_fetch`, with the usual MCP approvals.
+This optional server leaves the built-in **WebSearch** and **WebFetch** tools available.
+
+The preset requires [Node.js](https://nodejs.org/) 22 or later and uses
+[`mcp-remote`](https://github.com/punkpeye/mcp-remote) to connect ProxyAI's stdio MCP
+client to `https://search.parallel.ai/mcp` over HTTP. The first connection downloads
+the bridge through `npx`. It honors `HTTP_PROXY`, `HTTPS_PROXY`, and `NO_PROXY`.
+Search queries and requested URLs are sent to Parallel
+when you approve a tool call. Free usage is subject to rate limits.
+
+The preset appears in new MCP settings. If you already have saved servers, use
+**Import from JSON** in ProxyAI's MCP settings to add it:
+
+```json
+{
+  "mcpServers": {
+    "Parallel Search": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote@0.15.1",
+        "https://search.parallel.ai/mcp",
+        "--transport", "http-only",
+        "--enable-proxy",
+        "--header", "User-Agent:ProxyAI/1.0 (+https://tryproxy.io)"
+      ]
+    }
+  }
+}
+```
+
+See [Parallel Search MCP](https://docs.parallel.ai/integrations/mcp/search-mcp)
+for tool inputs and service limits. Remove the server's tag from the chat input
+to stop exposing its tools to that conversation.
+
 ### Read
 
 Reads a file from disk and returns it in numbered `cat -n` format.
