@@ -8,51 +8,71 @@ import ee.carlrobert.codegpt.util.ApplicationUtil
     name = "CodeGPT_McpSettings",
     storages = [Storage("CodeGPT_McpSettings.xml")]
 )
-class McpSettings : SimplePersistentStateComponent<McpSettingsState>(McpSettingsState())
+class McpSettings : SimplePersistentStateComponent<McpSettingsState>(defaultMcpSettingsState())
 
 class McpSettingsState : BaseState() {
     var servers by list<McpServerDetailsState>()
+    var initialized by property(false)
 
     init {
-        servers.add(McpServerDetailsState().apply {
-            id = 1L
-            name = "Test Server"
-            command = "npx"
-            arguments = mutableListOf("-y", "@modelcontextprotocol/server-everything")
-        })
-        servers.add(McpServerDetailsState().apply {
-            id = 2L
-            name = "File System Server"
-            command = "npx"
-            arguments = mutableListOf(
-                "-y",
-                "@modelcontextprotocol/server-filesystem",
-                ApplicationUtil.findCurrentProject()?.basePath ?: "/"
-            )
-        })
-        servers.add(McpServerDetailsState().apply {
-            id = 3L
-            name = "Git"
-            command = "uvx"
-            arguments = mutableListOf(
-                "mcp-server-git",
-                "--repository",
-                ApplicationUtil.findCurrentProject()?.basePath ?: "/"
-            )
-        })
-        servers.add(McpServerDetailsState().apply {
-            id = 4L
-            name = "Context7"
-            command = "npx"
-            arguments = mutableListOf("-y", "@upstash/context7-mcp")
-        })
-        servers.add(McpServerDetailsState().apply {
-            id = 5L
-            name = "ripgrep"
-            command = "npx"
-            arguments = mutableListOf("-y", "mcp-ripgrep@latest")
-        })
+        // Keep an intentionally empty server list represented in persistent storage.
+        initialized = true
     }
+}
+
+// Seed presets only for a fresh component, never while deserializing saved settings.
+private fun defaultMcpSettingsState() = McpSettingsState().apply {
+    servers.add(McpServerDetailsState().apply {
+        id = 1L
+        name = "Test Server"
+        command = "npx"
+        arguments = mutableListOf("-y", "@modelcontextprotocol/server-everything")
+    })
+    servers.add(McpServerDetailsState().apply {
+        id = 2L
+        name = "File System Server"
+        command = "npx"
+        arguments = mutableListOf(
+            "-y",
+            "@modelcontextprotocol/server-filesystem",
+            ApplicationUtil.findCurrentProject()?.basePath ?: "/"
+        )
+    })
+    servers.add(McpServerDetailsState().apply {
+        id = 3L
+        name = "Git"
+        command = "uvx"
+        arguments = mutableListOf(
+            "mcp-server-git",
+            "--repository",
+            ApplicationUtil.findCurrentProject()?.basePath ?: "/"
+        )
+    })
+    servers.add(McpServerDetailsState().apply {
+        id = 4L
+        name = "Context7"
+        command = "npx"
+        arguments = mutableListOf("-y", "@upstash/context7-mcp")
+    })
+    servers.add(McpServerDetailsState().apply {
+        id = 5L
+        name = "ripgrep"
+        command = "npx"
+        arguments = mutableListOf("-y", "mcp-ripgrep@latest")
+    })
+    servers.add(McpServerDetailsState().apply {
+        id = 6L
+        name = "Parallel Search"
+        command = "npx"
+        arguments = mutableListOf(
+            "-y",
+            "mcp-remote@0.15.1",
+            "https://search.parallel.ai/mcp",
+            "--transport", "http-only",
+            "--enable-proxy",
+            "--header", "User-Agent:ProxyAI/1.0 (+https://tryproxy.io)"
+        )
+    })
 }
 
 class McpServerDetailsState : BaseState() {
