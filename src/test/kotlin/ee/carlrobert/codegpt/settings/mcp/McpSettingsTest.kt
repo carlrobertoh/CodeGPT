@@ -36,9 +36,11 @@ class McpSettingsTest : IntegrationTest() {
 
     fun testEmptySavedServerListStaysEmpty() {
         val saved = McpSettingsState().apply { servers.clear() }
+        val serialized = XmlSerializer.serialize(saved)
+        assertThat(serialized.children).isNotEmpty()
 
         val restored = XmlSerializer.deserialize(
-            XmlSerializer.serialize(saved),
+            serialized,
             McpSettingsState::class.java
         )
 
@@ -46,7 +48,7 @@ class McpSettingsTest : IntegrationTest() {
     }
 
     fun testPresetsDoNotExposeToolsWithoutConversationSelection() {
-        assertThat(McpSettingsState().servers.map { it.name }).contains("Parallel Search")
+        assertThat(McpSettings().state.servers.map { it.name }).contains("Parallel Search")
 
         val tools = McpDynamicToolRegistry.createTools(
             AgentMcpContext(UUID.randomUUID(), emptySet())

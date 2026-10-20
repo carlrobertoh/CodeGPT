@@ -7,7 +7,6 @@ import ee.carlrobert.codegpt.agent.AgentMcpContext
 import ee.carlrobert.codegpt.agent.tools.McpDynamicToolRegistry
 import ee.carlrobert.codegpt.agent.tools.McpTool
 import ee.carlrobert.codegpt.settings.mcp.McpSettings
-import ee.carlrobert.codegpt.settings.mcp.McpSettingsState
 import ee.carlrobert.codegpt.ui.textarea.header.tag.McpTagDetails
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.*
@@ -30,7 +29,7 @@ class ParallelSearchMcpTest : IntegrationTest() {
         assumeTrue(System.getenv("PROXYAI_TEST_PARALLEL_LIVE") == "1")
         val settings = service<McpSettings>()
         val savedState = settings.state
-        val state = McpSettingsState()
+        val state = McpSettings().state
         val preset = state.servers.single { it.name == "Parallel Search" }
         preset.environmentVariables = mutableMapOf(
             "MCP_REMOTE_CONFIG_DIR" to Files.createTempDirectory("parallel-live-auth").toString()
@@ -131,7 +130,7 @@ class ParallelSearchMcpTest : IntegrationTest() {
 
         val settings = service<McpSettings>()
         val savedState = settings.state
-        val state = McpSettingsState()
+        val state = McpSettings().state
         val preset = state.servers.single { it.name == "Parallel Search" }
         assertThat(preset.arguments).contains("https://search.parallel.ai/mcp")
         preset.arguments = preset.arguments.map {
